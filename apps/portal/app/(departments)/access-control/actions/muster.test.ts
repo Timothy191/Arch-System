@@ -6,6 +6,10 @@ import { revalidatePath } from 'next/cache';
 import { getMusterRollCall, markPersonnelMusterStatus } from './muster';
 import { assertAccessControlRole } from './shared';
 
+jest.mock('@repo/redis', () => ({
+  cacheInvalidateTags: jest.fn(async () => undefined),
+}));
+
 jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
 }));

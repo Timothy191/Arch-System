@@ -1,5 +1,6 @@
 'use server';
 
+import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
 import { DatabaseError } from '@/lib/errors/error-classes';
 import { ACCESS_CONTROL_WRITE_ROLES, assertAccessControlRoleFor } from '../actions/shared';
@@ -399,10 +400,16 @@ export async function upsertEmployeeForCardPrinting(
     // Handled by DB trigger trg_sync_personnel_to_operators when migration 189 is active
   }
 
+  await cacheInvalidateTags([
+    'table:personnel',
+    'table:badges',
+    ...(targetDeptId ? [`dept:${targetDeptId}`] : []),
+  ]);
   revalidatePath('/access-control/print-cards');
   revalidatePath('/access-control/card-actions');
   revalidatePath('/access-control/badges');
   revalidatePath('/access-control/muster');
+  revalidatePath('/access-control');
   revalidatePath('/control-room/machine-operations');
 
   const updatedList = await getEmployeeCardProfiles(empCode);

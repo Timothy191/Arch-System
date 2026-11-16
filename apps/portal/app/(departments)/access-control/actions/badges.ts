@@ -1,10 +1,17 @@
 'use server';
 
+import { visitorPassRequestSchema } from '@repo/contract';
+import { cacheInvalidateTags } from '@repo/redis';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { DatabaseError, ValidationError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
+import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 import { assertAccessControlRole } from './shared';
+
+const VISITOR_BADGE_TTL_MS = 8 * 60 * 60 * 1000;
+const DENIAL_BLACKLIST_THRESHOLD = 3;
+const MAX_BADGE_CODE_LENGTH = 128;
 
 export async function getBadgesForDepartment(deptId: string, page = 1, pageSize = 50) {
   const { supabase } = await assertAccessControlRole();
@@ -159,20 +166,39 @@ export async function getVisitorsForDepartment(deptId: string, page = 1, pageSiz
 }
 
 export async function registerVisitor(formData: FormData) {
-  const { supabase, employee } = await assertAccessControlRole();
+  const { supabase, employee } = await assertAccessControlRole({ requireWrite: true });
 
-  const firstName = formData.get('first_name') as string;
-  const surname = formData.get('surname') as string;
-  const company = formData.get('company') as string;
-  const reason = formData.get('reason') as string;
+  const rawFirstName = String(formData.get('first_name') ?? '').trim();
+  const rawSurname = String(formData.get('surname') ?? '').trim();
+  const rawCompany = String(formData.get('company') ?? '').trim() || 'General Visitor';
+  const rawReason = String(formData.get('reason') ?? '').trim() || 'Site Visit';
+  const rawVisiting = String(formData.get('visiting') ?? '').trim() || 'Access Control';
+  const rawIdNumber = formData.get('id_number') ? String(formData.get('id_number')).trim() : null;
+
+  const parsed = visitorPassRequestSchema.safeParse({
+    first_name: rawFirstName,
+    surname: rawSurname,
+    company: rawCompany,
+    visiting: rawVisiting,
+    reason_for_entry: rawReason,
+    id_number: rawIdNumber,
+  });
+
+  if (!parsed.success) {
+    throw new ValidationError(
+      parsed.error.issues[0]?.message ?? 'Invalid visitor registration data'
+    );
+  }
 
   const { data: visitor, error } = await supabase
     .from('visitors')
     .insert({
-      first_name: firstName,
-      surname,
-      company,
-      reason_for_entry: reason,
+      first_name: parsed.data.first_name,
+      surname: parsed.data.surname,
+      company: parsed.data.company,
+      visiting: parsed.data.visiting,
+      reason_for_entry: parsed.data.reason_for_entry,
+      id_number: parsed.data.id_number,
       department_id: employee.department_id,
       status: 'Checked In',
       check_in_time: new Date().toISOString(),
@@ -187,16 +213,16 @@ export async function registerVisitor(formData: FormData) {
     });
   }
 
-  // Also issue a temporary badge
+  // Issue an 8-hour temporary badge using canonical lowercase 'visitor' entity_type
   const qrCode = `TEMP-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
   const { error: badgeError } = await supabase.from('badges').insert({
     qr_code: qrCode,
-    entity_type: 'Visitor',
+    entity_type: 'visitor',
     visitor_id: visitor.id,
     department_id: employee.department_id,
     is_active: true,
     issued_at: new Date().toISOString(),
-    expires_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(), // 8 hours
+    expires_at: new Date(Date.now() + VISITOR_BADGE_TTL_MS).toISOString(),
   });
 
   if (badgeError) {
@@ -207,11 +233,19 @@ export async function registerVisitor(formData: FormData) {
     );
   }
 
+  await cacheInvalidateTags([
+    'table:visitors',
+    'table:badges',
+    ...(employee.department_id ? [`dept:${employee.department_id}`] : []),
+  ]);
   revalidatePath('/access-control/visitors');
-  return { success: true };
+  revalidatePath('/access-control/badges');
+  revalidatePath('/access-control');
+  return { success: true, qrCode };
 }
 
 export interface AccessLogFilterOptions {
+  readonly departmentId?: string | null;
   readonly employeeId?: string | null;
   readonly searchQuery?: string | null;
   readonly direction?: 'IN' | 'OUT' | 'ALL' | null;
@@ -270,6 +304,10 @@ export async function getAccessLogsWithFilters(options: AccessLogFilterOptions =
     `,
     { count: 'exact' }
   );
+
+  if (options.departmentId) {
+    query = query.eq('department_id', options.departmentId);
+  }
 
   if (options.employeeId) {
     const { data: employeeBadges } = await supabase
@@ -379,11 +417,15 @@ export async function getAccessLogsWithFilters(options: AccessLogFilterOptions =
     });
   }
 
-  return { logs: filteredLogs, totalCount: count ?? filteredLogs.length };
+  const hasSearchFilter = Boolean(options.searchQuery && options.searchQuery.trim().length > 0);
+  return {
+    logs: filteredLogs,
+    totalCount: hasSearchFilter ? filteredLogs.length : (count ?? filteredLogs.length),
+  };
 }
 
-export async function getAccessLogsForDepartment(_deptId?: string, page = 1, pageSize = 50) {
-  return getAccessLogsWithFilters({ page, pageSize });
+export async function getAccessLogsForDepartment(deptId?: string, page = 1, pageSize = 50) {
+  return getAccessLogsWithFilters({ departmentId: deptId ?? null, page, pageSize });
 }
 
 export async function getPersonnelListForFilter(): Promise<
@@ -497,6 +539,82 @@ export async function getEmployeeAttendanceSummary(
   };
 }
 
+const BADGE_SELECT_COLUMNS =
+  'id, is_active, entity_type, personnel_id, visitor_id, fleet_id, expires_at, department_id';
+
+async function findBadgeByQrOrRfid(
+  supabase: ReturnType<typeof createServiceRoleClient>,
+  sanitizedCode: string
+) {
+  const { data: byQr } = await supabase
+    .from('badges')
+    .select(BADGE_SELECT_COLUMNS)
+    .eq('qr_code', sanitizedCode)
+    .maybeSingle();
+
+  if (byQr) return byQr;
+
+  const { data: byRfid } = await supabase
+    .from('badges')
+    .select(BADGE_SELECT_COLUMNS)
+    .eq('rfid_code', sanitizedCode)
+    .maybeSingle();
+
+  return byRfid;
+}
+
+async function enforceRepeatedDenialsPolicy(options: {
+  readonly supabase: ReturnType<typeof createServiceRoleClient>;
+  readonly badgeId: string;
+  readonly departmentId: string | null;
+  readonly gateLocation: string;
+  readonly denialReason: string;
+}): Promise<boolean> {
+  const todayUtc = new Date();
+  todayUtc.setUTCHours(0, 0, 0, 0);
+
+  const { count: denialsCount } = await options.supabase
+    .from('access_logs')
+    .select('*', { count: 'exact', head: true })
+    .eq('badge_id', options.badgeId)
+    .eq('access_granted', false)
+    .gte('scanned_at', todayUtc.toISOString());
+
+  if (!denialsCount || denialsCount < DENIAL_BLACKLIST_THRESHOLD) {
+    return false;
+  }
+
+  await options.supabase
+    .from('badges')
+    .update({ is_active: false, revoked_at: new Date().toISOString() })
+    .eq('id', options.badgeId);
+
+  await triggerTrackedWorkflow(
+    `SOC-ALERT-${options.badgeId}-${Date.now()}`,
+    '/webhook/soc-alert-blacklist',
+    {
+      badgeId: options.badgeId,
+      gateId: options.gateLocation,
+      reason: options.denialReason,
+      count: denialsCount,
+      departmentId: options.departmentId,
+    }
+  );
+
+  return true;
+}
+
+async function invalidateScanCaches(departmentId?: string | null) {
+  await cacheInvalidateTags([
+    'table:access_logs',
+    'table:badges',
+    ...(departmentId ? [`dept:${departmentId}`] : []),
+  ]);
+  revalidateTag('access-control', 'max');
+  revalidatePath('/access-control/access-logs');
+  revalidatePath('/access-control');
+}
+
 export async function executeEasyScan(input: {
   readonly code: string;
   readonly direction?: 'IN' | 'OUT';
@@ -508,19 +626,16 @@ export async function executeEasyScan(input: {
   if (!rawCode) {
     throw new ValidationError('Badge or RFID code cannot be empty');
   }
+  if (rawCode.length > MAX_BADGE_CODE_LENGTH) {
+    throw new ValidationError('Badge or RFID code exceeds maximum allowed length');
+  }
 
   const supabase = createServiceRoleClient();
   const direction = input.direction ?? 'IN';
   const gateLocation = input.gateLocation ?? 'Main Gate North Turnstile';
   const scannerId = input.scannerId ?? 'PORTAL-EASY-SCANNER';
 
-  const { data: badge } = await supabase
-    .from('badges')
-    .select(
-      'id, is_active, entity_type, personnel_id, visitor_id, fleet_id, expires_at, department_id'
-    )
-    .or(`qr_code.eq.${rawCode},rfid_code.eq.${rawCode}`)
-    .maybeSingle();
+  const badge = await findBadgeByQrOrRfid(supabase, rawCode);
 
   if (!badge) {
     await supabase.from('access_logs').insert([
@@ -539,8 +654,7 @@ export async function executeEasyScan(input: {
       },
     ]);
 
-    revalidateTag('access-control', 'max');
-    revalidatePath('/access-control/access-logs');
+    await invalidateScanCaches(null);
     return {
       success: false,
       accessGranted: false,
@@ -571,8 +685,7 @@ export async function executeEasyScan(input: {
       },
     ]);
 
-    revalidateTag('access-control', 'max');
-    revalidatePath('/access-control/access-logs');
+    await invalidateScanCaches(badge.department_id);
     return {
       success: false,
       accessGranted: false,
@@ -603,8 +716,14 @@ export async function executeEasyScan(input: {
       },
     ]);
 
-    revalidateTag('access-control', 'max');
-    revalidatePath('/access-control/access-logs');
+    await enforceRepeatedDenialsPolicy({
+      supabase,
+      badgeId: badge.id,
+      departmentId: badge.department_id,
+      gateLocation,
+      denialReason: 'DENIED - Credential Expired',
+    });
+    await invalidateScanCaches(badge.department_id);
     return {
       success: false,
       accessGranted: false,
@@ -695,8 +814,17 @@ export async function executeEasyScan(input: {
     },
   ]);
 
-  revalidateTag('access-control', 'max');
-  revalidatePath('/access-control/access-logs');
+  if (!isAccessGranted && denialReason) {
+    await enforceRepeatedDenialsPolicy({
+      supabase,
+      badgeId: badge.id,
+      departmentId: badge.department_id,
+      gateLocation,
+      denialReason,
+    });
+  }
+
+  await invalidateScanCaches(badge.department_id);
   return {
     success: true,
     accessGranted: isAccessGranted,

@@ -7,8 +7,14 @@ import { usePitConnectivity } from './usePitConnectivity';
 // Fallback interface matching MusterSummary
 export interface MusterSummary {
   totalSoulsOnSite: number;
-  blastStatus: 'CLEAR' | 'WARNING' | 'IMMINENT' | 'ALL_CLEAR';
-  lastUpdated: string;
+  blastStatus:
+    | 'ALL_CLEAR'
+    | 'STANDBY_BLAST_SCHEDULED'
+    | 'MUSTER_EVACUATION_ACTIVE'
+    | 'CLEAR'
+    | 'WARNING'
+    | 'IMMINENT';
+  lastUpdated?: string;
 }
 
 export type CachedMusterData<TData = MusterSummary> = TData & {

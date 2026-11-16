@@ -1,5 +1,6 @@
 'use server';
 
+import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
 import { assertAccessControlRole } from './shared';
 
@@ -7,6 +8,8 @@ const MUSTER_PERSONNEL_LIMIT = 100;
 const MUSTER_VISITORS_LIMIT = 50;
 const MUSTER_RECENT_LOGS_LIMIT = 50;
 const MUSTER_EVENTS_LIMIT = 100;
+const FALLBACK_EMPTY_TOTAL_SOULS = 48;
+const FALLBACK_EMPTY_ACCOUNTED_SOULS = 42;
 
 interface MusterEventRow {
   readonly personnel_id: string | null;
@@ -164,7 +167,8 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
     const targetSt = stations[index % stations.length] ?? stations[0]!;
     const assignedStation = persisted ? persisted.station : isAccounted ? targetSt.name : null;
     if (isAccounted && assignedStation) {
-      targetSt.count += 1;
+      const matchedStation = stations.find((st) => st.name === assignedStation) ?? targetSt;
+      matchedStation.count += 1;
     }
 
     const assignedZone =
@@ -202,46 +206,55 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
   }
 
   for (const v of visitorsList) {
-    const isAccounted = index % 3 !== 0;
+    const visitorFullName = `${v.first_name} ${v.surname}`;
+    const persisted = persistedMusterMap.get(v.id) ?? persistedMusterMap.get(visitorFullName);
+    const isAccounted = persisted ? persisted.status === 'accounted' : index % 3 !== 0;
     const stCharlie = stations[2] ?? stations[0]!;
-    const assignedStation = isAccounted ? stCharlie.name : null;
-    if (isAccounted) {
-      stCharlie.count += 1;
+    const assignedStation = persisted ? persisted.station : isAccounted ? stCharlie.name : null;
+    if (isAccounted && assignedStation) {
+      const matchedStation = stations.find((st) => st.name === assignedStation) ?? stCharlie;
+      matchedStation.count += 1;
     }
 
     records.push({
       id: v.id,
       entityType: 'visitor',
-      name: `${v.first_name} ${v.surname}`,
+      name: visitorFullName,
       company: v.company ?? 'Contractor / Third Party',
       roleOrPurpose: v.reason_for_entry ?? 'Site Visit',
       assignedZone: 'Administration Complex',
       lastSeenTime: '25m ago',
       lastSeenGate: 'Main Gate',
-      status: isAccounted ? 'accounted' : 'unaccounted',
+      status: persisted ? persisted.status : isAccounted ? 'accounted' : 'unaccounted',
       station: assignedStation,
-      checkedOffAt: isAccounted
-        ? new Date().toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : null,
+      checkedOffAt: persisted
+        ? persisted.checkedOffAt
+        : isAccounted
+          ? new Date().toLocaleTimeString('en-US', {
+              hour12: false,
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : null,
       inductionValid: true,
       medicalValid: true,
     });
     index++;
   }
 
-  const totalSouls = records.length || 48;
-  const accounted = records.filter((r) => r.status === 'accounted').length || 42;
-  const unaccounted = totalSouls - accounted;
+  const hasRecords = records.length > 0;
+  const totalSouls = hasRecords ? records.length : FALLBACK_EMPTY_TOTAL_SOULS;
+  const accounted = hasRecords
+    ? records.filter((r) => r.status === 'accounted').length
+    : FALLBACK_EMPTY_ACCOUNTED_SOULS;
+  const evacuated = hasRecords ? records.filter((r) => r.status === 'evacuated').length : 0;
+  const unaccounted = Math.max(0, totalSouls - accounted - evacuated);
 
   return {
     totalSoulsOnSite: totalSouls,
     accountedCount: accounted,
     unaccountedCount: unaccounted,
-    evacuatedCount: 0,
+    evacuatedCount: evacuated,
     blastStatus: unaccounted === 0 ? 'ALL_CLEAR' : 'STANDBY_BLAST_SCHEDULED',
     musterStations: stations,
     records,
@@ -272,6 +285,7 @@ export async function markPersonnelMusterStatus(payload: {
     // Non-fatal fallback for offline/preview environments
   }
 
+  await cacheInvalidateTags(['table:muster_events']);
   revalidatePath('/access-control/muster');
   revalidatePath('/access-control');
   return { success: true };

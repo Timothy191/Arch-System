@@ -16,6 +16,8 @@ const mockDetectCapabilities = jest.fn();
 
 jest.mock('../src/client', () => ({
   getRedisClient: jest.fn(async () => ({ isMock: true })),
+  getRedisStackClient: jest.fn(async () => ({ isMock: true })),
+  resolveRedisStackUrl: jest.fn(() => process.env.REDIS_STACK_URL?.trim() || undefined),
 }));
 
 jest.mock('../src/raw', () => {
@@ -182,13 +184,13 @@ describe('RediSearch Vector Accelerator', () => {
       expect(args.slice(0, 3)).toEqual([
         'FT.SEARCH',
         'arch:vector:documents',
-        '@department:{drilling}=>[KNN 3 @embedding $VEC]',
+        '@department:{drilling}=>[KNN 3 @embedding $VEC AS score]',
       ]);
       expect(args.slice(3, 6)).toEqual(['PARAMS', 2, 'VEC']);
       expect(Buffer.isBuffer(args[6])).toBe(true);
-      expect(args.slice(7, 10)).toEqual(['LIMIT', 0, 3]);
-      expect(args[10]).toBe('RETURN');
-      expect(args.slice(11)).toEqual([4, '__vector_score', 'AS', 'score', 'content', 'DIALECT', 2]);
+      expect(args.slice(7, 12)).toEqual(['SORTBY', 'score', 'LIMIT', 0, 3]);
+      expect(args[12]).toBe('RETURN');
+      expect(args.slice(13)).toEqual([2, 'score', 'content', 'DIALECT', 2]);
     });
 
     test('parses the RESP2 flat reply', async () => {
@@ -202,7 +204,7 @@ describe('RediSearch Vector Accelerator', () => {
         searchVectors({ spec, vector: new Float32Array([1, 0, 0, 0]) })
       ).resolves.toEqual([
         {
-          id: 'arch:vector:doc:doc-1',
+          id: 'doc-1',
           score: 0.25,
           fields: { score: '0.25', content: 'conveyor stall' },
         },
@@ -221,7 +223,7 @@ describe('RediSearch Vector Accelerator', () => {
       });
 
       expect(matches).toHaveLength(1);
-      expect(matches[0]).toMatchObject({ id: 'arch:vector:doc:doc-2', score: 0.5 });
+      expect(matches[0]).toMatchObject({ id: 'doc-2', score: 0.5 });
     });
 
     test('answers empty when the index is missing', async () => {
@@ -278,6 +280,37 @@ describe('RediSearch Vector Accelerator', () => {
 
       mockSend.mockRejectedValueOnce(new Error('no such index'));
       await expect(dropVectorIndex('arch:vector:documents')).resolves.toBe(false);
+    });
+  });
+
+  describe('REDIS_STACK_URL probing', () => {
+    const prevStackUrl = process.env.REDIS_STACK_URL;
+    afterEach(() => {
+      if (prevStackUrl === undefined) {
+        delete process.env.REDIS_STACK_URL;
+      } else {
+        process.env.REDIS_STACK_URL = prevStackUrl;
+      }
+    });
+
+    test('probes dedicated stack client with cacheKey="stack" when REDIS_STACK_URL is tcp', async () => {
+      process.env.REDIS_STACK_URL = 'redis://127.0.0.1:6380';
+      mockDetectCapabilities.mockResolvedValueOnce(tcpCapabilities);
+
+      await expect(searchAvailability()).resolves.toEqual({ available: true });
+      expect(mockDetectCapabilities).toHaveBeenCalledWith(
+        { isMock: true },
+        { cacheKey: 'stack', transport: 'tcp' }
+      );
+    });
+
+    test('rejects http(s):// REDIS_STACK_URL as serverless-rest', async () => {
+      process.env.REDIS_STACK_URL = 'https://upstash.example.com';
+
+      await expect(searchAvailability()).resolves.toEqual({
+        available: false,
+        reason: 'serverless-rest',
+      });
     });
   });
 });

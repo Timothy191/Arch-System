@@ -50,6 +50,21 @@ export async function assertAccessControlRoleFor(
   return { supabase, user: principal.user, employee: principal.employee };
 }
 
+export function hasAccessControlDepartmentPermission(
+  employee: Pick<EmployeeSummary, 'role'> & {
+    readonly accessible_departments?: readonly string[] | null;
+  }
+): boolean {
+  if ((ACCESS_CONTROL_WRITE_ROLES as readonly string[]).includes(employee.role)) {
+    return true;
+  }
+  const accessibleDepts = employee.accessible_departments;
+  if (Array.isArray(accessibleDepts) && accessibleDepts.length > 0) {
+    return accessibleDepts.includes('access-control');
+  }
+  return false;
+}
+
 /**
  * Shared auth helper for access-control server actions.
  * Not exported to clients: only consumed by sibling action modules.
@@ -57,14 +72,9 @@ export async function assertAccessControlRoleFor(
 export async function assertAccessControlRole(options?: {
   requireWrite?: boolean;
 }): Promise<AccessControlSession> {
-  const { supabase, principal } = options?.requireWrite
-    ? {
-        supabase: await createServerSupabaseClient(),
-        principal: await getAuthenticatedEmployee(),
-      }
-    : await getCachedAccessControlSession();
-
   if (options?.requireWrite) {
+    const supabase = await createServerSupabaseClient();
+    const principal = await getAuthenticatedEmployee(supabase);
     if (!principal?.employee) {
       throw new AuthError('Unauthorized: employee profile required for access control mutations');
     }
@@ -77,8 +87,17 @@ export async function assertAccessControlRole(options?: {
     return { supabase, user: principal.user, employee: principal.employee };
   }
 
+  const { supabase, principal } = await getCachedAccessControlSession();
+
   if (!principal?.employee || !principal?.user) {
     throw new AuthError('Unauthorized: employee profile required for access control operations');
+  }
+
+  if (!hasAccessControlDepartmentPermission(principal.employee)) {
+    throw new ForbiddenError('Forbidden: insufficient department access for access-control', {
+      resource: 'access_control',
+      action: 'assert_department_access',
+    });
   }
 
   return { supabase, user: principal.user, employee: principal.employee };

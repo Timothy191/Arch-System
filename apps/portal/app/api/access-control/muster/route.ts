@@ -1,8 +1,13 @@
 import { musterEventsSchema } from '@repo/contract';
+import { cacheInvalidateTags } from '@repo/redis';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
+import {
+  ACCESS_CONTROL_WRITE_ROLES,
+  hasAccessControlDepartmentPermission,
+} from '@/app/(departments)/access-control/actions/shared';
 
 interface UntypedMusterTable {
   select: (columns: string) => {
@@ -25,16 +30,23 @@ function fromMusterTable(supabase: unknown): UntypedMusterTable {
 }
 
 export async function GET() {
-  const principal = await getAuthenticatedEmployee();
-  if (!principal) {
+  const supabase = await createServerSupabaseClient();
+  const principal = await getAuthenticatedEmployee(supabase);
+  if (!principal?.employee) {
     return NextResponse.json(
       { success: false, error: { message: 'Unauthorized', code: 'UNAUTHORIZED' } },
       { status: 401 }
     );
   }
 
+  if (!hasAccessControlDepartmentPermission(principal.employee)) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Forbidden', code: 'FORBIDDEN' } },
+      { status: 403 }
+    );
+  }
+
   try {
-    const supabase = await createServerSupabaseClient();
     const { data, error } = await fromMusterTable(supabase)
       .select(
         'id, personnel_id, employee_id, badge_code, full_name, muster_point, status, notes, recorded_by, recorded_at'
@@ -68,11 +80,25 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const principal = await getAuthenticatedEmployee();
-  if (!principal) {
+  const supabase = await createServerSupabaseClient();
+  const principal = await getAuthenticatedEmployee(supabase);
+  if (!principal?.employee) {
     return NextResponse.json(
       { success: false, error: { message: 'Unauthorized', code: 'UNAUTHORIZED' } },
       { status: 401 }
+    );
+  }
+
+  if (!(ACCESS_CONTROL_WRITE_ROLES as readonly string[]).includes(principal.employee.role)) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          message: 'Forbidden: access_control, admin or supervisor role required',
+          code: 'FORBIDDEN',
+        },
+      },
+      { status: 403 }
     );
   }
 
@@ -95,7 +121,7 @@ export async function POST(req: Request) {
 
   const candidate = {
     personnel_id: isUuid ? rawEntityId : null,
-    employee_id: principal.employee?.id ?? null,
+    employee_id: principal.employee.id,
     badge_code: body.badge_code ? String(body.badge_code).trim() : rawEntityId || null,
     full_name: String(
       body.full_name ?? body.entityName ?? body.name ?? (rawEntityId || 'Site Personnel')
@@ -103,7 +129,7 @@ export async function POST(req: Request) {
     muster_point: String(body.muster_point ?? body.station ?? 'Primary Assembly Point A').trim(),
     status: normalizedStatus,
     notes: body.notes ? String(body.notes).trim() : null,
-    recorded_by: principal.employee?.id ?? null,
+    recorded_by: principal.user.id,
   };
 
   const parsed = musterEventsSchema.safeParse(candidate);
@@ -121,7 +147,6 @@ export async function POST(req: Request) {
   }
 
   try {
-    const supabase = await createServerSupabaseClient();
     const { data, error } = await fromMusterTable(supabase)
       .insert({
         personnel_id: parsed.data.personnel_id ?? null,
@@ -143,6 +168,7 @@ export async function POST(req: Request) {
       );
     }
 
+    await cacheInvalidateTags(['table:muster_events']);
     revalidatePath('/access-control/muster');
     revalidatePath('/access-control');
 

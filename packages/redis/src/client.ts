@@ -14,11 +14,20 @@ function resolveRedisUrl(): string {
   return process.env.REDIS_URL || 'redis://localhost:6379';
 }
 
+export function resolveRedisStackUrl(): string | undefined {
+  return process.env.REDIS_STACK_URL?.trim() || undefined;
+}
+
 let client: RedisClientType | null = null;
 let connecting: Promise<RedisClientType> | null = null;
 let connectingClient: RedisClientType | null = null;
 let subscribers: RedisClientType[] = [];
 let serverlessMode = false;
+
+let stackClient: RedisClientType | null = null;
+let stackConnecting: Promise<RedisClientType> | null = null;
+let stackConnectingClient: RedisClientType | null = null;
+let stackLastFailureAt = 0;
 
 // Circuit breaker: avoid repeated multi-second connection attempts when Redis is
 // unreachable. After a failed connect, short-circuit for a cooldown window so
@@ -312,6 +321,86 @@ export async function closeRedis(): Promise<void> {
     }
   }
   subscribers = [];
+
+  const pendingStack = stackConnecting;
+  const pendingStackClient = stackConnectingClient;
+  stackConnecting = null;
+  stackConnectingClient = null;
+  if (pendingStackClient) {
+    await pendingStackClient.disconnect().catch(() => undefined);
+  }
+  if (stackClient?.isOpen) {
+    await stackClient.quit().catch(() => stackClient?.disconnect().catch(() => undefined));
+  }
+  stackClient = null;
+  if (pendingStack) {
+    await pendingStack.catch(() => undefined);
+  }
+}
+
+/**
+ * Connect to the dedicated Redis Stack (RediSearch) instance when `REDIS_STACK_URL`
+ * is configured; otherwise fall back to `getRedisClient()`.
+ */
+export async function getRedisStackClient(): Promise<RedisClientType> {
+  const stackUrl = resolveRedisStackUrl();
+  if (!stackUrl) {
+    return getRedisClient();
+  }
+  if (stackUrl.startsWith('http://') || stackUrl.startsWith('https://')) {
+    throw new Error('REDIS_STACK_URL must be a TCP redis:// or rediss:// URL.');
+  }
+  if (process.env.VERCEL === '1' && stackUrl.includes('localhost')) {
+    throw new Error('Redis Stack is not configured in this Vercel environment.');
+  }
+  if (stackClient?.isOpen) {
+    return stackClient;
+  }
+  if (stackLastFailureAt > 0 && Date.now() - stackLastFailureAt < REDIS_FAILURE_COOLDOWN_MS) {
+    throw new Error('Redis Stack connection in cooldown after recent failure');
+  }
+  if (stackConnecting) {
+    return stackConnecting;
+  }
+
+  const attempt = (async () => {
+    const next = createClient({
+      url: stackUrl,
+      socket: {
+        keepAlive: 5000,
+        connectTimeout: 1000,
+        reconnectStrategy: (retries: number) => {
+          if (retries > 2) return new Error('Redis Stack unavailable');
+          return Math.min(retries * 100, 500);
+        },
+      },
+    }) as RedisClientType;
+
+    const resetIfCurrent = () => {
+      if (stackClient === next) stackClient = null;
+      if (stackConnecting === attempt) stackConnecting = null;
+      if (stackConnectingClient === next) stackConnectingClient = null;
+    };
+    next.on('error', resetIfCurrent);
+    next.on('end', resetIfCurrent);
+
+    stackConnectingClient = next;
+    await next.connect();
+    stackConnectingClient = null;
+    stackClient = next;
+    stackLastFailureAt = 0;
+    return stackClient;
+  })();
+
+  stackConnecting = attempt;
+  try {
+    return await attempt;
+  } catch (error) {
+    stackLastFailureAt = Date.now();
+    if (stackConnecting === attempt) stackConnecting = null;
+    stackConnectingClient = null;
+    throw error;
+  }
 }
 
 /**

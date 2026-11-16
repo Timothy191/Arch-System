@@ -36,20 +36,27 @@ export interface AccessReportsData {
 
 export async function getAccessReportsData(
   deptId: string,
-  _startDate?: string,
-  _endDate?: string
+  startDate?: string,
+  endDate?: string
 ): Promise<AccessReportsData> {
   const { supabase } = await assertAccessControlRole();
 
+  let logsQuery = supabase
+    .from('access_logs')
+    .select('id, scanned_at, gate_location, access_granted, denial_reason, access_type, direction')
+    .eq('department_id', deptId)
+    .order('scanned_at', { ascending: false })
+    .limit(200);
+
+  if (startDate) {
+    logsQuery = logsQuery.gte('scanned_at', `${startDate}T00:00:00Z`);
+  }
+  if (endDate) {
+    logsQuery = logsQuery.lte('scanned_at', `${endDate}T23:59:59Z`);
+  }
+
   const [logsRes, badgesRes] = await Promise.all([
-    supabase
-      .from('access_logs')
-      .select(
-        'id, scanned_at, gate_location, access_granted, denial_reason, access_type, direction'
-      )
-      .eq('department_id', deptId)
-      .order('scanned_at', { ascending: false })
-      .limit(100),
+    logsQuery,
     supabase
       .from('badges')
       .select('id, is_active, entity_type')
@@ -58,11 +65,13 @@ export async function getAccessReportsData(
   ]);
 
   const logs = logsRes.data ?? [];
-  const totalEvents = logs.length ? logs.length * 12 : 624;
-  const deniedEvents =
-    logs.filter((l: { access_granted: boolean }) => !l.access_granted).length * 8 || 18;
-  const grantedEvents = totalEvents - deniedEvents;
-  const complianceRate = Math.round((grantedEvents / totalEvents) * 100);
+  const hasRealLogs = logs.length > 0;
+  const totalEvents = hasRealLogs ? logs.length : 624;
+  const deniedEvents = hasRealLogs
+    ? logs.filter((l: { access_granted: boolean }) => !l.access_granted).length
+    : 18;
+  const grantedEvents = Math.max(0, totalEvents - deniedEvents);
+  const complianceRate = totalEvents > 0 ? Math.round((grantedEvents / totalEvents) * 100) : 100;
 
   return {
     summary: {
@@ -116,13 +125,16 @@ export async function getAccessReportsData(
           gate_location: string;
           direction: string;
           access_granted: boolean;
+          access_type: string | null;
           denial_reason: string | null;
         }) => ({
           id: l.id,
           timestamp: new Date(l.scanned_at).toLocaleString(),
           gate: l.gate_location,
-          entityName: 'Authorized Operator / Truck',
-          entityType: 'Personnel',
+          entityName: l.access_type
+            ? `Credential Scan (${l.access_type})`
+            : 'Authorized Operator / Truck',
+          entityType: l.access_type || 'Personnel',
           action: l.direction === 'IN' ? 'Entry Verification' : 'Exit Clearance',
           granted: l.access_granted,
           reason: l.denial_reason,

@@ -421,7 +421,7 @@ export async function getBadgeStatusDistribution(
         const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
         const [
-          { count: activeCount },
+          { count: totalActiveCount },
           { count: expiringCount },
           { count: expiredCount },
           { count: revokedCount },
@@ -430,8 +430,7 @@ export async function getBadgeStatusDistribution(
             .from('badges')
             .select('*', { count: 'exact', head: true })
             .eq('department_id', deptId)
-            .eq('is_active', true)
-            .gt('expires_at', in7Days.toISOString()),
+            .eq('is_active', true),
           supabase
             .from('badges')
             .select('*', { count: 'exact', head: true })
@@ -452,10 +451,10 @@ export async function getBadgeStatusDistribution(
             .eq('is_active', false),
         ]);
 
-        active = activeCount || 0;
         expiring_soon = expiringCount || 0;
         expired = expiredCount || 0;
         revoked = revokedCount || 0;
+        active = Math.max(0, (totalActiveCount || 0) - expiring_soon - expired);
       } else if (error) {
         logError(
           new DatabaseError(
@@ -473,10 +472,15 @@ export async function getBadgeStatusDistribution(
         const dist = (data as Record<string, unknown>)?.badge_status_distribution as
           | Record<string, number>
           | undefined;
-        active = dist?.active ?? 0;
+        const metricsObj = (data as Record<string, unknown>)?.metrics as
+          | Record<string, number>
+          | undefined;
+        const totalActive = metricsObj?.active_qr_codes ?? 0;
         expiring_soon = dist?.expiring_soon ?? 0;
         expired = dist?.expired ?? 0;
         revoked = dist?.revoked ?? 0;
+        const rawActive = dist?.active ?? 0;
+        active = Math.max(rawActive, totalActive - expiring_soon - expired);
       }
 
       return [

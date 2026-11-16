@@ -1,5 +1,6 @@
 'use server';
 
+import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
 import { DatabaseError } from '@/lib/errors/error-classes';
 import { assertAccessControlRoleFor } from '../actions/shared';
@@ -513,7 +514,17 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
     });
   }
 
+  await cacheInvalidateTags([
+    'table:badges',
+    'table:personnel',
+    'table:fleet',
+    'table:equipment',
+    'table:visitors',
+    ...(employee.department_id ? [`dept:${employee.department_id}`] : []),
+  ]);
   revalidatePath('/access-control/qr-codes');
+  revalidatePath('/access-control/badges');
+  revalidatePath('/access-control');
   return { success: true, badge: newBadge };
 }
 
@@ -521,7 +532,7 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
  * Revoke a badge
  */
 export async function revokeBadgeCredential(badgeId: string) {
-  const { supabase } = await assertAccessControlRole();
+  const { supabase, employee } = await assertAccessControlRole();
 
   const { error } = await supabase
     .from('badges')
@@ -535,6 +546,12 @@ export async function revokeBadgeCredential(badgeId: string) {
     throw new DatabaseError('Failed to revoke badge', { table: 'badges', cause: error });
   }
 
+  await cacheInvalidateTags([
+    'table:badges',
+    ...(employee.department_id ? [`dept:${employee.department_id}`] : []),
+  ]);
   revalidatePath('/access-control/qr-codes');
+  revalidatePath('/access-control/badges');
+  revalidatePath('/access-control');
   return { success: true };
 }

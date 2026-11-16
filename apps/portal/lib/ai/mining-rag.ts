@@ -1,6 +1,8 @@
+import { searchAvailability, searchVectors, upsertVector } from '@repo/redis/search';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { logError } from '@/lib/errors/error-logger';
 import { generateEmbedding } from './embeddings';
+import { cosineDistanceToScore, ensureIndexOnce, MINING_VECTOR_SPEC } from './vector-indexes';
 
 export interface BreakdownVectorItem {
   id: string;
@@ -125,6 +127,36 @@ export async function indexBreakdownVector(
       return { success: false };
     }
 
+    if (data?.id) {
+      try {
+        const availability = await searchAvailability();
+        if (availability.available && (await ensureIndexOnce(MINING_VECTOR_SPEC))) {
+          await upsertVector({
+            spec: MINING_VECTOR_SPEC,
+            id: data.id,
+            vector: new Float32Array(vector),
+            fields: {
+              session_id: 'breakdowns',
+              user_id: userId,
+              content: text,
+              source: 'breakdown',
+              breakdown_id: item.id,
+              fleet_id: item.fleet_id,
+              machine_type: item.machine_type,
+              repair_notes: item.repair_notes ?? '',
+              status: item.status || 'active',
+              created_at: new Date().toISOString(),
+            },
+          });
+        }
+      } catch (redisErr) {
+        logError(redisErr instanceof Error ? redisErr : new Error(String(redisErr)), {
+          context: 'index_breakdown_redis_stack_failed',
+          breakdownId: item.id,
+        });
+      }
+    }
+
     return { success: true, id: data?.id };
   } catch (err) {
     logError(err instanceof Error ? err : new Error(String(err)), {
@@ -173,6 +205,34 @@ export async function indexShiftNoteVector(
       return { success: false };
     }
 
+    if (data?.id) {
+      try {
+        const availability = await searchAvailability();
+        if (availability.available && (await ensureIndexOnce(MINING_VECTOR_SPEC))) {
+          await upsertVector({
+            spec: MINING_VECTOR_SPEC,
+            id: data.id,
+            vector: new Float32Array(vector),
+            fields: {
+              session_id: 'shift_notes',
+              user_id: userId,
+              content: text,
+              source: 'shift_note',
+              note_id: item.id,
+              shift_type: item.shift_type,
+              note_date: item.note_date,
+              created_at: new Date().toISOString(),
+            },
+          });
+        }
+      } catch (redisErr) {
+        logError(redisErr instanceof Error ? redisErr : new Error(String(redisErr)), {
+          context: 'index_shift_note_redis_stack_failed',
+          noteId: item.id,
+        });
+      }
+    }
+
     return { success: true, id: data?.id };
   } catch (err) {
     logError(err instanceof Error ? err : new Error(String(err)), {
@@ -195,6 +255,43 @@ export async function searchSimilarBreakdowns(
 
   try {
     const vector = await generateEmbedding(query, userId);
+
+    try {
+      const availability = await searchAvailability();
+      if (availability.available) {
+        const matches = await searchVectors({
+          spec: MINING_VECTOR_SPEC,
+          vector: new Float32Array(vector),
+          k: matchCount * 2,
+          filter: '@session_id:breakdowns',
+          returns: [
+            'user_id',
+            'breakdown_id',
+            'fleet_id',
+            'machine_type',
+            'content',
+            'repair_notes',
+            'created_at',
+          ],
+        });
+        const scoped = matches.filter((m) => m.fields.user_id === userId).slice(0, matchCount);
+        if (scoped.length > 0) {
+          return scoped.map((m) => ({
+            id: m.id,
+            breakdownId: m.fields.breakdown_id || undefined,
+            fleetId: m.fields.fleet_id || 'Fleet Unit',
+            machineType: m.fields.machine_type || 'Equipment',
+            reason: m.fields.content || '',
+            repairNotes: m.fields.repair_notes || undefined,
+            score: cosineDistanceToScore(m.score),
+            createdAt: m.fields.created_at || new Date().toISOString(),
+          }));
+        }
+      }
+    } catch {
+      // Non-fatal: fall back to Postgres pgvector RPC
+    }
+
     const supabase = await createServerSupabaseClient();
 
     // Call PostgreSQL hybrid search RPC
@@ -254,6 +351,34 @@ export async function searchShiftIntelligence(
 
   try {
     const vector = await generateEmbedding(query, userId);
+
+    try {
+      const availability = await searchAvailability();
+      if (availability.available) {
+        const matches = await searchVectors({
+          spec: MINING_VECTOR_SPEC,
+          vector: new Float32Array(vector),
+          k: matchCount * 2,
+          filter: '@session_id:shift_notes',
+          returns: ['user_id', 'note_id', 'shift_type', 'note_date', 'content', 'created_at'],
+        });
+        const scoped = matches.filter((m) => m.fields.user_id === userId).slice(0, matchCount);
+        if (scoped.length > 0) {
+          return scoped.map((m) => ({
+            id: m.id,
+            noteId: m.fields.note_id || undefined,
+            shiftType: m.fields.shift_type || 'shift',
+            noteDate: m.fields.note_date || '',
+            content: m.fields.content || '',
+            score: cosineDistanceToScore(m.score),
+            createdAt: m.fields.created_at || new Date().toISOString(),
+          }));
+        }
+      }
+    } catch {
+      // Non-fatal: fall back to Postgres pgvector RPC
+    }
+
     const supabase = await createServerSupabaseClient();
 
     const { data, error } = await supabase.rpc('search_memories_hybrid', {
