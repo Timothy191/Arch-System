@@ -234,7 +234,7 @@ Runtime clients are decoupled behind factory helpers to prevent environment leak
 | **Glass Component**        | `packages/ui/src/components/GlassCard.tsx`                | Primary card component adhering to strict light-mode glass refraction.            |
 | **Offline Queue**          | `apps/portal/hooks/useOfflineQueue.ts`                    | Zustand persistent store queueing mutations during field connectivity drops.      |
 | **Pit Connectivity**       | `libs/shared/hooks/src/usePitConnectivity.ts`             | Jittered heartbeat detector for mining pit network degradation and lie-fi.        |
-| **Policy Compiler**        | `tools/repo/policy-compiler.cjs`                          | Monorepo boundary compiler generating ESLint boundaries and policy JSONs.         |
+| **Policy Compiler**        | `tools/repo/policy-compiler.cjs`                          | Monorepo boundary compiler generating policy JSONs (`tools/repo/policy/*.json`).  |
 | **Compound Bash Guard**    | `tools/scripts/check-compound-bash.cjs`                   | AST parser blocking dangerous shell commands before execution.                    |
 | **Quality Gates**          | `tools/scripts/enforce-quality-gates.sh`                  | 4-gate verification script (ARWR, tests, modernization, strict TS).               |
 | **TODO & Report Protocol** | `.agents/rules/todo-completion-and-detailed-reporting.md` | Mandatory 100% TODO execution and detailed post-investigation reporting protocol. |

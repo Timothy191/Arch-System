@@ -7,11 +7,13 @@
  * using the same pattern as `indexBreakdownVector` in `mining-rag.ts`.
  */
 
+import { searchAvailability, upsertVector } from '@repo/redis/search';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { basename, extname, join } from 'path';
 import { chunkForEmbedding } from './chunking';
 import { batchGenerateEmbeddings } from './embeddings';
+import { DOCUMENTS_VECTOR_SPEC, ensureIndexOnce } from './vector-indexes';
 
 const EXTERNAL_SESSION_ID = 'external_content';
 const MEMORY_TYPE = 'semantic';
@@ -122,25 +124,53 @@ async function indexContent(
   const vectors = await batchGenerateEmbeddings(texts, userId);
 
   const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.from('memory_embeddings').insert(
-    chunks.map((chunk, idx) => ({
-      session_id: EXTERNAL_SESSION_ID,
-      user_id: userId,
-      content: chunk.text,
-      embedding: JSON.stringify(vectors[idx] ?? []),
-      memory_type: MEMORY_TYPE,
-      metadata: {
-        source: item.source,
-        source_id: item.sourceId,
-        title: item.title,
-        ...item.metadata,
-      },
-    }))
-  );
+  const { data: insertedRows, error } = await supabase
+    .from('memory_embeddings')
+    .insert(
+      chunks.map((chunk, idx) => ({
+        session_id: EXTERNAL_SESSION_ID,
+        user_id: userId,
+        content: chunk.text,
+        embedding: JSON.stringify(vectors[idx] ?? []),
+        memory_type: MEMORY_TYPE,
+        metadata: {
+          source: item.source,
+          source_id: item.sourceId,
+          title: item.title,
+          ...item.metadata,
+        },
+      }))
+    )
+    .select('id');
 
   if (error) {
     console.error(`Failed to index ${item.source}:${item.sourceId}`, error);
     return { success: false };
+  }
+
+  try {
+    const availability = await searchAvailability();
+    if (availability.available && (await ensureIndexOnce(DOCUMENTS_VECTOR_SPEC))) {
+      await Promise.all(
+        chunks.map((chunk, idx) =>
+          upsertVector({
+            spec: DOCUMENTS_VECTOR_SPEC,
+            id: insertedRows?.[idx]?.id ?? `${item.source}:${item.sourceId}:${idx}`,
+            vector: new Float32Array(vectors[idx] ?? []),
+            fields: {
+              session_id: EXTERNAL_SESSION_ID,
+              user_id: userId,
+              content: chunk.text,
+              source: item.source,
+              source_id: item.sourceId,
+              title: item.title,
+            },
+          })
+        )
+      );
+    }
+  } catch (redisErr) {
+    console.warn(`Non-fatal Redis Stack sync failed for ${item.source}:${item.sourceId}`, redisErr);
   }
 
   return { success: true };

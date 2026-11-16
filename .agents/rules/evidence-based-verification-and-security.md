@@ -49,5 +49,14 @@ Building on unverified assumptions is a critical failure.
 
 ## Additional Rules
 
+- **Evidence-based decisions (All Agents, All Tasks)**: Every architectural, refactoring, dependency, config, and completion decision made by any agent MUST cite directly observed evidence (`file:line`, symbol name, or exact tool/command output) gathered in the current session. Unverified assumptions or memory-only claims are prohibited.
 - **Docs vs reality**: record contradictions as architectural discrepancies requiring decision — no assumptions or unauthorized rewrites.
 - **Library vs runtime**: if the execution layer is absent, state library-only/test-only.
+
+## "Audit" Prompt Trigger Protocol (DeepAudit)
+
+Whenever a user prompt includes the word **`Audit`** (case-insensitive, including `audit` or `auditing`):
+
+1. Load and follow `.agents/skills/deep-audit/SKILL.md` (`lintsinghua/DeepAudit` 4-phase workflow: Reconnaissance -> AST/RAG Analysis -> Empirical Verification -> Orchestrator Report).
+2. Execute `pnpm audit:deep` and `pnpm audit:react-doctor` as baseline empirical verification alongside domain-targeted checks (`pnpm audit:compliance` / Jest security assertions).
+3. Report only empirically verified findings with `file:line`, severity (`P0`–`P3`), evidence level (`E1`–`E4`), and output digests.

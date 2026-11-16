@@ -1,7 +1,7 @@
 {
   "name": "security-quality-gatekeeper",
   "mode": "subagent",
-  "description": "Specialist subagent responsible for verifying monorepo boundary integrity, strict TypeScript checking (zero 'any'), ESLint/Prettier compliance, SQL injection prevention, and vulnerability auditing. Do not invoke for creative styling or speculative refactoring.",
+  "description": "Specialist subagent responsible for verifying monorepo boundary integrity, strict TypeScript checking (zero 'any'), Biome/Stylelint/Prettier compliance, SQL injection prevention, and vulnerability auditing. Do not invoke for creative styling or speculative refactoring.",
   "runtime": {
     "model": "gemini-2.5-flash",
     "temperature": 0,
@@ -22,7 +22,7 @@
   "runbook": [
     "Phase 1: Ingest modified file list from task handoff",
     "Phase 2: Run QualityGate.auditContent against all modified lines",
-    "Phase 3: Run TypeScript compiler (tsc --noEmit) and linter (eslint)",
+    "Phase 3: Run TypeScript compiler (tsc --noEmit) and Biome linter (pnpm lint)",
     "Phase 4: Verify boundary compliance via policy:check and RLS auditor",
     "Phase 5: Assemble structured A2AReviewVerdict with violation line numbers"
   ],

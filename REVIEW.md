@@ -17,12 +17,12 @@ integrity, offline resilience, and strict field terminal constraints.
 
 ## Review Severity Calibration
 
-| Level | Definition | Action Required |
-|:---|:---|:---|
-| **P0 - Blocker** | Monorepo boundary violation, dark-mode styling, raw `<img>`, client-side DB query, broken RLS policy, unhandled offline loss, data corruption risk. | Must block PR merge. Immediate fix required. |
-| **P1 - Critical** | Performance regression, N+1 query, non-serializable RSC prop, unkeyed loop, missing rate-limiting on Server Action, cache tag leak. | Requires resolution prior to production release. |
-| **P2 - Warning** | Suboptimal bundle size, missing error boundaries, suboptimal OKLCH token usage, missing unit test coverage for edge case. | Address before closeout or track in follow-up. |
-| **P3 - Suggestion** | Idiomatic simplification, naming clarity, minor docstring enrichment. | Non-blocking. |
+| Level               | Definition                                                                                                                                          | Action Required                                  |
+| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
+| **P0 - Blocker**    | Monorepo boundary violation, dark-mode styling, raw `<img>`, client-side DB query, broken RLS policy, unhandled offline loss, data corruption risk. | Must block PR merge. Immediate fix required.     |
+| **P1 - Critical**   | Performance regression, N+1 query, non-serializable RSC prop, unkeyed loop, missing rate-limiting on Server Action, cache tag leak.                 | Requires resolution prior to production release. |
+| **P2 - Warning**    | Suboptimal bundle size, missing error boundaries, suboptimal OKLCH token usage, missing unit test coverage for edge case.                           | Address before closeout or track in follow-up.   |
+| **P3 - Suggestion** | Idiomatic simplification, naming clarity, minor docstring enrichment.                                                                               | Non-blocking.                                    |
 
 ---
 
@@ -62,18 +62,32 @@ integrity, offline resilience, and strict field terminal constraints.
 
 ---
 
+## Systematic Code Review Checklist (Code Review Tips & Reuse-First)
+
+Apply these checks across every diff before approving:
+
+1. **Readability & Single Responsibility**: Require intent-revealing names with explicit units (`timeoutMs`, `maxWeightTons`), zero magic numbers/strings, functions `<= 50` lines with cyclomatic complexity `<= 8`, and guard clauses returning early.
+2. **Side Effects & Immutability**: Prefer pure transformations over `readonly` inputs; never mutate function arguments in-place; isolate I/O, cache invalidation (`updateTag`), and audit logging at explicit Server Action / Route Handler boundaries.
+3. **Limits, Bounds & Defensive Guards**: Enforce explicit `.limit()` clauses on database queries, bounded pagination, payload caps (`body-limit.ts`), rate limits (`@repo/rate-limiter`), division-by-zero guards in telemetry/KPI math, and empty/null collection guards.
+4. **Security & TOCTOU Prevention**: Validate untrusted inputs via `@repo/contract` Zod schemas before execution, follow the Canonical 8-Step Server Action sequence, and enforce tenant/department ownership inside atomic RPCs or Kysely queries to avoid Time-of-Check to Time-of-Use (TOCTOU) race conditions.
+5. **Performance & Concurrency**: Eliminate N+1 queries and sequential `await` waterfalls inside loops (`Promise.all` / `Promise.allSettled` or batch RPCs); clean up Realtime CDC channels, observers, and timers to avoid leaks.
+6. **Testing & Behavioral Edge Cases**: Verify observable behavior and failure paths (`401`/`403` unauthorized, `400` invalid payload, `429` rate limit, offline queue fallback) instead of brittle internal mocks.
+7. **Reuse-First & Blast-Radius Pre-Flight (`codemap` / CodeGraph SSoT)**: Before adding a new shared helper, hook, or UI primitive, inspect existing canonical modules (`pnpm audit:ssot-duplicates`, `pnpm ci:context`, `pnpm ci:impact`) to reuse established SSoTs and size downstream blast radius.
+
+---
+
 ## Sub-Agent Usage Tiers
 
 The Review Agent must scale sub-agent allocation based on change scope and domain risk.
 All sub-agents are strictly **read-only** and do not post comments directly. They return
 structured findings with `path`, `line`, `severity`, `rationale`, and `confidence`.
 
-| Diff Size | Sub-Agent Allocation | Review Strategy |
-|:---|:---|:---|
-| **Tiny** (<100 lines, ≤2 files) | **0 sub-agents** | Main reviewer inspects directly. Coordination overhead exceeds benefit. |
-| **Small** (100–300 lines, 3–5 files) | **1 sub-agent** | Targeted pass on the highest-risk area (e.g., auth, migrations, RLS, SCADA). |
-| **Medium** (300–800 lines, 6+ files) | **3 sub-agents** | Split across 3 specialized review domains: (1) Architecture & Security, (2) UI/Tokens & Accessibility, (3) Testing & Behavioral Coverage. |
-| **Large / Cross-Cutting** (>800 lines) | **Up to 6 sub-agents** | Sharded by independent architectural domains. |
+| Diff Size                              | Sub-Agent Allocation   | Review Strategy                                                                                                                           |
+| :------------------------------------- | :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tiny** (<100 lines, ≤2 files)        | **0 sub-agents**       | Main reviewer inspects directly. Coordination overhead exceeds benefit.                                                                   |
+| **Small** (100–300 lines, 3–5 files)   | **1 sub-agent**        | Targeted pass on the highest-risk area (e.g., auth, migrations, RLS, SCADA).                                                              |
+| **Medium** (300–800 lines, 6+ files)   | **3 sub-agents**       | Split across 3 specialized review domains: (1) Architecture & Security, (2) UI/Tokens & Accessibility, (3) Testing & Behavioral Coverage. |
+| **Large / Cross-Cutting** (>800 lines) | **Up to 6 sub-agents** | Sharded by independent architectural domains.                                                                                             |
 
 ### Specialized Reviewer Roles
 

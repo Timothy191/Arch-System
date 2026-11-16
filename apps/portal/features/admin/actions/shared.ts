@@ -1,7 +1,17 @@
+import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 
 const HTTP_UNAUTHORIZED = 401;
 const HTTP_FORBIDDEN = 403;
+const HTTP_TOO_MANY_REQUESTS = 429;
+
+const adminMutationLimiter = new RateLimiter({
+  store: new MemoryStore(),
+  strategy: new FixedWindowStrategy(),
+  limit: 30,
+  windowMs: 60_000,
+  keyPrefix: 'ratelimit:admin-mutation:',
+});
 
 /**
  * Shared admin guard for admin server actions (fleet, minerals, sites, targets).
@@ -23,6 +33,11 @@ export async function assertAdmin() {
 
   if (employee?.role !== 'admin') {
     return { error: 'Forbidden: admin role required', status: HTTP_FORBIDDEN } as const;
+  }
+
+  const rateLimit = await adminMutationLimiter.check(user.id);
+  if (!rateLimit.allowed) {
+    return { error: 'Rate limit exceeded', status: HTTP_TOO_MANY_REQUESTS } as const;
   }
 
   return { supabase, employee };

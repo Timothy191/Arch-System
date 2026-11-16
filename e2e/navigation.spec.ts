@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 // Project default storageState is authenticated; these specs exercise the logged-out/login flow.
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test.describe('department navigation', () => {
+test.describe('department navigation', { tag: '@smoke' }, () => {
   test('unauthenticated access to any department redirects to login', async ({ page }) => {
     const departments = ['drilling', 'production', 'engineering', 'control-room', 'access-control'];
 
@@ -50,7 +50,7 @@ test.describe('department navigation', () => {
   });
 });
 
-test.describe('login page navigation', () => {
+test.describe('login page navigation', { tag: '@smoke' }, () => {
   test('login page is publicly accessible', async ({ page }) => {
     await page.goto('/login');
     await expect(page).toHaveURL(/\/login/);

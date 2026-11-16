@@ -46,6 +46,7 @@ const serverEnvShape = {
 
   // ── Redis (optional, used only when configured) ────────────────────
   REDIS_URL: z.string().optional(),
+  REDIS_STACK_URL: z.string().optional(),
 
   // ── LLM / AI providers (optional) ──────────────────────────────────
   OPENAI_API_KEY: z.string().optional(),
@@ -179,6 +180,7 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
       PORT: process.env.PORT,
       NODE_ENV: process.env.NODE_ENV,
       REDIS_URL: process.env.REDIS_URL,
+      REDIS_STACK_URL: process.env.REDIS_STACK_URL,
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,
       OPENAI_MODEL: process.env.OPENAI_MODEL,
       OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
@@ -234,6 +236,7 @@ function parseEnv(): EnvVars {
     PORT: process.env.PORT,
     NODE_ENV: process.env.NODE_ENV,
     REDIS_URL: process.env.REDIS_URL,
+    REDIS_STACK_URL: process.env.REDIS_STACK_URL,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_MODEL: process.env.OPENAI_MODEL,
     OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,

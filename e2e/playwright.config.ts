@@ -1,5 +1,33 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Bridge E2E credentials from the gitignored apps/portal/.env into process.env.
+ * Precedence: real env (TEST_EMAIL / TEST_PASSWORD) > SMOKE_TEST_* in apps/portal/.env >
+ * TEST_* in apps/portal/.env. When nothing is found, e2e/helpers/credentials.ts throws
+ * a fail-fast error at spec load instead of silently using committed literals.
+ */
+function loadDevCredentials(): void {
+  if (process.env.TEST_EMAIL && process.env.TEST_PASSWORD) return;
+  const envFile = path.resolve(process.cwd(), 'apps/portal/.env');
+  if (!existsSync(envFile)) return;
+  const entries = new Map<string, string>();
+  for (const line of readFileSync(envFile, 'utf8').split('\n')) {
+    const match = /^([A-Z_0-9]+)=(.*)$/.exec(line.trim());
+    if (match) entries.set(match[1], match[2]);
+  }
+  const fallbackPairs: ReadonlyArray<readonly [string, string]> = [
+    ['TEST_EMAIL', 'SMOKE_TEST_EMAIL'],
+    ['TEST_PASSWORD', 'SMOKE_TEST_PASSWORD'],
+  ];
+  for (const [target, fallbackName] of fallbackPairs) {
+    const resolved = process.env[target] || entries.get(target) || entries.get(fallbackName);
+    if (resolved) process.env[target] = resolved;
+  }
+}
+
+loadDevCredentials();
 
 /** Resolve a Chrome/Chromium executable across environments.
  * Priority: explicit GOOGLE_CHROME_SHIM path -> system chrome -> playwright's bundled chromium.
@@ -35,8 +63,11 @@ export default defineConfig({
   /* Limit parallel workers locally so Next.js dev server on-demand compilation is not overloaded. */
   workers: process.env.CI ? 1 : 2,
   timeout: 60000,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [['list'], ['html', { open: 'never' }]],
+  /* Scratch specs live outside the suite until promoted or deleted. */
+  testIgnore: ['temp/**'],
+  /* Reporter to use: failures reporter prints unexpected outcomes as they occur (Playwright >= 1.65),
+   * HTML report keeps only non-passing tests to stay scannable. */
+  reporter: [['failures'], ['html', { open: 'never', onlyFailures: true }]],
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',

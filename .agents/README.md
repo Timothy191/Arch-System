@@ -1,37 +1,24 @@
-# Arch-CorpOS Agentic Governance & Win Loops
+# Arch-System Agentic Governance & Verification
 
-This directory (`.agents/`) contains the Agent Governance infrastructure and the Arch-CorpOS autonomous business loop runner (Win Loop implementation).
+This directory (`.agents/`) contains the Agent Governance infrastructure, lifecycle hooks, A2A protocol registry, engineering rules, and reusable skills for **Arch-System**.
 
 ## 1. Agent Governance Hooks
 
 Located in `.agents/hooks/`, these scripts guard subagent execution boundaries:
 
 - `pre-invocation-inject.sh`: Injects context prior to agent boot.
-- `pre-tool-guard.sh`: Prevents operations outside of designated scopes (e.g. restricts access to system files or destructive commands).
-- `post-tool-tracer.sh`: Logs executed operations and metadata to `.agents/audit.log`.
+- `post-tool-tracer.sh`: Logs executed operations and metadata to `.agents/a2a/bus/hook-events.jsonl`.
 - `worktree-guard.sh`: Ensures agents do not operate directly on protected branches (like `main`) without a clean git state or worktree isolation.
+- `pre-task-budget-check.cjs` & `post-task-token-track.cjs`: Enforce task-scaled context token budgets.
 
-## 2. Arch-CorpOS Business Loops
+## 2. Autonomous Orchestration & Verification
 
-Located in `.agents/corpos/` and `.agents/loops/`, this system implements the "Win Loop" architecture, a synthesis of `win.sh`, `CorpOS`, and `ai-company`.
+Autonomous execution and multi-agent coordination are powered by:
 
-### Key Components
-
-- **corpos**: The central CLI binary (`.agents/corpos/bin/corpos`).
-- **tick.sh**: The execution engine that ingests a signal, evaluates rules, outputs a strategic brief, invokes verification gates, captures artifacts, determines outcomes, logs to the append-only journal, and schedules the next run (`.agents/corpos/engine/tick.sh`).
-- **corpos.config.json**: Defines the organizational departments and their authority ceilings.
-
-### How to use
-
-```bash
-# Check system status
-pnpm corpos status
-
-# Trigger a manual tick (dry run)
-pnpm corpos tick codebase-health --dry-run
-```
-
-For detailed specifications of the Win Loop engine, see `.agents/corpos/SPEC.md`.
+- **Ralph Runner**: `.agents/bin/ralph.cjs` (and `.agents/bin/ralph`) for iterative autonomous task loops.
+- **Swarms Orchestrator**: `pnpm agent:swarm` (`tools/scripts/run-swarm.cjs`) and `tools/swarms-orchestrator/` (Rust Tokio orchestrator).
+- **A2A Intercom & Bus**: `pnpm agent:claim`, `pnpm agent:release`, `pnpm agent:talk`, `pnpm agent:whiteboard` (`tools/scripts/agent-intercom.cjs`) backed by `.agents/a2a/`.
+- **28-Gate Verification**: `pnpm agent:verify` (`tools/scripts/agent-verify.sh`), writing cryptographic evidence to `.ci-local/agent-verify-evidence.json`.
 
 ---
 
@@ -54,7 +41,7 @@ The score is used to:
 
 - **Score ≥ 0**: Normal operation — proceed with standard verification gates
 - **Score < 0**: Escalate — require human review before next task execution
-- **Score ≤ -5**: Mandatory full `pnpm agent:verify` (27-gate suite) before any further action
+- **Score ≤ -5**: Mandatory full `pnpm agent:verify` (28-gate suite) before any further action
 
 Agents must log each action's outcome and score in the session context before concluding work.
 
@@ -96,7 +83,7 @@ Before declaring completion:
 
 1. Re-run all acceptance criteria from the spec
 2. Confirm no regressions in unrelated gates
-3. Update `AGENT_TRACER.md` for affected packages
+3. Update root `AGENT_TRACER.md` with an ISO-8601 entry (never create per-package `*/AGENT_TRACER.md` files)
 4. Commit with a conventional commit message
 
-This approach is enforced by the `pnpm agent:verify` 27-gate suite — the spec's acceptance criteria must include passing all applicable gates.
+This approach is enforced by the `pnpm agent:verify` 28-gate suite — the spec's acceptance criteria must include passing all applicable gates.

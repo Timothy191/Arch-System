@@ -1,4 +1,12 @@
-import { detectCapabilities, getCacheStats, getRedisClient, isServerlessRedis } from '@repo/redis';
+import {
+  detectCapabilities,
+  getCacheStats,
+  getRedisClient,
+  isServerlessRedis,
+  searchAvailability,
+  type VectorIndexStats,
+  vectorIndexStats,
+} from '@repo/redis';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(_req: NextRequest) {
@@ -37,6 +45,25 @@ export async function GET(_req: NextRequest) {
 
   const serverless = typeof isServerlessRedis === 'function' ? isServerlessRedis() : false;
 
+  let vectorSearch: Awaited<ReturnType<typeof searchAvailability>> = {
+    available: false,
+    reason: 'unreachable',
+  };
+  let vectorIndexes: VectorIndexStats[] = [];
+  try {
+    if (typeof searchAvailability === 'function') {
+      vectorSearch = await searchAvailability();
+      if (vectorSearch.available && typeof vectorIndexStats === 'function') {
+        vectorIndexes = await Promise.all([
+          vectorIndexStats('arch:vector:mining'),
+          vectorIndexStats('arch:vector:documents'),
+        ]);
+      }
+    }
+  } catch {
+    // Non-fatal in health check
+  }
+
   return NextResponse.json(
     {
       status: degraded ? 'degraded' : 'healthy',
@@ -45,6 +72,8 @@ export async function GET(_req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       cacheStats,
       capabilities,
+      vectorSearch,
+      vectorIndexes,
       timestamp: new Date().toISOString(),
     },
     { status: degraded ? 503 : 200 }

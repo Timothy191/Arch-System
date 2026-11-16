@@ -185,6 +185,12 @@
  *         description: Internal server error
  */
 
+import {
+  adminDataDeleteSchema,
+  adminDataInsertSchema,
+  adminDataQuerySchema,
+  adminDataUpdateSchema,
+} from '@repo/contract/schemas/admin.schema';
 import { serverLogger } from '@repo/logger';
 import { FixedWindowStrategy, RateLimiter, RedisStore } from '@repo/rate-limiter';
 import { getRedisClient } from '@repo/redis';
@@ -203,7 +209,6 @@ const OPERATIONAL_TABLES = new Set([
   'hourly_loads',
   'delay_entries', // AGENT-TRACE: New delay tracking system (replaces operational_delays)
   'delay_categories', // AGENT-TRACE: New delay categories
-  // "operational_delays", // DEPRECATED 2025-01-15 - Replaced by delay_entries system
   'engineering_notes',
   'shift_status',
   'excavator_activity',
@@ -285,10 +290,19 @@ async function handleGetRequest(
   }
 
   const { searchParams } = _request.nextUrl;
-  const limit = Math.min(parseInt(searchParams.get('limit') ?? '50', 10), 200);
-  const offset = parseInt(searchParams.get('offset') ?? '0', 10);
-  const orderBy = searchParams.get('order_by') ?? 'created_at';
-  const orderDir = searchParams.get('order_dir') === 'asc' ? 'asc' : 'desc';
+  const parsedQuery = adminDataQuerySchema.safeParse({
+    limit: searchParams.get('limit') ?? undefined,
+    offset: searchParams.get('offset') ?? undefined,
+    order_by: searchParams.get('order_by') ?? undefined,
+    order_dir: searchParams.get('order_dir') ?? undefined,
+  });
+  if (!parsedQuery.success) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Invalid query parameters', code: 'VALIDATION_ERROR' } },
+      { status: 400 }
+    );
+  }
+  const { limit, offset, order_by: orderBy, order_dir: orderDir } = parsedQuery.data;
 
   const serviceRole = createServiceRoleClient();
   const query = serviceRole
@@ -309,11 +323,64 @@ async function handleGetRequest(
   return NextResponse.json({ data, count, limit, offset });
 }
 
-export async function GET(
+async function handlePostRequest(
   request: NextRequest,
   { params }: { params: Promise<{ table: string }> }
 ) {
-  return withRateLimit(request, () => handleGetRequest(request, { params }));
+  const auth = await assertAdmin();
+  if ('error' in auth) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  const { table: rawTable } = await params;
+  const table = rawTable.toLowerCase();
+  if (!OPERATIONAL_TABLES.has(table)) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Unknown table', code: 'API_ERROR' } },
+      { status: 404 }
+    );
+  }
+
+  const body = await request.json();
+  const parsedBody = adminDataInsertSchema.safeParse(body);
+  if (!parsedBody.success) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Invalid insert payload', code: 'VALIDATION_ERROR' } },
+      { status: 400 }
+    );
+  }
+
+  const serviceRole = createServiceRoleClient();
+  const { data: inserted, error } = await serviceRole
+    .from(table)
+    .insert(parsedBody.data)
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Insert failed', code: 'API_ERROR' } },
+      { status: 500 }
+    );
+  }
+
+  await serviceRole.from('audit_logs').insert({
+    action: 'create',
+    table_name: table,
+    record_id: inserted?.id ?? null,
+    old_data: null,
+    new_data: parsedBody.data,
+    performed_by: auth.employee.id,
+  });
+
+  return NextResponse.json({ success: true, data: inserted });
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ table: string }> }
+) {
+  return withRateLimit(request, () => handlePostRequest(request, { params }));
 }
 
 async function handlePutRequest(
@@ -335,14 +402,18 @@ async function handlePutRequest(
   }
 
   const body = await request.json();
-  const { id, ...data } = body;
-
-  if (!id) {
+  const parsedBody = adminDataUpdateSchema.safeParse(body);
+  if (!parsedBody.success) {
     return NextResponse.json(
-      { success: false, error: { message: 'Missing record id', code: 'API_ERROR' } },
+      { success: false, error: { message: 'Missing record id', code: 'VALIDATION_ERROR' } },
       { status: 400 }
     );
   }
+  const { id, data: nestedData, ...rest } = parsedBody.data;
+  const data =
+    nestedData && typeof nestedData === 'object' && !Array.isArray(nestedData)
+      ? (nestedData as Record<string, unknown>)
+      : rest;
 
   // AGENT-TRACE: Per-machine rate limiting for status updates
   if (table === 'machines' && 'active' in data) {
@@ -412,13 +483,17 @@ async function handleDeleteRequest(
   }
 
   const { searchParams } = request.nextUrl;
-  const id = searchParams.get('id');
-  if (!id) {
+  const parsedDelete = adminDataDeleteSchema.safeParse({ id: searchParams.get('id') });
+  if (!parsedDelete.success) {
     return NextResponse.json(
-      { success: false, error: { message: 'Missing id query parameter', code: 'API_ERROR' } },
+      {
+        success: false,
+        error: { message: 'Missing id query parameter', code: 'VALIDATION_ERROR' },
+      },
       { status: 400 }
     );
   }
+  const id = parsedDelete.data.id;
 
   const serviceRole = createServiceRoleClient();
 
@@ -449,4 +524,11 @@ export async function DELETE(
   { params }: { params: Promise<{ table: string }> }
 ) {
   return withRateLimit(request, () => handleDeleteRequest(request, { params }));
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ table: string }> }
+) {
+  return withRateLimit(request, () => handleGetRequest(request, { params }));
 }

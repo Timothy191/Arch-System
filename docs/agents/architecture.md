@@ -12,7 +12,7 @@ The repository is structured as a **pnpm workspaces + Turborepo 2.x** monorepo:
 - **`packages/*`**: Foundational domain-agnostic packages (`@repo/contract`, `@repo/errors`, `@repo/supabase`, `@repo/database`, `@repo/redis`, `@repo/rate-limiter`, `@repo/logger`, `@repo/theme`, `@repo/ui`, `@repo/agents`, `@repo/eval`, `@repo/utils`, `@repo/typescript-config`).
 - **`libs/*`**: Domain feature slices (`libs/features/auth`, `libs/features/departments`, `libs/features/hub`) and cross-cutting domain utilities (`libs/shared/data-access`, `libs/shared/hooks`, `libs/shared/utils`).
 - **`tools/*`**: Build-time monorepo governance, Single Source of Truth policy compiler, AST compound bash safety check, and audit suites.
-- **Background Engines**: Arch-CorpOS autonomous business loops (`.agents/corpos/bin/corpos`), Rust Tokio swarms (`tools/swarms-orchestrator`), and Inngest background event workflows (`@repo/utils/inngest`).
+- **Background Engines**: Ralph autonomous runner (`.agents/bin/ralph.cjs`), Rust Tokio swarms (`tools/swarms-orchestrator`), and Inngest background event workflows (`@repo/utils/inngest`).
 
 ```
                            +-----------------------------------+
@@ -55,7 +55,7 @@ The repository is structured as a **pnpm workspaces + Turborepo 2.x** monorepo:
 
 ### Monorepo Boundary Invariants
 
-Enforced by `tools/repo/policy-compiler.cjs` via `tools/repo/policy/dependency.rules.json` and ESLint boundaries:
+Enforced by `tools/repo/policy-compiler.cjs` via `tools/repo/policy/dependency.rules.json` and `pnpm policy:check`:
 
 1. **No direct database access in apps**: `apps/*` MUST NOT import `packages/database` directly — data persistence routes through `@repo/supabase` or typed services.
 2. **Pure UI components**: `packages/ui` MUST remain strictly pure presentational — zero database, Supabase, or backend access.
@@ -89,7 +89,7 @@ Enforced by `tools/repo/policy-compiler.cjs` via `tools/repo/policy/dependency.r
 | `packages/contract/`     | Canonical Single Source of Truth for Zod schemas, TypeScript types, and OpenAPI specifications.                                                                  |
 | `packages/errors/`       | Standardized `AppError` class hierarchy, error codes, and TypeScript type guards.                                                                                |
 | `packages/supabase/`     | SSR/browser Supabase client factories (`/server`, `/client`, `/middleware`), Kysely client (`/kysely`), and query instrumentation.                               |
-| `packages/database/`     | 164+ sequential PostgreSQL migrations (`migrations/NNN_*.sql`), rollback scripts, and safety tests.                                                              |
+| `packages/database/`     | 169+ sequential PostgreSQL migrations (`migrations/NNN_*.sql`), rollback scripts, and safety tests.                                                              |
 | `packages/redis/`        | Two-tier (L1 Memory LRU / L2 Redis) caching, privilege-fenced sessions, distributed locks, streams, and analytics ([ADR-012](adr-async-processing-topology.md)). |
 | `packages/rate-limiter/` | Distributed multi-strategy rate limiters (sliding window, token bucket, fixed window) with DI stores.                                                            |
 | `packages/logger/`       | Structured JSON logger powered by Pino (`serverLogger`, `browserLogger`) with OpenTelemetry correlation.                                                         |

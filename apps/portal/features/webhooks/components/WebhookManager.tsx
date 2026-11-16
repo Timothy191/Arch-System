@@ -8,7 +8,7 @@ import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { fetchClient } from '@repo/utils/client';
 import { AnimatePresence, m } from 'framer-motion';
-import { CheckCircle, Plus, RefreshCw, Trash2, XCircle } from 'lucide-react';
+import { CheckCircle, Plus, RefreshCw, Sparkles, Trash2, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -45,6 +45,39 @@ const EVENT_TYPES: WebhookEventType[] = [
   'operational_delay.created',
   'operational_delay.updated',
 ];
+
+const RECOMMENDED_WEBHOOKS = [
+  {
+    id: 'shift-closeout',
+    label: 'Shift Closeout Feed',
+    description: 'Daily shift logs and closeout updates',
+    event_types: ['daily_log.created', 'daily_log.updated'],
+  },
+  {
+    id: 'breakdown-alerts',
+    label: 'Breakdown Alerts',
+    description: 'Engineering dispatch and completion events',
+    event_types: ['breakdown.created', 'breakdown.updated', 'breakdown.completed'],
+  },
+  {
+    id: 'production-sync',
+    label: 'Production Sync',
+    description: 'Throughput and production log updates',
+    event_types: ['production_log.created', 'production_log.updated'],
+  },
+  {
+    id: 'delay-tracking',
+    label: 'Delay Tracking',
+    description: 'Operational delay and idle-time events',
+    event_types: ['operational_delay.created', 'operational_delay.updated'],
+  },
+  {
+    id: 'full-operations',
+    label: 'Full Operations Feed',
+    description: 'All operational events in one endpoint',
+    event_types: [...EVENT_TYPES],
+  },
+] as const;
 
 export function WebhookManager() {
   const [webhooks, setWebhooks] = useState<WebhookEndpoint[]>([]);
@@ -128,6 +161,17 @@ export function WebhookManager() {
     }
   };
 
+  const handleRetry = async (id: string) => {
+    try {
+      const result = await fetchClient.post<{ retried: number; succeeded: number }>(
+        `/api/webhooks/${id}/retry`
+      );
+      toast.success(`Retried ${result.retried} failed deliveries (${result.succeeded} succeeded)`);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to retry deliveries');
+    }
+  };
+
   const handleEdit = (webhook: WebhookEndpoint) => {
     setEditingWebhook(webhook);
     setFormData({
@@ -146,6 +190,18 @@ export function WebhookManager() {
         ? prev.event_types.filter((t) => t !== eventType)
         : [...prev.event_types, eventType],
     }));
+  };
+
+  const applyTemplate = (template: (typeof RECOMMENDED_WEBHOOKS)[number]) => {
+    setEditingWebhook(null);
+    setFormData({
+      url: '',
+      description: template.description,
+      event_types: [...template.event_types] as WebhookEventType[],
+      active: true,
+    });
+    setShowForm(true);
+    toast.success(`Loaded "${template.label}" template`);
   };
 
   if (loading) {
@@ -184,6 +240,29 @@ export function WebhookManager() {
           Add Webhook
         </Button>
       </m.div>
+
+      <GlassCard className="p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-arch-accent-blue" aria-hidden="true" />
+          <h3 className="font-semibold text-arch-text-primary text-sm">
+            Recommended Webhook Templates
+          </h3>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {RECOMMENDED_WEBHOOKS.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              onClick={() => applyTemplate(template)}
+              className="rounded-lg border border-white/20 bg-white/50 p-3 text-left transition-colors hover:border-arch-accent-blue hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue"
+              aria-label={`Use ${template.label} template`}
+            >
+              <p className="font-medium text-arch-text-primary text-xs">{template.label}</p>
+              <p className="mt-1 text-[11px] text-arch-text-secondary">{template.description}</p>
+            </button>
+          ))}
+        </div>
+      </GlassCard>
 
       <AnimatePresence mode="wait">
         {showForm && (
@@ -383,6 +462,18 @@ export function WebhookManager() {
                       className="border-black/5 bg-white text-arch-text-secondary shadow-sm transition-colors hover:bg-arch-accent-blue/10 hover:text-arch-accent-blue"
                       onClick={(e) => {
                         e.stopPropagation();
+                        handleRetry(webhook.id);
+                      }}
+                      aria-label="Retry failed deliveries"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-black/5 bg-white text-arch-text-secondary shadow-sm transition-colors hover:bg-arch-accent-blue/10 hover:text-arch-accent-blue"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         handleEdit(webhook);
                       }}
                     >
@@ -396,6 +487,7 @@ export function WebhookManager() {
                         e.stopPropagation();
                         handleDelete(webhook.id);
                       }}
+                      aria-label="Delete webhook"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

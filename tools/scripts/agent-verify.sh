@@ -24,6 +24,7 @@ EVIDENCE_JSON="${EVIDENCE_DIR}/agent-verify-evidence.json"
 TMP_GATES_NDJSON="${EVIDENCE_DIR}/.gates-run-$$.ndjson"
 mkdir -p "${EVIDENCE_DIR}"
 rm -f "${TMP_GATES_NDJSON}"
+trap 'rm -f "${TMP_GATES_NDJSON}"' EXIT
 
 RUN_ID="verify_$(date -u +%Y%m%dT%H%M%SZ)"
 STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -165,7 +166,7 @@ if [[ "${FAST_MODE}" == "false" ]]; then
     "mandatory" "RUNTIME_EMPIRICAL"
 
   run_gate 19 "🎭" "End-to-End User Journey Coverage" \
-    "node tools/audits/audit-e2e-journeys.cjs && (if [[ \"\${RUN_LIVE_E2E:-0}\" == \"1\" ]]; then pnpm test:e2e -- --project=chromium e2e/login.spec.ts e2e/navigation.spec.ts; fi)" \
+    "node tools/audits/audit-e2e-journeys.cjs && (if [[ \"\${RUN_LIVE_E2E:-0}\" == \"1\" ]]; then pnpm test:e2e -- --project=chromium --grep @smoke; fi)" \
     "Run 'pnpm audit:e2e-journeys' or 'RUN_LIVE_E2E=1 pnpm test:e2e' to fix missing E2E workflow coverage or failing smoke specs." \
     "mandatory" "RUNTIME_EMPIRICAL"
 

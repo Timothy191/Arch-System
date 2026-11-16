@@ -42,12 +42,17 @@ function resolvePath(p) {
 function main() {
   console.log('Syncing MCP configurations...');
 
-  let mcpJsonPath = path.join(REPO_ROOT, 'config/tools/mcp.json');
+  let mcpJsonPath = path.join(REPO_ROOT, 'tools/mcp/mcp-registry.json');
+  if (!fs.existsSync(mcpJsonPath)) {
+    mcpJsonPath = path.join(REPO_ROOT, 'config/tools/mcp.json');
+  }
   if (!fs.existsSync(mcpJsonPath)) {
     mcpJsonPath = path.join(REPO_ROOT, '.mcp.json');
   }
   if (!fs.existsSync(mcpJsonPath)) {
-    console.error(`Base MCP config not found at config/tools/mcp.json or .mcp.json`);
+    console.error(
+      `Base MCP config not found at tools/mcp/mcp-registry.json, config/tools/mcp.json, or .mcp.json`
+    );
     process.exit(1);
   }
 
@@ -59,7 +64,12 @@ function main() {
     process.exit(1);
   }
 
-  const mcpServers = baseConfig.mcpServers || {};
+  const rawServers = baseConfig.servers || baseConfig.mcpServers || {};
+  const mcpServers = {};
+  for (const [name, server] of Object.entries(rawServers)) {
+    const { name: _n, required: _r, category: _c, toolsCount: _t, note: _note, ...clean } = server;
+    mcpServers[name] = clean;
+  }
 
   const portalEnv = parseEnvFile(path.join(REPO_ROOT, 'apps/portal/.env'));
   const rootEnv = parseEnvFile(path.join(REPO_ROOT, '.env'));

@@ -3,7 +3,7 @@ import { AUTH_FILE } from './helpers/auth';
 
 const PAGE_LOAD_TIMEOUT_MS = 15000;
 
-test.describe('Control Room Shift Closeout E2E (TASK-10.6)', () => {
+test.describe('Control Room Shift Closeout E2E (TASK-10.6)', { lock: '-exclusive-' }, () => {
   test.use({ storageState: AUTH_FILE });
 
   test('switches to Shift Closeout tab, toggles Day/Night Shift, and verifies Lock & Sign Shift action state', async ({

@@ -13,8 +13,8 @@ test.describe('PWA Offline Capabilities', () => {
     // First, visit the app while online to ensure the service worker registers
     await page.goto('/hub');
 
-    // Wait for SW to install and activate. A short timeout helps.
-    await page.waitForTimeout(2000);
+    // Wait for the service worker to install and activate before going offline.
+    await page.waitForLoadState('networkidle');
 
     // Simulate going offline
     await context.setOffline(true);

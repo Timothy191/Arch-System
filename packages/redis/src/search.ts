@@ -1,4 +1,4 @@
-import { getRedisClient } from './client';
+import { getRedisStackClient, resolveRedisStackUrl } from './client';
 import {
   asFieldMap,
   asNumber,
@@ -105,7 +105,22 @@ export type SearchAvailability =
 export async function searchAvailability(
   capabilities?: RedisCapabilities
 ): Promise<SearchAvailability> {
-  const probe = capabilities ?? (await detectCapabilities().catch(() => null));
+  let probe: RedisCapabilities | null | undefined = capabilities;
+  if (!probe) {
+    const stackUrl = resolveRedisStackUrl();
+    if (stackUrl) {
+      if (stackUrl.startsWith('http://') || stackUrl.startsWith('https://')) {
+        return { available: false, reason: 'serverless-rest' };
+      }
+      const stackClient = await requireClient();
+      if (!stackClient) return { available: false, reason: 'unreachable' };
+      probe = await detectCapabilities(stackClient, { cacheKey: 'stack', transport: 'tcp' }).catch(
+        () => null
+      );
+    } else {
+      probe = await detectCapabilities().catch(() => null);
+    }
+  }
   if (!probe) return { available: false, reason: 'unreachable' };
   if (!probe.search) return { available: false, reason: 'no-search-module' };
   if (probe.transport !== 'tcp') return { available: false, reason: 'serverless-rest' };
@@ -121,11 +136,11 @@ export function vectorKey(spec: VectorIndexSpec, id: string): string {
   return `${spec.keyPrefix}${id}`;
 }
 
-type RedisHandle = Awaited<ReturnType<typeof getRedisClient>>;
+type RedisHandle = Awaited<ReturnType<typeof getRedisStackClient>>;
 
 async function requireClient(): Promise<RedisHandle | null> {
   try {
-    return await getRedisClient();
+    return await getRedisStackClient();
   } catch {
     return null;
   }
@@ -239,7 +254,11 @@ export async function dropVectorIndex(indexName: string): Promise<boolean> {
  * A missing score becomes `MAX_SAFE_INTEGER` so callers sorting by ascending
  * distance (RediSearch reports distance, like pgvector) put it last.
  */
-function asVectorMatches(reply: unknown): VectorMatch[] {
+function stripPrefix(id: string, keyPrefix: string): string {
+  return keyPrefix && id.startsWith(keyPrefix) ? id.slice(keyPrefix.length) : id;
+}
+
+function asVectorMatches(reply: unknown, keyPrefix = '', scoreField = SCORE_FIELD): VectorMatch[] {
   if (!Array.isArray(reply)) return [];
 
   const matches: VectorMatch[] = [];
@@ -247,7 +266,7 @@ function asVectorMatches(reply: unknown): VectorMatch[] {
     const row = reply[i];
     if (typeof row === 'string') {
       const fields = asFieldMap(reply[i + 1]);
-      matches.push({ id: row, score: scoreOf(fields), fields });
+      matches.push({ id: stripPrefix(row, keyPrefix), score: scoreOf(fields, scoreField), fields });
       i += 1;
       continue;
     }
@@ -255,14 +274,21 @@ function asVectorMatches(reply: unknown): VectorMatch[] {
       const id = asStringOrNull(row[0]);
       if (id === null) continue;
       const fields = asFieldMap(row.find((entry) => Array.isArray(entry)) ?? []);
-      matches.push({ id, score: scoreFrom(row[1]) ?? scoreOf(fields), fields });
+      matches.push({
+        id: stripPrefix(id, keyPrefix),
+        score: scoreFrom(row[1]) ?? scoreOf(fields, scoreField),
+        fields,
+      });
     }
   }
   return matches;
 }
 
-function scoreOf(fields: Record<string, string>): number {
-  return scoreFrom(fields[AS_SCORE] ?? fields[SCORE_FIELD]) ?? Number.MAX_SAFE_INTEGER;
+function scoreOf(fields: Record<string, string>, scoreField: string): number {
+  return (
+    scoreFrom(fields[AS_SCORE] ?? fields[scoreField] ?? fields[SCORE_FIELD]) ??
+    Number.MAX_SAFE_INTEGER
+  );
 }
 
 function scoreFrom(value: unknown): number | null {
@@ -285,9 +311,9 @@ export async function searchVectors(query: VectorSearchQuery): Promise<VectorMat
   if (!redis) return [];
 
   const k = Math.max(1, query.k ?? DEFAULT_KNN_K);
-  // FT.SEARCH RETURN takes a token count, then `field [AS name]` groups.
-  const returnTokens: RedisCommand = [SCORE_FIELD, 'AS', AS_SCORE, ...(query.returns ?? [])];
-  const expression = `${query.filter ? `${query.filter}=>` : '*=>'}[KNN ${k} @${query.spec.vectorField} $VEC]`;
+  const scoreField = `__${query.spec.vectorField}_score`;
+  const returnTokens: RedisCommand = [AS_SCORE, ...(query.returns ?? [])];
+  const expression = `${query.filter ? `${query.filter}=>` : '*=>'}[KNN ${k} @${query.spec.vectorField} $VEC AS ${AS_SCORE}]`;
 
   const args: RedisCommand = [
     'FT.SEARCH',
@@ -297,6 +323,8 @@ export async function searchVectors(query: VectorSearchQuery): Promise<VectorMat
     2,
     'VEC',
     encodeVector(query.vector),
+    'SORTBY',
+    AS_SCORE,
     'LIMIT',
     0,
     k,
@@ -308,7 +336,7 @@ export async function searchVectors(query: VectorSearchQuery): Promise<VectorMat
   ];
 
   try {
-    return asVectorMatches(await send(redis, args));
+    return asVectorMatches(await send(redis, args), query.spec.keyPrefix, scoreField);
   } catch {
     // Missing index, syntax error, or a dropped connection: all mean "use the
     // Postgres embeddings" from the caller's point of view.

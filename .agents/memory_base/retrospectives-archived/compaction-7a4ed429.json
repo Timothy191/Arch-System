@@ -1,0 +1,35 @@
+{
+  "id": "compaction-7a4ed429",
+  "timestamp": "2026-11-16T12:36:56.240Z",
+  "taskTag": "compaction-standard-7a4ed429",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/.gemini/antigravity-cli/brain/7a4ed429-b5a4-4154-bfb5-f328b390b183/implementation_plan.md\"",
+    "\"/home/tim/Fork/Arch-System/.pr_agent.toml\"",
+    "\"/home/tim/Fork/Arch-System/.github/workflows/pr-agent.yml\"",
+    "\"/home/tim/Fork/Arch-System/tools/audits/audit-react-doctor.cjs\"",
+    "\"/home/tim/Fork/Arch-System/tools/audits/deep-audit.cjs\"",
+    "\"/home/tim/Fork/Arch-System/.agents/skills/deep-audit/SKILL.md\"",
+    "\"/home/tim/Fork/Arch-System/REVIEW.md\"",
+    "\"/home/tim/Fork/Arch-System/.agents/rules/clean-code-and-refactoring.md\"",
+    "\"/home/tim/Fork/Arch-System/.agents/rules/react-components.md\"",
+    "\"/home/tim/Fork/Arch-System/tools/audits/audit-react-doctor.cjs\"",
+    "\"/home/tim/Fork/Arch-System/.agents/skills.json\"",
+    "\"/home/tim/Fork/Arch-System/.agents/rules/evidence-based-verification-and-security.md\"",
+    "\"/home/tim/Fork/Arch-System/.agents/GUIDE.md\"",
+    "\"/home/tim/Fork/.agents/skills/skill-router/SKILL.md\"",
+    "\"/home/tim/Fork/Arch-System/package.json\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (418 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 242094,
+    "cacheHitRatio": 0.906,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

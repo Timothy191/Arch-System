@@ -4,7 +4,7 @@ import { TEST_EMAIL, TEST_PASSWORD } from './helpers/credentials';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test.describe('login page', () => {
+test.describe('login page', { tag: '@smoke' }, () => {
   test('renders login form with all fields', async ({ page }) => {
     await page.goto('/login');
     await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
@@ -57,7 +57,7 @@ test.describe('login page', () => {
   });
 });
 
-test.describe('auth middleware', () => {
+test.describe('auth middleware', { tag: '@smoke' }, () => {
   test('unauthenticated user is redirected to login from protected routes', async ({ page }) => {
     await page.goto('/drilling');
 
@@ -144,7 +144,7 @@ test.describe('design system', () => {
   });
 });
 
-test.describe('full login and reset password flows', () => {
+test.describe('full login and reset password flows', { tag: '@smoke' }, () => {
   test('intro overlay is skipped automatically in E2E environment', async ({ page }) => {
     await page.goto('/login');
     await expect(

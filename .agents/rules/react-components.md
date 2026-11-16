@@ -49,6 +49,7 @@ export function TelemetryButton({ ref, summaryPromise, children, ...props }: Tel
 - **Client Component Constraints**: Never mark a `'use client'` component `async`. Never fetch data in `useEffect` or import `swr`—use RSC, `@tanstack/react-query`, or `useSupabaseRealtime`.
 - **Minimal Serialization Across RSC Boundaries**: Never pass un-serializable values (functions, class instances, symbols) or oversized raw database rows from Server to Client Components; pass only the minimal primitive props required by the leaf.
 - **Pure Presentation in `@repo/ui`**: Components in `packages/ui` must never import `@repo/database` or `@repo/supabase`. Import UI primitives via granular package exports (`@repo/ui/GlassCard`, `@repo/ui/Button`), never barrel imports.
+- **React Doctor Diagnostics (`pnpm audit:react-doctor`)**: Enforces zero `forwardRef` usage, zero server-only imports in `'use client'` files, zero `fetch()` calls inside `useEffect`, and tracks array-index keys (`key={index}`) and direct DOM selectors via `tools/audits/audit-react-doctor.cjs`.
 
 ---
 

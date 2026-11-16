@@ -2,7 +2,7 @@
 /**
  * ralph — local Ralph Loop driver for the Arch monorepo.
  *
- * Implements the contract from .agents/skills/ralph-loop/SKILL.md:
+ * Commands:
  *   ralph init              Write .ralphrc.json quality-gate config.
  *   ralph run "<job-desc>"  Execute one atomic job cycle and run quality gate.
  *   ralph loop <n> "goal"   Stub: delegates to ralph run in sequence.

@@ -6,7 +6,7 @@ alwaysApply: true
 
 # Monorepo Dependency & Boundary Invariants
 
-Enforced by `tools/repo/policy-compiler.cjs` and ESLint boundaries:
+Enforced by `tools/repo/policy-compiler.cjs` and `pnpm policy:check`:
 
 1. **No Direct Database Access in Apps**: `apps/*` MUST NOT import `packages/database` directly — data persistence routes through `@repo/supabase` or typed services.
 2. **Pure UI Components**: `packages/ui` MUST remain strictly pure presentational — zero database, Supabase, or backend access.

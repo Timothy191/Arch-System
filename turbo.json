@@ -80,6 +80,7 @@
         "DATABASE_URL",
         "DATABASE_POOLER_URL",
         "REDIS_URL",
+        "REDIS_STACK_URL",
         "SERVERLESS_REDIS_URL",
         "REDIS_AUTH_SECRET",
         "UPSTASH_REDIS_REST_URL",
@@ -160,6 +161,7 @@
         "DATABASE_URL",
         "DATABASE_POOLER_URL",
         "REDIS_URL",
+        "REDIS_STACK_URL",
         "SERVERLESS_REDIS_URL",
         "REDIS_AUTH_SECRET",
         "UPSTASH_REDIS_REST_URL",
@@ -234,6 +236,7 @@
         "DATABASE_URL",
         "DATABASE_POOLER_URL",
         "REDIS_URL",
+        "REDIS_STACK_URL",
         "CRON_SECRET",
         "SCANNER_API_KEY",
         "ALLOWED_SCANNER_SOURCES",
@@ -257,6 +260,7 @@
       "cache": false,
       "passThroughEnv": [
         "REDIS_URL",
+        "REDIS_STACK_URL",
         "REDIS_INTEGRATION",
         "UPSTASH_REDIS_REST_URL",
         "UPSTASH_REDIS_REST_TOKEN"
@@ -266,6 +270,7 @@
       "cache": false,
       "passThroughEnv": [
         "REDIS_URL",
+        "REDIS_STACK_URL",
         "REDIS_INTEGRATION",
         "UPSTASH_REDIS_REST_URL",
         "UPSTASH_REDIS_REST_TOKEN"

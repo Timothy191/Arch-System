@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { performMockLogin } from './helpers/auth';
 
-test.describe('Session Management', () => {
+test.describe('Session Management', { lock: '-exclusive-' }, () => {
   test.describe('Logout functionality', () => {
     test.beforeEach(async ({ page }) => {
       await performMockLogin(page, 'admin');

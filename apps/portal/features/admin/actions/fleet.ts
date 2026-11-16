@@ -63,23 +63,7 @@ export async function adminAddMachine(data: {
     .maybeSingle();
 
   if (error) {
-    // Fallback if optional migration 185 columns are not yet applied in the target DB
-    const fallback = await supabase
-      .from('machines')
-      .insert({
-        name: resolvedName,
-        machine_type: data.machine_type.trim(),
-        serial_number: resolvedMachineId,
-        bin_factor: primaryBinFactor,
-        department_id: data.department_id,
-        site_id: data.site_id || null,
-        active: data.active ?? true,
-        report_exempt: data.report_exempt ?? false,
-      })
-      .select('id')
-      .maybeSingle();
-
-    if (fallback.error) return { error: 'Failed to add machine' };
+    return { error: 'Failed to add machine' };
   }
 
   const createdMachineId = inserted?.id;

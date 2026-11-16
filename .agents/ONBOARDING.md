@@ -66,10 +66,11 @@ sequenceDiagram
 
 Select the matching agent persona card from `.agents/a2a/registry/`:
 
-- **Master Coordination:** `core-coordinator.json`
-- **Cross-Project Auditing:** `federation-auditor.json`
-- **Deployments & Preflight:** `deployment-sentinel.json`
-- **Code & Migration Review:** `maker-checker-gate.json`
-- **Contract Synchronization:** `contract-sync-agent.json`
+- **Master Coordination:** `core-coordinator.json` / `autonomous-orchestrator.json`
+- **Database & RLS:** `database-architect.json`
+- **UI & Design Tokens:** `ui-engineer.json`
+- **Security & Quality Gate:** `security-quality-gatekeeper.json`
+- **Contract & Telemetry Sync:** `telemetry-codebase-architect.json`
+- **Code & Architecture Review:** `critique-council-reviewer.json`
 
-For deep monorepo work inside `Arch-System`, refer to the 17 A2A persona cards under `Arch-System/.agents/a2a/registry/` and 19 agent definitions under `Arch-System/.agents/agents/`.
+For deep monorepo work inside `Arch-System`, refer to the 18 A2A persona cards under `Arch-System/.agents/a2a/registry/` and 19 agent definitions (18 local + 1 symlinked) under `Arch-System/.agents/agents/`.
