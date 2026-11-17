@@ -20,7 +20,7 @@
   ],
   "author": "Arch-System",
   "license": "MIT",
-  "dependencies": {
+  "optionalDependencies": {
     "tree-sitter": "^0.20.0",
     "tree-sitter-typescript": "^0.20.0"
   },
