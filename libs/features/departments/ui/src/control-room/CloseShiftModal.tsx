@@ -4,6 +4,7 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { AlertCircle, CheckCircle, Loader2, Lock, UserCheck, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { CONTROL_ROOM_FIELD_CLASS } from './form-classes';
 
 export interface CloseShiftResult {
   success?: boolean;
@@ -220,7 +221,7 @@ export function CloseShiftModal({
                 value={employeeCode}
                 onChange={(e) => setEmployeeCode(e.target.value)}
                 placeholder="e.g. EMP001"
-                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
+                className={CONTROL_ROOM_FIELD_CLASS}
               />
             </div>
 
@@ -231,7 +232,7 @@ export function CloseShiftModal({
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 placeholder="Enter supervisor PIN"
-                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
+                className={CONTROL_ROOM_FIELD_CLASS}
               />
             </div>
 

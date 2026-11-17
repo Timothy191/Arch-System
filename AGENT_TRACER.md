@@ -4,6 +4,11 @@
 
 ---
 
+## [2026-11-17T14:42:00+02:00] - Backlog Resolution: Extract Shared `CONTROL_ROOM_FIELD_CLASS` & Ratchet Tailwind Repeated Chains (`chore/resolve-cleanup-backlog`)
+
+- **Shared Form Field Styling**: Created [`form-classes.ts`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/form-classes.ts) exporting `CONTROL_ROOM_FIELD_CLASS` and replaced `7` duplicated inline input/textarea class chains across [`DozerRollForm.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/DozerRollForm.tsx) (`5` instances) and [`CloseShiftModal.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/CloseShiftModal.tsx) (`2` instances).
+- **Tailwind Baseline Ratchet**: Updated [`tools/audits/tailwind-baseline.json`](file:///home/tim/Fork/Arch-System/tools/audits/tailwind-baseline.json) to lock in the reduced repeated-chain count.
+
 ## [2026-11-17T14:15:00+02:00] - Scheduled Improvement Pass 7: Observability/Logs `no-store` Headers & Worker Null/Error Guard (`chore/auto-improve-20261117-1414`)
 
 - **Observability & System Logs `Cache-Control` Hardening**: Upgraded [`apps/portal/app/api/observability/ci/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/observability/ci/route.ts#L40) and added `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` to [`apps/portal/app/api/logs/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/logs/route.ts#L236-L240).

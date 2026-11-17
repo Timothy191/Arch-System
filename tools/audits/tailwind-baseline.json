@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-17T12:05:59.660Z",
+  "generatedAt": "2026-11-17T12:42:11.944Z",
   "config": {
     "maxUtilitiesPerElement": 20,
     "duplicateMinTokens": 10,
@@ -43,10 +43,6 @@
     "bg-[var(--bg-secondary)] border border-[var(--accent-blue)]/30 flex flex-wrap gap-4 items-center justify-between p-3.5 rounded-lg": {
       "tokens": 10,
       "uses": 3
-    },
-    "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20 placeholder:text-[var(--text-muted)] px-3 py-2.5 rounded-lg text-[var(--text-heading)] text-sm transition-colors w-full": {
-      "tokens": 15,
-      "uses": 7
     },
     "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 px-3 py-2 rounded-lg text-[var(--text-heading)] text-sm transition-colors w-full": {
       "tokens": 14,

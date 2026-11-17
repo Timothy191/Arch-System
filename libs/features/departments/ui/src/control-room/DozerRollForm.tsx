@@ -13,6 +13,7 @@ import { Calculator, Equal, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { createDozerRoll } from './actions';
+import { CONTROL_ROOM_FIELD_CLASS } from './form-classes';
 
 interface DozerWithSite {
   id: string;
@@ -317,7 +318,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                     value={lengthM}
                     onChange={(e) => setLengthM(e.target.value)}
                     placeholder="Length (m)"
-                    className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
+                    className={CONTROL_ROOM_FIELD_CLASS}
                   />
                 </div>
                 <X className="h-5 w-5 shrink-0 text-[var(--text-muted)]" />
@@ -329,7 +330,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                     value={widthM}
                     onChange={(e) => setWidthM(e.target.value)}
                     placeholder="Width (m)"
-                    className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
+                    className={CONTROL_ROOM_FIELD_CLASS}
                   />
                 </div>
                 <Equal className="h-5 w-5 shrink-0 text-[var(--text-muted)]" />
@@ -352,7 +353,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                   value={bladePasses}
                   onChange={(e) => setBladePasses(e.target.value)}
                   placeholder="e.g. 12"
-                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
+                  className={CONTROL_ROOM_FIELD_CLASS}
                 />
               </div>
               <div className="space-y-2">
@@ -364,7 +365,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                   value={pushCount}
                   onChange={(e) => setPushCount(e.target.value)}
                   placeholder="e.g. 8"
-                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
+                  className={CONTROL_ROOM_FIELD_CLASS}
                 />
               </div>
               <div className="space-y-2">
@@ -377,7 +378,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                   value={hoursOperated}
                   onChange={(e) => setHoursOperated(e.target.value)}
                   placeholder="e.g. 8.5"
-                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
+                  className={CONTROL_ROOM_FIELD_CLASS}
                 />
               </div>
             </div>
