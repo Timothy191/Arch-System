@@ -79,7 +79,7 @@ export async function GET(_req?: NextRequest) {
     },
     {
       status: healthy ? 200 : 503,
-      headers: { 'Cache-Control': 'no-store' },
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
     }
   );
 }

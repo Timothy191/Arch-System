@@ -103,7 +103,9 @@ describe('GET /api/health/supabase-realtime', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('Cache-Control')).toBe(
+      'no-store, no-cache, must-revalidate, max-age=0'
+    );
     expect(body).toMatchObject({
       status: 'healthy',
       realtime_healthy: true,

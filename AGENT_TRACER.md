@@ -4,6 +4,12 @@
 
 ---
 
+## [2026-11-17T13:55:00+02:00] - Scheduled Improvement Pass 5: `Select` Utility Extraction, Health `no-store` Parity & Tailwind Ratchet (`chore/auto-improve-20261117-1354`)
+
+- **UI Primitive Utility Extraction**: Extracted `SELECT_TRIGGER_STYLES`, `SELECT_CONTENT_STYLES`, and `SELECT_ITEM_STYLES` in [`packages/ui/src/components/ui/select.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/ui/select.tsx#L10-L30).
+- **Health Endpoint Cache-Control Parity**: Upgraded `Cache-Control` to `no-store, no-cache, must-revalidate, max-age=0` in [`apps/portal/app/api/health/supabase-realtime/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/supabase-realtime/route.ts#L82) and [`apps/portal/app/api/health/fuxa/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/fuxa/route.ts#L83).
+- **Tailwind Utility Baseline Ratchet**: Ratcheted [`tools/audits/tailwind-baseline.json`](file:///home/tim/Fork/Arch-System/tools/audits/tailwind-baseline.json) down from `2` files to `1` file (`26` repeated chains).
+
 ## [2026-11-17T13:45:00+02:00] - Scheduled Improvement Pass 4: `DropdownMenu` Utility Extraction, Health `no-store` Headers & Tailwind Ratchet (`chore/auto-improve-20261117-1345`)
 
 - **UI Primitive Utility Extraction**: Extracted `DROPDOWN_SUB_CONTENT_STYLES` and `DROPDOWN_CONTENT_STYLES` in [`packages/ui/src/components/ui/dropdown-menu.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/ui/dropdown-menu.tsx#L41-L58).

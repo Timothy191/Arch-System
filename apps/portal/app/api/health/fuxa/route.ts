@@ -80,6 +80,6 @@ export async function GET(_req?: NextRequest) {
 
   return NextResponse.json(payload, {
     status: httpStatus,
-    headers: { 'Cache-Control': 'no-store' },
+    headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
   });
 }

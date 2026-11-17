@@ -1,14 +1,13 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-17T11:45:47.876Z",
+  "generatedAt": "2026-11-17T11:55:19.026Z",
   "config": {
     "maxUtilitiesPerElement": 20,
     "duplicateMinTokens": 10,
     "duplicateMinUses": 3
   },
   "overBudgetByFile": {
-    "apps/portal/features/hub/components/CoreOperationalModules.tsx": 1,
-    "packages/ui/src/components/ui/select.tsx": 1
+    "apps/portal/features/hub/components/CoreOperationalModules.tsx": 1
   },
   "repeatedChains": {
     "active:scale-95 bg-[var(--bg-secondary)] border border-[var(--border-default)] flex font-medium h-12 hover:bg-[var(--bg-tertiary)] items-center justify-center rounded-xl text-lg touch-manipulation transition-all w-12": {

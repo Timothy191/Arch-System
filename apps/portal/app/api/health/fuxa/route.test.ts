@@ -69,7 +69,9 @@ describe('GET /api/health/fuxa', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('Cache-Control')).toBe(
+      'no-store, no-cache, must-revalidate, max-age=0'
+    );
     expect(fetchMock).toHaveBeenCalledWith(
       'http://fuxa.internal:1881',
       expect.objectContaining({ method: 'HEAD' })
@@ -119,7 +121,9 @@ describe('GET /api/health/fuxa', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('Cache-Control')).toBe(
+      'no-store, no-cache, must-revalidate, max-age=0'
+    );
     expect(body).toMatchObject({
       status: 'degraded',
       fuxa_healthy: false,
@@ -160,7 +164,9 @@ describe('GET /api/health/fuxa', () => {
     const body = await response.json();
 
     expect(response.status).toBe(503);
-    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('Cache-Control')).toBe(
+      'no-store, no-cache, must-revalidate, max-age=0'
+    );
     expect(body).toMatchObject({
       status: 'unhealthy',
       fuxa_healthy: false,
