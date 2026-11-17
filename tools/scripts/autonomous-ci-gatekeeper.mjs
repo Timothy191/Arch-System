@@ -16,6 +16,11 @@ import os from 'node:os';
 import path from 'node:path';
 
 const GITHUB_REPO = 'Timothy191/Arch-System';
+const REPO_ROOT = process.cwd();
+const DEFAULT_CODEGRAPH_DB = process.env.CODEGRAPH_DB || path.resolve(REPO_ROOT, '../../local.db');
+const DEFAULT_FETCH_CONCURRENCY = '2';
+const DEFAULT_FETCH_RETRIES = '5';
+const DEFAULT_FETCH_TIMEOUT_MS = '120000';
 const EVIDENCE_FILE_PATH = path.resolve('.ci-local/agent-verify-evidence.json');
 const MAX_EVIDENCE_AGE_MS = 900_000;
 const STATUS_DESCRIPTION_LIMIT = 140;
@@ -51,11 +56,20 @@ function parseCliArgs(argv) {
   return options;
 }
 
-function runCommand(command, args, cwd = process.cwd()) {
+function runCommand(command, args, options = {}) {
+  const cwd = options.cwd ?? process.cwd();
   const result = spawnSync(command, args, {
     cwd,
     encoding: 'utf8',
     stdio: 'pipe',
+    env: {
+      ...process.env,
+      CODEGRAPH_DB: DEFAULT_CODEGRAPH_DB,
+      npm_config_network_concurrency:
+        process.env.npm_config_network_concurrency ?? DEFAULT_FETCH_CONCURRENCY,
+      npm_config_fetch_retries: process.env.npm_config_fetch_retries ?? DEFAULT_FETCH_RETRIES,
+      npm_config_fetch_timeout: process.env.npm_config_fetch_timeout ?? DEFAULT_FETCH_TIMEOUT_MS,
+    },
   });
   return {
     status: result.status ?? 1,
@@ -170,7 +184,53 @@ function hasPassingRequiredStatuses(sha) {
   }
 }
 
-function verifyShaInWorktree({ sha, isDryRun }) {
+function mergeBaseIntoWorktree({ sha, baseRef, worktreeDir, isDryRun }) {
+  if (!baseRef) {
+    return true;
+  }
+
+  runCommand('git', ['fetch', 'origin', 'main'], { cwd: worktreeDir });
+  const mergeResult = runCommand('git', ['merge', '--no-edit', baseRef], { cwd: worktreeDir });
+  if (mergeResult.status === 0) {
+    return true;
+  }
+
+  for (const context of REQUIRED_CONTEXTS) {
+    postCommitStatus({
+      sha,
+      state: 'failure',
+      context,
+      description: `Merge conflict with ${baseRef}; rebase PR branch onto main`,
+      isDryRun,
+    });
+  }
+  return false;
+}
+
+function executeWorktreeGates({ sha, worktreeDir, isDryRun }) {
+  const installResult = runCommand('pnpm', ['install', '--frozen-lockfile'], {
+    cwd: worktreeDir,
+  });
+  if (installResult.status !== 0) {
+    throw new Error(`pnpm install failed in worktree: ${installResult.stderr.slice(-400)}`);
+  }
+
+  const verifyResult = runCommand('bash', ['tools/scripts/agent-verify.sh'], {
+    cwd: worktreeDir,
+  });
+  const securityResult = runCommand('pnpm', ['policy:security', '--ci'], { cwd: worktreeDir });
+  const isSuccess = verifyResult.status === 0 && securityResult.status === 0;
+  const state = isSuccess ? 'success' : 'failure';
+  const description = isSuccess
+    ? 'Local 28-gate agent:verify + policy:security passed'
+    : 'Local 28-gate agent:verify or policy:security failed';
+
+  for (const context of REQUIRED_CONTEXTS) {
+    postCommitStatus({ sha, state, context, description, isDryRun });
+  }
+}
+
+function verifyShaInWorktree({ sha, baseRef = '', isDryRun }) {
   if (hasPassingRequiredStatuses(sha)) {
     console.log(
       `[CI-GATEKEEPER] ${sha.slice(0, 8)} already has passing local statuses — skipping.`
@@ -199,22 +259,11 @@ function verifyShaInWorktree({ sha, isDryRun }) {
   }
 
   try {
-    const installResult = runCommand('pnpm', ['install', '--frozen-lockfile'], worktreeDir);
-    if (installResult.status !== 0) {
-      throw new Error(`pnpm install failed in worktree: ${installResult.stderr.slice(-400)}`);
+    const canVerify = mergeBaseIntoWorktree({ sha, baseRef, worktreeDir, isDryRun });
+    if (!canVerify) {
+      return;
     }
-
-    const verifyResult = runCommand('bash', ['tools/scripts/agent-verify.sh'], worktreeDir);
-    const securityResult = runCommand('pnpm', ['policy:security', '--ci'], worktreeDir);
-    const isSuccess = verifyResult.status === 0 && securityResult.status === 0;
-    const state = isSuccess ? 'success' : 'failure';
-    const description = isSuccess
-      ? 'Local 28-gate agent:verify + policy:security passed'
-      : 'Local 28-gate agent:verify or policy:security failed';
-
-    for (const context of REQUIRED_CONTEXTS) {
-      postCommitStatus({ sha, state, context, description, isDryRun });
-    }
+    executeWorktreeGates({ sha, worktreeDir, isDryRun });
   } finally {
     runCommand('git', ['worktree', 'remove', '--force', worktreeDir]);
   }
@@ -236,7 +285,7 @@ function runForPr({ prNumber, isDryRun }) {
     `[CI-GATEKEEPER] Verifying PR #${prNumber} (${pr.headRefName} @ ${pr.headRefOid.slice(0, 8)})`
   );
   runCommand('git', ['fetch', 'origin', pr.headRefName]);
-  verifyShaInWorktree({ sha: pr.headRefOid, isDryRun });
+  verifyShaInWorktree({ sha: pr.headRefOid, baseRef: 'origin/main', isDryRun });
 }
 
 function runForAllOpenPrs({ isDryRun }) {
@@ -259,7 +308,7 @@ function runForAllOpenPrs({ isDryRun }) {
       continue;
     }
     runCommand('git', ['fetch', 'origin', pr.headRefName]);
-    verifyShaInWorktree({ sha: pr.headRefOid, isDryRun });
+    verifyShaInWorktree({ sha: pr.headRefOid, baseRef: 'origin/main', isDryRun });
   }
 }
 
