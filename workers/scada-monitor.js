@@ -98,7 +98,22 @@ async function handleFetch(request) {
     }
 
     // Process the upload
-    const data = await request.json();
+    let data;
+    try {
+      const rawBody = await request.text();
+      if (rawBody.length > maxSize) {
+        return new Response(JSON.stringify({ error: 'File too large', maxSize }), {
+          status: 413,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      data = JSON.parse(rawBody);
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON payload' }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
     return new Response(JSON.stringify({ success: true, size: contentLength, data }), {
       headers: { 'content-type': 'application/json' },
     });

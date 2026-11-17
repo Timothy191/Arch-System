@@ -4,6 +4,12 @@
 
 ---
 
+## [2026-11-17T13:32:00+02:00] - Scheduled Improvement Pass 2: Worker JSON/Size Guard, Health `no-store` Headers & Tailwind Ratchet (`chore/auto-improve-20261117-1331`)
+
+- **Cloudflare Worker Edge Input Hardening**: Wrapped `request.text()` + `JSON.parse()` in [`workers/scada-monitor.js`](file:///home/tim/Fork/Arch-System/workers/scada-monitor.js#L100-L116) with a `try/catch` returning `400 Bad Request` (`{ error: 'Invalid JSON payload' }`) and an explicit `maxSize` body-length check when `content-length` is omitted.
+- **Health Endpoint Cache-Control Hardening**: Added `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` headers to [`apps/portal/app/api/health/redis/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/redis/route.ts#L79-L84) and [`apps/portal/app/api/health/vibemon/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/vibemon/route.ts#L102-L107) to prevent edge/CDN caching of live telemetry.
+- **Tailwind Utility Budget Reduction**: Extracted `QUICK_NAV_TRIGGER_CLASS` in [`ControlRoomQuickNav.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/control-room/components/ControlRoomQuickNav.tsx#L95-L101>) and ratcheted [`tools/audits/tailwind-baseline.json`](file:///home/tim/Fork/Arch-System/tools/audits/tailwind-baseline.json) down from `5` files to `4` files.
+
 ## [2026-11-17T13:25:00+02:00] - Scheduled Improvement Pass 1: Radix/Content-Length Guard, RSC Overview Loading & Tailwind Baseline Ratchet (`chore/auto-improve-20261117-1324`)
 
 - **Biome `useParseIntRadix` & Header Guard**: Updated [`workers/scada-monitor.js`](file:///home/tim/Fork/Arch-System/workers/scada-monitor.js#L92-L93) to use `Number.parseInt(contentLength, 10)` with `Number.isFinite(parsedLength)` validation, clearing the final Biome info diagnostic across all 1,661 workspace files.

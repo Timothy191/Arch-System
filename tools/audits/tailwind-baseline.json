@@ -1,13 +1,12 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-17T11:24:50.141Z",
+  "generatedAt": "2026-11-17T11:32:38.614Z",
   "config": {
     "maxUtilitiesPerElement": 20,
     "duplicateMinTokens": 10,
     "duplicateMinUses": 3
   },
   "overBudgetByFile": {
-    "apps/portal/app/(departments)/control-room/components/ControlRoomQuickNav.tsx": 1,
     "apps/portal/features/hub/components/CoreOperationalModules.tsx": 1,
     "packages/ui/src/components/ui/dialog.tsx": 1,
     "packages/ui/src/components/ui/dropdown-menu.tsx": 1,

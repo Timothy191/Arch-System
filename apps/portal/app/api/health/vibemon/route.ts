@@ -99,5 +99,10 @@ export async function GET(_request: NextRequest) {
   const parsedPayload = vibemonHealthResponseSchema.safeParse(candidatePayload);
   const responseBody = parsedPayload.success ? parsedPayload.data : candidatePayload;
 
-  return NextResponse.json(responseBody, { status: HTTP_STATUS_OK });
+  return NextResponse.json(responseBody, {
+    status: HTTP_STATUS_OK,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+    },
+  });
 }
