@@ -6,6 +6,9 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import React from 'react';
 
+const ADMIN_NAV_LINK_CLASS =
+  'gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100';
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
@@ -50,33 +53,25 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
           {/* Navigation Links */}
           <nav className="flex items-center gap-1.5 sm:gap-2">
-            <Link
-              href="/admin"
-              className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100"
-            >
+            <Link href="/admin" className={ADMIN_NAV_LINK_CLASS}>
               <Cpu className="h-3.5 w-3.5 text-zinc-500" />
               General
             </Link>
-            <Link
-              href="/admin/workflows"
-              className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100"
-            >
+            <Link href="/admin/workflows" className={ADMIN_NAV_LINK_CLASS}>
               <N8nIcon className="h-3.5 w-3.5" color="#ea4b71" />
               n8n Workflows
             </Link>
-            <Link
-              href="/admin/redis"
-              className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100"
-            >
+            <Link href="/admin/redis" className={ADMIN_NAV_LINK_CLASS}>
               <RedisIcon className="h-3.5 w-3.5" color="#dc382d" />
               RedisInsight
             </Link>
-            <Link
-              href="/admin/ai-metrics"
-              className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100"
-            >
+            <Link href="/admin/ai-metrics" className={ADMIN_NAV_LINK_CLASS}>
               <Activity className="h-3.5 w-3.5 text-emerald-600" />
               AI Metrics
+            </Link>
+            <Link href="/admin/observability" className={ADMIN_NAV_LINK_CLASS}>
+              <Activity className="h-3.5 w-3.5 text-indigo-600" />
+              Observability &amp; CI
             </Link>
           </nav>
 

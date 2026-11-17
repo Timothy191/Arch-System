@@ -9,6 +9,12 @@
   "globalPassThroughEnv": [
     "OTEL_EXPORTER_OTLP_ENDPOINT",
     "OTEL_SERVICE_NAME",
+    "PROMETHEUS_URL",
+    "GRAFANA_URL",
+    "GRAFANA_PUBLIC_URL",
+    "GRAFANA_API_KEY",
+    "WOODPECKER_URL",
+    "WOODPECKER_TOKEN",
     "TURBO_REMOTE_CACHE_SIGNATURE_KEY"
   ],
   "tasks": {

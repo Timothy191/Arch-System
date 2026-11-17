@@ -1697,6 +1697,20 @@
         }
       }
     },
+    "/api/health/vibemon": {
+      "get": {
+        "summary": "VibeMon Multi-Agent Telemetry & MCP health check",
+        "description": "Probes VibeMon remote MCP and local telemetry sink status. VibeMon is an optional developer/agent telemetry service; always returns HTTP 200 so portal availability probes remain unaffected.",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "VibeMon health status"
+          }
+        }
+      }
+    },
     "/api/health/n8n": {
       "get": {
         "summary": "n8n Workflow Engine health check",

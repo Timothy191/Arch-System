@@ -1,12 +1,45 @@
 'use server';
 
+import { gateDenialSchema, gatePulseSchema } from '@repo/contract';
+import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
 import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
-import { DatabaseError } from '@/lib/errors/error-classes';
+import { DatabaseError, RateLimitError } from '@/lib/errors/error-classes';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 import { assertAccessControlRole } from './shared';
-import { RateLimiter, type RateLimitResult, MemoryStore, FixedWindowStrategy } from '@repo/rate-limiter';
-import { gateDenialSchema, gatePulseSchema, type GatePulseInput } from '@repo/contract';
+
+export interface PerimeterGate {
+  id: string;
+  name: string;
+  type: 'boom_barrier' | 'turnstile' | 'weighbridge_rfid' | 'biometric_portal';
+  zone: string;
+  status: 'ONLINE' | 'INTERLOCK_ARMED' | 'MAINTENANCE' | 'OFFLINE';
+  mode: 'Auto-Pulse' | 'BAC Enforced (0.00‰)' | 'EPC Gen2 Long-Range' | 'Dual-Key Auth';
+  cycleCountToday: number;
+  lastEventTime: string;
+  lastEntityPassed: string;
+  interlockActive: boolean;
+}
+
+const GATE_RATE_LIMIT_WINDOW_MS = 60_000;
+const GATE_PULSE_MAX_REQUESTS = 10;
+const GATE_DENIAL_MAX_REQUESTS = 20;
+
+const GATE_PULSE_LIMITER = new RateLimiter({
+  store: new MemoryStore(),
+  strategy: new FixedWindowStrategy(),
+  limit: GATE_PULSE_MAX_REQUESTS,
+  windowMs: GATE_RATE_LIMIT_WINDOW_MS,
+  keyPrefix: 'ratelimit:gate_pulse:',
+});
+
+const GATE_DENIAL_LIMITER = new RateLimiter({
+  store: new MemoryStore(),
+  strategy: new FixedWindowStrategy(),
+  limit: GATE_DENIAL_MAX_REQUESTS,
+  windowMs: GATE_RATE_LIMIT_WINDOW_MS,
+  keyPrefix: 'ratelimit:gate_denial:',
+});
 
 const GATE_REGISTRY: readonly {
   readonly id: string;
@@ -99,7 +132,7 @@ export async function getLivePerimeterGates(): Promise<PerimeterGate[]> {
     const cycleCounts: Record<string, number> = {};
     const lastLogPerGate: Record<string, LastLogEntry> = {};
 
-    for (const log of (logs ?? [])) {
+    for (const log of logs ?? []) {
       const loc = log.gate_location;
       cycleCounts[loc] = (cycleCounts[loc] ?? 0) + 1;
       if (!lastLogPerGate[loc] || log.scanned_at > lastLogPerGate[loc].scanned_at) {
@@ -126,8 +159,12 @@ export async function getLivePerimeterGates(): Promise<PerimeterGate[]> {
         )
         .in('id', badgeIds);
 
-      const badgeById = new Map<string, { id: string; entity_type: string; personnel: unknown; visitor: unknown; fleet: unknown } | undefined>();
-      for (const b of (badges ?? [])) {
+      const badgeById = new Map<
+        string,
+        | { id: string; entity_type: string; personnel: unknown; visitor: unknown; fleet: unknown }
+        | undefined
+      >();
+      for (const b of badges ?? []) {
         badgeById.set(b.id, b);
       }
 
@@ -141,13 +178,16 @@ export async function getLivePerimeterGates(): Promise<PerimeterGate[]> {
 
         if (badge.entity_type === 'personnel' && badge.personnel) {
           const p = badge.personnel as { first_name?: string; surname?: string } | null;
-          lastEntityNames[gateLoc] = `${p?.first_name ?? ''} ${p?.surname ?? ''}`.trim() || 'Personnel';
+          lastEntityNames[gateLoc] =
+            `${p?.first_name ?? ''} ${p?.surname ?? ''}`.trim() || 'Personnel';
         } else if (badge.entity_type === 'visitor' && badge.visitor) {
           const v = badge.visitor as { first_name?: string; surname?: string } | null;
-          lastEntityNames[gateLoc] = `${v?.first_name ?? ''} ${v?.surname ?? ''}`.trim() || 'Visitor';
+          lastEntityNames[gateLoc] =
+            `${v?.first_name ?? ''} ${v?.surname ?? ''}`.trim() || 'Visitor';
         } else if (badge.entity_type === 'vehicle' && badge.fleet) {
           const f = badge.fleet as { fleet_code?: string; vehicle_type?: string } | null;
-          lastEntityNames[gateLoc] = `${f?.vehicle_type ?? 'Vehicle'}: ${f?.fleet_code ?? ''}`.trim() || 'Vehicle';
+          lastEntityNames[gateLoc] =
+            `${f?.vehicle_type ?? 'Vehicle'}: ${f?.fleet_code ?? ''}`.trim() || 'Vehicle';
         } else {
           lastEntityNames[gateLoc] = `Badge ${badge.id.slice(0, 8)}`;
         }
@@ -202,13 +242,7 @@ export async function triggerGatePulse(
   gateId: string,
   reason: string
 ): Promise<{ success: boolean; message: string }> {
-  // Rate limiting check
-  const { allowed, limit, remaining, resetTime } = await GATE_PULSE_LIMITER.check(
-    gateId
-  );
-  if (!allowed) {
-    throw new RateLimitError('Rate limit exceeded', { limit, remaining, resetTime });
-  }
+  const { supabase, user, employee } = await assertAccessControlRole({ requireWrite: true });
 
   const parsed = gatePulseSchema.safeParse({ gateId, reason });
   if (!parsed.success) {
@@ -217,7 +251,11 @@ export async function triggerGatePulse(
     });
   }
 
-  const { supabase, employee } = await assertAccessControlRole({ requireWrite: true });
+  // Rate limiting check
+  const { allowed, limit, remaining, resetTime } = await GATE_PULSE_LIMITER.check(gateId);
+  if (!allowed) {
+    throw new RateLimitError('Rate limit exceeded', { limit, remaining, resetTime });
+  }
 
   const { error } = await supabase.from('access_logs').insert({
     gate_location: gateId,
@@ -226,7 +264,7 @@ export async function triggerGatePulse(
     access_granted: true,
     denial_reason: `Operator Pulse: ${parsed.data.reason} (Authorized by ${employee?.role ?? 'admin'})`,
     department_id: employee?.department_id,
-    operator: employee?.user?.id ?? 'system',
+    operator: user?.id ?? employee?.id ?? 'system',
     device_id: parsed.data.scannerId ?? null,
     scanned_at: new Date().toISOString(),
   });
@@ -250,13 +288,7 @@ export async function logGateDenial(
   badgeId: string,
   reason: string
 ): Promise<{ success: boolean; message: string; blacklisted?: boolean }> {
-  // Rate limiting check
-  const { allowed, limit, remaining, resetTime } = await GATE_DENIAL_LIMITER.check(
-    gateId
-  );
-  if (!allowed) {
-    throw new RateLimitError('Rate limit exceeded', { limit, remaining, resetTime });
-  }
+  const { supabase } = await assertAccessControlRole({ requireWrite: true });
 
   const parsed = gateDenialSchema.safeParse({ gateId, badgeId, reason });
   if (!parsed.success) {
@@ -265,7 +297,11 @@ export async function logGateDenial(
     });
   }
 
-  const { supabase } = await assertAccessControlRole({ requireWrite: true });
+  // Rate limiting check
+  const { allowed, limit, remaining, resetTime } = await GATE_DENIAL_LIMITER.check(gateId);
+  if (!allowed) {
+    throw new RateLimitError('Rate limit exceeded', { limit, remaining, resetTime });
+  }
 
   const { data: log, error } = await supabase
     .from('access_logs')

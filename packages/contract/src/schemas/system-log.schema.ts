@@ -30,6 +30,20 @@ export const systemLogCategorySchema = z.string().min(1).max(60);
 export type SystemLogCategory = z.infer<typeof systemLogCategorySchema>;
 
 /**
+ * Trace ID for correlating log entries across a request lifecycle.
+ * Mirrors public.system_logs.trace_id.
+ */
+export const systemLogTraceIdSchema = z.string().uuid().optional();
+export type SystemLogTraceId = z.infer<typeof systemLogTraceIdSchema>;
+
+/**
+ * Request ID for correlating logs within a request processing context.
+ * Mirrors public.system_logs.request_id.
+ */
+export const systemLogRequestIdSchema = z.string().uuid().optional();
+export type SystemLogRequestId = z.infer<typeof systemLogRequestIdSchema>;
+
+/**
  * Payload accepted by POST /api/logs. Identity fields (employee_id,
  * department_id, ip_address, user_agent) are derived server-side from the
  * session/request and are intentionally NOT client-settable.
@@ -43,6 +57,8 @@ export const createSystemLogEntrySchema = z.object({
   context: z.record(z.string(), z.unknown()).default({}),
   url: z.string().max(2000).optional(),
   method: z.string().max(10).optional(),
+  traceId: systemLogTraceIdSchema,
+  requestId: systemLogRequestIdSchema,
 });
 export type CreateSystemLogEntry = z.infer<typeof createSystemLogEntrySchema>;
 
@@ -60,6 +76,8 @@ export const systemLogEntrySchema = z.object({
   context: z.record(z.string(), z.unknown()),
   url: z.string().nullable(),
   method: z.string().nullable(),
+  trace_id: systemLogTraceIdSchema.nullable(),
+  request_id: systemLogRequestIdSchema.nullable(),
   employee_id: uuidSchema.nullable(),
   department_id: uuidSchema.nullable(),
   ip_address: z.string().nullable(),

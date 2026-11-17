@@ -244,7 +244,10 @@ const SCANNER_ID_LENGTH = 64;
 export const gatePulseSchema = z.object({
   gateId: nonEmptyString.max(GATE_ID_LENGTH, 'Gate ID must be 64 characters or less'),
   reason: nonEmptyString.max(GATE_REASON_LENGTH, 'Pulse reason must be 256 characters or less'),
-  scannerId: nonEmptyString.max(SCANNER_ID_LENGTH, 'Scanner ID must be 64 characters or less').optional().nullable(),
+  scannerId: nonEmptyString
+    .max(SCANNER_ID_LENGTH, 'Scanner ID must be 64 characters or less')
+    .optional()
+    .nullable(),
 });
 
 export type GatePulseInput = z.infer<typeof gatePulseSchema>;

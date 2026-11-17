@@ -25,22 +25,22 @@ export { ValidationError } from './validation';
 export { EmployeeProfileUpdateSchema, PrintRequestSchema } from './schemas/access-card.schema';
 export {
   type GateDenialInput,
-  gateDenialSchema,
   type GatePulseInput,
+  gateDenialSchema,
   gatePulseSchema,
   type MusterEventInput,
-  musterEventsSchema,
   type MusterStatusInput,
+  musterEventsSchema,
   musterStatusSchema,
   type PlantDelayInput,
   type PlantHourlyLogInput,
   type PlantInventoryItemInput,
   type PlantInventoryUsageInput,
+  type PrintCardRequestInput,
   plantDelaysSchema,
   plantHourlyLogsSchema,
   plantInventoryItemsSchema,
   plantInventoryUsageSchema,
-  type PrintCardRequestInput,
   printCardRequestSchema,
   type VisitorPassRequestInput,
   visitorPassRequestSchema,
@@ -278,6 +278,22 @@ export type {
 export type { MachineType } from './schemas/machine-types.schema';
 export type { EmbedDashboardInput } from './schemas/metabase.schema';
 export type { ProductionMonthlyTarget } from './schemas/multi-site-production.schema';
+export {
+  type CiPipelineEntry,
+  ciPipelineEntrySchema,
+  type GrafanaDashboardEntry,
+  grafanaDashboardEntrySchema,
+  type ObservabilityCiResponse,
+  type ObservabilityServiceStatus,
+  type ObservabilitySummaryResponse,
+  observabilityCiResponseSchema,
+  observabilityServiceStatusSchema,
+  observabilitySummaryResponseSchema,
+  type PrometheusMetricSample,
+  prometheusMetricSampleSchema,
+  type ServiceConnectionMode,
+  serviceConnectionModeSchema,
+} from './schemas/observability-layer.schema';
 export type {
   OfflineMutationBatch,
   OfflineMutationHlc,
@@ -288,6 +304,27 @@ export * from './schemas/search.schema';
 export * from './schemas/spatial-telemetry.schema';
 export * from './schemas/system-health.schema';
 export * from './schemas/system-log.schema';
+export * from './schemas/vibemon.schema';
+export {
+  type VibemonAgent,
+  type VibemonEventType,
+  type VibemonHealthDetails,
+  type VibemonHealthResponse,
+  type VibemonHealthStatus,
+  type VibemonHookEvent,
+  type VibemonKeyMode,
+  type VibemonTodoPriority,
+  type VibemonTodoStatus,
+  vibemonAgentSchema,
+  vibemonEventTypeSchema,
+  vibemonHealthDetailsSchema,
+  vibemonHealthResponseSchema,
+  vibemonHealthStatusSchema,
+  vibemonHookEventSchema,
+  vibemonKeyModeSchema,
+  vibemonTodoPrioritySchema,
+  vibemonTodoStatusSchema,
+} from './schemas/vibemon.schema';
 export * from './schemas/whatsapp.schema';
 export type { EmployeeProfileUpdateInput, PrintRequestInput } from './types/access-card.types';
 export type {

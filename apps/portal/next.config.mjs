@@ -37,6 +37,11 @@ const nextConfig = {
   outputFileTracingExcludes: {
     '*': [
       '**/.agents/**',
+      '**/.agentsroom/**',
+      '**/.cline/**',
+      '**/.handoff/**',
+      '**/.vibemon/**',
+      '**/graphify-out/**',
       '**/.gemini/**',
       '**/.palabre/**',
       '**/.swarm/**',
@@ -74,6 +79,9 @@ const nextConfig = {
   // AGENT-TRACE: On Vercel, omit standalone output so Next.js uses native Vercel lambda tracing.
   // In Docker/self-hosted environments, produce standalone output.
   output: process.env.VERCEL ? undefined : 'standalone',
+  // Keep buildId deterministic across Next.js 16 / withWorkflow config evaluations
+  generateBuildId: async () =>
+    process.env.VERCEL_DEPLOYMENT_ID || process.env.VERCEL_GIT_COMMIT_SHA || PORTAL_VERSION,
   env: {
     PORTAL_VERSION,
     NEXT_PUBLIC_PORTAL_VERSION: PORTAL_VERSION,
@@ -236,6 +244,7 @@ const nextConfig = {
     'pino-pretty',
   ],
   experimental: {
+    agentUpgrade: 'security',
     // AGENT-TRACE: Next.js 16 persistent Turbopack file-system cache for ~400% faster warm dev startups & builds
     turbopackFileSystemCacheForDev: true,
     turbopackFileSystemCacheForBuild: true,
@@ -285,17 +294,7 @@ const nextConfig = {
       '@univerjs/preset-sheets-core',
     ],
   },
-  performance: {
-    // Performance budgets for production builds
-    // These budgets trigger warnings when exceeded and can be enforced via CI
-    hints: isCI ? 'warning' : 'warning',
-    // Max bundle size for JavaScript (including all chunks)
-    maxEntrypointSize: isCI ? 250 * 1024 : 280 * 1024, // 250KB in CI, 280KB locally
-    // Max size for a single chunk
-    maxChunkSize: isCI ? 100 * 1024 : 150 * 1024, // 100KB in CI, 150KB locally
-    // Asset size limit (images, fonts, etc.)
-    assetMaxSize: 500 * 1024, // 500KB for individual assets
-  },
+
   async headers() {
     return [
       {

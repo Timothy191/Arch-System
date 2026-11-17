@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/components/ui
 import { Logo } from '@repo/ui/Logo';
 import { MacTitleBar } from '@repo/ui/MacTitleBar';
 import {
+  Activity,
   BookOpen,
   Bot,
   Building2,
@@ -29,6 +30,7 @@ const DatabaseSchema = lazy(() => import('./sections/DatabaseSchema'));
 const DocumentationMaps = lazy(() => import('./sections/DocumentationMaps'));
 const AgenticMonitor = lazy(() => import('./sections/AgenticMonitor'));
 const AuditReportsSection = lazy(() => import('./sections/AuditReportsSection'));
+const ObservabilityConsole = lazy(() => import('@/components/observability/ObservabilityConsole'));
 
 const OVERVIEW_NAV_ITEMS = [
   {
@@ -78,6 +80,12 @@ const OVERVIEW_NAV_ITEMS = [
     label: 'Agentic Monitor',
     badge: 'AI Mesh',
     icon: Bot,
+  },
+  {
+    value: 'observability',
+    label: 'Observability & CI',
+    badge: 'OTel + Prom',
+    icon: Activity,
   },
 ] as const;
 
@@ -371,6 +379,12 @@ export default function OverviewPage() {
           <TabsContent value="agentic" className="m-0 focus-visible:outline-none">
             <Suspense fallback={<SectionLoader />}>
               <AgenticMonitor />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="observability" className="m-0 focus-visible:outline-none">
+            <Suspense fallback={<SectionLoader />}>
+              <ObservabilityConsole />
             </Suspense>
           </TabsContent>
         </div>

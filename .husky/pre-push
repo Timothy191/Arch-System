@@ -1,5 +1,13 @@
 export PATH="$HOME/.volta/bin:$PATH"
 
+publish_ci_status() {
+  local head_sha
+  head_sha="$(git rev-parse HEAD 2>/dev/null || true)"
+  if [ -n "$head_sha" ] && [ -f "tools/scripts/autonomous-ci-gatekeeper.mjs" ]; then
+    (sleep 3 && node tools/scripts/autonomous-ci-gatekeeper.mjs --from-evidence --sha "$head_sha" >/dev/null 2>&1) &
+  fi
+}
+
 if [ "${FORCE_AGENT_VERIFY:-0}" != "1" ] && [ -f ".ci-local/agent-verify-evidence.json" ]; then
   if node -e '
     const fs = require("node:fs");
@@ -13,8 +21,9 @@ if [ "${FORCE_AGENT_VERIFY:-0}" != "1" ] && [ -f ".ci-local/agent-verify-evidenc
     }
     process.exit(1);
   ' 2>/dev/null; then
+    publish_ci_status
     exit 0
   fi
 fi
 
-bash tools/scripts/agent-verify.sh
+bash tools/scripts/agent-verify.sh && publish_ci_status

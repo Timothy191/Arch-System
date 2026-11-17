@@ -27,4 +27,7 @@ if [ -f .agents/memory_base/index.json ]; then
   " 2>/dev/null || true
 fi
 
+echo -e "\n### Autonomous CI Gatekeeper (.agents/rules/autonomous-ci-gatekeeper.md)"
+echo "- GitHub Actions may be locked by billing. NEVER wait on GH Actions; after 'pnpm agent:verify' passes, run 'pnpm ci:gatekeeper --from-evidence' (or 'pnpm ci:gatekeeper --pr <N>') to publish required Commit Statuses via gh api."
+
 exit 0

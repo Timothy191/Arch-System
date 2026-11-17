@@ -17,6 +17,21 @@ jest.mock('next/server', () => ({
   connection: jest.fn(async () => undefined),
 }));
 
+jest.mock('@repo/supabase/client', () => ({
+  createBrowserSupabaseClient: jest.fn(() => ({
+    channel: jest.fn(() => ({
+      on: jest.fn().mockReturnThis(),
+      subscribe: jest.fn().mockReturnThis(),
+    })),
+    removeChannel: jest.fn(),
+  })),
+}));
+
+jest.mock('@repo/shared/hooks', () => ({
+  ...jest.requireActual('@repo/shared/hooks'),
+  useSupabaseRealtime: jest.fn(() => ({ status: 'SUBSCRIBED', error: null })),
+}));
+
 jest.mock('next/dynamic', () => () => {
   const DynamicStub = () => <div data-testid="dynamic-dashboard-widget" />;
   return DynamicStub;

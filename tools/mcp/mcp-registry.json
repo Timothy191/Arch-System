@@ -23,6 +23,17 @@
       "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
       "type": "stdio"
     },
+    "code-intelligence": {
+      "name": "code-intelligence",
+      "description": "Code intelligence MCP server: tree-sitter based symbol search, token-budgeted context assembly, edit safety preflight, and refactoring planning. Provides 90-99% token savings per code lookup versus traditional file-based approaches.",
+      "required": false,
+      "category": "developer_tools",
+      "type": "remote",
+      "url": "http://localhost:3001/mcp",
+      "env": {
+        "CODEINTELLIGENCE_INDEX_PATH": "/home/tim/Fork/Arch-System/.code-intelligence-index"
+      }
+    },
     "chrome-devtools": {
       "name": "chrome-devtools",
       "description": "Chrome DevTools MCP for browser inspection and automation",
@@ -67,18 +78,6 @@
       },
       "note": "easy-redis-mcp — the redis-mcp-server package referenced here previously was unpublished from npm (404); uvx fallback also removed"
     },
-    "code-index": {
-      "name": "code-index",
-      "description": "High-performance Rust AST code indexer: sub-ms symbol search, callers, callees, and FTS",
-      "required": false,
-      "category": "developer_tools",
-      "command": "/home/tim/.local/bin/code-index",
-      "args": ["serve", "--path", "/home/tim/Fork/Arch-System"],
-      "env": {
-        "CODE_INDEX_HOME": "/home/tim/.local/share/code-index"
-      },
-      "type": "stdio"
-    },
     "skills-mcp": {
       "name": "skills-mcp",
       "description": "Anti-bloat on-demand skill, context & persona registry MCP server",
@@ -105,6 +104,70 @@
       "command": "node",
       "args": ["/home/tim/Fork/slim-tooling-mcp/dist/index.js"],
       "type": "stdio"
+    },
+    "vibemon": {
+      "name": "vibemon",
+      "description": "VibeMon Remote MCP Server: Multi-agent session pulse, team TODOs, work links, and Work State v1 handoffs",
+      "required": false,
+      "category": "developer_tools",
+      "type": "remote",
+      "url": "https://vibemon.dev/api/mcp",
+      "env": {
+        "VIBEMON_API_KEY": "${VIBEMON_API_KEY}"
+      }
+    },
+    "vercel": {
+      "name": "vercel",
+      "description": "Vercel Official Remote MCP Server: Deployment logs, build diagnostics, preview URLs, and project status for arch-system",
+      "required": false,
+      "category": "cloud_infrastructure",
+      "type": "remote",
+      "url": "https://mcp.vercel.com"
+    },
+    "sentry": {
+      "name": "sentry",
+      "description": "Sentry Official Remote MCP Server: Production/preview stack traces, issue grouping, and release regression triage",
+      "required": false,
+      "category": "developer_tools",
+      "type": "remote",
+      "url": "https://mcp.sentry.dev/mcp",
+      "env": {
+        "SENTRY_AUTH_TOKEN": "${SENTRY_AUTH_TOKEN}"
+      }
+    },
+    "postgres-readonly": {
+      "name": "postgres-readonly",
+      "description": "Read-Only PostgreSQL MCP Server: Safe EXPLAIN (ANALYZE, BUFFERS), index inspection, and RLS query tuning against read replica",
+      "required": false,
+      "category": "cloud_infrastructure",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "${SUPABASE_READ_REPLICA_URL}"]
+    },
+    "prometheus": {
+      "name": "prometheus",
+      "description": "Prometheus MCP Server: Query Golden Signals, prom-client metrics, latency histograms, and cache hit ratios",
+      "required": false,
+      "category": "developer_tools",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "prometheus-mcp-server"],
+      "env": {
+        "PROMETHEUS_URL": "${PROMETHEUS_URL:-http://127.0.0.1:9090}"
+      }
+    },
+    "grafana": {
+      "name": "grafana",
+      "description": "Grafana MCP Server: Dashboard inspection, alert rules, and Prometheus/OTel metric exploration",
+      "required": false,
+      "category": "developer_tools",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@grafana/mcp-grafana"],
+      "env": {
+        "GRAFANA_URL": "${GRAFANA_URL:-http://127.0.0.1:3005}",
+        "GRAFANA_API_KEY": "${GRAFANA_API_KEY}"
+      }
     }
   }
 }

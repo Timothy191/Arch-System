@@ -3,7 +3,7 @@
   "description": "Rate limiting framework with multiple strategies (fixed-window, sliding-window, token-bucket) and stores (memory, Redis) using dependency injection",
   "version": "1.0.0",
   "devDependencies": {
-    "@repo/typescript-config": "1.0.0",
+    "@repo/typescript-config": "*",
     "@swc/jest": "^0.2.39",
     "@types/jest": "^30.0.0",
     "@types/node": "catalog:",

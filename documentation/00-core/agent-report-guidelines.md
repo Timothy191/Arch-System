@@ -3,41 +3,48 @@
 ## Important Rule: All agents must include the following metrics and content when generating reports
 
 ### 1. Session Metrics
+
 - **Session effective %**: Report the percentage of session tokens successfully utilized vs. total available
 - **Session duration**: Total active time of the agent session
 - **Session peak usage**: Maximum token consumption during any single operation
 
 ### 2. Token Accounting
+
 - **Token input**: Number of tokens sent to the model for this request/response cycle
 - **Token output**: Number of tokens returned in the model response
 - **Token cached**: Number of tokens served from cache (if applicable)
 - **Token efficiency**: `(output + cached) / input` ratio, reported as a percentage
 
 ### 3. Actions Required
+
 - **Mandatory actions**: List all required follow-up actions with priority labels
 - **Optional actions**: List recommended but not required follow-up items
 - **Blocked actions**: List items that cannot proceed due to constraints, with resolution path
 - **Completion status**: Percentage of required actions completed vs. total
 
 ### 4. Changes Made
+
 - **Files modified**: List all file paths changed, with brief description of changes
 - **Lines added/removed**: Net change in code size
 - **New schemas/types**: Any new Zod schemas, TypeScript types, or SQL migrations added
 - **Deprecated removed**: Any previously existing code/path that was eliminated
 
 ### 5. Insights & Findings
+
 - **Key discoveries**: Most important findings from the investigation/work
 - **Patterns observed**: Recurring issues or successful patterns detected
 - **Anomalies**: Unusual findings that deviate from expected behavior
 - **Risk assessments**: Evaluation of any identified risks or trade-offs
 
 ### 6. Integration Coverage
+
 - **APIs contacted**: List of external services or internal APIs used
 - **Integration success rate**: Percentage of successful vs. failed API calls
 - **Cache hit rate**: For any cached data operations
 - **Fallback usage**: Percentage of operations that required fallback paths
 
 ### 7. Code Quality Metrics
+
 - **Code quality score**: Based on applicable quality gates (biome, stylelint, cspell)
 - **Test coverage change**: Delta in test coverage percentage
 - **New test count**: Number of new tests added/removed
@@ -45,7 +52,9 @@
 - **Type errors**: Count of type errors fixed vs. introduced
 
 ### 8. Additional Metrics (Use % Format)
+
 All percentages should be reported as `value/max` format (e.g., `87/100` or `87%`):
+
 - **System uptime %** (if applicable)
 - **Error rate %** (errors / total operations)
 - **Success rate %** (successful operations / total operations)

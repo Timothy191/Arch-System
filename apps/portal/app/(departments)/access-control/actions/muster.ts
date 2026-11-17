@@ -1,10 +1,10 @@
 'use server';
 
+import { musterStatusSchema } from '@repo/contract';
 import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
-import { assertAccessControlRole } from './shared';
-import { musterStatusSchema, type MusterStatusInput } from '@repo/contract';
 import { DatabaseError } from '@/lib/errors/error-classes';
+import { assertAccessControlRole } from './shared';
 
 const MUSTER_PERSONNEL_LIMIT = 100;
 const MUSTER_VISITORS_LIMIT = 50;
@@ -92,7 +92,7 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
     supabase
       .from('personnel')
       .select(
-        'id, first_name, surname, emp_code, job_title, induction_expiry, medical_expiry, status'
+        'id, department_id, first_name, surname, emp_code, job_title, induction_expiry, medical_expiry, status'
       )
       .eq('department_id', deptId)
       .limit(MUSTER_PERSONNEL_LIMIT),
@@ -148,11 +148,10 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
 
   // Resolve last-seen gate/time per entity from recent access logs.
   // access_logs.badge_id → badges.id → badges.personnel_id / badges.visitor_id
-  const lastSeenByEntity = new Map<
-    string,
-    { lastSeenTime: string; lastSeenGate: string }
-  >();
-  const badgeIdsInLogs = [...new Set(recentLogs.map((l) => l.badge_id).filter(Boolean))] as string[];
+  const lastSeenByEntity = new Map<string, { lastSeenTime: string; lastSeenGate: string }>();
+  const badgeIdsInLogs = [
+    ...new Set(recentLogs.map((l) => l.badge_id).filter(Boolean)),
+  ] as string[];
 
   if (badgeIdsInLogs.length > 0) {
     const { data: badgeRows } = await supabase
@@ -160,8 +159,11 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       .select('id, personnel_id, visitor_id')
       .in('id', badgeIdsInLogs);
 
-    const badgeById = new Map<string, { id: string; personnel_id: string | null; visitor_id: string | null } | undefined>();
-    for (const b of (badgeRows ?? [])) {
+    const badgeById = new Map<
+      string,
+      { id: string; personnel_id: string | null; visitor_id: string | null } | undefined
+    >();
+    for (const b of badgeRows ?? []) {
       badgeById.set(b.id, b);
     }
 
@@ -204,7 +206,6 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
     },
   ];
 
-  let index = 0;
   for (const p of personnelList) {
     const isInductionValid = p.induction_expiry ? new Date(p.induction_expiry) > now : true;
     const isMedicalValid = p.medical_expiry ? new Date(p.medical_expiry) > now : true;
@@ -243,7 +244,6 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       inductionValid: isInductionValid,
       medicalValid: isMedicalValid,
     });
-    index++;
   }
 
   for (const v of visitorsList) {
@@ -281,7 +281,6 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       inductionValid: true,
       medicalValid: true,
     });
-    index++;
   }
 
   const totalSouls = records.length;
@@ -305,14 +304,14 @@ export async function markPersonnelMusterStatus(payload: {
   status: 'accounted' | 'unaccounted' | 'evacuated';
   station?: string;
 }): Promise<{ success: boolean }> {
+  const { supabase, user } = await assertAccessControlRole({ requireWrite: true });
+
   const parsed = musterStatusSchema.safeParse(payload);
   if (!parsed.success) {
     throw new DatabaseError('Invalid muster status input', {
       context: { issues: parsed.error.issues },
     });
   }
-
-  const { supabase, user } = await assertAccessControlRole({ requireWrite: true });
 
   try {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(

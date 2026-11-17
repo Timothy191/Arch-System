@@ -28,6 +28,8 @@ interface ErrorLogEntry {
   method?: string;
   userId?: string;
   sessionId?: string;
+  traceId?: string;
+  requestId?: string;
 }
 
 /**
@@ -89,6 +91,8 @@ function createErrorLog(
       method: context?.method,
       userId: context?.userId,
       sessionId: context?.sessionId,
+      traceId: context?.traceId as string | undefined,
+      requestId: context?.requestId as string | undefined,
     };
   }
 
@@ -116,6 +120,8 @@ function createErrorLog(
       method: context?.method,
       userId: context?.userId,
       sessionId: context?.sessionId,
+      traceId: context?.traceId as string | undefined,
+      requestId: context?.requestId as string | undefined,
     };
   }
 

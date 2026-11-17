@@ -34,7 +34,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
   const [statusFilter, setStatusFilter] = useState<'all' | 'unaccounted' | 'accounted'>('all');
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const { isOnline } = usePitConnectivity();
-  const { enqueue: _enqueue, queue, isSyncing } = useOfflineQueue();
+  const { enqueue, queue, isSyncing } = useOfflineQueue();
 
   // Bolt Optimization: Aggregate status counts and per-station counts in a single pass O(R) loop.
   // Replaces multiple O(R) .filter calls and O(S * R) station count lookups inside render loops.
@@ -93,8 +93,8 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
 
     const musterPayload = {
       entityId: record.id,
-      status: nextStatus === 'accounted' ? 'accounted' : 'unaccounted',
-      station: nextStatus === 'accounted' ? (record.station || 'Muster Point Alpha') : undefined,
+      status: nextStatus === 'accounted' ? ('accounted' as const) : ('unaccounted' as const),
+      station: nextStatus === 'accounted' ? record.station || 'Muster Point Alpha' : undefined,
     };
 
     try {

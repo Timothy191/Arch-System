@@ -41,6 +41,7 @@ const PUBLIC_OR_EXEMPT_API_ROUTES = new Set([
   'app/api/health/redis/route.ts',
   'app/api/health/route.ts',
   'app/api/health/supabase-realtime/route.ts',
+  'app/api/health/vibemon/route.ts',
   'app/api/health/warmup/route.ts',
   'app/api/inngest/route.ts',
   'app/api/log/route.ts',

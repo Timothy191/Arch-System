@@ -13,15 +13,13 @@ function nowMs(): number {
 /** High-resolution start marker captured when the instrumentation module loads. */
 const processStartTimeMs = nowMs();
 
-const BASELINES_CONFIG_PATH = `${process.cwd()}/lib/performance/performance-baselines.json`;
-
 async function loadBaselinesFromConfig(): Promise<void> {
   if (process.env.NEXT_RUNTIME !== 'nodejs') {
     return;
   }
   try {
-    const { readFileSync } = await import('node:fs');
-    const baselinesConfig = JSON.parse(readFileSync(BASELINES_CONFIG_PATH, 'utf8')) as {
+    const baselinesConfig = (await import('@/lib/performance/performance-baselines.json'))
+      .default as {
       readonly baselines?: ReadonlyArray<{
         readonly metricId: string;
         readonly baselineValue: number;
@@ -111,13 +109,18 @@ export const onRequestError = async (
     );
 
     // Persist to public.system_logs for the Administration "System Logs" console.
-    const { recordCaughtError } = await import('@/lib/logging/system-logs');
-    await recordCaughtError(err, {
+    const { recordSystemLog } = await import('@/lib/logging/system-logs');
+    await recordSystemLog({
       source: 'server',
       category: 'request',
-      method: request?.method,
+      level: 'error',
+      message: 'Global edge request error',
+      stack: err instanceof Error ? err.stack : undefined,
       url: request?.path ?? request?.url,
+      method: request?.method,
       context: { routerKind: context?.routerKind, routePath: context?.routePath },
+      traceId: context?.traceId as string | undefined,
+      requestId: context?.requestId as string | undefined,
     });
   } else {
     console.error('Global edge request error:', err);

@@ -87,14 +87,16 @@ export async function getAccessReportsData(
 
   // Gate traffic: group real access logs by gate location
   const gateStats: Record<string, { inbound: number; outbound: number; lastSeen: string }> = {};
-  for (const l of logs) {
-    if (!gateStats[l.gate_location]) {
-      gateStats[l.gate_location] = { inbound: 0, outbound: 0, lastSeen: l.scanned_at };
+  for (const logEntry of logs) {
+    let entry = gateStats[logEntry.gate_location];
+    if (!entry) {
+      entry = { inbound: 0, outbound: 0, lastSeen: logEntry.scanned_at };
+      gateStats[logEntry.gate_location] = entry;
     }
-    if (l.direction === 'IN') gateStats[l.gate_location].inbound += 1;
-    if (l.direction === 'OUT') gateStats[l.gate_location].outbound += 1;
-    if (l.scanned_at > gateStats[l.gate_location].lastSeen) {
-      gateStats[l.gate_location].lastSeen = l.scanned_at;
+    if (logEntry.direction === 'IN') entry.inbound += 1;
+    if (logEntry.direction === 'OUT') entry.outbound += 1;
+    if (logEntry.scanned_at > entry.lastSeen) {
+      entry.lastSeen = logEntry.scanned_at;
     }
   }
   const gateTraffic = Object.entries(gateStats)
@@ -104,11 +106,11 @@ export async function getAccessReportsData(
       outbound: stats.outbound,
       peakHour: stats.lastSeen,
     }))
-    .sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
+    .sort((a, b) => b.inbound + b.outbound - (a.inbound + a.outbound));
 
   // Active credentials from real badge data
-  const activeCredentials = badgesRes.data?.filter((b: { is_active: boolean }) => b.is_active)
-    .length ?? 0;
+  const activeCredentials =
+    badgesRes.data?.filter((b: { is_active: boolean }) => b.is_active).length ?? 0;
 
   return {
     summary: {
@@ -119,12 +121,14 @@ export async function getAccessReportsData(
       activeCredentials,
       contractorHoursLogged: 0,
     },
-    denialTaxonomy: denialTaxonomy.length > 0 ? denialTaxonomy : [
-      { reason: 'No denials recorded', count: 0, percentage: 0 },
-    ],
-    gateTraffic: gateTraffic.length > 0 ? gateTraffic : [
-      { gateName: 'No traffic recorded', inbound: 0, outbound: 0, peakHour: '—' },
-    ],
+    denialTaxonomy:
+      denialTaxonomy.length > 0
+        ? denialTaxonomy
+        : [{ reason: 'No denials recorded', count: 0, percentage: 0 }],
+    gateTraffic:
+      gateTraffic.length > 0
+        ? gateTraffic
+        : [{ gateName: 'No traffic recorded', inbound: 0, outbound: 0, peakHour: '—' }],
     recentAudits: logs
       .slice(0, 15)
       .map(

@@ -28,6 +28,64 @@
       "url": "https://mcp.frontendchecklist.io",
       "description": "Front-End Checklist: 385 quality-gated frontend best practice rules for automated code review",
       "type": "remote"
+    },
+    "skills-mcp": {
+      "command": "node",
+      "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
+      "description": "On-demand Skill Registry & Ephemeral Skill Injection MCP Server",
+      "type": "stdio"
+    },
+    "memory-gateway-mcp": {
+      "command": "node",
+      "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
+      "description": "Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs",
+      "type": "stdio"
+    },
+    "vibemon": {
+      "url": "https://vibemon.dev/api/mcp",
+      "description": "VibeMon Remote MCP Server: Multi-agent session pulse, team TODOs, work links, and Work State v1 handoffs",
+      "type": "remote",
+      "headers": {
+        "Authorization": "Bearer ${VIBEMON_API_KEY}"
+      }
+    },
+    "vercel": {
+      "url": "https://mcp.vercel.com",
+      "description": "Vercel Official Remote MCP Server: Deployment logs, build diagnostics, preview URLs, and project status",
+      "type": "remote"
+    },
+    "sentry": {
+      "url": "https://mcp.sentry.dev/mcp",
+      "description": "Sentry Official Remote MCP Server: Production/preview stack traces, issue grouping, and release regression triage",
+      "type": "remote",
+      "headers": {
+        "Authorization": "Bearer ${SENTRY_AUTH_TOKEN}"
+      }
+    },
+    "postgres-readonly": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "${SUPABASE_READ_REPLICA_URL}"],
+      "description": "Read-Only PostgreSQL MCP Server: Safe EXPLAIN (ANALYZE, BUFFERS) and index/RLS query inspection",
+      "type": "stdio"
+    },
+    "prometheus": {
+      "command": "npx",
+      "args": ["-y", "prometheus-mcp-server"],
+      "description": "Prometheus MCP Server: Query Golden Signals, prom-client metrics, latency histograms, and cache hit ratios",
+      "type": "stdio",
+      "env": {
+        "PROMETHEUS_URL": "${PROMETHEUS_URL:-http://127.0.0.1:9090}"
+      }
+    },
+    "grafana": {
+      "command": "npx",
+      "args": ["-y", "@grafana/mcp-grafana"],
+      "description": "Grafana MCP Server: Dashboard inspection, alert rules, and Prometheus/OTel metric exploration",
+      "type": "stdio",
+      "env": {
+        "GRAFANA_URL": "${GRAFANA_URL:-http://127.0.0.1:3005}",
+        "GRAFANA_API_KEY": "${GRAFANA_API_KEY}"
+      }
     }
   }
 }

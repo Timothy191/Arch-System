@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
-    "@repo/typescript-config": "1.0.0",
+    "@repo/typescript-config": "*",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
     "@tailwindcss/typography": "^0.5.16",

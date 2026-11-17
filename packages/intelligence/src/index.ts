@@ -1,3 +1,4 @@
+export * from './arch-intelligence-naming';
 export * from './operations-copilot-engine';
 export * from './predictive-maintenance-engine';
 export * from './production-forecast-engine';

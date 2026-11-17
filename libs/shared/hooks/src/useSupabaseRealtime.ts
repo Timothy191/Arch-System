@@ -68,6 +68,8 @@ export interface UseSupabaseRealtimeOptions<T = Record<string, unknown>> {
  * Declarative hook for PostgreSQL Change Data Capture (CDC) subscriptions.
  * Automatically handles channel lifecycle, filtering, and cleanup on unmount.
  */
+let nextChannelSequence = 0;
+
 export function useSupabaseRealtime<T = Record<string, unknown>>({
   supabaseClient,
   table,
@@ -106,7 +108,8 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
     }
 
     let isMounted = true;
-    const channelName = `realtime:${schema}:${table}:${filter || 'all'}:${Date.now()}`;
+    nextChannelSequence += 1;
+    const channelName = `realtime:${schema}:${table}:${filter || 'all'}:${Date.now()}:${nextChannelSequence}`;
 
     const channel = supabaseClient.channel(channelName) as RealtimeChannelLike<T>;
 

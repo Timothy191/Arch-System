@@ -1,11 +1,11 @@
 'use client';
 
+import { useSupabaseRealtime } from '@repo/shared/hooks';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Activity, RefreshCw, Sliders, Zap, WifiOff } from 'lucide-react';
+import { Activity, RefreshCw, Sliders, WifiOff, Zap } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { createBrowserSupabaseClient } from '@repo/supabase/client';
-import { useSupabaseRealtime } from '@repo/shared/hooks';
 import { type PerimeterGate, triggerGatePulse } from '../actions';
 
 const GATE_LOCATION_TO_ID: Record<string, string> = {
@@ -30,47 +30,41 @@ export function PerimeterGateHUD({ initialGates }: PerimeterGateHUDProps) {
     supabaseClient: supabase,
     table: 'access_logs',
     event: 'INSERT',
-    onInsert: useCallback(
-      (record: Record<string, unknown>) => {
-        const gateLocation = record.gate_location as string | undefined;
-        const gateId = GATE_LOCATION_TO_ID[gateLocation ?? ''];
-        if (!gateId) return;
+    onInsert: useCallback((record: Record<string, unknown>) => {
+      const gateLocation = record.gate_location as string | undefined;
+      const gateId = GATE_LOCATION_TO_ID[gateLocation ?? ''];
+      if (!gateId) return;
 
-        const badgeId = record.badge_id as string | undefined;
-        setGates((current) =>
-          current.map((g) => {
-            if (g.id !== gateId) return g;
-            return {
-              ...g,
-              cycleCountToday: g.cycleCountToday + 1,
-              lastEventTime: 'Just now',
-              lastEntityPassed: badgeId ? `Badge ${badgeId.slice(0, 8)}` : 'Unknown badge',
-            };
-          })
-        );
-      },
-      []
-    ),
+      const badgeId = record.badge_id as string | undefined;
+      setGates((current) =>
+        current.map((g) => {
+          if (g.id !== gateId) return g;
+          return {
+            ...g,
+            cycleCountToday: g.cycleCountToday + 1,
+            lastEventTime: 'Just now',
+            lastEntityPassed: badgeId ? `Badge ${badgeId.slice(0, 8)}` : 'Unknown badge',
+          };
+        })
+      );
+    }, []),
   });
 
-  const handlePulse = useCallback(
-    async (gate: PerimeterGate) => {
-      try {
-        setPulsingGateId(gate.id);
-        const res = await triggerGatePulse(
-          gate.name,
-          `Authorized remote pulse from SOC Terminal (Gate: ${gate.id})`
-        );
-        toast.success(res.message);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Failed to pulse gate barrier';
-        toast.error(message);
-      } finally {
-        setPulsingGateId(null);
-      }
-    },
-    []
-  );
+  const handlePulse = useCallback(async (gate: PerimeterGate) => {
+    try {
+      setPulsingGateId(gate.id);
+      const res = await triggerGatePulse(
+        gate.name,
+        `Authorized remote pulse from SOC Terminal (Gate: ${gate.id})`
+      );
+      toast.success(res.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to pulse gate barrier';
+      toast.error(message);
+    } finally {
+      setPulsingGateId(null);
+    }
+  }, []);
 
   const isRealtimeConnected = realtimeStatus === 'SUBSCRIBED';
 

@@ -1,6 +1,6 @@
 {
   "name": "@repo/intelligence",
-  "description": "Operational mining intelligence engines: telemetry anomaly detection, predictive maintenance FMEA, production forecasting, shift handover synthesis, and grounded operations copilot",
+  "description": "Arch Intelligence — Operational mining intelligence engines: telemetry anomaly detection, predictive maintenance FMEA, production forecasting, shift handover synthesis, and grounded operations copilot",
   "version": "1.0.0",
   "private": true,
   "main": "./src/index.ts",
@@ -8,12 +8,13 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "brand": "Arch Intelligence",
   "dependencies": {
     "@repo/contract": "1.0.0",
     "@repo/errors": "1.0.0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "1.0.0",
+    "@repo/typescript-config": "*",
     "@swc/jest": "^0.2.39",
     "@types/jest": "^30.0.0",
     "@types/node": "catalog:",

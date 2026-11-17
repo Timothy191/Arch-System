@@ -6,7 +6,7 @@
     "redis": "^4.7.0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "1.0.0",
+    "@repo/typescript-config": "*",
     "@types/node": "catalog:",
     "jest": "^30.2.0",
     "typescript": "catalog:"
