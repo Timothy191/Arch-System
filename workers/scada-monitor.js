@@ -89,7 +89,8 @@ async function handleFetch(request) {
     const contentLength = request.headers.get('content-length');
     const maxSize = 10 * 1024 * 1024; // 10MB
 
-    if (contentLength && parseInt(contentLength) > maxSize) {
+    const parsedLength = contentLength ? Number.parseInt(contentLength, 10) : 0;
+    if (Number.isFinite(parsedLength) && parsedLength > maxSize) {
       return new Response(JSON.stringify({ error: 'File too large', maxSize }), {
         status: 413,
         headers: { 'content-type': 'application/json' },

@@ -4,6 +4,12 @@
 
 ---
 
+## [2026-11-17T13:25:00+02:00] - Scheduled Improvement Pass 1: Radix/Content-Length Guard, RSC Overview Loading & Tailwind Baseline Ratchet (`chore/auto-improve-20261117-1324`)
+
+- **Biome `useParseIntRadix` & Header Guard**: Updated [`workers/scada-monitor.js`](file:///home/tim/Fork/Arch-System/workers/scada-monitor.js#L92-L93) to use `Number.parseInt(contentLength, 10)` with `Number.isFinite(parsedLength)` validation, clearing the final Biome info diagnostic across all 1,661 workspace files.
+- **RSC & Token/A11y Hardening on `/overview` Loading Skeleton**: Converted [`apps/portal/app/overview/loading.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/overview/loading.tsx) from `'use client'` to a zero-JS Server Component, replaced raw `text-gray-*` utilities with semantic `@repo/theme` tokens (`text-accent-gold`, `text-text-secondary`), and added `role="status"` + `aria-live="polite"`.
+- **Tailwind Utility Baseline Ratchet**: Locked in the reduced repeated-chain count in [`tools/audits/tailwind-baseline.json`](file:///home/tim/Fork/Arch-System/tools/audits/tailwind-baseline.json) (`5` files, `26` repeated chains).
+
 ## [2026-11-17T12:44:00+02:00] - Reconcile Working Tree, Remove Broken Untracked Artifacts & Verify Monorepo State (`chore/reconcile-working-tree`)
 
 - **Branch & Triage**: Created `chore/reconcile-working-tree` from `main` (`8045c109` — `feat(portal): add cloudflare edge integration`) and audited ~65 dirty/untracked paths against `AGENT_TRACER.md` and `git log`.

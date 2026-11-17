@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-10T07:02:18.529Z",
+  "generatedAt": "2026-11-17T11:24:50.141Z",
   "config": {
     "maxUtilitiesPerElement": 20,
     "duplicateMinTokens": 10,
@@ -116,10 +116,6 @@
     },
     "flex font-bold h-5 hover:bg-black/[0.05] items-center justify-center rounded text-[12px] text-[var(--text-secondary)] w-5": {
       "tokens": 10,
-      "uses": 4
-    },
-    "flex font-medium gap-1.5 gold-steel-border gold-steel-border-slim hover:bg-zinc-100 items-center px-3 py-1.5 rounded-md text-xs text-zinc-700 transition-colors": {
-      "tokens": 13,
       "uses": 4
     }
   }
