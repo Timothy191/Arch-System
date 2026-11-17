@@ -4,6 +4,11 @@
 
 ---
 
+## [2026-11-17T14:15:00+02:00] - Scheduled Improvement Pass 7: Observability/Logs `no-store` Headers & Worker Null/Error Guard (`chore/auto-improve-20261117-1414`)
+
+- **Observability & System Logs `Cache-Control` Hardening**: Upgraded [`apps/portal/app/api/observability/ci/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/observability/ci/route.ts#L40) and added `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` to [`apps/portal/app/api/logs/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/logs/route.ts#L236-L240).
+- **Cloudflare Worker Null-Safety & Top-Level Catch**: Added top-level `.catch()` JSON `500` fallback with `x-content-type-options: nosniff` and optional-chained `accept-encoding` header check in [`workers/scada-monitor.js`](file:///home/tim/Fork/Arch-System/workers/scada-monitor.js#L6-L17).
+
 ## [2026-11-17T14:06:00+02:00] - Scheduled Improvement Pass 6: `CoreOperationalModules` Utility Extraction (0 Over-Budget Files), Metrics/Summary `no-store` Headers (`chore/auto-improve-20261117-1404`)
 
 - **Zero Over-Budget Tailwind Elements**: Extracted `EXECUTIVE_LINK_CLASS` in [`CoreOperationalModules.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/hub/components/CoreOperationalModules.tsx#L17-L22) and ratcheted [`tools/audits/tailwind-baseline.json`](file:///home/tim/Fork/Arch-System/tools/audits/tailwind-baseline.json) down to **`0` over-budget files** (`26` repeated chains).

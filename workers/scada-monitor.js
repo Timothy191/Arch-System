@@ -4,7 +4,18 @@
  */
 
 addEventListener('fetch', (event) => {
-  event.respondWith(handleFetch(event.request));
+  event.respondWith(
+    handleFetch(event.request).catch(
+      () =>
+        new Response(JSON.stringify({ error: 'Internal worker error' }), {
+          status: 500,
+          headers: {
+            'content-type': 'application/json',
+            'x-content-type-options': 'nosniff',
+          },
+        })
+    )
+  );
 });
 
 async function handleFetch(request) {
@@ -42,7 +53,7 @@ async function handleFetch(request) {
   }
 
   // === gRPC Support ===
-  if (url.pathname === '/grpc' && request.headers.get('accept-encoding').includes('gzip')) {
+  if (url.pathname === '/grpc' && request.headers.get('accept-encoding')?.includes('gzip')) {
     return new Response('gRPC endpoint', {
       headers: {
         'content-type': 'application/grpc',

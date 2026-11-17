@@ -222,16 +222,23 @@ async function handleGet(request: NextRequest) {
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    data: data ?? [],
-    pagination: {
-      page,
-      pageSize,
-      totalCount: count ?? 0,
-      totalPages: Math.ceil((count ?? 0) / pageSize),
+  return NextResponse.json(
+    {
+      success: true,
+      data: data ?? [],
+      pagination: {
+        page,
+        pageSize,
+        totalCount: count ?? 0,
+        totalPages: Math.ceil((count ?? 0) / pageSize),
+      },
     },
-  });
+    {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      },
+    }
+  );
 }
 
 async function handlePatch(request: NextRequest) {

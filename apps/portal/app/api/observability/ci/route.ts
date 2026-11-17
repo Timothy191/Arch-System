@@ -37,6 +37,6 @@ export async function GET() {
 
   return NextResponse.json(validated, {
     status: HTTP_OK,
-    headers: { 'Cache-Control': 'no-store' },
+    headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
   });
 }
