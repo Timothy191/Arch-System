@@ -37,7 +37,7 @@ export async function getTools(
 
   return withCache(
     async () => {
-      const db = await createReadReplicaClient(cookieList);
+      const db = await createReadReplicaClient(cookieList ?? []);
 
       const { data, error } = await db
         .from('tools')

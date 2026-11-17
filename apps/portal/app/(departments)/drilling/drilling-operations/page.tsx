@@ -192,7 +192,7 @@ async function loadDrillingMonthlyOps({
   resolvedMonth,
   today,
 }: GetCachedDrillingMonthlyOpsOptions): Promise<CachedDrillingMonthlyOps> {
-  const db = await createReadReplicaClient();
+  const db = await createReadReplicaClient([]);
   const daysCount = getDaysInMonthCount(resolvedMonth);
   const monthStart = `${resolvedMonth}-01`;
   const monthEnd = `${resolvedMonth}-${String(daysCount).padStart(DAY_PAD_LENGTH, DAY_PAD_CHAR)}`;

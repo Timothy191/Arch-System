@@ -214,6 +214,12 @@ describe('HubPage — graceful degradation', () => {
     expect(container.firstChild).not.toBeNull();
     expect(screen.queryByText(/Hub Error/i)).toBeNull();
     expect(screen.queryByText(/Try again/i)).toBeNull();
+
+    // Regression: cached fetchers must pass explicit [] so Next.js 16 never calls cookies() inside 'use cache'
+    const { createReadReplicaClient } = await import('@repo/supabase/read-replica');
+    for (const call of (createReadReplicaClient as jest.Mock).mock.calls) {
+      expect(call[0]).toEqual([]);
+    }
     expect(screen.queryByText(/Active Portal Metrics/i)).toBeNull();
     expect(screen.queryByText(/Production Utilization/i)).toBeNull();
     expect(screen.queryByText(/Live System Urgency & Incident Controls/i)).toBeNull();

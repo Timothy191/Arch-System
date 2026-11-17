@@ -429,16 +429,16 @@ describe('HeroRotator', () => {
       'border-0',
       'bg-transparent',
       'shadow-none',
-      'text-amber-500',
-      'hover:text-amber-400'
+      'text-accent-gold',
+      'hover:text-accent-gold-hover'
     );
     expect(prevBtn).not.toHaveClass('rounded-full', 'gold-steel-border');
     expect(nextBtn).toHaveClass(
       'border-0',
       'bg-transparent',
       'shadow-none',
-      'text-amber-500',
-      'hover:text-amber-400'
+      'text-accent-gold',
+      'hover:text-accent-gold-hover'
     );
     expect(nextBtn).not.toHaveClass('rounded-full', 'gold-steel-border');
 
@@ -453,8 +453,8 @@ describe('HeroRotator', () => {
       'opacity-100',
       'visible',
       'scale-120',
-      'text-amber-400',
-      'brightness-125'
+      'text-accent-gold',
+      'brightness-110'
     );
     expect(inactiveIndicator).toHaveClass('opacity-0', 'invisible');
     expect(activeIndicator.querySelector('svg')).toHaveClass(

@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { normalizeTraceId, parseTraceparentTraceId } from './lib/observability/tracing';
 import { proxy as handleProxy } from './server/proxy';
 
 /**
@@ -10,8 +11,20 @@ import { proxy as handleProxy } from './server/proxy';
  * - API exemptions (/api/c66, /api/health, /api/metrics)
  */
 export async function proxy(request: NextRequest) {
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const requestUuid = crypto.randomUUID();
+  const nonce = Buffer.from(requestUuid).toString('base64');
+  const traceId =
+    parseTraceparentTraceId(request.headers.get('traceparent')) ??
+    normalizeTraceId(request.headers.get('x-trace-id')) ??
+    requestUuid.replace(/-/g, '');
+  const requestId =
+    request.headers.get('x-request-id')?.trim() ||
+    request.headers.get('x-vercel-id')?.trim() ||
+    requestUuid;
+
   request.headers?.set?.('x-nonce', nonce);
+  request.headers?.set?.('x-trace-id', traceId);
+  request.headers?.set?.('x-request-id', requestId);
 
   const response = await handleProxy(request);
 
@@ -44,6 +57,8 @@ export async function proxy(request: NextRequest) {
 
   response.headers.set('Content-Security-Policy', cspHeader);
   response.headers.set('x-nonce', nonce);
+  response.headers.set('x-trace-id', traceId);
+  response.headers.set('x-request-id', requestId);
 
   return response;
 }

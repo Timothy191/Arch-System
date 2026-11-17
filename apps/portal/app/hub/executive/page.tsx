@@ -85,7 +85,7 @@ async function getExecutiveData() {
 
   return withCache(
     async () => {
-      const db = await createReadReplicaClient();
+      const db = await createReadReplicaClient([]);
       const today = new Date().toISOString().split('T')[0]!;
       const monthStart = `${today.slice(0, 7)}-01`;
       const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]!;

@@ -114,6 +114,33 @@ describe('POST /api/logs', () => {
     expect(res.status).toBe(201);
     expect(recordSystemLog).toHaveBeenCalled();
   });
+
+  it('accepts W3C 32-hex traceId and extracts traceparent/request-id headers', async () => {
+    const req = new Request('http://localhost/api/logs', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        traceparent: '00-68c830d6e21ff5b0747afc0a817e9c61-00f067aa0ba902b7-01',
+        'x-vercel-id': 'cpt1::req-trace-check',
+      },
+      body: JSON.stringify({
+        level: 'error',
+        source: 'server',
+        category: 'request',
+        message: 'Correlated W3C trace test',
+      }),
+    });
+
+    const res = await POST(req as never);
+
+    expect(res.status).toBe(201);
+    expect(recordSystemLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        traceId: '68c830d6e21ff5b0747afc0a817e9c61',
+        requestId: 'cpt1::req-trace-check',
+      })
+    );
+  });
 });
 
 describe('GET /api/logs', () => {
@@ -163,6 +190,24 @@ describe('GET /api/logs', () => {
     expect(body.success).toBe(true);
     expect(body.data).toHaveLength(1);
     expect(body.pagination.totalCount).toBe(1);
+  });
+
+  it('searches across trace_id and request_id when search query is supplied', async () => {
+    getAuthenticatedEmployee.mockResolvedValue(ADMIN_PRINCIPAL);
+    const builder = mockSupabase({
+      data: [],
+      count: 0,
+      error: null,
+    });
+
+    const res = await GET(
+      getRequest('?search=68c830d6e21ff5b0747afc0a817e9c61&page=1&pageSize=10') as never
+    );
+
+    expect(res.status).toBe(200);
+    expect(builder.or).toHaveBeenCalledWith(
+      expect.stringContaining('trace_id.ilike.%68c830d6e21ff5b0747afc0a817e9c61%')
+    );
   });
 });
 

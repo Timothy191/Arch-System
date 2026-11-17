@@ -6,6 +6,7 @@
  */
 
 import * as Sentry from '@sentry/nextjs';
+import { getActiveTraceId, normalizeTraceId } from '@/lib/observability/tracing';
 
 /**
  * Error severity levels
@@ -135,6 +136,8 @@ function createErrorLog(
     method: context?.method,
     userId: context?.userId,
     sessionId: context?.sessionId,
+    traceId: normalizeTraceId(context?.traceId) ?? getActiveTraceId(),
+    requestId: typeof context?.requestId === 'string' ? context.requestId : undefined,
   };
 }
 
@@ -203,6 +206,8 @@ async function sendToMonitoring(entry: ErrorLogEntry): Promise<void> {
         },
         url: entry.url,
         method: entry.method,
+        traceId: normalizeTraceId(entry.traceId) ?? getActiveTraceId(),
+        requestId: entry.requestId,
       });
     } catch {
       // Persistence is best-effort — never let logging crash the app.

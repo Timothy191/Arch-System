@@ -36,7 +36,7 @@ async function getDashboardCounts(today: string) {
 
   return withCache(
     async () => {
-      const db = await createReadReplicaClient();
+      const db = await createReadReplicaClient([]);
       const [breakdowns, machines] = await Promise.all([
         db
           .from('breakdowns')
@@ -75,7 +75,7 @@ async function getLiveDepartmentMetrics(today: string): Promise<DepartmentLiveMe
 
   return withCache(
     async () => {
-      const db = await createReadReplicaClient();
+      const db = await createReadReplicaClient([]);
       return fetchLiveDepartmentMetrics(db, today);
     },
     {

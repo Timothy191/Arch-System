@@ -40,7 +40,7 @@ async function loadDrillingDashboardMetrics(
   deptId: string,
   today: string
 ): Promise<DrillingDashboardMetrics> {
-  const db = await createReadReplicaClient();
+  const db = await createReadReplicaClient([]);
 
   const [{ data: drills }, { data: todayOperations }, { data: todayDelays }] = await Promise.all([
     db.from('machines').select('id, name').eq('machine_type', 'Drill Rig').eq('active', true),

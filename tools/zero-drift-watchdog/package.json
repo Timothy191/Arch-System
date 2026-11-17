@@ -17,7 +17,7 @@
     "./cli": "./src/cli.mjs"
   },
   "scripts": {
-    "test": "node --test test/**/*.test.mjs",
+    "test": "node --test --test-concurrency=2 test/**/*.test.mjs",
     "test:unit": "node --test test/unit/**/*.test.mjs",
     "test:e2e": "node test/run-all-tests.mjs",
     "watchdog": "node bin/zero-drift-watchdog.mjs",

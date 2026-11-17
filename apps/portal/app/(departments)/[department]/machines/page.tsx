@@ -27,7 +27,7 @@ interface DepartmentMachineRow {
 }
 
 async function loadDepartmentMachines(deptSlug: string): Promise<DepartmentMachineRow[]> {
-  const db = await createReadReplicaClient();
+  const db = await createReadReplicaClient([]);
   let machinesQuery = db
     .from('machines')
     .select(

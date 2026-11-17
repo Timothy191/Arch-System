@@ -111,8 +111,10 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getClientIp, withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { recordSystemLog } from '@/lib/logging/system-logs';
+import { extractRequestTraceMetadata } from '@/lib/observability/tracing';
 
 const INGEST_LIMIT = { windowMs: 60_000, maxRequests: 60 };
+const SAFE_SEARCH_FILTER_REGEX = /[,()%]/g;
 
 async function assertAdmin() {
   const principal = await getAuthenticatedEmployee();
@@ -150,9 +152,12 @@ async function handlePost(request: NextRequest) {
   const principal = await getAuthenticatedEmployee().catch(() => null);
   const ipAddress = getClientIp(request);
   const entry = parsed.data;
+  const headerTraceMeta = extractRequestTraceMetadata(request.headers);
 
   await recordSystemLog({
     ...entry,
+    traceId: entry.traceId ?? headerTraceMeta.traceId,
+    requestId: entry.requestId ?? headerTraceMeta.requestId,
     employeeId: principal?.employee?.id ?? null,
     departmentId: principal?.employee?.department_id ?? null,
     ipAddress,
@@ -198,7 +203,12 @@ async function handleGet(request: NextRequest) {
   if (category) query = query.eq('category', category);
   if (resolved !== undefined) query = query.eq('resolved', resolved === 'true');
   if (search) {
-    query = query.or(`message.ilike.%${search}%,category.ilike.%${search}%`);
+    const sanitizedSearch = search.replace(SAFE_SEARCH_FILTER_REGEX, '').trim();
+    if (sanitizedSearch.length > 0) {
+      query = query.or(
+        `message.ilike.%${sanitizedSearch}%,category.ilike.%${sanitizedSearch}%,trace_id.ilike.%${sanitizedSearch}%,request_id.ilike.%${sanitizedSearch}%`
+      );
+    }
   }
 
   const from = (page - 1) * pageSize;

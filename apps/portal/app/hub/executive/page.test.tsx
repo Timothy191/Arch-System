@@ -187,5 +187,8 @@ describe('ExecutiveDashboardPage — production summary failure', () => {
     expect(screen.getByText('Total Tonnage').parentElement).toHaveTextContent('300 t');
     expect(screen.getByTestId('production-trend-chart')).toBeInTheDocument();
     expect(screen.getByText('Export CSV')).toBeInTheDocument();
+
+    const { createReadReplicaClient } = await import('@repo/supabase/read-replica');
+    expect(createReadReplicaClient).toHaveBeenCalledWith([]);
   });
 });

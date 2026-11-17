@@ -26,7 +26,7 @@ interface EngineeringHubMetrics {
 }
 
 async function loadEngineeringHubMetrics(deptId: string): Promise<EngineeringHubMetrics> {
-  const db = await createReadReplicaClient();
+  const db = await createReadReplicaClient([]);
   const resolvedSinceIso = new Date(Date.now() - MS_PER_DAY).toISOString();
 
   const [{ count: activeBreakdowns }, { count: resolvedToday }, { data: recentBreakdowns }] =

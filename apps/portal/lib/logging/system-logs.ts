@@ -13,6 +13,7 @@ import type { CreateSystemLogEntry } from '@repo/contract';
 import { serverLogger } from '@repo/logger';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import * as React from 'react';
+import { getActiveTraceId, normalizeTraceId } from '@/lib/observability/tracing';
 
 type ReactWithTaint = {
   experimental_taintObjectReference?: (message: string, object: object) => void;
@@ -92,12 +93,13 @@ export async function recordSystemLog(
       created_at: new Date().toISOString(),
     };
 
-    // Inject traceId and requestId if provided
-    if (entry.traceId !== undefined) {
-      payload.trace_id = entry.traceId;
+    // Inject traceId (explicit or active OpenTelemetry span) and requestId if available
+    const resolvedTraceId = normalizeTraceId(entry.traceId) ?? getActiveTraceId();
+    if (resolvedTraceId !== undefined) {
+      payload.trace_id = resolvedTraceId;
     }
-    if (entry.requestId !== undefined) {
-      payload.request_id = entry.requestId;
+    if (entry.requestId !== undefined && entry.requestId.trim() !== '') {
+      payload.request_id = entry.requestId.trim();
     }
 
     const { error } = await supabase.from('system_logs').insert(payload);

@@ -19,6 +19,8 @@ interface SystemLogRow {
   context: Record<string, unknown>;
   url: string | null;
   method: string | null;
+  trace_id?: string | null;
+  request_id?: string | null;
   employee_id: string | null;
   created_at: string;
   resolved: boolean;
@@ -127,7 +129,7 @@ export function SystemLogsTab() {
         <div className="relative min-w-64 flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
-            placeholder="Search messages & categories..."
+            placeholder="Search messages, categories, or Trace ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full border-[var(--border-default)] bg-[var(--bg-secondary)] pl-10"
@@ -301,6 +303,12 @@ export function SystemLogsTab() {
                       <tr className="bg-[var(--bg-tertiary)]/50">
                         <td colSpan={7} className="px-6 py-4">
                           <div className="space-y-3">
+                            {(log.trace_id || log.request_id) && (
+                              <div className="flex flex-wrap gap-4 font-mono text-[var(--text-muted)] text-xs">
+                                {log.trace_id && <span>Trace ID: {log.trace_id}</span>}
+                                {log.request_id && <span>Request ID: {log.request_id}</span>}
+                              </div>
+                            )}
                             {log.url && (
                               <div className="font-mono text-[var(--text-muted)] text-xs">
                                 {log.method ? `${log.method} ` : ''}

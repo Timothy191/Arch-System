@@ -82,7 +82,7 @@ async function loadDepartmentHistory({
   from,
   to,
 }: LoadDepartmentHistoryOptions): Promise<CachedDepartmentHistoryPayload> {
-  const db = await createReadReplicaClient();
+  const db = await createReadReplicaClient([]);
 
   if (isControlRoom) {
     const [{ data: shiftStatuses }, { data: operations }, { data: loads }] = await Promise.all([

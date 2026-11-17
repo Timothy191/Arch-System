@@ -93,7 +93,12 @@ export async function register(): Promise<void> {
 
 export const onRequestError = async (
   err: unknown,
-  request: { method?: string; path?: string; url?: string },
+  request: {
+    method?: string;
+    path?: string;
+    url?: string;
+    headers?: Record<string, string | string[] | undefined>;
+  },
   context: { routerKind?: string; routePath?: string; [key: string]: unknown }
 ) => {
   performanceMonitor.recordError({
@@ -103,8 +108,31 @@ export const onRequestError = async (
 
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     const { serverLogger } = await import('@repo/logger');
+    const { getActiveTraceId, normalizeTraceId, parseTraceparentTraceId } = await import(
+      '@/lib/observability/tracing'
+    );
+    const readReqHeader = (name: string): string | undefined => {
+      const val = request?.headers?.[name] ?? request?.headers?.[name.toLowerCase()];
+      return Array.isArray(val) ? val[0] : val;
+    };
+    const resolvedTraceId =
+      normalizeTraceId(context?.traceId) ??
+      getActiveTraceId() ??
+      parseTraceparentTraceId(readReqHeader('traceparent')) ??
+      normalizeTraceId(readReqHeader('x-trace-id'));
+    const resolvedRequestId =
+      (typeof context?.requestId === 'string' ? context.requestId : undefined) ??
+      readReqHeader('x-request-id') ??
+      readReqHeader('x-vercel-id');
+
     serverLogger.error(
-      { err, request: { method: request.method }, context },
+      {
+        err,
+        request: { method: request.method },
+        context,
+        traceId: resolvedTraceId,
+        requestId: resolvedRequestId,
+      },
       'Global request error'
     );
 
@@ -119,8 +147,8 @@ export const onRequestError = async (
       url: request?.path ?? request?.url,
       method: request?.method,
       context: { routerKind: context?.routerKind, routePath: context?.routePath },
-      traceId: context?.traceId as string | undefined,
-      requestId: context?.requestId as string | undefined,
+      traceId: resolvedTraceId,
+      requestId: resolvedRequestId,
     });
   } else {
     console.error('Global edge request error:', err);

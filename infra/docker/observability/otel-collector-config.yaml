@@ -16,7 +16,7 @@ exporters:
     endpoint: 0.0.0.0:8889
     namespace: arch_system
   debug:
-    verbosity: basic
+    verbosity: normal
 
 service:
   pipelines:

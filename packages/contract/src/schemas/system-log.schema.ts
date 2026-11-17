@@ -29,18 +29,29 @@ export type SystemLogSource = z.infer<typeof systemLogSourceSchema>;
 export const systemLogCategorySchema = z.string().min(1).max(60);
 export type SystemLogCategory = z.infer<typeof systemLogCategorySchema>;
 
+const W3C_TRACE_ID_REGEX = /^[0-9a-f]{32}$/i;
+const CORRELATION_ID_REGEX = /^[a-zA-Z0-9:._-]{1,128}$/;
+
 /**
  * Trace ID for correlating log entries across a request lifecycle.
+ * Accepts W3C 32-hex trace IDs (e.g. OpenTelemetry / Vercel) or standard UUIDs.
  * Mirrors public.system_logs.trace_id.
  */
-export const systemLogTraceIdSchema = z.string().uuid().optional();
+export const systemLogTraceIdSchema = z
+  .union([z.string().regex(W3C_TRACE_ID_REGEX), z.string().uuid()])
+  .optional();
 export type SystemLogTraceId = z.infer<typeof systemLogTraceIdSchema>;
 
 /**
  * Request ID for correlating logs within a request processing context.
+ * Accepts UUIDs or edge request identifiers (e.g. x-vercel-id / x-request-id).
  * Mirrors public.system_logs.request_id.
  */
-export const systemLogRequestIdSchema = z.string().uuid().optional();
+export const systemLogRequestIdSchema = z
+  .string()
+  .trim()
+  .regex(CORRELATION_ID_REGEX, 'Invalid request ID format')
+  .optional();
 export type SystemLogRequestId = z.infer<typeof systemLogRequestIdSchema>;
 
 /**
