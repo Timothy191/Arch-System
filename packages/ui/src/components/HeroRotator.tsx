@@ -372,7 +372,7 @@ export function HeroRotator({
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="pointer-events-auto absolute top-1/2 -left-2 -translate-y-1/2 border-0 bg-transparent p-3 text-amber-500 shadow-none transition-all duration-300 hover:scale-110 hover:text-amber-400 active:scale-95 sm:-left-4 sm:p-4 lg:-left-6"
+              className="pointer-events-auto absolute top-1/2 -left-2 -translate-y-1/2 border-0 bg-transparent p-3 text-accent-gold shadow-none transition-all duration-300 hover:scale-110 hover:text-accent-gold-hover active:scale-95 sm:-left-4 sm:p-4 lg:-left-6"
               style={{
                 filter: 'drop-shadow(0 2px 6px rgba(15,23,42,0.22))',
               }}
@@ -383,7 +383,7 @@ export function HeroRotator({
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="pointer-events-auto absolute top-1/2 -right-2 -translate-y-1/2 border-0 bg-transparent p-3 text-amber-500 shadow-none transition-all duration-300 hover:scale-110 hover:text-amber-400 active:scale-95 sm:-right-4 sm:p-4 lg:-right-6"
+              className="pointer-events-auto absolute top-1/2 -right-2 -translate-y-1/2 border-0 bg-transparent p-3 text-accent-gold shadow-none transition-all duration-300 hover:scale-110 hover:text-accent-gold-hover active:scale-95 sm:-right-4 sm:p-4 lg:-right-6"
               style={{
                 filter: 'drop-shadow(0 2px 6px rgba(15,23,42,0.22))',
               }}
@@ -420,8 +420,8 @@ export function HeroRotator({
                 className={cn(
                   'group/ind flex items-center justify-center rounded-md p-1 transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] active:scale-90',
                   idx === activeIndex
-                    ? 'visible -translate-y-0.5 scale-120 text-amber-400 opacity-100 brightness-125 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]'
-                    : 'pointer-events-none invisible text-accent-amber/80 opacity-0'
+                    ? 'visible -translate-y-0.5 scale-120 text-accent-gold opacity-100 brightness-110 drop-shadow-[0_0_8px_rgba(212,175,55,0.75)]'
+                    : 'pointer-events-none invisible text-accent-gold/80 opacity-0'
                 )}
               >
                 <ArchEmblemIcon
@@ -444,13 +444,13 @@ export function HeroRotator({
         aria-hidden="true"
         className="mx-auto mt-4 flex w-[92%] max-w-[1060px] items-center justify-center gap-3 sm:w-[88%] lg:w-[82%]"
       >
-        <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
-        <span className="h-2 w-2 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-        <span className="gold-steel-border gold-steel-border-slim flex h-6 w-6 items-center justify-center rounded-full border border-accent-amber/45 bg-white/95 text-accent-amber shadow-xs sm:h-7 sm:w-7">
-          <ArchEmblemIcon className="h-3.5 w-3.5 text-accent-amber motion-safe:animate-pulse sm:h-4 sm:w-4" />
+        <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-gold/55 to-accent-gold motion-safe:animate-pulse" />
+        <span className="h-2 w-2 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />
+        <span className="gold-steel-border gold-steel-border-slim flex h-6 w-6 items-center justify-center rounded-full border border-accent-gold/45 bg-white/95 text-accent-gold shadow-xs sm:h-7 sm:w-7">
+          <ArchEmblemIcon className="h-3.5 w-3.5 text-accent-gold motion-safe:animate-pulse sm:h-4 sm:w-4" />
         </span>
-        <span className="h-2 w-2 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-        <span className="h-[2px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+        <span className="h-2 w-2 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />
+        <span className="h-[2px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-gold/55 to-accent-gold motion-safe:animate-pulse" />
       </div>
     </div>
   );

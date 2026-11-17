@@ -746,7 +746,7 @@ function HourlyLoadsGrid({
                           onChange={(e) => setMachineSearch(e.target.value)}
                           placeholder="Search machine..."
                           aria-label="Search machine"
-                          className="gold-steel-border gold-steel-border-slim w-full rounded-full border border-accent-amber/60 bg-white/95 py-1 pr-6 pl-7 font-medium text-[11px] text-[var(--text-heading)] ring-1 ring-accent-amber/30 focus:outline-none"
+                          className="gold-steel-border gold-steel-border-slim w-full rounded-full border border-accent-gold/60 bg-white/95 py-1 pr-6 pl-7 font-medium text-[11px] text-[var(--text-heading)] ring-1 ring-accent-gold/30 focus:outline-none"
                         />
                         {machineSearch && (
                           <button

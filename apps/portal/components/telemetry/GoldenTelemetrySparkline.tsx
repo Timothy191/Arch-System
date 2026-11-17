@@ -219,7 +219,7 @@ export function GoldenTelemetrySparkline({
       )}
 
       <div
-        className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/40 bg-white/90 px-2.5 py-1.5 shadow-2xs"
+        className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-gold/40 bg-white/90 px-2.5 py-1.5 shadow-2xs"
         data-testid={cfg.boxTestIdPrefix ? `${cfg.boxTestIdPrefix}-${id}` : undefined}
       >
         <svg

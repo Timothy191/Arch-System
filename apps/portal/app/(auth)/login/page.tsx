@@ -30,7 +30,7 @@ const RIGHT_AUTH_PANEL_CLASS =
   'liquid-glass-light flex flex-col justify-between bg-[var(--material-ultra-thin)] p-6 backdrop-blur-md md:p-7 lg:col-span-7';
 
 const TASKBAR_GOLD_SEPARATOR_CLASS =
-  'select-none font-bold font-mono text-[13px] text-accent-amber leading-none';
+  'select-none font-bold font-mono text-[13px] text-accent-gold leading-none';
 
 export const metadata: Metadata = {
   title: 'Login — Arch Systems',
@@ -125,8 +125,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               {/* Brand Identity */}
               <div className="relative z-10 space-y-3">
                 <div className="flex items-center gap-3.5">
-                  <div className="gold-steel-border gold-steel-border-slim flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-white/90 text-amber-700 shadow-diffusion-sm">
-                    <Logo className="relative z-30 h-14 w-14 shrink-0 scale-110 text-amber-700 drop-shadow-sm" />
+                  <div className="gold-steel-border gold-steel-border-slim flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-accent-gold/35 bg-white/90 text-accent-gold shadow-diffusion-sm">
+                    <Logo className="relative z-30 h-14 w-14 shrink-0 scale-110 text-accent-gold drop-shadow-sm" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h1 className="font-bold font-display text-2xl text-[var(--text-heading)] text-zinc-900 tracking-tight">
@@ -137,11 +137,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                       aria-hidden="true"
                       className="my-2 flex w-56 items-center justify-center gap-2"
                     >
-                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-amber-500/20 via-amber-500 to-amber-600 shadow-diffusion-sm" />
-                      <span className="h-2.5 w-2.5 rotate-45 rounded-[2px] border border-amber-600 bg-amber-400/60 shadow-diffusion-sm" />
-                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-l from-amber-500/20 via-amber-500 to-amber-600 shadow-diffusion-sm" />
+                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-accent-gold/20 via-accent-gold to-accent-gold-hover shadow-diffusion-sm" />
+                      <span className="h-2.5 w-2.5 rotate-45 rounded-[2px] border border-accent-gold-hover bg-accent-gold/55 shadow-diffusion-sm" />
+                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-l from-accent-gold/20 via-accent-gold to-accent-gold-hover shadow-diffusion-sm" />
                     </div>
-                    <div className="inline-flex items-center gap-1.5 rounded border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 font-medium text-[13px] text-amber-900 leading-[18px]">
+                    <div className="inline-flex items-center gap-1.5 rounded border border-accent-gold/35 bg-accent-gold/10 px-2.5 py-0.5 font-medium text-[13px] text-amber-900 leading-[18px]">
                       <span>Brakfontein Pit &amp; Plant · SCADA</span>
                     </div>
                   </div>
@@ -167,7 +167,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                   <span className="font-medium text-[13px] text-zinc-600 leading-[18px]">
                     Powered by
                   </span>
-                  <EveLogo className="h-4 w-auto text-amber-700" />
+                  <EveLogo className="h-4 w-auto text-accent-gold" />
                 </div>
               </div>
             </aside>
@@ -231,7 +231,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                     className="h-2 w-2 shrink-0 rounded-full bg-accent-green"
                     aria-hidden="true"
                   />
-                  <ShieldCheck className="h-4 w-4 shrink-0 text-amber-700" />
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-accent-gold" />
                   <span>Secure industrial access</span>
                 </div>
                 <div className="flex items-center gap-2 font-medium text-[13px] leading-[18px]">

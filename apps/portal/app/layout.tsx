@@ -273,7 +273,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                         />
                         Sync Active
                       </span>
-                      <EveLogo className="h-2.5 w-auto text-[var(--text-secondary)]" />
+                      <EveLogo className="h-2.5 w-auto text-accent-gold" />
                       <span className="font-medium font-mono text-[9.5px] text-[var(--text-secondary)]">
                         eve
                       </span>

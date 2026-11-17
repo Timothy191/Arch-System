@@ -10,19 +10,13 @@ interface LogoProps {
   variant?: 'default' | 'focus' | 'gold';
 }
 
-export function Logo({ className, variant = 'default' }: LogoProps) {
-  const isGold = variant === 'gold';
-
-  // AGENT-TRACE: Vector logo rendering the official Arch OS scalable symbol
+export function Logo({ className, variant: _variant = 'default' }: LogoProps) {
+  // AGENT-TRACE: Vector logo rendering the official Arch OS scalable symbol in canonical Metallic Gold (--accent-gold / #d4af37)
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox={ARCH_LOGO_VIEWBOX}
-      className={cn(
-        'fill-current',
-        isGold ? 'text-accent-amber' : 'text-arch-accent-blue',
-        className
-      )}
+      className={cn('fill-current text-accent-gold', className)}
       aria-hidden="true"
     >
       <path d={ARCH_LOGO_PATH} fillRule="evenodd" />

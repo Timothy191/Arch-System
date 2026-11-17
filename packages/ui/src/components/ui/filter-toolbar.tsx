@@ -54,7 +54,7 @@ export const FilterToolbar = React.forwardRef<HTMLDivElement, FilterToolbarProps
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="gold-steel-border gold-steel-border-slim h-9 rounded-full border-accent-amber/60 bg-white/95 pr-8 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-amber/30 focus-visible:ring-1"
+                className="gold-steel-border gold-steel-border-slim h-9 rounded-full border-accent-gold/60 bg-white/95 pr-8 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-gold/30 focus-visible:ring-1"
               />
               {searchQuery && (
                 <button

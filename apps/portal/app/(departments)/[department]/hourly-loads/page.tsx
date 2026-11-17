@@ -88,7 +88,7 @@ export default async function HourlyLoadsPage({
         />
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
           <PageHeader title="Hourly Loads Sheet" showDate={false} />
-          <div className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-full border border-accent-amber/50 bg-white/90 px-3 py-1 font-mono font-semibold text-[var(--accent-blue)] text-xs shadow-2xs">
+          <div className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-full border border-accent-gold/50 bg-white/90 px-3 py-1 font-mono font-semibold text-[var(--accent-blue)] text-xs shadow-2xs">
             <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
             <span>
               {(machines || []).length} Haulers · {(excavators || []).length} Excavators

@@ -158,7 +158,7 @@ export function MacMenuBar({
           title="Open System Menu"
         >
           <span
-            className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[var(--accent-blue)]"
+            className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent-gold"
             aria-hidden="true"
           />
           <span
@@ -479,9 +479,9 @@ export function MacMenuBar({
             <div className="gold-steel-border gold-steel-border-slim relative w-full max-w-2xl rounded-full">
               <Logo
                 variant="gold"
-                className="pointer-events-none absolute top-1/2 left-2.5 z-10 h-3.5 w-3.5 -translate-y-1/2 text-accent-amber"
+                className="pointer-events-none absolute top-1/2 left-2.5 z-10 h-3.5 w-3.5 -translate-y-1/2 text-accent-gold"
               />
-              <Search className="pointer-events-none absolute top-1/2 right-2.5 z-10 h-3 w-3 -translate-y-1/2 text-[var(--text-muted)]" />
+              <Search className="pointer-events-none absolute top-1/2 right-2.5 z-10 h-3 w-3 -translate-y-1/2 text-accent-gold" />
               <input
                 id="mac-menubar-search"
                 name="q"
@@ -491,9 +491,9 @@ export function MacMenuBar({
                 placeholder="Search..."
                 aria-label="Search"
                 className={cn(
-                  'gold-steel-border gold-steel-border-slim h-6 w-full rounded-full border border-accent-amber/60 bg-white/35 pr-7 pl-7',
+                  'gold-steel-border gold-steel-border-slim h-6 w-full rounded-full border border-accent-gold/60 bg-white/35 pr-7 pl-7',
                   'text-[12px] text-[var(--text-heading)] shadow-diffusion-sm backdrop-blur-md transition-all placeholder:text-[var(--text-muted)]',
-                  'hover:bg-white/50 focus:border-accent-amber focus:bg-white/70 focus:outline-none'
+                  'hover:bg-white/50 focus:border-accent-gold focus:bg-white/70 focus:outline-none'
                 )}
               />
             </div>

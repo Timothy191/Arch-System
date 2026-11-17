@@ -23,13 +23,13 @@ export interface ExcavatorActivityTelemetryOverviewProps {
 }
 
 const GOLDEN_SEPARATOR_CLASS =
-  'h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent';
+  'h-px w-full bg-gradient-to-r from-accent-gold/65 via-slate-200 to-transparent';
 
 const GOLDEN_LABEL_PILL_CLASS =
-  'system-label gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-full border border-accent-amber/40 bg-white/85 px-2.5 py-0.5 shadow-2xs';
+  'system-label gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-full border border-accent-gold/40 bg-white/85 px-2.5 py-0.5 shadow-2xs';
 
 const TALLY_PILL_CLASS =
-  'gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-full border border-accent-amber/35 bg-white/85 px-2.5 py-1 font-mono font-semibold text-[11px] text-[var(--text-heading)] tabular-nums shadow-2xs';
+  'gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-full border border-accent-gold/35 bg-white/85 px-2.5 py-1 font-mono font-semibold text-[11px] text-[var(--text-heading)] tabular-nums shadow-2xs';
 
 const DEFAULT_SHIFT_BCM_TARGET = 5400;
 const DEFAULT_SHIFT_LOADS_TARGET = 180;

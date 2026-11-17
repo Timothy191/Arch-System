@@ -155,7 +155,7 @@ export function MachineOperationsFilterStrip({
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
             placeholder="Search machine, type, or SN..."
-            className="gold-steel-border gold-steel-border-slim h-9 w-full rounded-full border border-accent-amber/60 bg-white/95 py-1.5 pr-4 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-amber/30 focus:outline-none"
+            className="gold-steel-border gold-steel-border-slim h-9 w-full rounded-full border border-accent-gold/60 bg-white/95 py-1.5 pr-4 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-gold/30 focus:outline-none"
           />
         </div>
       </div>

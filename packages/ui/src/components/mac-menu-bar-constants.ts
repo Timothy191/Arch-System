@@ -165,7 +165,7 @@ export const PRODUCTIVITY_LIST = [
     name: 'notes',
     displayName: 'Notes',
     icon: StickyNote,
-    colorClass: 'text-accent-amber',
+    colorClass: 'text-accent-gold',
   },
 ] as const;
 

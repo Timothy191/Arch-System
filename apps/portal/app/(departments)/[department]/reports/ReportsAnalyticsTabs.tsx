@@ -216,7 +216,7 @@ export function ReportsSubtabsToolbar({
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
             placeholder="Search machine, site, date..."
-            className="gold-steel-border gold-steel-border-slim w-48 rounded-full border border-accent-amber/60 bg-white/95 py-1.5 pr-3.5 pl-8 font-medium text-[var(--text-heading)] text-xs ring-1 ring-accent-amber/30 focus:outline-none sm:w-56"
+            className="gold-steel-border gold-steel-border-slim w-48 rounded-full border border-accent-gold/60 bg-white/95 py-1.5 pr-3.5 pl-8 font-medium text-[var(--text-heading)] text-xs ring-1 ring-accent-gold/30 focus:outline-none sm:w-56"
           />
         </div>
       </div>

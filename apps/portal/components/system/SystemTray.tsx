@@ -85,7 +85,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
   const VolumeIcon =
     volume.muted || volume.volume === 0 ? VolumeX : volume.volume < 50 ? Volume1 : Volume2;
   const volumeColor =
-    volume.muted || volume.volume === 0 ? 'text-[var(--text-muted)]' : 'text-[var(--accent-blue)]';
+    volume.muted || volume.volume === 0 ? 'text-[var(--text-muted)]' : 'text-accent-gold';
 
   const ConnIcon = !network.online ? WifiOff : Wifi;
   const connColor = network.online ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]';
@@ -132,7 +132,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
             data-testid="taskbar-home-button"
             className={cn(
               'flex h-5 w-5 items-center justify-center rounded-full',
-              'text-[var(--text-secondary)] hover:text-[var(--text-heading)]',
+              'text-accent-gold hover:text-accent-gold-hover',
               'transition-colors active:scale-[0.95]'
             )}
             title="Home — Return to Hub"
@@ -143,7 +143,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
           <span
             aria-hidden="true"
             data-testid="system-tray-gold-separator"
-            className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+            className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
           >
             |
           </span>
@@ -153,7 +153,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
           <span
             aria-hidden="true"
             data-testid="system-tray-gold-separator"
-            className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+            className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
           >
             |
           </span>
@@ -182,7 +182,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
             <span
               aria-hidden="true"
               data-testid="system-tray-gold-separator"
-              className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+              className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
             >
               |
             </span>
@@ -191,7 +191,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
             <span
               aria-hidden="true"
               data-testid="system-tray-gold-separator"
-              className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+              className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
             >
               |
             </span>
@@ -199,7 +199,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
             <span
               aria-hidden="true"
               data-testid="system-tray-gold-separator"
-              className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+              className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
             >
               |
             </span>
@@ -218,7 +218,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
                 <span
                   aria-hidden="true"
                   data-testid="system-tray-gold-separator"
-                  className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+                  className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
                 >
                   |
                 </span>
@@ -235,14 +235,14 @@ const SystemTrayPillInner = function SystemTrayPillInner({
             <span
               aria-hidden="true"
               data-testid="system-tray-gold-separator"
-              className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+              className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
             >
               |
             </span>
             <Logo
               variant="gold"
               className={cn(
-                'h-3 w-3 shrink-0 transition-transform duration-200 ease-out',
+                'h-3 w-3 shrink-0 text-accent-gold transition-transform duration-200 ease-out',
                 trayOpen ? 'rotate-0' : 'rotate-180'
               )}
             />
@@ -313,7 +313,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
       <span
         aria-hidden="true"
         data-testid="system-tray-gold-separator"
-        className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+        className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
       >
         |
       </span>

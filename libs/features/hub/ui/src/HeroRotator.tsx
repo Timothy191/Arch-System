@@ -46,8 +46,8 @@ export function HeroRotator({
       video: '/images/departments/overview.mp4',
       stats: { label: 'System Health', value: '100% Optimal' },
       status: 'active',
-      icon: <Logo variant="gold" className="h-4 w-4 text-accent-amber" />,
-      iconBgColor: 'bg-accent-amber/10',
+      icon: <Logo variant="gold" className="h-4 w-4 text-accent-gold" />,
+      iconBgColor: 'bg-accent-gold/10',
       primary: { href: primaryHref, label: primaryLabel, icon: arrowIcon },
       secondary: { href: secondaryHref, label: secondaryLabel, icon: arrowIcon },
       assetOverline: 'CENTRAL COMMAND // SYS-MAIN',
@@ -109,8 +109,8 @@ export function HeroRotator({
               : `/images/departments/${dept.name}.mp4`,
         stats: dept.stats || { label: 'Telemetry', value: 'Online' },
         status: dept.status || 'active',
-        icon: <Logo variant="gold" className="h-4 w-4 text-accent-amber" />,
-        iconBgColor: 'bg-accent-amber/10',
+        icon: <Logo variant="gold" className="h-4 w-4 text-accent-gold" />,
+        iconBgColor: 'bg-accent-gold/10',
         primary: dept.actions?.[0]
           ? { href: dept.actions[0].href, label: dept.actions[0].label, icon: arrowIcon }
           : {

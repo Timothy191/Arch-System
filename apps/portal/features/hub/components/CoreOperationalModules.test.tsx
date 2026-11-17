@@ -87,6 +87,9 @@ describe('CoreOperationalModules', () => {
       'gold-steel-border-slim'
     );
     expect(screen.getByTestId('core-modules-header-separator')).toBeInTheDocument();
+    expect(screen.getByTestId('core-modules-header-separator').querySelector('svg')).toHaveClass(
+      'text-accent-gold'
+    );
   });
 
   describe('CookieConsent persistence & zero-flash behavior', () => {

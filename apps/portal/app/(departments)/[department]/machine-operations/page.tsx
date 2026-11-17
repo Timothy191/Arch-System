@@ -276,11 +276,11 @@ export default async function MachineOperationsPage({
       <div className="space-y-4">
         <div
           data-testid="todays-operations-golden-header"
-          className="gold-steel-border gold-steel-border-slim relative flex items-center justify-between overflow-hidden rounded-xl border border-accent-amber/45 bg-white/90 px-4 py-2.5 shadow-2xs"
+          className="gold-steel-border gold-steel-border-slim relative flex items-center justify-between overflow-hidden rounded-xl border border-accent-gold/45 bg-white/90 px-4 py-2.5 shadow-2xs"
         >
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 animate-shimmer bg-gradient-to-r from-amber-500/10 via-amber-300/25 to-amber-500/10"
+            className="pointer-events-none absolute inset-0 animate-shimmer bg-gradient-to-r from-accent-gold/10 via-accent-gold/25 to-accent-gold/10"
           />
           <div className="relative z-10 flex items-center gap-2.5">
             <Logo variant="gold" className="h-4 w-4 shrink-0" />
@@ -290,7 +290,7 @@ export default async function MachineOperationsPage({
           </div>
           <span
             data-testid="todays-operations-fleet-count"
-            className="gold-steel-border gold-steel-border-slim relative z-10 inline-flex items-center gap-1.5 rounded-full border border-accent-amber/45 bg-amber-50/90 px-3 py-1 font-mono font-semibold text-[var(--accent-blue)] text-xs shadow-2xs"
+            className="gold-steel-border gold-steel-border-slim relative z-10 inline-flex items-center gap-1.5 rounded-full border border-accent-gold/45 bg-amber-50/90 px-3 py-1 font-mono font-semibold text-[var(--accent-blue)] text-xs shadow-2xs"
           >
             <span
               aria-hidden="true"

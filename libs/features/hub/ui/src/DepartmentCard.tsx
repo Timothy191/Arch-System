@@ -81,10 +81,10 @@ function ArchBookmarkIcon({ isPinned, className }: { isPinned: boolean; classNam
 }
 
 const GOLD_BADGE_CONFIG = {
-  bg: 'border-accent-amber/45 bg-white/95 text-accent-amber shadow-sm',
-  text: 'text-accent-amber',
-  iconColor: 'text-accent-amber',
-  ringColor: 'ring-accent-amber/35',
+  bg: 'border-accent-gold/45 bg-white/95 text-accent-gold shadow-sm',
+  text: 'text-accent-gold',
+  iconColor: 'text-accent-gold',
+  ringColor: 'ring-accent-gold/35',
 } as const;
 
 const COLOR_MAP: Record<
@@ -348,13 +348,13 @@ function DepartmentCard({
               aria-hidden="true"
               className="my-1.5 flex w-full items-center justify-center gap-2"
             >
-              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber" />
-              <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-              <span className="gold-steel-border gold-steel-border-slim flex h-4.5 w-4.5 items-center justify-center rounded-full border border-accent-amber/45 bg-white/90 text-accent-amber shadow-2xs">
-                <Logo variant="gold" className="h-2.5 w-2.5 text-accent-amber" />
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-gold/55 to-accent-gold" />
+              <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />
+              <span className="gold-steel-border gold-steel-border-slim flex h-4.5 w-4.5 items-center justify-center rounded-full border border-accent-gold/45 bg-white/90 text-accent-gold shadow-2xs">
+                <Logo variant="gold" className="h-2.5 w-2.5 text-accent-gold" />
               </span>
-              <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber" />
+              <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-gold/55 to-accent-gold" />
             </div>
             <p className="uiverse-card-subtitle">{department.description}</p>
           </div>
@@ -364,7 +364,7 @@ function DepartmentCard({
             <div className="uiverse-card-tag-row group-hover:border-arch-accent-blue/25 group-hover:bg-white/95">
               <div className="flex items-center gap-2">
                 <span
-                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-amber/80"
+                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-gold/80"
                   aria-hidden="true"
                 />
                 <span className="uiverse-card-tag-row-text">{department.stats.label}</span>

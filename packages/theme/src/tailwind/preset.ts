@@ -59,10 +59,11 @@ const archTheme: Config = {
     // must be safelisted or purged. Prefer static lookup maps long-term.
     {
       pattern:
-        /^(bg|text|border)-(accent|arch|dept)-(blue|red|green|amber|charcoal|emerald|mint|slate|neutral)/,
+        /^(bg|text|border)-(accent|arch|dept)-(blue|gold|red|green|amber|charcoal|emerald|mint|slate|neutral)/,
     },
     {
-      pattern: /^(bg|text|border)-(accent|arch)-(blue|red|green|amber)\/(5|10|15|20|25|30|40|50)$/,
+      pattern:
+        /^(bg|text|border)-(accent|arch)-(blue|gold|red|green|amber)\/(5|10|15|20|25|30|40|50)$/,
     },
   ],
   future: {
@@ -159,9 +160,11 @@ const archTheme: Config = {
         'brand-blue': withAlpha('--arch-brand-blue'),
         'brand-blue-hover': withAlpha('--arch-brand-blue-hover'),
 
-        // macOS system accent colors
+        // macOS system & Arch metallic gold accent colors
         'accent-charcoal': withAlpha('--accent-charcoal'),
         'accent-blue': withAlpha('--accent-blue'),
+        'accent-gold': withAlpha('--accent-gold'),
+        'accent-gold-hover': withAlpha('--accent-gold-hover'),
         'accent-red': withAlpha('--accent-red'),
         'accent-green': withAlpha('--accent-green'),
         'accent-amber': withAlpha('--accent-amber'),
@@ -206,7 +209,8 @@ const archTheme: Config = {
           },
           accent: {
             charcoal: withAlpha('--accent-charcoal'), // --arch13 #1c1c1e
-            blue: withAlpha('--accent-blue'), // deprecated alias → charcoal
+            blue: withAlpha('--accent-blue'), // deprecated alias → metallic gold
+            gold: withAlpha('--accent-gold'), // canonical metallic gold #d4af37
             red: withAlpha('--accent-red'), // --arch12 #d22118
             green: withAlpha('--accent-green'), // --arch14 #34c759
           },

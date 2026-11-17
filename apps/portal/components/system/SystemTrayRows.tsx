@@ -445,11 +445,11 @@ export function TaskbarNotificationBell({ embedded = false }: { embedded?: boole
           data-testid="taskbar-notifications-bell"
           className={cn(
             embedded
-              ? 'relative flex h-5 w-5 items-center justify-center rounded-full text-[var(--text-secondary)] transition-colors hover:text-[var(--text-heading)] focus-visible:outline-none active:scale-[0.95]'
-              : 'gold-steel-border gold-steel-border-slim relative flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.97]'
+              ? 'relative flex h-5 w-5 items-center justify-center rounded-full text-accent-gold transition-colors hover:text-accent-gold-hover focus-visible:outline-none active:scale-[0.95]'
+              : 'gold-steel-border gold-steel-border-slim relative flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold/50 active:scale-[0.97]'
           )}
         >
-          <Bell className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+          <Bell className="h-3.5 w-3.5 text-accent-gold" />
           {unreadCount > 0 && (
             <span
               data-testid="notification-unread-dot"

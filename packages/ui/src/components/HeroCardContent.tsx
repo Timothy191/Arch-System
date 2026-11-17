@@ -19,20 +19,20 @@ export function SystemGoldenSeparator({
       aria-hidden="true"
       className={cn('flex w-full items-center justify-center gap-2', className)}
     >
-      <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
-      <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-      <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 items-center justify-center rounded-full border border-accent-amber/45 bg-white/90 text-accent-amber shadow-2xs">
+      <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-gold/55 to-accent-gold motion-safe:animate-pulse" />
+      <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />
+      <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 items-center justify-center rounded-full border border-accent-gold/45 bg-white/90 text-accent-gold shadow-2xs">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox={ARCH_LOGO_VIEWBOX}
-          className="h-3 w-3 fill-current text-accent-amber motion-safe:animate-pulse"
+          className="h-3 w-3 fill-current text-accent-gold motion-safe:animate-pulse"
           aria-hidden="true"
         >
           <path d={ARCH_EMBLEM_PATH} fillRule="evenodd" />
         </svg>
       </span>
-      <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-      <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+      <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />
+      <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-gold/55 to-accent-gold motion-safe:animate-pulse" />
     </div>
   );
 }
@@ -638,7 +638,7 @@ export function HeroOperationalKpiStrip({
                 <span
                   aria-hidden="true"
                   data-testid="hero-kpi-gold-separator"
-                  className="hidden shrink-0 select-none items-center justify-center font-bold font-mono text-[10px] text-accent-amber sm:inline-flex"
+                  className="hidden shrink-0 select-none items-center justify-center font-bold font-mono text-[10px] text-accent-gold sm:inline-flex"
                 >
                   |
                 </span>
@@ -663,7 +663,7 @@ export function HeroOperationalKpiStrip({
               {tile.subtext}
             </span>
             <div className="h-1 w-14 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-accent-amber to-emerald-500" />
+              <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-accent-gold to-emerald-500" />
             </div>
           </div>
         </div>
@@ -763,11 +763,11 @@ export function HeroCardContent({
           <div className="space-y-2">
             <div className="flex items-center gap-2.5">
               <span
-                className="gold-steel-border gold-steel-border-slim inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-accent-amber/40 bg-accent-amber/10 text-accent-amber shadow-2xs"
+                className="gold-steel-border gold-steel-border-slim inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-accent-gold/40 bg-accent-gold/10 text-accent-gold shadow-2xs"
                 aria-hidden="true"
                 data-testid={`hero-dept-icon-${panel.name}`}
               >
-                <Logo variant="gold" className="h-4 w-4 text-accent-amber" />
+                <Logo variant="gold" className="h-4 w-4 text-accent-gold" />
               </span>
               <h2 className="pr-4 font-anurati font-bold text-[var(--text-heading)] text-xl leading-snug tracking-[0.04em] sm:text-2xl">
                 {panel.title}

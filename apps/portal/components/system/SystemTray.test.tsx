@@ -274,8 +274,13 @@ describe('SystemTrayPill (Unified Control Room Taskbar)', () => {
     expect(supportBtn).toBeInTheDocument();
     expect(supportBtn).toHaveTextContent('Support');
 
-    // 5. Gold Separators
+    // 5. Gold Separators & canonical Metallic Gold icon setup
+    expect(homeBtn).toHaveClass('text-accent-gold');
+    expect(notifBtn).toHaveClass('text-accent-gold');
     const separators = screen.getAllByTestId('system-tray-gold-separator');
     expect(separators.length).toBeGreaterThanOrEqual(4);
+    for (const sep of separators) {
+      expect(sep).toHaveClass('text-accent-gold');
+    }
   });
 });

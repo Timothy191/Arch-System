@@ -152,7 +152,7 @@ describe('DepartmentCard', () => {
     expect(iconBubble?.style.width).toBe('2rem');
     expect(iconBubble?.style.height).toBe('2rem');
     const bubbleLogo = iconBubble?.querySelector('svg');
-    expect(bubbleLogo).toHaveClass('h-5', 'w-5');
+    expect(bubbleLogo).toHaveClass('h-5', 'w-5', 'text-accent-gold');
   });
 
   it('renders -card.webp banner initially and steps down through fallback variants on error', () => {

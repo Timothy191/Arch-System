@@ -37,7 +37,7 @@ function ModuleSearchInput({ searchQuery, onSearchChange }: ModuleSearchInputPro
 
   return (
     <div className="gold-steel-border gold-steel-border-slim relative min-w-[200px] flex-1 rounded-full sm:w-64 sm:min-w-[240px]">
-      <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-arch-text-tertiary" />
+      <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-accent-gold" />
       <input
         id="hub-module-search"
         type="text"
@@ -48,7 +48,7 @@ function ModuleSearchInput({ searchQuery, onSearchChange }: ModuleSearchInputPro
         onChange={(e) => onSearchChange(e.target.value)}
         onFocus={() => setIsSearchFocused(true)}
         onBlur={() => setIsSearchFocused(false)}
-        className="gold-steel-border gold-steel-border-slim h-11 w-full rounded-full border border-arch-border-subtle bg-white/90 pr-10 pl-10 text-[13px] text-arch-text-primary shadow-xs transition-all placeholder:text-arch-text-tertiary focus:border-accent-amber focus:border-arch-accent-amber/50 focus:outline-none"
+        className="gold-steel-border gold-steel-border-slim h-11 w-full rounded-full border border-arch-border-subtle bg-white/90 pr-10 pl-10 text-[13px] text-arch-text-primary shadow-xs transition-all placeholder:text-arch-text-tertiary focus:border-accent-gold focus:outline-none"
       />
       <span id="hub-module-search-hint" className="sr-only">
         Press slash or Command K to focus the module search
@@ -144,7 +144,7 @@ export function CoreOperationalModules({
             </span>
             <span
               data-testid="core-modules-count-badge"
-              className="gold-steel-border gold-steel-border-slim ml-0.5 rounded-full border border-accent-amber/45 bg-arch-surface-secondary px-2.5 py-0.5 font-mono text-[13px] text-arch-text-secondary tabular-nums leading-[18px]"
+              className="gold-steel-border gold-steel-border-slim ml-0.5 rounded-full border border-accent-gold/45 bg-arch-surface-secondary px-2.5 py-0.5 font-mono text-[13px] text-arch-text-secondary tabular-nums leading-[18px]"
             >
               {filteredDepartments.length} / {departments.length}
             </span>
@@ -249,13 +249,13 @@ export function CoreOperationalModules({
         aria-hidden="true"
         className="flex w-full items-center justify-center gap-2.5 py-0.5"
       >
-        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[#c59b27]/75 to-[#f3d37a] shadow-[0_0_8px_rgba(212,175,55,0.45)]" />
-        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-[#b08318]/65 bg-gradient-to-br from-[#fff6d6] via-[#e6be5a] to-[#9e7312] shadow-[0_0_6px_rgba(212,175,55,0.55)]" />
-        <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#c59b27]/70 bg-gradient-to-b from-[#fffdf7] via-[#f7e7b4] to-[#d9ad42] shadow-[0_1px_5px_rgba(180,130,25,0.35),inset_0_1px_1px_rgba(255,255,255,0.95)]">
-          <Logo className="h-3 w-3 text-[#7a5608] drop-shadow-[0_0.5px_0_rgba(255,255,255,0.8)]" />
+        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-gold/55 to-accent-gold shadow-[0_0_8px_rgba(212,175,55,0.45)]" />
+        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35 shadow-[0_0_6px_rgba(212,175,55,0.55)]" />
+        <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-accent-gold/55 bg-white/95 text-accent-gold shadow-xs">
+          <Logo variant="gold" className="h-3 w-3 text-accent-gold" />
         </span>
-        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-[#b08318]/65 bg-gradient-to-br from-[#fff6d6] via-[#e6be5a] to-[#9e7312] shadow-[0_0_6px_rgba(212,175,55,0.55)]" />
-        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[#c59b27]/75 to-[#f3d37a] shadow-[0_0_8px_rgba(212,175,55,0.45)]" />
+        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35 shadow-[0_0_6px_rgba(212,175,55,0.55)]" />
+        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-gold/55 to-accent-gold shadow-[0_0_8px_rgba(212,175,55,0.45)]" />
       </div>
 
       {/* Grid Display */}

@@ -64,11 +64,16 @@
      aliases (--color-action-*, --color-status-*) rather than these directly.
      ─────────────────────────────────────────────────────────────────────── */
 
-  /* Vivid Electric Blue — primary CTA, interactive highlights */
+  /* Metallic Gold (#d4af37) — canonical brand icon, emblem, separator, and CTA accent */
   --accent-electric-blue: #d4af37;
   --accent-electric-blue-hover: #c5a017;
   --accent-electric-blue-subtle: rgba(212, 175, 55, 0.08);
   --accent-electric-blue-border: rgba(212, 175, 55, 0.28);
+
+  --accent-gold: var(--accent-electric-blue);
+  --accent-gold-hover: var(--accent-electric-blue-hover);
+  --accent-gold-subtle: var(--accent-electric-blue-subtle);
+  --accent-gold-border: var(--accent-electric-blue-border);
 
   /* Mint Green — status: optimal / active / healthy */
   --accent-mint: #10b981;
