@@ -4,6 +4,12 @@
 
 ---
 
+## [2026-11-17T13:39:00+02:00] - Scheduled Improvement Pass 3: `DialogContent` Utility Extraction, Health `no-store` Headers & Tailwind Ratchet (`chore/auto-improve-20261117-1337`)
+
+- **UI Primitive Utility Extraction**: Extracted `DIALOG_CONTENT_STYLES` in [`packages/ui/src/components/ui/dialog.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/ui/dialog.tsx#L31-L38) to eliminate the 28-utility inline string on `DialogPrimitive.Content`.
+- **Health Endpoint Cache-Control Hardening**: Added `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` headers to [`apps/portal/app/api/health/live/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/live/route.ts#L13-L18), [`apps/portal/app/api/health/cache/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/cache/route.ts#L50-L63), and [`apps/portal/app/api/health/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/route.ts#L140-L144).
+- **Tailwind Utility Baseline Ratchet**: Ratcheted [`tools/audits/tailwind-baseline.json`](file:///home/tim/Fork/Arch-System/tools/audits/tailwind-baseline.json) down from `4` files to `3` files (`26` repeated chains).
+
 ## [2026-11-17T13:32:00+02:00] - Scheduled Improvement Pass 2: Worker JSON/Size Guard, Health `no-store` Headers & Tailwind Ratchet (`chore/auto-improve-20261117-1331`)
 
 - **Cloudflare Worker Edge Input Hardening**: Wrapped `request.text()` + `JSON.parse()` in [`workers/scada-monitor.js`](file:///home/tim/Fork/Arch-System/workers/scada-monitor.js#L100-L116) with a `try/catch` returning `400 Bad Request` (`{ error: 'Invalid JSON payload' }`) and an explicit `maxSize` body-length check when `content-length` is omitted.

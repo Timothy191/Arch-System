@@ -138,6 +138,7 @@ export async function GET() {
   return NextResponse.json(dataToReturn, {
     status: httpStatus,
     headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
       'Server-Timing': serverTiming,
     },
   });

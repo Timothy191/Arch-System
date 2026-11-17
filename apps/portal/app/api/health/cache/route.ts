@@ -47,11 +47,18 @@ export async function GET() {
   const total = stats.hits + stats.misses;
   const hitRate = total > 0 ? Math.round((stats.hits / total) * 10000) / 10000 : 0;
 
-  return NextResponse.json({
-    status: redisConnected ? 'healthy' : 'degraded',
-    hitRate,
-    ...stats,
-    redisConnected,
-    timestamp: new Date().toISOString(),
-  });
+  return NextResponse.json(
+    {
+      status: redisConnected ? 'healthy' : 'degraded',
+      hitRate,
+      ...stats,
+      redisConnected,
+      timestamp: new Date().toISOString(),
+    },
+    {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      },
+    }
+  );
 }
