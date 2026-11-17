@@ -7,8 +7,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Cache Miss Rate exceeds 40%"
-          description: "Cache miss rate for Tier L1 is too high. Policy engine may not be keeping up."
+          summary: 'Cache Miss Rate exceeds 40%'
+          description: 'Cache miss rate for Tier L1 is too high. Policy engine may not be keeping up.'
 
       - alert: RedisShardDown
         expr: up{job="redis-cluster"} == 0
@@ -16,5 +16,23 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Redis Shard Down"
-          description: "A node in the L2 cache cluster has failed."
+          summary: 'Redis Shard Down'
+          description: 'A node in the L2 cache cluster has failed.'
+
+      - alert: L2CacheLatencyHigh
+        expr: portal_cache_latency_ms{metric="p95"} > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: L2 Cache P95 Latency Above 100ms
+          description: 'L2 Redis cache p95 latency has exceeded 100ms. Consider cache optimization or Redis scaling.'
+
+      - alert: CacheWriteThroughDelayHigh
+        expr: portal_cache_write_through_delay_ms > 500
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Cache Write-Through Delay High
+          description: 'Cache write-through delay to Supabase exceeds 500ms. Review write pattern or Supabase performance.'

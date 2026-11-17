@@ -72,6 +72,7 @@ function resolveLatestConversationId(explicitId) {
 
   if (!fs.existsSync(CONVERSATIONS_DIR)) return '';
 
+  const forkRoot = path.dirname(WORKSPACE_ROOT);
   const entries = fs
     .readdirSync(CONVERSATIONS_DIR)
     .filter((name) => name.endsWith('.db'))
@@ -81,6 +82,23 @@ function resolveLatestConversationId(explicitId) {
       return { id: name.replace(/\.db$/, ''), mtimeMs: stat.mtimeMs };
     })
     .sort((left, right) => right.mtimeMs - left.mtimeMs);
+
+  for (const entry of entries) {
+    const transcriptPath = path.join(
+      BRAIN_DIR,
+      entry.id,
+      '.system_generated',
+      'logs',
+      'transcript.jsonl'
+    );
+    if (!fs.existsSync(transcriptPath)) continue;
+    try {
+      const sample = fs.readFileSync(transcriptPath, 'utf8');
+      if (sample.includes(WORKSPACE_ROOT) || sample.includes(forkRoot)) {
+        return entry.id;
+      }
+    } catch {}
+  }
 
   return entries[0]?.id || '';
 }
@@ -345,6 +363,14 @@ function formatHandoffMarkdown(payload) {
 - **Compaction Verdict**: \`${guardVerdict.decision}\` (${guardVerdict.reason})
 - **Live Context Fill**: \`${metrics.latestInputTokens.toLocaleString()} / ${DEFAULT_CONTEXT_WINDOW_LIMIT.toLocaleString()}\` tokens (\`${(guardVerdict.usageRatio * 100).toFixed(1)}%\`)
 - **Prefix Cache Hit Ratio**: \`${(metrics.cacheHitRatio * 100).toFixed(1)}%\` (Avoided Rebuild: \`${guardVerdict.avoidedCacheRebuildTokens.toLocaleString()}\` tokens)
+
+## 0. Auto-Onboarding & Substrate Status
+
+- **VibeMon Tracking (Mandatory)**: \`./vibemon.sh\` — update via \`curl -fsSL https://vibemon.dev/install.sh | bash\` (\`pnpm vibemon:update\`), verify via \`pnpm vibemon:status\`, and emit lifecycle events via \`pnpm vibemon:track <event> <agent>\`
+- **Graphify Knowledge Graph**: \`graphify-out/graph.json\` — query via \`graphify path "<A>" "<B>"\`, \`graphify explain "<symbol>"\`, \`graphify section "<heading>"\`, or \`graphify update .\`
+- **CodeGraph Substrate**: \`/home/tim/local.db\` — verify with \`pnpm audit:code-intelligence\` and \`pnpm ci:reindex:diff\`
+- **Swarm Vector Memory**: \`.swarm/memory.db\` — refresh via \`node tools/scripts/sync-vector-memory.mjs\`
+- **MCP Auto-Onboarding**: Call \`memory-gateway-mcp\` \`get_session_onboarding\` / \`search_unified_memory\` (4 tiers including \`knowledge_graph\`) and \`skills-mcp\` \`assemble_code_context_pack\`
 
 ## 1. Bounded SKILL.state Spine (O(1) <= ${MAX_COMPACTION_STATE_CHARS} chars)
 

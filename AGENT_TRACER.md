@@ -4,6 +4,14 @@
 
 ---
 
+## [2026-11-17T12:44:00+02:00] - Reconcile Working Tree, Remove Broken Untracked Artifacts & Verify Monorepo State (`chore/reconcile-working-tree`)
+
+- **Branch & Triage**: Created `chore/reconcile-working-tree` from `main` (`8045c109` — `feat(portal): add cloudflare edge integration`) and audited ~65 dirty/untracked paths against `AGENT_TRACER.md` and `git log`.
+- **Broken Artifact Removal**: Removed unreferenced, broken untracked drafts in `apps/portal/app/(departments)/production/` (`page.tsx`, `actions.ts`, `actions.test.ts`, `layout.tsx`, `loading.tsx`) and `apps/portal/app/(departments)/drilling/actions.{ts,test.ts}` (which mixed `'use server'` with client hooks, `createReadReplicaClient` writes, `any`, and raw Tailwind colors, causing 15 `tsc --noEmit` errors).
+- **Lint & Audit Repairs**: Fixed literal newline string-literal syntax errors and 4 unused-variable errors in [`tools/audits/run-audit.cjs`](file:///home/tim/Fork/Arch-System/tools/audits/run-audit.cjs) and formatted [`apps/portal/app/overview/layout.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/overview/layout.tsx) and [`apps/portal/app/overview/loading.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/overview/loading.tsx) via Biome.
+- **Reconciled Additions**: Retained and verified `@repo/code-intelligence` ([`packages/code-intelligence/`](file:///home/tim/Fork/Arch-System/packages/code-intelligence/package.json), [`tools/code-intelligence/`](file:///home/tim/Fork/Arch-System/tools/code-intelligence/READY.md), [`useCodeIntelligence.ts`](file:///home/tim/Fork/Arch-System/libs/shared/hooks/src/useCodeIntelligence.ts)), `.cline/`, `.husky/post-{commit,merge}`, [`scripts/deploy-cloudflare.sh`](file:///home/tim/Fork/Arch-System/scripts/deploy-cloudflare.sh), [`infra/observability/`](file:///home/tim/Fork/Arch-System/infra/observability/prometheus.yml), [`tools/scripts/`](file:///home/tim/Fork/Arch-System/tools/scripts/ratchet-policy.sh) compliance scripts, [`mining-rag.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/mining-rag.ts), and `.agents/` memory/rule updates.
+- **Verification**: Verified `pnpm policy:check`, `pnpm type-check` (`23/23` packages), `pnpm lint` (Biome `1661` files), `pnpm deps:lint`, `pnpm cycles` (`1333` modules, `0` violations), and `pnpm test` (`21/21` tasks; `237/237` portal suites, `1606/1606` tests), followed by `pnpm agent:verify`.
+
 ## [2026-11-17T09:18:00+02:00] - Secondary Documentation & GitHub Wiki Synchronization Pass + `pnpm wiki:sync` Pipeline
 
 - **Structured Thinking (STM-0)**:

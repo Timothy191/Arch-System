@@ -57,6 +57,7 @@ ruvector.db-*
 .kiro/guardrails/
 .kiro/skills/
 .agent-plugins/
+.agentsroom/
 .agents/teamwork/
 
 # IDE
@@ -67,6 +68,8 @@ skills-lock.json
 MCP/
 .playwright-mcp/
 .repowise/
+graphify-out/
+.vibemon/
 
 # Debug
 npm-debug.log*
@@ -328,3 +331,4 @@ get-token.js
 graphify-out/
 .agentsroom/
 .vibemon/
+.agents/mcp_config.json

@@ -1,0 +1,36 @@
+{
+  "name": "@repo/code-intelligence",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Code intelligence layer with tree-sitter based symbol search, context assembly, and refactoring safety for Arch-System",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watchAll",
+    "codegen": "tsc --build && echo 'Build complete'"
+  },
+  "keywords": [
+    "code-intelligence",
+    "tree-sitter",
+    "symbol-search",
+    "context-assembly",
+    "refactoring-safety"
+  ],
+  "author": "Arch-System",
+  "license": "MIT",
+  "dependencies": {
+    "tree-sitter": "^0.20.0",
+    "tree-sitter-typescript": "^0.20.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "typescript": "~5.9.2"
+  },
+  "peerDependencies": {},
+  "workspaces": [],
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

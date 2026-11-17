@@ -1,0 +1,18 @@
+---
+description: Next.js layering and boundary rules — apps→@repo/supabase, UI pure presentation
+alwaysApply: true
+---
+
+# Next.js Layering Boundaries
+
+Enforced invariants (from `AGENTS.md`, Section 1):
+
+| Source | Forbidden Target | Reason |
+|--------|-----------------|--------|
+| `apps/*` | `packages/database` | Route persistence through `@repo/supabase` or feature `data-access` |
+| `packages/ui` | `packages/database`, `packages/supabase` | UI stays strictly presentational |
+| `packages/theme` | `packages/ui` | Theme tokens feed UI, never the reverse |
+| `packages/*`, `tools/*` | `apps/*` | Strict dependency inversion |
+| `tools/*` | `packages/supabase` | Build-time tools never import runtime database clients |
+
+Machine-enforced by `pnpm policy:check` and `pnpm cycles` (zero circular dependencies).

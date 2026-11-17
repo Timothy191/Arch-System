@@ -1,0 +1,21 @@
+---
+description: Verification gates — agent:verify, type-check, lint, test, audit:compliance
+alwaysApply: true
+---
+
+# Verification Gates
+
+Before declaring any task complete, run (inside `Arch-System/`):
+
+```bash
+export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH:/home/tim/.cargo/bin"
+
+pnpm agent:verify       # 28-gate fail-fast suite
+pnpm type-check         # turbo type-check --concurrency=2
+pnpm lint               # turbo run lint (Biome per package)
+pnpm test               # turbo run test
+pnpm audit:compliance   # static invariant sweep
+pnpm token:budget-check # 40KB root instruction file ceiling
+```
+
+Zero-interruption self-healing: autonomously inspect errors, fix files, and re-verify until all gates pass. Never stop to ask the user to fix test failures.

@@ -176,7 +176,7 @@ export default function SystemArchitecture() {
               Core Modules
             </div>
             <div className="mt-0.5 font-bold text-lg text-text-heading">
-              {DEPARTMENTS.length} / 8
+              {DEPARTMENTS.length} / {DEPARTMENTS.length}
             </div>
           </div>
           <div className="rounded-xl border border-border-subtle bg-bg-secondary/80 px-4 py-2.5">

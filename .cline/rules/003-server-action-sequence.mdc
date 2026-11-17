@@ -1,0 +1,19 @@
+---
+description: Canonical 8-Step Server Action security sequence
+alwaysApply: true
+---
+
+# Canonical 8-Step Server Action Sequence
+
+All protected Server Actions (`'use server'`) and Route Handlers must follow this exact order:
+
+1. **Authenticate** — `getAuthenticatedEmployee(supabase)`
+2. **Authorize** — check `accessible_departments` / role
+3. **Validate** — `@repo/contract` Zod schema (`safeParse`)
+4. **Rate-limit** — `RateLimiter` with `MemoryStore`/`RedisStore`
+5. **Execute** — Supabase RPC / mutation
+6. **Audit log** — `logger.info({ event, actorId, ... })`
+7. **Invalidate caches** — `updateTag()` / `updateTags()` (before `redirect()`)
+8. **Return typed result** — always invalidate before `redirect()` (throws control-flow exception)
+
+Enforced by `pnpm audit:compliance` and the server-action audit gates.

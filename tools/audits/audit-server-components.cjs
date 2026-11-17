@@ -147,6 +147,27 @@ for (const file of tsxFiles) {
       );
     }
   }
+
+  // Check 6: React 19 ref-as-prop (prohibit forwardRef in apps/* and libs/*; legacy packages/ui wrappers exempt)
+  const normalizedRel = relPath.split(path.sep).join('/');
+  if (
+    !normalizedRel.startsWith('packages/ui/src/components/') &&
+    /\b(?:React\.)?forwardRef\s*(?:<|\()/.test(content)
+  ) {
+    violations.push(
+      `${relPath} - Uses legacy forwardRef(). Use React 19 ref-as-prop on function components.`
+    );
+  }
+
+  // Check 7: Prohibit unguarded dangerouslySetInnerHTML outside CSP-nonced SpeculationRules.tsx
+  if (
+    content.includes('dangerouslySetInnerHTML') &&
+    normalizedRel !== 'apps/portal/components/SpeculationRules.tsx'
+  ) {
+    violations.push(
+      `${relPath} - Uses dangerouslySetInnerHTML outside CSP-nonced allowlist (SpeculationRules.tsx).`
+    );
+  }
 }
 
 // ── 3. Defense-in-Depth Layout Guards Audit ─────────────────────────────────

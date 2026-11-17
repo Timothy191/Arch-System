@@ -1,8 +1,10 @@
 import {
+  buildOperationalGraphContext,
   formatBreakdownText,
   formatShiftNoteText,
   indexBreakdownVector,
   indexShiftNoteVector,
+  searchOperationalGraphRag,
   searchShiftIntelligence,
   searchSimilarBreakdowns,
 } from './mining-rag';
@@ -241,6 +243,103 @@ describe('mining-rag domain vector search', () => {
       const res = await searchSimilarBreakdowns('unknown issue', 'user-1');
       expect(mockRpc).toHaveBeenCalledTimes(1);
       expect(res).toEqual([]);
+    });
+  });
+
+  describe('Operational GraphRAG (buildOperationalGraphContext & searchOperationalGraphRag)', () => {
+    it('builds SAME_FLEET, SAME_MACHINE_TYPE, and CORRELATED_SHIFT_DELAY edges with fleet summaries', () => {
+      const ctx = buildOperationalGraphContext(
+        [
+          {
+            id: 'brk-1',
+            fleetId: 'EX01',
+            machineType: 'Excavator',
+            reason: 'Boom cylinder seal leak',
+            score: 94,
+            createdAt: '2026-11-16T08:00:00Z',
+          },
+          {
+            id: 'brk-2',
+            fleetId: 'EX01',
+            machineType: 'Excavator',
+            reason: 'Hydraulic pressure drop',
+            score: 89,
+            createdAt: '2026-11-15T10:00:00Z',
+          },
+          {
+            id: 'brk-3',
+            fleetId: 'EX02',
+            machineType: 'Excavator',
+            reason: 'Swing bearing wear',
+            score: 82,
+            createdAt: '2026-11-14T10:00:00Z',
+          },
+        ],
+        [
+          {
+            id: 'note-1',
+            shiftType: 'day',
+            noteDate: '2026-11-16',
+            content: 'EX01 paused 45 min for hydraulic boom inspection on bench 2',
+            score: 91,
+            createdAt: '2026-11-16T09:00:00Z',
+          },
+        ]
+      );
+
+      expect(ctx.fleetSummary.EX01).toEqual({
+        fleetId: 'EX01',
+        machineType: 'Excavator',
+        breakdownCount: 2,
+        relatedShiftCount: 2,
+      });
+      expect(ctx.edges).toEqual(
+        expect.arrayContaining([
+          { sourceId: 'brk-1', targetId: 'brk-2', relation: 'SAME_FLEET', weight: 0.95 },
+          { sourceId: 'brk-1', targetId: 'brk-3', relation: 'SAME_MACHINE_TYPE', weight: 0.65 },
+          {
+            sourceId: 'brk-1',
+            targetId: 'note-1',
+            relation: 'CORRELATED_SHIFT_DELAY',
+            weight: 0.85,
+          },
+        ])
+      );
+    });
+
+    it('retrieves breakdown and shift intelligence in parallel via searchOperationalGraphRag', async () => {
+      mockRpc
+        .mockResolvedValueOnce({
+          data: [
+            {
+              id: 'brk-rag-1',
+              content: 'Fleet: DT05 | Dump Truck | Brake overheating',
+              combined_score: 0.9,
+              created_at: '2026-11-16T07:00:00Z',
+              metadata: { fleet_id: 'DT05', machine_type: 'Dump Truck' },
+            },
+          ],
+          error: null,
+        })
+        .mockResolvedValueOnce({
+          data: [
+            {
+              id: 'note-rag-1',
+              content: 'DT05 ramp haulage delay 30 min due to brake check',
+              combined_score: 0.87,
+              created_at: '2026-11-16T08:00:00Z',
+              metadata: { shift_type: 'day', note_date: '2026-11-16' },
+            },
+          ],
+          error: null,
+        });
+
+      const ctx = await searchOperationalGraphRag('DT05 brake', 'user-1', 3);
+      expect(mockRpc).toHaveBeenCalledTimes(2);
+      expect(ctx.seedBreakdowns).toHaveLength(1);
+      expect(ctx.relatedShiftNotes).toHaveLength(1);
+      expect(ctx.edges).toHaveLength(1);
+      expect(ctx.edges[0]?.relation).toBe('CORRELATED_SHIFT_DELAY');
     });
   });
 });

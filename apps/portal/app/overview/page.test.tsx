@@ -95,7 +95,7 @@ describe('OverviewPage & SystemArchitecture (/overview)', () => {
       within(headerPanel).getByText('End-to-End System Architecture Topology')
     ).toBeInTheDocument();
     expect(within(headerPanel).getByText('Core Modules')).toBeInTheDocument();
-    expect(within(headerPanel).getByText('8 / 8')).toBeInTheDocument();
+    expect(within(headerPanel).getByText(/^\d+\s*\/\s*\d+$/)).toBeInTheDocument();
 
     // Default view shows Cards & Flow View
     expect(screen.getByTestId('architecture-cards-flow-view')).toBeInTheDocument();

@@ -1,0 +1,15 @@
+---
+description: Light-mode invariants — no dark classes, no raw hex/OKLCH tokens only
+alwaysApply: true
+---
+
+# Light Mode Only
+
+Enforced invariants (from `AGENTS.md`, Section 1):
+
+1. **Canvas:** `#f3f4f6` (`data-theme="light"`)
+2. **Tokens:** Semantic OKLCH variables from `@repo/theme/src/tokens/` only
+3. **No `dark:` utilities** anywhere in the codebase
+4. **No raw hex or RGB values** — use CSS variable references (`var(--*)`)
+
+These are enforced by `pnpm audit:tokens` and Stylelint (`stylelint.config.mjs`).

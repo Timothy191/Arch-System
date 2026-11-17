@@ -1,6 +1,7 @@
 ---
 description: Agent Intercom, Whiteboard, and File Claim Coordination Protocol
-globs: ['**/*']
+paths:
+  - '**/*'
 alwaysApply: true
 ---
 

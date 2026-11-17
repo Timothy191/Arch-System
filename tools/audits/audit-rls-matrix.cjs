@@ -38,6 +38,14 @@ const RE_ENABLE_RLS =
   /ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:[\w]+\.)?([\w]+)\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/gi;
 const RE_POLICY =
   /CREATE\s+POLICY\s+("?[\w]+"?)\s+ON\s+(?:[\w]+\.)?([\w]+)\s*(?:AS\s+[\w]+\s*)?(?:FOR\s+(SELECT|INSERT|UPDATE|DELETE|ALL))?([\s\S]*?);/gi;
+const RE_DROP_POLICY =
+  /DROP\s+POLICY(?:\s+IF\s+EXISTS)?\s+("?[\w]+"?)\s+ON\s+(?:[\w]+\.)?([\w]+)/gi;
+const RE_CREATE_INDEX =
+  /CREATE\s+(?:UNIQUE\s+)?INDEX(?:\s+CONCURRENTLY)?(?:\s+IF\s+NOT\s+EXISTS)?\s+[\w"]+\s+ON\s+(?:[\w]+\.)?([\w]+)\b/gi;
+const MODERN_INITPLAN_MIN_MIGRATION = 210;
+
+const activePolicies = new Map();
+const indexedTables = new Set();
 
 // Step 1: Collect Tables
 migrationFiles.forEach((file) => {
@@ -64,7 +72,7 @@ migrationFiles.forEach((file) => {
   }
 });
 
-// Step 2: Track RLS Enablement
+// Step 2: Track RLS Enablement & Secondary Indexes
 migrationFiles.forEach((file) => {
   const sql = stripComments(fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8'));
   let match;
@@ -75,17 +83,37 @@ migrationFiles.forEach((file) => {
       tables.get(name).rlsEnabled = true;
     }
   }
+  RE_CREATE_INDEX.lastIndex = 0;
+  while ((match = RE_CREATE_INDEX.exec(sql)) !== null) {
+    indexedTables.add(match[1].toLowerCase());
+  }
 });
 
-// Step 3: Track Policies
+// Step 3: Track Policies & Active Policy Bodies
 migrationFiles.forEach((file) => {
   const sql = stripComments(fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8'));
   let match;
+  RE_DROP_POLICY.lastIndex = 0;
+  while ((match = RE_DROP_POLICY.exec(sql)) !== null) {
+    const policyName = match[1].replace(/"/g, '');
+    const tableName = match[2].toLowerCase();
+    activePolicies.delete(`${tableName}:${policyName}`);
+  }
+
   RE_POLICY.lastIndex = 0;
   while ((match = RE_POLICY.exec(sql)) !== null) {
     const policyName = match[1].replace(/"/g, '');
     const tableName = match[2].toLowerCase();
     const operation = (match[3] || 'ALL').toUpperCase();
+    const body = match[4] || '';
+
+    activePolicies.set(`${tableName}:${policyName}`, {
+      file,
+      tableName,
+      policyName,
+      operation,
+      body,
+    });
 
     if (tables.has(tableName)) {
       const tableRecord = tables.get(tableName);
@@ -95,6 +123,28 @@ migrationFiles.forEach((file) => {
     }
   }
 });
+
+const modernUnwrappedPolicies = [];
+let legacyUnwrappedCount = 0;
+let initPlanWrappedCount = 0;
+
+for (const policy of activePolicies.values()) {
+  if (/\(\s*SELECT\s+auth\.(uid|jwt)\s*\(\s*\)/i.test(policy.body)) {
+    initPlanWrappedCount++;
+  }
+  const withoutWrappedAuth = policy.body.replace(
+    /\(\s*SELECT\s+auth\.(uid|jwt)\s*\(\s*\)[^)]*\)/gi,
+    ''
+  );
+  if (/\bauth\.(uid|jwt)\s*\(\s*\)/i.test(withoutWrappedAuth)) {
+    const migrationNum = Number.parseInt(policy.file.slice(0, 3), 10);
+    if (!Number.isNaN(migrationNum) && migrationNum >= MODERN_INITPLAN_MIN_MIGRATION) {
+      modernUnwrappedPolicies.push(policy);
+    } else {
+      legacyUnwrappedCount++;
+    }
+  }
+}
 
 let missingRlsCount = 0;
 const totalTables = tables.size;
@@ -120,6 +170,8 @@ for (const [name, data] of tables.entries()) {
   });
 }
 
+const indexedTablesCount = Array.from(tables.keys()).filter((t) => indexedTables.has(t)).length;
+
 console.log('==================================================');
 console.log('📊 4-Operation RLS Coverage Matrix Results');
 console.log('==================================================');
@@ -129,6 +181,13 @@ console.log(
 );
 console.log(
   `Tables with Active Operations: ${matrixRows.filter((r) => r.sel === '🟢' || r.ins === '🟢').length}`
+);
+console.log(`Tables with Secondary Indexes: ${indexedTablesCount}/${totalTables}`);
+console.log(
+  `Active Policies InitPlan-Wrapped: ${initPlanWrappedCount}/${activePolicies.size} (Legacy unwrapped: ${legacyUnwrappedCount})`
+);
+console.log(
+  `Modern Migrations (>=${MODERN_INITPLAN_MIN_MIGRATION}) Unwrapped auth.uid()/auth.jwt() Violations: ${modernUnwrappedPolicies.length} (0 Target)`
 );
 
 if (process.argv.includes('--write')) {
@@ -140,7 +199,10 @@ Generated on ${new Date().toISOString()}
 ## Summary Metrics
 - **Total Tables**: ${totalTables}
 - **RLS Enabled**: ${totalTables - missingRlsCount}/${totalTables} (${(((totalTables - missingRlsCount) / totalTables) * 100).toFixed(1)}%)
-- **Critical Security Violations**: ${missingRlsCount}
+- **Tables with Secondary Indexes**: ${indexedTablesCount}/${totalTables}
+- **InitPlan Wrapped Policies**: ${initPlanWrappedCount}/${activePolicies.size} (Legacy unwrapped: ${legacyUnwrappedCount})
+- **Modern Migrations (>=${MODERN_INITPLAN_MIN_MIGRATION}) Unwrapped Violations**: ${modernUnwrappedPolicies.length}
+- **Critical Security Violations**: ${missingRlsCount + modernUnwrappedPolicies.length}
 
 ## 4-Operation Policy Coverage Matrix
 | Table Name | RLS Status | SELECT | INSERT | UPDATE | DELETE | Source Migration |
@@ -154,10 +216,17 @@ ${matrixRows.map((r) => `| \`${r.name}\` | ${r.rls} | ${r.sel} | ${r.ins} | ${r.
   console.log(`📄 Matrix report written to: documentation/03-audit-reports/rls-matrix-report.md`);
 }
 
-if (missingRlsCount > 0) {
-  console.error(`❌ Audit Failed: ${missingRlsCount} table(s) missing RLS.`);
+if (missingRlsCount > 0 || modernUnwrappedPolicies.length > 0) {
+  if (missingRlsCount > 0) {
+    console.error(`❌ Audit Failed: ${missingRlsCount} table(s) missing RLS.`);
+  }
+  for (const violation of modernUnwrappedPolicies) {
+    console.error(
+      `❌ InitPlan Violation in ${violation.file}: policy "${violation.policyName}" on ${violation.tableName} uses unwrapped auth.uid()/auth.jwt(); wrap in (SELECT auth.uid()).`
+    );
+  }
   process.exit(1);
 } else {
-  console.log('✅ RLS Coverage Matrix Audit: 100.0% PASS\n');
+  console.log('✅ RLS Coverage & InitPlan Matrix Audit: 100.0% PASS\n');
   process.exit(0);
 }

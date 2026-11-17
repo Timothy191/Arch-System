@@ -30,6 +30,13 @@
 
 # Agent and local environments
 /.agents/
+/.agentsroom/
+/.cline/
+/.devcontainer/
+/.handoff/
+/.vibemon/
+/vibemon.sh
+/graphify-out/
 /.memory_base/
 /.palabre/
 /.gpt-researcher/

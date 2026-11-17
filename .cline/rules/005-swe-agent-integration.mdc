@@ -1,0 +1,37 @@
+---
+description: SWE agent integration — dispatch, verification, and A2A bus coordination rules
+alwaysApply: true
+---
+
+# SWE Agent Integration
+
+When a task requires end-to-end software engineering (plan → implement → verify → ship), route through the `swe-agent`:
+
+## Dispatch Pattern
+
+1. Read `.agents/agents/swe-agent/agent.md` for the full agent directive
+2. Read `.agents/a2a/registry/swe-agent.json` for the A2A registry card
+3. Use `swe-plan-and-decompose` skill from skills-mcp to break down the goal
+4. Use `swe-implement-and-verify` skill to implement each subtask
+5. Emit events to `.agents/a2a/bus/event-log.jsonl` for traceability
+
+## Maker-Checker Verification
+
+Every SWE agent change must pass through `security-quality-gatekeeper` before completion:
+- SWE agent emits `DIFF_PRODUCED` event to the A2A bus
+- `security-quality-gatekeeper` audits the diff and returns `A2AReviewVerdict`
+- Verdict must be `PASS` with score >= 90 before `TASK_COMPLETED` is emitted
+
+## Verification Gates
+
+Before any SWE task is considered complete:
+- `pnpm type-check` — zero TypeScript errors
+- `pnpm lint` — Biome clean
+- `pnpm test` — targeted tests pass
+- `pnpm policy:check` — layering boundaries intact
+- `pnpm token:budget-check` — within 40KB root instruction ceiling
+
+## Path Constraints
+
+SWE agent scope: `apps/portal/**`, `packages/**`, `libs/**`, `docs/specs/**`, `.agents/a2a/**`
+Excluded: `node_modules/**`, `.git/**`, `dist/**`, `.next/**`, `.turbo/**`, `.env*`, generated files

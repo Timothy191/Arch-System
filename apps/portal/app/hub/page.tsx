@@ -194,6 +194,7 @@ export default async function HubPage() {
   const HUB_MODULE_ORDER = [
     'admin',
     'access-control',
+    'cloudflare',
     'production',
     'drilling',
     'plant-processing',

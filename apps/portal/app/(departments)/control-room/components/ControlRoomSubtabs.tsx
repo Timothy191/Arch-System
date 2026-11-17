@@ -1,4 +1,4 @@
-import { BarChart3, CheckSquare, ClipboardCheck, Shield } from 'lucide-react';
+import { BarChart3, CheckSquare, ClipboardCheck, Cloud } from 'lucide-react';
 import Link from 'next/link';
 
 export const CONTROL_ROOM_ACTIVE_SUBTAB_CLASS =
@@ -72,7 +72,7 @@ export function ControlRoomSubtabs({
             : CONTROL_ROOM_INACTIVE_SUBTAB_CLASS
         }
       >
-        <Shield className="h-3.5 w-3.5" />
+        <Cloud className="h-3.5 w-3.5" />
         <span>Cloudflare Edge</span>
       </Link>
     </div>

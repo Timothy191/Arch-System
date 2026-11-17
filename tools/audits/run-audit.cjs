@@ -416,4 +416,57 @@ All audit logs are stored chronologically in \`documentation/03-audit-reports/\`
   }
 }
 
+// 7. Run Dependency Tool Integrations (scancode-toolkit, ort, dependency-cruiser, ratchet)
+console.log('\n[9] Running Dependency Tool Integrations...');
+let toolsExitCode = 0;
+try {
+  // scancode-toolkit: License compliance & SBOM
+  console.log('\n[9] Running scancode-toolkit (license compliance & SBOM)...');
+  execSync('bash tools/scripts/scanode-cdx.sh', {
+    cwd: ROOT,
+    timeout: 120000,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  });
+  console.log('scancode-toolkit scan completed');
+
+  // ort-review: Comprehensive OSS review
+  console.log('\n[9] Running ort-review (comprehensive review)...');
+  execSync('bash tools/scripts/ort-review.sh', {
+    cwd: ROOT,
+    timeout: 120000,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  });
+  console.log('ort review completed');
+
+  // dependency-cruiser: Circular deps & graph
+  console.log('\n[9] Running dependency-cruiser (circular deps & graph)...');
+  execSync('bash tools/scripts/dep-cruise-graph.sh', {
+    cwd: ROOT,
+    timeout: 120000,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  });
+  console.log('dependency-cruiser analysis completed');
+
+  // ratchet: Dependency policies
+  console.log('\n[9] Running ratchet (dependency policies)...');
+  execSync('bash tools/scripts/ratchet-policy.sh', {
+    cwd: ROOT,
+    timeout: 120000,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  });
+  console.log('ratchet policy check completed');
+} catch (err) {
+  toolsExitCode = 1;
+  console.warn('\n[9]⚠️ One or more dependency tool integrations exited with errors.');
+  console.warn(err.message || String(err));
+}
+
+if (toolsExitCode !== 0) {
+  logger.warn('Some dependency tool integrations did not exit cleanly - check reports above');
+}
+
 main();

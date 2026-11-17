@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Auto-sync graphify knowledge graph incrementally after merge without blocking git.
+
+[ "${CI:-}" = "true" ] && exit 0
+
+GRAPHIFY_BIN=""
+if command -v graphify >/dev/null 2>&1; then
+  GRAPHIFY_BIN="$(command -v graphify)"
+elif [ -x "/home/tim/.local/bin/graphify" ]; then
+  GRAPHIFY_BIN="/home/tim/.local/bin/graphify"
+else
+  exit 0
+fi
+
+(nohup "$GRAPHIFY_BIN" update . >/dev/null 2>&1 &)
+exit 0

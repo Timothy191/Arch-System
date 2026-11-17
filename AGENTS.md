@@ -4,7 +4,7 @@
 
 **Arch-System** (Plantcor / Arch OS) is a production industrial mining-operations portal serving multi-departmental workspaces (control room, drilling, production, plant processing, plant inventory, engineering, availability and utilization, access control, office, executive hub, system overview, and database administration) with live SCADA telemetry, shift closeout workflows, and audit-logged RBAC.
 
-Built as a **Next.js 16 App Router + React 19** monorepo (`pnpm@9.15.9`, Turborepo 2.x, TypeScript 5.9, Node.js >=24), it deploys to Vercel (`arch-system`) and connects to cloud-hosted **Supabase** (PostgreSQL 17, Auth, Realtime CDC) and **Redis** (local TCP in development; serverless REST compatible in production).
+Built as a **Next.js 16 App Router + React 19** monorepo (`pnpm@9.15.9`, Turborepo 2.x, TypeScript 5.9.3, Node.js >=24), it deploys to Vercel (`arch-system`) and connects to cloud-hosted **Supabase** (PostgreSQL 17, Auth, Realtime CDC) and **Redis** (local TCP in development; serverless REST compatible in production).
 
 **Repository topology**: `/home/tim/Fork/Arch-System` is a standalone Git repository (`github.com/Timothy191/Arch-System`). When checked out inside `/home/tim/Fork`, the parent directory acts as a zero-dependency federated wrapper (`pnpm install` is blocked in `Fork/`) alongside standalone MCP servers (`skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`, `langgraph-mcp`). Run all package, git, and verification commands inside `Arch-System/` unless editing a sibling MCP server.
 
@@ -153,7 +153,7 @@ pnpm quality                   # Full release-grade verification suite
 - **React components**: `PascalCase.tsx` (`GlassCard.tsx`, `PlantDelaysAnalyticsSection.tsx`).
 - **Hooks**: `useCamelCase.ts` (`useSupabaseRealtime.ts`, `useThrottledDebounce.ts`).
 - **Contract schemas & types**: `kebab-case.schema.ts` (`shift-closeout.schema.ts`), `kebab-case.types.ts`, utilities in `kebab-case.ts`.
-- **SQL migrations**: 3-digit zero-padded `NNN_snake_case.sql` (`218_add_head_office_and_ensure_sites.sql`) — never rename or renumber applied files.
+- **SQL migrations**: 3-digit zero-padded `NNN_snake_case.sql` (`222_add_trace_and_request_ids_to_system_logs.sql`) — never rename or renumber applied files.
 - **Commits**: Conventional Commits (`<type>(<scope>): <imperative lower-case summary>`), enforced by `commitlint`.
 
 ### Error handling
@@ -275,13 +275,14 @@ Always acquire external clients through factory functions to preserve pooling an
   - **Rust `1.85.0`** (`tools/swarms-orchestrator/rust-toolchain.toml`, `cargo ... --locked`).
   - **Python `>=3.10`** (`packages/eval/pyproject.toml`, Poetry or `uv` for DeepEval/pytest; Ruff 100-col lint).
   - **Cloud Supabase + Local Redis**: Target cloud-hosted Supabase exclusively (do not start a local Supabase container stack); run local Redis via `pnpm redis:up` (`infra/docker/compose.redis.yml`).
-  - **Vercel**: Single canonical project `arch-system` (`vercel.json`; deploy via `pnpm deploy:vercel:prod`).
+  - **Vercel**: Single canonical project `arch-system` (`vercel.json`; deploy via `pnpm deploy:vercel:prod` after `vercel link` to the correct account). Git auto-deploys from `main` on the account owning `arch-system-kappap.vercel.app`; the `server-management1` team's duplicate projects were deleted — do not relink them.
 - **Code-Intelligence substrate**: Prefer `codemap` and `ast-grep` for structural exploration. The CodeGraph SQLite index at `/home/tim/local.db` (baseline in `.agents/memory_base/index-snapshot.json`) is enforced by Gate 28 (`pnpm audit:code-intelligence`, requiring >= 50% ranged entities and exact baseline parity). Never hand-edit `local.db`; rebuild via `pnpm ci:reindex && pnpm ci:snapshot`.
 - **Hooks, MCP, & budgets**:
   - Husky `pre-commit` runs `lint-staged`, skill checks, `validate:json`, and `check-enforcement-integrity.cjs` (`--no-verify` is blocked by `commit-guard.sh`). `pre-push` executes `agent-verify.sh` unless `.ci-local/agent-verify-evidence.json` recorded all 28 gates passing within 15 minutes (`FORCE_AGENT_VERIFY=1` bypasses cache).
   - `.mcp.json` registers `supabase`, `codemap`, `chrome-devtools`, `context7`, and `frontend-checklist` (validated by `pnpm mcp:verify`).
   - Environment files: `Arch-System/.env`, `apps/portal/.env` (validated in `libs/shared/utils/src/env.ts`), and `.env.tools`. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_KEY`, `SUPABASE_JWT_SECRET`, and `DATABASE*_URL` strictly server-only.
   - `pnpm token:budget-check` enforces a `40,000`-byte inode-deduplicated ceiling across root instruction files (`AGENTS.md`, `CLAUDE.md`, `.claude.local.md`, `GEMINI.md`, `.cursorrules`).
+  - **VibeMon Tracking (Mandatory)**: All agents must keep VibeMon updated via `./vibemon.sh update` (`pnpm vibemon:update`) and emit task/session telemetry via `./vibemon.sh` (`pnpm vibemon:track <event> <agent>`, verified via `pnpm vibemon:status`).
 
 ---
 
@@ -289,11 +290,11 @@ Always acquire external clients through factory functions to preserve pooling an
 
 ### Test frameworks & suites
 
-- **Unit & Component (`*.test.ts(x)`)**: **Jest 30 + `@swc/jest`** across `apps/portal` and 14 `packages/*` / `libs/*` workspaces (no Vitest). `apps/portal/jest.config.cjs` defaults to `jsdom` with `apps/portal/setupTests.ts` (in-memory mocks for `next/cache`, `@repo/redis`, `@repo/agents`, `next/dynamic`, and DOM observers). Server Action and Route Handler tests opt into Node via `/** @jest-environment node */` comments.
+- **Unit & Component (`*.test.ts(x)`)**: **Jest 30.2 + `@swc/jest`** across `apps/portal` and 14 `packages/*` / `libs/*` workspaces (no Vitest). `apps/portal/jest.config.cjs` defaults to `jsdom` with `apps/portal/setupTests.ts` (in-memory mocks for `next/cache`, `@repo/redis`, `@repo/agents`, `next/dynamic`, and DOM observers). Server Action and Route Handler tests opt into Node via `/** @jest-environment node */` comments.
 - **Database (`@repo/database`)**: Runs Node `node:test` and `.mjs` security/rollback scripts (`pnpm --filter @repo/database test`; `test:migration-replay` validates against a disposable `postgres:17-alpine` container).
 - **Redis Integration (`*.integration.test.ts`)**: Live TCP suites in `packages/redis/tests/integration/` and `apps/portal/test/integration/` (drops `setupTests.ts` mocks), gated by `REDIS_INTEGRATION=1` (`pnpm test:redis:integration`).
 - **Python AI Eval (`@repo/eval`)**: `pytest` + `deepeval` in `packages/eval/` (silently skips under `pnpm test` if neither `poetry` nor `uv` is installed; CI enforces `poetry run deepeval test run tests/`).
-- **E2E & Visual (`e2e/*.spec.ts`)**: **Playwright** (`e2e/playwright.config.ts`) running `setup` -> `chromium`, `mobile-chrome`, `tablet-chrome` with cached auth in `e2e/.auth/user.json` (optional `PLAYWRIGHT_WEBKIT=1`). Automatically starts `portal` on `:3000` unless `BASE_URL` is set; runs headed locally (`CI=1 pnpm test:e2e` for headless). Visual regression (`pnpm test:e2e:visual`) uses Linux Chromium snapshots with `maxDiffPixelRatio: 0.02`. k6 load tests live in `e2e/load/`.
+- **E2E & Visual (`e2e/*.spec.ts`)**: **Playwright 1.65** (`e2e/playwright.config.ts`) running `setup` -> `chromium`, `mobile-chrome`, `tablet-chrome` with cached auth in `e2e/.auth/user.json` (optional `PLAYWRIGHT_WEBKIT=1`). Automatically starts `portal` on `:3000` unless `BASE_URL` is set; runs headed locally (`CI=1 pnpm test:e2e` for headless). Visual regression (`pnpm test:e2e:visual`) uses Linux Chromium snapshots with `maxDiffPixelRatio: 0.02`. k6 load tests live in `e2e/load/`.
 - **Accessibility**: `@repo/ui` has no Jest suite; run `pnpm --filter @repo/ui storybook` (`:6006`) then `pnpm test:a11y` (`packages/ui/.storybook/test-runner.cjs` + axe, which must remain `.cjs` on Node 24+). Complemented by `e2e/accessibility.spec.ts` and `e2e/visual/accessibility.spec.ts`.
 
 ### Coverage expectations, conventions, & gotchas

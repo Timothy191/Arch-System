@@ -8,7 +8,7 @@ groups:
           severity: critical
         annotations:
           summary: High HTTP Error Rate on Portal
-          description: "{{ $value | humanizePercentage }} of requests are failing."
+          description: '{{ $value | humanizePercentage }} of requests are failing.'
 
       - alert: HighLatency
         expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
@@ -17,7 +17,7 @@ groups:
           severity: warning
         annotations:
           summary: High P95 Latency
-          description: "P95 latency is over 1 second (current: {{ $value }}s)."
+          description: 'P95 latency is over 1 second (current: {{ $value }}s).'
 
       - alert: DatabaseConnectionIssues
         expr: up{job="database"} == 0
@@ -26,4 +26,31 @@ groups:
           severity: critical
         annotations:
           summary: Database Down
-          description: "Prometheus cannot scrape database metrics."
+          description: 'Prometheus cannot scrape database metrics.'
+
+      - alert: SCADAStreamAnomaly
+        expr: zscore(scada_machine_telemetry_latency_seconds[5m]) > 3
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: SCADA Stream Latency Anomaly
+          description: 'Machine telemetry latency exceeded 3 standard deviations (current: {{ $value }}s).'
+
+      - alert: RedisConnectivityDrop
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Redis L2 Cache Cluster Down
+          description: 'Redis L2 cache cluster is unreachable; cache functionality impaired.'
+
+      - alert: CacheEffectivenessDegraded
+        expr: (portal_cache_hits_total{source="l2"} / max by (source) (portal_cache_hits_total)) < 0.7
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: L2 Cache Hit Rate Below 70%
+          description: 'L2 Redis cache hit rate has dropped below 70% threshold. Consider reviewing cache TTL or data volume.'

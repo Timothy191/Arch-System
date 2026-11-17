@@ -741,3 +741,5 @@ domcontentloaded
 enotdir
 multigraph
 ipcountry
+scancode
+scanode

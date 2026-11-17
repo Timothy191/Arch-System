@@ -28,4 +28,8 @@ case "$file" in
     ./node_modules/.bin/cspell "$file" --config config/tools/cspell.json --no-progress --gitignore --no-must-find-files >/dev/null 2>&1 || true
     ;;
 esac
+
+if [ -x "$HOME/.vibemon/notify.sh" ]; then
+  printf '%s' "$payload" | bash "$HOME/.vibemon/notify.sh" activity qoder >/dev/null 2>&1 || true
+fi
 exit 0

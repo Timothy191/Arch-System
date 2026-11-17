@@ -1,0 +1,46 @@
+{
+  "mcp": {
+    "enableAllProjectMcpServers": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".cline/hooks/pre-task-check.sh",
+            "name": "cline-pre-task-check",
+            "statusMessage": "Running Cline pre-task verification",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": ".cline/hooks/swe-pre-flight-check.sh",
+            "name": "cline-swe-pre-flight",
+            "statusMessage": "Running SWE agent pre-flight check",
+            "timeout": 15,
+            "if": "Edit|Write(.agents/**|apps/portal/**|packages/**|libs/**|docs/specs/**)"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".cline/hooks/post-task-tracer.sh",
+            "name": "cline-post-task-tracer",
+            "statusMessage": "Recording Cline task in AGENT_TRACER.md",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": ["Bash(pnpm *)", "Bash(node *)", "Bash(git *)", "Bash(python3 *)"]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "compaction-462ff991",
+  "timestamp": "2026-11-17T07:55:10.607Z",
+  "taskTag": "compaction-standard-462ff991",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/infra/observability/grafana-dashboards/control-room-dashboard.json\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/tools.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/engineering/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/drilling/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/drilling/drilling-operations/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/history/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machines/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/observability/tracing.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/proxy.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/logging/system-logs.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/errors/error-logger.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/instrumentation.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/logs/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/SystemLogsTab.tsx\"",
+    "\"/home/tim/Fork/Arch-System/infra/docker/observability/otel-collector-config.yaml\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (419 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 354337,
+    "cacheHitRatio": 0.9171,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

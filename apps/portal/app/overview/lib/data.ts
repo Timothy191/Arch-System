@@ -422,6 +422,32 @@ export const DEPARTMENTS = [
     ],
     roles: ['admin', 'engineer', 'super_admin'],
   },
+
+  {
+    id: 'cloudflare',
+    name: 'Cloudflare',
+    slug: 'cloudflare',
+    description: 'Cloudflare Zero Trust, Tunnels, Workers, Queues, Turnstile, AI Gateway, R2 & WAF',
+    color: '#f472b6',
+    routes: [
+      {
+        path: '/cloudflare',
+        name: 'Infrastructure',
+        description: 'Cloudflare infrastructure & edge security centre',
+      },
+      {
+        path: '/cloudflare/turnstile',
+        name: 'Turnstile',
+        description: 'Turnstile token verification & configuration',
+      },
+      {
+        path: '/cloudflare/summary',
+        name: 'Summary',
+        description: 'Aggregate Cloudflare service status & metrics',
+      },
+    ],
+    roles: ['admin', 'super_admin', 'executive'],
+  },
 ];
 
 // Navigation graph nodes and edges for XYFlow

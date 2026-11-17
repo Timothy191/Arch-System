@@ -1,207 +1,412 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Arch-Systems — Cloudflare Tunnel & Edge CDN Deployment Orchestrator
-# ─────────────────────────────────────────────────────────────────────────────
-# Exposes Arch-System Next.js Portal and SCADA endpoints securely over your
-# custom domain via Cloudflare Edge CDN & Cloudflare Tunnels (cloudflared).
+# ==============================================================================
+# Arch-System — Cloudflare Tunnel Deployment Orchestrator (SAFE)
+# ==============================================================================
+# Safe replacement for the previous deploy-cloudflare.sh which performed unsafe
+# SIGKILL-on-port termination and hard Docker/Supabase stack assumptions.
 #
-# Uses: scripts/lib/common.sh
-# ─────────────────────────────────────────────────────────────────────────────
+# This script:
+#   - NEVER kills arbitrary processes by port number without explicit
+#     operator confirmation.
+#   - NEVER forces kill -9 unless the operator explicitly opts in.
+#   - Does NOT assume a local Supabase/Docker stack is required.
+#   - Supports separate dev (TryCloudflare) and production (named tunnel)
+#     templates; production tunnel is NEVER started automatically.
+#   - Provides subcommands: validate-config, dev-start, dev-stop, status,
+#     health-check, shutdown, tunnel-config-example.
+#
+# All Cloudflare credentials (tunnel ID, credentials file path, domain hostnames)
+# are supplied via environment variables, never committed inline.
+#
+# Environment variables (all optional, documented defaults):
+#   CLOUDFLARE_TUNNEL_ID        Named tunnel ID for production mode
+#   CLOUDFLARE_TUNNEL_CREDS     Path to tunnel credentials JSON file
+#   CLOUDFLARE_DEV_DOMAIN       Hostname for dev tunnel (optional)
+#   CLOUDFLARE_PROD_DOMAIN      Hostname for production tunnel (optional)
+#   CLOUDFLARE_PORT             Local origin port (default: 3000)
+#   CLOUDFLARE_RUN_DIR          PID/log directory (default: ./run)
+#   CLOUDFLARE_MODE             dev | prod (default: dev)
+#   CLOUDFLARE_ALLOW_PORT_KILL  Set to "1" to allow port termination (default: 0)
+# ==============================================================================
+
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
+
 LOG_LABEL="[cloudflare]"
 
-ENV_FILE="$PORTAL_DIR/.env"
-ENV_BAK="$PORTAL_DIR/.env.bak"
-PORT="${PORT:-3000}"
-TUNNEL_CONFIG="$REPO_ROOT/infra/cloudflared/production-tunnel.yml.example"
-
-# ── Cleanup Trap ─────────────────────────────────────────────────────────────
-cleanup() {
-  trap - EXIT INT TERM
-  info "Cleaning up background processes..."
-  for pidfile in .portal.pid .cloudflared.pid; do
-    if [ -f "$RUN_DIR/$pidfile" ]; then
-      local pid
-      pid=$(cat "$RUN_DIR/$pidfile" 2>/dev/null || true)
-      if [ -n "$pid" ] && pid_running "$pid"; then
-        kill -TERM "$pid" 2>/dev/null || true
-      fi
-      rm -f "$RUN_DIR/$pidfile"
-    fi
-  done
-}
-# Only register trap if executed directly and user interrupts
-trap cleanup INT TERM
-
-echo -e "\n${CYAN}┌────────────────────────────────────────────────────────────┐${NC}"
-echo -e "${CYAN}│       ARCH-SYSTEMS — CLOUDFLARE TUNNEL & EDGE ORCHESTRATOR │${NC}"
-echo -e "${CYAN}├────────────────────────────────────────────────────────────┤${NC}"
-echo -e "${CYAN}│${NC} Encrypted Cloudflare Edge CDN hosting for domain access.   ${CYAN}│${NC}"
-echo -e "${CYAN}│${NC} Connects Arch-System + Arch-Base over Cloudflare WAF.      ${CYAN}│${NC}"
-echo -e "${CYAN}└────────────────────────────────────────────────────────────┘${NC}\n"
-
-# ── Step 1: Verify Cloudflared Binary ─────────────────────────────────────
-info "Checking Cloudflare Tunnel daemon (cloudflared)..."
-if ! command -v cloudflared >/dev/null 2>&1; then
-  fatal "cloudflared is not installed on this system. Install via: pacman -S cloudflared (or yay -S cloudflared)"
-fi
-
-CF_VERSION=$(cloudflared --version 2>&1 | head -n 1)
-info "Cloudflared version: ${CYAN}${BOLD}$CF_VERSION${NC}"
-
-# ── Step 2: Choose Operation Mode ─────────────────────────────────────────
-echo -e "\n${WHITE}Choose serving mode:${NC}"
-echo -e "  [1] ${GREEN}${BOLD}Development Mode${NC} (TryCloudflare ad-hoc HTTPS tunnel: instant hot-reload)"
-echo -e "  [2] ${BLUE}${BOLD}Production Mode${NC}  (Precompiled standalone server via Production Tunnel config)"
-
-if [ -t 0 ]; then
-  read -p "Select mode [1/2] (Default: 1): " mode_choice
-  mode_choice=${mode_choice:-1}
-else
-  mode_choice="${CF_MODE:-1}"
-fi
-
-# ── Step 3: Check and Launch Database (Supabase) ──────────────────────────
-info "Checking local Supabase database..."
-if ! command -v docker >/dev/null 2>&1; then
-  fatal "Docker is required to run the local Supabase stack."
-fi
-
-if ! docker info >/dev/null 2>&1; then
-  fatal "Docker daemon is not running. Please start Docker (sudo systemctl start docker)."
-fi
-
-# Grab Supabase keys from environment
-if [ -f "$ENV_FILE" ]; then
-  anon_key=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_ANON_KEY")
-  service_key=$(get_env_var "$ENV_FILE" "SUPABASE_SERVICE_KEY")
-fi
-
-# ── Step 4: Clear Port & Launch Portal ─────────────────────────────────────
-if is_port_in_use "$PORT"; then
-  info "Freeing port $PORT..."
-  kill_port "$PORT" 9
-fi
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+PORTAL_DIR="${PORTAL_DIR:-$REPO_ROOT/apps/portal}"
+RUN_DIR="${CLOUDFLARE_RUN_DIR:-$REPO_ROOT/run}"
+PORT="${CLOUDFLARE_PORT:-3000}"
+MODE="${CLOUDFLARE_MODE:-dev}"
+TUNNEL_ID="${CLOUDFLARE_TUNNEL_ID:-}"
+TUNNEL_CREDS="${CLOUDFLARE_TUNNEL_CREDS:-}"
+DEV_DOMAIN="${CLOUDFLARE_DEV_DOMAIN:-}"
+PROD_DOMAIN="${CLOUDFLARE_PROD_DOMAIN:-}"
+ALLOW_PORT_KILL="${CLOUDFLARE_ALLOW_PORT_KILL:-0}"
 
 mkdir -p "$RUN_DIR"
 
-if [ "$mode_choice" -eq 1 ]; then
-  info "Launching in Development Mode (Hot-Reloading active)..."
-  cd "$PORTAL_DIR"
-  HOSTNAME=0.0.0.0 PORT=$PORT pnpm dev > "$RUN_DIR/portal.log" 2>&1 &
-  echo $! > "$RUN_DIR/.portal.pid"
-else
-  info "Building production standalone bundle..."
-  cd "$REPO_ROOT"
-  pnpm --filter portal build
+# ── Subcommand usage ──────────────────────────────────────────────────────────
 
-  info "Launching Production Standalone server..."
-  cd "$PORTAL_DIR"
-  HOSTNAME=0.0.0.0 PORT=$PORT node .next/standalone/apps/portal/server.js > "$RUN_DIR/portal.log" 2>&1 &
-  echo $! > "$RUN_DIR/.portal.pid"
-fi
+usage() {
+  cat <<EOF
+Usage: $0 <subcommand> [options]
 
-# ── Step 5: Start Arch-Base Web App ───────────────────────────────────────
-if [ -n "$ARCH_BASE_WEB_DIR" ] && [ -d "$ARCH_BASE_WEB_DIR" ]; then
-  if curl -fs "http://localhost:3001" > /dev/null 2>&1; then
-    info "Arch-Base web app already running on port 3001."
+Subcommands:
+  validate-config   Validate the tunnel config YAML without starting anything
+  dev-start         Start local portal + TryCloudflare dev tunnel
+  dev-stop          Stop locally started portal/dev-tunnel processes
+  status            Show status of PID files and cloudflared binary
+  health-check      Poll the local origin health endpoint
+  shutdown          Stop all processes tracked by this script
+  tunnel-config-example   Print a sanitised tunnel config example (no secrets)
+
+Environment variables (all optional):
+  CLOUDFLARE_TUNNEL_ID        Named tunnel ID for production mode
+  CLOUDFLARE_TUNNEL_CREDS     Path to tunnel credentials JSON file
+  CLOUDFLARE_DEV_DOMAIN       Hostname for dev tunnel (optional)
+  CLOUDFLARE_PROD_DOMAIN      Hostname for production tunnel (optional)
+  CLOUDFLARE_PORT             Local origin port (default: 3000)
+  CLOUDFLARE_RUN_DIR          PID/log directory (default: ./run)
+  CLOUDFLARE_MODE             dev | prod (default: dev)
+  CLOUDFLARE_ALLOW_PORT_KILL  Set to "1" to allow port termination (default: 0)
+
+Examples:
+  CLOUDFLARE_MODE=dev CLOUDFLARE_PORT=3000 $0 dev-start
+  CLOUDFLARE_MODE=prod CLOUDFLARE_TUNNEL_ID=... CLOUDFLARE_TUNNEL_CREDS=... \
+    CLOUDFLARE_ALLOW_PORT_KILL=1 $0 validate-config
+EOF
+  exit 0
+}
+
+# ── Safety guards ─────────────────────────────────────────────────────────────
+
+# Safe port check using ss (preferred) or lsof fallback, with no automatic kill.
+is_port_in_use_safe() {
+  local port="$1"
+  if command -v ss >/dev/null 2>&1; then
+    ss -ltn "sport = :${port}" | grep -q 'LISTEN'
+  elif command -v lsof >/dev/null 2>&1; then
+    lsof -ti:"$port" >/dev/null 2>&1
   else
-    info "Starting Arch-Base web app on port 3001..."
-    cd "$ARCH_BASE_DIR"
-    pnpm --filter web dev > "$ARCH_BASE_DIR/.arch-base-web.log" 2>&1 &
-    echo $! > "$ARCH_BASE_DIR/.arch-base-web.pid"
-    cd "$REPO_ROOT"
-    for i in {1..30}; do
-      if curl -fs "http://localhost:3001" > /dev/null 2>&1; then
-        info "Arch-Base web app is healthy"
-        break
+    warn "Neither ss nor lsof available; cannot detect port usage"
+    return 1
+  fi
+}
+
+# Report PIDs on a port without killing them.
+list_port_pids() {
+  local port="$1"
+  if command -v ss >/dev/null 2>&1; then
+    ss -ltn "sport = :${port}" 2>/dev/null | awk 'NR>1{print $NF}' | tr -d '"'
+  elif command -v lsof >/dev/null 2>&1; then
+    lsof -ti:"$port" 2>/dev/null | head -n1 || true
+  fi
+}
+
+confirm_port_kill() {
+  local port="$1"
+  local pids
+  pids=$(list_port_pids "$port" || true)
+  if [ -z "$pids" ]; then
+    info "Port $PORT is not in use."
+    return 0
+  fi
+
+  warn "Port $PORT is in use by PID(s): $pids"
+  info "Refusing to terminate automatically (safe default)."
+
+  if [ "$ALLOW_PORT_KILL" != "1" ]; then
+    fatal "Port $PORT is occupied. Set CLOUDFLARE_ALLOW_PORT_KILL=1 to confirm \
+termination, or stop the process manually."
+  fi
+
+  warn "CLOUDFLARE_ALLOW_PORT_KILL=1 set — operator confirmed port termination."
+  return 0
+}
+
+kill_pid_graceful() {
+  local pidfile="$1" name="${2:-service}"
+  if [ -f "$pidfile" ]; then
+    local pid
+    pid=$(cat "$pidfile" 2>/dev/null || true)
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      info "Stopping $name (PID: $pid)..."
+      kill -TERM "$pid" 2>/dev/null || true
+      local i
+      for ((i = 0; i < 10; i++)); do
+        kill -0 "$pid" 2>/dev/null || break
+        sleep 1
+      done
+      if kill -0 "$pid" 2>/dev/null; then
+        warn "$name did not stop gracefully after 10s; leaving running."
+        warn "Manual intervention required: kill $pid"
+      else
+        log "$name stopped cleanly."
       fi
-      sleep 2
-    done
+    fi
+    rm -f "$pidfile"
   fi
-fi
+}
 
-# ── Step 6: Health Check ──────────────────────────────────────────────────
-info "Waiting for portal to become healthy..."
-health_ok=false
-for i in {1..30}; do
-  if curl -fs "http://127.0.0.1:$PORT/api/health" >/dev/null 2>&1; then
-    health_ok=true
-    break
+# ── cloudflared binary check ──────────────────────────────────────────────────
+
+require_cloudflared() {
+  if ! command -v cloudflared >/dev/null 2>&1; then
+    fatal "cloudflared is not installed. Install via your package manager."
   fi
-  sleep 2
-done
+  info "Cloudflared: $(cloudflared --version 2>&1 | head -n 1)"
+}
 
-if [ "$health_ok" = false ]; then
-  warn "Portal started, but /api/health did not return 200 within 60s. Check: tail -n 20 $RUN_DIR/portal.log"
-else
-  log "Portal health check verified (200 OK)."
-fi
+# ── Tunnel config generation (sanitised, env-var driven) ──────────────────────
 
-# ── Step 7: Configure Cloudflare Tunnel (HTTPS) ───────────────────────────
-info "Configuring Cloudflare Tunnel reverse proxy..."
+generate_tunnel_config() {
+  local output_path="${1:-/dev/stdout}"
 
-if [ "$mode_choice" -eq 1 ]; then
-  info "Starting TryCloudflare ad-hoc tunnel for http://localhost:$PORT..."
-  cloudflared tunnel --url "http://localhost:$PORT" --no-autoupdate > "$RUN_DIR/cloudflared.log" 2>&1 &
-  echo $! > "$RUN_DIR/.cloudflared.pid"
+  cat > "$output_path" <<YAML
+# Auto-generated by scripts/deploy-cloudflare.sh — DO NOT COMMIT SECRETS
+# Populate CLOUDFLARE_TUNNEL_ID and CLOUDFLARE_TUNNEL_CREDS before production use.
+tunnel: ${TUNNEL_ID:-REPLACE_ME_TUNNEL_ID}
+credentials-file: ${TUNNEL_CREDS:-/etc/cloudflared/creds/REPLACE_ME.json}
 
-  CF_URL=""
-  for i in {1..15}; do
-    CF_URL=$(grep -o 'https://[-0-9a-z]*\.trycloudflare\.com' "$RUN_DIR/cloudflared.log" 2>/dev/null | head -n 1 || true)
-    if [ -n "$CF_URL" ]; then break; fi
+originRequest:
+  connectTimeout: 30s
+  keepAliveTimeout: 90s
+  noTLSVerify: false
+
+ingress:
+  # Primary Next.js Portal origin (localhost only — never bind to 0.0.0.0)
+  - hostname: ${PROD_DOMAIN:-REPLACE_ME_DOMAIN}
+    service: http://127.0.0.1:${PORT}
+    originRequest:
+      keepAliveConnections: 10
+
+  # Default-deny fallback (required by cloudflared)
+  - service: http_status:404
+YAML
+
+  info "Tunnel config written to ${output_path}"
+}
+
+# ── Subcommand implementations ───────────────────────────────────────────────
+
+cmd_validate_config() {
+  phase "Validate Tunnel Configuration"
+  require_cloudflared
+
+  local tmp_config
+  tmp_config=$(mktemp)
+  generate_tunnel_config "$tmp_config"
+
+  info "Validating generated tunnel config (ingress rules only, no tunnel start)..."
+  if cloudflared tunnel --config "$tmp_config" ingress validate >/dev/null 2>&1; then
+    success "Tunnel config validation passed."
+  else
+    error "Tunnel config validation failed."
+    cloudflared tunnel --config "$tmp_config" ingress validate || true
+    rm -f "$tmp_config"
+    exit 1
+  fi
+
+  if [ -z "$TUNNEL_ID" ]; then
+    warn "CLOUDFLARE_TUNNEL_ID is not set — production tunnel cannot be started."
+  fi
+  if [ -z "$TUNNEL_CREDS" ]; then
+    warn "CLOUDFLARE_TUNNEL_CREDS is not set — credentials file path missing."
+  fi
+
+  rm -f "$tmp_config"
+}
+
+cmd_dev_start() {
+  phase "Development Mode — TryCloudflare Tunnel"
+  require_cloudflared
+
+  # Confirm portal port safety before starting anything.
+  if is_port_in_use_safe "$PORT"; then
+    confirm_port_kill "$PORT"
+  fi
+
+  mkdir -p "$RUN_DIR"
+
+  info "Starting local Next.js portal on port $PORT..."
+  cd "$PORTAL_DIR"
+  PORT=$PORT pnpm dev > "$RUN_DIR/cloudflare-portal.log" 2>&1 &
+  local portal_pid=$!
+  echo "$portal_pid" > "$RUN_DIR/cloudflare-portal.pid"
+  cd "$REPO_ROOT"
+  info "Portal started (PID: $portal_pid)"
+
+  info "Waiting for portal health endpoint..."
+  local healthy=false
+  for i in $(seq 1 30); do
+    if curl -fs "http://127.0.0.1:$PORT/api/health" >/dev/null 2>&1; then
+      healthy=true
+      break
+    fi
+    sleep 2
+  done
+
+  if [ "$healthy" = false ]; then
+    warn "Portal /api/health did not return 200 within 60s."
+    warn "Check logs: tail -n 50 $RUN_DIR/cloudflare-portal.log"
+  else
+    success "Portal health check verified (200 OK)."
+  fi
+
+  info "Starting TryCloudflare dev tunnel for http://127.0.0.1:$PORT..."
+  cloudflared tunnel --url "http://127.0.0.1:$PORT" --no-autoupdate > "$RUN_DIR/cloudflare-tunnel.log" 2>&1 &
+  local tunnel_pid=$!
+  echo "$tunnel_pid" > "$RUN_DIR/cloudflare-tunnel.pid"
+
+  local cf_url=""
+  for i in $(seq 1 15); do
+    cf_url=$(grep -o 'https://[-0-9a-z]*\.trycloudflare\.com' "$RUN_DIR/cloudflare-tunnel.log" 2>/dev/null | head -n 1 || true)
+    if [ -n "$cf_url" ]; then
+      break
+    fi
     sleep 1
   done
 
-  if [ -n "$CF_URL" ]; then
-    log "TryCloudflare tunnel active: ${CYAN}${BOLD}$CF_URL${NC}"
+  if [ -n "$cf_url" ]; then
+    success "TryCloudflare dev tunnel active: $cf_url"
   else
-    warn "Tunnel started, check logs at $RUN_DIR/cloudflared.log"
+    warn "Dev tunnel URL not detected yet. Check: $RUN_DIR/cloudflare-tunnel.log"
   fi
-else
-  info "Validating production Cloudflare Tunnel configuration..."
-  cloudflared tunnel --config "$TUNNEL_CONFIG" ingress validate
-  info "Starting named production Cloudflare Tunnel..."
-  cloudflared tunnel --config "$TUNNEL_CONFIG" run > "$RUN_DIR/cloudflared.log" 2>&1 &
-  echo $! > "$RUN_DIR/.cloudflared.pid"
-  log "Production Cloudflare Tunnel process started."
+
+  echo
+  echo "Local portal:  http://127.0.0.1:$PORT"
+  echo "Tunnel log:    $RUN_DIR/cloudflare-tunnel.log"
+  echo "Portal log:    $RUN_DIR/cloudflare-portal.log"
+  echo "To stop:       $0 dev-stop"
+}
+
+cmd_dev_stop() {
+  phase "Stop Development Processes"
+  kill_pid_graceful "$RUN_DIR/cloudflare-portal.pid" "portal"
+  kill_pid_graceful "$RUN_DIR/cloudflare-tunnel.pid" "cloudflared dev tunnel"
+  success "Development processes stopped."
+}
+
+cmd_status() {
+  phase "Cloudflare Tunnel Status"
+  require_cloudflared
+
+  echo "Script directory:   $SCRIPT_DIR"
+  echo "Repo root:          $REPO_ROOT"
+  echo "Run directory:      $RUN_DIR"
+  echo "Portal port:        $PORT"
+  echo "Mode:               $MODE"
+  echo "Tunnel ID:          ${TUNNEL_ID:-<not set>}"
+  echo "Tunnel creds:       ${TUNNEL_CREDS:-<not set>}"
+  echo "Allow port kill:    $ALLOW_PORT_KILL"
+  echo
+
+  if [ -f "$RUN_DIR/cloudflare-portal.pid" ]; then
+    local pid
+    pid=$(cat "$RUN_DIR/cloudflare-portal.pid" 2>/dev/null || true)
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      echo "Portal:             RUNNING (PID: $pid)"
+    else
+      echo "Portal:             NOT RUNNING (stale PID file)"
+    fi
+  else
+    echo "Portal:             NOT RUNNING"
+  fi
+
+  if [ -f "$RUN_DIR/cloudflare-tunnel.pid" ]; then
+    local pid
+    pid=$(cat "$RUN_DIR/cloudflare-tunnel.pid" 2>/dev/null || true)
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      echo "Cloudflared tunnel: RUNNING (PID: $pid)"
+    else
+      echo "Cloudflared tunnel: NOT RUNNING (stale PID file)"
+    fi
+  else
+    echo "Cloudflared tunnel: NOT RUNNING"
+  fi
+
+  echo
+  if is_port_in_use_safe "$PORT"; then
+    echo "Port $PORT:         IN USE (PIDs: $(list_port_pids "$PORT" | tr '\n' ' '))"
+  else
+    echo "Port $PORT:         FREE"
+  fi
+}
+
+cmd_health_check() {
+  phase "Health Check — Local Origin"
+  require_cloudflared
+
+  local url="http://127.0.0.1:$PORT/api/health"
+  info "Polling $url ..."
+
+  if curl -fs "$url" >/dev/null 2>&1; then
+    success "Local origin is healthy (200 OK)."
+  else
+    fatal "Local origin at $url is not responding."
+  fi
+}
+
+cmd_shutdown() {
+  phase "Shutdown All Tracked Cloudflare Processes"
+  kill_pid_graceful "$RUN_DIR/cloudflare-portal.pid" "portal"
+  kill_pid_graceful "$RUN_DIR/cloudflare-tunnel.pid" "cloudflared dev tunnel"
+  success "Shutdown complete."
+}
+
+cmd_tunnel_config_example() {
+  phase "Sanitised Tunnel Config Example"
+  cat <<'EOF'
+# Production Cloudflare Tunnel Configuration (sanitised example)
+# Copy to infra/cloudflared/production-tunnel.yml and replace values.
+#
+# Never commit real tunnel IDs, credentials, or domain hostnames.
+# Populate via environment variables:
+#   CLOUDFLARE_TUNNEL_ID
+#   CLOUDFLARE_TUNNEL_CREDS
+#   CLOUDFLARE_PROD_DOMAIN
+
+tunnel: REPLACE_WITH_TUNNEL_ID
+credentials-file: REPLACE_WITH_CREDENTIALS_FILE_PATH
+
+originRequest:
+  connectTimeout: 30s
+  keepAliveTimeout: 90s
+  noTLSVerify: false
+
+ingress:
+  - hostname: REPLACE_WITH_PROD_DOMAIN
+    service: http://127.0.0.1:3000
+    originRequest:
+      keepAliveConnections: 10
+
+  # Default-deny fallback (required by cloudflared)
+  - service: http_status:404
+EOF
+}
+
+# ── Entry point ───────────────────────────────────────────────────────────────
+
+if [ $# -eq 0 ]; then
+  usage
 fi
 
-# ── Step 8: Deployment Summary ────────────────────────────────────────────
-echo -e "\n${GREEN}┌────────────────────────────────────────────────────────────┐${NC}"
-echo -e "${GREEN}│       ARCH-SYSTEMS IS NOW SERVING VIA CLOUDFLARE TUNNEL    │${NC}"
-echo -e "${GREEN}├────────────────────────────────────────────────────────────┤${NC}"
-if [ -n "${CF_URL:-}" ]; then
-echo -e "${GREEN}│${NC} ${BOLD}Public Cloudflare HTTPS URL:${NC}                              ${GREEN}│${NC}"
-echo -e "${GREEN}│${NC} ${CYAN}${BOLD}${CF_URL}${NC}             ${GREEN}│${NC}"
-echo -e "${GREEN}│${NC}                                                            ${GREEN}│${NC}"
-fi
-echo -e "${GREEN}│${NC} ${BOLD}Local Portal Endpoint:${NC}                                    ${GREEN}│${NC}"
-echo -e "${GREEN}│${NC} ${CYAN}${BOLD}http://localhost:${PORT}${NC}                                     ${GREEN}│${NC}"
-echo -e "${GREEN}│${NC}                                                            ${GREEN}│${NC}"
-echo -e "${GREEN}│${NC} ${WHITE}Supabase:${NC}           https://mrwhtxbhrzyttlsyuofc.supabase.co  ${GREEN}│${NC}"
-echo -e "${GREEN}├────────────────────────────────────────────────────────────┤${NC}"
-if [ "$mode_choice" -eq 1 ]; then
-echo -e "${GREEN}│${NC} ${YELLOW}Mode:${NC} ${BOLD}Development (TryCloudflare Tunnel + Hot Reload)${NC}       ${GREEN}│${NC}"
-else
-echo -e "${GREEN}│${NC} ${BLUE}Mode:${NC} ${BOLD}Production Standalone (Named Cloudflare Tunnel)${NC}       ${GREEN}│${NC}"
-fi
-echo -e "${GREEN}│${NC}                                                            ${GREEN}│${NC}"
-echo -e "${GREEN}│${NC} To halt stack: ${YELLOW}./scripts/shutdown.sh${NC}                       ${GREEN}│${NC}"
-echo -e "${GREEN}└────────────────────────────────────────────────────────────┘${NC}\n"
+SUBCOMMAND="$1"
+shift || true
 
-log "Cloudflare deployment sequence completed successfully."
-
-# --- Arch-CorpOS Business Loop Trigger ---
-log "Triggering Post-Deployment Self-Improving Validation..."
-if [ -x "$REPO_ROOT/.agents/corpos/bin/corpos" ]; then
-  "$REPO_ROOT/.agents/corpos/bin/corpos" tick deployment-learning-loop || true
-else
-  log "CorpOS binary not found, skipping autonomous validation."
-fi
-
+case "$SUBCOMMAND" in
+  validate-config) cmd_validate_config ;;
+  dev-start)       cmd_dev_start ;;
+  dev-stop)        cmd_dev_stop ;;
+  status)          cmd_status ;;
+  health-check)    cmd_health_check ;;
+  shutdown)        cmd_shutdown ;;
+  tunnel-config-example) cmd_tunnel_config_example ;;
+  --help|-h|help)  usage ;;
+  *) fatal "Unknown subcommand: $SUBCOMMAND. Run '$0 --help' for usage." ;;
+esac

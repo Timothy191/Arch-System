@@ -36,12 +36,23 @@ interface LiveAiMetricsOverlay {
   readonly cacheHitRatio?: number;
 }
 
+interface VibemonBadgeState {
+  readonly version: string;
+  readonly keyMode: string;
+  readonly openTodosCount: number | null;
+}
+
 export default function AgenticMonitor() {
   const [scope, setScope] = useState<'all-time' | 'session'>('all-time');
   const [selectedAgent, setSelectedAgent] = useState<string>('all');
   const [exchangeRate] = useState<number>(DEFAULT_USD_TO_ZAR_RATE); // USD to ZAR
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [liveOverlay, setLiveOverlay] = useState<LiveAiMetricsOverlay | null>(null);
+  const [vibemonBadge, setVibemonBadge] = useState<VibemonBadgeState>({
+    version: '32',
+    keyMode: 'remote',
+    openTodosCount: null,
+  });
 
   const baseMetrics = scope === 'all-time' ? LIFETIME_METRICS : SESSION_METRICS;
   const currentMetrics = liveOverlay ? { ...baseMetrics, ...liveOverlay } : baseMetrics;
@@ -49,9 +60,28 @@ export default function AgenticMonitor() {
   const fetchLiveMetrics = useCallback(async (targetScope: 'all-time' | 'session') => {
     setRefreshing(true);
     try {
-      const response = await fetch(`/api/ai/metrics?scope=${targetScope}`, {
-        cache: 'no-store',
-      });
+      const [response, vibemonResponse] = await Promise.all([
+        fetch(`/api/ai/metrics?scope=${targetScope}`, {
+          cache: 'no-store',
+        }),
+        fetch('/api/health/vibemon', {
+          cache: 'no-store',
+        }).catch(() => null),
+      ]);
+      if (vibemonResponse?.ok) {
+        const vibemonPayload = (await vibemonResponse.json()) as {
+          readonly keyMode?: string;
+          readonly details?: {
+            readonly version?: string;
+            readonly openTodosCount?: number | null;
+          };
+        };
+        setVibemonBadge({
+          version: vibemonPayload.details?.version ?? '32',
+          keyMode: vibemonPayload.keyMode ?? 'remote',
+          openTodosCount: vibemonPayload.details?.openTodosCount ?? null,
+        });
+      }
       if (response.ok) {
         const payload = (await response.json()) as {
           readonly metrics?: {
@@ -171,6 +201,16 @@ export default function AgenticMonitor() {
             <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-emerald-700 text-xs">
               <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-600" /> Multi-Agent
               Synced
+            </span>
+            <span
+              data-testid="vibemon-status-badge"
+              className="flex items-center gap-1.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1 font-mono text-[var(--text-heading)] text-xs"
+            >
+              VibeMon v{vibemonBadge.version} ({vibemonBadge.keyMode}
+              {vibemonBadge.openTodosCount !== null
+                ? ` · ${vibemonBadge.openTodosCount} TODOs`
+                : ''}
+              )
             </span>
           </div>
         </div>

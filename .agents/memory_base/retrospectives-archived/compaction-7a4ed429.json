@@ -1,6 +1,6 @@
 {
   "id": "compaction-7a4ed429",
-  "timestamp": "2026-11-16T12:36:56.240Z",
+  "timestamp": "2026-11-16T12:40:43.707Z",
   "taskTag": "compaction-standard-7a4ed429",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:execute_full_compact",

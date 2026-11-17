@@ -55,6 +55,37 @@ export interface SearchMemoriesHybridRow {
   combined_score: number;
 }
 
+export type OperationalGraphRelation =
+  | 'SAME_FLEET'
+  | 'SAME_MACHINE_TYPE'
+  | 'CORRELATED_SHIFT_DELAY';
+
+export interface OperationalGraphEdge {
+  sourceId: string;
+  targetId: string;
+  relation: OperationalGraphRelation;
+  weight: number;
+}
+
+export interface FleetGraphSummary {
+  fleetId: string;
+  machineType: string;
+  breakdownCount: number;
+  relatedShiftCount: number;
+}
+
+export interface OperationalGraphContext {
+  seedBreakdowns: BreakdownSearchResult[];
+  relatedShiftNotes: ShiftIntelligenceResult[];
+  edges: OperationalGraphEdge[];
+  fleetSummary: Record<string, FleetGraphSummary>;
+}
+
+const SAME_FLEET_WEIGHT = 0.95;
+const SAME_MACHINE_TYPE_WEIGHT = 0.65;
+const CORRELATED_SHIFT_WEIGHT = 0.85;
+const DATE_PREFIX_LEN = 10;
+
 /**
  * Format breakdown details into high-density semantic text for vector search.
  */
@@ -422,4 +453,124 @@ export async function searchShiftIntelligence(
     });
     return [];
   }
+}
+
+function addBreakdownPairEdges(
+  breakdowns: readonly BreakdownSearchResult[],
+  edges: OperationalGraphEdge[]
+): void {
+  for (let i = 0; i < breakdowns.length; i++) {
+    const first = breakdowns[i];
+    if (!first) continue;
+    for (let j = i + 1; j < breakdowns.length; j++) {
+      const second = breakdowns[j];
+      if (!second) continue;
+
+      if (first.fleetId && first.fleetId === second.fleetId) {
+        edges.push({
+          sourceId: first.id,
+          targetId: second.id,
+          relation: 'SAME_FLEET',
+          weight: SAME_FLEET_WEIGHT,
+        });
+        continue;
+      }
+
+      if (first.machineType && first.machineType === second.machineType) {
+        edges.push({
+          sourceId: first.id,
+          targetId: second.id,
+          relation: 'SAME_MACHINE_TYPE',
+          weight: SAME_MACHINE_TYPE_WEIGHT,
+        });
+      }
+    }
+  }
+}
+
+/**
+ * Assemble an operational GraphRAG context linking seed breakdowns, machine types,
+ * fleet units, and correlated shift delay notes via typed relationship edges.
+ */
+export function buildOperationalGraphContext(
+  breakdowns: readonly BreakdownSearchResult[],
+  shiftNotes: readonly ShiftIntelligenceResult[]
+): OperationalGraphContext {
+  const edges: OperationalGraphEdge[] = [];
+  const fleetSummary: Record<string, FleetGraphSummary> = {};
+
+  for (const breakdown of breakdowns) {
+    const existing = fleetSummary[breakdown.fleetId];
+    if (existing) {
+      existing.breakdownCount += 1;
+      continue;
+    }
+    fleetSummary[breakdown.fleetId] = {
+      fleetId: breakdown.fleetId,
+      machineType: breakdown.machineType,
+      breakdownCount: 1,
+      relatedShiftCount: 0,
+    };
+  }
+
+  addBreakdownPairEdges(breakdowns, edges);
+
+  for (const breakdown of breakdowns) {
+    const fleetNeedle = breakdown.fleetId.toLowerCase();
+    const machineNeedle = breakdown.machineType.toLowerCase();
+    const breakdownDate = breakdown.createdAt.slice(0, DATE_PREFIX_LEN);
+
+    for (const note of shiftNotes) {
+      const noteLower = note.content.toLowerCase();
+      const mentionsFleet = fleetNeedle !== '' && noteLower.includes(fleetNeedle);
+      const mentionsMachine = machineNeedle !== '' && noteLower.includes(machineNeedle);
+      const matchesDate = breakdownDate !== '' && breakdownDate === note.noteDate;
+      if (!mentionsFleet && !mentionsMachine && !matchesDate) continue;
+
+      edges.push({
+        sourceId: breakdown.id,
+        targetId: note.id,
+        relation: 'CORRELATED_SHIFT_DELAY',
+        weight: CORRELATED_SHIFT_WEIGHT,
+      });
+
+      const summary = fleetSummary[breakdown.fleetId];
+      if (summary) {
+        summary.relatedShiftCount += 1;
+      }
+    }
+  }
+
+  return {
+    seedBreakdowns: [...breakdowns],
+    relatedShiftNotes: [...shiftNotes],
+    edges,
+    fleetSummary,
+  };
+}
+
+/**
+ * Execute Operational GraphRAG retrieval combining breakdown vectors, shift intelligence,
+ * and cross-entity relation expansion in a single parallel pass.
+ */
+export async function searchOperationalGraphRag(
+  query: string,
+  userId: string,
+  matchCount = 5
+): Promise<OperationalGraphContext> {
+  if (!query || query.trim() === '') {
+    return {
+      seedBreakdowns: [],
+      relatedShiftNotes: [],
+      edges: [],
+      fleetSummary: {},
+    };
+  }
+
+  const [seedBreakdowns, relatedShiftNotes] = await Promise.all([
+    searchSimilarBreakdowns(query, userId, matchCount),
+    searchShiftIntelligence(query, userId, matchCount),
+  ]);
+
+  return buildOperationalGraphContext(seedBreakdowns, relatedShiftNotes);
 }

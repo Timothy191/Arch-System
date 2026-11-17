@@ -11,3 +11,4 @@ export * from './offline-storage';
 export * from './openrouter';
 export * from './spatial-projection';
 export * from './time';
+export * from './vibemon';

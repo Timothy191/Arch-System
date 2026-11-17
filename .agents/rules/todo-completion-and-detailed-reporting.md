@@ -1,7 +1,8 @@
 ---
 name: todo-completion-and-detailed-reporting
 description: Invoke todo-completion skill for mandatory TODO protocol
-globs: ['**/*']
+paths:
+  - '**/*'
 alwaysApply: true
 ---
 

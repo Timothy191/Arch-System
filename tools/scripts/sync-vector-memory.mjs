@@ -166,6 +166,71 @@ async function syncRetrospectives(db) {
   ];
 
   let count = 0;
+  const seenIds = new Set();
+
+  // First sync full JSON retrospectives (active + archived) so rootCause, resolution, and affectedFiles are indexed
+  const retroJsonDirs = [
+    path.join(ARCH_ROOT, '.agents', 'memory_base', 'retrospectives'),
+    path.join(ARCH_ROOT, '.agents', 'memory_base', 'retrospectives-archived'),
+  ];
+  for (const retroDir of retroJsonDirs) {
+    if (!fs.existsSync(retroDir)) continue;
+    const files = fs.readdirSync(retroDir).filter((f) => f.endsWith('.json'));
+    for (const file of files) {
+      const filePath = path.join(retroDir, file);
+      try {
+        const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+        if (!parsed || typeof parsed !== 'object') continue;
+        const id =
+          typeof parsed.id === 'string' && parsed.id ? parsed.id : path.basename(file, '.json');
+        const category =
+          typeof parsed.category === 'string' && parsed.category ? parsed.category : 'GENERAL';
+        const errorSignature = parsed.errorSignature || parsed.task || parsed.finding || id;
+        const rootCause = typeof parsed.rootCause === 'string' ? parsed.rootCause : '';
+        const resolution =
+          typeof parsed.resolution === 'string' ? parsed.resolution : parsed.summary || '';
+        const preventionRule =
+          typeof parsed.preventionRule === 'string' ? parsed.preventionRule : '';
+        const affectedFiles = Array.isArray(parsed.affectedFiles)
+          ? parsed.affectedFiles.map(String)
+          : [];
+
+        const parts = [`[Incident: ${category}]`, `Error Signature: ${errorSignature}`];
+        if (rootCause) parts.push(`Root Cause: ${rootCause}`);
+        if (resolution) parts.push(`Resolution: ${resolution}`);
+        if (preventionRule) parts.push(`Prevention Rule: ${preventionRule}`);
+        if (affectedFiles.length > 0) parts.push(`Affected Files: ${affectedFiles.join(', ')}`);
+
+        upsertMemoryEntry(db, {
+          id,
+          key: id,
+          namespace: 'retrospectives',
+          content: parts.join('\n'),
+          type: 'pattern',
+          provenance_type: 'tool_result',
+          tags: [
+            'retrospective',
+            category.toLowerCase(),
+            retroDir.endsWith('retrospectives-archived') ? 'archived' : 'active',
+          ],
+          metadata: {
+            category,
+            errorSignature,
+            rootCause,
+            resolution,
+            preventionRule,
+            affectedFiles,
+            sourceFile: filePath,
+          },
+        });
+        seenIds.add(id);
+        count++;
+      } catch (e) {
+        console.warn(`Could not parse retrospective ${filePath}:`, e.message);
+      }
+    }
+  }
+
   for (const indexPath of indices) {
     if (!fs.existsSync(indexPath)) continue;
 
@@ -174,7 +239,7 @@ async function syncRetrospectives(db) {
       const data = JSON.parse(raw);
       if (Array.isArray(data.entries)) {
         for (const item of data.entries) {
-          if (!item?.id) continue;
+          if (!item?.id || seenIds.has(item.id)) continue;
           const key = item.id;
           const content = `[Incident: ${item.category}]\nError Signature: ${item.errorSignature}\nPrevention Rule: ${item.preventionRule}`;
 
@@ -193,6 +258,7 @@ async function syncRetrospectives(db) {
               remediationDiff: item.remediationDiff,
             },
           });
+          seenIds.add(item.id);
           count++;
         }
       }
@@ -201,6 +267,93 @@ async function syncRetrospectives(db) {
     }
   }
   return count;
+}
+
+async function syncGraphifyHubs(db) {
+  const graphPath = path.join(ARCH_ROOT, 'graphify-out', 'graph.json');
+  if (!fs.existsSync(graphPath)) return 0;
+
+  try {
+    const raw = fs.readFileSync(graphPath, 'utf-8');
+    const parsed = JSON.parse(raw);
+    const nodes = Array.isArray(parsed.nodes) ? parsed.nodes : [];
+    const links = Array.isArray(parsed.links)
+      ? parsed.links
+      : Array.isArray(parsed.edges)
+        ? parsed.edges
+        : [];
+
+    const degreeMap = new Map();
+    const neighborsMap = new Map();
+    const labelById = new Map();
+    for (const node of nodes) {
+      if (node?.id) labelById.set(node.id, node.label || node.id);
+    }
+
+    for (const link of links) {
+      if (!link?.source || !link?.target) continue;
+      degreeMap.set(link.source, (degreeMap.get(link.source) || 0) + 1);
+      degreeMap.set(link.target, (degreeMap.get(link.target) || 0) + 1);
+
+      const sList = neighborsMap.get(link.source) || [];
+      if (sList.length < 8) {
+        sList.push(
+          `--> ${labelById.get(link.target) || link.target} [${link.relation || 'relates_to'}]`
+        );
+        neighborsMap.set(link.source, sList);
+      }
+      const tList = neighborsMap.get(link.target) || [];
+      if (tList.length < 8) {
+        tList.push(
+          `<-- ${labelById.get(link.source) || link.source} [${link.relation || 'relates_to'}]`
+        );
+        neighborsMap.set(link.target, tList);
+      }
+    }
+
+    const ranked = nodes
+      .filter((n) => n?.id)
+      .map((n) => ({ node: n, degree: degreeMap.get(n.id) || 0 }))
+      .sort((a, b) => b.degree - a.degree)
+      .slice(0, 25);
+
+    let count = 0;
+    for (const { node, degree } of ranked) {
+      const label = node.label || node.id;
+      const community = node.community_name || 'architecture';
+      const neighbors = neighborsMap.get(node.id) || [];
+      const content = [
+        `[Graphify Hub: ${label}]`,
+        `File: ${node.source_file || 'doc'} (${node.source_location || 'L1'})`,
+        `Community: ${community} | Degree: ${degree}`,
+        neighbors.length > 0 ? `Connections:\n${neighbors.join('\n')}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
+
+      upsertMemoryEntry(db, {
+        key: `graph-hub:${node.id}`,
+        namespace: 'knowledge_graph',
+        content,
+        type: 'structural',
+        provenance_type: 'tool_result',
+        tags: ['graphify', 'hub', community],
+        metadata: {
+          nodeId: node.id,
+          label,
+          sourceFile: node.source_file,
+          sourceLocation: node.source_location,
+          community,
+          degree,
+        },
+      });
+      count++;
+    }
+    return count;
+  } catch (e) {
+    console.warn('Could not sync Graphify hubs:', e.message);
+    return 0;
+  }
 }
 
 async function main() {
@@ -216,6 +369,9 @@ async function main() {
 
     const retroCount = await syncRetrospectives(db);
     console.log(`   ✓ Synced ${retroCount} retrospective patterns`);
+
+    const graphHubCount = await syncGraphifyHubs(db);
+    console.log(`   ✓ Synced ${graphHubCount} Graphify hub nodes`);
 
     const totalStmt = db.prepare(
       "SELECT count(*) as count FROM memory_entries WHERE status = 'active'"

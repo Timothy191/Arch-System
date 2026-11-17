@@ -9,20 +9,32 @@ receivers:
 processors:
   batch:
 
+  # Cloudflare trace processor — extracts Cloudflare-specific attributes
+  cloudflare:
+    operations_to_ignore: []
+    metrics_interval: 60
+    ignore_status_codes: [400, 404, 500, 502, 503, 504]
+    # These attributes will be added to each span
+    # - cloudflare_trace_id
+    # - cloudflare_request_id
+    # - cloudflare_status_code
+    # - cloudflare_error_code
+
 exporters:
   # Pull-based exporter: exposes collected metrics at /metrics on :8889 for Prometheus to scrape.
   prometheus:
     endpoint: '0.0.0.0:8889'
-  # Local dev sink for traces; swap for otlp/jaeger or Tempo when a trace backend is provisioned.
-  debug:
-    verbosity: basic
+  # Tempo trace exporter — forwards traces to Grafana Tempo for long-term storage and visualization.
+  tempo:
+    endpoint: 'tempo:4317'
+    insecure: true
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [tempo, prometheus]
     metrics:
       receivers: [otlp]
       processors: [batch]

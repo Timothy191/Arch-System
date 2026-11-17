@@ -1,6 +1,7 @@
 ---
 description: Deprecated - infrastructure not implemented
-globs: ['**/*']
+paths:
+  - '**/*'
 alwaysApply: false
 ---
 

@@ -1,0 +1,32 @@
+{
+  "sentry": {
+    "priority": "High",
+    "effort": "Low",
+    "benefit": "Error tracking + LLM prompt monitoring, AI hallucination detection, Session replay (with replay-sdk)",
+    "recommendation": "Add immediately"
+  },
+  "grafana-prometheus": {
+    "priority": "High",
+    "effort": "Medium",
+    "benefit": "Open-source observability, Pre-built dashboards, Alerting on quality gates, No vendor lock-in",
+    "recommendation": "Add if needing open-source"
+  },
+  "datadog": {
+    "priority": "Medium",
+    "effort": "Medium",
+    "benefit": "Full-featured SaaS observability, Unified UI, Automatic instrumentation, Session replay add-on",
+    "recommendation": "Consider if budget allows"
+  },
+  "new-relic": {
+    "priority": "Medium",
+    "effort": "Medium",
+    "benefit": "Full-stack monitoring, Infrastructure metrics, LLM token tracking",
+    "recommendation": "Conditional based on existing stack"
+  },
+  "lightstep": {
+    "priority": "Low",
+    "effort": "Medium",
+    "benefit": "Error root cause analysis, Intelligent alerting",
+    "recommendation": "Skip (redundant)"
+  }
+}

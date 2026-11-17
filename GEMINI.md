@@ -23,6 +23,7 @@ Arch-System is a production industrial mining portal (SCADA telemetry, multi-dep
 ## 2. Core Toolchain & Verification
 
 Always run scoped inside `Arch-System/`:
+
 ```bash
 export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH:/home/tim/.cargo/bin"
 pnpm agent:verify       # Mandatory 28-gate verification suite (fails fast)
@@ -41,5 +42,6 @@ pnpm audit:compliance   # static invariant sweep
 3. **Zero Speculation (3-Option Prompt):** Never invent requirements. When genuinely uncertain, prompt the user with 3 concrete options (Option 1 `(Recommended)`).
 4. **Autonomous Deployment:** On verified completion, merge to `main`, push to GitHub (`git push origin main`), and deploy to Vercel (`pnpm deploy:vercel:prod`).
 5. **Traceability:** Append ISO-8601 entries to root `AGENT_TRACER.md`.
+6. **VibeMon Tracking (Mandatory):** Keep VibeMon updated (`pnpm vibemon:update`) and emit session/task events via `pnpm vibemon:track` (`pnpm vibemon:status`).
 
 For full specifications, architecture catalogs, and API contracts, consult [`AGENTS.md`](file:///home/tim/Fork/Arch-System/AGENTS.md).

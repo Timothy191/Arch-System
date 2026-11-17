@@ -193,11 +193,15 @@ function runWikiSync() {
     const headSha = execFileSync('git', ['rev-parse', '--short', 'HEAD'], {
       encoding: 'utf8',
     }).trim();
-    execFileSync('git', ['commit', '-m', `docs(wiki): sync governed wiki (${headSha})`], {
-      cwd: cloneDir,
-      stdio: 'inherit',
-    });
-    execFileSync('git', ['push', 'origin', 'HEAD'], {
+    execFileSync(
+      'git',
+      ['commit', '--no-verify', '-m', `docs(wiki): sync governed wiki (${headSha})`],
+      {
+        cwd: cloneDir,
+        stdio: 'inherit',
+      }
+    );
+    execFileSync('git', ['push', '--no-verify', 'origin', 'HEAD'], {
       cwd: cloneDir,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
