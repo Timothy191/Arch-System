@@ -3,9 +3,9 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'How React 18 Improves Application Performance | Arch Systems',
+  title: 'React 19 & Next.js 16 Performance Guide | Arch Systems',
   description:
-    'Concurrent features like Transitions, Suspense, and React Server Components improve application performance.',
+    'Concurrent features like Transitions, Suspense, React Server Components, and Next.js 16 Cache Components improve portal responsiveness.',
 };
 
 const TRANSITION_CODE = `import { useTransition } from "react";
@@ -72,20 +72,21 @@ export default function React18PerformancePage() {
           Documentation
         </Link>
         <span className="text-[var(--text-muted)]">/</span>
-        <span className="text-[var(--text-muted)]">React 18 Performance</span>
+        <span className="text-[var(--text-muted)]">React 19 &amp; Next.js 16 Performance</span>
       </div>
 
       <header className="space-y-3">
         <h1 className="font-extrabold text-3xl text-[var(--text-heading)] tracking-tight sm:text-4xl">
-          How React 18 Improves Application Performance
+          How React 19 &amp; Next.js 16 Improve Portal Performance
         </h1>
         <p className="text-[var(--text-muted)] text-sm">
-          Published July 19, 2023 · Lydia Hallie · Field Engineering
+          Updated November 2026 · Arch Systems Field Engineering
         </p>
         <p className="max-w-3xl text-[var(--text-secondary)] text-base leading-relaxed">
-          React 18 introduces concurrent features that fundamentally change how React applications
-          render. Concurrent React, Transitions, React Server Components, Suspense, and the new
-          cache API each reduce blocking time and improve responsiveness.
+          Arch OS runs on React 19.2.7 and Next.js 16.4.6 App Router. Concurrent rendering,
+          Transitions, React Server Components, Suspense streaming, and dual-tier{' '}
+          <code>&apos;use cache&apos;</code> + Redis L1/L2 caching keep high-density SCADA
+          dashboards responsive across 12-hour shifts.
         </p>
       </header>
 

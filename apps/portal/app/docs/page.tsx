@@ -92,10 +92,10 @@ const DOCUMENTATION_VOLUMES = [
   },
   {
     id: 'react-18-performance',
-    title: 'React 18 Performance Guide',
-    subtitle: 'Concurrent Rendering',
+    title: 'React 19 & Next.js 16 Performance Guide',
+    subtitle: 'RSC & Cache Components',
     description:
-      'How concurrent features like Transitions, Suspense, and React Server Components improve application performance.',
+      'How React 19 Transitions, Suspense streaming, React Server Components, and Next.js 16 "use cache" profiles keep 12-hour SCADA dashboards responsive.',
     variant: 'stripe' as const,
     color: '#0ea5e9',
     textColor: '#ffffff',

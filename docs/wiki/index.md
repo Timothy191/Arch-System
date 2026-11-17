@@ -1,9 +1,9 @@
 # Wiki Index
 
-> Content catalog for the Arch-Systems (Plantcor) company knowledge base.
+> Content catalog for the Arch-Systems (Plantcor / Arch OS) company knowledge base.
 > Read this first to find relevant pages for any query.
-> Last updated: 2026-10-29 | Total pages: 87 (19 concepts + 8 entities + 9 comparisons + 10 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
-> Current project version: v1.6.2 (Industrial Command & Turborepo) | Next.js 16 | React 19 | Supabase PostgreSQL 17 | Light Theme | 185 Migrations
+> Last updated: 2026-11-17 | Total pages: 87 (19 concepts + 8 entities + 9 comparisons + 10 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
+> Current project version: v1.6.2 (Industrial Command & Turborepo 2.x) | Next.js 16.4.6 | React 19.2.7 | Node.js >=24 | Supabase PostgreSQL 17 | Light Theme + Metallic Gold (`#d4af37`) | 172+ Migrations
 
 ## Quick Reference
 
@@ -86,17 +86,17 @@
 
 ### Features
 
-- [[department-features|Department Features]] — Control room, engineering, drilling, production, access control, system overview, and database capabilities
+- [[department-features|Department Features]] — Control room, engineering, drilling, production, plant processing, plant inventory, access control, availability & utilization, system overview, and database capabilities
 - [[external-tools|External Tools Integration]] — Flowise, Univer embedding, Inngest background jobs, Novu notifications, health checks
-- [[monitoring-error-tracking|Monitoring and Error Tracking]] — Sentry, Highlight session replay, OpenTelemetry tracing, Prometheus/Grafana, real-time subscriptions
-- [[analytics-reporting|Advanced Analytics & Reporting]] — Executive KPI dashboard, PDF/Excel export, trend analysis, ML predictive maintenance
+- [[monitoring-error-tracking|Monitoring and Error Tracking]] — Native Observability & CI Console (`/admin/observability`), OpenTelemetry Collector, Prometheus/Grafana, Woodpecker CI, VibeMon `v32`, Sentry, and Supabase Realtime CDC
+- [[analytics-reporting|Advanced Analytics & Reporting]] — Executive KPI dashboard, `@repo/intelligence` engines, PDF/Excel export, trend analysis, ML predictive maintenance
 
 ### Quality & Design
 
-- [[design-system|Portal Design System]] — Light-only macOS Sonoma Tailwind design tokens, Style Dictionary pipeline, and shared components
+- [[design-system|Portal Design System]] — Light-only macOS Sonoma OKLCH design tokens, canonical Metallic Gold (`--accent-gold` / `#d4af37`), Style Dictionary pipeline, and shared `@repo/ui` components
 - [[deepeval-integration|DeepEval Integration]] — LLM evaluation framework for AI service quality and code convention compliance
-- [[testing-qa-strategy|Testing & QA Strategy]] — Unit coverage 40%+, E2E critical flows, visual regression, load & security testing
-- [[mobile-pwa|Mobile Responsiveness & PWA]] — Offline support, touch-optimized forms, PWA install
+- [[testing-qa-strategy|Testing & QA Strategy]] — 28-gate `pnpm agent:verify`, Autonomous CI Gatekeeper (`pnpm ci:gatekeeper`), unit coverage, Playwright E2E, and security auditing
+- [[mobile-pwa|Mobile Responsiveness & PWA]] — Offline IndexedDB queue (`useOfflineQueue`), touch-optimized forms, PWA install
 
 ### Git Tree & Project History
 

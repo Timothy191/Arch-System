@@ -191,7 +191,7 @@ export default defineConfig({
     socialLinks: [
       {
         icon: 'github',
-        link: 'https://github.com/DRACOSFN/Turborepo-Fullstack-Starter-Template',
+        link: 'https://github.com/Timothy191/Arch-System',
       },
     ],
 
@@ -203,8 +203,7 @@ export default defineConfig({
 
     // Edit link
     editLink: {
-      pattern:
-        'https://github.com/DRACOSFN/Turborepo-Fullstack-Starter-Template/edit/main/docs/wiki/:path',
+      pattern: 'https://github.com/Timothy191/Arch-System/edit/main/docs/wiki/:path',
       text: 'Edit this page on GitHub',
     },
 

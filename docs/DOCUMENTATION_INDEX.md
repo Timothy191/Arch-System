@@ -14,9 +14,9 @@ Quick navigation guide for Arch-Systems documentation.
 ### Quick Reference
 
 - **[docs/reports/PROJECT_AUDIT_UPGRADE_PLAN.md](./reports/PROJECT_AUDIT_UPGRADE_PLAN.md)** - Full-stack project audit, remote caching optimizations, and upgrade roadmap
-- **[docs/wiki/index.md](./wiki/index.md)** - Project Wiki Index (Comprehensive catalog of 63 pages across concepts, comparisons, and entities)
-- **[AGENTS.md](AGENTS.md)** - Workflow rules, quality gates, and quick commands
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment guide for all environments
+- **[docs/wiki/index.md](./wiki/index.md)** - Project Wiki Index (Comprehensive governed catalog across concepts, comparisons, entities, ADRs, and queries — audited via `pnpm audit:wiki` and synced via `pnpm wiki:sync`)
+- **[AGENTS.md](../AGENTS.md)** - Canonical workflow rules, architecture boundaries, 28-gate verification suite, and quick commands
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment guide for Vercel Production, Docker observability, and on-premises environments
 
 ## 🛠️ Development
 
@@ -173,5 +173,5 @@ Arch-System/
 
 ---
 
-**Last Updated**: 2026-10-29
+**Last Updated**: 2026-11-17
 **Maintained by**: Arch-Systems Development Team & Documentation Specialist Agent

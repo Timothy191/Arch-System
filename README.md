@@ -1,46 +1,52 @@
-# Arch-Systems (Plantcor) Mining Operations Portal
+# Arch-Systems (Plantcor / Arch OS) Mining Operations Portal
 
-[![Coverage Status](https://coveralls.io/repos/github/Timothy191/Arch-System/badge.svg?branch=main)](https://coveralls.io/github/Timothy191/Arch-System?branch=main)
-A high-performance, multi-departmental mining operations portal built as a monorepo. It provides authenticated access to department-specific dashboards for drilling, production, access control, engineering, control room, system overview, and database administration.
+[![Deployment](https://img.shields.io/badge/Vercel-Production-000000?logo=vercel)](https://arch-system-kappap.vercel.app)
+[![Next.js](https://img.shields.io/badge/Next.js-16.4.6-000000?logo=next.js)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19.2.7-61DAFB?logo=react)](https://react.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_17-3ECF8E?logo=supabase)](https://supabase.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-d4af37.svg)](LICENSE)
+
+A production, multi-departmental industrial mining operations portal built as a **Turborepo 2.x + pnpm 9.15.9** monorepo. It provides authenticated, role-scoped access to department workspaces for **Control Room**, **Drilling**, **Production**, **Plant & Processing**, **Plant Inventory**, **Engineering**, **Availability & Utilization**, **Access Control**, **Office**, **Executive Hub**, **System Overview**, and **Database Administration**, backed by live SCADA telemetry, shift closeout workflows, and audit-logged PostgreSQL 17 Row-Level Security (RLS).
 
 ## 🏗️ Architecture
 
-This project is organized as a **Turborepo** monorepo using **pnpm** for workspace management.
+This repository is organized as a **Turborepo 2.x** monorepo using **`pnpm@9.15.9`** on **Node.js `>=24.0.0`**.
 
 ### Applications (`apps/`)
 
-- **`portal`**: The main Next.js 16 (App Router) application. High-density dashboards, real-time monitoring, data entry forms, SCADA integration, and architectural visualization (includes the `/overview` route).
+- **`portal`**: The sole deployable Next.js 16.4.6 (App Router + React 19) application (`package.json` name: `portal`). Hosts all departmental workspaces, live SCADA & telemetry dashboards, shift closeout sheets, the Native Observability & CI Console (`/admin/observability`), `/overview` topology explorer, and `/docs` interactive reference.
 
 ### Packages (`packages/`)
 
-- **`@repo/theme`**: Design tokens, OKLCH color system, and Tailwind CSS configuration (Single Source of Truth).
-- **`@repo/ui`**: Shared React components (GlassCard, KPI, DepartmentLayout, etc.) built with Radix UI and shadcn/ui.
-- **`@repo/supabase`**: Supabase clients (browser, server, middleware, service-role, read-replica) and Kysely query builders.
-- **`@repo/database`**: SQL migrations and schema definitions (source of truth).
-- **`@repo/contract`**: API type definitions and Zod validation schemas (canonical data contracts).
-- **`@repo/errors`**: Structured error classes with context and cause tracking.
-- **`@repo/redis`**: Redis client, caching helpers, cache statistics, and TTL registry.
-- **`@repo/rate-limiter`**: Rate limiting framework with fixed-window, sliding-window, and token-bucket strategies.
-- **`@repo/logger`**: Structured Pino logging for server, browser, and Next.js.
-- **`@repo/utils`**: Utility functions for third-party integrations (Novu, Inngest, Excel exports).
-- **`@repo/eval`**: LLM evaluation suite using DeepEval for AI service quality testing.
-- **`@repo/agents`**: Shared agent coordination engine and specialist modules.
-- **`@repo/typescript-config`**: Shared TypeScript configuration.
+- **`@repo/theme`**: Light-mode OKLCH design tokens, canonical Metallic Gold (`--accent-gold` / `#d4af37`) brand tokens, Style Dictionary codegen, and Tailwind CSS preset (Single Source of Truth).
+- **`@repo/ui`**: Presentational React 19 components (`GlassCard`, `Logo`, `EveLogo`, `HeroRotator`, `DepartmentLayout`, `MacMenuBar`) built with Radix UI and Tailwind CSS.
+- **`@repo/contract`**: Canonical Zod 4 schemas and inferred TypeScript types (`./validation`, `./schemas/*`, `./types/*`). Every database table and API boundary maps to a schema verified by `pnpm audit:drift`.
+- **`@repo/supabase`**: Typed Supabase clients (`./server`, `./client`, `./middleware`, `./proxy`, `./read-replica`, `./service-role`) and pooled Kysely query builder (`./kysely`).
+- **`@repo/database`**: Immutable PostgreSQL 17 SQL migrations SSoT (`packages/database/migrations/NNN_snake_case.sql`, 172+ applied migrations with strict RLS).
+- **`@repo/redis`**: Capability-only Redis layer (`./cache` L1/L2 + tag invalidation, `./session` auth sessions with privilege-version revocation, `./analytics`, `./search` RediSearch + pgvector fallback, streams, and distributed locks).
+- **`@repo/intelligence`**: Operational mining intelligence engines (`TelemetryAnomalyEngine`, `PredictiveMaintenanceEngine`, `ProductionForecastEngine`, `ShiftIntelligenceEngine`, `OperationsCopilotEngine`).
+- **`@repo/rate-limiter`**: Pluggable `RateLimiter` (`MemoryStore` / `RedisStore` x `FixedWindowStrategy` / `SlidingWindowStrategy` / `TokenBucketStrategy`).
+- **`@repo/errors`**: Structured `AppError` hierarchy and `isAppError` boundary guards.
+- **`@repo/logger`**: Structured Pino logging (`./server`, `./browser`, `./next`).
+- **`@repo/utils`**: Shared client/server utilities, VibeMon telemetry client (`./vibemon`), Inngest, Novu, n8n, offline IndexedDB queue (`./offline-storage`), and Excel export helpers.
+- **`@repo/agents`**: Multi-agent orchestration, swarm coordination, and token-budget management.
+- **`@repo/eval`**: Python DeepEval LLM evaluation suite (`pyproject.toml`).
+- **`@repo/typescript-config`**: Strict shared TypeScript (`5.9.3`) configurations.
 
 ### Libraries (`libs/`)
 
-- **`libs/features/*`**: Domain-specific feature modules (`auth`, `departments`, `hub`, etc.) with UI and data-access layers.
-- **`libs/shared/*`**: Shared utilities, data-access, hooks, and utilities across features.
-
-### Services (`services/`)
-
-- **`services/integrations/`**: Third-party API client integrations (OpenRouter, Cohere, n8n).
+- **`libs/features/*`**: Domain vertical slices (`auth`, `departments`, `hub`) partitioned into `ui`, `data-access`, and `utils`.
+- **`libs/shared/*`**: Cross-cutting `@repo/shared/hooks` (`useSupabaseRealtime`, `useOfflineQueue`, `useThrottledDebounce`, `useRedisCache`), `@repo/shared/data-access`, and `@repo/shared/utils` (`env.ts` Zod/t3-env validator, `cache-utils.ts`).
 
 ## 🚀 Quick Start
 
-### One-Command Setup (Clone & Run)
+### Prerequisites
 
-Simply clone and run `./setup.sh`:
+- **Node.js `>=24.0.0`** (`.nvmrc` and `.node-version` pin `24`)
+- **`pnpm@9.15.9`** (enforced via `packageManager` — never use `npm`, `yarn`, or `bun`)
+- **Cloud Supabase** credentials configured in `apps/portal/.env` + **Docker** for local Redis (`pnpm redis:up`)
+
+### One-Command Setup (Clone & Run)
 
 ```bash
 git clone https://github.com/Timothy191/Arch-System.git
@@ -48,13 +54,13 @@ cd Arch-System
 ./setup.sh --dev
 ```
 
-This single command will:
+This command will:
 
-1. Validate Node.js (`>=22`) and auto-configure `pnpm`.
-2. Install all monorepo dependencies.
-3. Auto-configure `apps/portal/.env` from templates.
-4. Compile design tokens and monorepo architectural boundaries.
-5. Bind to `0.0.0.0` so the server is **accessible across your entire local network / Wi-Fi** (phones, tablets, other PCs).
+1. Validate Node.js (`>=24.0.0`) and `pnpm@9.15.9`.
+2. Install all monorepo dependencies (`pnpm install --frozen-lockfile`).
+3. Configure `apps/portal/.env` from `.env.example` templates.
+4. Compile design tokens (`@repo/theme`) and architectural boundary policies (`pnpm policy:check`).
+5. Launch the local Redis stack and start the portal on `0.0.0.0:3000`.
 
 ### Setup Options
 
@@ -65,51 +71,44 @@ This single command will:
 ./setup.sh --clean     # Clean reinstall: wipes node_modules/cache and reinstalls cleanly
 ```
 
-### Local Network Access (Any Device on Same Network)
+### GitHub Codespaces / DevContainer
 
-When the server starts, it binds to `0.0.0.0:3000`:
-
-- **This Machine**: `http://localhost:3000`
-- **Other Devices on Local Network**: `http://<YOUR_LOCAL_IP>:3000` (e.g. `http://192.168.1.50:3000` or `http://10.42.0.240:3000`)
+A preconfigured `.devcontainer/devcontainer.json` (Node 24, Rust 1.85.0, Python 3.12, Redis 7.4 sidecar) is included for instant cloud or VS Code DevContainer onboarding.
 
 ## 🛠️ Key Commands
 
-- `pnpm dev`: Start the portal development server (includes asset sync).
-- `pnpm dev:quick`: Start headless dev server (quick boot).
-- `pnpm dev:turbo`: Start portal dev server via Turborepo.
-- `pnpm build`: Build all applications and packages.
-- `pnpm lint`: Run linting across the entire monorepo.
-- `pnpm test`: Run tests (Jest and Playwright).
-- `pnpm type-check`: Run TypeScript type checking across the monorepo.
-- `pnpm quality`: Run the full quality gate (lint, type-check, tests, token linting, policy checks).
-- `pnpm deploy:local`: Full stack deployment (Supabase + build + start).
-- `pnpm audit:suite`: Run compliance audits (RLS, design tokens, contract drift, agentic content).
+- `pnpm dev`: Start the full development stack (local Redis `:6379` + RedisInsight `:5540`, asset sync, and portal `:3000`).
+- `pnpm dev:quick`: Fast headless portal dev server against Cloud Supabase (skips Docker).
+- `pnpm redis:up`: Start local Redis 7.4 + RedisInsight independently.
+- `pnpm build`: Sync assets, patch glass CSS, and build all workspace packages (`turbo run build`).
+- `pnpm type-check`: Run strict TypeScript checking across the workspace (`turbo run type-check --concurrency=2`).
+- `pnpm lint`: Run Biome 2.5 across the monorepo (`pnpm lint:styles`, `pnpm lint:spelling`, `pnpm md:lint` for CSS/spelling/Markdown).
+- `pnpm test`: Run Jest unit/integration suites across all packages.
+- `pnpm agent:verify`: **Mandatory 28-gate fail-fast verification suite** (emits `.ci-local/agent-verify-evidence.json`).
+- `pnpm ci:gatekeeper`: Autonomous local CI gatekeeper — verifies or reads `.ci-local/agent-verify-evidence.json` and publishes all 6 required GitHub ruleset commit statuses.
+- `pnpm wiki:sync`: Audit `docs/wiki/*` (`pnpm audit:wiki`) and synchronize governed pages (`Home.md`, `_Sidebar.md`, `_Footer.md`, entities, concepts, comparisons, queries) to the GitHub Wiki repository.
+- `pnpm vibemon:status` / `pnpm vibemon:track`: Inspect and emit real-time VibeMon multi-agent telemetry.
+- `pnpm quality`: Full release-grade verification suite.
 
 ## 📖 Documentation
 
-### Unified Documentation Center
+### Unified Documentation & Knowledge Base
 
-- **[documentation/README.md](documentation/README.md)**: New unified documentation center with consolidated structure
-  - **[documentation/03-audit-reports/](documentation/03-audit-reports/)**: Audit reports, RLS analysis, and quality compliance
-  - **[codebase-maps/](codebase-maps/)**: Codebase visualization and architecture maps
-  - **[documentation/05-wiki/](documentation/05-wiki/)**: Comprehensive technical wiki and knowledge base
+- **[AGENTS.md](AGENTS.md)**: Canonical repository guidelines, architecture boundaries, 8-step Server Action security sequence, and 28-gate verification runbook (`CLAUDE.md` symlinks to `GEMINI.md` for compact operational directives).
+- **[GEMINI.md](GEMINI.md)**: Compact operational directive and non-negotiable invariants for AI coding agents.
+- **[docs/wiki/index.md](docs/wiki/index.md)**: Governed technical wiki catalog (entities, concepts, ADRs, comparisons, operational runbooks, and queries), audited via `pnpm audit:wiki` and synced to the [GitHub Wiki](https://github.com/Timothy191/Arch-System/wiki).
+- **[docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)**: Complete navigation index across `docs/` and `documentation/`.
+- **[documentation/README.md](documentation/README.md)**: Tool-generated documentation center and `documentation/03-audit-reports/` compliance ledger.
+- **[codebase-maps/README.md](codebase-maps/README.md)**: Automated dependency, route, and schema topology maps.
 
-### Core Documentation
+### Design, Product, Deployment, & Security
 
-- **[CLAUDE.md](CLAUDE.md)**: Authoritative technical guide and conventions.
-- **[DESIGN.md](docs/DESIGN.md)**: Detailed design system, color palette (OKLCH), and component rules.
-- **[PRODUCT.md](docs/PRODUCT.md)**: Product strategy, user personas, and core mission.
-
-### Additional Documentation
-
-- **[AGENTS.md](AGENTS.md)**: Development workflow, quality gates, and agent contracts
-- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Deployment guide for all environments
-- **[docs/ONBOARDING.md](docs/ONBOARDING.md)**: Step-by-step developer onboarding guide
-- **[docs/MONOREPO.md](docs/MONOREPO.md)**: Monorepo structure, Turbo targets, and security policies
-- **[docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)**: Comprehensive documentation index
-- **[GEMINI.md](GEMINI.md)**: Alias for the canonical agent guide (symlink → `AGENTS.md`)
-- **[`.cursorrules`](.cursorrules)**: Alias for the canonical agent guide (symlink → `AGENTS.md`)
-- **[SECURITY.md](docs/SECURITY.md)**: Security policy and vulnerability reporting
+- **[docs/DESIGN.md](docs/DESIGN.md)**: Light-mode OKLCH design system, Metallic Gold (`#d4af37`) brand tokens, liquid-glass surfaces, and typography scale.
+- **[docs/PRODUCT.md](docs/PRODUCT.md)**: Product strategy, industrial operator personas, and departmental workflows.
+- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Vercel production (`arch-system`), Docker observability stack (`compose.observability.yml`), and Rocky Linux/RHEL deployment guide.
+- **[docs/ONBOARDING.md](docs/ONBOARDING.md)**: Developer onboarding checklist.
+- **[.github/SECURITY.md](.github/SECURITY.md)** & **[docs/SECURITY.md](docs/SECURITY.md)**: Security policy, Private Vulnerability Reporting, and enforced controls.
+- **[CHANGELOG.md](CHANGELOG.md)**: Release history and production milestones.
 
 ---
 

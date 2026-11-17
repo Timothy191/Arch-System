@@ -1,16 +1,29 @@
 ---
 title: Monitoring and Error Tracking
 created: 2026-05-15
-updated: 2026-05-17
+updated: 2026-11-17
 type: concept
-tags: [infrastructure, system, application, concept]
-sources: [raw/codebase/monitoring.md]
+tags: [infrastructure, system, application, concept, observability]
+sources:
+  [
+    apps/portal/components/observability/ObservabilityConsole.tsx,
+    infra/docker/compose.observability.yml,
+  ]
 confidence: high
 ---
 
 # Monitoring and Error Tracking
 
-The portal uses Sentry for error tracking and Supabase real-time channels for live operational data. Satellite monitoring adds Copernicus STAC integration for geospatial analysis.
+The portal pairs a **Native Observability & CI Console** (`/admin/observability` and `/overview`) with **OpenTelemetry (OTel)**, **Prometheus**, **light-mode Grafana**, **Woodpecker CI**, **VibeMon `v32`**, **Sentry v10**, and **Supabase Realtime CDC** (`useSupabaseRealtime`) for end-to-end operational telemetry.
+
+## Native Observability & CI Console (`/admin/observability`)
+
+Built on `@repo/contract/schemas/observability-layer.schema`, the portal exposes authenticated dual-mode BFF routes (`/api/observability/summary` and `/api/observability/ci`) backing `ObservabilityConsole.tsx`:
+
+- **Golden Signals**: Latency (p50/p95/p99), traffic (req/s), error ratio, and saturation across portal routes, Supabase, and Redis.
+- **Container & Collector Health**: Live health checks for `plantcor-otel-collector` (`:4318` / `:13133`), `plantcor-prometheus` (`:9090`), and `plantcor-grafana` (`:3001`, configured with `GF_DEFAULT_THEME=light`).
+- **CI Pipeline & 6-Check Gatekeeper Telemetry**: Displays Woodpecker CI pipeline status alongside the local 28-gate `pnpm agent:verify` + `pnpm ci:gatekeeper` status checks (`Quality Gates`, `Policy Check`, `Dead Code Detection`, `Dependency Lint`, `Security Audit`, `Tier 2 Review Policy Check`).
+- **VibeMon Multi-Agent Pulse (`/api/health/vibemon`)**: Tracks active coding agent sessions, task budgets, and Work State v1 handoffs in `AgenticMonitor.tsx`.
 
 ## Sentry Integration
 

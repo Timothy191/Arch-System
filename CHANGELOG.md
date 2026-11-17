@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-11-17
+
+### Added
+
+- **Native Observability & CI Console (`/admin/observability` & `/overview`)**: Added `@repo/contract` Zod 4 observability schemas (`observability-layer.schema.ts`), dual-mode BFF endpoints (`/api/observability/summary` and `/api/observability/ci`), `ObservabilityConsole` component, and Docker Compose observability stack (`infra/docker/compose.observability.yml` with OpenTelemetry Collector, Prometheus, light-mode Grafana, and optional Woodpecker CI runner).
+- **Autonomous Local CI Gatekeeper (`tools/scripts/autonomous-ci-gatekeeper.mjs` / `pnpm ci:gatekeeper`)**: Verifies candidate commits across the 28-gate `agent-verify.sh` suite and publishes all 6 required GitHub ruleset status contexts (`Quality Gates (Lint, Type Check, Build & Test)`, `Policy Check`, `Dead Code Detection`, `Dependency Lint`, `Security Audit`, `Tier 2 Review Policy Check`).
+- **GitHub Wiki Audit & Synchronization (`pnpm audit:wiki` & `pnpm wiki:sync`)**: Added `tools/scripts/sync-github-wiki.mjs` to validate frontmatter, wikilinks, and index coverage and synchronize `docs/wiki/*` (`Home.md`, `_Sidebar.md`, `_Footer.md`, entities, concepts, comparisons, queries) directly to `Timothy191/Arch-System.wiki.git`.
+- **VibeMon Multi-Agent Telemetry (`@repo/utils/vibemon`, `/api/health/vibemon`)**: Integrated VibeMon `v32` project-root wrapper (`./vibemon.sh`), Zod 4 schemas (`vibemon.schema.ts`), MCP registration, and live `AgenticMonitor` pulse telemetry.
+- **CodeGraph & Graphify Knowledge Graph Substrate**: Added multi-language AST/graph indexing (`.ts`, `.tsx`, `.sql`, `.css`, `.tf`), `graphify` skill, and automated substrate freshness gates (`pnpm audit:code-intelligence`).
+- **GitHub Codespaces Foundation (`.devcontainer/`)**: Added `.devcontainer/devcontainer.json` and `post-create.sh` provisioning Node.js 24, pnpm 9.15.9, Rust 1.85.0, Python 3.12, and local Redis 7.4.
+- **Canonical Metallic Gold Token (`--accent-gold` / `#d4af37`)**: Added `accent-gold` and `accent-gold-hover` (`#c5a017`) to `@repo/theme` (`tokens.json`, `variables.css`, Tailwind preset) and unified `<Logo />`, menubar, system tray, Support widget, and `/hub` badges/separators to `rgb(212, 175, 55)`.
+
+### Changed
+
+- **Next.js 16.4.6 & Supply-Chain Hardening**: Upgraded `next` to `16.4.6` (`experimental.agentUpgrade: 'security'`), remediated all 7 Dependabot alerts (`hono >= 4.13.19`, `@hono/node-server >= 2.1.8`, `http2-wrapper >= 2.2.4`, `webpack-sources >= 3.7.0`), consolidated GitHub branch protection into a single `main-branch-protection` ruleset (`26682077`), and modernized `.github/dependabot.yml`, `CODEOWNERS`, `SECURITY.md`, and issue/PR templates.
+- **Control Room Performance (`ExcavatorActivityList`)**: Memoized list rows and consolidated multi-metric rollups into a single $O(N)$ pass.
+
+### Fixed
+
+- **Supabase Realtime StrictMode Channel Collision (`useSupabaseRealtime`)**: Added monotonic channel sequence counter (`nextChannelSequence`) to prevent `Date.now()` channel collisions during React 19 StrictMode double-mounts.
+- **Access Control Type & Runtime Hardening (`/access-control`)**: Restored rate-limiting (`GATE_PULSE_LIMITER`, `GATE_DENIAL_LIMITER`), operator attribution, and `noUncheckedIndexedAccess` safety across gate, muster, and report Server Actions.
+
 ## [1.6.2] - 2026-10-29
 
 ### Added

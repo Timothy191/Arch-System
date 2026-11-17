@@ -1,32 +1,36 @@
 ---
 title: Deployment Runbook
 created: 2026-05-15
-updated: 2026-05-15
+updated: 2026-11-17
 type: concept
 tags: [deployment, ops, production, ci-cd]
-sources: [CLAUDE.md, turbo.json]
+sources:
+  [AGENTS.md, turbo.json, tools/scripts/agent-verify.sh, tools/scripts/autonomous-ci-gatekeeper.mjs]
 confidence: high
 ---
 
 # Deployment Runbook
 
-Step-by-step procedures for deploying the Arch-Systems portal to production environments.
+Step-by-step procedures for verifying and deploying the Arch-Systems (`Plantcor / Arch OS`) portal to Vercel Production (`https://arch-system-kappap.vercel.app`) and on-premises Linux environments.
 
 ---
 
 ## Pre-Deployment Checklist
 
-### 1. Code Quality Gates
+### 1. Mandatory 28-Gate Verification & CI Gatekeeper
 
 ```bash
-# Run all quality checks
-pnpm lint
-pnpm --filter portal type-check
-pnpm --filter portal test
-pnpm build
+# Run the full 28-gate fail-fast verification suite
+pnpm agent:verify
+
+# Run static security policy enforcement
+pnpm policy:security --ci
+
+# Publish all 6 required GitHub ruleset commit statuses from verified evidence
+pnpm ci:gatekeeper
 ```
 
-All checks must pass before deployment.
+All 28 gates and 6 required status checks (`Quality Gates (Lint, Type Check, Build & Test)`, `Policy Check`, `Dead Code Detection`, `Dependency Lint`, `Security Audit`, `Tier 2 Review Policy Check`) must pass before merging or deploying.
 
 ### 2. Database Migration Review
 

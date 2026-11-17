@@ -1,16 +1,16 @@
 ---
 title: Team Onboarding
 created: 2026-05-15
-updated: 2026-05-15
+updated: 2026-11-17
 type: concept
 tags: [onboarding, team, getting-started, docs]
-sources: [CLAUDE.md, docs/wiki/concepts/turbo-monorepo.md]
+sources: [AGENTS.md, GEMINI.md, docs/wiki/concepts/turborepo-monorepo.md]
 confidence: high
 ---
 
 # Team Onboarding Guide
 
-Welcome to the Arch-Systems (Plantcor) development team. This guide will take you from zero to productive contributor.
+Welcome to the Arch-Systems (Plantcor / Arch OS) development team. This guide will take you from zero to productive contributor.
 
 ---
 
@@ -19,28 +19,26 @@ Welcome to the Arch-Systems (Plantcor) development team. This guide will take yo
 ### Prerequisites Installation
 
 ```bash
-# 1. Install Node.js (use nvm or download)
-nvm install 20
-nvm use 20
-node --version  # v20.17.0 or higher
+# 1. Install Node.js >=24.0.0 (use mise, nvm, or fnm)
+nvm install 24
+nvm use 24
+node --version  # v24.15.0 or higher
 
-# 2. Install pnpm
-npm install -g pnpm@9.12.0
-pnpm --version  # 9.12.0
-
-# 3. Install Git hooks (optional but recommended)
-git config --global core.hooksPath .githooks
+# 2. Activate pinned pnpm 9.15.9
+corepack enable
+corepack prepare pnpm@9.15.9 --activate
+pnpm --version  # 9.15.9
 ```
 
 ### Repository Setup
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/DRACOSFN/Turborepo-Fullstack-Starter-Template.git
-cd Arch-Mk2
+git clone https://github.com/Timothy191/Arch-System.git
+cd Arch-System
 
-# 2. Install dependencies
-pnpm install
+# 2. Install dependencies (installs Husky hooks automatically)
+pnpm install --frozen-lockfile
 
 # 3. Verify installation
 pnpm --filter portal type-check
@@ -52,20 +50,19 @@ pnpm --filter portal type-check
 # 1. Copy environment template
 cp apps/portal/.env.example apps/portal/.env
 
-# 2. Fill in required variables
-# Ask team lead for:
-# - Supabase project URL and keys
-# - AI provider API keys (Groq/OpenRouter)
-# - Optional: FLOWISE_URL for tool integration
+# 2. Fill in required variables in apps/portal/.env:
+# - Cloud Supabase URL and keys (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY)
+# - Local Redis URL (REDIS_URL=redis://localhost:6379)
 
-# 3. Start local Supabase (separate terminal)
-cd packages/database
-pnpm supabase:dev
+# 3. Start local Redis 7.4 + RedisInsight (:5540)
+pnpm redis:up
 
 # 4. Start the portal
 pnpm dev
 # Open http://localhost:3000
 ```
+
+> **Tip:** You can also open the repository directly in **GitHub Codespaces** or VS Code DevContainers using the preconfigured `.devcontainer/devcontainer.json`.
 
 ---
 

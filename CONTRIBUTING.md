@@ -8,31 +8,33 @@ Arch-System (the Plantcor mining operations portal) is an industrial operations 
 
 ### Prerequisites
 
-- **Node.js** ≥ 22 (the `volta` block in `package.json` pins `24.15.0`; any Node ≥22 manager works)
+- **Node.js** `>=24.0.0` (`.nvmrc` and `.node-version` pin `24`)
 - **pnpm** `9.15.9` (pinned via the `packageManager` field in root `package.json`)
-- **Docker** — required for local Supabase
+- **Docker** — required for local Redis (`pnpm redis:up`) and optional local observability stack (`infra/docker/compose.observability.yml`)
+- **Cloud Supabase** — all development and production environments connect to cloud-hosted Supabase PostgreSQL 17
 - **Git** with hooks enabled (Husky installs automatically on `pnpm install`)
 
 ### First clone
 
 ```bash
-git clone <repo-url> arch-system
-cd arch-system
-pnpm install                       # installs deps and activates Husky hooks
-cp apps/portal/env/.env.example apps/portal/.env
-# edit apps/portal/.env — fill Supabase keys, Sentry DSN, etc.
+git clone https://github.com/Timothy191/Arch-System.git
+cd Arch-System
+pnpm install --frozen-lockfile     # installs deps and activates Husky hooks
+cp apps/portal/.env.example apps/portal/.env
+# edit apps/portal/.env — fill Cloud Supabase keys, Redis URL, Sentry DSN, etc.
 ```
 
 ### Environment setup
 
-Ensure `apps/portal/.env` contains your Cloud Supabase configuration (`NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co`).
+Ensure `apps/portal/.env` contains your Cloud Supabase configuration (`NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY`) and local Redis connection (`REDIS_URL=redis://localhost:6379`).
 
 ### Run the app
 
 ```bash
-pnpm dev                                # portal on :3000 (uses scripts/dev.sh)
-# or, more explicit:
-pnpm --filter portal dev
+pnpm redis:up                           # start local Redis 7.4 + RedisInsight (:5540)
+pnpm dev                                # full dev stack + portal on :3000
+# or fast headless portal only:
+pnpm dev:quick
 ```
 
 ### Verify the install
@@ -40,58 +42,58 @@ pnpm --filter portal dev
 ```bash
 pnpm test                               # runs Jest across the workspace
 pnpm --filter portal test -- --testPathPatterns=smoke  # single file
+pnpm agent:verify                       # mandatory 28-gate fail-fast verification suite
 ```
 
 If `pnpm test` is green and the portal loads at `http://localhost:3000`, you are ready to contribute.
 
 ## Architecture overview
 
-The monorepo is a **Turborepo + pnpm workspaces** project (`turbo run` is the entry point for every task). Top-level layout:
+The monorepo is a **Turborepo 2.x + pnpm workspaces** project (`turbo run` is the entry point for every task). Top-level layout:
 
-| Path                | Purpose                                                                                                                    |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `apps/portal`       | Next.js 16+ (App Router, React 19) — the mining operations portal. Server Actions and API routes co-located with features. |
-| `packages/ui`       | Shared Radix + shadcn UI components. `widgets/` for composites.                                                            |
-| `packages/theme`    | OKLCH design tokens + Tailwind preset (single source of truth).                                                            |
-| `packages/supabase` | Browser, server, middleware, read-replica Supabase clients, and auto-generated database types.                             |
-| `packages/database` | SQL migrations (source of truth) — never edit the Supabase copy.                                                           |
-| `packages/redis`    | Redis cache helpers (used by `apps/portal/proxy.ts`).                                                                      |
-| `packages/utils`    | Shared utilities (Inngest, Novu integrations).                                                                             |
-| `packages/errors`   | Domain-specific error classes.                                                                                             |
-| `packages/eval`     | Python/DeepEval AI compliance suite (separate Poetry env, not in `pnpm quality`).                                          |
-| `tools/`            | Build-time scripts: policy compiler, tag applicator, circular-dep detector, MCP servers.                                   |
-| `e2e/`              | Playwright E2E tests (visual snapshots, integration).                                                                      |
+| Path                    | Purpose                                                                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/portal`           | Next.js 16.4.6 (App Router, React 19) — the mining operations portal. Server Actions and API routes co-located with features.      |
+| `packages/ui`           | Shared Radix + Tailwind UI components (`GlassCard`, `Logo`, `EveLogo`, `HeroRotator`, `DepartmentLayout`, `MacMenuBar`).           |
+| `packages/theme`        | Light-mode OKLCH design tokens, Metallic Gold (`--accent-gold` / `#d4af37`) tokens, Style Dictionary codegen, and Tailwind preset. |
+| `packages/contract`     | Canonical Zod 4 schemas and inferred TypeScript types (`pnpm audit:drift`).                                                        |
+| `packages/supabase`     | Browser, server, middleware, proxy, service-role, read-replica Supabase clients, Kysely builder, and generated database types.     |
+| `packages/database`     | Immutable PostgreSQL 17 SQL migrations (source of truth, 172+ applied migrations).                                                 |
+| `packages/redis`        | Capability-only Redis layer (L1/L2 cache, auth sessions, analytics, RediSearch, streams, distributed locks).                       |
+| `packages/intelligence` | Operational mining intelligence engines (anomaly, predictive maintenance, forecast, shift intelligence, copilot).                  |
+| `packages/rate-limiter` | Memory & Redis rate-limiting strategies (fixed-window, sliding-window, token-bucket).                                              |
+| `packages/utils`        | Shared client/server utilities, VibeMon client, Inngest, Novu, n8n, and offline storage.                                           |
+| `packages/errors`       | Domain-specific `AppError` hierarchy and boundary guards.                                                                          |
+| `packages/eval`         | Python/DeepEval AI compliance suite (`pyproject.toml`).                                                                            |
+| `libs/features/*`       | Domain vertical slices (`auth`, `departments`, `hub` x `ui`, `data-access`, `utils`).                                              |
+| `libs/shared/*`         | Cross-cutting SSR-safe hooks (`@repo/shared/hooks`), data-access, and env/cache utilities (`@repo/shared/utils`).                  |
+| `tools/`                | Build-time scripts: policy compiler, 28-gate verifier, autonomous CI gatekeeper, wiki sync, Rust swarm orchestrator.               |
+| `e2e/`                  | Playwright E2E tests (visual snapshots, a11y, integration) and k6 load scripts.                                                    |
 
-Deep dives live in `CLAUDE.md` and `AGENTS.md` — link at the end of this document.
+Deep dives live in `AGENTS.md` and `GEMINI.md` — linked at the end of this document.
 
 ## Quality gates
 
-CI runs every gate on every PR. The order matters — each step is a hard fail.
+Every pull request and `main` push is governed by the **28-gate verification suite** (`pnpm agent:verify` / `bash tools/scripts/agent-verify.sh`) and the **6 required GitHub ruleset status checks** published by `pnpm ci:gatekeeper` (`node tools/scripts/autonomous-ci-gatekeeper.mjs`):
 
-| Order | Step                          | Command                                                 | Blocks PR?  |
-| ----- | ----------------------------- | ------------------------------------------------------- | ----------- |
-| 1     | Dependency version lint       | `pnpm deps:lint` (syncpack)                             | ✅          |
-| 2     | Security audit                | `pnpm audit --audit-level=high --prod`                  | ✅          |
-| 3     | Dead-code detection           | `pnpm knip`                                             | ✅          |
-| 4     | Circular-dependency detection | `node tools/audits/circular-dep-detect.cjs`             | ✅          |
-| 5     | **Policy SSoT drift**         | `pnpm policy:check`                                     | ✅          |
-| 6     | Markdown lint                 | `pnpm md:lint`                                          | ✅          |
-| 7     | Secret scan (gitleaks)        | `gitleaks/gitleaks-action@v2`                           | ✅          |
-| 8     | Lint + Type-check             | `pnpm turbo run lint type-check`                        | ✅          |
-| 9     | Token + CSS lint              | `pnpm turbo run lint:tokens lint:css`                   | ✅          |
-| 10    | Test with coverage            | `pnpm turbo run test --coverage`                        | ✅          |
-| 11    | Build                         | `pnpm turbo run build`                                  | ✅          |
-| 12    | Bundle size check             | `pnpm bundlesize`                                       | ✅          |
-| 13    | Lighthouse CI (preview)       | `npx @lhci/cli@0.14.x autorun`                          | ✅          |
-| 14    | Self-healing CI               | `pnpm turbo run lint --filter=...[origin/main] --force` | ⚠️ advisory |
+| Required GitHub Ruleset Context                  | Local Verification Gate(s)                                                                    | Blocks Merge? |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------- | ------------- |
+| `Quality Gates (Lint, Type Check, Build & Test)` | Gates 1–3, 14, 18–19, 22–23 (`pnpm type-check`, `pnpm lint`, `pnpm test`, `pnpm build`)       | ✅            |
+| `Policy Check`                                   | Gates 4–5, 9–10, 13, 16–17 (`pnpm policy:check`, `pnpm audit:drift`, `pnpm audit:rls-matrix`) | ✅            |
+| `Dead Code Detection`                            | Gate 15 (`pnpm knip`)                                                                         | ✅            |
+| `Dependency Lint`                                | Gate 12 (`pnpm deps:lint` / Syncpack)                                                         | ✅            |
+| `Security Audit`                                 | Gates 6, 11, 20, 25 + `pnpm policy:security --ci`                                             | ✅            |
+| `Tier 2 Review Policy Check`                     | Gates 7–8, 21, 24, 26–28 (evidence manifest, CodeGraph integrity, observability resilience)   | ✅            |
 
-**Local fast lane** (most changes do not need steps 12–14):
+**Local verification & status publication**:
 
 ```bash
-pnpm quality    # lint → type-check → test → lint:tokens → lint:css → format-check → lint-root → deps:lint → knip
+pnpm agent:verify       # Runs all 28 gates fail-fast and writes .ci-local/agent-verify-evidence.json
+pnpm ci:gatekeeper      # Publishes the 6 required GitHub ruleset commit statuses from verified evidence
+pnpm quality            # Full release-grade quality suite
 ```
 
-Run `pnpm quality` before pushing. Husky's `pre-push` hook re-runs lint and type-check on the portal; CI re-runs the full list.
+Run `pnpm agent:verify` before pushing. Husky's `pre-push` hook enforces the 28-gate suite and auto-publishes the verified commit statuses.
 
 ### Coverage thresholds (enforced by Jest)
 

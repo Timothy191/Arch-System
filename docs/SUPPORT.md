@@ -23,18 +23,17 @@
 
 #### Development Environment Setup
 
-- Ensure Node.js ≥22 and pnpm 9.15.9 are installed.
-- Run `pnpm install` to install dependencies.
-- Copy `apps/portal/env/.env.example` to `apps/portal/.env` and
-  configure environment variables.
-- Start Supabase locally: `pnpm --filter @repo/database supabase:dev`.
+- Ensure Node.js `>=24.0.0` and `pnpm@9.15.9` are installed.
+- Run `pnpm install --frozen-lockfile` to install dependencies.
+- Copy `apps/portal/.env.example` to `apps/portal/.env` and configure your Cloud Supabase credentials and local Redis URL (`redis://localhost:6379`).
+- Start local Redis: `pnpm redis:up` (`infra/docker/compose.redis.yml`).
 
 #### Build & Performance
 
-- Run `pnpm quality` to check for linting, type checking, and dependency issues.
+- Run `pnpm agent:verify` or `pnpm quality` to verify linting, type checking, architectural boundaries, and tests.
 - Clear local Turbo cache safely: `rm -rf .turbo/cache`.
 - For selective checks on changed files:
-  `pnpm turbo run lint test build --filter=...[origin/main]` or `pnpm quality`.
+  `pnpm turbo:affected:type-check` or `pnpm agent:verify`.
 - Update dependencies safely: `pnpm deps:lint` and then `pnpm deps:fix`.
 
 #### Remote Cache (Self-hosted)
@@ -46,14 +45,14 @@
 
 #### Database Issues
 
-- Reset local Supabase database: `pnpm --filter @repo/database supabase:reset`
-- Regenerate TypeScript types: `pnpm --filter @repo/database supabase:gen`
+- Run migration and RLS checks locally: `pnpm --filter @repo/database test` and `pnpm lint:migrations`
+- Regenerate TypeScript types: `pnpm --filter @repo/supabase supabase:gen-types`
 - Check migration status in `packages/database/migrations/`
 
 #### Control-Room & Operations
 
-- **Dashboard not updating**: Verify the `infra/observability/` stack
-  status (Prometheus, Grafana) and check FUXA configurations/alerts.
+- **Dashboard not updating**: Verify the `infra/docker/compose.observability.yml` stack
+  status (OpenTelemetry Collector, Prometheus, Grafana) and check FUXA configurations/alerts.
 - **Pin reset procedure**: See [Pin Reset Runbook](operations/pin-reset-procedure.md).
 - **Shift closeout**: Refer to [Shift Closeout Runbook](operations/shift-closeout-runbook.md).
 - **SCADA/FUXA Troubleshooting**: Refer to [FUXA Troubleshooting Guide](operations/fuxa-troubleshooting.md).
@@ -65,17 +64,17 @@
 #### GitHub Issues
 
 - 🐛 Report bugs:
-  [Create an issue](https://github.com/DRACOSFN/Turborepo-Fullstack-Starter-Template/issues/new?template=bug_report.md)
+  [Create an issue](https://github.com/Timothy191/Arch-System/issues/new?template=bug_report.md)
 - 💡 Request features:
-  [Create an issue](https://github.com/DRACOSFN/Turborepo-Fullstack-Starter-Template/issues/new?template=feature_request.md)
+  [Create an issue](https://github.com/Timothy191/Arch-System/issues/new?template=feature_request.md)
 - ❓ Ask questions:
-  [Create a discussion](https://github.com/DRACOSFN/Turborepo-Fullstack-Starter-Template/discussions)
+  [Create an issue or discussion](https://github.com/Timothy191/Arch-System/issues)
 
 #### Community
 
-- 💬 Discussions:
-  [GitHub Discussions](https://github.com/DRACOSFN/Turborepo-Fullstack-Starter-Template/discussions)
-- 🔒 Security Issues: See [SECURITY.md](SECURITY.md) for responsible disclosure.
+- 💬 Issues & Q&A:
+  [GitHub Issues](https://github.com/Timothy191/Arch-System/issues)
+- 🔒 Security Issues: See [SECURITY.md](SECURITY.md) or [GitHub Private Vulnerability Reporting](https://github.com/Timothy191/Arch-System/security/advisories/new) for responsible disclosure.
 - 🏢 Enterprise Support: Contact repository administrators or use
   internal operations support channels.
 

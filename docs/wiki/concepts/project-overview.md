@@ -1,22 +1,22 @@
 ---
 title: Project Overview & Tech Stack
 created: 2026-06-15
-updated: 2026-06-15
+updated: 2026-11-17
 type: concept
 tags: [architecture, overview, documentation, system, stack]
-sources: [package.json, pnpm-workspace.yaml, turbo.json, CLAUDE.md, PRODUCT.md, DESIGN.md]
+sources: [package.json, pnpm-workspace.yaml, turbo.json, AGENTS.md, PRODUCT.md, DESIGN.md]
 confidence: high
 ---
 
 # Project Overview & Tech Stack
 
-Welcome to the **Arch-Systems (Plantcor) Mining Operations Portal** knowledge base. This document serves as the authoritative, comprehensive entry point for understanding the system's architecture, its technology stack, the reasoning behind key technical decisions, and the development workflow.
+Welcome to the **Arch-Systems (Plantcor / Arch OS) Mining Operations Portal** knowledge base. This document serves as the authoritative, comprehensive entry point for understanding the system's architecture, its technology stack, the reasoning behind key technical decisions, and the development workflow.
 
 ---
 
 ## 1. Executive Summary & Domain Context
 
-Arch-Systems is an enterprise-scale, **on-premises first, multi-departmental mining operations portal** built for industrial vigilance and operational precision. The portal functions as a high-density control center, aggregating real-time SCADA telemetry, production yields, equipment maintenance, access control logs, architectural topology, and live database diagnostics.
+Arch-Systems is an enterprise-scale, **multi-departmental mining operations portal** built for industrial vigilance and operational precision. Deployed to Vercel Production (`arch-system`) and backed by **Cloud Supabase (PostgreSQL 17)** and **Redis 7.4**, the portal functions as a high-density control center aggregating real-time SCADA telemetry, production yields, wash-plant hourly sheets, equipment maintenance, access control logs, architectural topology, and live database diagnostics.
 
 ### The 7 Core Operational Modules
 

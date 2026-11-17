@@ -1,27 +1,27 @@
 ---
 title: Arch-Systems (Plantcor)
 created: 2026-05-14
-updated: 2026-06-03
+updated: 2026-11-17
 type: entity
 tags: [system, application, company]
-sources: [turbo.json, packages/database/migrations/, package.json]
+sources: [turbo.json, packages/database/migrations/, package.json, AGENTS.md]
 confidence: high
 ---
 
-# Arch-Systems (Plantcor)
+# Arch-Systems (Plantcor / Arch OS)
 
-Arch-Systems (Plantcor) is a multi-departmental mining operations portal built as a monorepo. It provides authenticated access to department-specific dashboards for drilling, production, access control, access card actions, engineering, and control room.
+Arch-Systems (Plantcor / Arch OS) is a production multi-departmental mining operations portal built as a Turborepo 2.x monorepo. It provides authenticated, role-scoped access to department workspaces for control room, drilling, production, plant processing, plant inventory, engineering, availability and utilization, access control, office, executive hub, system overview, and database administration.
 
 ## Technology Stack
 
-- **Frontend:** Next.js 16 (App Router, React 19.2.7), Tailwind CSS 3.4, shadcn/ui
-- **Backend:** Supabase (PostgreSQL, Auth, Storage, Read Replicas)
-- **Build/Orchestration:** Turborepo 2.10.12 + pnpm 9.15.9 workspaces
-- **Testing:** Jest 30 (unit), Playwright 1.60 (E2E)
-- **3D:** @react-three/fiber 8 + @react-three/drei 9
+- **Frontend:** Next.js 16.4.6 (App Router, React 19.2.7), Tailwind CSS 3.4 (Light-mode OKLCH + Metallic Gold `#d4af37`), Radix UI
+- **Backend:** Cloud Supabase (PostgreSQL 17, Auth, Storage, Realtime CDC, Read Replicas) + Redis 7.4 (L1/L2 cache, sessions, RediSearch, streams)
+- **Build/Orchestration:** Turborepo 2.10.12 + pnpm 9.15.9 workspaces on Node.js >=24.0.0
+- **Testing & Verification:** Jest 30 (unit), Playwright 1.65 (E2E), 28-gate `pnpm agent:verify` + Autonomous CI Gatekeeper (`pnpm ci:gatekeeper`)
+- **3D & Visualization:** @react-three/fiber + @react-three/drei, React Flow, Recharts
 - **Maps:** react-map-gl 8 + maplibre-gl 5
-- **State:** Zustand 5
-- **Observability:** Highlight.io (session replay, server tracing) + OpenTelemetry
+- **State:** TanStack Query + Zustand 5 + XState 5 + IndexedDB offline queue
+- **Observability:** Native Observability Console (`/admin/observability`), OpenTelemetry Collector, Prometheus, Grafana (light mode), Woodpecker CI, VibeMon `v32`, and Sentry v10
 
 ## Monorepo Structure
 
