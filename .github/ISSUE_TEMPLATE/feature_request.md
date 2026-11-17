@@ -1,27 +1,21 @@
 ---
 name: Feature request
-about: Suggest an improvement or new feature
-title: "Feature: "
+about: Propose an operational workflow, telemetry engine, or platform capability
+title: 'feat(scope): '
 labels: enhancement
-assignees: ""
+assignees: Timothy191
 ---
 
-**Summary**
+## Problem Statement
 
-Describe the feature or improvement.
+Describe the operational or engineering problem in Plantcor / Arch OS.
 
-**Problem statement**
+## Proposed Solution
 
-What problem does this solve?
+Outline the target workflow, `@repo/contract` Zod schemas, Server Actions / RSC routes, and caching or Realtime CDC requirements.
 
-**Proposed solution**
+## Affected Modules
 
-How should it work?
-
-**Impact**
-
-Who benefits and why?
-
-**Additional context**
-
-Add any other context, examples, or designs.
+- Workspace / Route Group:
+- Shared Packages (`@repo/*`):
+- Database / RLS Impact:

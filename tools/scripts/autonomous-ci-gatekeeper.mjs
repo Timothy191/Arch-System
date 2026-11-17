@@ -25,7 +25,14 @@ const EVIDENCE_FILE_PATH = path.resolve('.ci-local/agent-verify-evidence.json');
 const MAX_EVIDENCE_AGE_MS = 900_000;
 const STATUS_DESCRIPTION_LIMIT = 140;
 
-const REQUIRED_CONTEXTS = ['Quality Gates (Lint, Type Check, Build & Test)', 'Security Audit'];
+const REQUIRED_CONTEXTS = [
+  'Quality Gates (Lint, Type Check, Build & Test)',
+  'Policy Check',
+  'Dead Code Detection',
+  'Dependency Lint',
+  'Security Audit',
+  'Tier 2 Review Policy Check',
+];
 
 function parseCliArgs(argv) {
   const options = {
@@ -41,6 +48,10 @@ function parseCliArgs(argv) {
       options.mode = 'from-evidence';
     } else if (token === '--all-open-prs') {
       options.mode = 'all-open-prs';
+    } else if (token === '--pause-workflows') {
+      options.mode = 'pause-workflows';
+    } else if (token === '--resume-workflows') {
+      options.mode = 'resume-workflows';
     } else if (token === '--pr') {
       options.mode = 'pr';
       options.prNumber = argv[index + 1] ?? '';
@@ -312,6 +323,34 @@ function runForAllOpenPrs({ isDryRun }) {
   }
 }
 
+function setRepoWorkflowsState({ shouldEnable, isDryRun }) {
+  const targetCurrentState = shouldEnable ? 'disabled_manually' : 'active';
+  const subcommand = shouldEnable ? 'enable' : 'disable';
+  const listResult = runCommand('gh', [
+    'api',
+    `/repos/${GITHUB_REPO}/actions/workflows?per_page=100`,
+    '--jq',
+    `.workflows[] | select(.state == "${targetCurrentState}" and (.path | startswith(".github/workflows/"))) | "\\(.id)|\\(.name)"`,
+  ]);
+  if (listResult.status !== 0) {
+    throw new Error(`Failed to list workflows: ${listResult.stderr}`);
+  }
+
+  const lines = listResult.stdout.split('\n').filter(Boolean);
+  for (const line of lines) {
+    const [workflowId, workflowName] = line.split('|');
+    if (isDryRun) {
+      console.log(`[DRY-RUN] gh workflow ${subcommand} ${workflowId} (${workflowName})`);
+      continue;
+    }
+    const toggleResult = runCommand('gh', ['workflow', subcommand, String(workflowId)]);
+    if (toggleResult.status !== 0) {
+      throw new Error(`Failed to ${subcommand} ${workflowName}: ${toggleResult.stderr}`);
+    }
+    console.log(`[CI-GATEKEEPER] ${subcommand}d workflow: ${workflowName}`);
+  }
+}
+
 function printHelp() {
   console.log(`Autonomous Local CI Gatekeeper (${GITHUB_REPO})
 
@@ -319,24 +358,28 @@ Usage:
   pnpm ci:gatekeeper --from-evidence [--sha <sha>] [--dry-run]
   pnpm ci:gatekeeper --pr <number> [--dry-run]
   pnpm ci:gatekeeper --all-open-prs [--dry-run]
+  pnpm ci:gatekeeper --pause-workflows [--dry-run]
+  pnpm ci:gatekeeper --resume-workflows [--dry-run]
 `);
 }
 
 function main() {
   const options = parseCliArgs(process.argv.slice(2));
-  if (options.mode === 'from-evidence') {
-    publishFromEvidence({ sha: options.sha, isDryRun: options.isDryRun });
-    return;
-  }
-  if (options.mode === 'pr' && options.prNumber) {
-    runForPr({ prNumber: options.prNumber, isDryRun: options.isDryRun });
-    return;
-  }
-  if (options.mode === 'all-open-prs') {
-    runForAllOpenPrs({ isDryRun: options.isDryRun });
-    return;
-  }
-  printHelp();
+  const handlers = {
+    'from-evidence': () => publishFromEvidence({ sha: options.sha, isDryRun: options.isDryRun }),
+    'all-open-prs': () => runForAllOpenPrs({ isDryRun: options.isDryRun }),
+    'pause-workflows': () =>
+      setRepoWorkflowsState({ shouldEnable: false, isDryRun: options.isDryRun }),
+    'resume-workflows': () =>
+      setRepoWorkflowsState({ shouldEnable: true, isDryRun: options.isDryRun }),
+    pr: () =>
+      options.prNumber
+        ? runForPr({ prNumber: options.prNumber, isDryRun: options.isDryRun })
+        : printHelp(),
+    help: () => printHelp(),
+  };
+  const handler = handlers[options.mode] ?? printHelp;
+  handler();
 }
 
 main();

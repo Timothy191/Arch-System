@@ -6,23 +6,25 @@ Concise, repository-specific guidance for Copilot-style assistants and automated
 
 ## 1) Build, test and lint commands
 
-All tasks run through Turborepo (`turbo run`). pnpm `9.15.9` is pinned via the `packageManager` field in root `package.json`; the `volta` block pins Node `24.15.0` (any Node ≥22 works).
+All tasks run through Turborepo (`turbo run`). pnpm `9.15.9` is pinned via the `packageManager` field in root `package.json`; `.node-version` and `.nvmrc` pin Node `24` (`>=24.0.0` required).
 
-| Action                                   | Command                                                                                  |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Install deps                             | `pnpm install`                                                                           |
-| Dev server (portal on `0.0.0.0:3000`)    | `pnpm dev`                                                                               |
-| Minimal dev server (headless, no Docker) | `pnpm dev:quick`                                                                         |
-| Database type generation                 | `pnpm --filter @repo/database db:types`                                                  |
-| Build all                                | `pnpm build`                                                                             |
-| Build one project                        | `pnpm --filter @repo/<name> build` or `pnpm turbo run build --filter=<name>`             |
-| Lint all                                 | `pnpm lint` (Biome in portal; Stylelint/cspell via `pnpm lint:styles` / `lint:spelling`) |
-| Type-check all                           | `pnpm type-check`                                                                        |
-| Run all unit tests                       | `pnpm test`                                                                              |
-| Run one portal test file                 | `pnpm --filter portal test -- --testPathPatterns=<file>`                                 |
-| Run E2E                                  | `pnpm test:e2e` (requires portal dev server on `:3000` and Chromium)                     |
-| Full local quality gate                  | `pnpm quality`                                                                           |
-| Format code                              | `pnpm format`                                                                            |
+| Action                                   | Command                                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Install deps                             | `pnpm install --frozen-lockfile`                                                           |
+| Dev server (portal on `0.0.0.0:3000`)    | `pnpm dev`                                                                                 |
+| Minimal dev server (headless, no Docker) | `pnpm dev:quick`                                                                           |
+| Database type generation                 | `pnpm --filter @repo/supabase supabase:gen-types`                                          |
+| Build all                                | `pnpm build`                                                                               |
+| Build one project                        | `pnpm --filter @repo/<name> build` or `pnpm turbo run build --filter=<name>`               |
+| Lint all                                 | `pnpm lint` (Biome across workspace; Stylelint/CSpell via `lint:styles` / `lint:spelling`) |
+| Type-check all                           | `pnpm type-check`                                                                          |
+| Run all unit tests                       | `pnpm test`                                                                                |
+| Run one portal test file                 | `pnpm --filter portal test -- --testPathPatterns=<file>`                                   |
+| Run E2E                                  | `pnpm test:e2e` (requires portal dev server on `:3000` and Chromium)                       |
+| Mandatory 28-gate completion suite       | `pnpm agent:verify`                                                                        |
+| Publish GitHub CI Commit Statuses        | `pnpm ci:gatekeeper --from-evidence`                                                       |
+| Full local quality gate                  | `pnpm quality`                                                                             |
+| Format code                              | `pnpm format`                                                                              |
 
 `pnpm quality` runs: `turbo run lint type-check test lint:tokens lint:css`, then `lint:styles`, `lint:css-perf`, `lint:spelling`, `deps:lint` (syncpack), `knip`, `policy:check`, `audit:compliance`, `html:check`, `verify:gates`. Run it before proposing a merge.
 
@@ -42,10 +44,10 @@ Coverage thresholds (portal Jest, global): lines 40%, branches 30%, functions 30
 
 ### Codegen pipelines (never edit generated output)
 
-| Source                          | Command                                 | Generated output                                              |
-| ------------------------------- | --------------------------------------- | ------------------------------------------------------------- |
-| `packages/theme/tokens.json`    | `pnpm --filter @repo/theme build`       | `packages/theme/src/tokens/generated.ts`, `src/css/index.css` |
-| `packages/database/migrations/` | `pnpm --filter @repo/database db:types` | `packages/supabase/src/database.types.ts`                     |
+| Source                          | Command                                           | Generated output                                              |
+| ------------------------------- | ------------------------------------------------- | ------------------------------------------------------------- |
+| `packages/theme/tokens.json`    | `pnpm --filter @repo/theme codegen`               | `packages/theme/src/tokens/generated.ts`, `src/css/index.css` |
+| `packages/database/migrations/` | `pnpm --filter @repo/supabase supabase:gen-types` | `packages/supabase/src/database.types.ts`                     |
 
 Commit both source and generated files in the same atomic change.
 
@@ -112,7 +114,7 @@ Commit both source and generated files in the same atomic change.
 
 ### Agent tracing
 
-1. Read the affected package's `AGENT_TRACER.md` before editing; update it after every change.
+1. Record workspace changes in the single root `AGENT_TRACER.md` only (ISO-8601 heading at top). Never create per-package `*/AGENT_TRACER.md` files (`pnpm audit:agents:check` enforces this).
 2. Add `// AGENT-TRACE:` breadcrumbs for non-obvious logic.
 3. Instrument new service paths with OpenTelemetry / prom-client where applicable.
 

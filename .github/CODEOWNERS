@@ -1,3 +1,10 @@
-# GitHub CODEOWNERS
-# Assign all paths to the repository owner for review and approvals.
-* @timothy191
+# Arch-System GitHub CODEOWNERS
+# Enforce code-owner review across application, database, infrastructure, and governance boundaries.
+
+*                           @Timothy191
+/.github/                   @Timothy191
+/apps/portal/server/        @Timothy191
+/packages/contract/         @Timothy191
+/packages/database/         @Timothy191
+/packages/supabase/         @Timothy191
+/tools/repo/                @Timothy191

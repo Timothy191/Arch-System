@@ -1,35 +1,31 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: "Bug: "
+about: Report a defect in Arch-System portal workspaces, telemetry, caching, or RBAC
+title: 'fix(scope): '
 labels: bug
-assignees: ""
+assignees: Timothy191
 ---
 
-**Summary**
+## Summary
 
-Describe the bug in a few sentences.
+Describe the defect and affected department or subsystem (`control-room`, `drilling`, `production`, `plant-processing`, `engineering`, `access-control`, `hub`, `overview`, `admin`, `supabase`, `redis`).
 
-**Steps to reproduce**
+## Steps to Reproduce
 
 1.
 2.
 3.
 
-**Expected behavior**
+## Expected Behavior
 
-What should happen?
+Describe the expected production behavior.
 
-**Actual behavior**
+## Actual Behavior
 
-What happens instead?
+Describe what occurred instead, including error codes, Correlation/Request IDs, or logs (never paste secrets or tokens).
 
-**Environment**
+## Environment
 
-- Browser / OS:
-- Node version:
-- App / branch:
-
-**Additional context**
-
-Add any other context about the problem here.
+- Route / Workspace:
+- Commit SHA (`/api/version`):
+- Node.js / Browser:

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability Disclosure
+    url: https://github.com/Timothy191/Arch-System/security/advisories/new
+    about: Privately report security vulnerabilities via GitHub Security Advisories (do not open public issues for security bugs).

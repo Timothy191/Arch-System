@@ -3,16 +3,36 @@ updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
-      interval: 'daily'
+      interval: 'weekly'
     open-pull-requests-limit: 10
+    commit-message:
+      prefix: 'chore(deps)'
     groups:
       production-dependencies:
         dependency-type: 'production'
       development-dependencies:
         dependency-type: 'development'
-    security-updates-only: true
+
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'weekly'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
+
+  - package-ecosystem: 'cargo'
+    directory: '/tools/swarms-orchestrator'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
+
+  - package-ecosystem: 'pip'
+    directory: '/packages/eval'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
