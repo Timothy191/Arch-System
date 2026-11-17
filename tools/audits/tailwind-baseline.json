@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-17T11:39:28.451Z",
+  "generatedAt": "2026-11-17T11:45:47.876Z",
   "config": {
     "maxUtilitiesPerElement": 20,
     "duplicateMinTokens": 10,
@@ -8,7 +8,6 @@
   },
   "overBudgetByFile": {
     "apps/portal/features/hub/components/CoreOperationalModules.tsx": 1,
-    "packages/ui/src/components/ui/dropdown-menu.tsx": 1,
     "packages/ui/src/components/ui/select.tsx": 1
   },
   "repeatedChains": {

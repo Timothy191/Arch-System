@@ -35,6 +35,12 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json(
     { status, latencyMs: Date.now() - startedAt, components },
-    { status: degraded ? 503 : 200, headers: { 'X-Health-Status': status } }
+    {
+      status: degraded ? 503 : 200,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'X-Health-Status': status,
+      },
+    }
   );
 }

@@ -4,6 +4,12 @@
 
 ---
 
+## [2026-11-17T13:45:00+02:00] - Scheduled Improvement Pass 4: `DropdownMenu` Utility Extraction, Health `no-store` Headers & Tailwind Ratchet (`chore/auto-improve-20261117-1345`)
+
+- **UI Primitive Utility Extraction**: Extracted `DROPDOWN_SUB_CONTENT_STYLES` and `DROPDOWN_CONTENT_STYLES` in [`packages/ui/src/components/ui/dropdown-menu.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/ui/dropdown-menu.tsx#L41-L58).
+- **Health Endpoint Cache-Control Hardening**: Added `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` headers to [`apps/portal/app/api/health/n8n/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/n8n/route.ts#L62-L67) and [`apps/portal/app/api/health/warmup/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/warmup/route.ts#L38-L44).
+- **Tailwind Utility Baseline Ratchet**: Ratcheted [`tools/audits/tailwind-baseline.json`](file:///home/tim/Fork/Arch-System/tools/audits/tailwind-baseline.json) down from `3` files to `2` files (`26` repeated chains).
+
 ## [2026-11-17T13:39:00+02:00] - Scheduled Improvement Pass 3: `DialogContent` Utility Extraction, Health `no-store` Headers & Tailwind Ratchet (`chore/auto-improve-20261117-1337`)
 
 - **UI Primitive Utility Extraction**: Extracted `DIALOG_CONTENT_STYLES` in [`packages/ui/src/components/ui/dialog.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/ui/dialog.tsx#L31-L38) to eliminate the 28-utility inline string on `DialogPrimitive.Content`.

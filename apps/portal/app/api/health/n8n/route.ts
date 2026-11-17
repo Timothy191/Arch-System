@@ -59,5 +59,10 @@ export async function GET(_req: NextRequest) {
 
   // n8n is optional: Always return HTTP 200 so external status monitors and health probes
   // do not trigger alerts or break portal operations when n8n is absent.
-  return NextResponse.json(payload, { status: 200 });
+  return NextResponse.json(payload, {
+    status: 200,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+    },
+  });
 }
