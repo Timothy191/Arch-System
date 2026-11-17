@@ -480,26 +480,33 @@ export async function GET(request: Request) {
 
     const buildTelemetry = await buildExecutiveTelemetry(true);
 
-    return NextResponse.json({
-      success: true,
-      metrics: {
-        totalTokens,
-        totalPromptTokens,
-        totalCompletionTokens,
-        totalCachedTokens,
-        cacheHitRatio,
-        tokensSaved,
-        totalCostUSD,
-        totalCostZAR,
-        totalRequests: usage.length,
-        avgLatency: Math.round(
-          usage.reduce((sum, r) => sum + Number(r.latency_ms ?? 0), 0) / (usage.length || 1)
-        ),
-        byModel: modelBreakdown,
-        recentUsage,
-        buildTelemetry,
+    return NextResponse.json(
+      {
+        success: true,
+        metrics: {
+          totalTokens,
+          totalPromptTokens,
+          totalCompletionTokens,
+          totalCachedTokens,
+          cacheHitRatio,
+          tokensSaved,
+          totalCostUSD,
+          totalCostZAR,
+          totalRequests: usage.length,
+          avgLatency: Math.round(
+            usage.reduce((sum, r) => sum + Number(r.latency_ms ?? 0), 0) / (usage.length || 1)
+          ),
+          byModel: modelBreakdown,
+          recentUsage,
+          buildTelemetry,
+        },
       },
-    });
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        },
+      }
+    );
   } catch (error) {
     await logError(error, { context: 'ai_metrics_route' });
     const message =

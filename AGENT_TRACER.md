@@ -4,6 +4,11 @@
 
 ---
 
+## [2026-11-17T14:06:00+02:00] - Scheduled Improvement Pass 6: `CoreOperationalModules` Utility Extraction (0 Over-Budget Files), Metrics/Summary `no-store` Headers (`chore/auto-improve-20261117-1404`)
+
+- **Zero Over-Budget Tailwind Elements**: Extracted `EXECUTIVE_LINK_CLASS` in [`CoreOperationalModules.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/hub/components/CoreOperationalModules.tsx#L17-L22) and ratcheted [`tools/audits/tailwind-baseline.json`](file:///home/tim/Fork/Arch-System/tools/audits/tailwind-baseline.json) down to **`0` over-budget files** (`26` repeated chains).
+- **Telemetry & Observability `Cache-Control` Hardening**: Added `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` to [`apps/portal/app/api/ai/metrics/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/ai/metrics/route.ts#L503-L507) and upgraded [`apps/portal/app/api/observability/summary/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/observability/summary/route.ts#L40).
+
 ## [2026-11-17T13:55:00+02:00] - Scheduled Improvement Pass 5: `Select` Utility Extraction, Health `no-store` Parity & Tailwind Ratchet (`chore/auto-improve-20261117-1354`)
 
 - **UI Primitive Utility Extraction**: Extracted `SELECT_TRIGGER_STYLES`, `SELECT_CONTENT_STYLES`, and `SELECT_ITEM_STYLES` in [`packages/ui/src/components/ui/select.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/ui/select.tsx#L10-L30).

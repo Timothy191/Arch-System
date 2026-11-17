@@ -14,6 +14,13 @@ import { useTypewriterPlaceholder } from '@/hooks/useTypewriterPlaceholder';
 import { dispatchActiveModuleChange } from '@/lib/event-manager';
 import type { EmployeeClearance } from '@/lib/hub-departments';
 
+const EXECUTIVE_LINK_CLASS = cn(
+  'gold-steel-border gold-steel-border-slim group/exec inline-flex min-h-11 items-center gap-2',
+  'rounded-full border border-arch-border-subtle bg-white/90 px-3.5 py-1.5',
+  'font-semibold text-[13px] text-arch-text-primary leading-[18px] shadow-xs transition-all duration-150',
+  'hover:-translate-y-px hover:border-arch-accent-blue/40 hover:bg-white hover:text-arch-accent-blue active:scale-[0.985]'
+);
+
 interface CoreOperationalModulesProps {
   departments: Department[];
   clearance?: EmployeeClearance;
@@ -151,10 +158,7 @@ export function CoreOperationalModules({
           </h2>
 
           {canSeeExecutive && (
-            <Link
-              href="/hub/executive"
-              className="gold-steel-border gold-steel-border-slim group/exec inline-flex min-h-11 items-center gap-2 rounded-full border border-arch-border-subtle bg-white/90 px-3.5 py-1.5 font-semibold text-[13px] text-arch-text-primary leading-[18px] shadow-xs transition-all duration-150 hover:-translate-y-px hover:border-arch-accent-blue/40 hover:bg-white hover:text-arch-accent-blue active:scale-[0.985]"
-            >
+            <Link href="/hub/executive" className={EXECUTIVE_LINK_CLASS}>
               <span className="flex items-center justify-center rounded-full bg-arch-accent-blue/10 p-1 text-arch-accent-blue">
                 <BarChart3 className="h-3.5 w-3.5" />
               </span>
