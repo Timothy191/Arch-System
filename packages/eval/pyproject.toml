@@ -36,7 +36,7 @@ google-genai = ">=1.0"
 google-antigravity = ">=0.1.0"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.5"
+ruff = ">=0.5,<0.18"
 
 [build-system]
 requires = ["poetry-core"]
