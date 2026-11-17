@@ -3,7 +3,7 @@
   "description": "Redis client, caching helpers, cache statistics, TTL registry, sessions with privilege revocation, streams, distributed locks, analytics counters, RediSearch vector search and capability probing",
   "version": "1.0.0",
   "dependencies": {
-    "redis": "^4.7.0"
+    "redis": "^6.3.1"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",

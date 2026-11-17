@@ -3,7 +3,7 @@
   "description": "Structured logging with Pino — server, browser, and Next.js helpers",
   "version": "1.0.0",
   "dependencies": {
-    "pino": "^9.6.0"
+    "pino": "^10.4.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
