@@ -205,6 +205,7 @@ export * from './codemod';
 export * from './control-room';
 export * from './schemas/_registry';
 export * from './schemas/audit-log.schema';
+export * from './schemas/cloudflare.schema';
 export * from './schemas/combobox.schema';
 export type {
   ComplianceAuditRun,

@@ -1,0 +1,82 @@
+# Global setup
+name = "arch-system"
+compatibility_date = "2024-01-01"
+
+# Observability - Tracing
+[observability]
+  traces = true
+
+# Account ID
+account_id = "d7646260887677f91b94383b08472d0d"
+
+# Route configuration for Workers
+[routes]
+  # General routes
+  pattern = "/*"
+  name = "arch-system-workers"
+
+# Queues
+[queues]
+binding = "AGENT_QUEUE"
+queue = "agent-events"
+
+# Durable Object configuration
+[[durable_objects]]
+  class_name = "AgentCoordinator"
+binding = "agentCoordinator"
+
+# R2 Storage configuration
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "arch-system-agents"
+
+# D1 Database configuration
+[[d1_databases]]
+binding = "DB"
+database_name = "arch-system-db"
+class_name = "main"
+
+# KV Namespaces configuration
+[[kv_namespaces]]
+binding = "KV"
+
+# Cloudflare API credentials (set CLOUDFLARE_API_TOKEN via `wrangler secret put`)
+CLOUDFLARE_ACCOUNT_ID = "d7646260887677f91b94383b08472d0d"
+AI_GATEWAY_ID = "default"
+
+# Workers AI configuration
+[ai]
+  cloudflareai = true
+
+# Script configuration
+[[script]]
+  main = "workers/scada-monitor.js"
+  binding = "agentCoordinator"
+
+# Observability - Tracing
+[observability]
+  enabled = true
+  
+# WAF enabled
+waf_enabled = true
+
+# Bot management
+bot_fighting = true
+
+# TLS configuration
+tls_1_3_enabled = true
+
+# IPv6 support
+ipv6_enabled = true
+
+# Security headers
+hsts_enabled = true
+
+# Load balancing
+load_balancing = true
+
+# Security settings
+security_level = "high"
+
+# Cache settings
+cache_level = "standard"

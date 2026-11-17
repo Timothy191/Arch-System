@@ -1,4 +1,4 @@
-import { BarChart3, CheckSquare, ClipboardCheck } from 'lucide-react';
+import { BarChart3, CheckSquare, ClipboardCheck, Shield } from 'lucide-react';
 import Link from 'next/link';
 
 export const CONTROL_ROOM_ACTIVE_SUBTAB_CLASS =
@@ -9,7 +9,7 @@ export const CONTROL_ROOM_INACTIVE_SUBTAB_CLASS =
 
 export interface ControlRoomSubtabsProps {
   readonly departmentSlug?: string;
-  readonly activeTab: 'scada' | 'shift-operations' | 'shift-closeout';
+  readonly activeTab: 'scada' | 'shift-operations' | 'shift-closeout' | 'cloudflare-edge';
   readonly borderTop?: boolean;
 }
 
@@ -62,6 +62,18 @@ export function ControlRoomSubtabs({
       >
         <CheckSquare className="h-3.5 w-3.5" />
         <span>Shift Closeout</span>
+      </Link>
+      <Link
+        href={`/${departmentSlug}/cloudflare-edge`}
+        aria-current={activeTab === 'cloudflare-edge' ? 'page' : undefined}
+        className={
+          activeTab === 'cloudflare-edge'
+            ? CONTROL_ROOM_ACTIVE_SUBTAB_CLASS
+            : CONTROL_ROOM_INACTIVE_SUBTAB_CLASS
+        }
+      >
+        <Shield className="h-3.5 w-3.5" />
+        <span>Cloudflare Edge</span>
       </Link>
     </div>
   );
