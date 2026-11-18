@@ -27,6 +27,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { getActiveSkillDirectories } = require('./active-skill-directories.cjs');
+const { validateSkillDirectory } = require('./validate-agent-skill.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const AGENTS_DIR = path.join(ROOT, '.agents');
@@ -74,37 +75,26 @@ const skillsDir = path.join(AGENTS_DIR, 'skills');
 let skillsCount = 0;
 if (fs.existsSync(skillsDir)) {
   const skillEntries = getActiveSkillDirectories(
-    fs.readdirSync(skillsDir, { withFileTypes: true })
+    fs.readdirSync(skillsDir, { withFileTypes: true }),
+    skillsDir
   );
   skillEntries.forEach((entry) => {
     skillsCount++;
-    const skillFile = path.join(skillsDir, entry.name, 'SKILL.md');
-    if (!fs.existsSync(skillFile)) {
+    const skillDir = path.join(skillsDir, entry.name);
+    const { errors, warnings: skillWarnings } = validateSkillDirectory(skillDir);
+    for (const err of errors) {
       violations.push({
-        file: `.agents/skills/${entry.name}`,
-        type: 'MISSING_SKILL_MD',
-        description: `Skill folder is missing required SKILL.md.`,
+        file: `.agents/skills/${entry.name}/SKILL.md`,
+        type: err.type,
+        description: err.description,
       });
-    } else {
-      const content = fs.readFileSync(skillFile, 'utf8');
-      // Validate YAML frontmatter
-      const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-      if (!frontmatterMatch) {
-        warnings.push({
-          file: `.agents/skills/${entry.name}/SKILL.md`,
-          type: 'MISSING_FRONTMATTER',
-          description: `SKILL.md is missing YAML frontmatter (name, description).`,
-        });
-      } else {
-        const fm = frontmatterMatch[1];
-        if (!fm.includes('name:') || !fm.includes('description:')) {
-          warnings.push({
-            file: `.agents/skills/${entry.name}/SKILL.md`,
-            type: 'INCOMPLETE_FRONTMATTER',
-            description: `Frontmatter missing required 'name' or 'description' field.`,
-          });
-        }
-      }
+    }
+    for (const warn of skillWarnings) {
+      warnings.push({
+        file: `.agents/skills/${entry.name}/SKILL.md`,
+        type: warn.type,
+        description: warn.description,
+      });
     }
   });
   console.log(`   ✓ Audited ${skillsCount} agent skills.`);

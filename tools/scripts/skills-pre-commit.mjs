@@ -10,7 +10,11 @@
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
+
+const require = createRequire(import.meta.url);
+const { validateSkillDirectory } = require('../audits/validate-agent-skill.cjs');
 
 const VALIDATOR =
   process.env.SKILL_VALIDATOR || `${process.env.HOME}/.cline/skills-tools/validate-skill.mjs`;
@@ -27,10 +31,7 @@ function stagedFiles() {
   }
 }
 
-if (!fs.existsSync(VALIDATOR)) {
-  // Lazily skip when the toolkit isn't installed on this host.
-  process.exit(0);
-}
+const hasExternalValidator = fs.existsSync(VALIDATOR);
 
 const files = stagedFiles();
 const skillDirs = new Set();
@@ -54,17 +55,27 @@ if (skillDirs.size === 0) process.exit(0);
 let failed = 0;
 for (const d of skillDirs) {
   process.stdout.write(`Skills pre-commit: validating ${d}\n`);
-  try {
-    execFileSync('node', [VALIDATOR, d], { stdio: 'inherit' });
-  } catch {
-    failed = 1;
+  if (hasExternalValidator) {
+    try {
+      execFileSync('node', [VALIDATOR, d], { stdio: 'inherit' });
+    } catch {
+      failed = 1;
+    }
+  } else {
+    const { errors, warnings } = validateSkillDirectory(d);
+    for (const warn of warnings) {
+      process.stdout.write(`  WARN [${warn.type}] ${warn.description}\n`);
+    }
+    for (const err of errors) {
+      process.stderr.write(`  ERROR [${err.type}] ${err.description}\n`);
+      failed = 1;
+    }
   }
 }
 
 if (failed !== 0) {
   process.stdout.write(
-    '\nSkills pre-commit: skill validation FAILED — fix the FATAL violations above before committing.\n'
+    '\nSkills pre-commit: skill validation FAILED — fix the errors above before committing.\n'
   );
-  process.stdout.write(`Validator: node ${VALIDATOR} <skill-dir>\n`);
 }
 process.exit(failed);

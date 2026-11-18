@@ -38,14 +38,11 @@ In large monorepos with diverse apps and libraries:
 
 - **Root `AGENTS.md`**: Global monorepo guidelines, workspace scripts, toolchain versions (Node, pnpm, Turborepo), global architecture boundaries, and quality gate commands.
 - **Subpackage Guidelines**: Specific subproject instructions can be placed in subdirectories or referenced via packages without duplication.
-- **Agent Tracing (`AGENT_TRACER.md`)**: Maintained in each package root to record chronological changelogs for seamless handoffs between autonomous agents.
+- **Agent Tracing (`AGENT_TRACER.md`)**: Maintained as a single consolidated root `AGENT_TRACER.md` ledger (never create per-package `AGENT_TRACER.md` files).
 
 ---
 
-## 4. References & Bundled Standard Repository
+## 4. References & Bundled Templates
 
-The official upstream specification repository is mirrored locally in this skill:
-
-- **Upstream Repository**: [`references/agents-md-repo`](./references/agents-md-repo)
-- **Specification Documentation**: [`references/agents-md-repo/README.md`](./references/agents-md-repo/README.md)
-- **Upstream Example**: [`references/agents-md-repo/AGENTS.md`](./references/agents-md-repo/AGENTS.md)
+- **Upstream Specification**: [agentsmd/agents.md](https://github.com/agentsmd/agents.md)
+- **Package `AGENTS.md` Template**: [`assets/monorepo-package-AGENTS.md`](./assets/monorepo-package-AGENTS.md)

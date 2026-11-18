@@ -4,6 +4,11 @@
 
 ---
 
+## [2026-11-18T13:45:00+02:00] - Agent Skills Open Standard Compliance & Validator Upgrade (`chore/agent-skills-spec-compliance`)
+
+- **Validator Upgrades**: Created [`validate-agent-skill.cjs`](file:///home/tim/Fork/Arch-System/tools/audits/validate-agent-skill.cjs) implementing the Agent Skills specification (`name` regex/dir-match, `description <= 1024`, allowed frontmatter keys, `<= 500` lines warning, relative link verification), wired into [`audit-agentic-content.cjs`](file:///home/tim/Fork/Arch-System/tools/audits/audit-agentic-content.cjs) and [`skills-pre-commit.mjs`](file:///home/tim/Fork/Arch-System/tools/scripts/skills-pre-commit.mjs), and updated [`active-skill-directories.cjs`](file:///home/tim/Fork/Arch-System/tools/audits/active-skill-directories.cjs) to follow symlinked skill directories (`14` skills audited).
+- **Skill Compliance Fixes**: Repaired [`agents-md/SKILL.md`](file:///home/tim/Fork/Arch-System/.agents/skills/agents-md/SKILL.md) (removed broken links, aligned `AGENT_TRACER.md` rule to single root SSoT, moved template to `assets/`), split [`permanent-engineering-rules/SKILL.md`](file:///home/tim/Fork/Arch-System/.agents/skills/permanent-engineering-rules/SKILL.md) under 500 lines via `references/domain-and-nextjs-rules.md`, and normalized frontmatter/`scripts/` on the 3 federated skills (`audit-federation`, `deploy-federation`, `workspace-onboard`).
+
 ## [2026-11-18T13:33:00+02:00] - Databricks Unity Catalog & Open Sharing Integration Registration (`feat/databricks-integration`)
 
 - **Live Verification**: Verified Databricks Workspace `https://dbc-6e364c3e-be48.cloud.databricks.com` (`7474659968586218`) identity auth, Unity Catalog metastore (`aws:us-east-2:6d04c3c2-8cd2-441a-8dbc-557da864afc1`), and `workspace` catalog.

@@ -19,4 +19,4 @@ Domain package providing specialized functionality within the monorepo.
 
 ## Agent Tracing
 
-- Log all modifications and handovers in `AGENT_TRACER.md`.
+- Log all modifications and handovers in the single root `AGENT_TRACER.md` (never create per-package `AGENT_TRACER.md` files).

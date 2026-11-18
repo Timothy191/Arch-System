@@ -300,6 +300,10 @@ Start → Use synthetic values from GitHub Secrets
 - `NEXT_PUBLIC_FUXA_URL`: FUXA SCADA/HMI dashboard URL
 - `ALLOWED_SCANNER_SOURCES`: Comma-separated allowed scanner source header values
 
+### Third-Party Integration Variables
+
+- `CLICKUP_API_KEY`: ClickUp API key (server-only; used by integrations/sync scripts). Get one at [clickup.com/api](https://clickup.com/api)
+
 ## 🔍 Validation Checklist
 
 Before committing or deploying:
