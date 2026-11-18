@@ -4,6 +4,11 @@
 
 ---
 
+## [2026-11-18T16:25:00+02:00] - Remove Redundant Upstash Vector Store (`chore/remove-redundant-upstash-vector`)
+
+- **Audit & Consolidation**: Confirmed `pgvector` (Supabase) and `@repo/redis/search` (RediSearch HNSW) are actively used in production AI/RAG pipelines, whereas Upstash Vector had zero callers.
+- **Cleanup**: Deleted Upstash Vector index `arch-system-vector`, removed `@upstash/vector` from `apps/portal`, deleted `apps/portal/lib/vector.ts` and `apps/portal/lib/vector.test.ts`, and removed `UPSTASH_VECTOR_REST_URL` / `UPSTASH_VECTOR_REST_TOKEN` from local `.env*`, `.env.example`, and Vercel.
+
 ## [2026-11-18T15:57:00+02:00] - Upstash Blob & Vector Provisioning (`feat/upstash-blob-and-vector`)
 
 - **Provisioned Resources**: Created Upstash Blob bucket `arch-system-blob` (`private`) and Upstash Vector index `arch-system-vector` (`us-east-1`, `BGE_SMALL_EN_V1_5`, `384` dims, `COSINE`, `DENSE`) via `upstash` CLI; synced credentials to git-ignored `.env`/`.env.local` and Vercel (`production` & `preview`).
