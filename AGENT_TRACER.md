@@ -4,6 +4,11 @@
 
 ---
 
+## [2026-11-18T15:57:00+02:00] - Upstash Blob & Vector Provisioning (`feat/upstash-blob-and-vector`)
+
+- **Provisioned Resources**: Created Upstash Blob bucket `arch-system-blob` (`private`) and Upstash Vector index `arch-system-vector` (`us-east-1`, `BGE_SMALL_EN_V1_5`, `384` dims, `COSINE`, `DENSE`) via `upstash` CLI; synced credentials to git-ignored `.env`/`.env.local` and Vercel (`production` & `preview`).
+- **SDK Clients & Tests**: Installed `@upstash/blob` and `@upstash/vector` in `apps/portal`, added [`apps/portal/lib/blob.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/blob.ts) and [`apps/portal/lib/vector.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/vector.ts) with unit tests, and documented env placeholders in `.env.example`.
+
 ## [2026-11-18T13:45:00+02:00] - Agent Skills Open Standard Compliance & Validator Upgrade (`chore/agent-skills-spec-compliance`)
 
 - **Validator Upgrades**: Created [`validate-agent-skill.cjs`](file:///home/tim/Fork/Arch-System/tools/audits/validate-agent-skill.cjs) implementing the Agent Skills specification (`name` regex/dir-match, `description <= 1024`, allowed frontmatter keys, `<= 500` lines warning, relative link verification), wired into [`audit-agentic-content.cjs`](file:///home/tim/Fork/Arch-System/tools/audits/audit-agentic-content.cjs) and [`skills-pre-commit.mjs`](file:///home/tim/Fork/Arch-System/tools/scripts/skills-pre-commit.mjs), and updated [`active-skill-directories.cjs`](file:///home/tim/Fork/Arch-System/tools/audits/active-skill-directories.cjs) to follow symlinked skill directories (`14` skills audited).
