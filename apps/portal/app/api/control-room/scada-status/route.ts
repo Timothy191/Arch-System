@@ -9,6 +9,8 @@
  */
 
 import { getRedisClient } from '@repo/redis';
+import { getAuthenticatedEmployee } from '@repo/supabase';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
 import { applyCors } from '@/lib/api/cors';
 import { logError } from '@/lib/errors/error-logger';

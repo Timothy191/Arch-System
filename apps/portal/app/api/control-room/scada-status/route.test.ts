@@ -15,6 +15,15 @@ jest.mock('@repo/redis', () => ({
   }),
 }));
 jest.mock('@/lib/errors/error-logger', () => ({ logError: jest.fn() }));
+jest.mock('@repo/supabase', () => ({
+  getAuthenticatedEmployee: jest.fn().mockResolvedValue({
+    user: { id: 'u-1' },
+    employee: { id: 'emp-1', role: 'control_room_operator' },
+  }),
+}));
+jest.mock('@repo/supabase/server', () => ({
+  createServerSupabaseClient: jest.fn().mockResolvedValue({}),
+}));
 
 describe('GET /api/control-room/scada-status', () => {
   beforeEach(() => {

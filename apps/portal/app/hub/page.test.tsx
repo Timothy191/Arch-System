@@ -26,6 +26,10 @@ jest.mock('next/navigation', () => ({
   redirect: jest.fn(),
 }));
 
+jest.mock('next/server', () => ({
+  connection: jest.fn(async () => undefined),
+}));
+
 jest.mock('next/headers', () => ({
   cookies: jest.fn(async () => ({
     getAll: jest.fn(() => []),

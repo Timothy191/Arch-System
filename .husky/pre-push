@@ -1,4 +1,4 @@
-export PATH="$HOME/.volta/bin:$PATH"
+export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:$HOME/.local/share/mise/shims:$HOME/.volta/bin:$PATH"
 
 publish_ci_status() {
   local head_sha
@@ -8,14 +8,23 @@ publish_ci_status() {
   fi
 }
 
-if [ "${FORCE_AGENT_VERIFY:-0}" != "1" ] && [ -f ".ci-local/agent-verify-evidence.json" ]; then
-  if node -e '
+if [ "${FORCE_AGENT_VERIFY:-0}" != "1" ] && [ -f ".ci-local/agent-verify-evidence.json" ] && [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+  HEAD_TREE_HASH="$(git rev-parse 'HEAD^{tree}' 2>/dev/null || echo '')"
+  if HEAD_TREE_HASH="$HEAD_TREE_HASH" node -e '
     const fs = require("node:fs");
     const ev = JSON.parse(fs.readFileSync(".ci-local/agent-verify-evidence.json", "utf8"));
     const ageMs = Date.now() - new Date(ev.completedAt || 0).getTime();
-    // Compare against totalGates (not a hardcoded 27/28) so the fast-path stays
-    // valid when the gate suite grows or shrinks. Requires a clean, fresh run.
-    if (ev.passedGates === ev.totalGates && ev.failedGates === 0 && ageMs >= 0 && ageMs <= 900000) {
+    const headTree = process.env.HEAD_TREE_HASH;
+    // Compare against totalGates (not a hardcoded 27/28) and gitTreeHash so
+    // the fast-path stays valid only for the exact verified tree within 15m.
+    if (
+      headTree &&
+      ev.gitTreeHash === headTree &&
+      ev.passedGates === ev.totalGates &&
+      ev.failedGates === 0 &&
+      ageMs >= 0 &&
+      ageMs <= 900000
+    ) {
       console.log(`⚡ [PRE-PUSH] Verified ${ev.passedGates}/${ev.totalGates} gate evidence (${Math.round(ageMs / 1000)}s old, runId=${ev.runId}) — skipping redundant second run.`);
       process.exit(0);
     }
@@ -26,4 +35,4 @@ if [ "${FORCE_AGENT_VERIFY:-0}" != "1" ] && [ -f ".ci-local/agent-verify-evidenc
   fi
 fi
 
-bash tools/scripts/agent-verify.sh && publish_ci_status
+pnpm turbo:affected:type-check && bash tools/scripts/agent-verify.sh && publish_ci_status

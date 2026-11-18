@@ -217,9 +217,9 @@ function getHeroTelemetrySeries(
   }
 }
 
-const GRAPH_VIEWBOX_WIDTH = 360;
-const GRAPH_VIEWBOX_HEIGHT = 76;
-const GRAPH_PAD_LEFT = 32;
+const GRAPH_VIEWBOX_WIDTH = 420;
+const GRAPH_VIEWBOX_HEIGHT = 92;
+const GRAPH_PAD_LEFT = 28;
 const GRAPH_PAD_RIGHT = 8;
 const GRAPH_PAD_TOP = 6;
 const GRAPH_PAD_BOTTOM = 14;
@@ -314,7 +314,7 @@ function HeroTelemetryGraph({
 
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="relative z-10 h-16 w-full overflow-visible"
+          className="relative z-10 h-20 w-full overflow-visible sm:h-24"
           role="img"
           aria-label={`${series.title} telemetry trend graph`}
         >
@@ -518,156 +518,531 @@ export interface HeroKpiTile {
   label: string;
   value: string;
   subtext: string;
+  delta: string;
+  progressPct: number;
 }
+
+const DEFAULT_HERO_KPI_TILES: readonly [HeroKpiTile, HeroKpiTile, HeroKpiTile, HeroKpiTile] = [
+  {
+    label: 'Active Modules',
+    value: '11 / 11',
+    subtext: 'All Systems Nominal',
+    delta: '100% Online',
+    progressPct: 100,
+  },
+  {
+    label: 'SCADA Nodes',
+    value: '128 PLC',
+    subtext: '0.4ms Telemetry',
+    delta: '+0.2ms',
+    progressPct: 96,
+  },
+  {
+    label: 'Shift OEE',
+    value: '94.6%',
+    subtext: '+2.4% vs Plan',
+    delta: '+2.4%',
+    progressPct: 95,
+  },
+  {
+    label: 'Energy Intensity',
+    value: '18.2 kWh/t',
+    subtext: 'Grid Load Balanced',
+    delta: '-3.1%',
+    progressPct: 86,
+  },
+];
+
+const HERO_KPI_TILES_BY_PANEL: Readonly<
+  Record<string, readonly [HeroKpiTile, HeroKpiTile, HeroKpiTile, HeroKpiTile]>
+> = {
+  'plant-inventory': [
+    {
+      label: 'Equipment Units',
+      value: '7 Tracked',
+      subtext: 'CR · SC · DM · TH',
+      delta: 'Live',
+      progressPct: 92,
+    },
+    {
+      label: 'Par Compliance',
+      value: '87.5%',
+      subtext: '14.2d Autonomy',
+      delta: '+3.1%',
+      progressPct: 88,
+    },
+    {
+      label: 'Replenish Queue',
+      value: '4 Lines',
+      subtext: 'Active Reorder',
+      delta: 'On Time',
+      progressPct: 78,
+    },
+    {
+      label: 'Stock Accuracy',
+      value: '99.1%',
+      subtext: 'Bin Audit Verified',
+      delta: '+0.4%',
+      progressPct: 99,
+    },
+  ],
+  'plant-processing': [
+    {
+      label: 'Feed Rate',
+      value: '1,140 t/h',
+      subtext: 'DMC Module A/B',
+      delta: '+4.8%',
+      progressPct: 91,
+    },
+    {
+      label: 'Clean Yield',
+      value: '91.4%',
+      subtext: 'CV 27.4 MJ/kg',
+      delta: '+1.6%',
+      progressPct: 91,
+    },
+    {
+      label: 'Medium Density',
+      value: '1.48 SG',
+      subtext: 'Silo 1 & 2 Nominal',
+      delta: 'Stable',
+      progressPct: 95,
+    },
+    {
+      label: 'Water Recovery',
+      value: '94.2%',
+      subtext: 'Thickener Closed Loop',
+      delta: '+2.0%',
+      progressPct: 94,
+    },
+  ],
+  production: [
+    {
+      label: 'ROM Tonnage',
+      value: '12,480 t',
+      subtext: 'Shift Cumulative',
+      delta: '+6.2%',
+      progressPct: 89,
+    },
+    {
+      label: 'Haul Fleet',
+      value: '18 / 19',
+      subtext: '94.7% Active',
+      delta: '1 Standby',
+      progressPct: 95,
+    },
+    {
+      label: 'Strip Ratio',
+      value: '2.8 : 1',
+      subtext: 'Within Plan',
+      delta: 'Optimal',
+      progressPct: 84,
+    },
+    {
+      label: 'Cycle Efficiency',
+      value: '92.3%',
+      subtext: 'Avg 11.4m Cycle',
+      delta: '+3.5%',
+      progressPct: 92,
+    },
+  ],
+  drilling: [
+    {
+      label: 'Active Rigs',
+      value: '6 / 6',
+      subtext: 'Pit Viper 351',
+      delta: '100%',
+      progressPct: 100,
+    },
+    {
+      label: 'Penetration',
+      value: '52.4 m/h',
+      subtext: '+14.1% ROP',
+      delta: '+14.1%',
+      progressPct: 88,
+    },
+    {
+      label: 'Blast Pattern',
+      value: 'Pattern B-14',
+      subtext: '92% Drilled',
+      delta: 'On Spec',
+      progressPct: 92,
+    },
+    {
+      label: 'Bit Life Index',
+      value: '84.0%',
+      subtext: '412m Remaining',
+      delta: 'Healthy',
+      progressPct: 84,
+    },
+  ],
+  admin: [
+    {
+      label: 'Active Operators',
+      value: '124 Users',
+      subtext: 'RBAC Enforced',
+      delta: 'Verified',
+      progressPct: 94,
+    },
+    {
+      label: 'RLS Matrix',
+      value: '100%',
+      subtext: 'Zero Policy Drift',
+      delta: '0 Gaps',
+      progressPct: 100,
+    },
+    {
+      label: 'Audit Ledger',
+      value: 'Live CDC',
+      subtext: 'Tamper-Proof',
+      delta: 'Synced',
+      progressPct: 98,
+    },
+    {
+      label: 'Session Health',
+      value: '99.9%',
+      subtext: 'Redis Token Guard',
+      delta: '<12ms',
+      progressPct: 99,
+    },
+  ],
+  'access-control': [
+    {
+      label: 'Site Muster',
+      value: '142 Crew',
+      subtext: 'Biometric Verified',
+      delta: '100%',
+      progressPct: 96,
+    },
+    {
+      label: 'Gate SLA',
+      value: '99.8%',
+      subtext: 'Gates 1–4 Active',
+      delta: '+0.3%',
+      progressPct: 99,
+    },
+    {
+      label: 'Clearance',
+      value: '100% Valid',
+      subtext: '0 Holds',
+      delta: 'Clear',
+      progressPct: 100,
+    },
+    {
+      label: 'Visitor Pass',
+      value: '9 Active',
+      subtext: 'Escort Assigned',
+      delta: 'Logged',
+      progressPct: 82,
+    },
+  ],
+  engineering: [
+    {
+      label: 'Availability',
+      value: '98.0%',
+      subtext: 'MTBF 142h',
+      delta: '+1.8%',
+      progressPct: 98,
+    },
+    {
+      label: 'Work Orders',
+      value: '3 Open',
+      subtext: '0 Critical',
+      delta: '-2 Today',
+      progressPct: 85,
+    },
+    {
+      label: 'PM Schedule',
+      value: '99.1%',
+      subtext: 'On Target',
+      delta: '+0.9%',
+      progressPct: 99,
+    },
+    {
+      label: 'Spares Readiness',
+      value: '95.4%',
+      subtext: 'Critical Stock OK',
+      delta: 'Ready',
+      progressPct: 95,
+    },
+  ],
+  'control-room': [
+    {
+      label: 'Hourly Loads',
+      value: '384 Loads',
+      subtext: '+9.2% Shift Plan',
+      delta: '+9.2%',
+      progressPct: 93,
+    },
+    {
+      label: 'SCADA Tags',
+      value: '1,240 Live',
+      subtext: 'Modbus TCP',
+      delta: '0.4ms',
+      progressPct: 97,
+    },
+    {
+      label: 'Dispatch Sync',
+      value: '0.4 ms',
+      subtext: 'Realtime CDC',
+      delta: 'Nominal',
+      progressPct: 98,
+    },
+    {
+      label: 'Closeout Ready',
+      value: '96.5%',
+      subtext: 'Shift Handover',
+      delta: 'On Track',
+      progressPct: 96,
+    },
+  ],
+  overview: [
+    {
+      label: 'Edge Cache',
+      value: '0.42 ms',
+      subtext: 'Redis L1/L2',
+      delta: '99.2% Hit',
+      progressPct: 99,
+    },
+    {
+      label: 'Uptime SLA',
+      value: '99.98%',
+      subtext: '30d Rolling',
+      delta: '+0.02%',
+      progressPct: 100,
+    },
+    {
+      label: 'Tri-State Sync',
+      value: '100% Parity',
+      subtext: 'Zero Drift',
+      delta: 'Verified',
+      progressPct: 100,
+    },
+    {
+      label: 'Gate Score',
+      value: '28 / 28',
+      subtext: 'Policy Enforced',
+      delta: 'Pass',
+      progressPct: 100,
+    },
+  ],
+  database: [
+    {
+      label: 'Schema State',
+      value: '142 Applied',
+      subtext: 'PostgreSQL 17',
+      delta: 'Synced',
+      progressPct: 100,
+    },
+    {
+      label: 'Replica RTT',
+      value: '18 ms',
+      subtext: 'Pool Healthy',
+      delta: '-4ms',
+      progressPct: 94,
+    },
+    {
+      label: 'WAL Stream',
+      value: 'Active',
+      subtext: 'Realtime CDC',
+      delta: '0 Lag',
+      progressPct: 98,
+    },
+    {
+      label: 'Index Health',
+      value: '99.6%',
+      subtext: 'HNSW + B-Tree',
+      delta: 'Optimal',
+      progressPct: 99,
+    },
+  ],
+  'availability-utilization': [
+    {
+      label: 'Availability',
+      value: '96.2%',
+      subtext: 'Fleet Mean',
+      delta: '+1.4%',
+      progressPct: 96,
+    },
+    {
+      label: 'Utilization',
+      value: '94.6%',
+      subtext: '+4.3% OEE',
+      delta: '+4.3%',
+      progressPct: 95,
+    },
+    {
+      label: 'Closeout SLA',
+      value: '100%',
+      subtext: 'Shift Verified',
+      delta: 'Complete',
+      progressPct: 100,
+    },
+    {
+      label: 'Standby Loss',
+      value: '2.1%',
+      subtext: 'Below 3% Cap',
+      delta: '-0.8%',
+      progressPct: 89,
+    },
+  ],
+  reports: [
+    {
+      label: 'Availability',
+      value: '96.2%',
+      subtext: 'Fleet Mean',
+      delta: '+1.4%',
+      progressPct: 96,
+    },
+    {
+      label: 'Utilization',
+      value: '94.6%',
+      subtext: '+4.3% OEE',
+      delta: '+4.3%',
+      progressPct: 95,
+    },
+    {
+      label: 'Closeout SLA',
+      value: '100%',
+      subtext: 'Shift Verified',
+      delta: 'Complete',
+      progressPct: 100,
+    },
+    {
+      label: 'Export Queue',
+      value: '0 Pending',
+      subtext: 'PDF & Excel Ready',
+      delta: 'Instant',
+      progressPct: 100,
+    },
+  ],
+  executive: [
+    {
+      label: 'MTD Tonnage',
+      value: '342,800 t',
+      subtext: '+4.6% vs Plan',
+      delta: '+4.6%',
+      progressPct: 94,
+    },
+    {
+      label: 'Reconciliation',
+      value: '99.4%',
+      subtext: '0.6% Drift',
+      delta: 'Locked',
+      progressPct: 99,
+    },
+    {
+      label: 'Executive OEE',
+      value: '96.8%',
+      subtext: 'All Sites Verified',
+      delta: '+2.1%',
+      progressPct: 97,
+    },
+    {
+      label: 'Cost / Tonne',
+      value: '-4.2%',
+      subtext: 'Under Budget',
+      delta: 'Favorable',
+      progressPct: 91,
+    },
+  ],
+};
 
 export function getHeroKpiTiles(
   panelName: string
-): readonly [HeroKpiTile, HeroKpiTile, HeroKpiTile] {
-  switch (panelName) {
-    case 'plant-inventory':
-      return [
-        { label: 'Equipment Units', value: '7 Tracked', subtext: 'CR · SC · DM · TH' },
-        { label: 'Par Compliance', value: '87.5%', subtext: '14.2d Autonomy' },
-        { label: 'Replenish Queue', value: '4 Lines', subtext: 'Active Reorder' },
-      ];
-    case 'plant-processing':
-      return [
-        { label: 'Feed Rate', value: '1,140 t/h', subtext: 'DMC Module A/B' },
-        { label: 'Clean Yield', value: '91.4%', subtext: 'CV 27.4 MJ/kg' },
-        { label: 'Medium Density', value: '1.48 SG', subtext: 'Silo 1 & 2 Nominal' },
-      ];
-    case 'production':
-      return [
-        { label: 'ROM Tonnage', value: '12,480 t', subtext: 'Shift Cumulative' },
-        { label: 'Haul Fleet', value: '18 / 19', subtext: '94.7% Active' },
-        { label: 'Strip Ratio', value: '2.8 : 1', subtext: 'Within Plan' },
-      ];
-    case 'drilling':
-      return [
-        { label: 'Active Rigs', value: '6 / 6', subtext: 'Pit Viper 351' },
-        { label: 'Penetration', value: '52.4 m/h', subtext: '+14.1% ROP' },
-        { label: 'Blast Pattern', value: 'Pattern B-14', subtext: '92% Drilled' },
-      ];
-    case 'admin':
-      return [
-        { label: 'Active Operators', value: '124 Users', subtext: 'RBAC Enforced' },
-        { label: 'RLS Matrix', value: '100%', subtext: 'Zero Policy Drift' },
-        { label: 'Audit Ledger', value: 'Live CDC', subtext: 'Tamper-Proof' },
-      ];
-    case 'access-control':
-      return [
-        { label: 'Site Muster', value: '142 Crew', subtext: 'Biometric Verified' },
-        { label: 'Gate SLA', value: '99.8%', subtext: 'Gates 1–4 Active' },
-        { label: 'Clearance', value: '100% Valid', subtext: '0 Holds' },
-      ];
-    case 'engineering':
-      return [
-        { label: 'Availability', value: '98.0%', subtext: 'MTBF 142h' },
-        { label: 'Work Orders', value: '3 Open', subtext: '0 Critical' },
-        { label: 'PM Schedule', value: '99.1%', subtext: 'On Target' },
-      ];
-    case 'control-room':
-      return [
-        { label: 'Hourly Loads', value: '384 Loads', subtext: '+9.2% Shift Plan' },
-        { label: 'SCADA Tags', value: '1,240 Live', subtext: 'Modbus TCP' },
-        { label: 'Dispatch Sync', value: '0.4 ms', subtext: 'Realtime CDC' },
-      ];
-    case 'overview':
-      return [
-        { label: 'Edge Cache', value: '0.42 ms', subtext: 'Redis L1/L2' },
-        { label: 'Uptime SLA', value: '99.98%', subtext: '30d Rolling' },
-        { label: 'Tri-State Sync', value: '100% Parity', subtext: 'Zero Drift' },
-      ];
-    case 'database':
-      return [
-        { label: 'Schema State', value: '142 Applied', subtext: 'PostgreSQL 17' },
-        { label: 'Replica RTT', value: '18 ms', subtext: 'Pool Healthy' },
-        { label: 'WAL Stream', value: 'Active', subtext: 'Realtime CDC' },
-      ];
-    case 'availability-utilization':
-    case 'reports':
-      return [
-        { label: 'Availability', value: '96.2%', subtext: 'Fleet Mean' },
-        { label: 'Utilization', value: '94.6%', subtext: '+4.3% OEE' },
-        { label: 'Closeout SLA', value: '100%', subtext: 'Shift Verified' },
-      ];
-    case 'executive':
-      return [
-        { label: 'MTD Tonnage', value: '342,800 t', subtext: '+4.6% vs Plan' },
-        { label: 'Reconciliation', value: '99.4%', subtext: '0.6% Drift' },
-        { label: 'Executive OEE', value: '96.8%', subtext: 'All Sites Verified' },
-      ];
-    default:
-      return [
-        { label: 'Active Modules', value: '11 / 11', subtext: 'All Systems Nominal' },
-        { label: 'SCADA Nodes', value: '128 PLC', subtext: '0.4ms Telemetry' },
-        { label: 'Shift OEE', value: '94.6%', subtext: '+2.4% vs Plan' },
-      ];
-  }
+): readonly [HeroKpiTile, HeroKpiTile, HeroKpiTile, HeroKpiTile] {
+  return HERO_KPI_TILES_BY_PANEL[panelName] ?? DEFAULT_HERO_KPI_TILES;
 }
 
 export function HeroOperationalKpiStrip({
   panelName,
+  panelTitle,
+  stats,
   className,
 }: {
   panelName: string;
+  panelTitle?: string;
+  stats?: { label: string; value: string };
   className?: string;
 }) {
   const tiles = getHeroKpiTiles(panelName);
   return (
     <div
       className={cn(
-        'liquid-glass-light gold-steel-border gold-steel-border-slim grid grid-cols-1 gap-2 rounded-xl border border-slate-300/90 bg-white/95 px-4 py-2.5 shadow-sm backdrop-blur-md sm:grid-cols-3 sm:gap-0',
+        'liquid-glass-light gold-steel-border gold-steel-border-slim rounded-2xl border border-slate-300/90 bg-white/95 px-4 py-3 shadow-sm backdrop-blur-md',
         className
       )}
       data-testid={`hero-kpi-strip-${panelName}`}
       aria-label="Operational subsystem indicators"
     >
-      {tiles.map((tile, index) => (
-        <div
-          key={tile.label}
-          className={cn(
-            'flex min-w-0 items-center justify-between gap-3 py-1',
-            index > 0 && 'sm:border-slate-200/90 sm:border-l sm:pl-4',
-            index < tiles.length - 1 && 'sm:pr-4'
-          )}
-        >
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-full px-2 py-0.5">
-              {index > 0 && (
-                <span
-                  aria-hidden="true"
-                  data-testid="hero-kpi-gold-separator"
-                  className="hidden shrink-0 select-none items-center justify-center font-bold font-mono text-[10px] text-accent-gold sm:inline-flex"
-                >
-                  |
-                </span>
-              )}
-              <span
-                className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"
-                aria-hidden="true"
-              />
-              <span className="truncate font-bold font-mono text-[10px] text-slate-700 uppercase tracking-wider">
-                {tile.label}
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="gold-steel-border gold-steel-border-slim inline-flex items-center rounded-full px-2 py-0.5 font-extrabold font-mono text-slate-950 text-sm tabular-nums tracking-tight">
-                {tile.value}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex shrink-0 flex-col items-end gap-1">
-            <span className="gold-steel-border gold-steel-border-slim inline-flex items-center rounded-md border border-blue-200/90 bg-blue-50/90 px-2 py-0.5 font-bold font-mono text-[10px] text-blue-950">
-              {tile.subtext}
-            </span>
-            <div className="h-1 w-14 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-accent-gold to-emerald-500" />
-            </div>
-          </div>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-slate-200/80 border-b pb-1.5">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+          <span className="font-bold font-mono text-[10px] text-slate-600 uppercase tracking-wider">
+            {panelTitle ? `${panelTitle} · Live Telemetry` : 'Operational Subsystem Telemetry'}
+          </span>
         </div>
-      ))}
+        {stats && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/35 bg-accent-gold/10 px-2.5 py-0.5 font-bold font-mono text-[10px] text-slate-900">
+            <span className="text-slate-600 uppercase">{stats.label}:</span>
+            <span>{stats.value}</span>
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+        {tiles.map((tile, index) => (
+          <div
+            key={tile.label}
+            className={cn(
+              'flex min-w-0 items-center justify-between gap-3 py-1',
+              index > 0 && 'lg:border-slate-200/90 lg:border-l lg:pl-4',
+              index < tiles.length - 1 && 'lg:pr-4'
+            )}
+          >
+            <div className="flex min-w-0 flex-col gap-1">
+              <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-full px-2 py-0.5">
+                {index > 0 && (
+                  <span
+                    aria-hidden="true"
+                    data-testid="hero-kpi-gold-separator"
+                    className="hidden shrink-0 select-none items-center justify-center font-bold font-mono text-[10px] text-accent-gold sm:inline-flex"
+                  >
+                    |
+                  </span>
+                )}
+                <span
+                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"
+                  aria-hidden="true"
+                />
+                <span className="truncate font-bold font-mono text-[10px] text-slate-700 uppercase tracking-wider">
+                  {tile.label}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="gold-steel-border gold-steel-border-slim inline-flex items-center rounded-full px-2 py-0.5 font-extrabold font-mono text-slate-950 text-sm tabular-nums tracking-tight">
+                  {tile.value}
+                </span>
+                <span className="font-bold font-mono text-[9.5px] text-emerald-700">
+                  {tile.delta}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 flex-col items-end gap-1">
+              <span className="gold-steel-border gold-steel-border-slim inline-flex items-center rounded-md border border-blue-200/90 bg-blue-50/90 px-2 py-0.5 font-bold font-mono text-[10px] text-blue-950">
+                {tile.subtext}
+              </span>
+              <div className="h-1 w-14 overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-accent-gold to-emerald-500 transition-all duration-300"
+                  style={{ width: `${tile.progressPct}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

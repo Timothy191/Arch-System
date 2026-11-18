@@ -147,6 +147,7 @@ describe('DEPARTMENTS registry', () => {
     // Parity with the generic department tab set: every shared operational page
     // that `app/(departments)/[department]/*` serves must be reachable.
     const genericTabNames = getDepartmentTabs('production').map((t) => t.name);
+    expect(genericTabNames).not.toContain('tools');
     for (const sharedTab of genericTabNames) {
       expect(tabs.map((t) => t.name)).toContain(sharedTab);
     }

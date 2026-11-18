@@ -9,9 +9,9 @@ import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server
 import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { CoreOperationalModules, HeroBackground, HeroRotator } from '@/features/hub';
-import { OperationsCopilot } from '@/features/hub/components/OperationsCopilot';
 import { withCache } from '@/lib/cache-utils';
 import {
   getAccessibleDepartmentNames,
@@ -93,6 +93,7 @@ async function getLiveDepartmentMetrics(today: string): Promise<DepartmentLiveMe
 }
 
 export default async function HubPage() {
+  await connection();
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
 
@@ -297,10 +298,6 @@ export default async function HubPage() {
           </div>
         </section>
       )}
-      {/* Operations Copilot (AI-assisted troubleshooting) */}
-      <section>
-        <OperationsCopilot />
-      </section>
     </div>
   );
 }

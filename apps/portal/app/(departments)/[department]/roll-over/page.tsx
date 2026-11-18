@@ -1,5 +1,6 @@
 import { DozerRollForm } from '@repo/departments/ui';
 import { GlassCard } from '@repo/ui/GlassCard';
+import { connection } from 'next/server';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 
 export default async function RollOverPage({
@@ -7,6 +8,7 @@ export default async function RollOverPage({
 }: {
   params: Promise<{ department: string }>;
 }) {
+  await connection();
   const { department: deptSlug } = await params;
   requireDepartment(deptSlug, 'control-room');
   const { deptId, supabase, today } = await getDepartmentContext({

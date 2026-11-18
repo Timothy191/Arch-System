@@ -9,7 +9,9 @@
     "strictNullChecks": true,
     "baseUrl": ".",
     "paths": {
-      "@repo/*": ["../../../packages/*"]
+      "@repo/*": ["../../../packages/*"],
+      "tree-sitter": ["./src/tree-sitter-ext.d.ts"],
+      "tree-sitter-typescript": ["./src/tree-sitter-typescript.d.ts"]
     },
     "lib": ["ES2022", "DOM"],
     "skipLibCheck": true,

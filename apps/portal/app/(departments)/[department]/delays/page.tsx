@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantDelaysClient } from '~/features/departments/components/plant-processing/PlantDelaysClient';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
@@ -7,6 +8,7 @@ export default async function DepartmentDelaysPage({
 }: {
   params: Promise<{ department: string }>;
 }) {
+  await connection();
   const { department: deptSlug } = await params;
   requireDepartment(deptSlug, 'plant-processing');
   const { today } = await getDepartmentContext({

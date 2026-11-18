@@ -3,6 +3,7 @@ import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { GlassCard } from '@repo/ui/GlassCard';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import { withCache } from '@/lib/cache-utils';
 import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
@@ -70,6 +71,7 @@ export default async function MachinesPage({
   if (deptSlug === 'plant-processing') {
     redirect('/plant-processing/delays');
   }
+  await connection();
   const { today } = await getDepartmentContext({
     department: deptSlug,
   });
@@ -83,17 +85,17 @@ export default async function MachinesPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 px-5 py-2.5 shadow-card backdrop-blur-md">
         <h2 className="font-bold text-2xl text-[var(--text-heading)]">Machine Database</h2>
         <Link
           href="/admin"
-          className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-4 py-2 text-[var(--text-muted)] text-sm transition-colors hover:border-[var(--border-emphasis)] hover:text-[var(--text-heading)]"
+          className="rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] px-4 py-2 text-[var(--text-muted)] text-sm transition-colors hover:border-[var(--border-emphasis)] hover:text-[var(--text-heading)]"
         >
           Manage in Admin →
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/5 px-4 py-3 text-[var(--accent-blue)] text-sm">
+      <div className="flex items-center gap-2 rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/5 px-5 py-2.5 text-[var(--accent-blue)] text-sm">
         <svg
           className="h-4 w-4 shrink-0"
           fill="none"
@@ -173,9 +175,9 @@ export default async function MachinesPage({
               {siteEntries.map(([siteKey, { siteCode, siteName, machines: sms }]) => (
                 <div key={siteKey} className="space-y-3">
                   {/* Site heading */}
-                  <div className="flex items-center gap-3 border-[var(--border-default)] border-b pb-2">
+                  <div className="inline-flex items-center gap-2.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 px-3.5 py-1.5 shadow-card">
                     {siteCode ? (
-                      <span className="inline-flex rounded border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-mono text-[var(--accent-blue)] text-xs">
+                      <span className="inline-flex rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-mono text-[var(--accent-blue)] text-xs">
                         {siteCode}
                       </span>
                     ) : null}

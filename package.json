@@ -331,6 +331,10 @@
     "pnpm": "9.15.9"
   },
   "pnpm": {
+    "ignoredBuiltDependencies": [
+      "tree-sitter",
+      "tree-sitter-typescript"
+    ],
     "peerDependencyRules": {
       "ignoreMissing": [
         "esbuild"
@@ -349,7 +353,8 @@
         "GHSA-gcqx-w48m-w2h4",
         "GHSA-g3hv-75wg-m249",
         "GHSA-4r6h-8v6p-xvw6",
-        "GHSA-5pgg-2g8v-p4x9"
+        "GHSA-5pgg-2g8v-p4x9",
+        "GHSA-fc5q-39xc-vjpf"
       ]
     },
     "overrides": {

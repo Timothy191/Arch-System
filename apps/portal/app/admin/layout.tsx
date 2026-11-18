@@ -4,12 +4,14 @@ import { RedisIcon } from '@repo/ui/RedisIcon';
 import { Activity, ArrowLeft, Cpu, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import React from 'react';
 
 const ADMIN_NAV_LINK_CLASS =
   'gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  await connection();
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
 

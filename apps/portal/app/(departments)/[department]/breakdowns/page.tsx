@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import { searchBreakdownDiagnosticsAction } from '@/app/actions/vector-search';
 import type { Breakdown, BreakdownMetrics, Machine } from '@/features/departments';
 import { BreakdownsDashboard } from '@/features/departments';
@@ -8,6 +9,7 @@ export default async function BreakdownsPage({
 }: {
   params: Promise<{ department: string }>;
 }) {
+  await connection();
   const { department: deptSlug } = await params;
   requireDepartment(deptSlug, 'engineering');
   const { deptId, supabase, today } = await getDepartmentContext({

@@ -323,7 +323,11 @@ describe('Gate 16 — Module-Level Authorization Matrix (Control Room, Plant, En
 
       getAuthenticatedEmployee.mockResolvedValueOnce({
         user: { id: 'u-1' },
-        employee: { id: 'emp-1', role: 'control_room_operator' },
+        employee: {
+          id: 'emp-1',
+          role: 'control_room_operator',
+          accessible_departments: ['control-room'],
+        },
       });
       const validReq = new Request('http://localhost:3000/api/control-room/generate-report', {
         method: 'POST',
@@ -358,7 +362,11 @@ describe('Gate 16 — Module-Level Authorization Matrix (Control Room, Plant, En
       // Supervisor triggering separation-of-duties DB constraint gets 403 SEPARATION_OF_DUTIES_VIOLATION
       getAuthenticatedEmployee.mockResolvedValueOnce({
         user: { id: 'u-sup' },
-        employee: { id: 'emp-sup', role: 'supervisor' },
+        employee: {
+          id: 'emp-sup',
+          role: 'supervisor',
+          accessible_departments: ['control-room'],
+        },
       });
       const sodReq = new NextRequest(
         'http://localhost:3000/api/control-room/shift-closeout/approve',

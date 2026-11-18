@@ -70,7 +70,7 @@ describe('POST /api/control-room/shift-closeout/approve', () => {
   it('rejects self-approval under MHSA separation of duties', async () => {
     jest.mocked(getAuthenticatedEmployee).mockResolvedValue({
       user: { id: 'u2' },
-      employee: { id: 'e2', role: 'supervisor' },
+      employee: { id: 'e2', role: 'supervisor', accessible_departments: ['control-room'] },
     } as never);
 
     mockSupabase.rpc.mockResolvedValue({
@@ -94,7 +94,7 @@ describe('POST /api/control-room/shift-closeout/approve', () => {
   it('approves report successfully when supervisor is distinct from submitter', async () => {
     jest.mocked(getAuthenticatedEmployee).mockResolvedValue({
       user: { id: 'u3' },
-      employee: { id: 'e3', role: 'supervisor' },
+      employee: { id: 'e3', role: 'supervisor', accessible_departments: ['control-room'] },
     } as never);
 
     mockSupabase.rpc.mockResolvedValue({

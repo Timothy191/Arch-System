@@ -36,7 +36,7 @@ export default {
     commands.push('pnpm syncpack fix-mismatches --config config/tools/.syncpackrc.js');
     // Then prettier each file
     for (const file of filtered) {
-      commands.push(`prettier --write ${file}`);
+      commands.push(`pnpm biome check --write --no-errors-on-unmatched ${file}`);
     }
     return commands;
   },
@@ -86,6 +86,9 @@ export default {
       'pnpm cycles',
       'pnpm audit:tailwind',
     ];
+    if (filtered.some((f) => f.includes('/apps/portal/'))) {
+      commands.push('pnpm --filter portal type-check');
+    }
     // Process in chunks of 20 to keep memory low
     for (const batch of chunk(filtered, 20)) {
       commands.push(`pnpm biome check --write --no-errors-on-unmatched ${batch.join(' ')}`);

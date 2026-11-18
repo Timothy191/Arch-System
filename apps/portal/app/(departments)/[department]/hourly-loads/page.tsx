@@ -2,6 +2,7 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
+import { connection } from 'next/server';
 import { withAsyncSpan } from '@/lib/observability/tracing';
 import { getMineralRegistry } from '~/features/admin/actions/minerals';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
@@ -13,6 +14,7 @@ export default async function HourlyLoadsPage({
 }: {
   params: Promise<{ department: string }>;
 }) {
+  await connection();
   const { department } = await params;
   requireDepartment(department, 'control-room');
 

@@ -14,11 +14,14 @@ import type {
   SplitHourlyLoadInput,
   UpdateExcavatorAssignmentConfigInput,
 } from '@repo/contract/types/form.types';
+import { cacheInvalidateTags } from '@repo/redis/cache';
 import { type EmployeeSummary, getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { withAsyncSpan } from '@/lib/observability/tracing';
 import {
+  deriveExcavatorDumperAssignments,
   formatExcavatorMaterial,
+  type HourlyShift,
   isRegularMachineExcavatorActivity,
   normalizeQuickBlockFormat,
   parseExcavatorMaterial,

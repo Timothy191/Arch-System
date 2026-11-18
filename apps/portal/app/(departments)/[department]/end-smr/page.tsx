@@ -1,8 +1,10 @@
+import { connection } from 'next/server';
 import { getFleetOpeningSmrSnapshot } from '~/lib/control-room-fleet-smr';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { EndSMRForm } from './EndSMRForm';
 
 export default async function EndSMRPage({ params }: { params: Promise<{ department: string }> }) {
+  await connection();
   const { department: deptSlug } = await params;
   requireDepartment(deptSlug, 'control-room');
   const { deptId, supabase, today } = await getDepartmentContext({

@@ -11,6 +11,10 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
+jest.mock('next/server', () => ({
+  connection: jest.fn(async () => undefined),
+}));
+
 jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
   getUserSafely: jest.fn(),

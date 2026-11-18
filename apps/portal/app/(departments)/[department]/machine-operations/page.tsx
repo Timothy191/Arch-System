@@ -1,6 +1,7 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
 import dynamic from 'next/dynamic';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { type BreakdownDelaySource, breakdownShiftDelayHours } from '~/lib/shift-completeness';
@@ -28,6 +29,7 @@ export default async function MachineOperationsPage({
 }: {
   params: Promise<{ department: string }>;
 }) {
+  await connection();
   const { department: deptSlug } = await params;
   requireDepartment(deptSlug, 'control-room');
   const { deptId, supabase, today } = await getDepartmentContext({

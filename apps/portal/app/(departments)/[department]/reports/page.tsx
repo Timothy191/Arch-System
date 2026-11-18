@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantHistoryDatabaseClient } from '~/features/departments/components/plant-processing/PlantHistoryDatabaseClient';
@@ -18,6 +19,7 @@ export default async function ReportsPage({
   params: Promise<{ department: string }>;
   searchParams: Promise<{ from?: string; to?: string; tab?: string }>;
 }) {
+  await connection();
   const { department: deptSlug } = await params;
   if (deptSlug === 'plant-processing') {
     const { today } = await getDepartmentContext({ department: deptSlug });

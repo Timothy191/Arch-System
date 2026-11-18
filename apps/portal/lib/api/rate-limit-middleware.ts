@@ -118,7 +118,7 @@ function isIpWhitelisted(ip: string): boolean {
 }
 
 export function getClientIp(request: Request | NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for');
+  const forwarded = request?.headers?.get?.('x-forwarded-for');
   const realIp =
     forwarded?.split(',')[0]?.trim() ||
     ('ip' in request ? (request as { ip?: string }).ip : undefined);
@@ -217,7 +217,9 @@ export async function withRateLimit(
     return handler();
   }
 
-  const path = new URL(request.url).pathname;
+  const path = request.url
+    ? new URL(request.url, 'http://localhost').pathname
+    : ((request as NextRequest).nextUrl?.pathname ?? '/');
   let config = options?.customLimit || getRateLimitConfig(path);
 
   // 2. Load-Adaptive Throttling: Scale down the rate limit if system CPU load is high
@@ -252,7 +254,7 @@ export async function withRateLimit(
   const response = await handler();
   const headers = rateLimitHeaders(result, config.windowMs);
   for (const [name, value] of Object.entries(headers)) {
-    response.headers.set(name, value);
+    response?.headers?.set?.(name, value);
   }
 
   return response;

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import {
   DOCUMENTS_ACTIONS,
@@ -44,9 +45,10 @@ export default async function ToolsPage({
   params: Promise<{ department: string }>;
   searchParams: Promise<{ tab?: string | string[] }>;
 }) {
+  await connection();
   const { department } = await params;
-  if (department === 'plant-processing') {
-    redirect('/plant-processing');
+  if (department === 'plant-processing' || department === 'production') {
+    redirect(`/${department}`);
   }
 
   const { tab: rawTab } = await searchParams;

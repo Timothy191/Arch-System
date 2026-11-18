@@ -3,6 +3,7 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { CheckSquare, ClipboardCheck, Clock, Cpu } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
 import { getDepartmentContext } from '~/lib/dept-context';
@@ -42,6 +43,7 @@ function SummaryGridSkeleton() {
 }
 
 export default async function ControlRoomPage() {
+  await connection();
   const { deptId, today } = await getDepartmentContext({ department: 'control-room' });
 
   return (

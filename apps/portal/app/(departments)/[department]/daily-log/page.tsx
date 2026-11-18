@@ -1,4 +1,5 @@
 import { GlassCard } from '@repo/ui/GlassCard';
+import { connection } from 'next/server';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { DailyLogForm } from './DailyLogForm';
@@ -8,6 +9,7 @@ export default async function DailyLogPage({
 }: {
   params: Promise<{ department: string }>;
 }) {
+  await connection();
   const { department } = await params;
   const { deptId, supabase, today } = await getDepartmentContext({
     department,

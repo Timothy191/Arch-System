@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantHourlySheetClient } from '~/features/departments/components/plant-processing/PlantHourlySheetClient';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
@@ -7,6 +8,7 @@ export default async function DepartmentHourlySheetPage({
 }: {
   params: Promise<{ department: string }>;
 }) {
+  await connection();
   const { department: deptSlug } = await params;
   requireDepartment(deptSlug, 'plant-processing');
   const { today } = await getDepartmentContext({

@@ -44,6 +44,31 @@ function buildSupabaseAuth(user: unknown) {
     auth: {
       getUser: jest.fn().mockResolvedValue({ data: { user }, error: null }),
     },
+    from: jest.fn(() => ({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      is: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({
+        data: user
+          ? {
+              id: 'emp-1',
+              role: 'control_room_operator',
+              accessible_departments: ['control-room'],
+            }
+          : null,
+        error: null,
+      }),
+      maybeSingle: jest.fn().mockResolvedValue({
+        data: user
+          ? {
+              id: 'emp-1',
+              role: 'control_room_operator',
+              accessible_departments: ['control-room'],
+            }
+          : null,
+        error: null,
+      }),
+    })),
   };
 }
 

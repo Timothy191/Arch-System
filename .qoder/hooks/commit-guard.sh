@@ -6,7 +6,7 @@ cmd=$(printf '%s' "$payload" | jq -r '.tool_input.command // empty')
 [ -n "$cmd" ] || exit 0
 
 case "$cmd" in
-  *"git commit"*) ;;
+  *"git commit"*|*"git push"*) ;;
   *) exit 0 ;;
 esac
 

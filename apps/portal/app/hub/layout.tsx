@@ -1,9 +1,12 @@
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 import { BottomNav } from '@/components/nav/BottomNav';
 import { getAccessibleDepartmentNames } from '@/lib/hub-departments';
 
-export default async function HubLayout({ children }: { children: React.ReactNode }) {
+async function HubBottomNav() {
+  await connection();
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
 
@@ -12,7 +15,10 @@ export default async function HubLayout({ children }: { children: React.ReactNod
   }
 
   const accessibleDepartments = await getAccessibleDepartmentNames(user.id);
+  return <BottomNav accessibleDepartments={accessibleDepartments} />;
+}
 
+export default function HubLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[calc(100vh-28px)] text-[var(--text-heading)]">
       <div className="relative z-10">
@@ -22,7 +28,9 @@ export default async function HubLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Mobile bottom navigation (hidden on md+) */}
-        <BottomNav accessibleDepartments={accessibleDepartments} />
+        <Suspense fallback={null}>
+          <HubBottomNav />
+        </Suspense>
       </div>
     </div>
   );

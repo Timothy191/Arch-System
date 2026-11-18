@@ -1,11 +1,13 @@
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 
 // AGENT-TRACE: Layout for documentation routes - enforces auth protection
 // Only accessible to authenticated users with admin or engineering roles
 // Redirects unauthorized users to login
 
 export default async function DocsLayout({ children }: { children: React.ReactNode }) {
+  await connection();
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },

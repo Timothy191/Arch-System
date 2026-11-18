@@ -1,4 +1,5 @@
 import { getCurrentShift } from '@repo/utils';
+import { connection } from 'next/server';
 import { getDepartmentContext } from '~/lib/dept-context';
 import {
   type CompiledDrillReportRow,
@@ -34,6 +35,7 @@ export default async function DrillingReportsPage({
   params,
   searchParams,
 }: DrillingReportsPageProps) {
+  await connection();
   await params;
   const { from: fromParam, to: toParam, tab: tabParam } = await searchParams;
   const { deptId, supabase, today } = await getDepartmentContext({

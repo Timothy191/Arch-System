@@ -1,5 +1,6 @@
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import { AdminTabsClient } from '~/features/admin/components/AdminTabsClient';
 import { AuditLogsTab } from '~/features/admin/tabs/AuditLogsTab';
 import { DepartmentsTab } from '~/features/admin/tabs/DepartmentsTab';
@@ -34,6 +35,7 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
+  await connection();
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
 

@@ -2,6 +2,10 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import DepartmentDashboard from './page';
 
+jest.mock('next/server', () => ({
+  connection: jest.fn(async () => undefined),
+}));
+
 jest.mock('~/lib/dept-context', () => ({
   getDepartmentContext: jest
     .fn()

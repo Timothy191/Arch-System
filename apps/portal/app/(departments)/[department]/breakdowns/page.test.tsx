@@ -2,6 +2,10 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import BreakdownsPage from './page';
 
+jest.mock('next/server', () => ({
+  connection: jest.fn(async () => undefined),
+}));
+
 // Mock child component BreakdownsDashboard
 jest.mock('@/features/departments', () => ({
   BreakdownsDashboard: jest.fn(({ metrics, breakdowns, machines }) => (

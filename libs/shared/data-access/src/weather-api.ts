@@ -122,8 +122,8 @@ export async function fetchWeather(
   const current = data.current;
   const weatherInfo = getWeatherDescription(current.weather_code);
 
-  // Parse daily forecast (next 5 days)
-  const daily: DailyForecast[] = data.daily.time.slice(0, 5).map((date: string, index: number) => {
+  // Parse daily forecast (full 7-day week)
+  const daily: DailyForecast[] = data.daily.time.slice(0, 7).map((date: string, index: number) => {
     const code = data.daily.weather_code[index];
     const info = getWeatherDescription(code);
     return {

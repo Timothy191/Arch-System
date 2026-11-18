@@ -7,6 +7,7 @@ import { AlertTriangle, Cpu, Loader2, ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { APP_VERSION } from '@/lib/version';
@@ -46,6 +47,7 @@ interface LoginPageProps {
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
+  await connection();
   const cookieStore = await cookies();
   const hasAuthCookie = cookieStore
     .getAll()

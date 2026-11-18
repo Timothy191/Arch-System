@@ -4,6 +4,7 @@
   "regions": ["dub1"],
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm type-check && pnpm lint && pnpm test && pnpm turbo run build --filter=portal...",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- apps/portal packages libs vercel.json pnpm-lock.yaml",
   "outputDirectory": "apps/portal/.next",
   "crons": [
     {

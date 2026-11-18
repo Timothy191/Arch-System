@@ -404,6 +404,8 @@ export function HeroRotator({
           <HeroOperationalKpiStrip
             key={panels[activeIndex].id}
             panelName={panels[activeIndex].name}
+            panelTitle={panels[activeIndex].title}
+            stats={panels[activeIndex].stats}
           />
         </div>
       )}

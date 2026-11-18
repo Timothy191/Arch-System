@@ -10,6 +10,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 
 export default async function TireManagementPage({
@@ -17,6 +18,7 @@ export default async function TireManagementPage({
 }: {
   params: Promise<{ department: string }>;
 }) {
+  await connection();
   const { department: deptSlug } = await params;
   requireDepartment(deptSlug, 'engineering');
 

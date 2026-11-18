@@ -10,6 +10,10 @@ jest.mock('next/navigation', () => ({
   },
 }));
 
+jest.mock('next/server', () => ({
+  connection: jest.fn(async () => undefined),
+}));
+
 // Mock cookies
 const mockCookies = jest.fn();
 jest.mock('next/headers', () => ({

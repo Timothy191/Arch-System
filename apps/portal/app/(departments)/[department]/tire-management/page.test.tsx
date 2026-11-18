@@ -2,6 +2,10 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import TireManagementPage from './page';
 
+jest.mock('next/server', () => ({
+  connection: jest.fn(async () => undefined),
+}));
+
 // Mock department context
 jest.mock('~/lib/dept-context', () => ({
   requireDepartment: jest.fn(),

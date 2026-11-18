@@ -1,5 +1,9 @@
 jest.mock('@/styles/print-report.css', () => ({}));
 
+jest.mock('next/server', () => ({
+  connection: jest.fn(async () => undefined),
+}));
+
 jest.mock('@react-pdf/renderer', () => {
   const React = require('react');
   return {

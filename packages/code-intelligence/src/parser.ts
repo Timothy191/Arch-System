@@ -50,7 +50,7 @@ export interface ParsedFile {
 
 export class TreeSitterParser {
   private parser: Parser;
-  private typescriptLanguage: Parser.Language;
+  private typescriptLanguage: unknown;
 
   constructor() {
     this.typescriptLanguage = new ts.language();
@@ -87,7 +87,10 @@ export class TreeSitterParser {
   ): void {
     if (node.type === 'typescript:file' || node.type === 'javascript:file') {
       for (let i = 0; i < node.childCount; i++) {
-        this.walkNode(node.child(i), content, symbols, rawSymbolRanges, filepath);
+        const child = node.child(i);
+        if (child) {
+          this.walkNode(child, content, symbols, rawSymbolRanges, filepath);
+        }
       }
       return;
     }
@@ -117,8 +120,8 @@ export class TreeSitterParser {
     ) {
       const nameNode = node.childForFieldName('name');
       const name = nameNode ? this.getNodeText(content, nameNode) : '<anonymous>';
-      const asyncMarker = node.childForFieldName('async')?.childCount > 0;
-      const generatorMarker = node.childForFieldName('generator')?.childCount > 0;
+      const asyncMarker = (node.childForFieldName('async')?.childCount ?? 0) > 0;
+      const generatorMarker = (node.childForFieldName('generator')?.childCount ?? 0) > 0;
 
       symbols.push({
         kind: 'function',
@@ -156,7 +159,7 @@ export class TreeSitterParser {
         endRow: node.endPosition.row,
         endColumn: node.endPosition.column,
         signature: this.extractMethodSignature(node, content),
-        isAsync: asyncChild?.childCount > 0,
+        isAsync: (asyncChild?.childCount ?? 0) > 0,
       });
       if (name !== '<anonymous>') {
         rawSymbolRanges.set(name, [node.startByte, node.endByte]);
@@ -178,7 +181,7 @@ export class TreeSitterParser {
           startColumn: node.startPosition.column,
           endRow: node.endPosition.row,
           endColumn: node.endPosition.column,
-          isAsync: node.childForFieldName('async')?.childCount > 0,
+          isAsync: (node.childForFieldName('async')?.childCount ?? 0) > 0,
         });
         rawSymbolRanges.set(name, [node.startByte, node.endByte]);
       }
@@ -187,7 +190,7 @@ export class TreeSitterParser {
     if (node.type === 'variable_declaration') {
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
-        if (child.type === 'variable_declarator') {
+        if (child?.type === 'variable_declarator') {
           const nameNode = child.childForFieldName('name');
           const name = nameNode ? this.getNodeText(content, nameNode) : undefined;
 
@@ -244,7 +247,10 @@ export class TreeSitterParser {
     }
 
     for (let i = 0; i < node.childCount; i++) {
-      this.walkNode(node.child(i), content, symbols, rawSymbolRanges, filepath);
+      const child = node.child(i);
+      if (child) {
+        this.walkNode(child, content, symbols, rawSymbolRanges, filepath);
+      }
     }
   }
 
@@ -258,6 +264,7 @@ export class TreeSitterParser {
     if (argsNode) {
       for (let i = 0; i < argsNode.childCount; i++) {
         const argNode = argsNode.child(i);
+        if (!argNode) continue;
         const argText = this.getNodeText(content, argNode).trim();
         if (argText) {
           params.push(argText);
@@ -271,7 +278,7 @@ export class TreeSitterParser {
     const nameNode = node.childForFieldName('name');
     const name = nameNode ? this.getNodeText(content, nameNode) : '';
 
-    const isAsync = node.childForFieldName('async')?.childCount > 0;
+    const isAsync = (node.childForFieldName('async')?.childCount ?? 0) > 0;
     const prefix = isAsync ? 'async ' : '';
 
     return prefix + name + '(' + params.join(',') + ')' + (returnType ? ': ' + returnType : '');
@@ -306,6 +313,7 @@ export class TreeSitterParser {
     if (argsNode) {
       for (let i = 0; i < argsNode.childCount; i++) {
         const argNode = argsNode.child(i);
+        if (!argNode) continue;
         const argText = this.getNodeText(content, argNode).trim();
         if (argText) {
           params.push(argText);
@@ -314,7 +322,7 @@ export class TreeSitterParser {
     }
 
     const asyncChild = node.childForFieldName('async');
-    const isAsync = asyncChild?.childCount > 0;
+    const isAsync = (asyncChild?.childCount ?? 0) > 0;
     const prefix = isAsync ? 'async ' : '';
 
     return prefix + name + '(' + params.join(',') + ')';

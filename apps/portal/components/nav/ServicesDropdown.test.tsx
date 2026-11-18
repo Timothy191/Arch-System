@@ -276,4 +276,19 @@ describe('ServicesDropdown', () => {
       expect(trigger).toHaveAttribute('aria-expanded', 'false');
     });
   });
+
+  it('toggles the 7-day weather forecast panel when the weather card is clicked', async () => {
+    render(<ServicesDropdown />);
+    fireEvent.click(screen.getByRole('button', { name: /system tray/i }));
+
+    const weatherToggle = await screen.findByTestId('weather-panel-toggle');
+    expect(screen.queryByTestId('weekly-weather-forecast-panel')).not.toBeInTheDocument();
+
+    fireEvent.click(weatherToggle);
+    expect(screen.getByTestId('weekly-weather-forecast-panel')).toBeInTheDocument();
+    expect(screen.getByText('7-Day Site Forecast')).toBeInTheDocument();
+
+    fireEvent.click(weatherToggle);
+    expect(screen.queryByTestId('weekly-weather-forecast-panel')).not.toBeInTheDocument();
+  });
 });

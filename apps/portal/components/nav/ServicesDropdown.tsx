@@ -32,6 +32,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { fetchWeather, getWindDirection, type WeatherData } from '@/lib/weather-api';
 import { logout } from '~/app/actions';
 
+function formatForecastDay(dateStr: string): string {
+  const parsed = new Date(`${dateStr}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return dateStr;
+  return parsed.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+}
+
 /* ------------------------------------------------------------------ */
 //  Shift helpers
 /* ------------------------------------------------------------------ */
@@ -114,6 +120,7 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
 
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
+  const [showWeeklyForecast, setShowWeeklyForecast] = useState(false);
 
   const shift = useMemo(() => getShiftInfo(), []);
   const safety = useSafetyAlerts();
@@ -148,7 +155,15 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
 
   return (
     <>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenu
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (!nextOpen) {
+            setShowWeeklyForecast(false);
+          }
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <button
             aria-label="System Tray"
@@ -175,14 +190,29 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
-          className="z-popover w-64 rounded-xl border border-black/[0.08] bg-white/95 py-2 shadow-window backdrop-blur-2xl"
+          className={cn(
+            'z-popover rounded-xl border border-black/[0.08] bg-white/95 py-2 shadow-window backdrop-blur-2xl transition-[width] duration-150',
+            showWeeklyForecast ? 'w-80' : 'w-64'
+          )}
           align="end"
           sideOffset={5}
         >
           {/* ── Environmental & Operations Status ── */}
           <div className="grid grid-cols-2 gap-1.5 px-2 pb-1.5">
             {/* Weather */}
-            <div className="rounded-lg border border-black/[0.04] bg-black/[0.02] p-2">
+            <button
+              type="button"
+              onClick={() => setShowWeeklyForecast((prev) => !prev)}
+              aria-expanded={showWeeklyForecast}
+              aria-label="Toggle 7-day weather forecast"
+              data-testid="weather-panel-toggle"
+              className={cn(
+                'rounded-lg border p-2 text-left transition-colors hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50',
+                showWeeklyForecast
+                  ? 'border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/5'
+                  : 'border-black/[0.04] bg-black/[0.02]'
+              )}
+            >
               {weatherLoading || !weather ? (
                 <div className="flex items-center gap-2">
                   <CloudSun className="h-4 w-4 animate-pulse text-[var(--text-muted)]" />
@@ -191,7 +221,7 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
               ) : (
                 <div className="flex items-center gap-2">
                   <span className="text-xl leading-none">{weather.icon}</span>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="font-semibold text-[12px] text-[var(--text-heading)]">
                       {weather.temperature}°C
                     </div>
@@ -201,7 +231,7 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
                   </div>
                 </div>
               )}
-            </div>
+            </button>
 
             {/* Shift */}
             <div className="rounded-lg border border-black/[0.04] bg-black/[0.02] p-2">
@@ -223,7 +253,18 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
             </div>
 
             {/* Wind / Visibility */}
-            <div className="col-span-2 rounded-lg border border-black/[0.04] bg-black/[0.02] p-2">
+            <button
+              type="button"
+              onClick={() => setShowWeeklyForecast((prev) => !prev)}
+              aria-expanded={showWeeklyForecast}
+              aria-label="Toggle 7-day weather forecast from conditions"
+              className={cn(
+                'col-span-2 rounded-lg border p-2 text-left transition-colors hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50',
+                showWeeklyForecast
+                  ? 'border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/5'
+                  : 'border-black/[0.04] bg-black/[0.02]'
+              )}
+            >
               {weatherLoading || !weather ? (
                 <div className="flex items-center gap-2">
                   <Wind className="h-4 w-4 animate-pulse text-[var(--text-muted)]" />
@@ -243,7 +284,60 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
                   </span>
                 </div>
               )}
-            </div>
+            </button>
+
+            {showWeeklyForecast && (
+              <div
+                data-testid="weekly-weather-forecast-panel"
+                className="col-span-2 space-y-1.5 rounded-lg border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/[0.04] p-2.5"
+              >
+                <div className="flex items-center justify-between border-black/[0.06] border-b pb-1">
+                  <span className="font-semibold text-[11px] text-[var(--text-heading)]">
+                    7-Day Site Forecast
+                  </span>
+                  <span className="text-[10px] text-[var(--text-muted)]">
+                    {weather?.location.name ?? 'Delmas, Mpumalanga'}
+                  </span>
+                </div>
+                {weather?.daily && weather.daily.length > 0 ? (
+                  <div className="space-y-1">
+                    {weather.daily.map((day) => (
+                      <div
+                        key={day.date}
+                        className="flex items-center justify-between gap-2 rounded-md px-1.5 py-1 text-[11px] hover:bg-black/[0.03]"
+                      >
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <span className="w-12 shrink-0 font-medium text-[var(--text-heading)]">
+                            {formatForecastDay(day.date)}
+                          </span>
+                          <span className="text-sm leading-none" aria-hidden="true">
+                            {day.icon}
+                          </span>
+                          <span className="truncate text-[10px] text-[var(--text-muted)]">
+                            {day.description}
+                          </span>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2 font-mono text-[10.5px] tabular-nums">
+                          {day.precipitation > 0 && (
+                            <span className="text-[var(--accent-blue)]">
+                              {day.precipitation.toFixed(1)}mm
+                            </span>
+                          )}
+                          <span className="text-[var(--text-muted)]">{day.minTemp}°</span>
+                          <span className="font-semibold text-[var(--text-heading)]">
+                            {day.maxTemp}°
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="py-1 text-[11px] text-[var(--text-muted)]">
+                    Weekly forecast unavailable.
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Safety Alert Summary */}
             <div className="col-span-2 rounded-lg border border-black/[0.04] bg-black/[0.02] p-2">

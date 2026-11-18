@@ -1,9 +1,9 @@
 {
   "version": "1.6.2",
-  "gitCommit": "8045c109",
-  "gitCommitFull": "8045c109273a4bd5e241e06d55eeeab0e8c529e2",
-  "gitBranch": "chore/reconcile-working-tree",
-  "buildTimestamp": "2026-11-17T10:46:31.564Z",
+  "gitCommit": "d827a02b",
+  "gitCommitFull": "d827a02ba31293ceafca48ab23fa4e26b031c1cb",
+  "gitBranch": "fix/hub-prerender-and-design-updates",
+  "buildTimestamp": "2026-11-18T10:47:26.117Z",
   "releaseName": "Arch OS v1.6.2 // Industrial Command",
   "systemCodename": "Industrial Telemetry Bus"
 }

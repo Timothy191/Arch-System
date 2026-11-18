@@ -1,6 +1,7 @@
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
+import { connection } from 'next/server';
 import type { BreakdownControlRoomView } from '@/features/departments';
 import {
   buildCarryOverBreakdownDelays,
@@ -123,6 +124,7 @@ export default async function EngineeringNotesPage({
   params: Promise<{ department: string }>;
   searchParams?: Promise<{ tab?: string; shift?: string }>;
 }) {
+  await connection();
   const { department } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   requireDepartment(department, ['control-room', 'engineering']);

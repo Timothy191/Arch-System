@@ -302,6 +302,14 @@ export const PRODUCTIVITY_TOOLS = [
   },
 ];
 
+export const PRODUCTION_TABS = [
+  { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+  { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
+  { name: 'machines', label: 'Machines', icon: 'Cpu' },
+  { name: 'history', label: 'History', icon: 'History' },
+  { name: 'reports', label: 'Reports', icon: 'FileText' },
+] as const;
+
 export const DEPARTMENT_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
@@ -426,6 +434,7 @@ const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
 > = {
+  production: PRODUCTION_TABS,
   'control-room': CONTROL_ROOM_TABS,
   'access-control': ACCESS_CONTROL_TABS,
   engineering: ENGINEERING_TABS,

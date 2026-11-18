@@ -2,6 +2,7 @@ import type { UnifiedShiftReport } from '@repo/contract/types/shift-compilation.
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { getCurrentShift } from '@repo/utils';
+import { connection } from 'next/server';
 import { getFleetOpeningSmrSnapshot } from '~/lib/control-room-fleet-smr';
 import { getDepartmentContext } from '~/lib/dept-context';
 import type { ShiftReportSummary } from '../../control-room/components/SupervisorApprovalPanel';
@@ -15,6 +16,7 @@ export default async function ShiftCompilationPage({
   params: Promise<{ department: string }>;
   searchParams: Promise<{ date?: string; shift?: string; tab?: string }>;
 }) {
+  await connection();
   const { department } = await params;
   const { date: queryDate, shift: queryShift, tab: queryTab } = await searchParams;
 

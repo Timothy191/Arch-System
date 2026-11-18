@@ -2,6 +2,7 @@ import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
@@ -134,6 +135,7 @@ export default async function DepartmentDashboard({
   params: Promise<{ department: string }>;
   searchParams?: Promise<{ from?: string; to?: string; tab?: string }>;
 }) {
+  await connection();
   const { department: deptSlug } = await params;
 
   if (deptSlug === 'availability-utilization') {
