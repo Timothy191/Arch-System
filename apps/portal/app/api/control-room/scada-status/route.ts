@@ -14,6 +14,7 @@ import { applyCors } from '@/lib/api/cors';
 import { logError } from '@/lib/errors/error-logger';
 import { addEvent, setAttributes, withAsyncSpan } from '@/lib/observability/tracing';
 
+const ALLOWED_ROLES = new Set(['admin', 'operator', 'supervisor', 'control_room_operator']);
 const SCADA_STATE_KEY = 'control-room:scada:state';
 
 export async function GET(req: Request) {
@@ -28,6 +29,20 @@ export async function GET(req: Request) {
       let cachedTagCount = 0;
 
       const redis = await getRedisClient().catch(() => null);
+      const supabase = await createServerSupabaseClient();
+      const principal = await getAuthenticatedEmployee(supabase);
+      if (!principal) {
+        return NextResponse.json(
+          { success: false, error: { message: 'Unauthorized', code: 'UNAUTHORIZED' } },
+          { status: 401 }
+        );
+      }
+      if (!principal.employee || !ALLOWED_ROLES.has(principal.employee.role)) {
+        return NextResponse.json(
+          { success: false, error: { message: 'Forbidden', code: 'FORBIDDEN' } },
+          { status: 403 }
+        );
+      }
       if (redis) {
         redisConnected = true;
         try {

@@ -14,18 +14,23 @@ import type {
   SplitHourlyLoadInput,
   UpdateExcavatorAssignmentConfigInput,
 } from '@repo/contract/types/form.types';
-import { cacheInvalidateTags } from '@repo/redis';
 import { type EmployeeSummary, getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { withAsyncSpan } from '@/lib/observability/tracing';
 import {
-  deriveExcavatorDumperAssignments,
   formatExcavatorMaterial,
-  type HourlyShift,
   isRegularMachineExcavatorActivity,
   normalizeQuickBlockFormat,
   parseExcavatorMaterial,
 } from './loads-utils';
+
+const _CONTROL_ROOM_SUPERVISOR_ROLES = ['admin', 'supervisor', 'control_room_operator'] as const;
+const _CONTROL_ROOM_OPERATOR_ROLES = [
+  'admin',
+  'operator',
+  'supervisor',
+  'control_room_operator',
+] as const;
 
 async function invalidateHourlyLoadsCache(departmentId: string, tags: string[]): Promise<void> {
   try {

@@ -3,14 +3,18 @@ import {
   machineOperatorScanResponseSchema,
   z,
 } from '@repo/contract';
+
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { getCurrentShift, getOperationalToday } from '@repo/utils';
 import { NextResponse } from 'next/server';
+import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { CACHE_TAGS } from '@/lib/cache-tags';
 import { isAdtOrDumpTruck, isDozer, isDrill, isExcavator } from '@/lib/control-room/machine-utils';
 import { logError } from '@/lib/errors/error-logger';
 import { revalidateTagInRouteHandler, updateTag } from '@/lib/server-cache';
+
+const ALLOWED_SCAN_ROLES = new Set(['admin', 'operator', 'control_room_operator', 'supervisor']);
 
 const serviceRow = <T extends z.ZodType>(schema: T) => z.array(schema);
 
@@ -375,361 +379,368 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  try {
-    const supabase = await createServerSupabaseClient();
-    const principal = await getAuthenticatedEmployee(supabase);
-    if (!principal) return jsonError('Authentication required', 401, 'UNAUTHENTICATED');
-    if (!principal.employee) return jsonError('Employee record not found', 403, 'NO_EMPLOYEE');
-
-    const rawBody = await request.text();
-    if (new TextEncoder().encode(rawBody).byteLength > 16 * 1024) {
-      return jsonError('Request body too large', 413, 'BODY_TOO_LARGE');
-    }
-
-    let body: unknown;
+  return withRateLimit(request, async () => {
     try {
-      body = JSON.parse(rawBody);
-    } catch {
-      return jsonError('Malformed JSON', 400, 'MALFORMED_JSON');
-    }
-    const parsed = machineOperatorScanRequestSchema.safeParse(body);
-    if (!parsed.success) return jsonError('Invalid scanner request', 400, 'INVALID_REQUEST');
-    const input = parsed.data;
+      const supabase = await createServerSupabaseClient();
+      const principal = await getAuthenticatedEmployee(supabase);
+      if (!principal) return jsonError('Authentication required', 401, 'UNAUTHENTICATED');
+      if (!principal.employee) return jsonError('Employee record not found', 403, 'NO_EMPLOYEE');
+      if (!ALLOWED_SCAN_ROLES.has(principal.employee.role)) {
+        return jsonError('Role not authorized for machine operator scans', 403, 'FORBIDDEN');
+      }
 
-    const employee = principal.employee;
-    if (
-      !canAccessDepartment(employee, input.departmentId) ||
-      !['admin', 'operator', 'supervisor'].includes(employee.role)
-    ) {
-      return jsonError('Not authorized for Control Room assignments', 403, 'FORBIDDEN');
-    }
+      const rawBody = await request.text();
+      if (new TextEncoder().encode(rawBody).byteLength > 16 * 1024) {
+        return jsonError('Request body too large', 413, 'BODY_TOO_LARGE');
+      }
 
-    const machine = await findMachine(supabase, input.machineCode, input.machineId);
-    if (!machine?.active) {
-      return jsonError('Active machine was not found for this scan', 404, 'MACHINE_NOT_FOUND');
-    }
+      let body: unknown;
+      try {
+        body = JSON.parse(rawBody);
+      } catch {
+        return jsonError('Malformed JSON', 400, 'MALFORMED_JSON');
+      }
+      const parsed = machineOperatorScanRequestSchema.safeParse(body);
+      if (!parsed.success) return jsonError('Invalid scanner request', 400, 'INVALID_REQUEST');
+      const input = parsed.data;
 
-    const machineDto = buildMachineDto(machine);
-
-    if (!input.operatorCode && !input.operatorId) {
-      const preview = machineOperatorScanResponseSchema.parse({
-        stage: 'machine',
-        machine: machineDto,
-      });
-      return NextResponse.json(preview);
-    }
-
-    let person: z.infer<typeof personnelRowsSchema.element> | undefined;
-    let badgeValid = false;
-    let selectedOperator: { id: string; full_name: string; employee_code: string } | null = null;
-    if (input.operatorCode) {
-      const [qrBadge] = await readServiceRows(
-        'badges',
-        'is_active,entity_type,personnel_id,expires_at',
-        'qr_code',
-        input.operatorCode,
-        badgeRowsSchema.element
-      );
-      const [rfidBadge] = qrBadge
-        ? [undefined]
-        : await readServiceRows(
-            'badges',
-            'is_active,entity_type,personnel_id,expires_at',
-            'rfid_code',
-            input.operatorCode,
-            badgeRowsSchema.element
-          );
-      const badge = qrBadge ?? rfidBadge;
+      const employee = principal.employee;
       if (
-        !badge?.is_active ||
-        badge.entity_type !== 'personnel' ||
-        !badge.personnel_id ||
-        (badge.expires_at && !dateIsCurrent(badge.expires_at, new Date()))
+        !canAccessDepartment(employee, input.departmentId) ||
+        !['admin', 'operator', 'supervisor'].includes(employee.role)
       ) {
-        return jsonError(
-          'Operator badge is invalid, expired, or not personnel',
-          403,
-          'BADGE_INVALID'
-        );
+        return jsonError('Not authorized for Control Room assignments', 403, 'FORBIDDEN');
       }
-      badgeValid = true;
-      [person] = await readServiceRows(
-        'personnel',
-        'emp_code,first_name,surname,job_title,status,medical_expiry,induction_expiry',
-        'id',
-        badge.personnel_id,
-        personnelRowsSchema.element
-      );
-    } else if (input.operatorId) {
-      const { data, error } = await supabase
-        .from('operators')
-        .select('id, full_name, employee_code')
-        .eq('id', input.operatorId)
-        .eq('active', true)
-        .is('deleted_at', null)
-        .maybeSingle();
-      if (error) throw new Error(`Operator directory lookup failed: ${error.message}`);
-      selectedOperator = data;
-      if (!selectedOperator) {
-        return jsonError('Selected operator is not active', 403, 'OPERATOR_INACTIVE');
-      }
-      [person] = await readServiceRows(
-        'personnel',
-        'emp_code,first_name,surname,job_title,status,medical_expiry,induction_expiry',
-        'emp_code',
-        selectedOperator.employee_code,
-        personnelRowsSchema.element
-      );
-    }
-    const now = new Date();
-    if (person?.status?.toLowerCase() !== 'active') {
-      return jsonError('Personnel record is not active', 403, 'OPERATOR_INACTIVE');
-    }
-    if (!matchesMachineType(person.job_title, machine.machine_type)) {
-      return jsonError(
-        `Operator job title does not match ${machine.machine_type}`,
-        403,
-        'MACHINE_TYPE_MISMATCH'
-      );
-    }
-    const medicalValid = dateIsCurrent(person.medical_expiry, now);
-    const inductionValid = dateIsCurrent(person.induction_expiry, now);
-    if (!medicalValid || !inductionValid) {
-      return jsonError(
-        `Assignment blocked: ${[
-          !medicalValid ? 'medical clearance missing or expired' : null,
-          !inductionValid ? 'induction missing or expired' : null,
-        ]
-          .filter(Boolean)
-          .join(' and ')}`,
-        403,
-        'OPERATOR_NOT_CLEARED'
-      );
-    }
 
-    const { data: operator, error: operatorError } = selectedOperator
-      ? { data: selectedOperator, error: null }
-      : await supabase
+      const machine = await findMachine(supabase, input.machineCode, input.machineId);
+      if (!machine?.active) {
+        return jsonError('Active machine was not found for this scan', 404, 'MACHINE_NOT_FOUND');
+      }
+
+      const machineDto = buildMachineDto(machine);
+
+      if (!input.operatorCode && !input.operatorId) {
+        const preview = machineOperatorScanResponseSchema.parse({
+          stage: 'machine',
+          machine: machineDto,
+        });
+        return NextResponse.json(preview);
+      }
+
+      let person: z.infer<typeof personnelRowsSchema.element> | undefined;
+      let badgeValid = false;
+      let selectedOperator: { id: string; full_name: string; employee_code: string } | null = null;
+      if (input.operatorCode) {
+        const [qrBadge] = await readServiceRows(
+          'badges',
+          'is_active,entity_type,personnel_id,expires_at',
+          'qr_code',
+          input.operatorCode,
+          badgeRowsSchema.element
+        );
+        const [rfidBadge] = qrBadge
+          ? [undefined]
+          : await readServiceRows(
+              'badges',
+              'is_active,entity_type,personnel_id,expires_at',
+              'rfid_code',
+              input.operatorCode,
+              badgeRowsSchema.element
+            );
+        const badge = qrBadge ?? rfidBadge;
+        if (
+          !badge?.is_active ||
+          badge.entity_type !== 'personnel' ||
+          !badge.personnel_id ||
+          (badge.expires_at && !dateIsCurrent(badge.expires_at, new Date()))
+        ) {
+          return jsonError(
+            'Operator badge is invalid, expired, or not personnel',
+            403,
+            'BADGE_INVALID'
+          );
+        }
+        badgeValid = true;
+        [person] = await readServiceRows(
+          'personnel',
+          'emp_code,first_name,surname,job_title,status,medical_expiry,induction_expiry',
+          'id',
+          badge.personnel_id,
+          personnelRowsSchema.element
+        );
+      } else if (input.operatorId) {
+        const { data, error } = await supabase
           .from('operators')
           .select('id, full_name, employee_code')
-          .eq('employee_code', person.emp_code)
+          .eq('id', input.operatorId)
           .eq('active', true)
           .is('deleted_at', null)
           .maybeSingle();
-    if (operatorError)
-      throw new Error(`Operator directory lookup failed: ${operatorError.message}`);
-    if (!operator) {
-      return jsonError(
-        'Personnel badge has no active Control Room operator record',
-        403,
-        'OPERATOR_NOT_REGISTERED'
-      );
-    }
+        if (error) throw new Error(`Operator directory lookup failed: ${error.message}`);
+        selectedOperator = data;
+        if (!selectedOperator) {
+          return jsonError('Selected operator is not active', 403, 'OPERATOR_INACTIVE');
+        }
+        [person] = await readServiceRows(
+          'personnel',
+          'emp_code,first_name,surname,job_title,status,medical_expiry,induction_expiry',
+          'emp_code',
+          selectedOperator.employee_code,
+          personnelRowsSchema.element
+        );
+      }
+      const now = new Date();
+      if (person?.status?.toLowerCase() !== 'active') {
+        return jsonError('Personnel record is not active', 403, 'OPERATOR_INACTIVE');
+      }
+      if (!matchesMachineType(person.job_title, machine.machine_type)) {
+        return jsonError(
+          `Operator job title does not match ${machine.machine_type}`,
+          403,
+          'MACHINE_TYPE_MISMATCH'
+        );
+      }
+      const medicalValid = dateIsCurrent(person.medical_expiry, now);
+      const inductionValid = dateIsCurrent(person.induction_expiry, now);
+      if (!medicalValid || !inductionValid) {
+        return jsonError(
+          `Assignment blocked: ${[
+            !medicalValid ? 'medical clearance missing or expired' : null,
+            !inductionValid ? 'induction missing or expired' : null,
+          ]
+            .filter(Boolean)
+            .join(' and ')}`,
+          403,
+          'OPERATOR_NOT_CLEARED'
+        );
+      }
 
-    let siteId = machine.site_id ?? input.siteId ?? null;
-    if (!siteId) {
-      const { data: defaultSite } = await supabase
+      const { data: operator, error: operatorError } = selectedOperator
+        ? { data: selectedOperator, error: null }
+        : await supabase
+            .from('operators')
+            .select('id, full_name, employee_code')
+            .eq('employee_code', person.emp_code)
+            .eq('active', true)
+            .is('deleted_at', null)
+            .maybeSingle();
+      if (operatorError)
+        throw new Error(`Operator directory lookup failed: ${operatorError.message}`);
+      if (!operator) {
+        return jsonError(
+          'Personnel badge has no active Control Room operator record',
+          403,
+          'OPERATOR_NOT_REGISTERED'
+        );
+      }
+
+      let siteId = machine.site_id ?? input.siteId ?? null;
+      if (!siteId) {
+        const { data: defaultSite } = await supabase
+          .from('sites')
+          .select('id')
+          .eq('active', true)
+          .is('deleted_at', null)
+          .limit(1)
+          .maybeSingle();
+        siteId = defaultSite?.id ?? null;
+      }
+      if (!siteId) {
+        return jsonError('Select a site before assigning this machine', 422, 'SITE_REQUIRED');
+      }
+      const { data: site, error: siteError } = await supabase
         .from('sites')
         .select('id')
+        .eq('id', siteId)
         .eq('active', true)
         .is('deleted_at', null)
-        .limit(1)
         .maybeSingle();
-      siteId = defaultSite?.id ?? null;
-    }
-    if (!siteId) {
-      return jsonError('Select a site before assigning this machine', 422, 'SITE_REQUIRED');
-    }
-    const { data: site, error: siteError } = await supabase
-      .from('sites')
-      .select('id')
-      .eq('id', siteId)
-      .eq('active', true)
-      .is('deleted_at', null)
-      .maybeSingle();
-    if (siteError) throw new Error(`Site lookup failed: ${siteError.message}`);
-    if (!site) return jsonError('Selected site is not active or accessible', 403, 'SITE_INVALID');
+      if (siteError) throw new Error(`Site lookup failed: ${siteError.message}`);
+      if (!site) return jsonError('Selected site is not active or accessible', 403, 'SITE_INVALID');
 
-    const shiftDate = getOperationalToday('Africa/Johannesburg');
-    const shiftType = getCurrentShift(now, 'Africa/Johannesburg');
+      const shiftDate = getOperationalToday('Africa/Johannesburg');
+      const shiftType = getCurrentShift(now, 'Africa/Johannesburg');
 
-    // Attempt atomic database dispatch RPC if available in current schema environment
-    if (typeof supabase.rpc === 'function') {
-      try {
-        const { data: rpcData, error: rpcError } = await supabase.rpc(
-          'atomic_machine_operator_dispatch',
-          {
-            p_machine_id: machine.id,
-            p_operator_id: operator.id,
-            p_site_id: siteId,
-            p_department_id: input.departmentId,
-            p_shift_date: shiftDate,
-            p_shift_type: shiftType,
-            p_start_time: operationalTime(now),
-            p_created_by: employee.id,
-          }
-        );
-
-        if (!rpcError && rpcData && typeof rpcData === 'object') {
-          const rpcObj = rpcData as {
-            allowed?: boolean;
-            code?: string;
-            reason?: string;
-            alreadyAssigned?: boolean;
-            operationId?: string;
-            machineCapabilities?: Record<string, boolean>;
-          };
-
-          if (rpcObj.allowed === false) {
-            if (rpcObj.code === 'MACHINE_OCCUPIED') {
-              return jsonError(
-                rpcObj.reason ?? 'Machine already has an active operator this shift',
-                409,
-                'MACHINE_ASSIGNED'
-              );
+      // Attempt atomic database dispatch RPC if available in current schema environment
+      if (typeof supabase.rpc === 'function') {
+        try {
+          const { data: rpcData, error: rpcError } = await supabase.rpc(
+            'atomic_machine_operator_dispatch',
+            {
+              p_machine_id: machine.id,
+              p_operator_id: operator.id,
+              p_site_id: siteId,
+              p_department_id: input.departmentId,
+              p_shift_date: shiftDate,
+              p_shift_type: shiftType,
+              p_start_time: operationalTime(now),
+              p_created_by: employee.id,
             }
-            if (rpcObj.code === 'CLEARANCE_EXPIRED') {
-              return jsonError(
-                rpcObj.reason ?? 'Assignment blocked: medical or induction expired',
-                403,
-                'OPERATOR_NOT_CLEARED'
-              );
-            }
-            return jsonError(
-              rpcObj.reason ?? 'Machine dispatch could not be authorized',
-              403,
-              rpcObj.code ?? 'DISPATCH_BLOCKED'
-            );
-          }
+          );
 
-          if (rpcObj.allowed === true && rpcObj.operationId) {
-            const capabilities = {
-              ...machineDto.capabilities,
-              ...(rpcObj.machineCapabilities ?? {}),
+          if (!rpcError && rpcData && typeof rpcData === 'object') {
+            const rpcObj = rpcData as {
+              allowed?: boolean;
+              code?: string;
+              reason?: string;
+              alreadyAssigned?: boolean;
+              operationId?: string;
+              machineCapabilities?: Record<string, boolean>;
             };
 
-            const result = machineOperatorScanResponseSchema.parse({
-              stage: 'assignment',
-              machine: {
-                ...machineDto,
-                capabilities,
-              },
-              operator: { id: operator.id, name: operator.full_name },
-              operationId: rpcObj.operationId,
-              assignedAt: now.toISOString(),
-              alreadyAssigned: Boolean(rpcObj.alreadyAssigned),
-              checks: {
-                machineActive: true,
-                badgeValid,
-                badgeScanned: badgeValid,
-                operatorActive: true,
-                medicalValid: true,
-                inductionValid: true,
-                machineQualification: 'not_configured',
-              },
-            });
-            if (!rpcObj.alreadyAssigned) {
-              await updateTag(CACHE_TAGS.TABLE_MACHINE_OPERATIONS);
-              await revalidateTagInRouteHandler(CACHE_TAGS.CONTROL_ROOM, 'max');
-              await revalidateTagInRouteHandler(CACHE_TAGS.MACHINE_OPERATIONS, 'max');
+            if (rpcObj.allowed === false) {
+              if (rpcObj.code === 'MACHINE_OCCUPIED') {
+                return jsonError(
+                  rpcObj.reason ?? 'Machine already has an active operator this shift',
+                  409,
+                  'MACHINE_ASSIGNED'
+                );
+              }
+              if (rpcObj.code === 'CLEARANCE_EXPIRED') {
+                return jsonError(
+                  rpcObj.reason ?? 'Assignment blocked: medical or induction expired',
+                  403,
+                  'OPERATOR_NOT_CLEARED'
+                );
+              }
+              return jsonError(
+                rpcObj.reason ?? 'Machine dispatch could not be authorized',
+                403,
+                rpcObj.code ?? 'DISPATCH_BLOCKED'
+              );
             }
-            return NextResponse.json(result, { status: rpcObj.alreadyAssigned ? 200 : 201 });
+
+            if (rpcObj.allowed === true && rpcObj.operationId) {
+              const capabilities = {
+                ...machineDto.capabilities,
+                ...(rpcObj.machineCapabilities ?? {}),
+              };
+
+              const result = machineOperatorScanResponseSchema.parse({
+                stage: 'assignment',
+                machine: {
+                  ...machineDto,
+                  capabilities,
+                },
+                operator: { id: operator.id, name: operator.full_name },
+                operationId: rpcObj.operationId,
+                assignedAt: now.toISOString(),
+                alreadyAssigned: Boolean(rpcObj.alreadyAssigned),
+                checks: {
+                  machineActive: true,
+                  badgeValid,
+                  badgeScanned: badgeValid,
+                  operatorActive: true,
+                  medicalValid: true,
+                  inductionValid: true,
+                  machineQualification: 'not_configured',
+                },
+              });
+              if (!rpcObj.alreadyAssigned) {
+                await updateTag(CACHE_TAGS.TABLE_MACHINE_OPERATIONS);
+                await revalidateTagInRouteHandler(CACHE_TAGS.CONTROL_ROOM, 'max');
+                await revalidateTagInRouteHandler(CACHE_TAGS.MACHINE_OPERATIONS, 'max');
+              }
+              return NextResponse.json(result, { status: rpcObj.alreadyAssigned ? 200 : 201 });
+            }
           }
+        } catch (rpcErr) {
+          logError(rpcErr, { context: 'control_room_atomic_dispatch_rpc_fallback' });
         }
-      } catch (rpcErr) {
-        logError(rpcErr, { context: 'control_room_atomic_dispatch_rpc_fallback' });
       }
-    }
 
-    const { data: currentOperation, error: currentOperationError } = await supabase
-      .from('machine_operations')
-      .select('id, operator_id, site_id')
-      .eq('department_id', input.departmentId)
-      .eq('machine_id', machine.id)
-      .eq('shift_date', shiftDate)
-      .eq('shift_type', shiftType)
-      .is('end_time', null)
-      .limit(1)
-      .maybeSingle();
-    if (currentOperationError) {
-      throw new Error(`Current machine assignment lookup failed: ${currentOperationError.message}`);
-    }
-    if (currentOperation) {
-      if (currentOperation.operator_id === operator.id && currentOperation.site_id === siteId) {
-        const alreadyAssigned = machineOperatorScanResponseSchema.parse({
-          stage: 'assignment',
-          machine: machineDto,
-          operator: { id: operator.id, name: operator.full_name },
-          operationId: currentOperation.id,
-          assignedAt: now.toISOString(),
-          alreadyAssigned: true,
-          checks: {
-            machineActive: true,
-            badgeValid,
-            badgeScanned: badgeValid,
-            operatorActive: true,
-            medicalValid: true,
-            inductionValid: true,
-            machineQualification: 'not_configured',
-          },
-        });
-        return NextResponse.json(alreadyAssigned);
-      }
-      return jsonError(
-        'Machine already has an active operator this shift',
-        409,
-        'MACHINE_ASSIGNED'
-      );
-    }
-
-    const { data: operation, error: insertError } = await supabase
-      .from('machine_operations')
-      .insert({
-        department_id: input.departmentId,
-        machine_id: machine.id,
-        operator_id: operator.id,
-        site_id: siteId,
-        shift_date: shiftDate,
-        shift_type: shiftType,
-        start_time: operationalTime(now),
-        created_by: employee.id,
-      })
-      .select('id')
-      .single();
-    if (insertError) {
-      if (insertError.code === '23505') {
-        return jsonError(
-          'Machine assignment conflicts with an existing shift record',
-          409,
-          'DUPLICATE'
+      const { data: currentOperation, error: currentOperationError } = await supabase
+        .from('machine_operations')
+        .select('id, operator_id, site_id')
+        .eq('department_id', input.departmentId)
+        .eq('machine_id', machine.id)
+        .eq('shift_date', shiftDate)
+        .eq('shift_type', shiftType)
+        .is('end_time', null)
+        .limit(1)
+        .maybeSingle();
+      if (currentOperationError) {
+        throw new Error(
+          `Current machine assignment lookup failed: ${currentOperationError.message}`
         );
       }
-      throw new Error(`Machine assignment insert failed: ${insertError.message}`);
-    }
+      if (currentOperation) {
+        if (currentOperation.operator_id === operator.id && currentOperation.site_id === siteId) {
+          const alreadyAssigned = machineOperatorScanResponseSchema.parse({
+            stage: 'assignment',
+            machine: machineDto,
+            operator: { id: operator.id, name: operator.full_name },
+            operationId: currentOperation.id,
+            assignedAt: now.toISOString(),
+            alreadyAssigned: true,
+            checks: {
+              machineActive: true,
+              badgeValid,
+              badgeScanned: badgeValid,
+              operatorActive: true,
+              medicalValid: true,
+              inductionValid: true,
+              machineQualification: 'not_configured',
+            },
+          });
+          return NextResponse.json(alreadyAssigned);
+        }
+        return jsonError(
+          'Machine already has an active operator this shift',
+          409,
+          'MACHINE_ASSIGNED'
+        );
+      }
 
-    const result = machineOperatorScanResponseSchema.parse({
-      stage: 'assignment',
-      machine: machineDto,
-      operator: { id: operator.id, name: operator.full_name },
-      operationId: operation.id,
-      assignedAt: now.toISOString(),
-      alreadyAssigned: false,
-      checks: {
-        machineActive: true,
-        badgeValid,
-        badgeScanned: badgeValid,
-        operatorActive: true,
-        medicalValid: true,
-        inductionValid: true,
-        machineQualification: 'not_configured',
-      },
-    });
-    await updateTag(CACHE_TAGS.TABLE_MACHINE_OPERATIONS);
-    await revalidateTagInRouteHandler(CACHE_TAGS.CONTROL_ROOM, 'max');
-    await revalidateTagInRouteHandler(CACHE_TAGS.MACHINE_OPERATIONS, 'max');
-    return NextResponse.json(result, { status: 201 });
-  } catch (error) {
-    logError(error, { context: 'control_room_machine_operator_scan' });
-    return jsonError('Machine/operator scan could not be processed', 500, 'SCAN_FAILED');
-  }
+      const { data: operation, error: insertError } = await supabase
+        .from('machine_operations')
+        .insert({
+          department_id: input.departmentId,
+          machine_id: machine.id,
+          operator_id: operator.id,
+          site_id: siteId,
+          shift_date: shiftDate,
+          shift_type: shiftType,
+          start_time: operationalTime(now),
+          created_by: employee.id,
+        })
+        .select('id')
+        .single();
+      if (insertError) {
+        if (insertError.code === '23505') {
+          return jsonError(
+            'Machine assignment conflicts with an existing shift record',
+            409,
+            'DUPLICATE'
+          );
+        }
+        throw new Error(`Machine assignment insert failed: ${insertError.message}`);
+      }
+
+      const result = machineOperatorScanResponseSchema.parse({
+        stage: 'assignment',
+        machine: machineDto,
+        operator: { id: operator.id, name: operator.full_name },
+        operationId: operation.id,
+        assignedAt: now.toISOString(),
+        alreadyAssigned: false,
+        checks: {
+          machineActive: true,
+          badgeValid,
+          badgeScanned: badgeValid,
+          operatorActive: true,
+          medicalValid: true,
+          inductionValid: true,
+          machineQualification: 'not_configured',
+        },
+      });
+      await updateTag(CACHE_TAGS.TABLE_MACHINE_OPERATIONS);
+      await revalidateTagInRouteHandler(CACHE_TAGS.CONTROL_ROOM, 'max');
+      await revalidateTagInRouteHandler(CACHE_TAGS.MACHINE_OPERATIONS, 'max');
+      return NextResponse.json(result, { status: 201 });
+    } catch (error) {
+      logError(error, { context: 'control_room_machine_operator_scan' });
+      return jsonError('Machine/operator scan could not be processed', 500, 'SCAN_FAILED');
+    }
+  });
 }
