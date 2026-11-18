@@ -1,0 +1,35 @@
+{
+  "id": "compaction-b5de3913",
+  "timestamp": "2026-11-18T11:02:39.314Z",
+  "taskTag": "compaction-standard-b5de3913",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/.gemini/antigravity-cli/brain/b5de3913-5442-446a-8911-60dee990d6ce/AUTOMATIONS_HARDENING_TODO.md\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/jobs/workflow-runner.test.ts\"",
+    "\"/home/tim/.gemini/antigravity-cli/brain/b5de3913-5442-446a-8911-60dee990d6ce/scratch/apply-connection.mjs\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machines/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/libs/features/departments/data-access/src/departments.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/.qoder/hooks/commit-guard.sh\"",
+    "\"/home/tim/Fork/Arch-System/.npmrc\"",
+    "\"/home/tim/Fork/Arch-System/vercel.json\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/control-room/scada-status/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/hourly-loads/actions.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/breakdowns/page.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(auth)/login/page.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/page.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/admin-auth.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/tire-management/page.test.tsx\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (431 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 457955,
+    "cacheHitRatio": 0.9215,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

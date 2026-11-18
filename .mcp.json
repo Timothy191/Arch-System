@@ -1,33 +1,10 @@
 {
   "mcpServers": {
-    "supabase": {
-      "url": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching",
-      "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
-      "type": "remote"
-    },
     "codemap": {
       "command": "/home/tim/.local/bin/codemap",
       "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
       "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
       "type": "stdio"
-    },
-    "chrome-devtools": {
-      "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@1.12.0"],
-      "cwd": "/tmp",
-      "description": "Chrome DevTools MCP for browser inspection and automation",
-      "type": "stdio"
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"],
-      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
-      "type": "stdio"
-    },
-    "frontend-checklist": {
-      "url": "https://mcp.frontendchecklist.io",
-      "description": "Front-End Checklist: 385 quality-gated frontend best practice rules for automated code review",
-      "type": "remote"
     },
     "skills-mcp": {
       "command": "node",
@@ -41,6 +18,38 @@
       "description": "Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs",
       "type": "stdio"
     },
+    "slim-tooling-mcp": {
+      "command": "node",
+      "args": ["/home/tim/Fork/slim-tooling-mcp/dist/index.js"],
+      "description": "Token-saving tooling and codemod utilities MCP server",
+      "type": "stdio"
+    },
+    "context7": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
+      "type": "stdio"
+    },
+    "chrome-devtools": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "chrome-devtools-mcp@1.12.0"],
+      "cwd": "/tmp",
+      "description": "Chrome DevTools MCP for browser inspection and automation",
+      "type": "stdio"
+    },
+    "frontend-checklist": {
+      "url": "https://mcp.frontendchecklist.io",
+      "description": "Front-End Checklist: 385 quality-gated frontend best practice rules for automated code review",
+      "type": "remote"
+    },
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching",
+      "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
+      "type": "remote",
+      "headers": {
+        "Authorization": "Bearer ${SUPABASE_MCP_TOKEN}"
+      }
+    },
     "vibemon": {
       "url": "https://vibemon.dev/api/mcp",
       "description": "VibeMon Remote MCP Server: Multi-agent session pulse, team TODOs, work links, and Work State v1 handoffs",
@@ -52,7 +61,10 @@
     "vercel": {
       "url": "https://mcp.vercel.com",
       "description": "Vercel Official Remote MCP Server: Deployment logs, build diagnostics, preview URLs, and project status",
-      "type": "remote"
+      "type": "remote",
+      "headers": {
+        "Authorization": "Bearer ${VERCEL_TOKEN}"
+      }
     },
     "sentry": {
       "url": "https://mcp.sentry.dev/mcp",
@@ -60,31 +72,6 @@
       "type": "remote",
       "headers": {
         "Authorization": "Bearer ${SENTRY_AUTH_TOKEN}"
-      }
-    },
-    "postgres-readonly": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres", "${SUPABASE_READ_REPLICA_URL}"],
-      "description": "Read-Only PostgreSQL MCP Server: Safe EXPLAIN (ANALYZE, BUFFERS) and index/RLS query inspection",
-      "type": "stdio"
-    },
-    "prometheus": {
-      "command": "npx",
-      "args": ["-y", "prometheus-mcp-server"],
-      "description": "Prometheus MCP Server: Query Golden Signals, prom-client metrics, latency histograms, and cache hit ratios",
-      "type": "stdio",
-      "env": {
-        "PROMETHEUS_URL": "${PROMETHEUS_URL:-http://127.0.0.1:9090}"
-      }
-    },
-    "grafana": {
-      "command": "npx",
-      "args": ["-y", "@grafana/mcp-grafana"],
-      "description": "Grafana MCP Server: Dashboard inspection, alert rules, and Prometheus/OTel metric exploration",
-      "type": "stdio",
-      "env": {
-        "GRAFANA_URL": "${GRAFANA_URL:-http://127.0.0.1:3005}",
-        "GRAFANA_API_KEY": "${GRAFANA_API_KEY}"
       }
     }
   }
