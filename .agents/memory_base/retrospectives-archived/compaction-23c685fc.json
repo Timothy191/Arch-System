@@ -1,0 +1,19 @@
+{
+  "id": "compaction-23c685fc",
+  "timestamp": "2026-11-18T15:13:26.376Z",
+  "taskTag": "compaction-standard-23c685fc",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:consolidate_state_spine",
+  "affectedFiles": [],
+  "rootCause": "Context fill is below 25% idempotent floor or within 4 turns of prior checkpoint; preserving warm prefix cache.",
+  "resolution": "Persisted bounded SKILL.state (304 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "consolidate_state_spine",
+    "latestInputTokens": 35026,
+    "cacheHitRatio": 0.7506,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 26457
+  }
+}

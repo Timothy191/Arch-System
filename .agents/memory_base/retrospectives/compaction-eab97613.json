@@ -1,0 +1,26 @@
+{
+  "id": "compaction-eab97613",
+  "timestamp": "2026-11-18T15:19:32.189Z",
+  "taskTag": "compaction-standard-eab97613",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/tools/scripts/token-tracker.cjs\"",
+    "\"/home/tim/Fork/Arch-System/.gitignore\"",
+    "\"/home/tim/Fork/.gitignore\"",
+    "\"/home/tim/Fork/Arch-System/docs/plans/2026-10-29-redis-optimization-report.md\"",
+    "\"/home/tim/Fork/Arch-System/docs/plans/control-room-overhaul/implementation.md\"",
+    "\"/home/tim/Fork/Arch-System/docs/plans/control-room-overhaul/requirements.md\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (336 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 75615,
+    "cacheHitRatio": 0.8761,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

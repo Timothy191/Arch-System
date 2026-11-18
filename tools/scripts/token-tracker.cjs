@@ -156,6 +156,7 @@ function determineEffectiveTaskBudget(taskContext = {}) {
     const tierSpec = tiers[explicitTier];
     // Budget is effectively unlimited: no hard cap on the context window.
     const windowSize = budget.contextWindowTokens || 200000;
+    const maxRatio = tierSpec.maxPreTaskWindowRatio || budget.maxPreTaskWindowRatio || 0.3;
     return {
       level: explicitTier,
       score:
@@ -176,7 +177,10 @@ function determineEffectiveTaskBudget(taskContext = {}) {
         maxOutputTokens: tierSpec.maxOutputTokens,
         toolCallBudget: tierSpec.toolCallBudget,
         reserveMargin: tierSpec.reserveMargin,
-        maxPreTaskWindowRatio: tierSpec.maxPreTaskWindowRatio,
+        maxLeasedSkills: tierSpec.maxLeasedSkills,
+        maxSubagents: tierSpec.maxSubagents,
+        maxPreTaskWindowRatio: maxRatio,
+        maxPreTaskTokens: Math.floor(windowSize * maxRatio),
         windowSize,
       },
     };
@@ -288,7 +292,10 @@ function determineEffectiveTaskBudget(taskContext = {}) {
       maxOutputTokens: tierSpec.maxOutputTokens,
       toolCallBudget: tierSpec.toolCallBudget,
       reserveMargin: tierSpec.reserveMargin,
+      maxLeasedSkills: tierSpec.maxLeasedSkills,
+      maxSubagents: tierSpec.maxSubagents,
       maxPreTaskWindowRatio: maxRatio,
+      maxPreTaskTokens: Math.floor(windowSize * maxRatio),
       windowSize,
     },
   };

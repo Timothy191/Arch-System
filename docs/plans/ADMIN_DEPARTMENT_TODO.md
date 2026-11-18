@@ -28,7 +28,7 @@
 
 - [x] Add tests for all admin tabs
 - [x] Expand admin data API route tests
-- [ ] Add admin E2E flows
+- [x] Add admin E2E flows — covered in `e2e/permissions-roles.spec.ts` (admin access, menu visibility, restricted pages, role isolation)
 
 ## P4 — UX / accessibility / observability
 

@@ -98,13 +98,13 @@
 
 ### 3.1 Shift Checklist Database Persistence
 
-- [ ] **TASK-3.1.1:** In [`ControlRoomChecklistWidget.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ControlRoomChecklistWidget.tsx):
+- [x] **TASK-3.1.1:** In [`ControlRoomChecklistWidget.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ControlRoomChecklistWidget.tsx):
   - Persist checked states to PostgreSQL via dedicated API / Supabase mutation.
   - Wire "Proceed to Shift Closeout" button to navigate to `/control-room/shift-closeout` with checklist reference.
 
 ### 3.2 ISA-18.2 Alarm Acknowledgement State Machine
 
-- [ ] **TASK-3.2.1:** In [`AlertPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/AlertPanel.tsx):
+- [x] **TASK-3.2.1:** In [`AlertPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/AlertPanel.tsx):
   - Update styles for critical alarms with high-contrast banners (`bg-red-600 text-white font-bold`).
   - Add functional `[Acknowledge]` action with operator comments modal.
   - Log acknowledgement timestamp and operator ID to audit trail.
@@ -115,14 +115,14 @@
   - [`FleetKpiTable.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/FleetKpiTable.tsx)
   - [`ProductionSummaryCard.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/ProductionSummaryCard.tsx)
   - [`TireAlertsBanner.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/TireAlertsBanner.tsx)
-- [ ] **TASK-3.3.2:** Migrate all deprecated `arch-*` classes in `EquipmentDashboard.tsx` to CSS custom property tokens (`var(--surface-*)`, `var(--text-*)`).
-- [ ] **TASK-3.3.3:** Add dark-theme contrast variables for night shift (18:00–06:00) control room lighting.
+- [x] **TASK-3.3.2:** Migrate all deprecated `arch-*` classes in `EquipmentDashboard.tsx` to CSS custom property tokens (`var(--surface-*)`, `var(--text-*)`).
+- [x] **TASK-3.3.3:** Add dark-theme contrast variables for night shift (18:00–06:00) control room lighting. (Superseded by Light-Mode Only Invariant — semantic OKLCH tokens enforced)
 
 ---
 
-### [ ] CRITICAL STAGE REVIEW 3: Phase 3 Verification Gate
+### [x] CRITICAL STAGE REVIEW 3: Phase 3 Verification Gate
 
-- [ ] Verify checklist items retain checked state after a hard browser reload.
-- [ ] Verify acknowledging an alert transitions status to steady state with audit logging.
-- [ ] Verify dark mode renders without blinding white cards in `FleetKpiTable` or `ProductionSummaryCard`.
-- [ ] Execute `pnpm agent:verify` or full quality suite (`pnpm type-check && pnpm lint && pnpm test`).
+- [x] Verify checklist items retain checked state after a hard browser reload.
+- [x] Verify acknowledging an alert transitions status to steady state with audit logging.
+- [x] Verify dark mode renders without blinding white cards in `FleetKpiTable` or `ProductionSummaryCard`. (Superseded by Light-Mode Only Invariant — semantic OKLCH tokens enforced)
+- [x] Execute `pnpm agent:verify` or full quality suite (`pnpm type-check && pnpm lint && pnpm test`).

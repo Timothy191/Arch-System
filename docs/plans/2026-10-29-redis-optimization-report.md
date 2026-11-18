@@ -302,25 +302,25 @@ await recordL1EvictionCount(removed); // after memorySweep
 
 ### Immediate (P0 — this sprint)
 
-- [ ] Raise `MAX_L1_TTL_SECONDS` from 60 to 300 in `packages/redis/src/registry.ts`
-- [ ] Add JSDoc comment explaining L1/L2 TTL relationship
-- [ ] Run `pnpm test` for `@repo/redis` to confirm no regressions
+- [x] Raise `MAX_L1_TTL_SECONDS` from 60 to 300 in `packages/redis/src/registry.ts`
+- [x] Add JSDoc comment explaining L1/L2 TTL relationship
+- [x] Run `pnpm test` for `@repo/redis` to confirm no regressions
 
 ### Short-term (P1 — next sprint)
 
-- [ ] Audit all role/department change paths for privilege-version fencing compliance
-- [ ] Add `cacheInvalidateTagsBatch` to `packages/redis/src/invalidation.ts`
-- [ ] Add 3 new `CacheCategory` entries (TELEMETRY, REPORTS, SESSIONS)
+- [x] Audit all role/department change paths for privilege-version fencing compliance
+- [x] Add `cacheInvalidateTagsBatch` to `packages/redis/src/invalidation.ts`
+- [x] Add 3 new `CacheCategory` entries (TELEMETRY, REPORTS, SESSIONS)
 
 ### Medium-term (P2 — next month)
 
-- [ ] Restructure `cacheWrap` single-flight coalescing
-- [ ] Add periodic L1 sweep on Redis client connect
-- [ ] Add 5 new metrics to stats pipeline
-- [ ] Review and optimize `BROADCAST_KEY_LIMIT` based on observed invalidation patterns
+- [x] Restructure `cacheWrap` single-flight coalescing
+- [x] Add periodic L1 sweep on Redis client connect
+- [x] Add 5 new metrics to stats pipeline
+- [x] Review and optimize `BROADCAST_KEY_LIMIT` based on observed invalidation patterns
 
 ### Long-term (P3 — quarterly)
 
 - [ ] Evaluate Redis Cluster vs. Single-instance for write throughput
-- [ ] Migrate vector search to pgvector if RediSearch license costs increase
-- [] Design cold-start mitigation for serverless Redis (pre-warm caches on deployment)
+- [x] Migrate vector search to pgvector if RediSearch license costs increase
+- [x] Design cold-start mitigation for serverless Redis (pre-warm caches on deployment)

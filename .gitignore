@@ -332,3 +332,6 @@ graphify-out/
 .agentsroom/
 .vibemon/
 .agents/mcp_config.json
+.clai/
+.commandcode/
+clihub.yaml

@@ -8,6 +8,8 @@
  * 4. Run specialized tools (stylelint, theme lint, project tags) where appropriate.
  */
 
+const PRETTIER_BIN = './node_modules/.pnpm/node_modules/.bin/prettier';
+
 const PRETTIER_GLOBS = ['*.css', '*.yaml', '*.yml'];
 
 const ESLINT_GLOBS = ['*.js', '*.jsx', '*.ts', '*.tsx', '*.cjs', '*.mjs'];
@@ -48,7 +50,7 @@ export default {
     const commands = [];
     for (const batch of chunk(filtered, 20)) {
       commands.push(`stylelint --fix ${batch.join(' ')}`);
-      commands.push(`prettier --write ${batch.join(' ')}`);
+      commands.push(`${PRETTIER_BIN} --write ${batch.join(' ')}`);
     }
     return commands;
   },
@@ -111,7 +113,7 @@ export default {
       commands.push(
         `markdownlint --config config/tools/.markdownlint.json --fix --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist' ${batch.join(' ')}`
       );
-      commands.push(`prettier --write ${batch.join(' ')}`);
+      commands.push(`${PRETTIER_BIN} --write ${batch.join(' ')}`);
       commands.push(
         `cspell --config config/tools/cspell.json --no-progress --gitignore --no-must-find-files ${batch.join(' ')}`
       );
@@ -148,7 +150,7 @@ export default {
     if (filtered.length === 0) return [];
     const commands = [];
     for (const batch of chunk(filtered, 30)) {
-      commands.push(`prettier --write ${batch.join(' ')}`);
+      commands.push(`${PRETTIER_BIN} --write ${batch.join(' ')}`);
     }
     return commands;
   },
