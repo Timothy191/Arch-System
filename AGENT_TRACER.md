@@ -4,6 +4,12 @@
 
 ---
 
+## [2026-11-18T13:33:00+02:00] - Databricks Unity Catalog & Open Sharing Integration Registration (`feat/databricks-integration`)
+
+- **Live Verification**: Verified Databricks Workspace `https://dbc-6e364c3e-be48.cloud.databricks.com` (`7474659968586218`) identity auth, Unity Catalog metastore (`aws:us-east-2:6d04c3c2-8cd2-441a-8dbc-557da864afc1`), and `workspace` catalog.
+- **Catalog Migration**: Added [`225_integration_databricks_open_sharing.sql`](file:///home/tim/Fork/Arch-System/packages/database/migrations/225_integration_databricks_open_sharing.sql) seeding `databricks-unity-catalog` into `integration_catalog`.
+- **Environment Templates**: Added `DATABRICKS_HOST`, `DATABRICKS_WORKSPACE_ID`, `DATABRICKS_SHARING_ID`, and `DATABRICKS_TOKEN` placeholders to [`.env.example`](file:///home/tim/Fork/Arch-System/.env.example) and [`apps/portal/.env.example`](file:///home/tim/Fork/Arch-System/apps/portal/.env.example) (live credentials stored only in git-ignored `.env.local` files).
+
 ## [2026-11-18T13:14:00+02:00] - Full Codebase Update, 28-Gate Verification & Autonomous Git Cleanup (`main`)
 
 - **Full Codebase Update**: Executed `pnpm node:auto-update`, `pnpm deps:lint`, `pnpm policy:gen`, `pnpm version:sync`, `pnpm ci:reindex`, `pnpm ci:snapshot`, `pnpm memory:index`, `pnpm maps:gen`, and `pnpm check:fix` (formatted 4 files).
