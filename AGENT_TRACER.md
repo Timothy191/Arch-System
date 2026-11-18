@@ -4,6 +4,10 @@
 
 ---
 
+## [2026-11-18T17:01:00+02:00] - Trigger.dev Scaffold Cleanup (`chore/cleanup-trigger-dev`)
+
+- **Complete Propagated Removal**: Deleted `feat/trigger-dev-setup` branch, `apps/portal/trigger.config.ts`, and `apps/portal/src/trigger/*`; restored `apps/portal/.gitignore`, `apps/portal/tsconfig.json`, and `packages/agents/package.json`; and removed unused `@trigger.dev/sdk`, `@trigger.dev/build`, `@ai-sdk/anthropic`, and `ai` dependencies from `apps/portal/package.json`.
+
 ## [2026-11-18T16:25:00+02:00] - Remove Redundant Upstash Vector Store (`chore/remove-redundant-upstash-vector`)
 
 - **Audit & Consolidation**: Confirmed `pgvector` (Supabase) and `@repo/redis/search` (RediSearch HNSW) are actively used in production AI/RAG pipelines, whereas Upstash Vector had zero callers.
