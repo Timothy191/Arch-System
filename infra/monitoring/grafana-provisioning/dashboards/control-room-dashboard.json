@@ -1,0 +1,140 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Shift Coverage KPIs",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(shift_closeouts_total[1h])) / sum(rate(shifts_total[1h])) * 100",
+          "legendFormat": "Shift Closeout Rate %"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "title": "Active Machine Operations",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(machine_operations_active_total[5m])",
+          "legendFormat": "Active Operations / sec"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      }
+    },
+    {
+      "title": "Hourly Loads Average",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(hourly_loads_recorded_total[1h])",
+          "legendFormat": "Loads Recorded / sec"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 24,
+        "y": 0
+      }
+    },
+    {
+      "title": "SCADA Connection Status",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "scada_connection_status{job=\"fuxa\"} == 1",
+          "legendFormat": "SCADA Connected"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      }
+    },
+    {
+      "title": "Dozer Roll Form Submissions",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(dozer_roll_form_submissions_total[1h])",
+          "legendFormat": "Dozer Rolls / sec"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      }
+    },
+    {
+      "title": "Shift Completeness Rate",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(shift_completes_successful_total[1h])) / sum(rate(shift_completes_total[1h])) * 100",
+          "legendFormat": "Shift Completeness %"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 24,
+        "y": 8
+      }
+    },
+    {
+      "title": "Cloudflare Security",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "max by (status) (cf_waf_requests_total{job='cloudflare'})",
+          "legendFormat": "{{status}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "className": "background-default"
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 38,
+  "style": "light",
+  "tags": ["arch-system", "control-room", "department-kpi", "shift-operations"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Arch-System Control Room Department KPIs + Cloudflare Security",
+  "uid": "arch-control-room-kpi",
+  "version": 1
+}

@@ -1,0 +1,146 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Portal HTTP Error Rate",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(http_request_duration_seconds_count{job=\"portal\", status=~\"5..\"}[5m]) / rate(http_request_duration_seconds_count{job=\"portal\"}[5m])",
+          "legendFormat": "Error Rate",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "title": "Portal P95 Latency",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"portal\"}[5m]))",
+          "legendFormat": "P95 Latency (s)",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      }
+    },
+    {
+      "title": "Cache Hit Ratio (L1 vs L2)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "(portal_cache_hits_total{source=\"l1\"} / clamp_min(portal_cache_hits_total{source=\"l1\"} + portal_cache_misses_total{source=\"l1\"}, 1)) * 100",
+          "legendFormat": "L1 Hit %"
+        },
+        {
+          "expr": "(portal_cache_hits_total{source=\"l2\"} / clamp_min(portal_cache_hits_total{source=\"l2\"} + portal_cache_misses_total{source=\"l2\"}, 1)) * 100",
+          "legendFormat": "L2 Hit %"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 24,
+        "y": 0
+      }
+    },
+    {
+      "title": "Cache P95 Latency",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "portal_cache_latency_ms{metric=\"p95\"}",
+          "legendFormat": "p95 Latency (ms)"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      }
+    },
+    {
+      "title": "Cache Miss Rate",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(portal_cache_misses_total[5m])",
+          "legendFormat": "Misses / sec"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      }
+    },
+    {
+      "title": "Supabase Connection Pool",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "pg_stat_activity_count{application=\"Supabase\"}",
+          "legendFormat": "Active DB Connections"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 24,
+        "y": 8
+      }
+    },
+    {
+      "title": "Cloudflare API Metrics",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "max by (metric) (cf_requests_total{job='cloudflare'})",
+          "legendFormat": "Max Requests"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 100
+      },
+      "className": "background-default"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "light",
+  "tags": ["arch-system", "overview", "golden-signals", "cache", "supabase"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Arch-System Operational Overview + Cloudflare",
+  "uid": "arch-system-overview",
+  "version": 2
+}
