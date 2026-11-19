@@ -1,82 +1,41 @@
-# Global setup
-name = "arch-system"
-compatibility_date = "2024-01-01"
+# Cloudflare Workers configuration for Arch-System SCADA edge monitor
+# Primary portal hosting remains on Vercel (https://arch-system.vercel.app);
+# do not attach a wildcard /* route to this worker.
 
-# Observability - Tracing
+name = "arch-system-scada-monitor"
+main = "workers/scada-monitor.js"
+compatibility_date = "2025-11-01"
+workers_dev = true
+
 [observability]
-  traces = true
+enabled = true
 
-# Account ID
-account_id = "d7646260887677f91b94383b08472d0d"
+[durable_objects]
+bindings = [
+  { name = "AGENT_COORDINATOR", class_name = "AgentCoordinator" }
+]
 
-# Route configuration for Workers
-[routes]
-  # General routes
-  pattern = "/*"
-  name = "arch-system-workers"
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AgentCoordinator"]
 
-# Queues
-[queues]
-binding = "AGENT_QUEUE"
-queue = "agent-events"
+[vars]
+SCADA_STALE_THRESHOLD_MS = "60000"
+REQUIRE_SCADA_AUTH = "true"
 
-# Durable Object configuration
-[[durable_objects]]
-  class_name = "AgentCoordinator"
-binding = "agentCoordinator"
-
-# R2 Storage configuration
-[[r2_buckets]]
-binding = "R2"
-bucket_name = "arch-system-agents"
-
-# D1 Database configuration
-[[d1_databases]]
-binding = "DB"
-database_name = "arch-system-db"
-class_name = "main"
-
-# KV Namespaces configuration
-[[kv_namespaces]]
-binding = "KV"
-
-# Cloudflare API credentials (set CLOUDFLARE_API_TOKEN via `wrangler secret put`)
-CLOUDFLARE_ACCOUNT_ID = "d7646260887677f91b94383b08472d0d"
-AI_GATEWAY_ID = "default"
-
-# Workers AI configuration
-[ai]
-  cloudflareai = true
-
-# Script configuration
-[[script]]
-  main = "workers/scada-monitor.js"
-  binding = "agentCoordinator"
-
-# Observability - Tracing
-[observability]
-  enabled = true
-  
-# WAF enabled
-waf_enabled = true
-
-# Bot management
-bot_fighting = true
-
-# TLS configuration
-tls_1_3_enabled = true
-
-# IPv6 support
-ipv6_enabled = true
-
-# Security headers
-hsts_enabled = true
-
-# Load balancing
-load_balancing = true
-
-# Security settings
-security_level = "high"
-
-# Cache settings
-cache_level = "standard"
+# Provision production ingest secret out-of-band before enabling ingest traffic:
+#   wrangler secret put SCADA_INGEST_SECRET
+# For local unauthenticated testing only, override with `--var REQUIRE_SCADA_AUTH:false`.
+#
+# Optional bindings (uncomment and supply real IDs before deploying):
+# [[r2_buckets]]
+# binding = "TELEMETRY_ARCHIVE_BUCKET"
+# bucket_name = "arch-system-telemetry-archive"
+#
+# [[kv_namespaces]]
+# binding = "SCADA_CONFIG_KV"
+# id = "<kv-namespace-id>"
+#
+# [[queues.producers]]
+# binding = "SCADA_TELEMETRY_QUEUE"
+# queue = "arch-system-scada-events"

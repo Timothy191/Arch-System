@@ -2,13 +2,17 @@
   "name": "@repo/code-intelligence",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Code intelligence layer with tree-sitter based symbol search, context assembly, and refactoring safety for Arch-System",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc --build",
-    "test": "echo 'No tests configured'",
-    "test:watch": "jest --watchAll",
+    "type-check": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:ci": "biome ci .",
+    "test": "node --test src/parser.test.ts",
+    "test:watch": "node --test --watch src/parser.test.ts",
     "codegen": "tsc --build && echo 'Build complete'"
   },
   "keywords": [

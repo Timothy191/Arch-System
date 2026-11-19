@@ -1,0 +1,25 @@
+{
+  "id": "compaction-6a327686",
+  "timestamp": "2026-11-19T05:40:10.819Z",
+  "taskTag": "compaction-standard-6a327686",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/tools/federated-pipeline/test/federated-pipeline.test.mjs\"",
+    "\"/home/tim/Fork/tools/federation-watchdog/test/federated-audit.test.mjs\"",
+    "\"/home/tim/Fork/Arch-System/.agentsroom/sessions/agent-archsys-backend.json\"",
+    "\"/home/tim/Fork/Arch-System/.agentsroom/handoff-summary-agent-archsys-backend.md\"",
+    "\"/home/tim/Fork/Arch-System/monitoring/prometheus.yml\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (445 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 134041,
+    "cacheHitRatio": 0.8995,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

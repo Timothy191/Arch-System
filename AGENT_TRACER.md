@@ -4,6 +4,34 @@
 
 ---
 
+<!-- cspell:ignore commandcode autohand Autohand -->
+
+## [2026-11-19T07:34:00+02:00] - Harden Under-80% Root Directories (`chore/harden-under-80-folders`)
+
+- **Team 1 — Edge & SCADA Reliability ([`workers/`](file:///home/tim/Fork/Arch-System/workers) & [`wrangler.toml`](file:///home/tim/Fork/Arch-System/wrangler.toml))**:
+  - Upgraded [`workers/scada-monitor.js`](file:///home/tim/Fork/Arch-System/workers/scada-monitor.js) from legacy `addEventListener('fetch', ...)` + `getAgentCoordinator()` stub to a production Cloudflare Workers ES Module exporting `AgentCoordinator` Durable Object (sharded storage keys `scada:edge:meta`, `scada:edge:index`, `sensor:<id>`, staleness evaluation, deterministic `500`-sensor cap, bounded idempotency/replay deduplication), fail-closed HMAC-SHA256 verification (signing timestamp, idempotency key, and body), streaming `1 MiB` UTF-8 byte enforcement, prototype-pollution key rejection, `JSON.stringify` `/geo` safety, read-only `/ws` policy handling (`ping`/`pong` + `1008`), mandatory security headers, structured error logging, and iterative normalized industrial read-only safety boundary (`403 Forbidden` on case/delimiter variants of PLC/control write keys across both edge fetch and direct DO calls).
+  - Rewrote [`wrangler.toml`](file:///home/tim/Fork/Arch-System/wrangler.toml) to valid Wrangler v4 TOML (`AgentCoordinator` Durable Object binding + SQLite `[[migrations]]`, single `[observability]`, `REQUIRE_SCADA_AUTH = "true"` fail-closed default, zero hardcoded account IDs or `/*` wildcard proxying).
+  - Expanded [`workers/scada-monitor.test.mjs`](file:///home/tim/Fork/Arch-System/workers/scada-monitor.test.mjs), authored [`workers/README.md`](file:///home/tim/Fork/Arch-System/workers/README.md), and wired `"test:workers"` in [`package.json`](file:///home/tim/Fork/Arch-System/package.json).
+- **Team 2 — CommandCode Security & Taste ([`.commandcode/`](file:///home/tim/Fork/Arch-System/.commandcode))**:
+  - Scrubbed exposed third-party bearer/API tokens and inline Grafana payloads from local git-ignored [`.commandcode/settings.json`](file:///home/tim/Fork/Arch-System/.commandcode/settings.json) into a least-privilege command/read permission policy.
+  - Populated git-index-tracked [`.commandcode/taste/taste.md`](file:///home/tim/Fork/Arch-System/.commandcode/taste/taste.md) with repository-verified Arch-System engineering learnings across 7 categories (`commandcode taste lint --all` passing) and added local [`.commandcode/README.md`](file:///home/tim/Fork/Arch-System/.commandcode/README.md).
+- **Team 3 — Autohand Workspace Tooling & Memory ([`.autohand/`](file:///home/tim/Fork/Arch-System/.autohand))**:
+  - Created 4 schema-valid, SHA-256-fingerprinted project meta-tools under `.autohand/tools/` (`arch_verify_fast`, `arch_dept_verify` with 13-department enum, `arch_workers_verify`, `arch_governance_check`), seeded 4 project memories synchronized with `.autohand/memory/index.json` while preserving `events/LOG.jsonl`, and authored `.autohand/README.md`.
+
+## [2026-11-19T07:12:00+02:00] - Multi-Agent Monorepo Remediation Verification & 28-Gate Quality Gate (`chore/multi-agent-phase2-verification`)
+
+- **Independent QA Verification of Multi-Agent Tickets #1–#5**:
+  - **Ticket #1 (Principal Architect - Root Hygiene & Observability)**: Confirmed complete elimination of legacy/extraneous directories across `/home/tim/Fork/Arch-System` (`deactivate/`, `--skip/`, `.delta/`, `tools/documentation/`, `packages/observability/`) and `/home/tim/Fork` (`docs/`, `.vercel/`, MCP `tests/` directories); confirmed [`project.json`](file:///home/tim/Fork/Arch-System/.vercel/project.json) intact.
+  - **Ticket #2 (Full-Stack Lead - Code Intelligence & Workers)**: Verified [`@repo/code-intelligence`](file:///home/tim/Fork/Arch-System/packages/code-intelligence) unit tests (`5/5` passed) and type checking (`0` errors); verified [`workers/scada-monitor.test.mjs`](file:///home/tim/Fork/Arch-System/workers/scada-monitor.test.mjs) (`6/6` passed).
+  - **Ticket #3 (Portal & UI Specialist - Auth Slices)**: Verified [`@repo/auth/*`](file:///home/tim/Fork/Arch-System/libs/features/auth) packages across data-access, ui, and utils (`23/23` unit tests passed, strict type checking passed, Biome linting clean).
+  - **Ticket #4 (Data, Redis & Contracts - Federated Tooling & Prometheus)**: Verified [`federated-pipeline.test.mjs`](file:///home/tim/Fork/tools/federated-pipeline/test/federated-pipeline.test.mjs) and [`federated-audit.test.mjs`](file:///home/tim/Fork/tools/federation-watchdog/test/federated-audit.test.mjs) (`12/12` passed); verified [`run-harness.mjs`](file:///home/tim/Fork/tools/mcp-harness/run-harness.mjs) (`100%` pass across all 3 MCP servers and 7 guardrails); verified [`monitoring/prometheus.yml`](file:///home/tim/Fork/Arch-System/monitoring/prometheus.yml) clean and aligned.
+  - **Ticket #5 (QA & Verification Lead - 28-Gate Monorepo Quality Gate)**:
+    - Executed `pnpm policy:check` (boundary & security rules in sync, 0 violations).
+    - Executed `pnpm cycles` (0 circular dependencies across monorepo modules).
+    - Executed `pnpm audit:drift` (100% Drift Health Index, 104/104 tables mapped).
+    - Executed `pnpm audit:compliance` (RLS, Design System OKLCH tokens, Performance budgets, RSC boundaries, Cache tags, Hooks invariants, Agentic definitions all 100% compliant).
+    - Executed full 28-gate `pnpm agent:verify` suite — **28/28 gates PASSED** (`STATIC_CONTRACT_AND_INTEGRATION_VERIFIED`, evidence written to `.ci-local/agent-verify-evidence.json`).
+
 ## [2026-11-18T17:20:00+02:00] - Autonomous Multi-Layer Audit, Backlog Completion, MCP Federation Sync, Branch Cleanup & Production Redeployment (`chore/autonomous-multi-layer-completion`)
 
 - **4-Agent Layer Audit (Multi-Agent Orchestrator)**:

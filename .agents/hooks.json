@@ -1,11 +1,43 @@
 {
   "hooks": {
     "PreInvocation": [
-      { "command": "bash .agents/hooks/pre-invocation-inject.sh", "shell": "bash" }
+      {
+        "command": "bash .agents/hooks/pre-invocation-inject.sh",
+        "shell": "bash"
+      }
     ],
-
-    "PostToolUse": [{ "command": "bash .agents/hooks/post-tool-tracer.sh", "shell": "bash" }],
-    "Stop": [{ "command": "bash .agents/hooks/worktree-guard.sh", "shell": "bash" }]
+    "PostToolUse": [
+      {
+        "command": "bash .agents/hooks/post-tool-tracer.sh",
+        "shell": "bash"
+      }
+    ],
+    "Stop": [
+      {
+        "command": "bash .agents/hooks/worktree-guard.sh",
+        "shell": "bash"
+      }
+    ]
   },
-  "timeouts": { "PreToolUse": 5, "PostToolUse": 120, "Stop": 300 }
+  "timeouts": {
+    "PreToolUse": 5,
+    "PostToolUse": 120,
+    "Stop": 300
+  },
+  "agentsroom-status": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "[ -f '/home/tim/.agentsroom/hooks/antigravity-hook.cjs' ] || exit 0; 'node' '/home/tim/.agentsroom/hooks/antigravity-hook.cjs' PreInvocation",
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "[ -f '/home/tim/.agentsroom/hooks/antigravity-hook.cjs' ] || exit 0; 'node' '/home/tim/.agentsroom/hooks/antigravity-hook.cjs' Stop",
+        "timeout": 5
+      }
+    ]
+  }
 }

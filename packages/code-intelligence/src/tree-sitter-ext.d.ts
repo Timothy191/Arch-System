@@ -1,6 +1,4 @@
-// Full ambient typing for tree-sitter 0.20.6 matching its runtime API.
-// The bundled tree-sitter.d.ts omits several runtime members; skipLibCheck
-// absorbs the overlap between the two declarations.
+// Ambient typing for tree-sitter 0.20.6 and Node built-in test runner modules.
 declare module 'tree-sitter' {
   class Parser {
     parse(input: string): Parser.Tree;
@@ -25,9 +23,24 @@ declare module 'tree-sitter' {
     }
 
     interface Tree {
-      rootNode: SyntaxNode;
+      rootNode: SyntaxNode | null;
     }
   }
 
   export = Parser;
+}
+
+declare module 'node:test' {
+  export function describe(name: string, fn: () => void | Promise<void>): Promise<void>;
+  export function it(name: string, fn: () => void | Promise<void>): Promise<void>;
+}
+
+declare module 'node:assert/strict' {
+  function assert(condition: unknown, message?: string): asserts condition;
+  namespace assert {
+    function equal<T>(actual: T, expected: T, message?: string): void;
+    function deepEqual<T>(actual: T, expected: T, message?: string): void;
+    function ok(condition: unknown, message?: string): asserts condition;
+  }
+  export default assert;
 }

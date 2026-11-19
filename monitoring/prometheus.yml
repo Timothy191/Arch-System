@@ -1,6 +1,19 @@
+# cspell:words cadvisor alertmanagers
+# Local Docker monitoring scrape configuration mounted by `infra/monitoring/docker-compose.yml`
+# (`pnpm monitor:grafana` / `make` `MONITORING_DIR := infra/monitoring`).
+# Aligned with:
+#   - `infra/monitoring/docker-compose.yml` & `otel-collector-config.yaml` (Prometheus, cAdvisor, OTel Collector, Alertmanager, Loki, Tempo)
+#   - `infra/observability/prometheus.yml` (Alertmanager target + Supabase Cloud privileged metrics)
+#   - `config/prometheus.yml` (`kiro-agent` & `langfuse` telemetry scrape jobs)
 global:
   scrape_interval: 5s # High-fidelity scraping for active dev feedback
   evaluation_interval: 5s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
 
 scrape_configs:
   - job_name: 'prometheus'
@@ -11,9 +24,20 @@ scrape_configs:
     static_configs:
       - targets: ['cadvisor:8080']
 
-  - job_name: 'otel-collector' # Scrapes OTLP metrics exported by the OpenTelemetry Collector
+  - job_name: 'otel-collector' # Scrapes OTLP metrics exported by the OpenTelemetry Collector (:8889/metrics)
+    metrics_path: '/metrics'
     static_configs:
       - targets: ['otel-collector:8889']
+
+  - job_name: 'loki' # Scrapes Grafana Loki log aggregation engine metrics (`infra/monitoring/docker-compose.yml`)
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['loki:3100']
+
+  - job_name: 'tempo' # Scrapes Grafana Tempo distributed tracing backend metrics (`infra/monitoring/docker-compose.yml`)
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['tempo:3200']
 
   - job_name: 'plantcor-portal'
     metrics_path: '/api/metrics'
@@ -25,7 +49,19 @@ scrape_configs:
     static_configs:
       - targets: ['host.docker.internal:3000']
 
-  - job_name: 'supabase-cloud-metrics'
+  - job_name: 'kiro-agent' # Aligned with `config/prometheus.yml`
+    metrics_path: '/metrics'
+    honor_labels: true
+    static_configs:
+      - targets: ['host.docker.internal:9464']
+
+  - job_name: 'langfuse' # Aligned with `config/prometheus.yml`
+    metrics_path: '/api/public/metrics'
+    honor_labels: true
+    static_configs:
+      - targets: ['langfuse:3000']
+
+  - job_name: 'supabase-cloud-metrics' # Aligned with `infra/observability/prometheus.yml`
     scheme: 'https'
     scrape_interval: 15s
     metrics_path: '/customer/v1/privileged/metrics'

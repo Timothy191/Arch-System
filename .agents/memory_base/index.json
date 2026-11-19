@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-11-18T15:20:57.636Z",
-  "totalRetrospectives": 19,
+  "lastUpdated": "2026-11-19T05:43:40.648Z",
+  "totalRetrospectives": 16,
   "entries": [
     {
       "id": "compaction-034f9737",
@@ -10,24 +10,6 @@
     },
     {
       "id": "compaction-0670e5cc",
-      "category": "context-compaction",
-      "errorSignature": "compaction_decision:consolidate_state_spine",
-      "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."
-    },
-    {
-      "id": "compaction-e3c29065",
-      "category": "context-compaction",
-      "errorSignature": "compaction_decision:execute_full_compact",
-      "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."
-    },
-    {
-      "id": "compaction-eab97613",
-      "category": "context-compaction",
-      "errorSignature": "compaction_decision:execute_full_compact",
-      "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."
-    },
-    {
-      "id": "compaction-fa5c5e0e",
       "category": "context-compaction",
       "errorSignature": "compaction_decision:consolidate_state_spine",
       "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."

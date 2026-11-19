@@ -1,6 +1,6 @@
 {
   "id": "compaction-fa5c5e0e",
-  "timestamp": "2026-11-18T15:07:03.871Z",
+  "timestamp": "2026-11-18T15:14:16.632Z",
   "taskTag": "compaction-standard-fa5c5e0e",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:consolidate_state_spine",
@@ -11,9 +11,9 @@
   "metrics": {
     "mode": "standard",
     "decision": "consolidate_state_spine",
-    "latestInputTokens": 29802,
-    "cacheHitRatio": 0.4612,
+    "latestInputTokens": 43655,
+    "cacheHitRatio": 0.7615,
     "checkpointCount": 0,
-    "avoidedCacheRebuildTokens": 29802
+    "avoidedCacheRebuildTokens": 34666
   }
 }
