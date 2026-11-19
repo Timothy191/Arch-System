@@ -1,0 +1,26 @@
+{
+  "id": "compaction-79338410",
+  "timestamp": "2026-11-19T14:52:40.278Z",
+  "taskTag": "compaction-standard-79338410",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/tools/scripts/quality-orchestrator.test.mjs\"",
+    "\"/home/tim/Fork/Arch-System/tools/scripts/quality-orchestrator.mjs\"",
+    "\"/home/tim/Fork/Arch-System/.github/workflows/quality-intelligence.yml\"",
+    "\"/home/tim/Fork/Arch-System/package.json\"",
+    "\"/home/tim/Fork/Arch-System/tools/scripts/quality-orchestrator.test.mjs\"",
+    "\"/home/tim/Fork/Arch-System/tools/scripts/quality-orchestrator.mjs\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (330 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 163113,
+    "cacheHitRatio": 0.8919,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

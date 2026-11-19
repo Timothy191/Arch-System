@@ -1,9 +1,9 @@
 {
   "id": "compaction-9af29205",
-  "timestamp": "2026-11-19T13:35:51.512Z",
+  "timestamp": "2026-11-19T15:18:47.628Z",
   "taskTag": "compaction-standard-9af29205",
   "category": "context-compaction",
-  "errorSignature": "compaction_decision:consolidate_state_spine",
+  "errorSignature": "compaction_decision:execute_full_compact",
   "affectedFiles": [
     "\"/home/tim/Fork/Arch-System/workers/scada-monitor.js\"",
     "\"/home/tim/Fork/Arch-System/wrangler.toml\"",
@@ -21,15 +21,15 @@
     "\"/home/tim/Fork/Arch-System/packages/code-intelligence/package.json\"",
     "\"/home/tim/Fork/Arch-System/scripts/dev.sh\""
   ],
-  "rootCause": "Context fill is below 25% idempotent floor or within 4 turns of prior checkpoint; preserving warm prefix cache.",
-  "resolution": "Persisted bounded SKILL.state (446 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (449 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
   "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
   "metrics": {
     "mode": "standard",
-    "decision": "consolidate_state_spine",
-    "latestInputTokens": 46083,
-    "cacheHitRatio": 0.8237,
+    "decision": "execute_full_compact",
+    "latestInputTokens": 184459,
+    "cacheHitRatio": 0.822,
     "checkpointCount": 1,
-    "avoidedCacheRebuildTokens": 33501
+    "avoidedCacheRebuildTokens": 0
   }
 }

@@ -141,6 +141,12 @@ const DOMAIN_MAP = {
   ],
   production_monthly_targets: ['productionMonthlyTargetsSchema'],
   system_logs: ['systemLogEntrySchema', 'createSystemLogEntrySchema'],
+  quality_verification_runs: ['qualityVerificationRunRowSchema', 'qualityRunEvidenceSchema'],
+  agent_work_reports: ['agentWorkReportRowSchema', 'agentVerificationReportSchema'],
+  quality_release_certifications: [
+    'qualityReleaseCertificationRowSchema',
+    'releaseCertificationSchema',
+  ],
 };
 
 const coveredTables = [];

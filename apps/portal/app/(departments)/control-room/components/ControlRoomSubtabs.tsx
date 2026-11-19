@@ -1,4 +1,4 @@
-import { BarChart3, CheckSquare, ClipboardCheck, Cloud } from 'lucide-react';
+import { BarChart3, CheckSquare, ClipboardCheck, Cloud, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export const CONTROL_ROOM_ACTIVE_SUBTAB_CLASS =
@@ -9,7 +9,12 @@ export const CONTROL_ROOM_INACTIVE_SUBTAB_CLASS =
 
 export interface ControlRoomSubtabsProps {
   readonly departmentSlug?: string;
-  readonly activeTab: 'scada' | 'shift-operations' | 'shift-closeout' | 'cloudflare-edge';
+  readonly activeTab:
+    | 'scada'
+    | 'shift-operations'
+    | 'shift-closeout'
+    | 'cloudflare-edge'
+    | 'quality-intelligence';
   readonly borderTop?: boolean;
 }
 
@@ -74,6 +79,18 @@ export function ControlRoomSubtabs({
       >
         <Cloud className="h-3.5 w-3.5" />
         <span>Cloudflare Edge</span>
+      </Link>
+      <Link
+        href={`/${departmentSlug}/quality-intelligence`}
+        aria-current={activeTab === 'quality-intelligence' ? 'page' : undefined}
+        className={
+          activeTab === 'quality-intelligence'
+            ? CONTROL_ROOM_ACTIVE_SUBTAB_CLASS
+            : CONTROL_ROOM_INACTIVE_SUBTAB_CLASS
+        }
+      >
+        <ShieldCheck className="h-3.5 w-3.5" />
+        <span>Quality Intelligence</span>
       </Link>
     </div>
   );
