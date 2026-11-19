@@ -1,6 +1,6 @@
 {
   "id": "compaction-e8493890",
-  "timestamp": "2026-11-19T05:35:09.374Z",
+  "timestamp": "2026-11-19T07:12:07.137Z",
   "taskTag": "compaction-standard-e8493890",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:execute_full_compact",
@@ -8,13 +8,13 @@
     "\"/home/tim/Fork/Arch-System/.agentsroom/sessions/agent-chief-1736c53ef2fcbd40.json\""
   ],
   "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
-  "resolution": "Persisted bounded SKILL.state (445 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "resolution": "Persisted bounded SKILL.state (405 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
   "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
   "metrics": {
     "mode": "standard",
     "decision": "execute_full_compact",
-    "latestInputTokens": 254198,
-    "cacheHitRatio": 0.8861,
+    "latestInputTokens": 257318,
+    "cacheHitRatio": 0.8727,
     "checkpointCount": 0,
     "avoidedCacheRebuildTokens": 0
   }
