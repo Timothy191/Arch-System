@@ -344,6 +344,7 @@ export type {
   OfflineMutationHlc,
   OfflineSmrMutation,
 } from './schemas/offline-mutations.schema';
+export * from './schemas/quality-intelligence.schema';
 export * from './schemas/result.schema';
 export * from './schemas/search.schema';
 export * from './schemas/spatial-telemetry.schema';
