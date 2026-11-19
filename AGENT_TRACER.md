@@ -6,6 +6,18 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-19T15:27:00+02:00] - Permanent Dev-Server Consistency, Health Probe & Runtime Hygiene Fixes (`fix/dev-server-consistency`)
+
+- **Team A — Health API & Supabase Probe ([`packages/supabase/src/server.ts`](file:///home/tim/Fork/Arch-System/packages/supabase/src/server.ts), [`apps/portal/app/api/health/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/health/route.ts))**:
+  - Added opt-in `{ healthProbe?: boolean }` to `createServerSupabaseClient` / `instrumentedFetch` suppressing false-positive `Slow database query detected` and `Database query failed` logs on expected `401`/`403` anon RLS lockdown probes while keeping all standard query logging intact (`41/41` `@repo/supabase` tests passing).
+  - Parallelized `/api/health` Supabase, Redis, and optional FUXA probes via `Promise.all` and added `services.redis.mode` (`'serverless-rest' | 'tcp'`) while preserving `Server-Timing` (`13/13` health route tests passing).
+- **Team B — Theme Codegen, Drift Audit & Package Scripts ([`packages/theme/sd.config.mjs`](file:///home/tim/Fork/Arch-System/packages/theme/sd.config.mjs), [`tools/audits/antidrift-test.cjs`](file:///home/tim/Fork/Arch-System/tools/audits/antidrift-test.cjs), [`scripts/sync-assets-smart.cjs`](file:///home/tim/Fork/Arch-System/scripts/sync-assets-smart.cjs), [`package.json`](file:///home/tim/Fork/Arch-System/package.json), [`apps/portal/package.json`](file:///home/tim/Fork/Arch-System/apps/portal/package.json))**:
+  - Formatted `src/css/variables-generated.css` with Prettier inside Style Dictionary codegen/watch (`0` diff across repeated `pnpm --filter @repo/theme codegen` runs) and fixed stale drift path in `antidrift-test.cjs`.
+  - Guarded `version-manager.mjs sync` behind `SKIP_VERSION_SYNC=1` for local dev runs, removed duplicate `sync-assets-smart.cjs` prefixes from `dev:quick`/`dev:hosted`/`dev:cloudflare`, and defaulted portal dev bind to `-H ${HOST:-127.0.0.1}` (`start` remains `-H ${HOST:-0.0.0.0}`).
+- **Team C — Dev Orchestration Scripts ([`scripts/dev.sh`](file:///home/tim/Fork/Arch-System/scripts/dev.sh), [`scripts/dev-system-reimagined.sh`](file:///home/tim/Fork/Arch-System/scripts/dev-system-reimagined.sh))**:
+  - Pinned mise Node `24` ahead of `$HOME/.local/bin`, aligned Redis target detection with `@repo/redis` (`Upstash Serverless REST` vs. local TCP), fixed the GNU `find` exit-code bug and gated `.venv` & `.next/cache` deletion behind `--clean`, passed `SKIP_VERSION_SYNC=1`, and defaulted `HOST=127.0.0.1` with opt-in `--lan`.
+  - Restored `packages/eval/.venv` via `uv sync --frozen`.
+
 ## [2026-11-19T07:34:00+02:00] - Harden Under-80% Root Directories (`chore/harden-under-80-folders`)
 
 - **Team 1 — Edge & SCADA Reliability ([`workers/`](file:///home/tim/Fork/Arch-System/workers) & [`wrangler.toml`](file:///home/tim/Fork/Arch-System/wrangler.toml))**:
@@ -301,6 +313,7 @@
 ## [2026-11-14T01:00:00+02:00] - Remove All Token Budget & Agent Restraint Enforcement (Tracking + Warning Retained)
 
 - **Phase 1 (Token Budget Removal)**:
+
   - `packages/agents/src/token-budget.ts`: `enforceHardCap` default `true` → `false`; removed `breached` from `RoleBudget.status` and `recordUsage` return type; removed hard-cap circuit-breaker and reserve-margin absorption logic; overruns set `status = 'warning'` + `warningTriggered = true` and never block; `DEFAULT_BUDGET_TIERS` kept as reference data.
   - `tools/scripts/token-tracker.cjs`: removed `MAX_AUTONOMOUS_TOKEN_BUDGET` constant (was 200000); auto-scaling uncapped/effectively unlimited; `checkBudget()` converts blocking `issues` to `console.warn` informational warnings, always returns `true`; `--budget-check` unconditionally `process.exit(0)`; `determineEffectiveTaskBudget()` strips `maxLeasedSkills`, `maxSubagents`, `maxPreTaskTokens` from `effectiveBudget` output.
   - `.agents/hooks/pre-task-budget-check.cjs`: rewrote from blocking check to tracking-only; wraps both `task-budget` and `budget-check` in try/catch; always `process.exit(0)`.
@@ -309,6 +322,7 @@
   - `packages/agents/src/token-budget.test.ts`: rewrote overrun tests to assert warning-only behavior; removed all `breached === true` / circuit-breaker assertions.
 
 - **Phase 2 (Agent Restraint Removal)**:
+
   - `.agents/rules/context-lifecycle-and-compaction.md`: removed `pnpm token:budget-check` and `get_active_leases` from Phase 1 preflight; removed tiered token limits (3.5k–104k, ≤1–4 skills, 0–6 subagents).
   - `.agents/skills/agent-accuracy-enforcement/SKILL.md`: replaced Section 7 "Token Budget Discipline" with "Token Budget Tracking (Non-Blocking)"; removed tiered limits and self-healing gate.
   - `.agents/rules/mandatory-ai-engineering-governance.md`: removed human approval requirement from Tier 4/5; agents may independently merge and deploy; removed "An agent must never grant itself additional permissions" restriction.

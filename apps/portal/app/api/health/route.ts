@@ -1,11 +1,26 @@
 // eslint-disable-next-line no-restricted-imports
 import { type HealthCheckResponse, healthCheckResponseSchema } from '@repo/contract';
-import { getRedisClient } from '@repo/redis';
+import { getRedisClient, isServerlessRedis } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
 
 const POSTGRES_INSUFFICIENT_PRIVILEGE_CODE = '42501';
 const FUXA_PROBE_TIMEOUT_MS = 2000;
+const HTTP_STATUS_OK = 200;
+const HTTP_STATUS_SERVICE_UNAVAILABLE = 503;
+
+type ServiceHealthStatus = 'healthy' | 'degraded' | 'unhealthy';
+type RedisTransportMode = 'serverless-rest' | 'tcp';
+
+interface ServiceProbeResult {
+  readonly status: ServiceHealthStatus;
+  readonly latencyMs: number;
+  readonly error?: string;
+}
+
+interface RedisProbeResult extends ServiceProbeResult {
+  readonly mode: RedisTransportMode;
+}
 
 function isAnonLockdownResponse(
   queryError: { readonly code?: string; readonly message?: string } | null
@@ -19,123 +34,168 @@ function isAnonLockdownResponse(
   );
 }
 
-export async function GET() {
-  const startedAt = Date.now();
-
-  // 1. Supabase Check (select from machines; anon 42501 confirms PostgREST + PG + RBAC are live)
-  const supabaseStart = Date.now();
-  let supabaseStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-  let supabaseError: string | undefined;
-
-  try {
-    const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.from('machines').select('id').limit(1);
-
-    if (error && !isAnonLockdownResponse(error)) {
-      // Fallback to employees check if machines table is pending migration
-      const { error: empError } = await supabase.from('employees').select('id').limit(1);
-      if (empError && !isAnonLockdownResponse(empError)) {
-        supabaseStatus = 'degraded';
-        supabaseError = empError.message;
-      }
-    }
-  } catch (err) {
-    supabaseStatus = 'unhealthy';
-    supabaseError = err instanceof Error ? err.message : String(err);
+function resolveRedisMode(): RedisTransportMode {
+  if (typeof isServerlessRedis === 'function' && isServerlessRedis()) {
+    return 'serverless-rest';
   }
-  const supabaseLatencyMs = Date.now() - supabaseStart;
+  return 'tcp';
+}
 
-  // 2. Redis Check
-  const redisStart = Date.now();
-  let redisStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-  let redisError: string | undefined;
+async function probeSupabase(): Promise<ServiceProbeResult> {
+  const startedAt = Date.now();
+  try {
+    const supabase = await createServerSupabaseClient({ healthProbe: true });
+    const { error: machinesError } = await supabase.from('machines').select('id').limit(1);
+
+    if (!machinesError || isAnonLockdownResponse(machinesError)) {
+      return { status: 'healthy', latencyMs: Date.now() - startedAt };
+    }
+
+    // Fallback to employees check if machines table is pending migration
+    const { error: employeesError } = await supabase.from('employees').select('id').limit(1);
+    if (!employeesError || isAnonLockdownResponse(employeesError)) {
+      return { status: 'healthy', latencyMs: Date.now() - startedAt };
+    }
+
+    return {
+      status: 'degraded',
+      latencyMs: Date.now() - startedAt,
+      error: employeesError.message,
+    };
+  } catch (err) {
+    return {
+      status: 'unhealthy',
+      latencyMs: Date.now() - startedAt,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+async function probeRedis(): Promise<RedisProbeResult> {
+  const startedAt = Date.now();
+  let status: ServiceHealthStatus = 'healthy';
+  let errorMessage: string | undefined;
 
   try {
     const redis = await getRedisClient();
     if (redis && typeof redis.ping === 'function') {
       await redis.ping();
     } else if (redis && !redis.isOpen) {
-      redisStatus = 'degraded';
-      redisError = 'Redis connection is not open';
+      status = 'degraded';
+      errorMessage = 'Redis connection is not open';
     }
   } catch (err) {
-    redisStatus = 'degraded';
-    redisError = err instanceof Error ? err.message : String(err);
+    status = 'degraded';
+    errorMessage = err instanceof Error ? err.message : String(err);
   }
-  const redisLatencyMs = Date.now() - redisStart;
 
-  // 3. Fuxa SCADA Check (probe live FUXA_URL when configured; otherwise report Redis bridge state)
-  const fuxaStart = Date.now();
-  let fuxaStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-  let fuxaError: string | undefined;
+  return {
+    status,
+    latencyMs: Date.now() - startedAt,
+    mode: resolveRedisMode(),
+    ...(errorMessage ? { error: errorMessage } : {}),
+  };
+}
+
+async function probeFuxaEndpoint(fuxaUrl: string): Promise<ServiceProbeResult> {
+  const startedAt = Date.now();
+  try {
+    const probeRes = await fetch(`${fuxaUrl.replace(/\/$/, '')}/api/status`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(FUXA_PROBE_TIMEOUT_MS),
+    });
+    if (!probeRes.ok) {
+      return {
+        status: 'degraded',
+        latencyMs: Date.now() - startedAt,
+        error: `Fuxa SCADA HTTP ${probeRes.status}`,
+      };
+    }
+    return { status: 'healthy', latencyMs: Date.now() - startedAt };
+  } catch (err) {
+    return {
+      status: 'degraded',
+      latencyMs: Date.now() - startedAt,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+function resolveOverallStatus(
+  statuses: readonly [ServiceHealthStatus, ServiceHealthStatus, ServiceHealthStatus]
+): ServiceHealthStatus {
+  const [supabaseStatus, redisStatus, fuxaStatus] = statuses;
+  if (supabaseStatus === 'unhealthy') {
+    return 'unhealthy';
+  }
+  if (supabaseStatus === 'degraded' || redisStatus === 'degraded' || fuxaStatus === 'degraded') {
+    return 'degraded';
+  }
+  return 'healthy';
+}
+
+export async function GET() {
+  const startedAt = Date.now();
   const fuxaUrl = process.env.FUXA_URL || process.env.NEXT_PUBLIC_FUXA_URL;
 
-  if (fuxaUrl) {
-    try {
-      const probeRes = await fetch(`${fuxaUrl.replace(/\/$/, '')}/api/status`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(FUXA_PROBE_TIMEOUT_MS),
-      });
-      if (!probeRes.ok) {
-        fuxaStatus = 'degraded';
-        fuxaError = `Fuxa SCADA HTTP ${probeRes.status}`;
-      }
-    } catch (err) {
-      fuxaStatus = 'degraded';
-      fuxaError = err instanceof Error ? err.message : String(err);
-    }
-  } else {
-    fuxaStatus = redisStatus;
-    fuxaError = redisError;
-  }
-  const fuxaLatencyMs = fuxaUrl ? Date.now() - fuxaStart : redisLatencyMs;
+  const [supabaseResult, redisResult, fuxaProbeResult] = await Promise.all([
+    probeSupabase(),
+    probeRedis(),
+    fuxaUrl ? probeFuxaEndpoint(fuxaUrl) : Promise.resolve(null),
+  ]);
+
+  const fuxaResult: ServiceProbeResult = fuxaProbeResult ?? {
+    status: redisResult.status,
+    latencyMs: redisResult.latencyMs,
+    ...(redisResult.error ? { error: redisResult.error } : {}),
+  };
 
   const totalLatencyMs = Date.now() - startedAt;
-
-  // Aggregate overall status
-  const overallStatus: 'healthy' | 'degraded' | 'unhealthy' =
-    supabaseStatus === 'unhealthy'
-      ? 'unhealthy'
-      : supabaseStatus === 'degraded' || redisStatus === 'degraded' || fuxaStatus === 'degraded'
-        ? 'degraded'
-        : 'healthy';
+  const overallStatus = resolveOverallStatus([
+    supabaseResult.status,
+    redisResult.status,
+    fuxaResult.status,
+  ]);
 
   const responsePayload: HealthCheckResponse = {
     status: overallStatus,
     timestamp: new Date().toISOString(),
     latencyMs: totalLatencyMs,
     services: {
-      supabase: {
-        status: supabaseStatus,
-        latencyMs: supabaseLatencyMs,
-        ...(supabaseError ? { error: supabaseError } : {}),
-      },
+      supabase: supabaseResult,
       redis: {
-        status: redisStatus,
-        latencyMs: redisLatencyMs,
-        ...(redisError ? { error: redisError } : {}),
+        status: redisResult.status,
+        latencyMs: redisResult.latencyMs,
+        ...(redisResult.error ? { error: redisResult.error } : {}),
       },
-      fuxa: {
-        status: fuxaStatus,
-        latencyMs: fuxaLatencyMs,
-        ...(fuxaError ? { error: fuxaError } : {}),
-      },
+      fuxa: fuxaResult,
     },
   };
 
   // Validate payload against schema before returning
   const parsed = healthCheckResponseSchema.safeParse(responsePayload);
-  const dataToReturn = parsed.success ? parsed.data : responsePayload;
+  const validatedPayload = parsed.success ? parsed.data : responsePayload;
+  const responseBody = {
+    ...validatedPayload,
+    services: {
+      ...validatedPayload.services,
+      redis: {
+        ...validatedPayload.services.redis,
+        mode: redisResult.mode,
+      },
+    },
+  };
 
-  const httpStatus = overallStatus === 'unhealthy' ? 503 : 200;
+  const httpStatus =
+    overallStatus === 'unhealthy' ? HTTP_STATUS_SERVICE_UNAVAILABLE : HTTP_STATUS_OK;
   const serverTiming = [
-    `supabase;dur=${supabaseLatencyMs}`,
-    `redis;dur=${redisLatencyMs}`,
-    `fuxa;dur=${fuxaLatencyMs}`,
+    `supabase;dur=${supabaseResult.latencyMs}`,
+    `redis;dur=${redisResult.latencyMs}`,
+    `fuxa;dur=${fuxaResult.latencyMs}`,
     `total;dur=${totalLatencyMs}`,
   ].join(', ');
 
-  return NextResponse.json(dataToReturn, {
+  return NextResponse.json(responseBody, {
     status: httpStatus,
     headers: {
       'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',

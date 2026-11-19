@@ -295,6 +295,101 @@ describe('createServerSupabaseClient', () => {
 
     // Should not throw (called from Server Component context)
   });
+
+  test('suppresses slow and error logs for HTTP 401 and 403 when healthProbe is true', async () => {
+    const { createServerClient } = require('@supabase/ssr');
+    const { serverLogger } = require('@repo/logger');
+    const originalFetch = global.fetch;
+    const slowDelayMs = 550;
+    const httpUnauthorized = 401;
+    const httpForbidden = 403;
+
+    try {
+      await createServerSupabaseClient({ healthProbe: true });
+      const probeFetch = createServerClient.mock.calls[0][2].global
+        .fetch as typeof instrumentedFetch;
+
+      global.fetch = jest
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(
+                () => resolve(new Response('permission denied', { status: httpUnauthorized })),
+                slowDelayMs
+              )
+            )
+        );
+
+      const unauthorizedResponse = await probeFetch(
+        'https://api.supabase.co/rest/v1/machines?select=id&limit=1'
+      );
+      expect(unauthorizedResponse.status).toBe(httpUnauthorized);
+      expect(serverLogger.warn).not.toHaveBeenCalled();
+      expect(serverLogger.error).not.toHaveBeenCalled();
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce(
+        new Response('forbidden', { status: httpForbidden })
+      );
+      const forbiddenResponse = await probeFetch(
+        'https://api.supabase.co/rest/v1/machines?select=id&limit=1'
+      );
+      expect(forbiddenResponse.status).toBe(httpForbidden);
+      expect(serverLogger.warn).not.toHaveBeenCalled();
+      expect(serverLogger.error).not.toHaveBeenCalled();
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  test('keeps slow and error logs active for HTTP 401 when healthProbe is omitted or false', async () => {
+    const { createServerClient } = require('@supabase/ssr');
+    const { serverLogger } = require('@repo/logger');
+    const originalFetch = global.fetch;
+    const slowDelayMs = 550;
+    const httpUnauthorized = 401;
+
+    try {
+      await createServerSupabaseClient();
+      await createServerSupabaseClient({ healthProbe: false });
+      const defaultFetch = createServerClient.mock.calls[0][2].global
+        .fetch as typeof instrumentedFetch;
+      const nonProbeFetch = createServerClient.mock.calls[1][2].global
+        .fetch as typeof instrumentedFetch;
+
+      expect(defaultFetch).toBe(instrumentedFetch);
+      expect(nonProbeFetch).toBe(instrumentedFetch);
+
+      global.fetch = jest
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(
+                () => resolve(new Response('unauthorized', { status: httpUnauthorized })),
+                slowDelayMs
+              )
+            )
+        );
+
+      await defaultFetch('https://api.supabase.co/rest/v1/machines');
+      expect(serverLogger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ tableName: 'machines', method: 'GET', success: false }),
+        expect.stringContaining('Slow database query detected')
+      );
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce(
+        new Response('unauthorized', { status: httpUnauthorized })
+      );
+      await nonProbeFetch('https://api.supabase.co/rest/v1/machines');
+      expect(serverLogger.error).toHaveBeenCalledWith(
+        expect.objectContaining({ tableName: 'machines', method: 'GET', success: false }),
+        expect.stringContaining('Database query failed')
+      );
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
 });
 
 describe('getUserSafely', () => {

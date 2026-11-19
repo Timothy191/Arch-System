@@ -1,7 +1,55 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export PATH="$HOME/.local/bin:$PATH"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Resolve Node.js version from .node-version via mise ahead of $HOME/.local/bin
+# so global shims (e.g. ~/.local/bin/node v26.12.0) never shadow Node 24.
+resolve_node_bin() {
+  local expected_ver="24"
+  if [ -f "$REPO_ROOT/.node-version" ]; then
+    expected_ver=$(tr -d '[:space:]' < "$REPO_ROOT/.node-version")
+  fi
+  local expected_major="${expected_ver%%.*}"
+  expected_major="${expected_major#v}"
+  NODE_EXPECTED_MAJOR="$expected_major"
+
+  local candidate_bin=""
+  if command -v mise >/dev/null 2>&1; then
+    local mise_node
+    mise_node=$(cd "$REPO_ROOT" && mise which node 2>/dev/null || true)
+    if [ -n "$mise_node" ] && [ -x "$mise_node" ]; then
+      local mise_major
+      mise_major=$("$mise_node" -v 2>/dev/null | tr -d 'v' | cut -d. -f1 || echo "")
+      if [ "$mise_major" = "$expected_major" ]; then
+        candidate_bin="$(dirname "$mise_node")"
+      fi
+    fi
+  fi
+
+  if [ -z "$candidate_bin" ]; then
+    local d
+    for d in \
+      "$HOME/.local/share/mise/installs/node/24.15.0/bin" \
+      "$HOME/.local/share/mise/installs/node/${expected_ver}/bin" \
+      "$HOME/.local/share/mise/installs/node/${expected_major}/bin"; do
+      if [ -x "$d/node" ]; then
+        candidate_bin="$d"
+        break
+      fi
+    done
+  fi
+
+  if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+    export PATH="$HOME/.local/bin:$PATH"
+  fi
+  if [ -n "$candidate_bin" ]; then
+    export PATH="$candidate_bin:$PATH"
+  fi
+}
+resolve_node_bin
+
 # AGENT-TRACE: Turborepo uses local/remote cache for workspace task orchestration.
 
 # Prevent infinite hangs when probing health endpoints
@@ -19,13 +67,143 @@ curl() {
 #   parsing, port utilities, browser/terminal launching, health checks)
 # ──────────────────────────────────────────────────────────
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 LOG_LABEL="[dev]"
 
 PORT="${PORT:-3000}"
+HOST="${HOST:-127.0.0.1}"
+if [ -n "$(printenv HOSTNAME 2>/dev/null || true)" ]; then
+  HOSTNAME="$(printenv HOSTNAME)"
+else
+  HOSTNAME="$HOST"
+fi
 CLOUD_PROJECT_REF="mrwhtxbhrzyttlsyuofc"
+
+trim_env_val() {
+  local v="$1"
+  v="${v%$'\r'}"
+  v="${v#"${v%%[![:space:]]*}"}"
+  v="${v%"${v##*[![:space:]]}"}"
+  if [[ "$v" == \"*\" ]] && [[ ${#v} -ge 2 ]]; then
+    v="${v:1:${#v}-2}"
+  elif [[ "$v" == \'*\' ]] && [[ ${#v} -ge 2 ]]; then
+    v="${v:1:${#v}-2}"
+  fi
+  printf '%s' "$v"
+}
+
+resolve_nextjs_env_var() {
+  local key="$1"
+  local val="${!key:-}"
+  if [ -n "$val" ]; then
+    trim_env_val "$val"
+    return 0
+  fi
+  local f
+  for f in \
+    "$REPO_ROOT/apps/portal/.env.local" \
+    "$REPO_ROOT/apps/portal/.env" \
+    "$REPO_ROOT/.env.local" \
+    "$REPO_ROOT/.env"; do
+    if [ -f "$f" ]; then
+      val=$( (grep -E "^${key}=" "$f" 2>/dev/null || true) | head -n1 | cut -d= -f2- )
+      val=$(trim_env_val "$val")
+      if [ -n "$val" ]; then
+        printf '%s' "$val"
+        return 0
+      fi
+    fi
+  done
+  return 0
+}
+
+# detect_redis_target — mirrors packages/redis/src/client.ts:204-230 without printing tokens.
+detect_redis_target() {
+  local explicit_redis_url effective_redis_url rest_url is_http_redis=false
+  explicit_redis_url=$(resolve_nextjs_env_var "REDIS_URL")
+  effective_redis_url="${explicit_redis_url:-redis://localhost:6379}"
+
+  if [[ "$effective_redis_url" == http://* ]] || [[ "$effective_redis_url" == https://* ]]; then
+    is_http_redis=true
+  fi
+
+  rest_url=$(resolve_nextjs_env_var "SERVERLESS_REDIS_URL")
+  [ -z "$rest_url" ] && rest_url=$(resolve_nextjs_env_var "UPSTASH_REDIS_REST_URL")
+  [ -z "$rest_url" ] && rest_url=$(resolve_nextjs_env_var "KV_REST_API_URL")
+
+  local has_http_rest=false
+  if [[ "$rest_url" == http://* ]] || [[ "$rest_url" == https://* ]]; then
+    has_http_rest=true
+  fi
+
+  if [ "$is_http_redis" = "true" ] || { [ "$has_http_rest" = "true" ] && { [ -z "$explicit_redis_url" ] || [[ "$effective_redis_url" == *localhost* ]]; }; }; then
+    local raw_rest_url
+    if [ "$is_http_redis" = "true" ]; then
+      raw_rest_url="$effective_redis_url"
+    else
+      raw_rest_url="$rest_url"
+    fi
+    local scheme rest_no_scheme host_port host_only
+    scheme="${raw_rest_url%%://*}"
+    rest_no_scheme="${raw_rest_url#*://}"
+    rest_no_scheme="${rest_no_scheme#*@}"
+    host_port="${rest_no_scheme%%/*}"
+    host_only="${host_port%%:*}"
+
+    REDIS_TARGET_MODE="serverless-rest"
+    REDIS_TARGET_HOST="$host_only"
+    if [[ "$host_port" == *:* ]]; then
+      REDIS_TARGET_PORT="${host_port##*:}"
+    elif [ "$scheme" = "https" ]; then
+      REDIS_TARGET_PORT="443"
+    else
+      REDIS_TARGET_PORT="80"
+    fi
+    REDIS_TARGET_URL="${scheme}://${host_port}"
+    REDIS_TARGET_LABEL="Upstash Serverless REST (${REDIS_TARGET_URL})"
+  else
+    local scheme rest_no_scheme host_port host_only port_only is_local_tcp=false
+    if [[ "$effective_redis_url" == *://* ]]; then
+      scheme="${effective_redis_url%%://*}"
+      rest_no_scheme="${effective_redis_url#*://}"
+    else
+      scheme="redis"
+      rest_no_scheme="$effective_redis_url"
+    fi
+    rest_no_scheme="${rest_no_scheme#*@}"
+    host_port="${rest_no_scheme%%/*}"
+    host_only="${host_port%%:*}"
+    [ -z "$host_only" ] && host_only="localhost"
+    if [[ "$host_port" == *:* ]]; then
+      port_only="${host_port##*:}"
+    else
+      port_only="6379"
+    fi
+
+    case "$host_only" in
+      localhost | 127.0.0.1 | 0.0.0.0) is_local_tcp=true ;;
+    esac
+
+    REDIS_TARGET_MODE="tcp"
+    REDIS_TARGET_HOST="$host_only"
+    REDIS_TARGET_PORT="$port_only"
+    REDIS_TARGET_URL="${scheme}://${host_only}:${port_only}"
+    if [ "$is_local_tcp" = "true" ]; then
+      REDIS_TARGET_LABEL="${REDIS_TARGET_URL} (local TCP)"
+    else
+      REDIS_TARGET_LABEL="${REDIS_TARGET_URL} (remote TCP)"
+    fi
+  fi
+}
+
+is_local_port_listening() {
+  local p="$1"
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -ti:"$p" >/dev/null 2>&1 && return 0
+  fi
+  (exec 3<>/dev/tcp/127.0.0.1/"$p") 2>/dev/null
+}
 
 # Read environment variables from .env via shared get_env_var (safe, no eval)
 ENV_FILE="$PORTAL_DIR/.env"
@@ -33,7 +211,7 @@ ENV_FILE="$PORTAL_DIR/.env"
 
 SUPABASE_URL=$(get_env_var "$ENV_FILE" "SUPABASE_URL")
 [ -z "$SUPABASE_URL" ] && SUPABASE_URL=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_URL")
-REDIS_URL=$(get_env_var "$ENV_FILE" "REDIS_URL")
+detect_redis_target
 # SUPABASE_ANON_KEY: never log the value — only presence/absence.
 SUPABASE_ANON_KEY=$(get_env_var_fallback "$ENV_FILE" \
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" \
@@ -124,10 +302,13 @@ banner() {
   else
     mode_pill="${MAGENTA}${BOLD}LOCAL · DOCKER${NC}"
   fi
+  local node_v
+  node_v=$(node -v 2>/dev/null || echo "unknown")
   echo
   echo -e "  ${CYAN}${BOLD}╭─ ARCH SYSTEMS / DEV CONTROL ─────────────────────────────╮${NC}"
   echo -e "  ${CYAN}${BOLD}│${NC} ${BOLD}${WHITE}Operational portal${NC} ${DIM}· mining operations${NC}                 ${CYAN}${BOLD}│${NC}"
   echo -e "  ${CYAN}${BOLD}│${NC} ${DIM}branch${NC} ${WHITE}${branch}${NC}  ${DIM}·${NC}  ${mode_pill}  ${DIM}·${NC}  ${DIM}$(date '+%a %b %d %Y  %H:%M')${NC} ${CYAN}${BOLD}│${NC}"
+  echo -e "  ${CYAN}${BOLD}│${NC} ${DIM}node${NC} ${WHITE}${node_v}${NC}  ${DIM}·${NC}  ${DIM}host${NC} ${WHITE}${HOST}:${PORT}${NC}  ${DIM}·${NC}  ${DIM}redis${NC} ${WHITE}${REDIS_TARGET_LABEL}${NC} ${CYAN}${BOLD}│${NC}"
   echo -e "  ${CYAN}${BOLD}╰───────────────────────────────────────────────────────────╯${NC}"
   echo
 }
@@ -157,7 +338,6 @@ show_results() {
   local studio_url api_url redis_suffix
   studio_url="https://supabase.com/dashboard/project/$CLOUD_PROJECT_REF"
   api_url="https://$CLOUD_PROJECT_REF.supabase.co"
-  redis_suffix="(local)"
   echo
   echo -e "  ${GREEN}${BOLD}╭─ READY ──────────────────────────────────────────────────╮${NC}"
   echo -e "  ${GREEN}${BOLD}│${NC} ${BOLD}${WHITE}All systems go${NC} ${DIM}· edit a file to see live updates${NC}       ${GREEN}${BOLD}│${NC}"
@@ -169,7 +349,7 @@ show_results() {
   echo -e "  ${BOLD}${WHITE}Services${NC}"
   _url_row "Login" "http://localhost:$PORT/login"
   _url_row "Portal" "http://localhost:$PORT"
-  if [ -n "$lan_ip" ] && [ "$lan_ip" != "127.0.0.1" ]; then
+  if [ "$HOST" = "0.0.0.0" ] && [ -n "$lan_ip" ] && [ "$lan_ip" != "127.0.0.1" ]; then
     _url_row "Network" "http://${lan_ip}:$PORT" "(accessible across local network)"
   fi
   if [ "$START_CMS" = "true" ]; then
@@ -178,8 +358,18 @@ show_results() {
   if [ "$START_OVERVIEW" = "true" ]; then
     _url_row "Overview" "http://localhost:${OVERVIEW_PORT:-3003}"
   fi
-  _url_row "Redis" "redis://localhost:6379" "$redis_suffix"
-  _url_row "Redis UI" "http://localhost:5540" "(Insight)"
+  if [ "${REDIS_TARGET_MODE:-tcp}" = "serverless-rest" ]; then
+    _url_row "Redis" "${REDIS_TARGET_URL}" "(Upstash Serverless REST)"
+  else
+    case "${REDIS_TARGET_HOST:-localhost}" in
+      localhost | 127.0.0.1 | 0.0.0.0) redis_suffix="(local TCP)" ;;
+      *) redis_suffix="(remote TCP)" ;;
+    esac
+    _url_row "Redis" "${REDIS_TARGET_URL}" "$redis_suffix"
+  fi
+  if [ "${REDIS_TARGET_MODE:-tcp}" = "tcp" ] || is_local_port_listening 5540; then
+    _url_row "Redis UI" "http://localhost:5540" "(Insight)"
+  fi
   _url_row "Studio" "$studio_url"
   _url_row "API" "$api_url"
 
@@ -282,6 +472,7 @@ RUN_E2E=false
 STRICT_MODE=false
 HEADLESS_MODE=false
 CLOUD_MODE=false
+CLEAN_CACHE=false
 
 if [ "${HEADLESS:-false}" = "true" ] || [ "${CI:-false}" = "true" ] || [ "${NO_OPEN:-false}" = "true" ]; then
   HEADLESS_MODE=true
@@ -307,6 +498,15 @@ while [ $# -gt 0 ]; do
     ;;
   --cloud | --hosted | --no-docker)
     CLOUD_MODE=true
+    shift
+    ;;
+  --clean)
+    CLEAN_CACHE=true
+    shift
+    ;;
+  --lan)
+    HOST="0.0.0.0"
+    HOSTNAME="0.0.0.0"
     shift
     ;;
   --cms)
@@ -356,9 +556,9 @@ phase 0 "Pre-flight"
 rm -f "$REPO_ROOT/.dev-status-"*.sh
 check "Temp artifacts" "pass" "cleaned"
 
-# Sync global assets (smart sync with checksums)
+# Sync global assets (smart sync with checksums, without touching repo versions)
 if [ -f "$REPO_ROOT/scripts/sync-assets-smart.cjs" ]; then
-  node "$REPO_ROOT/scripts/sync-assets-smart.cjs"
+  SKIP_VERSION_SYNC=1 node "$REPO_ROOT/scripts/sync-assets-smart.cjs"
 elif [ -f "$REPO_ROOT/scripts/sync-assets.sh" ]; then
   bash "$REPO_ROOT/scripts/sync-assets.sh"
   check "Global assets" "pass" "synchronized (legacy)"
@@ -424,18 +624,17 @@ if [ "$FORCE_RESTART" = "true" ]; then
   smart_cache_cleanup # Smart Turborepo cache cleanup + Python bytecode
 
   # Python virtual environment — packages/eval/.venv holds installed eval deps
-  # (pytest, deepeval). Reinstalling is slow, so only remove STALE venvs (>7
-  # days unused). Fresh environments survive force restarts.
+  # (pytest, deepeval). Only remove stale venvs (>7 days unused) when --clean is passed.
   venv_found=false
   for venv_dir in "$REPO_ROOT/.venv" "$REPO_ROOT/packages/eval/.venv"; do
     if [ -d "$venv_dir" ]; then
       venv_found=true
-      if find "$venv_dir" -maxdepth 0 -mtime +7 >/dev/null 2>&1; then
+      if [ "$CLEAN_CACHE" = "true" ] && [ -n "$(find "$venv_dir" -maxdepth 0 -mtime +7 2>/dev/null)" ]; then
         venv_size=$(du -sh "$venv_dir" 2>/dev/null | awk '{print $1}')
         rm -rf "$venv_dir"
         check "Python venv (stale >7d)" "pass" "freed ${venv_size:-?} ($venv_dir)"
       else
-        check "Python venv" "pass" "recent — kept ($(du -sh "$venv_dir" 2>/dev/null | awk '{print $1}'))"
+        check "Python venv" "pass" "kept ($(du -sh "$venv_dir" 2>/dev/null | awk '{print $1}'))"
       fi
     fi
   done
@@ -459,14 +658,19 @@ if [ "$FORCE_RESTART" = "true" ]; then
     mkdir -p "$REPO_ROOT/deployment-logs"
     check "Deployment logs directory" "pass" "created empty directory"
   fi
-  clean_dir_cache "$REPO_ROOT/apps/portal/.next/cache" "Next.js portal cache"
 
-  # CMS and Overview are optional apps; only clean their caches if they exist.
-  if [ -d "$REPO_ROOT/apps/cms" ]; then
-    clean_dir_cache "$REPO_ROOT/apps/cms/.next/cache" "Next.js CMS cache"
-  fi
-  if [ -d "$REPO_ROOT/apps/overview" ]; then
-    clean_dir_cache "$REPO_ROOT/apps/overview/.next/cache" "Next.js overview cache"
+  if [ "$CLEAN_CACHE" = "true" ]; then
+    clean_dir_cache "$REPO_ROOT/apps/portal/.next/cache" "Next.js portal cache"
+
+    # CMS and Overview are optional apps; only clean their caches if they exist.
+    if [ -d "$REPO_ROOT/apps/cms" ]; then
+      clean_dir_cache "$REPO_ROOT/apps/cms/.next/cache" "Next.js CMS cache"
+    fi
+    if [ -d "$REPO_ROOT/apps/overview" ]; then
+      clean_dir_cache "$REPO_ROOT/apps/overview/.next/cache" "Next.js overview cache"
+    fi
+  else
+    check "Next.js caches" "skip" "preserved warm cache (use --clean to purge)"
   fi
 
   clean_dir_cache "$REPO_ROOT/packages/eval/.pytest_cache" "Pytest cache"
@@ -488,10 +692,22 @@ fi
 phase 1 "Environment"
 
 env_pass=true
-node -v >/dev/null 2>&1 && check "Node.js" "pass" "$(node -v)" || {
-  check "Node.js" "fail"
+if command -v node >/dev/null 2>&1; then
+  active_node_v=$(node -v 2>/dev/null || echo "v0.0.0")
+  active_node_major=$(printf '%s' "$active_node_v" | tr -d 'v' | cut -d. -f1)
+  expected_node_major="${NODE_EXPECTED_MAJOR:-24}"
+  if ! [[ "$active_node_major" =~ ^[0-9]+$ ]] || [ "$active_node_major" -lt "$expected_node_major" ]; then
+    check "Node.js" "fail" "$active_node_v (< v${expected_node_major} required by .node-version)"
+    env_pass=false
+  elif [ "$active_node_major" = "$expected_node_major" ]; then
+    check "Node.js" "pass" "$active_node_v (matches .node-version ${expected_node_major})"
+  else
+    check "Node.js" "warn" "$active_node_v (expected v${expected_node_major} from .node-version)"
+  fi
+else
+  check "Node.js" "fail" "node not found"
   env_pass=false
-}
+fi
 pnpm -v >/dev/null 2>&1 && check "pnpm" "pass" "$(pnpm -v)" || {
   check "pnpm" "fail"
   env_pass=false
@@ -599,8 +815,10 @@ check_and_fix_port() {
 
 if [ "$QUICK_MODE" = "true" ]; then
   check_and_fix_port "$PORT" "Next.js portal" ""
+elif [ "${REDIS_TARGET_MODE:-tcp}" = "serverless-rest" ]; then
+  check "Redis port" "skip" "${REDIS_TARGET_LABEL}"
 else
-  check_and_fix_port 6379 "Redis" "redis-server"
+  check_and_fix_port "${REDIS_TARGET_PORT:-6379}" "Redis" "redis-server"
 fi
 
 # 1c. Check & Fix Environment files
@@ -719,13 +937,15 @@ elif [ "$CLOUD_MODE" = "true" ]; then
     fi
   fi
 
-  # 2b. Redis — auto-start if not already running
+  # 2b. Redis — verify serverless REST or start local TCP if needed
   REDIS_REQUIRED=true
   if [ "$REDIS_REQUIRED" = "true" ]; then
-    if command -v redis-cli >/dev/null 2>&1 && echo "PING" | redis-cli 2>/dev/null | grep -q -E "(PONG|NOAUTH|WRONGPASS)"; then
-      check "Redis" "pass" "redis://localhost:6379 (already running)"
+    if [ "${REDIS_TARGET_MODE:-tcp}" = "serverless-rest" ]; then
+      check "Redis" "pass" "${REDIS_TARGET_LABEL}"
+    elif command -v redis-cli >/dev/null 2>&1 && echo "PING" | redis-cli -h "${REDIS_TARGET_HOST:-127.0.0.1}" -p "${REDIS_TARGET_PORT:-6379}" 2>/dev/null | grep -q -E "(PONG|NOAUTH|WRONGPASS)"; then
+      check "Redis" "pass" "${REDIS_TARGET_LABEL} (already running)"
     elif docker ps --format '{{.Names}}' 2>/dev/null | grep -q "arch-redis"; then
-      check "Redis" "pass" "Docker container already running"
+      check "Redis" "pass" "Docker container already running (${REDIS_TARGET_LABEL})"
     else
       echo -e "  ${INFO} Starting Redis (Docker)..."
       $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.redis.yml" up -d >/dev/null 2>&1
@@ -738,7 +958,7 @@ elif [ "$CLOUD_MODE" = "true" ]; then
         sleep 1
       done
       if [ "$REDIS_HEALTHY" = "true" ]; then
-        check "Redis" "pass" "redis://localhost:6379"
+        check "Redis" "pass" "${REDIS_TARGET_LABEL}"
       else
         check "Redis" "warn" "started but health check pending — check 'docker ps'"
       fi
@@ -766,20 +986,26 @@ fi
 # ── Phase 2.6: Security & Exposure ────────────────────────
 phase "2.6" "Security & Exposure"
 
-sec_redis_host="localhost"
-if [ -n "${REDIS_URL:-}" ]; then
-  sec_redis_host=$(printf '%s' "$REDIS_URL" | sed -E \
-    's#^[[:alpha:]][[:alnum:]+.-]*://##; s#^.*@##; s#[:/].*$##')
-  [ -z "$sec_redis_host" ] && sec_redis_host="localhost"
+if [ "${REDIS_TARGET_MODE:-tcp}" = "serverless-rest" ]; then
+  if [[ "${REDIS_TARGET_URL:-}" == https://* ]]; then
+    check "Redis target" "pass" "Upstash Serverless REST (${REDIS_TARGET_URL}) over TLS"
+  else
+    check "Redis target" "warn" "Serverless REST (${REDIS_TARGET_URL}) is not HTTPS"
+  fi
+else
+  case "${REDIS_TARGET_HOST:-localhost}" in
+  localhost | 127.0.0.1 | 0.0.0.0)
+    check "Redis bind" "pass" "${REDIS_TARGET_URL} (local TCP)"
+    ;;
+  *)
+    if [[ "${REDIS_TARGET_URL:-}" == rediss://* ]]; then
+      check "Redis bind" "pass" "${REDIS_TARGET_URL} (remote TLS TCP)"
+    else
+      check "Redis bind" "warn" "${REDIS_TARGET_HOST} is unencrypted non-local TCP — use rediss:// or bind 127.0.0.1"
+    fi
+    ;;
+  esac
 fi
-case "$sec_redis_host" in
-localhost | 127.0.0.1 | 0.0.0.0)
-  check "Redis bind" "pass" "localhost-only ($sec_redis_host)"
-  ;;
-*)
-  check "Redis bind" "warn" "$sec_redis_host is non-local — bind 127.0.0.1 + set a password if exposed"
-  ;;
-esac
 
 if [ -n "${SUPABASE_ANON_KEY:-}" ]; then
   check "Anon key" "pass" "NEXT_PUBLIC_SUPABASE_ANON_KEY present"
@@ -808,7 +1034,7 @@ else
   echo "$!" > "$REPO_ROOT/run/theme-watch.pid"
 
   cd "$REPO_ROOT/apps/portal"
-  PORT=$PORT HOST=0.0.0.0 HOSTNAME=0.0.0.0 NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=2048 --no-deprecation}" pnpm dev >"$REPO_ROOT/run/portal.log" 2>&1 &
+  PORT=$PORT HOST=$HOST HOSTNAME=$HOSTNAME NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=2048 --no-deprecation}" pnpm dev >"$REPO_ROOT/run/portal.log" 2>&1 &
   echo $! >"$REPO_ROOT/run/.portal.pid"
   cd "$REPO_ROOT"
   echo -e "  ${INFO} Starting Next.js dev server (via pnpm dev → Turbopack)..."
@@ -939,13 +1165,24 @@ else
   esac
 fi
 
-# 4h. Redis ping — direct redis-cli + the portal /api/health/redis endpoint.
+# 4h. Redis ping — direct redis-cli (TCP) or portal /api/health/redis (Serverless REST).
 if [ "$QUICK_MODE" = "true" ]; then
   check "Redis ping" "skip" "quick mode"
+elif [ "${REDIS_TARGET_MODE:-tcp}" = "serverless-rest" ]; then
+  if curl -fs "http://localhost:$PORT/api/health/redis" >/dev/null 2>&1; then
+    check "Redis ping" "pass" "${REDIS_TARGET_LABEL} via /api/health/redis"
+  else
+    rest_probe_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${REDIS_TARGET_URL}" 2>/dev/null || echo "000")
+    if [ "$rest_probe_code" != "000" ]; then
+      check "Redis ping" "pass" "${REDIS_TARGET_LABEL} reachable (HTTP $rest_probe_code)"
+    else
+      check "Redis ping" "warn" "${REDIS_TARGET_LABEL} unreachable"
+    fi
+  fi
 else
   smoke_redis_ok=false
   if command -v redis-cli >/dev/null 2>&1; then
-    if redis-cli -h 127.0.0.1 -p 6379 ping >/dev/null 2>&1; then
+    if redis-cli -h "${REDIS_TARGET_HOST:-127.0.0.1}" -p "${REDIS_TARGET_PORT:-6379}" ping >/dev/null 2>&1; then
       smoke_redis_ok=true
     fi
   fi
@@ -954,9 +1191,9 @@ else
     smoke_redis_ok=true
   fi
   if [ "$smoke_redis_ok" = "true" ]; then
-    check "Redis ping" "pass" "PONG (127.0.0.1:6379)"
+    check "Redis ping" "pass" "PONG (${REDIS_TARGET_LABEL})"
   else
-    check "Redis ping" "warn" "no PONG — redis-cli missing or server down"
+    check "Redis ping" "warn" "no PONG — redis-cli missing or server down (${REDIS_TARGET_LABEL})"
   fi
 fi
 

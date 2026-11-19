@@ -24,6 +24,7 @@
 #
 # Options:
 #   --port <PORT>        Target port for Next.js portal (default: 3000)
+#   --lan                Bind portal to 0.0.0.0 and show LAN URL (default: 127.0.0.1)
 #   --headless           Headless mode (no GUI popups, no auto-browser)
 #   --no-browser         Skip opening the browser upon readiness
 #   --no-monitor         Skip spawning the separate SysOps HUD terminal
@@ -45,6 +46,177 @@ curl() {
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Resolve Node.js version from .node-version via mise ahead of $HOME/.local/bin
+# so global shims (e.g. ~/.local/bin/node v26.12.0) never shadow Node 24.
+resolve_node_bin() {
+  local expected_ver="24"
+  if [ -f "$REPO_ROOT/.node-version" ]; then
+    expected_ver=$(tr -d '[:space:]' < "$REPO_ROOT/.node-version")
+  fi
+  local expected_major="${expected_ver%%.*}"
+  expected_major="${expected_major#v}"
+  NODE_EXPECTED_MAJOR="$expected_major"
+
+  local candidate_bin=""
+  if command -v mise >/dev/null 2>&1; then
+    local mise_node
+    mise_node=$(cd "$REPO_ROOT" && mise which node 2>/dev/null || true)
+    if [ -n "$mise_node" ] && [ -x "$mise_node" ]; then
+      local mise_major
+      mise_major=$("$mise_node" -v 2>/dev/null | tr -d 'v' | cut -d. -f1 || echo "")
+      if [ "$mise_major" = "$expected_major" ]; then
+        candidate_bin="$(dirname "$mise_node")"
+      fi
+    fi
+  fi
+
+  if [ -z "$candidate_bin" ]; then
+    local d
+    for d in \
+      "$HOME/.local/share/mise/installs/node/24.15.0/bin" \
+      "$HOME/.local/share/mise/installs/node/${expected_ver}/bin" \
+      "$HOME/.local/share/mise/installs/node/${expected_major}/bin"; do
+      if [ -x "$d/node" ]; then
+        candidate_bin="$d"
+        break
+      fi
+    done
+  fi
+
+  if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+    export PATH="$HOME/.local/bin:$PATH"
+  fi
+  if [ -n "$candidate_bin" ]; then
+    export PATH="$candidate_bin:$PATH"
+  fi
+}
+resolve_node_bin
+
+trim_env_val() {
+  local v="$1"
+  v="${v%$'\r'}"
+  v="${v#"${v%%[![:space:]]*}"}"
+  v="${v%"${v##*[![:space:]]}"}"
+  if [[ "$v" == \"*\" ]] && [[ ${#v} -ge 2 ]]; then
+    v="${v:1:${#v}-2}"
+  elif [[ "$v" == \'*\' ]] && [[ ${#v} -ge 2 ]]; then
+    v="${v:1:${#v}-2}"
+  fi
+  printf '%s' "$v"
+}
+
+resolve_nextjs_env_var() {
+  local key="$1"
+  local val="${!key:-}"
+  if [ -n "$val" ]; then
+    trim_env_val "$val"
+    return 0
+  fi
+  local f
+  for f in \
+    "$REPO_ROOT/apps/portal/.env.local" \
+    "$REPO_ROOT/apps/portal/.env" \
+    "$REPO_ROOT/.env.local" \
+    "$REPO_ROOT/.env"; do
+    if [ -f "$f" ]; then
+      val=$( (grep -E "^${key}=" "$f" 2>/dev/null || true) | head -n1 | cut -d= -f2- )
+      val=$(trim_env_val "$val")
+      if [ -n "$val" ]; then
+        printf '%s' "$val"
+        return 0
+      fi
+    fi
+  done
+  return 0
+}
+
+# detect_redis_target — mirrors packages/redis/src/client.ts:204-230 without printing tokens.
+detect_redis_target() {
+  local explicit_redis_url effective_redis_url rest_url is_http_redis=false
+  explicit_redis_url=$(resolve_nextjs_env_var "REDIS_URL")
+  effective_redis_url="${explicit_redis_url:-redis://localhost:6379}"
+
+  if [[ "$effective_redis_url" == http://* ]] || [[ "$effective_redis_url" == https://* ]]; then
+    is_http_redis=true
+  fi
+
+  rest_url=$(resolve_nextjs_env_var "SERVERLESS_REDIS_URL")
+  [ -z "$rest_url" ] && rest_url=$(resolve_nextjs_env_var "UPSTASH_REDIS_REST_URL")
+  [ -z "$rest_url" ] && rest_url=$(resolve_nextjs_env_var "KV_REST_API_URL")
+
+  local has_http_rest=false
+  if [[ "$rest_url" == http://* ]] || [[ "$rest_url" == https://* ]]; then
+    has_http_rest=true
+  fi
+
+  if [ "$is_http_redis" = "true" ] || { [ "$has_http_rest" = "true" ] && { [ -z "$explicit_redis_url" ] || [[ "$effective_redis_url" == *localhost* ]]; }; }; then
+    local raw_rest_url
+    if [ "$is_http_redis" = "true" ]; then
+      raw_rest_url="$effective_redis_url"
+    else
+      raw_rest_url="$rest_url"
+    fi
+    local scheme rest_no_scheme host_port host_only
+    scheme="${raw_rest_url%%://*}"
+    rest_no_scheme="${raw_rest_url#*://}"
+    rest_no_scheme="${rest_no_scheme#*@}"
+    host_port="${rest_no_scheme%%/*}"
+    host_only="${host_port%%:*}"
+
+    REDIS_TARGET_MODE="serverless-rest"
+    REDIS_TARGET_HOST="$host_only"
+    if [[ "$host_port" == *:* ]]; then
+      REDIS_TARGET_PORT="${host_port##*:}"
+    elif [ "$scheme" = "https" ]; then
+      REDIS_TARGET_PORT="443"
+    else
+      REDIS_TARGET_PORT="80"
+    fi
+    REDIS_TARGET_URL="${scheme}://${host_port}"
+    REDIS_TARGET_LABEL="Upstash Serverless REST (${REDIS_TARGET_URL})"
+  else
+    local scheme rest_no_scheme host_port host_only port_only is_local_tcp=false
+    if [[ "$effective_redis_url" == *://* ]]; then
+      scheme="${effective_redis_url%%://*}"
+      rest_no_scheme="${effective_redis_url#*://}"
+    else
+      scheme="redis"
+      rest_no_scheme="$effective_redis_url"
+    fi
+    rest_no_scheme="${rest_no_scheme#*@}"
+    host_port="${rest_no_scheme%%/*}"
+    host_only="${host_port%%:*}"
+    [ -z "$host_only" ] && host_only="localhost"
+    if [[ "$host_port" == *:* ]]; then
+      port_only="${host_port##*:}"
+    else
+      port_only="6379"
+    fi
+
+    case "$host_only" in
+      localhost | 127.0.0.1 | 0.0.0.0) is_local_tcp=true ;;
+    esac
+
+    REDIS_TARGET_MODE="tcp"
+    REDIS_TARGET_HOST="$host_only"
+    REDIS_TARGET_PORT="$port_only"
+    REDIS_TARGET_URL="${scheme}://${host_only}:${port_only}"
+    if [ "$is_local_tcp" = "true" ]; then
+      REDIS_TARGET_LABEL="${REDIS_TARGET_URL} (local TCP)"
+    else
+      REDIS_TARGET_LABEL="${REDIS_TARGET_URL} (remote TCP)"
+    fi
+  fi
+}
+
+is_local_port_listening() {
+  local p="$1"
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -ti:"$p" >/dev/null 2>&1 && return 0
+  fi
+  (exec 3<>/dev/tcp/127.0.0.1/"$p") 2>/dev/null
+}
 
 # Source shared library if available, else initialize fallbacks
 if [ -f "$SCRIPT_DIR/lib/common.sh" ]; then
@@ -93,6 +265,12 @@ rm -f "$RUN_DIR/.dev_ready" "$RUN_DIR/.dev_timeout"
 
 # Default Configuration
 PORT="${PORT:-3000}"
+HOST="${HOST:-127.0.0.1}"
+if [ -n "$(printenv HOSTNAME 2>/dev/null || true)" ]; then
+  HOSTNAME="$(printenv HOSTNAME)"
+else
+  HOSTNAME="$HOST"
+fi
 HEADLESS=false
 NO_BROWSER=false
 NO_MONITOR=false
@@ -111,6 +289,11 @@ while [[ $# -gt 0 ]]; do
     --port)
       PORT="$2"
       shift 2
+      ;;
+    --lan)
+      HOST="0.0.0.0"
+      HOSTNAME="0.0.0.0"
+      shift
       ;;
     --headless|--no-open)
       HEADLESS=true
@@ -156,6 +339,7 @@ while [[ $# -gt 0 ]]; do
       echo
       echo "Options:"
       echo "  --port <PORT>        Target port for portal (default: 3000)"
+      echo "  --lan                Bind portal to 0.0.0.0 and show LAN URL (default: 127.0.0.1)"
       echo "  --headless           Run headlessly (no browser, no popup terminals)"
       echo "  --no-browser         Do not auto-open browser"
       echo "  --no-monitor         Do not spawn monitor HUD"
@@ -175,6 +359,8 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+detect_redis_target
 
 # If no display server is present, automatically enable headless mode
 if [ -z "${DISPLAY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ]; then
@@ -350,8 +536,8 @@ print_banner() {
   echo -e "  ${CYAN}${BOLD}│${NC}              ${BOLD}${WHITE}ARCH-SYSTEMS — INDUSTRIAL DEV DEPLOYMENT${NC}                  ${CYAN}${BOLD}│${NC}"
   echo -e "  ${CYAN}${BOLD}│${NC}              ${DIM}Plantcor OS · High-Density Mining Operations${NC}              ${CYAN}${BOLD}│${NC}"
   echo -e "  ${CYAN}${BOLD}├────────────────────────────────────────────────────────────────────────┤${NC}"
-  echo -e "  ${CYAN}${BOLD}│${NC} ${DIM}Node:${NC} ${WHITE}$node_v${NC}   ${DIM}│${NC} ${DIM}Host:${NC} ${WHITE}0.0.0.0:$PORT${NC}   ${DIM}│${NC} ${DIM}Branch:${NC} ${WHITE}$branch ($commit)${NC}${dirty}      ${CYAN}${BOLD}│${NC}"
-  echo -e "  ${CYAN}${BOLD}│${NC} ${DIM}Engine:${NC} ${GREEN}Turbopack${NC} ${DIM}│${NC} ${DIM}Cache:${NC} ${MAGENTA}L1/L2 Redis${NC}  ${DIM}│${NC} ${DIM}Mode:${NC} ${mode_pill}           ${CYAN}${BOLD}│${NC}"
+  echo -e "  ${CYAN}${BOLD}│${NC} ${DIM}Node:${NC} ${WHITE}$node_v${NC}   ${DIM}│${NC} ${DIM}Host:${NC} ${WHITE}${HOST}:$PORT${NC}   ${DIM}│${NC} ${DIM}Branch:${NC} ${WHITE}$branch ($commit)${NC}${dirty}      ${CYAN}${BOLD}│${NC}"
+  echo -e "  ${CYAN}${BOLD}│${NC} ${DIM}Engine:${NC} ${GREEN}Turbopack${NC} ${DIM}│${NC} ${DIM}Redis:${NC} ${MAGENTA}${REDIS_TARGET_LABEL}${NC}  ${DIM}│${NC} ${DIM}Mode:${NC} ${mode_pill}           ${CYAN}${BOLD}│${NC}"
   echo -e "  ${CYAN}${BOLD}│${NC} ${DIM}Date:${NC} ${WHITE}$(date '+%a %b %d %Y  %H:%M')${NC}                                           ${CYAN}${BOLD}│${NC}"
   echo -e "  ${CYAN}${BOLD}└────────────────────────────────────────────────────────────────────────┘${NC}"
   echo
@@ -437,17 +623,19 @@ smart_cache_cleanup() {
     fi
   fi
 
-  # Stale Python virtual environments (> 7 days unused)
-  for venv_dir in "$REPO_ROOT/.venv" "$REPO_ROOT/packages/eval/.venv"; do
-    if [ -d "$venv_dir" ]; then
-      if find "$venv_dir" -maxdepth 0 -mtime +7 >/dev/null 2>&1; then
-        local venv_size
-        venv_size=$(du -sh "$venv_dir" 2>/dev/null | awk '{print $1}')
-        rm -rf "$venv_dir"
-        check_badge "Python Venv (stale)" "pass" "freed ${venv_size:-?} ($venv_dir)"
+  # Stale Python virtual environments (> 7 days unused) — only purge with --clean
+  if [ "${CLEAN_CACHE:-false}" = "true" ]; then
+    for venv_dir in "$REPO_ROOT/.venv" "$REPO_ROOT/packages/eval/.venv"; do
+      if [ -d "$venv_dir" ]; then
+        if [ -n "$(find "$venv_dir" -maxdepth 0 -mtime +7 2>/dev/null)" ]; then
+          local venv_size
+          venv_size=$(du -sh "$venv_dir" 2>/dev/null | awk '{print $1}')
+          rm -rf "$venv_dir"
+          check_badge "Python Venv (stale)" "pass" "freed ${venv_size:-?} ($venv_dir)"
+        fi
       fi
-    fi
-  done
+    done
+  fi
 }
 
 # ── Source File Staleness Detection ─────────────────────────
@@ -517,14 +705,17 @@ fi
 # ============================================================
 phase "1" "ENVIRONMENT & ENGINE PRE-FLIGHT"
 
-# 1.1 Node.js Version Check
+# 1.1 Node.js Version Check (against .node-version)
 node_version=$(node -v 2>/dev/null | tr -d 'v' || echo "0.0.0")
 node_major=$(echo "$node_version" | cut -d. -f1)
-if [ "$node_major" -ge 22 ]; then
-  check_badge "Node.js Runtime" "pass" "v$node_version (>= 22.0.0 satisfied)"
-else
-  check_badge "Node.js Runtime" "fail" "v$node_version — Node.js >= 22 required"
+expected_node_major="${NODE_EXPECTED_MAJOR:-24}"
+if ! [[ "$node_major" =~ ^[0-9]+$ ]] || [ "$node_major" -lt "$expected_node_major" ]; then
+  check_badge "Node.js Runtime" "fail" "v$node_version — Node.js >= ${expected_node_major} required (.node-version)"
   exit 1
+elif [ "$node_major" = "$expected_node_major" ]; then
+  check_badge "Node.js Runtime" "pass" "v$node_version (matches .node-version ${expected_node_major})"
+else
+  check_badge "Node.js Runtime" "warn" "v$node_version active — expected v${expected_node_major} from .node-version"
 fi
 
 # 1.2 pnpm Check
@@ -662,13 +853,43 @@ else
   check_badge "Port Arbitration ($PORT)" "pass" "Port $PORT is clean and available"
 fi
 
-# Also check Redis port (unless quick mode)
+# Also check Redis port (unless quick mode or serverless REST)
 if [ "$QUICK_MODE" = false ]; then
-  redis_port_pid=$(check_port "6379" | head -n1 || echo "")
-  if [ -n "$redis_port_pid" ]; then
-    redis_proc=$(ps -p "$redis_port_pid" -o comm= 2>/dev/null || echo "unknown")
-    check_badge "Port Check (6379)" "info" "Redis port held by $redis_proc (PID $redis_port_pid)"
+  if [ "${REDIS_TARGET_MODE:-tcp}" = "serverless-rest" ]; then
+    check_badge "Redis Target" "pass" "${REDIS_TARGET_LABEL}"
+  else
+    redis_port_pid=$(check_port "${REDIS_TARGET_PORT:-6379}" | head -n1 || echo "")
+    if [ -n "$redis_port_pid" ]; then
+      redis_proc=$(ps -p "$redis_port_pid" -o comm= 2>/dev/null || echo "unknown")
+      check_badge "Port Check (${REDIS_TARGET_PORT:-6379})" "info" "Redis port held by $redis_proc (PID $redis_port_pid)"
+    fi
   fi
+fi
+
+# ============================================================
+# PHASE 2.6: SECURITY & EXPOSURE
+# ============================================================
+phase "2.6" "SECURITY & EXPOSURE"
+
+if [ "${REDIS_TARGET_MODE:-tcp}" = "serverless-rest" ]; then
+  if [[ "${REDIS_TARGET_URL:-}" == https://* ]]; then
+    check_badge "Redis Security" "pass" "Upstash Serverless REST (${REDIS_TARGET_URL}) over TLS"
+  else
+    check_badge "Redis Security" "warn" "Serverless REST (${REDIS_TARGET_URL}) is not HTTPS"
+  fi
+else
+  case "${REDIS_TARGET_HOST:-localhost}" in
+    localhost | 127.0.0.1 | 0.0.0.0)
+      check_badge "Redis Security" "pass" "${REDIS_TARGET_URL} (local TCP)"
+      ;;
+    *)
+      if [[ "${REDIS_TARGET_URL:-}" == rediss://* ]]; then
+        check_badge "Redis Security" "pass" "${REDIS_TARGET_URL} (remote TLS TCP)"
+      else
+        check_badge "Redis Security" "warn" "${REDIS_TARGET_HOST} is unencrypted non-local TCP — use rediss:// or bind 127.0.0.1"
+      fi
+      ;;
+  esac
 fi
 
 # ============================================================
@@ -690,7 +911,7 @@ fi
 
 if [ -f "$REPO_ROOT/scripts/sync-assets-smart.cjs" ]; then
   check_badge "Asset Sync (DAG)" "wait" "Executing smart asset synchronization..."
-  if node "$REPO_ROOT/scripts/sync-assets-smart.cjs" >/dev/null 2>&1; then
+  if SKIP_VERSION_SYNC=1 node "$REPO_ROOT/scripts/sync-assets-smart.cjs" >/dev/null 2>&1; then
     check_badge "Asset Sync (DAG)" "pass" "Static tokens, SVGs, and contract assets synchronized"
   else
     check_badge "Asset Sync (DAG)" "warn" "Asset sync reported minor warnings (proceeding)"
@@ -709,16 +930,21 @@ redis_active=false
 
 if [ "$QUICK_MODE" = true ]; then
   check_badge "Redis Engine" "skip" "Quick mode — skipping Redis, using L1 LRU cache"
+elif [ "${REDIS_TARGET_MODE:-tcp}" = "serverless-rest" ]; then
+  redis_active=true
+  check_badge "Redis Engine" "pass" "${REDIS_TARGET_LABEL}"
 else
-  # Test if Redis is already running on 6379
-  if command -v redis-cli >/dev/null 2>&1 && redis-cli ping >/dev/null 2>&1; then
+  # Test if Redis is already running on target TCP host/port
+  local_redis_host="${REDIS_TARGET_HOST:-127.0.0.1}"
+  local_redis_port="${REDIS_TARGET_PORT:-6379}"
+  if command -v redis-cli >/dev/null 2>&1 && redis-cli -h "$local_redis_host" -p "$local_redis_port" ping >/dev/null 2>&1; then
     redis_active=true
-    redis_info=$(redis-cli info server 2>/dev/null | grep redis_version | cut -d: -f2 | tr -d '\r' || echo "unknown")
-    check_badge "Redis Server" "pass" "Active native instance v${redis_info} on 127.0.0.1:6379"
-  elif (exec 3<>/dev/tcp/127.0.0.1/6379) 2>/dev/null; then
+    redis_info=$(redis-cli -h "$local_redis_host" -p "$local_redis_port" info server 2>/dev/null | grep redis_version | cut -d: -f2 | tr -d '\r' || echo "unknown")
+    check_badge "Redis Server" "pass" "Active native instance v${redis_info} (${REDIS_TARGET_LABEL})"
+  elif (exec 3<>/dev/tcp/"$local_redis_host"/"$local_redis_port") 2>/dev/null; then
     exec 3<&- 3>&-
     redis_active=true
-    check_badge "Redis Server" "pass" "Active socket listener on 127.0.0.1:6379"
+    check_badge "Redis Server" "pass" "Active socket listener (${REDIS_TARGET_LABEL})"
   fi
 
   if [ "$redis_active" = false ]; then
@@ -728,13 +954,13 @@ else
       # Check if Redis container is already running
       if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "arch-redis"; then
         redis_active=true
-        check_badge "Redis Container" "pass" "arch-redis container already running"
+        check_badge "Redis Container" "pass" "arch-redis container already running (${REDIS_TARGET_LABEL})"
       elif [ -f "$REPO_ROOT/infra/docker/compose.redis.yml" ]; then
         check_badge "Redis Boot" "wait" "Booting Arch-System Redis & Redis Insight..."
         docker compose -f "$REPO_ROOT/infra/docker/compose.redis.yml" up -d >/dev/null 2>&1 || true
 
         for i in {1..8}; do
-          if (command -v redis-cli >/dev/null 2>&1 && redis-cli ping >/dev/null 2>&1) || \
+          if (command -v redis-cli >/dev/null 2>&1 && redis-cli -h "$local_redis_host" -p "$local_redis_port" ping >/dev/null 2>&1) || \
              (docker exec arch-redis redis-cli ping 2>/dev/null | grep -q PONG); then
             redis_active=true
             break
@@ -743,7 +969,7 @@ else
         done
 
         if [ "$redis_active" = true ]; then
-          check_badge "Redis Engine" "pass" "Redis Server (6379) & Redis Insight (5540) online"
+          check_badge "Redis Engine" "pass" "${REDIS_TARGET_LABEL} & Insight (5540) online"
         else
           check_badge "Redis Engine" "warn" "Redis container boot delayed — falling back to L1 LRU"
         fi
@@ -830,12 +1056,12 @@ else
     check_badge "Execution Mode" "info" "Inline mode selected — booting Turbopack in current terminal"
     echo -e "\n  ${GREEN}${BOLD}→ Launching Next.js Turbopack...${NC}\n"
     touch "$RUN_DIR/.portal.start"
-    PORT="$PORT" pnpm turbo run dev --filter=portal
+    PORT="$PORT" HOST="$HOST" HOSTNAME="$HOSTNAME" pnpm turbo run dev --filter=portal
     exit 0
   fi
 
   # GUI Terminal / Background Spawning
-  dev_command="cd '$REPO_ROOT' && echo -e '\e[1;32m[Arch-System]\e[0m Booting Next.js Turbopack on port $PORT...'; PORT=$PORT pnpm turbo run dev --filter=portal"
+  dev_command="cd '$REPO_ROOT' && echo -e '\e[1;32m[Arch-System]\e[0m Booting Next.js Turbopack on ${HOST}:$PORT...'; PORT=$PORT HOST=$HOST HOSTNAME=$HOSTNAME pnpm turbo run dev --filter=portal"
 
   if [ "$HEADLESS" = false ] && [ "$TERMINAL_EMU" != "none" ]; then
     if launch_terminal "Arch-System Dev Engine" "$dev_command"; then
@@ -847,7 +1073,7 @@ else
 
   if [ "$HEADLESS" = true ] || [ "$TERMINAL_EMU" = "none" ]; then
     check_badge "Dev Engine" "info" "Starting background Turbopack process (logs → run/portal.log)"
-    (cd "$REPO_ROOT" && PORT="$PORT" pnpm turbo run dev --filter=portal > "$PORTAL_LOG" 2>&1) &
+    (cd "$REPO_ROOT" && PORT="$PORT" HOST="$HOST" HOSTNAME="$HOSTNAME" pnpm turbo run dev --filter=portal > "$PORTAL_LOG" 2>&1) &
     PORTAL_SUB_PID=$!
     SPAWNED_PIDS+=("$PORTAL_SUB_PID")
     echo "$PORTAL_SUB_PID" > "$RUN_DIR/.dev_portal.pid"
@@ -946,16 +1172,20 @@ if [ "$server_ready" = true ]; then
   echo -e "  ${GREEN}${BOLD}╭──────────────────── ACTIVE SERVICE MATRIX ─────────────────────────╮${NC}"
   echo -e "  ${GREEN}${BOLD}│${NC}                                                                     ${GREEN}${BOLD}│${NC}"
   echo -e "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Portal (Local):${NC}    ${CYAN}http://localhost:$PORT${NC}                               ${GREEN}${BOLD}│${NC}"
-  if [ -n "${lan_ip:-}" ] && [ "$lan_ip" != "127.0.0.1" ]; then
+  if [ "$HOST" = "0.0.0.0" ] && [ -n "${lan_ip:-}" ] && [ "$lan_ip" != "127.0.0.1" ]; then
     printf "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Portal (LAN):${NC}      ${CYAN}http://%s:%s${NC}" "$lan_ip" "$PORT"
     echo -e "                               ${GREEN}${BOLD}│${NC}"
   fi
   echo -e "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Auth / Login:${NC}      ${CYAN}http://localhost:$PORT/login${NC}                         ${GREEN}${BOLD}│${NC}"
-  if [ "$redis_active" = true ]; then
-    echo -e "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Redis Cache:${NC}       ${CYAN}redis://127.0.0.1:6379${NC}                               ${GREEN}${BOLD}│${NC}"
-    echo -e "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Redis Insight:${NC}     ${CYAN}http://localhost:5540${NC}                                ${GREEN}${BOLD}│${NC}"
+  if [ "${REDIS_TARGET_MODE:-tcp}" = "serverless-rest" ]; then
+    echo -e "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Redis Cache:${NC}       ${CYAN}${REDIS_TARGET_LABEL}${NC}"
+  elif [ "$redis_active" = true ]; then
+    echo -e "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Redis Cache:${NC}       ${CYAN}${REDIS_TARGET_LABEL}${NC}"
   else
     echo -e "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Cache Engine:${NC}      ${DIM}In-Memory L1 LRU Cache${NC}                               ${GREEN}${BOLD}│${NC}"
+  fi
+  if [ "${REDIS_TARGET_MODE:-tcp}" = "tcp" ] || is_local_port_listening 5540; then
+    echo -e "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Redis Insight:${NC}     ${CYAN}http://localhost:5540${NC}                                ${GREEN}${BOLD}│${NC}"
   fi
   if [ "$CLOUD_MODE" = true ] && [ -n "${SUPABASE_URL:-}" ]; then
     echo -e "  ${GREEN}${BOLD}│${NC}  ${BOLD}${WHITE}Supabase:${NC}          ${CYAN}${SUPABASE_URL}${NC}                    ${GREEN}${BOLD}│${NC}"

@@ -9,10 +9,103 @@ import { normalizeSupabaseCookies } from './cookie-utils';
 
 export { createClient };
 
-export async function instrumentedFetch(
-  input: RequestInfo | URL,
-  init?: RequestInit
-): Promise<Response> {
+const SLOW_QUERY_THRESHOLD_MS = 500;
+const HTTP_STATUS_UNAUTHORIZED = 401;
+const HTTP_STATUS_FORBIDDEN = 403;
+
+export interface InstrumentedFetchOptions {
+  readonly isHealthProbe?: boolean;
+}
+
+export interface ServerSupabaseClientOptions {
+  readonly healthProbe?: boolean;
+}
+
+interface ExecuteInstrumentedFetchParams {
+  readonly input: RequestInfo | URL;
+  readonly init?: RequestInit;
+  readonly isHealthProbe: boolean;
+}
+
+interface QueryOutcomeLogParams {
+  readonly tableName: string;
+  readonly method: string;
+  readonly elapsedMs: number;
+  readonly success: boolean;
+  readonly statusCode: number | null;
+  readonly isHealthProbe: boolean;
+}
+
+function resolveRequestUrl(input: RequestInfo | URL): string {
+  if (typeof input === 'string') {
+    return input;
+  }
+  if (input instanceof URL) {
+    return input.toString();
+  }
+  return input.url;
+}
+
+function extractTableName(urlStr: string): string {
+  if (!urlStr) {
+    return 'unknown';
+  }
+  try {
+    const parsedUrl = new URL(urlStr);
+    const segments = parsedUrl.pathname.split('/');
+    const restIndex = segments.indexOf('v1');
+    if (restIndex !== -1 && segments[restIndex + 1]) {
+      return segments[restIndex + 1]!.split('?')[0] || 'unknown';
+    }
+  } catch {
+    // Ignore malformed URLs and fall back to unknown table label.
+  }
+  return 'unknown';
+}
+
+function logQueryOutcome(params: QueryOutcomeLogParams): void {
+  const { tableName, method, elapsedMs, success, statusCode, isHealthProbe } = params;
+  const roundedDurationMs = Math.round(elapsedMs);
+  const logFields = {
+    tableName,
+    method,
+    durationMs: roundedDurationMs,
+    success,
+  };
+
+  const isExpectedProbeLockdown =
+    isHealthProbe &&
+    (statusCode === HTTP_STATUS_UNAUTHORIZED || statusCode === HTTP_STATUS_FORBIDDEN);
+
+  if (isExpectedProbeLockdown) {
+    serverLogger.debug(
+      logFields,
+      `Database query: ${tableName} (${method}) in ${roundedDurationMs}ms`
+    );
+    return;
+  }
+
+  if (elapsedMs > SLOW_QUERY_THRESHOLD_MS) {
+    serverLogger.warn(
+      logFields,
+      `Slow database query detected: ${tableName} (${method}) took ${roundedDurationMs}ms`
+    );
+    return;
+  }
+
+  if (!success) {
+    serverLogger.error(logFields, `Database query failed: ${tableName} (${method})`);
+    return;
+  }
+
+  serverLogger.debug(
+    logFields,
+    `Database query: ${tableName} (${method}) in ${roundedDurationMs}ms`
+  );
+}
+
+async function executeInstrumentedFetch(params: ExecuteInstrumentedFetchParams): Promise<Response> {
+  const { input, init, isHealthProbe } = params;
   const start = performance.now();
   let response: Response | null = null;
   let success = false;
@@ -22,59 +115,52 @@ export async function instrumentedFetch(
     success = response.ok;
     return response;
   } finally {
-    const duration = performance.now() - start;
-    const urlStr =
-      typeof input === 'string'
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : (input as Request).url;
+    const elapsedMs = performance.now() - start;
+    const urlStr = resolveRequestUrl(input);
     const method = init?.method ?? 'GET';
+    const tableName = extractTableName(urlStr);
 
-    let tableName = 'unknown';
-    if (urlStr) {
-      try {
-        const url = new URL(urlStr);
-        const segments = url.pathname.split('/');
-        const restIndex = segments.indexOf('v1');
-        if (restIndex !== -1 && segments[restIndex + 1]) {
-          tableName = segments[restIndex + 1]!.split('?')[0] || 'unknown';
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    const logData = {
+    logQueryOutcome({
       tableName,
       method,
-      durationMs: Math.round(duration),
+      elapsedMs,
       success,
-    };
-
-    if (duration > 500) {
-      serverLogger.warn(
-        logData,
-        `Slow database query detected: ${tableName} (${method}) took ${logData.durationMs}ms`
-      );
-    } else if (!success) {
-      serverLogger.error(logData, `Database query failed: ${tableName} (${method})`);
-    } else {
-      serverLogger.debug(
-        logData,
-        `Database query: ${tableName} (${method}) in ${logData.durationMs}ms`
-      );
-    }
+      statusCode: response?.status ?? null,
+      isHealthProbe,
+    });
   }
 }
 
-export async function createServerSupabaseClient() {
+/**
+ * Create an instrumented fetch wrapper for Supabase HTTP requests.
+ */
+export function createInstrumentedFetch(options?: InstrumentedFetchOptions) {
+  const isHealthProbe = Boolean(options?.isHealthProbe);
+  return async function configuredInstrumentedFetch(
+    input: RequestInfo | URL,
+    init?: RequestInit
+  ): Promise<Response> {
+    return executeInstrumentedFetch({ input, init, isHealthProbe });
+  };
+}
+
+export async function instrumentedFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<Response> {
+  return executeInstrumentedFetch({ input, init, isHealthProbe: false });
+}
+
+export async function createServerSupabaseClient(options?: ServerSupabaseClientOptions) {
   const cookieStore = await cookies();
   const { supabaseUrl, supabaseAnonKey } = resolveSupabasePublicConfig();
+  const fetchImpl = options?.healthProbe
+    ? createInstrumentedFetch({ isHealthProbe: true })
+    : instrumentedFetch;
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     global: {
-      fetch: instrumentedFetch,
+      fetch: fetchImpl,
     },
     cookies: {
       getAll() {

@@ -192,13 +192,15 @@ async function main() {
 
 if (require.main === module) {
   // Always ensure automated versioning and build metadata are synchronized
-  try {
-    const versionManager = path.join(REPO_ROOT, 'tools/scripts/version-manager.mjs');
-    if (existsSync(versionManager)) {
-      execSync(`node "${versionManager}" sync`, { stdio: 'inherit' });
+  if (process.env.SKIP_VERSION_SYNC !== '1') {
+    try {
+      const versionManager = path.join(REPO_ROOT, 'tools/scripts/version-manager.mjs');
+      if (existsSync(versionManager)) {
+        execSync(`node "${versionManager}" sync`, { stdio: 'inherit' });
+      }
+    } catch (verErr) {
+      console.warn('⚠️  Warning: Version sync failed:', verErr.message);
     }
-  } catch (verErr) {
-    console.warn('⚠️  Warning: Version sync failed:', verErr.message);
   }
 
   main();

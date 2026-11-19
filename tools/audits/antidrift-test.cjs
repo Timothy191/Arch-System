@@ -287,7 +287,7 @@ function capabilityUnauthorizedMerge() {
 
   const generatedFiles = [
     'packages/theme/src/tokens/generated.ts',
-    'packages/theme/src/tokens/variables-generated.css',
+    'packages/theme/src/css/variables-generated.css',
   ];
   for (const f of generatedFiles) {
     // These are generated; their presence is expected. Drift is a hand-edit
