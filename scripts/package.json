@@ -7,7 +7,7 @@
     "migrate:hooks:dry": "ts-node codemods/migrate-to-shared-hooks.ts --dry-run"
   },
   "devDependencies": {
-    "ts-morph": "^20.0.0",
+    "ts-morph": "^28.0.0",
     "@types/node": "catalog:",
     "ts-node": "^10.9.1"
   }
