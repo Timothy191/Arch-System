@@ -333,5 +333,8 @@ graphify-out/
 .vibemon/
 .agents/mcp_config.json
 .clai/
-.commandcode/
+.commandcode/*
+!.commandcode/taste/
+.commandcode/taste/*
+!.commandcode/taste/taste.md
 clihub.yaml
