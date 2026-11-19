@@ -41,18 +41,11 @@ const CLOUDFLARE_API_BASE = 'https://api.cloudflare.com/client/v4';
 const DEFAULT_TIMEOUT_MS = 8_000;
 const DEFAULT_MAX_RETRIES = 2;
 
-/** Narrowest practical Cloudflare API token scopes (documentation only). */
-export const CLOUDFLARE_TOKEN_SCOPES = {
-  accountRead: 'AccountRead',
-  zoneRead: 'ZoneRead',
-  workersRead: 'WorkersScriptsRead',
-  queuesRead: 'QueuesRead',
-  r2Read: 'R2Read',
-  turnstileRead: 'TurnstileRead',
-  zeroTrustRead: 'AccountAccessPoliciesRead',
-  tunnelRead: 'TunnelRead',
-  aiGatewayRead: 'AIRead',
-} as const;
+/**
+ * Narrowest practical Cloudflare API token scopes (read-only, documentation only):
+ * - AccountRead, ZoneRead, WorkersScriptsRead, QueuesRead, R2Read,
+ *   TurnstileRead, AccountAccessPoliciesRead, TunnelRead, AIRead
+ */
 
 /** Environment variable names (never values). */
 export const CLOUDFLARE_ENV_VARS = {

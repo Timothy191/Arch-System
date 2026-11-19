@@ -30,7 +30,11 @@ const DatabaseSchema = lazy(() => import('./sections/DatabaseSchema'));
 const DocumentationMaps = lazy(() => import('./sections/DocumentationMaps'));
 const AgenticMonitor = lazy(() => import('./sections/AgenticMonitor'));
 const AuditReportsSection = lazy(() => import('./sections/AuditReportsSection'));
-const ObservabilityConsole = lazy(() => import('@/components/observability/ObservabilityConsole'));
+const ObservabilityConsole = lazy(() =>
+  import('@/components/observability/ObservabilityConsole').then((m) => ({
+    default: m.ObservabilityConsole,
+  }))
+);
 
 const OVERVIEW_NAV_ITEMS = [
   {

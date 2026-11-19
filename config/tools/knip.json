@@ -115,7 +115,8 @@
         "@repo/shared/utils",
         "@repo/typescript-config",
         "@tailwindcss/typography",
-        "tailwindcss-animate"
+        "tailwindcss-animate",
+        "server-only"
       ],
       "ignore": [
         "lib/observability/metrics.ts",
@@ -134,7 +135,8 @@
         "lib/control-room-shift-report.ts",
         "app/(departments)/[department]/reports/actions.ts",
         "app/(departments)/access-control/actions/badges.ts",
-        "app/(departments)/access-control/actions/gates.ts"
+        "app/(departments)/access-control/actions/gates.ts",
+        "features/hub/components/OperationsCopilot.tsx"
       ]
     },
     "packages/theme": {

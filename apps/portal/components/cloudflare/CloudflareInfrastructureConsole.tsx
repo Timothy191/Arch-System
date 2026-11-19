@@ -572,5 +572,3 @@ export function CloudflareInfrastructureConsole() {
     </div>
   );
 }
-
-export default CloudflareInfrastructureConsole;

@@ -269,5 +269,3 @@ export function ObservabilityConsole() {
     </div>
   );
 }
-
-export default ObservabilityConsole;

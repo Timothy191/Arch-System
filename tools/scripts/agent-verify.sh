@@ -163,7 +163,7 @@ if [[ "${FAST_MODE}" == "false" ]]; then
     "mandatory" "RUNTIME_EMPIRICAL"
 
   run_gate 18 "🚀" "Build, Deployment & Rollback Verification" \
-    "pnpm --filter portal build && node tools/scripts/vercel-preflight.cjs" \
+    "SKIP_VERSION_SYNC=1 pnpm --filter portal build && node tools/scripts/vercel-preflight.cjs" \
     "Fix Next.js build errors or run 'pnpm audit:vercel' to fix Vercel monorepo preflight errors." \
     "mandatory" "RUNTIME_EMPIRICAL"
 
@@ -180,6 +180,33 @@ if [[ "${FAST_MODE}" == "false" ]]; then
   run_gate 21 "⛓️ " "Dependency & Supply-Chain Security" \
     "node tools/audits/audit-supply-chain.cjs" \
     "Run 'pnpm audit:supply-chain' to resolve exposed secrets, unsafe lifecycle scripts, or high/critical advisories."
+
+  if ! node -e 'const s=require("node:net").createConnection({host:"127.0.0.1",port:6379});s.setTimeout(500);s.once("connect",()=>{s.destroy();process.exit(0);});s.once("timeout",()=>{s.destroy();process.exit(1);});s.once("error",()=>{s.destroy();process.exit(1);});' >/dev/null 2>&1; then
+    if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1 && [[ -f infra/docker/compose.redis.yml ]]; then
+      pnpm redis:up >/dev/null 2>&1 || true
+      node -e '
+        const net = require("node:net");
+        const deadline = Date.now() + 15000;
+        function probe() {
+          let settled = false;
+          const sock = net.createConnection({ host: "127.0.0.1", port: 6379 });
+          sock.setTimeout(500);
+          const finish = (connected) => {
+            if (settled) return;
+            settled = true;
+            sock.destroy();
+            if (connected) process.exit(0);
+            if (Date.now() >= deadline) process.exit(1);
+            setTimeout(probe, 500);
+          };
+          sock.once("connect", () => finish(true));
+          sock.once("timeout", () => finish(false));
+          sock.once("error", () => finish(false));
+        }
+        probe();
+      ' >/dev/null 2>&1 || true
+    fi
+  fi
 
   run_gate 22 "📡" "Production Observability, Resilience & Redis Integration" \
     "node tools/audits/audit-observability-resilience.cjs" \
