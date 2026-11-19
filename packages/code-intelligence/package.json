@@ -25,12 +25,12 @@
   "author": "Arch-System",
   "license": "MIT",
   "optionalDependencies": {
-    "tree-sitter": "^0.20.0",
-    "tree-sitter-typescript": "^0.20.0"
+    "tree-sitter": "^0.25.1",
+    "tree-sitter-typescript": "^0.23.2"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
-    "typescript": "~5.9.2"
+    "typescript": "~7.0.2"
   },
   "peerDependencies": {},
   "workspaces": [],
