@@ -337,7 +337,7 @@ export default async function HistoryPage({
                         {(hoursByShift[shiftKey] ?? 0).toFixed(1)}
                       </td>
                       <td className="px-6 py-4 text-right text-[var(--accent-blue)] text-sm">
-                        {(loadsByShift[shiftKey] ?? 0).toLocaleString()}
+                        {(loadsByShift[shiftKey] ?? 0).toLocaleString('en-US')}
                       </td>
                       <td className="px-6 py-4 text-right text-accent-blue text-sm">
                         {delayMinutesByShift[shiftKey] ?? 0}
@@ -439,7 +439,7 @@ export default async function HistoryPage({
                     {log.notes || '—'}
                   </td>
                   <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                    {new Date(log.created_at).toLocaleDateString()}
+                    {new Date(log.created_at).toLocaleDateString('en-ZA')}
                   </td>
                 </tr>
               ))}

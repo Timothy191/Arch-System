@@ -483,7 +483,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
               Total Material Moved
             </p>
             <p className="mt-0.5 font-extrabold font-mono text-blue-700 text-lg">
-              {summary.totalMaterialMoved.toLocaleString()}
+              {summary.totalMaterialMoved.toLocaleString('en-US')}
             </p>
             <p className="text-[10px] text-slate-500">BCM / Tonnes Combined</p>
           </div>
@@ -491,7 +491,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
           <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-2 shadow-2xs">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Total Haul Loads</p>
             <p className="mt-0.5 font-extrabold font-mono text-lg text-slate-900">
-              {summary.totalLoads.toLocaleString()}
+              {summary.totalLoads.toLocaleString('en-US')}
             </p>
             <p className="text-[10px] text-slate-500">Dispatched Dump Cycles</p>
           </div>
@@ -542,8 +542,8 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-slate-800">{site.site}</span>
                     <span className="font-mono text-slate-700">
-                      <strong>{site.amount.toLocaleString()}</strong> {site.unit} · {site.loads}{' '}
-                      loads · {site.hours.toFixed(1)}h
+                      <strong>{site.amount.toLocaleString('en-US')}</strong> {site.unit} ·{' '}
+                      {site.loads} loads · {site.hours.toFixed(1)}h
                     </span>
                   </div>
                   <div className="h-3 w-full overflow-hidden rounded bg-slate-100">
@@ -598,7 +598,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
                     <div>
                       <p className="font-semibold text-[11px] text-slate-800">{mat.material}</p>
                       <p className="font-mono text-[10px] text-slate-500">
-                        {mat.amount.toLocaleString()} {mat.unit} ({mat.pct}%)
+                        {mat.amount.toLocaleString('en-US')} {mat.unit} ({mat.pct}%)
                       </p>
                     </div>
                   </div>
@@ -680,7 +680,7 @@ function PageSiteBreakdown({ siteReport }: PageSiteProps) {
           <div>
             Total Material:{' '}
             <strong className="text-blue-700">
-              {siteReport.siteTotals.totalMaterialMoved.toLocaleString()}
+              {siteReport.siteTotals.totalMaterialMoved.toLocaleString('en-US')}
             </strong>{' '}
             {siteReport.siteTotals.coalTonnes > siteReport.siteTotals.bcmVolume ? 'Tonnes' : 'BCM'}
           </div>
@@ -739,7 +739,7 @@ function PageSiteBreakdown({ siteReport }: PageSiteProps) {
                   </td>
                   <td className="px-2 py-1 text-right font-mono text-[11px]">{d.bladePasses}</td>
                   <td className="px-2 py-1 text-right font-bold font-mono text-[11px] text-blue-700">
-                    {d.rolloverBcm.toLocaleString()}
+                    {d.rolloverBcm.toLocaleString('en-US')}
                   </td>
                   <td className="px-2 py-1 text-right font-mono text-[11px] text-slate-500">
                     {d.delayMinutes > 0 ? `${d.delayMinutes}m` : '-'}
@@ -850,7 +850,7 @@ function ExcavatorActivityBlock({ block }: ExcavatorActivityBlockProps) {
                   {hauler.loads}
                 </td>
                 <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-slate-900">
-                  {hauler.rowTotal.toLocaleString()}
+                  {hauler.rowTotal.toLocaleString('en-US')}
                 </td>
                 <td className="px-2.5 py-1 font-mono text-[11px] text-slate-600">
                   {hauler.delaysDisplay === '-' ? (
@@ -889,7 +889,7 @@ function ExcavatorActivityBlock({ block }: ExcavatorActivityBlockProps) {
           <div>
             <span className="text-slate-500">Total Material Moved: </span>
             <strong className="text-slate-900">
-              {block.autoTotals.totalMaterialMoved.toLocaleString()} {block.materialUnit}
+              {block.autoTotals.totalMaterialMoved.toLocaleString('en-US')} {block.materialUnit}
             </strong>
           </div>
           <div>

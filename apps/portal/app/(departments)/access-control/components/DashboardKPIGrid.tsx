@@ -108,12 +108,12 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
     {
       id: 'kpi-active-qr',
       title: 'Active QR Codes',
-      value: metrics.activeQrCodes.toLocaleString(),
+      value: metrics.activeQrCodes.toLocaleString('en-US'),
       subtext: 'Across employees, vehicles & equipment',
       icon: QrCode,
       trend: {
         direction: metrics.activeQrCodes > 0 ? 'up' : 'neutral',
-        label: `${metrics.activeQrCodes.toLocaleString()} active`,
+        label: `${metrics.activeQrCodes.toLocaleString('en-US')} active`,
       },
       variant: 'success',
       hero: true,
@@ -121,7 +121,7 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
     {
       id: 'kpi-expiring-soon',
       title: 'Expiring Within 7 Days',
-      value: metrics.expiringSoon.toLocaleString(),
+      value: metrics.expiringSoon.toLocaleString('en-US'),
       subtext: 'Require renewal before expiry',
       icon: Clock,
       trend: {
@@ -133,7 +133,7 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
     {
       id: 'kpi-denied-today',
       title: 'Denied Attempts Today',
-      value: metrics.deniedToday.toLocaleString(),
+      value: metrics.deniedToday.toLocaleString('en-US'),
       subtext: 'Across all zones — review required',
       icon: ShieldAlert,
       trend: {
@@ -145,19 +145,19 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
     {
       id: 'kpi-access-today',
       title: 'Access Events Today',
-      value: metrics.accessEventsToday.toLocaleString(),
+      value: metrics.accessEventsToday.toLocaleString('en-US'),
       subtext: 'Total scans across all entry points',
       icon: ScanLine,
       trend: {
         direction: metrics.accessEventsToday > 0 ? 'up' : 'neutral',
-        label: `${metrics.accessEventsToday.toLocaleString()} logged`,
+        label: `${metrics.accessEventsToday.toLocaleString('en-US')} logged`,
       },
       variant: 'default',
     },
     {
       id: 'kpi-expired-assigned',
       title: 'Expired Still Assigned',
-      value: metrics.expiredAssigned.toLocaleString(),
+      value: metrics.expiredAssigned.toLocaleString('en-US'),
       subtext: 'Critical — revoke immediately',
       icon: AlertCircle,
       trend: {

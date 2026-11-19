@@ -702,7 +702,9 @@ export function ControlRoomChecklistWidget({
 
                 {item.completed && item.completedAt && (
                   <div className="flex items-center gap-2 font-medium text-[10px] text-[var(--accent-green)]">
-                    <span>Verified at {new Date(item.completedAt).toLocaleTimeString()}</span>
+                    <span>
+                      Verified at {new Date(item.completedAt).toLocaleTimeString('en-ZA')}
+                    </span>
                     {item.completedBy && <span>• Signed: {item.completedBy}</span>}
                   </div>
                 )}

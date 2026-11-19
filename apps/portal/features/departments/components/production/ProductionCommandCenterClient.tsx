@@ -362,14 +362,14 @@ export function ProductionCommandCenterClient({
           </div>
           <div>
             <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
-              {totals.coalTonnes.toLocaleString()} t
+              {totals.coalTonnes.toLocaleString('en-US')} t
             </p>
             <p className="mt-0.5 text-[var(--text-muted)] text-xs">
               Target:{' '}
               <strong className="text-[var(--text-heading)]">
-                {target.coal_target_tonnes.toLocaleString()} t
+                {target.coal_target_tonnes.toLocaleString('en-US')} t
               </strong>{' '}
-              · Rem: {totals.remainingCoalTonnes.toLocaleString()} t
+              · Rem: {totals.remainingCoalTonnes.toLocaleString('en-US')} t
             </p>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
@@ -379,7 +379,7 @@ export function ProductionCommandCenterClient({
             />
           </div>
           <p className="font-mono text-[11px] text-[var(--text-secondary)]">
-            Req. Run-Rate: {totals.requiredDailyCoalRate.toLocaleString()} t/day
+            Req. Run-Rate: {totals.requiredDailyCoalRate.toLocaleString('en-US')} t/day
           </p>
         </GlassCard>
 
@@ -395,14 +395,14 @@ export function ProductionCommandCenterClient({
           </div>
           <div>
             <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
-              {totals.wasteTonnes.toLocaleString()} t
+              {totals.wasteTonnes.toLocaleString('en-US')} t
             </p>
             <p className="mt-0.5 text-[var(--text-muted)] text-xs">
               Target:{' '}
               <strong className="text-[var(--text-heading)]">
-                {target.waste_target_tonnes.toLocaleString()} t
+                {target.waste_target_tonnes.toLocaleString('en-US')} t
               </strong>{' '}
-              · Rem: {totals.remainingWasteTonnes.toLocaleString()} t
+              · Rem: {totals.remainingWasteTonnes.toLocaleString('en-US')} t
             </p>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
@@ -412,7 +412,7 @@ export function ProductionCommandCenterClient({
             />
           </div>
           <p className="font-mono text-[11px] text-[var(--text-secondary)]">
-            Req. Run-Rate: {totals.requiredDailyWasteRate.toLocaleString()} t/day
+            Req. Run-Rate: {totals.requiredDailyWasteRate.toLocaleString('en-US')} t/day
           </p>
         </GlassCard>
 
@@ -428,14 +428,14 @@ export function ProductionCommandCenterClient({
           </div>
           <div>
             <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
-              {totals.totalBcm.toLocaleString()} BCM
+              {totals.totalBcm.toLocaleString('en-US')} BCM
             </p>
             <p className="mt-0.5 text-[var(--text-muted)] text-xs">
               Target:{' '}
               <strong className="text-[var(--text-heading)]">
-                {target.bcm_target.toLocaleString()} BCM
+                {target.bcm_target.toLocaleString('en-US')} BCM
               </strong>{' '}
-              · {totals.haulTruckLoads.toLocaleString()} Haul Loads
+              · {totals.haulTruckLoads.toLocaleString('en-US')} Haul Loads
             </p>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
@@ -445,8 +445,8 @@ export function ProductionCommandCenterClient({
             />
           </div>
           <p className="font-mono text-[11px] text-[var(--text-secondary)]">
-            Haul: {totals.haulTruckBcm.toLocaleString()} · Dozer:{' '}
-            {totals.dozerPushBcm.toLocaleString()} BCM
+            Haul: {totals.haulTruckBcm.toLocaleString('en-US')} · Dozer:{' '}
+            {totals.dozerPushBcm.toLocaleString('en-US')} BCM
           </p>
         </GlassCard>
 
@@ -478,7 +478,7 @@ export function ProductionCommandCenterClient({
           <div className="flex items-center justify-between border-[var(--border-subtle)] border-t pt-1 text-xs">
             <span className="text-[var(--text-muted)]">Fleet Operating Hours:</span>
             <span className="font-mono font-semibold text-[var(--text-heading)]">
-              {totals.fleetOperatingHours.toLocaleString()} SMR hrs
+              {totals.fleetOperatingHours.toLocaleString('en-US')} SMR hrs
             </span>
           </div>
         </GlassCard>
@@ -502,7 +502,7 @@ export function ProductionCommandCenterClient({
                 1. Hourly Loads
               </p>
               <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
-                {totals.haulTruckLoads.toLocaleString()} loads
+                {totals.haulTruckLoads.toLocaleString('en-US')} loads
               </p>
             </div>
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
@@ -510,7 +510,7 @@ export function ProductionCommandCenterClient({
                 2. Excavator BCM
               </p>
               <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
-                {totals.excavatorBcm.toLocaleString()} BCM
+                {totals.excavatorBcm.toLocaleString('en-US')} BCM
               </p>
             </div>
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
@@ -518,7 +518,7 @@ export function ProductionCommandCenterClient({
                 3. Dozer Rollover
               </p>
               <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
-                {totals.dozerPushBcm.toLocaleString()} BCM
+                {totals.dozerPushBcm.toLocaleString('en-US')} BCM
               </p>
             </div>
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
@@ -526,7 +526,7 @@ export function ProductionCommandCenterClient({
                 4. Fleet SMR Ops
               </p>
               <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
-                {totals.fleetOperatingHours.toLocaleString()} hrs
+                {totals.fleetOperatingHours.toLocaleString('en-US')} hrs
               </p>
             </div>
           </div>
@@ -643,25 +643,25 @@ export function ProductionCommandCenterClient({
                     {row.date}
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
-                    {row.dayShiftCoalTonnes.toLocaleString()}
+                    {row.dayShiftCoalTonnes.toLocaleString('en-US')}
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
-                    {row.nightShiftCoalTonnes.toLocaleString()}
+                    {row.nightShiftCoalTonnes.toLocaleString('en-US')}
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono font-semibold text-emerald-700">
-                    {row.totalCoalTonnes.toLocaleString()}
+                    {row.totalCoalTonnes.toLocaleString('en-US')}
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono font-semibold text-blue-700">
-                    {row.totalWasteTonnes.toLocaleString()}
+                    {row.totalWasteTonnes.toLocaleString('en-US')}
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono text-[var(--text-heading)]">
                     {row.stripRatio.toFixed(2)}:1
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
-                    {row.haulTruckLoads.toLocaleString()}
+                    {row.haulTruckLoads.toLocaleString('en-US')}
                   </td>
                   <td className="px-3 py-2.5 text-right font-medium font-mono text-[var(--text-heading)]">
-                    {row.totalBcm.toLocaleString()}
+                    {row.totalBcm.toLocaleString('en-US')}
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
                     {row.fleetOperatingHours.toFixed(1)}h
@@ -681,22 +681,24 @@ export function ProductionCommandCenterClient({
                 <tr>
                   <td className="px-3 py-2.5">MONTHLY TOTAL</td>
                   <td className="px-3 py-2.5 text-right">
-                    {monthlyShiftTotals.dayShiftCoal.toLocaleString()}
+                    {monthlyShiftTotals.dayShiftCoal.toLocaleString('en-US')}
                   </td>
                   <td className="px-3 py-2.5 text-right">
-                    {monthlyShiftTotals.nightShiftCoal.toLocaleString()}
+                    {monthlyShiftTotals.nightShiftCoal.toLocaleString('en-US')}
                   </td>
                   <td className="px-3 py-2.5 text-right text-emerald-700">
-                    {totals.coalTonnes.toLocaleString()} t
+                    {totals.coalTonnes.toLocaleString('en-US')} t
                   </td>
                   <td className="px-3 py-2.5 text-right text-blue-700">
-                    {totals.wasteTonnes.toLocaleString()} t
+                    {totals.wasteTonnes.toLocaleString('en-US')} t
                   </td>
                   <td className="px-3 py-2.5 text-right">{totals.stripRatio.toFixed(2)}:1</td>
                   <td className="px-3 py-2.5 text-right">
-                    {totals.haulTruckLoads.toLocaleString()}
+                    {totals.haulTruckLoads.toLocaleString('en-US')}
                   </td>
-                  <td className="px-3 py-2.5 text-right">{totals.totalBcm.toLocaleString()} BCM</td>
+                  <td className="px-3 py-2.5 text-right">
+                    {totals.totalBcm.toLocaleString('en-US')} BCM
+                  </td>
                   <td className="px-3 py-2.5 text-right">{totals.fleetOperatingHours}h</td>
                 </tr>
               </tfoot>

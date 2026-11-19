@@ -150,7 +150,7 @@ export function ExecutiveBoardroomPrintView({
               <p className="mt-0.5 text-gray-600 text-xs">
                 Period: <strong>{selectedMonth}</strong> · Shift Scope:{' '}
                 <strong>{shiftType.toUpperCase()} SHIFT</strong> · Generated:{' '}
-                {new Date().toLocaleDateString()}
+                {new Date().toLocaleDateString('en-ZA')}
               </p>
             </div>
             <div className="rounded-lg border border-gray-300 p-2.5 text-right font-mono text-[10px]">

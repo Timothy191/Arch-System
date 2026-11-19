@@ -186,7 +186,7 @@ export function HourlyLoadsTelemetryHeader({
             </div>
             <span className="block text-[11px] text-[var(--text-muted)]">
               {grandTotalMaterial > 0
-                ? `${grandTotalMaterial.toLocaleString()} t total material`
+                ? `${grandTotalMaterial.toLocaleString('en-US')} t total material`
                 : 'Real-time shift tally'}
             </span>
           </div>

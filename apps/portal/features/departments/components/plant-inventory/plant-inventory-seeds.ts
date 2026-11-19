@@ -199,8 +199,8 @@ export const INITIAL_PLANT_USAGE_HISTORY: readonly PlantInventoryUsageEntry[] = 
 
 export function formatQty(value: number): string {
   return Number.isInteger(value)
-    ? value.toLocaleString()
-    : value.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+    ? value.toLocaleString('en-US')
+    : value.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
 }
 
 export function getStockStatusBadgeClass(status: PlantStockStatusFlag): string {

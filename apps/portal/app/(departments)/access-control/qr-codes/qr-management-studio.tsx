@@ -349,10 +349,10 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
                   <td className="p-3.5 text-slate-400">
                     <div>
-                      <span>Issued: {new Date(b.issued_at).toLocaleDateString()}</span>
+                      <span>Issued: {new Date(b.issued_at).toLocaleDateString('en-ZA')}</span>
                       {b.expires_at && (
                         <p className="text-[10px] text-amber-400">
-                          Exp: {new Date(b.expires_at).toLocaleDateString()}
+                          Exp: {new Date(b.expires_at).toLocaleDateString('en-ZA')}
                         </p>
                       )}
                     </div>

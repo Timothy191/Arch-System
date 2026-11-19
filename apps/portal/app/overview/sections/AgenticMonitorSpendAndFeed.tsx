@@ -211,7 +211,7 @@ export function AgenticMonitorSpendAndFeed({
                 </div>
                 <div className="flex items-center gap-3 font-mono text-xs">
                   <span className="text-[var(--text-secondary)]">
-                    {task.tokensUsed.toLocaleString()} tokens
+                    {task.tokensUsed.toLocaleString('en-US')} tokens
                   </span>
                   <span className="font-semibold text-emerald-700">
                     R {task.zarCost.toFixed(CURRENCY_DECIMALS)}

@@ -447,7 +447,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
             Loaded Loads
           </span>
           <span className="font-bold font-mono text-[var(--accent-blue)] text-sm">
-            {Math.max(totalMachineLoads, totalExcavatorLoads).toLocaleString()} Loads
+            {Math.max(totalMachineLoads, totalExcavatorLoads).toLocaleString('en-US')} Loads
           </span>
         </div>
         <div className="liquid-glass-light gold-steel-border gold-steel-border-slim rounded-xl border border-accent-green/40 bg-accent-green/15 px-3 py-2 shadow-diffusion-sm backdrop-blur-md">
@@ -455,7 +455,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
             Loaded Volume
           </span>
           <span className="font-bold font-mono text-accent-green text-sm">
-            {totalVolumeBcm.toLocaleString()} BCM
+            {totalVolumeBcm.toLocaleString('en-US')} BCM
           </span>
         </div>
       </div>
@@ -532,7 +532,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                           {ex.loadedLoads} loads
                         </td>
                         <td className="px-3 py-2 text-right font-mono font-semibold text-[var(--text-heading)]">
-                          {ex.totalBcm.toLocaleString()} BCM
+                          {ex.totalBcm.toLocaleString('en-US')} BCM
                         </td>
                         <td className="px-3 py-2 text-right">
                           <Link
@@ -616,7 +616,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                           </span>
                         </td>
                         <td className="px-3 py-2 text-right font-mono font-semibold text-[var(--text-heading)]">
-                          {m.totalBcm.toLocaleString()}
+                          {m.totalBcm.toLocaleString('en-US')}
                         </td>
                         <td className="px-3 py-2 text-center">
                           <span className="rounded-md border border-accent-green/20 bg-accent-green/10 px-2 py-0.5 font-bold text-[10px] text-accent-green uppercase tracking-wider">

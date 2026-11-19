@@ -316,9 +316,9 @@ export function PlantHistoryDatabaseClient({
       `🏭 *Module:* ${latestDaily.moduleId} | *Operator:* ${latestDaily.operatorName}`,
       ``,
       `*MASS BALANCE & SCALE SUMMARY*`,
-      `• *ROM Scale Feed:* ${latestDaily.romFeedTonnes.toLocaleString()} t`,
-      `• *New Product Scale (Clean Coal):* ${latestDaily.cleanCoalTonnes.toLocaleString()} t`,
-      `• *Discard / Rejects:* ${latestDaily.discardTonnes.toLocaleString()} t`,
+      `• *ROM Scale Feed:* ${latestDaily.romFeedTonnes.toLocaleString('en-US')} t`,
+      `• *New Product Scale (Clean Coal):* ${latestDaily.cleanCoalTonnes.toLocaleString('en-US')} t`,
+      `• *Discard / Rejects:* ${latestDaily.discardTonnes.toLocaleString('en-US')} t`,
       `• *Product Recovery Yield:* ${latestDaily.yieldPct.toFixed(1)}%`,
       `• *Mean Cyclone RD:* ${latestDaily.avgCycloneRd.toFixed(2)} g/cm³ | *Moisture:* ${latestDaily.avgMoisturePct.toFixed(1)}%`,
       `• *Circuit Run / Delay:* ${latestDaily.runHours}h run / ${latestDaily.delayMinutes}m downtime`,
@@ -606,13 +606,13 @@ export function PlantHistoryDatabaseClient({
                     </td>
                     <td className="px-4 py-3.5 text-right">{m.shiftsLogged}</td>
                     <td className="px-4 py-3.5 text-right font-semibold text-[var(--text-heading)]">
-                      {m.romFeedTonnes.toLocaleString()}
+                      {m.romFeedTonnes.toLocaleString('en-US')}
                     </td>
                     <td className="px-4 py-3.5 text-right font-bold text-emerald-700">
-                      {m.cleanCoalTonnes.toLocaleString()}
+                      {m.cleanCoalTonnes.toLocaleString('en-US')}
                     </td>
                     <td className="px-4 py-3.5 text-right text-amber-800">
-                      {m.discardTonnes.toLocaleString()}
+                      {m.discardTonnes.toLocaleString('en-US')}
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <span className="inline-block rounded border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 font-bold text-emerald-800">
@@ -673,13 +673,13 @@ export function PlantHistoryDatabaseClient({
                     </td>
                     <td className="px-4 py-3 text-[var(--text-secondary)]">{d.moduleId}</td>
                     <td className="px-4 py-3 text-right font-semibold text-[var(--text-heading)]">
-                      {d.romFeedTonnes.toLocaleString()}
+                      {d.romFeedTonnes.toLocaleString('en-US')}
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-emerald-700">
-                      {d.cleanCoalTonnes.toLocaleString()}
+                      {d.cleanCoalTonnes.toLocaleString('en-US')}
                     </td>
                     <td className="px-4 py-3 text-right text-amber-800">
-                      {d.discardTonnes.toLocaleString()}
+                      {d.discardTonnes.toLocaleString('en-US')}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <span className="inline-block rounded border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 font-bold text-emerald-800">

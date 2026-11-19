@@ -257,7 +257,7 @@ export function SystemLogsTab() {
                       onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
                     >
                       <td className="whitespace-nowrap px-6 py-4 text-[var(--text-muted)] text-sm">
-                        {new Date(log.created_at).toLocaleString()}
+                        {new Date(log.created_at).toLocaleString('en-ZA')}
                       </td>
                       <td className="px-6 py-4">
                         <Badge variant="outline" className={LEVEL_BADGE[log.level]}>

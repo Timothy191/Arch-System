@@ -36,19 +36,19 @@ export default function DashboardEntityStatus({ entityStatus }: DashboardEntityS
       {
         id: 'sum-active',
         label: 'Total Active',
-        value: totalActive.toLocaleString(),
+        value: totalActive.toLocaleString('en-US'),
         color: 'text-success',
       },
       {
         id: 'sum-expiring',
         label: 'Expiring',
-        value: totalExpiring.toLocaleString(),
+        value: totalExpiring.toLocaleString('en-US'),
         color: 'text-warning',
       },
       {
         id: 'sum-expired',
         label: 'Expired',
-        value: totalExpired.toLocaleString(),
+        value: totalExpired.toLocaleString('en-US'),
         color: 'text-danger',
       },
     ];

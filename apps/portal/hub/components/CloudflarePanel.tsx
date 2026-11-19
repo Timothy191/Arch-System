@@ -156,7 +156,7 @@ export function CloudflarePanel() {
       </div>
 
       <div className="mt-4 text-xs text-zinc-500">
-        Generated {new Date(summary.generatedAt).toLocaleString()}
+        Generated {new Date(summary.generatedAt).toLocaleString('en-ZA')}
       </div>
     </GlassCard>
   );

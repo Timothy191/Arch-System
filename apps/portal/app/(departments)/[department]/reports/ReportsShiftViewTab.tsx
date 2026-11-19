@@ -57,7 +57,7 @@ export function ReportsShiftViewTab({
             <span className="font-mono font-semibold text-[var(--accent-blue)] text-xs">
               {Number(
                 (shiftComparison.dayBcm + shiftComparison.nightBcm).toFixed(1)
-              ).toLocaleString()}{' '}
+              ).toLocaleString('en-US')}{' '}
               BCM
             </span>
           </div>
@@ -92,20 +92,20 @@ export function ReportsShiftViewTab({
             <div className="space-y-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
               <p className="font-medium text-[var(--accent-blue)] text-xs">Day Shift Totals</p>
               <p className="font-bold font-mono text-[var(--text-heading)] text-lg">
-                {Number(shiftComparison.dayBcm.toFixed(1)).toLocaleString()} BCM
+                {Number(shiftComparison.dayBcm.toFixed(1)).toLocaleString('en-US')} BCM
               </p>
               <p className="text-[var(--text-muted)] text-xs">
-                {shiftComparison.dayLoads.toLocaleString()} loads ·{' '}
+                {shiftComparison.dayLoads.toLocaleString('en-US')} loads ·{' '}
                 {shiftComparison.dayHours.toFixed(1)}h · {shiftComparison.dayDelays}m delay
               </p>
             </div>
             <div className="space-y-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
               <p className="font-medium text-indigo-500 text-xs">Night Shift Totals</p>
               <p className="font-bold font-mono text-[var(--text-heading)] text-lg">
-                {Number(shiftComparison.nightBcm.toFixed(1)).toLocaleString()} BCM
+                {Number(shiftComparison.nightBcm.toFixed(1)).toLocaleString('en-US')} BCM
               </p>
               <p className="text-[var(--text-muted)] text-xs">
-                {shiftComparison.nightLoads.toLocaleString()} loads ·{' '}
+                {shiftComparison.nightLoads.toLocaleString('en-US')} loads ·{' '}
                 {shiftComparison.nightHours.toFixed(1)}h · {shiftComparison.nightDelays}m delay
               </p>
             </div>
@@ -135,9 +135,9 @@ export function ReportsShiftViewTab({
                   <span className="font-medium text-[var(--text-heading)]">{s.site}</span>
                   <span className="font-mono text-[var(--text-secondary)]">
                     <strong className="text-[var(--accent-blue)]">
-                      {Number(s.bcm.toFixed(1)).toLocaleString()} BCM
+                      {Number(s.bcm.toFixed(1)).toLocaleString('en-US')} BCM
                     </strong>{' '}
-                    · {s.loads.toLocaleString()} loads · {s.hours.toFixed(1)}h (
+                    · {s.loads.toLocaleString('en-US')} loads · {s.hours.toFixed(1)}h (
                     {s.bcmPerHour.toFixed(1)} BCM/h)
                   </span>
                 </div>

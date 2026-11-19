@@ -316,7 +316,7 @@ export function Neo300PrinterQueuePanel({
                     </span>
                   </td>
                   <td className="py-2.5 text-[var(--text-secondary)]">
-                    {new Date(j.created_at).toLocaleTimeString([], {
+                    {new Date(j.created_at).toLocaleTimeString('en-US', {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}

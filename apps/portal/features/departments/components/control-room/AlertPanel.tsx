@@ -434,7 +434,7 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
               {horizon} Cumulative Trajectory vs Admin Target (100%)
             </span>
             <span className="font-bold font-mono text-[var(--accent-blue)]">
-              Target: {activeTarget.loadsTarget.toLocaleString()} loads
+              Target: {activeTarget.loadsTarget.toLocaleString('en-US')} loads
             </span>
           </div>
 
@@ -578,7 +578,7 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
                 Target
               </span>
               <span className="font-bold font-mono text-[var(--text-heading)] text-xs">
-                {activeTarget.loadsTarget.toLocaleString()} loads
+                {activeTarget.loadsTarget.toLocaleString('en-US')} loads
               </span>
             </div>
             <div className="rounded-lg border border-accent-amber/30 bg-accent-amber/10 px-3 py-1.5 shadow-2xs">
@@ -606,10 +606,10 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
                   <span className="font-bold text-[var(--text-heading)]">{metric.label}</span>
                   <div className="flex items-center gap-2 font-mono">
                     <span className="font-bold text-[var(--text-heading)]">
-                      {metric.actual.toLocaleString()} {metric.unit}
+                      {metric.actual.toLocaleString('en-US')} {metric.unit}
                     </span>
                     <span className="text-[var(--text-secondary)]">
-                      / {metric.target.toLocaleString()} {metric.unit}
+                      / {metric.target.toLocaleString('en-US')} {metric.unit}
                     </span>
                     <span className="rounded bg-[var(--accent-blue)]/15 px-1.5 py-0.5 font-bold text-[10px] text-[var(--accent-blue)]">
                       {pct}%

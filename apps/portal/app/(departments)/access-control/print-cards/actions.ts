@@ -3,6 +3,7 @@
 import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
 import { DatabaseError } from '@/lib/errors/error-classes';
+import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
 import { ACCESS_CONTROL_WRITE_ROLES, assertAccessControlRoleFor } from '../actions/shared';
 
 export interface Neo300Printer {
@@ -177,10 +178,10 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
     .order('surname', { ascending: true })
     .limit(100);
 
-  if (search && search.trim().length > 0) {
-    const s = search.trim();
+  const sanitizedSearch = search ? sanitizePostgrestFilterValue(search) : '';
+  if (sanitizedSearch.length > 0) {
     query = query.or(
-      `first_name.ilike.%${s}%,surname.ilike.%${s}%,emp_code.ilike.%${s}%,id_number.ilike.%${s}%`
+      `first_name.ilike.%${sanitizedSearch}%,surname.ilike.%${sanitizedSearch}%,emp_code.ilike.%${sanitizedSearch}%,id_number.ilike.%${sanitizedSearch}%`
     );
   }
 
@@ -207,10 +208,9 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       .order('surname', { ascending: true })
       .limit(100);
 
-    if (search && search.trim().length > 0) {
-      const s = search.trim();
+    if (sanitizedSearch.length > 0) {
       fallbackQuery = fallbackQuery.or(
-        `first_name.ilike.%${s}%,surname.ilike.%${s}%,emp_code.ilike.%${s}%,id_number.ilike.%${s}%`
+        `first_name.ilike.%${sanitizedSearch}%,surname.ilike.%${sanitizedSearch}%,emp_code.ilike.%${sanitizedSearch}%,id_number.ilike.%${sanitizedSearch}%`
       );
     }
 

@@ -87,7 +87,7 @@ const DEPARTMENT_MATRIX = [
     slug: 'drilling',
     displayName: 'Drilling',
     route: '/drilling',
-    entryFile: 'apps/portal/app/(departments)/[department]/page.tsx',
+    entryFile: 'apps/portal/app/(departments)/drilling/page.tsx',
     proxyPattern: '/drilling',
     portalTests: [
       'app/(departments)/drilling/drilling-operations/actions.test.ts',
@@ -141,7 +141,7 @@ const DEPARTMENT_MATRIX = [
     slug: 'control-room',
     displayName: 'Control Room',
     route: '/control-room',
-    entryFile: 'apps/portal/app/(departments)/[department]/page.tsx',
+    entryFile: 'apps/portal/app/(departments)/control-room/page.tsx',
     proxyPattern: '/control-room',
     portalTests: [
       'app/(departments)/control-room/components/ControlRoomQuickNav.test.tsx',

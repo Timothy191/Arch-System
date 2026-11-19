@@ -337,7 +337,7 @@ export function ShiftReportPdfDocument({
                   1. Excavators: {siteGroup.excavators.length} · 2. Roll Over:{' '}
                   {siteGroup.rollovers.length} · 3. Site Machines: {siteGroup.siteMachines.length} |
                   Worked: {siteGroup.totalHours.toFixed(2)}h · Volume:{' '}
-                  {Number(siteGroup.totalBcm.toFixed(1)).toLocaleString()} BCM
+                  {Number(siteGroup.totalBcm.toFixed(1)).toLocaleString('en-US')} BCM
                 </Text>
               </View>
 
@@ -430,8 +430,9 @@ export function ShiftReportPdfDocument({
                   {siteGroup.nonSiteDelayMin}m
                 </Text>
                 <Text style={[styles.cellTitle, styles.colActivity]}>
-                  Excavator: {Number(siteGroup.excavatorBcm.toFixed(1)).toLocaleString()} BCM ·
-                  Roll-over: {Number(siteGroup.rolloverBcm.toFixed(1)).toLocaleString()} BCM
+                  Excavator: {Number(siteGroup.excavatorBcm.toFixed(1)).toLocaleString('en-US')} BCM
+                  · Roll-over: {Number(siteGroup.rolloverBcm.toFixed(1)).toLocaleString('en-US')}{' '}
+                  BCM
                 </Text>
               </View>
             </View>

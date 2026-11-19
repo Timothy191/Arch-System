@@ -230,7 +230,7 @@ export function SupervisorApprovalPanel({
                     )}
                     {report.approvedAt && (
                       <span className="text-gray-400">
-                        {new Date(report.approvedAt).toLocaleDateString()}
+                        {new Date(report.approvedAt).toLocaleDateString('en-ZA')}
                       </span>
                     )}
                   </div>

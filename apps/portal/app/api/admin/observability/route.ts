@@ -214,7 +214,7 @@ function buildGoldenSignalPanels(
       primaryValue: String(hitRatePct),
       unit: '%',
       secondaryLabel: 'Total Lookups',
-      secondaryValue: totalLookups.toLocaleString(),
+      secondaryValue: totalLookups.toLocaleString('en-US'),
       alertState: resolveAlertState(context.alerts, 'cache_hit_ratio_drop'),
       thresholdLabel: `Floor > ${MIN_HIT_RATIO_THRESHOLD_PCT}%`,
       seriesValues: [context.cacheStats.l1Hits, context.cacheStats.l2Hits, totalLookups],

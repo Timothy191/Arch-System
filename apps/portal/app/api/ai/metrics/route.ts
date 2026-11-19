@@ -295,7 +295,7 @@ async function buildExecutiveTelemetry(dbHealthy: boolean): Promise<BuildTelemet
           name: 'Context Budget & Guardrails Engine',
           status: 'healthy',
           latencyMs: 4,
-          detail: `${base.engineeringVelocity.activeRulesTokens.toLocaleString()} BPE rules • 9/10 direct MCP servers`,
+          detail: `${base.engineeringVelocity.activeRulesTokens.toLocaleString('en-US')} BPE rules • 9/10 direct MCP servers`,
         },
         {
           name: 'VibeMon Multi-Agent Telemetry & MCP Sync',

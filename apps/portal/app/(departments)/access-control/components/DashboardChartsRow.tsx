@@ -42,7 +42,7 @@ export default function DashboardChartsRow({ hourlyStats, distribution }: Dashbo
         <div className="mb-4">
           <h2 className="font-bold text-foreground text-sm">QR Code Status Distribution</h2>
           <p className="mt-0.5 text-muted-foreground text-xs">
-            {total.toLocaleString()} registered QR codes
+            {total.toLocaleString('en-US')} registered QR codes
           </p>
         </div>
         <QRStatusDistributionChart data={distribution} />

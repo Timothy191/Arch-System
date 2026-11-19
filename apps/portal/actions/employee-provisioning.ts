@@ -8,8 +8,32 @@ import {
   AuthError,
   ConflictError,
   DatabaseError,
+  ForbiddenError,
   ValidationError,
 } from '@/lib/errors/error-classes';
+import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
+
+const PROVISIONING_ALLOWED_ROLES = new Set(['admin', 'manager', 'supervisor', 'access_control']);
+
+type ServerSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
+
+async function assertProvisioningAuthorized(
+  supabase: ServerSupabaseClient,
+  userId: string
+): Promise<void> {
+  const { data: employee, error } = await supabase
+    .from('employees')
+    .select('role')
+    .eq('auth_id', userId)
+    .single();
+
+  if (error || !employee || !PROVISIONING_ALLOWED_ROLES.has(employee.role)) {
+    throw new ForbiddenError('Forbidden: insufficient permissions for employee provisioning', {
+      resource: 'employee_provisioning',
+      action: 'assert_role',
+    });
+  }
+}
 
 const provisionEmployeeSchema = z.object({
   first_name: z.string().trim().min(1, 'First name is required').max(100),
@@ -85,6 +109,7 @@ export async function getProvisioningReferenceData(): Promise<{
   if (authError || !user) {
     throw new AuthError('Unauthorized: valid session required');
   }
+  await assertProvisioningAuthorized(supabase, user.id);
 
   const [deptRes, persRes] = await Promise.all([
     supabase
@@ -162,6 +187,7 @@ export async function provisionNewEmployee(
   if (authError || !user) {
     throw new AuthError('Unauthorized: valid session required');
   }
+  await assertProvisioningAuthorized(supabase, user.id);
 
   const parseResult = provisionEmployeeSchema.safeParse(rawInput);
   if (!parseResult.success) {
@@ -174,15 +200,18 @@ export async function provisionNewEmployee(
   // Resolve department_id if an area string was passed instead of uuid
   let targetDeptId = input.department_id || null;
   if (!targetDeptId && input.area) {
-    const { data: deptMatch } = await supabase
-      .from('departments')
-      .select('id')
-      .or(`name.eq."${input.area}",display_name.eq."${input.area}"`)
-      .limit(1)
-      .maybeSingle();
+    const sanitizedArea = sanitizePostgrestFilterValue(input.area);
+    if (sanitizedArea) {
+      const { data: deptMatch } = await supabase
+        .from('departments')
+        .select('id')
+        .or(`name.eq."${sanitizedArea}",display_name.eq."${sanitizedArea}"`)
+        .limit(1)
+        .maybeSingle();
 
-    if (deptMatch) {
-      targetDeptId = deptMatch.id;
+      if (deptMatch) {
+        targetDeptId = deptMatch.id;
+      }
     }
   }
 
@@ -350,6 +379,7 @@ export async function updateEmployeeAction(
   if (authError || !user) {
     throw new AuthError('Unauthorized: valid session required');
   }
+  await assertProvisioningAuthorized(supabase, user.id);
 
   const parsed = updateEmployeeSchema.safeParse(data);
   if (!parsed.success) {
@@ -362,15 +392,18 @@ export async function updateEmployeeAction(
   // Resolve department ID if department name / area was passed
   let targetDeptId = input.department_id || null;
   if (!targetDeptId && input.area) {
-    const { data: deptMatch } = await supabase
-      .from('departments')
-      .select('id')
-      .or(`name.ilike.%${input.area}%,display_name.ilike.%${input.area}%`)
-      .limit(1)
-      .maybeSingle();
+    const sanitizedArea = sanitizePostgrestFilterValue(input.area);
+    if (sanitizedArea) {
+      const { data: deptMatch } = await supabase
+        .from('departments')
+        .select('id')
+        .or(`name.ilike.%${sanitizedArea}%,display_name.ilike.%${sanitizedArea}%`)
+        .limit(1)
+        .maybeSingle();
 
-    if (deptMatch) {
-      targetDeptId = deptMatch.id;
+      if (deptMatch) {
+        targetDeptId = deptMatch.id;
+      }
     }
   }
 

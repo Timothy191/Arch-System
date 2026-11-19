@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { getCurrentShift } from '@repo/utils';
 import { connection } from 'next/server';
 import { getFleetOpeningSmrSnapshot } from '~/lib/control-room-fleet-smr';
-import { getDepartmentContext } from '~/lib/dept-context';
+import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import type { ShiftReportSummary } from '../../control-room/components/SupervisorApprovalPanel';
 import { getMultiSiteShiftReport, getUnifiedShiftReport } from './actions';
 import { ShiftCompilationClient } from './ShiftCompilationClient';
@@ -18,6 +18,7 @@ export default async function ShiftCompilationPage({
 }) {
   await connection();
   const { department } = await params;
+  requireDepartment(department, 'control-room');
   const { date: queryDate, shift: queryShift, tab: queryTab } = await searchParams;
 
   const { deptId, today } = await getDepartmentContext({

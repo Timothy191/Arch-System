@@ -11,6 +11,7 @@ import { withBodyLimit } from '@/lib/api/body-limit';
 import { applyCors } from '@/lib/api/cors';
 import { validateBody } from '@/lib/api/response';
 import { logError } from '@/lib/errors/error-logger';
+import { sanitizePostgrestExactCode } from '@/lib/supabase-filter';
 
 const MAX_BODY_SIZE_BYTES = 65536;
 const DEFAULT_SCANNER_SOURCE = 'C66-SCANNER';
@@ -240,6 +241,31 @@ async function processSingleScan(
   const alcoholTestedResult = scanRecord.alcohol_tested || DEFAULT_ALCOHOL_STATUS;
   const recordTimestamp = scanRecord.scanned_at || null;
 
+  const sanitizedCode = sanitizePostgrestExactCode(rawCode);
+  if (!sanitizedCode) {
+    await logAccess(supabase, {
+      badgeId: null,
+      entityType: 'UNKNOWN',
+      denialReason: UNKNOWN_BADGE_DENIAL,
+      gateLocation,
+      isAccessGranted: false,
+      departmentId: null,
+      direction: scanDirection,
+      deviceId: deviceIdentifier,
+      operator: operatorIdentifier,
+      alcoholTested: alcoholTestedResult,
+      scannedAt: recordTimestamp,
+    });
+
+    return {
+      isSuccess: false,
+      httpStatus: STATUS_NOT_FOUND,
+      entityName: UNKNOWN_BADGE_NAME,
+      entityType: null,
+      message: UNKNOWN_BADGE_DENIAL,
+    };
+  }
+
   const badgeQuery = supabase
     .from('badges')
     .select(
@@ -248,8 +274,10 @@ async function processSingleScan(
 
   const badgeLookupResponse =
     typeof (badgeQuery as { or?: unknown }).or === 'function'
-      ? await badgeQuery.or(`qr_code.eq.${rawCode},rfid_code.eq.${rawCode}`).maybeSingle()
-      : await badgeQuery.eq('qr_code', rawCode).single();
+      ? await badgeQuery
+          .or(`qr_code.eq.${sanitizedCode},rfid_code.eq.${sanitizedCode}`)
+          .maybeSingle()
+      : await badgeQuery.eq('qr_code', sanitizedCode).single();
 
   const matchedBadge = badgeLookupResponse?.data;
   const badgeLookupError = badgeLookupResponse?.error;

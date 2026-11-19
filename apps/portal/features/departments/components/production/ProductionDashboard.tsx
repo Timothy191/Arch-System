@@ -46,7 +46,8 @@ export async function MonthlyProductionTargetBanner() {
               Coal Target ({totals.coalTargetProgressPct}%)
             </div>
             <div className="mt-0.5 font-bold font-mono text-emerald-700 text-sm">
-              {totals.coalTonnes.toLocaleString()} / {target.coal_target_tonnes.toLocaleString()} t
+              {totals.coalTonnes.toLocaleString('en-US')} /{' '}
+              {target.coal_target_tonnes.toLocaleString('en-US')} t
             </div>
           </div>
 
@@ -55,8 +56,8 @@ export async function MonthlyProductionTargetBanner() {
               Waste Target ({totals.wasteTargetProgressPct}%)
             </div>
             <div className="mt-0.5 font-bold font-mono text-blue-700 text-sm">
-              {totals.wasteTonnes.toLocaleString()} / {target.waste_target_tonnes.toLocaleString()}{' '}
-              t
+              {totals.wasteTonnes.toLocaleString('en-US')} /{' '}
+              {target.waste_target_tonnes.toLocaleString('en-US')} t
             </div>
           </div>
 
@@ -65,7 +66,8 @@ export async function MonthlyProductionTargetBanner() {
               Bank Volume ({totals.bcmTargetProgressPct}%)
             </div>
             <div className="mt-0.5 font-bold font-mono text-[var(--text-heading)] text-sm">
-              {totals.totalBcm.toLocaleString()} / {target.bcm_target.toLocaleString()} BCM
+              {totals.totalBcm.toLocaleString('en-US')} /{' '}
+              {target.bcm_target.toLocaleString('en-US')} BCM
             </div>
           </div>
 

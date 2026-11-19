@@ -132,7 +132,7 @@ export const ExcavatorActivityList = memo(function ExcavatorActivityList({
               )}
               {siteLoads > 0 && (
                 <span className="font-medium text-[var(--accent-blue)]">
-                  {siteLoads.toLocaleString()} loads
+                  {siteLoads.toLocaleString('en-US')} loads
                 </span>
               )}
             </div>

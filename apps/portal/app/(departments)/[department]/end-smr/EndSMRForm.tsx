@@ -463,7 +463,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
                   <span className="font-mono font-semibold text-[var(--accent-blue)] text-xl">
                     {Number(
                       ((hoursWorked ?? 0) * DOZER_ROLLOVER_BCM_PER_HOUR).toFixed(1)
-                    ).toLocaleString()}{' '}
+                    ).toLocaleString('en-US')}{' '}
                     BCM
                   </span>
                 </div>

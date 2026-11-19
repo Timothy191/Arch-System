@@ -9,6 +9,7 @@ import { Pagination } from '@repo/ui/Pagination';
 import { Download, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { logError } from '@/lib/errors/error-logger';
+import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
 
 interface AuditLog {
   id: string;
@@ -81,7 +82,10 @@ export function AuditLogsTab() {
       query = query.eq('table_name', table);
     }
     if (search !== '') {
-      query = query.or(`action.ilike.%${search}%,table_name.ilike.%${search}%`);
+      const sanitizedSearch = sanitizePostgrestFilterValue(search);
+      if (sanitizedSearch !== '') {
+        query = query.or(`action.ilike.%${sanitizedSearch}%,table_name.ilike.%${sanitizedSearch}%`);
+      }
     }
 
     query = query.order('created_at', { ascending: false });
@@ -215,7 +219,7 @@ export function AuditLogsTab() {
                 logs.map((log) => (
                   <tr key={log.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                      {new Date(log.created_at).toLocaleString()}
+                      {new Date(log.created_at).toLocaleString('en-ZA')}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
                       {log.employees?.full_name || 'System'}

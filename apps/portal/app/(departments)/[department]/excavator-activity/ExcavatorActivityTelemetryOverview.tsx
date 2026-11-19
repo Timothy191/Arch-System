@@ -90,7 +90,7 @@ function ExcavatorActivityTelemetryOverviewBase({
               </span>
               <span className={TALLY_PILL_CLASS}>
                 <Truck className="h-3 w-3 text-[var(--accent-blue)]" />
-                {totalLoads.toLocaleString()} Loads (W: {wasteLoads} · C: {coalLoads})
+                {totalLoads.toLocaleString('en-US')} Loads (W: {wasteLoads} · C: {coalLoads})
               </span>
               <span className={TALLY_PILL_CLASS}>
                 <Activity className="h-3 w-3 text-accent-amber" />
@@ -141,7 +141,7 @@ function ExcavatorActivityTelemetryOverviewBase({
             badgeLabel={`${bcmAttainmentPct.toFixed(1)}% target`}
             currentValue={`${totalBcm.toFixed(1)} BCM`}
             avgValue={`${avgBcmPerExcavator.toFixed(1)}/ex`}
-            peakValue={`${safeTargetBcm.toLocaleString()} BCM`}
+            peakValue={`${safeTargetBcm.toLocaleString('en-US')} BCM`}
             points={buildSparklinePoints(Math.max(bcmAttainmentPct, 32))}
           />
         </GlassCard>
@@ -154,7 +154,7 @@ function ExcavatorActivityTelemetryOverviewBase({
                 <p className={GOLDEN_LABEL_PILL_CLASS}>Total Loads</p>
                 <div className="mt-1.5 flex items-baseline gap-2">
                   <p className="mt-1 font-bold text-2xl text-accent-green">
-                    {totalLoads.toLocaleString()}
+                    {totalLoads.toLocaleString('en-US')}
                   </p>
                   <span
                     data-testid="total-loads-pct-badge"
@@ -176,7 +176,7 @@ function ExcavatorActivityTelemetryOverviewBase({
             variant="excavator"
             title="Haulage Loads Velocity"
             badgeLabel={`${loadsAttainmentPct.toFixed(1)}% target`}
-            currentValue={`${totalLoads.toLocaleString()} ld`}
+            currentValue={`${totalLoads.toLocaleString('en-US')} ld`}
             avgValue={`${avgLoadsPerExcavator.toFixed(1)}/ex`}
             peakValue={`${safeTargetLoads} ld`}
             points={buildSparklinePoints(Math.max(loadsAttainmentPct, 35))}

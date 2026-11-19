@@ -18,7 +18,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
-import { lazy, Suspense, useCallback, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { GitHubProvenanceVisualGraphs, OverviewStackIconsStrip } from './OverviewHeaderVisuals';
 
 // Lazy load sections for better performance
@@ -109,6 +109,14 @@ export default function OverviewPage() {
   const [isOpen, setIsOpen] = useState(true);
   const [isPinned, setIsPinned] = useState(true);
   const sidebarRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const requestedTab = new URLSearchParams(window.location.search).get('tab');
+    if (requestedTab && OVERVIEW_NAV_ITEMS.some((item) => item.value === requestedTab)) {
+      setActiveTab(requestedTab);
+    }
+  }, []);
 
   const togglePin = useCallback(() => {
     setIsPinned((prev) => {

@@ -617,7 +617,7 @@ export function MachineOperationsForm({
           <h3 className="font-medium text-[var(--text-heading)] text-lg">Log Machine Operation</h3>
           {lastSaved && (
             <span className="text-[var(--text-muted)] text-xs">
-              Draft saved {lastSaved.toLocaleTimeString()}
+              Draft saved {lastSaved.toLocaleTimeString('en-ZA')}
             </span>
           )}
         </div>
@@ -1161,7 +1161,7 @@ export function MachineOperationsForm({
                     {formData.dozerActivityType === 'rollover'
                       ? Number(
                           ((hoursWorked ?? 0) * DOZER_PUSH_FACTOR_BCM_PER_HOUR).toFixed(1)
-                        ).toLocaleString()
+                        ).toLocaleString('en-US')
                       : '0'}{' '}
                     BCM
                   </span>

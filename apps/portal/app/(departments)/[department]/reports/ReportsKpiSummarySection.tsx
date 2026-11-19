@@ -97,7 +97,7 @@ export function ReportsKpiSummarySection({
               <Layers className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
             <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--text-heading)]">
-              {Number(kpiStats.totalBcm.toFixed(1)).toLocaleString()}
+              {Number(kpiStats.totalBcm.toFixed(1)).toLocaleString('en-US')}
             </p>
           </div>
           <div className="mt-3 space-y-1.5">
@@ -116,8 +116,10 @@ export function ReportsKpiSummarySection({
               />
             </div>
             <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
-              <span>Haul: {Number(kpiStats.totalHaulBcm.toFixed(0)).toLocaleString()}</span>
-              <span>Roll-over: {Number(kpiStats.totalDozerBcm.toFixed(0)).toLocaleString()}</span>
+              <span>Haul: {Number(kpiStats.totalHaulBcm.toFixed(0)).toLocaleString('en-US')}</span>
+              <span>
+                Roll-over: {Number(kpiStats.totalDozerBcm.toFixed(0)).toLocaleString('en-US')}
+              </span>
             </div>
           </div>
         </GlassCard>
@@ -130,13 +132,13 @@ export function ReportsKpiSummarySection({
               <Truck className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
             <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--accent-blue)]">
-              {kpiStats.totalLoads.toLocaleString()}
+              {kpiStats.totalLoads.toLocaleString('en-US')}
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px]">
             <span className="text-[var(--text-muted)]">Today&apos;s Loads:</span>
             <span className="font-mono font-semibold text-[var(--text-heading)]">
-              {kpiStats.todayLoads.toLocaleString()} loads
+              {kpiStats.todayLoads.toLocaleString('en-US')} loads
             </span>
           </div>
         </GlassCard>
@@ -170,14 +172,14 @@ export function ReportsKpiSummarySection({
               <BarChart3 className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
             <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--text-heading)]">
-              {Number(kpiStats.totalDozerBcm.toFixed(1)).toLocaleString()}{' '}
+              {Number(kpiStats.totalDozerBcm.toFixed(1)).toLocaleString('en-US')}{' '}
               <span className="font-normal text-[var(--text-muted)] text-xs">BCM</span>
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px]">
             <span className="text-[var(--text-muted)]">Blade Passes:</span>
             <span className="font-mono font-semibold text-[var(--text-heading)]">
-              {kpiStats.totalPasses.toLocaleString()}
+              {kpiStats.totalPasses.toLocaleString('en-US')}
             </span>
           </div>
         </GlassCard>
@@ -192,7 +194,7 @@ export function ReportsKpiSummarySection({
               <Wrench className="h-4 w-4 text-accent-red" />
             </div>
             <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--text-heading)]">
-              {kpiStats.totalDelayMin.toLocaleString()}{' '}
+              {kpiStats.totalDelayMin.toLocaleString('en-US')}{' '}
               <span className="font-normal text-[var(--text-muted)] text-xs">min</span>
             </p>
           </div>

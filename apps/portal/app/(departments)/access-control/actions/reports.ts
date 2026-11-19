@@ -142,7 +142,7 @@ export async function getAccessReportsData(
           denial_reason: string | null;
         }) => ({
           id: l.id,
-          timestamp: new Date(l.scanned_at).toLocaleString(),
+          timestamp: new Date(l.scanned_at).toLocaleString('en-US'),
           gate: l.gate_location,
           entityName: l.access_type
             ? `Credential Scan (${l.access_type})`

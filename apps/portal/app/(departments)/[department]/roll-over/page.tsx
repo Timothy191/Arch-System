@@ -96,7 +96,7 @@ export default async function RollOverPage({
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Total Roll-over (BCM)</p>
           <p className="mt-1 font-mono font-semibold text-2xl text-[var(--accent-blue)]">
-            {Number(totalRolloverBcm.toFixed(1)).toLocaleString()} BCM
+            {Number(totalRolloverBcm.toFixed(1)).toLocaleString('en-US')} BCM
           </p>
           <p className="mt-1 font-mono text-[11px] text-[var(--text-muted)]">
             {totalHours.toFixed(1)}h &times; 250 BCM/h
@@ -109,13 +109,13 @@ export default async function RollOverPage({
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Blade Passes</p>
           <p className="mt-1 font-medium text-2xl text-[var(--accent-blue)]">
-            {totalPasses.toLocaleString()}
+            {totalPasses.toLocaleString('en-US')}
           </p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Push Count</p>
           <p className="mt-1 font-medium text-2xl text-[var(--accent-blue)]">
-            {totalPushes.toLocaleString()}
+            {totalPushes.toLocaleString('en-US')}
           </p>
         </GlassCard>
         <GlassCard>
@@ -182,12 +182,13 @@ export default async function RollOverPage({
                       <div className="flex items-center gap-4 text-xs">
                         {siteRolloverBcm > 0 && (
                           <span className="font-mono font-semibold text-[var(--accent-blue)]">
-                            Roll-over: {Number(siteRolloverBcm.toFixed(1)).toLocaleString()} BCM
+                            Roll-over: {Number(siteRolloverBcm.toFixed(1)).toLocaleString('en-US')}{' '}
+                            BCM
                           </span>
                         )}
                         {sitePasses > 0 && (
                           <span className="font-medium text-[var(--accent-blue)]">
-                            {sitePasses.toLocaleString()} passes
+                            {sitePasses.toLocaleString('en-US')} passes
                           </span>
                         )}
                         {siteHours > 0 && (
@@ -225,7 +226,8 @@ export default async function RollOverPage({
                                 </div>
                                 <div className="space-y-0.5 text-right">
                                   <p className="font-mono font-semibold text-[var(--accent-blue)] text-sm">
-                                    Roll-over: {Number(rollBcm.toFixed(1)).toLocaleString()} BCM
+                                    Roll-over: {Number(rollBcm.toFixed(1)).toLocaleString('en-US')}{' '}
+                                    BCM
                                   </p>
                                   {roll.blade_passes > 0 && (
                                     <p className="text-[var(--text-muted)] text-xs">
@@ -272,7 +274,8 @@ export default async function RollOverPage({
                                 </div>
                                 <div className="space-y-0.5 text-right">
                                   <p className="font-mono font-semibold text-[var(--accent-blue)] text-sm">
-                                    Roll-over: {Number(rollBcm.toFixed(1)).toLocaleString()} BCM
+                                    Roll-over: {Number(rollBcm.toFixed(1)).toLocaleString('en-US')}{' '}
+                                    BCM
                                   </p>
                                   {roll.blade_passes > 0 && (
                                     <p className="text-[var(--text-muted)] text-xs">

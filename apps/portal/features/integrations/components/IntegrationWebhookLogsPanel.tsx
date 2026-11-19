@@ -309,7 +309,7 @@ export function IntegrationWebhookLogsPanel({
                       {catalogEntry?.server_url ?? 'In-process native module'} · {tools.length}{' '}
                       tool(s) synced
                       {installation.tools_synced_at
-                        ? ` · ${new Date(installation.tools_synced_at).toLocaleString()}`
+                        ? ` · ${new Date(installation.tools_synced_at).toLocaleString('en-ZA')}`
                         : ''}
                     </p>
                     {installation.last_error && (
@@ -519,7 +519,7 @@ export function IntegrationWebhookLogsPanel({
                                   <span className="font-mono">{log.tool_name}</span>
                                   <span className="text-[var(--text-muted)]">
                                     {log.duration_ms ?? '—'}ms ·{' '}
-                                    {new Date(log.created_at).toLocaleTimeString()}
+                                    {new Date(log.created_at).toLocaleTimeString('en-ZA')}
                                   </span>
                                   {log.error_message && (
                                     <span className="truncate text-red-700">

@@ -3,6 +3,7 @@
 import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
 import { DatabaseError } from '@/lib/errors/error-classes';
+import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
 import { assertAccessControlRoleFor } from '../actions/shared';
 
 export type CredentialEntityType = 'personnel' | 'vehicle' | 'coal_truck' | 'visitor' | 'equipment';
@@ -80,9 +81,9 @@ export async function getBadgesInventory(
     }
   }
 
-  if (search && search.trim().length > 0) {
-    const s = search.trim();
-    query = query.or(`qr_code.ilike.%${s}%,rfid_code.ilike.%${s}%`);
+  const sanitizedSearch = search ? sanitizePostgrestFilterValue(search) : '';
+  if (sanitizedSearch.length > 0) {
+    query = query.or(`qr_code.ilike.%${sanitizedSearch}%,rfid_code.ilike.%${sanitizedSearch}%`);
   }
 
   const { data: primaryBadges, error } = await query;
@@ -117,9 +118,8 @@ export async function getBadgesInventory(
       }
     }
 
-    if (search && search.trim().length > 0) {
-      const s = search.trim();
-      fallbackQuery = fallbackQuery.ilike('qr_code', `%${s}%`);
+    if (sanitizedSearch.length > 0) {
+      fallbackQuery = fallbackQuery.ilike('qr_code', `%${sanitizedSearch}%`);
     }
 
     const fallbackRes = await fallbackQuery;

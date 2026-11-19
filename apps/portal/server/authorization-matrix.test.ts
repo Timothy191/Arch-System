@@ -159,11 +159,35 @@ describe('Gate 16 — Module-Level Authorization Matrix (Control Room, Plant, En
       '/plant-inventory',
       '/engineering',
       '/access-control',
+      '/database',
+      '/database/panels',
+      '/hub/executive',
       '/admin',
     ])('redirects unauthenticated requests on %s to /login', async (routePath) => {
       const res = await proxy(makeProxyRequest(routePath, false));
       expect(res.status).toBe(307);
       expect(res.headers.get('location')).toContain('/login');
+    });
+
+    it('blocks operator from /database, /database/panels, and /hub/executive while permitting admin and manager', async () => {
+      for (const restrictedPath of ['/database', '/database/panels', '/hub/executive']) {
+        setupProxySession({ role: 'operator', departmentSlug: 'drilling' });
+        const deniedRes = await proxy(makeProxyRequest(restrictedPath));
+        expect(deniedRes.status).toBe(307);
+        expect(deniedRes.headers.get('location')).toContain('error=unauthorized_department');
+
+        for (const privilegedRole of ['admin', 'manager']) {
+          setupProxySession({ role: privilegedRole, departmentSlug: 'drilling' });
+          const allowedRes = await proxy(makeProxyRequest(restrictedPath));
+          expect(allowedRes.status).not.toBe(307);
+        }
+      }
+    });
+
+    it('still permits operator access to /hub while blocking /hub/executive', async () => {
+      setupProxySession({ role: 'operator', departmentSlug: 'drilling' });
+      const hubRes = await proxy(makeProxyRequest('/hub'));
+      expect(hubRes.status).not.toBe(307);
     });
 
     it('blocks non-admin roles (operator, supervisor, control_room_operator) from /admin', async () => {

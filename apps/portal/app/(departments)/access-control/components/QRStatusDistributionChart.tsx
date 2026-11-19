@@ -24,7 +24,7 @@ function CustomTooltip({ active, payload, totalValue }: CustomTooltipProps) {
       </div>
       <p className="text-muted-foreground">
         <span className="font-semibold text-foreground tabular-nums">
-          {d.value.toLocaleString()}
+          {d.value.toLocaleString('en-US')}
         </span>{' '}
         codes ({pct}%)
       </p>
@@ -66,7 +66,7 @@ export default function QRStatusDistributionChart({ data }: QRStatusDistribution
             <div className="min-w-0">
               <p className="truncate text-[10px] text-muted-foreground">{d.name}</p>
               <p className="font-bold text-foreground text-xs tabular-nums">
-                {d.value.toLocaleString()}
+                {d.value.toLocaleString('en-US')}
               </p>
             </div>
           </div>

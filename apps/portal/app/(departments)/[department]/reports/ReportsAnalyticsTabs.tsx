@@ -273,9 +273,9 @@ export function ReportsDayViewTab({ dailyAggregatedRows, todayStr }: ReportsDayV
                   </span>
                   <span className="font-mono text-[var(--text-secondary)]">
                     <strong className="text-[var(--text-heading)]">
-                      {Number(d.totalBcm.toFixed(1)).toLocaleString()} BCM
+                      {Number(d.totalBcm.toFixed(1)).toLocaleString('en-US')} BCM
                     </strong>{' '}
-                    ({d.loads.toLocaleString()} loads · {d.hours.toFixed(1)}h ·{' '}
+                    ({d.loads.toLocaleString('en-US')} loads · {d.hours.toFixed(1)}h ·{' '}
                     {d.bcmPerHour.toFixed(1)} BCM/h)
                   </span>
                 </div>
@@ -364,16 +364,16 @@ export function ReportsDayViewTab({ dailyAggregatedRows, todayStr }: ReportsDayV
                     {d.hours.toFixed(1)}h
                   </td>
                   <td className="px-5 py-3.5 text-right font-medium font-mono text-[var(--accent-blue)] text-sm">
-                    {d.loads.toLocaleString()}
+                    {d.loads.toLocaleString('en-US')}
                   </td>
                   <td className="px-5 py-3.5 text-right font-mono text-[var(--text-secondary)] text-sm">
-                    {Number(d.haulBcm.toFixed(1)).toLocaleString()}
+                    {Number(d.haulBcm.toFixed(1)).toLocaleString('en-US')}
                   </td>
                   <td className="px-5 py-3.5 text-right font-mono text-[var(--accent-blue)] text-sm">
-                    {Number(d.dozerRolloverBcm.toFixed(1)).toLocaleString()}
+                    {Number(d.dozerRolloverBcm.toFixed(1)).toLocaleString('en-US')}
                   </td>
                   <td className="px-5 py-3.5 text-right font-mono font-semibold text-accent-green text-sm">
-                    {Number(d.totalBcm.toFixed(1)).toLocaleString()}
+                    {Number(d.totalBcm.toFixed(1)).toLocaleString('en-US')}
                   </td>
                   <td className="px-5 py-3.5 text-right font-mono text-[var(--accent-blue)] text-sm">
                     {d.bcmPerHour.toFixed(1)}
@@ -565,19 +565,19 @@ export function ReportsArchivedViewTab({
               <div className="rounded-lg bg-[var(--bg-secondary)] p-2.5">
                 <p className="text-[var(--text-muted)]">Total Volume</p>
                 <p className="mt-0.5 font-bold font-mono text-accent-green text-base">
-                  {Number(m.totalBcm.toFixed(1)).toLocaleString()} BCM
+                  {Number(m.totalBcm.toFixed(1)).toLocaleString('en-US')} BCM
                 </p>
               </div>
               <div className="rounded-lg bg-[var(--bg-secondary)] p-2.5">
                 <p className="text-[var(--text-muted)]">Haul Loads</p>
                 <p className="mt-0.5 font-bold font-mono text-[var(--accent-blue)] text-base">
-                  {m.loads.toLocaleString()}
+                  {m.loads.toLocaleString('en-US')}
                 </p>
               </div>
               <div className="rounded-lg bg-[var(--bg-secondary)] p-2.5">
                 <p className="text-[var(--text-muted)]">Dozer Roll-over</p>
                 <p className="mt-0.5 font-mono font-semibold text-[var(--text-heading)] text-sm">
-                  {Number(m.dozerRolloverBcm.toFixed(1)).toLocaleString()} BCM
+                  {Number(m.dozerRolloverBcm.toFixed(1)).toLocaleString('en-US')} BCM
                 </p>
               </div>
               <div className="rounded-lg bg-[var(--bg-secondary)] p-2.5">
@@ -661,16 +661,16 @@ export function ReportsArchivedViewTab({
                     {row.hours.toFixed(1)}h
                   </td>
                   <td className="px-5 py-3 text-right font-mono text-[var(--accent-blue)] text-sm">
-                    {row.loads.toLocaleString()}
+                    {row.loads.toLocaleString('en-US')}
                   </td>
                   <td className="px-5 py-3 text-right font-mono text-[var(--text-secondary)] text-sm">
-                    {Number(row.haulBcm.toFixed(1)).toLocaleString()}
+                    {Number(row.haulBcm.toFixed(1)).toLocaleString('en-US')}
                   </td>
                   <td className="px-5 py-3 text-right font-mono text-[var(--accent-blue)] text-sm">
-                    {Number(row.dozerRolloverBcm.toFixed(1)).toLocaleString()}
+                    {Number(row.dozerRolloverBcm.toFixed(1)).toLocaleString('en-US')}
                   </td>
                   <td className="px-5 py-3 text-right font-mono font-semibold text-accent-green text-sm">
-                    {Number(row.totalBcm.toFixed(1)).toLocaleString()}
+                    {Number(row.totalBcm.toFixed(1)).toLocaleString('en-US')}
                   </td>
                   <td className="px-5 py-3 text-right font-mono text-[var(--text-secondary)] text-sm">
                     {row.delayMin}

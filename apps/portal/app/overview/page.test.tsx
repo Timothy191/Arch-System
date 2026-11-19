@@ -6,6 +6,19 @@ import DocumentationMaps from './sections/DocumentationMaps';
 import SystemArchitecture from './sections/SystemArchitecture';
 
 describe('OverviewPage & SystemArchitecture (/overview)', () => {
+  afterEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
+  it('should honor ?tab=audit query parameter on mount to activate Audit & Compliance', async () => {
+    window.history.pushState({}, '', '/overview?tab=audit');
+    render(<OverviewPage />);
+
+    const auditTab = await screen.findByRole('tab', { name: /Audit & Compliance/i });
+    expect(auditTab).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText(/Active View: Audit & Compliance/i)).toBeInTheDocument();
+  });
+
   it('should render the Department-style left side panel navigation with all 8 topology tabs and pin toggle', async () => {
     render(<OverviewPage />);
     await screen.findByTestId('system-architecture-header-panel');
@@ -37,6 +50,12 @@ describe('OverviewPage & SystemArchitecture (/overview)', () => {
     const pinButton = within(sidebar).getByRole('button', { name: /Unpin sidebar/i });
     fireEvent.click(pinButton);
     expect(within(sidebar).getByRole('button', { name: /Pin sidebar/i })).toBeInTheDocument();
+
+    fireEvent.mouseLeave(sidebar);
+    const edgeTrigger = screen.getByTestId('overview-edge-trigger');
+    fireEvent.mouseEnter(edgeTrigger);
+    fireEvent.click(within(sidebar).getByRole('button', { name: /Pin sidebar/i }));
+    expect(within(sidebar).getByRole('button', { name: /Unpin sidebar/i })).toBeInTheDocument();
   });
 
   it('should render visual SVG stack icons from STACK_ICON_MAP for all 14 codebase technologies in the header', async () => {

@@ -74,12 +74,12 @@ export function buildPdfSiteGroups(filteredMachineOps: MachineOperationLogItem[]
       m.excavatorActivity ||
       (role === 'excavator'
         ? m.bcmMoved > 0
-          ? `Excavator Loading · ${Number(m.bcmMoved.toFixed(1)).toLocaleString()} BCM`
+          ? `Excavator Loading · ${Number(m.bcmMoved.toFixed(1)).toLocaleString('en-US')} BCM`
           : 'Excavator Bench Operations'
         : role === 'rollover'
-          ? `Roll-over: ${Number(m.bcmMoved.toFixed(1)).toLocaleString()} BCM (${m.hoursWorked.toFixed(1)}h × 250 BCM/h)`
+          ? `Roll-over: ${Number(m.bcmMoved.toFixed(1)).toLocaleString('en-US')} BCM (${m.hoursWorked.toFixed(1)}h × 250 BCM/h)`
           : m.bcmMoved > 0
-            ? `Haulage · ${Number(m.bcmMoved.toFixed(1)).toLocaleString()} BCM`
+            ? `Haulage · ${Number(m.bcmMoved.toFixed(1)).toLocaleString('en-US')} BCM`
             : 'Site Operations');
 
     const normalizedItem: MachineOperationLogItem = {
@@ -333,7 +333,7 @@ export function ShiftPdfReportTab({
               <strong style="font-size:13px;letter-spacing:0.04em;">SITE: ${escapeHtml(g.site)}</strong>
               <span style="margin-left:10px;font-size:10px;color:#cbd5e1;">${g.excavators.length} Excavators · ${g.rollovers.length} Roll Over · ${g.siteMachines.length} Machines Worked on Site</span>
             </div>
-            <div style="font-size:11px;font-family:monospace;">Total: ${g.totalHours.toFixed(2)}h · ${Number(g.totalBcm.toFixed(1)).toLocaleString()} BCM</div>
+            <div style="font-size:11px;font-family:monospace;">Total: ${g.totalHours.toFixed(2)}h · ${Number(g.totalBcm.toFixed(1)).toLocaleString('en-US')} BCM</div>
           </div>
           <table style="width:100%;border-collapse:collapse;font-size:10.5px;">
             <thead>
@@ -734,7 +734,7 @@ export function ShiftPdfReportTab({
                         <p className="mt-1 font-extrabold font-mono text-blue-700 text-lg">
                           {Number(
                             activeSiteGroups.reduce((acc, g) => acc + g.totalBcm, 0).toFixed(1)
-                          ).toLocaleString()}{' '}
+                          ).toLocaleString('en-US')}{' '}
                           BCM
                         </p>
                         <p className="text-[10px] text-slate-500">Across All Active Sites</p>
@@ -795,7 +795,9 @@ export function ShiftPdfReportTab({
                             <div className="flex items-center justify-between text-xs">
                               <span className="font-semibold text-slate-800">{site.site}</span>
                               <span className="font-mono text-slate-700">
-                                <strong>{Number(site.totalBcm.toFixed(1)).toLocaleString()}</strong>{' '}
+                                <strong>
+                                  {Number(site.totalBcm.toFixed(1)).toLocaleString('en-US')}
+                                </strong>{' '}
                                 BCM · {site.orderedMachines.length} machines ·{' '}
                                 {site.totalHours.toFixed(1)}h
                               </span>
@@ -916,7 +918,7 @@ export function ShiftPdfReportTab({
                             <span>
                               Volume:{' '}
                               <strong className="text-[var(--accent-blue)]">
-                                {Number(siteGroup.totalBcm.toFixed(1)).toLocaleString()} BCM
+                                {Number(siteGroup.totalBcm.toFixed(1)).toLocaleString('en-US')} BCM
                               </strong>
                             </span>
                             <span

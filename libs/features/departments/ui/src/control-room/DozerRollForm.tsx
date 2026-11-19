@@ -409,7 +409,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                         (Number.isNaN(parseFloat(hoursOperated)) ? 0 : parseFloat(hoursOperated)) *
                         250
                       ).toFixed(1)
-                    ).toLocaleString()}{' '}
+                    ).toLocaleString('en-US')}{' '}
                     BCM
                   </span>
                 </div>

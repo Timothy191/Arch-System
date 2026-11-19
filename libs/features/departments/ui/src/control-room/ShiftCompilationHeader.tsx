@@ -97,7 +97,7 @@ export function ShiftCompilationHeader({
           Consolidated operational overview: loads, SMU utilization, downtime, and tire health
           {isClosed && closedAt && (
             <span className="ml-1 font-semibold text-arch-text-muted/70">
-              • Locked on {new Date(closedAt).toLocaleString()}
+              • Locked on {new Date(closedAt).toLocaleString('en-ZA')}
             </span>
           )}
         </p>

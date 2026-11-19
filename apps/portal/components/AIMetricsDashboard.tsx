@@ -296,7 +296,7 @@ export default function AIMetricsDashboard() {
                 </h3>
               </div>
               <span className="font-mono text-[var(--text-secondary)] text-xs">
-                {bt.totalSessions} sessions • {bt.totalTurns.toLocaleString()} turns
+                {bt.totalSessions} sessions • {bt.totalTurns.toLocaleString('en-US')} turns
               </span>
             </div>
 
@@ -304,19 +304,19 @@ export default function AIMetricsDashboard() {
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 p-3">
                 <div className="text-[11px] text-[var(--text-secondary)]">Avg Input / Turn</div>
                 <div className="mt-1 font-bold font-mono text-[var(--text-heading)] text-base">
-                  {bt.avgUsage.avgInputTokensPerTurn.toLocaleString()} tok
+                  {bt.avgUsage.avgInputTokensPerTurn.toLocaleString('en-US')} tok
                 </div>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 p-3">
                 <div className="text-[11px] text-[var(--text-secondary)]">Avg Output / Turn</div>
                 <div className="mt-1 font-bold font-mono text-[var(--text-heading)] text-base">
-                  {bt.avgUsage.avgOutputTokensPerTurn.toLocaleString()} tok
+                  {bt.avgUsage.avgOutputTokensPerTurn.toLocaleString('en-US')} tok
                 </div>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 p-3">
                 <div className="text-[11px] text-[var(--text-secondary)]">Avg Total / Turn</div>
                 <div className="mt-1 font-bold font-mono text-[var(--text-heading)] text-base">
-                  {bt.avgUsage.avgTotalTokensPerTurn.toLocaleString()} tok
+                  {bt.avgUsage.avgTotalTokensPerTurn.toLocaleString('en-US')} tok
                 </div>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 p-3">
@@ -531,7 +531,7 @@ export default function AIMetricsDashboard() {
               <div>
                 <div className="text-[10px] text-[var(--text-secondary)]">Lines Inserted</div>
                 <div className="font-bold text-accent-green">
-                  +{bt.engineeringVelocity.linesInserted.toLocaleString()}
+                  +{bt.engineeringVelocity.linesInserted.toLocaleString('en-US')}
                 </div>
               </div>
               <div>
@@ -624,7 +624,7 @@ export default function AIMetricsDashboard() {
                   <div>
                     <p className="font-mono text-[var(--text-heading)] text-xs">{usage.model}</p>
                     <p className="text-[10px] text-[var(--text-secondary)]">
-                      {new Date(usage.timestamp).toLocaleString()}
+                      {new Date(usage.timestamp).toLocaleString('en-ZA')}
                     </p>
                   </div>
                 </div>

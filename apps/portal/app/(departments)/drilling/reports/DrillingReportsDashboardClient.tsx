@@ -406,7 +406,7 @@ export function DrillingReportsDashboardClient({
               <ClipboardList className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
             <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--accent-blue)]">
-              {kpi.totalHoles.toLocaleString()}
+              {kpi.totalHoles.toLocaleString('en-US')}
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--text-muted)]">

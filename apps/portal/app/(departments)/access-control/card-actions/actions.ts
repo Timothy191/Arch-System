@@ -5,6 +5,7 @@ import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { RawSocketBridge } from '@repo/utils';
 import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
+import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
 import { submitCupsPrintJob } from '../lib/printer-detection';
 
 /* ------------------------------------------------------------------ */
@@ -57,7 +58,10 @@ export async function searchPersonnel(query: string): Promise<PersonnelSearchRes
 
   if (!query || query.trim().length < 2) return [];
 
-  const searchTerm = `%${query.trim()}%`;
+  const sanitizedQuery = sanitizePostgrestFilterValue(query);
+  if (sanitizedQuery.length < 2) return [];
+
+  const searchTerm = `%${sanitizedQuery}%`;
 
   const { data, error } = await supabase
     .from('personnel')

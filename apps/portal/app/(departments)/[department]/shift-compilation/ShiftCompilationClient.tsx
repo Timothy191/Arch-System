@@ -249,7 +249,7 @@ export function ShiftCompilationClient({
               <KPIGrid cols={4}>
                 <KPICard
                   label="Shift Production"
-                  value={`${totalLoads.toLocaleString()} Loads`}
+                  value={`${totalLoads.toLocaleString('en-US')} Loads`}
                   color="green"
                 />
                 <KPICard label="Active Fleet" value={`${activeMachines} Units`} color="blue" />

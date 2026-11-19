@@ -217,12 +217,12 @@ export function PlantHourlyRollupSection({
           <div className="flex items-end justify-between gap-3">
             <div>
               <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
-                {totals.latestHourRom.toLocaleString()} t/hr
+                {totals.latestHourRom.toLocaleString('en-US')} t/hr
               </p>
               <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Shift Σ:{' '}
                 <strong className="text-[var(--text-heading)]">
-                  {totals.totalRom.toLocaleString()} t
+                  {totals.totalRom.toLocaleString('en-US')} t
                 </strong>{' '}
                 · Slot: {totals.latestHourSlot.split(' - ')[0]}
               </p>
@@ -261,7 +261,8 @@ export function PlantHourlyRollupSection({
           </div>
 
           <p className="font-mono text-[11px] text-[var(--text-secondary)]">
-            Avg Run-Rate: {totals.avgTph.toLocaleString()} t/hr · Peak: {totals.peakHourRom} t/hr
+            Avg Run-Rate: {totals.avgTph.toLocaleString('en-US')} t/hr · Peak: {totals.peakHourRom}{' '}
+            t/hr
           </p>
         </GlassCard>
 
@@ -284,7 +285,7 @@ export function PlantHourlyRollupSection({
               </p>
               <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Target: <strong className="text-[var(--text-heading)]">90.0%</strong> · Clean:{' '}
-                {totals.totalClean.toLocaleString()} t
+                {totals.totalClean.toLocaleString('en-US')} t
               </p>
             </div>
 
@@ -318,8 +319,8 @@ export function PlantHourlyRollupSection({
           </div>
 
           <p className="font-mono text-[11px] text-[var(--text-secondary)]">
-            Clean Product: {totals.totalClean.toLocaleString()} t · Discard:{' '}
-            {totals.totalDiscard.toLocaleString()} t
+            Clean Product: {totals.totalClean.toLocaleString('en-US')} t · Discard:{' '}
+            {totals.totalDiscard.toLocaleString('en-US')} t
           </p>
         </GlassCard>
 
@@ -474,13 +475,17 @@ export function PlantHourlyRollupSection({
           <div className="flex items-end justify-between gap-3">
             <div>
               <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
-                {accountedTonnes.toLocaleString()} t Split
+                {accountedTonnes.toLocaleString('en-US')} t Split
               </p>
               <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Clean:{' '}
-                <strong className="text-emerald-700">{totals.totalClean.toLocaleString()} t</strong>{' '}
+                <strong className="text-emerald-700">
+                  {totals.totalClean.toLocaleString('en-US')} t
+                </strong>{' '}
                 · Discard:{' '}
-                <strong className="text-amber-800">{totals.totalDiscard.toLocaleString()} t</strong>
+                <strong className="text-amber-800">
+                  {totals.totalDiscard.toLocaleString('en-US')} t
+                </strong>
               </p>
             </div>
 
@@ -532,7 +537,7 @@ export function PlantHourlyRollupSection({
           </div>
 
           <p className="font-mono text-[11px] text-[var(--text-secondary)]">
-            ROM In: {totals.totalRom.toLocaleString()} t · Balance Δ:{' '}
+            ROM In: {totals.totalRom.toLocaleString('en-US')} t · Balance Δ:{' '}
             {massBalanceDelta >= 0 ? `+${massBalanceDelta}` : massBalanceDelta} t
           </p>
         </GlassCard>
@@ -782,7 +787,7 @@ export function PlantHourlyRollupSection({
                   Current Throughput
                 </p>
                 <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
-                  {totals.avgTph.toLocaleString()} t/h
+                  {totals.avgTph.toLocaleString('en-US')} t/h
                 </p>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
@@ -790,7 +795,7 @@ export function PlantHourlyRollupSection({
                   Latest Hour Scale
                 </p>
                 <p className="mt-0.5 font-bold font-mono text-emerald-700">
-                  {totals.latestHourRom.toLocaleString()} t/h
+                  {totals.latestHourRom.toLocaleString('en-US')} t/h
                 </p>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
@@ -798,7 +803,7 @@ export function PlantHourlyRollupSection({
                   Prior Shift Avg
                 </p>
                 <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
-                  {totals.priorShiftTph.toLocaleString()} t/h
+                  {totals.priorShiftTph.toLocaleString('en-US')} t/h
                 </p>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
@@ -888,7 +893,8 @@ export function PlantHourlyRollupSection({
                     </span>
                   </div>
                   <span className="font-bold font-mono text-emerald-700">
-                    {totals.totalClean.toLocaleString()} t ({totals.weightedYield.toFixed(1)}%)
+                    {totals.totalClean.toLocaleString('en-US')} t ({totals.weightedYield.toFixed(1)}
+                    %)
                   </span>
                 </div>
 
@@ -900,7 +906,8 @@ export function PlantHourlyRollupSection({
                     </span>
                   </div>
                   <span className="font-bold font-mono text-amber-800">
-                    {totals.totalDiscard.toLocaleString()} t ({totals.discardPct.toFixed(1)}%)
+                    {totals.totalDiscard.toLocaleString('en-US')} t ({totals.discardPct.toFixed(1)}
+                    %)
                   </span>
                 </div>
 

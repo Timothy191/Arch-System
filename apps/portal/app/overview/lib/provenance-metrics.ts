@@ -20,7 +20,7 @@ export const GIT_PROVENANCE_METRICS = {
       remainderHours,
       totalCalendarHours,
       activeEngineeringHours,
-      formattedSpan: `${calendarDays}d ${remainderHours}h (${totalCalendarHours.toLocaleString()}h elapsed)`,
+      formattedSpan: `${calendarDays}d ${remainderHours}h (${totalCalendarHours.toLocaleString('en-US')}h elapsed)`,
       formattedActiveWork: `${activeEngineeringHours}h Active Engineering`,
     };
   },

@@ -1,9 +1,9 @@
 'use client';
 
+import { RedisIcon } from '@repo/ui/components/RedisIcon';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
-import { RedisIcon } from '@repo/ui/RedisIcon';
 import {
   Activity,
   AlertTriangle,
@@ -76,6 +76,7 @@ const SAMPLE_COMMAND_NAMES = [
   'PUBLISH',
 ];
 const SAMPLE_COMMAND_COUNTS = [3245, 2891, 1567, 1423, 987, 654, 432, 321, 234, 156];
+const DEFAULT_HEARTBEAT_ISO = '2026-11-19T00:00:00.000Z';
 const SAMPLE_SLOWLOG_COMMANDS = [
   {
     command: 'LRANGE',
@@ -216,6 +217,17 @@ interface ObservabilityApiResponse {
   readonly memoryAllocated?: string;
   readonly clusterHealth?: string;
   readonly opsPerSecond?: number;
+  readonly timestamp?: string;
+  readonly overallSla24hPct?: number;
+  readonly uptimeByTarget?: {
+    readonly redis?: {
+      readonly sla24hPct?: number;
+      readonly ticks?: ReadonlyArray<{
+        readonly status?: HeartbeatStatus;
+        readonly latencyMs?: number;
+      }>;
+    };
+  };
 }
 
 const DEFAULT_HEARTBEAT_TICKS: readonly HeartbeatTick[] = Array.from(
@@ -269,7 +281,7 @@ const DEFAULT_REDIS_STATS: RedisStats = {
   totalKeys: DEFAULT_TOTAL_KEYS,
   opsPerSecond: DEFAULT_OPS_PER_SECOND,
   clusterHealth: 'GREEN',
-  lastHeartbeat: new Date().toISOString(),
+  lastHeartbeat: DEFAULT_HEARTBEAT_ISO,
   l1HitRatePct: DEFAULT_L1_HIT_RATE_PCT,
   l2HitRatePct: DEFAULT_L2_HIT_RATE_PCT,
   missRatePct: DEFAULT_MISS_RATE_PCT,
@@ -307,7 +319,7 @@ const KEY_SAMPLE_RECORDS: Record<string, Record<string, unknown>> = {
     userId: 'usr_timothy_admin',
     email: 'admin@plantcormining.os',
     role: 'admin',
-    lastActive: new Date().toISOString(),
+    lastActive: DEFAULT_HEARTBEAT_ISO,
     ip: '10.0.0.4',
   },
   telemetry_dump_r1: {
@@ -359,8 +371,14 @@ function normalizeHeartbeatTicks(
 function mapObservabilityToRedisStats(payload: ObservabilityApiResponse): RedisStats {
   const redisStats = payload.redis?.stats;
   const diagnostics = payload.redis?.diagnostics;
-  const redisUptime = payload.uptime?.redis ?? payload.uptime?.targets?.redis;
+  const redisUptime =
+    payload.uptimeByTarget?.redis ?? payload.uptime?.redis ?? payload.uptime?.targets?.redis;
   const goldenSignals = payload.goldenSignals ?? [];
+  const syncedTimestamp = payload.timestamp ?? new Date().toISOString();
+  const syncedTimestampMs = Date.parse(syncedTimestamp);
+  const previousSlowlogTimestamp = Number.isFinite(syncedTimestampMs)
+    ? new Date(syncedTimestampMs - SAMPLE_RATE_LIMIT_WINDOW_S * MS_PER_SECOND).toISOString()
+    : syncedTimestamp;
   const l1HitRatePct = computeHitRatePct(
     redisStats?.l1Hits,
     redisStats?.l1Misses,
@@ -430,16 +448,23 @@ function mapObservabilityToRedisStats(payload: ObservabilityApiResponse): RedisS
             command: 'LRANGE',
             durationMs: 142,
             client: '10.0.0.4:45231',
-            timestamp: new Date().toISOString(),
+            timestamp: syncedTimestamp,
           },
           {
             command: 'HGETALL',
             durationMs: 98,
             client: '10.0.0.7:33920',
-            timestamp: new Date(Date.now() - 60000).toISOString(),
+            timestamp: previousSlowlogTimestamp,
           },
         ]
       : SAMPLE_SLOWLOG_COMMANDS;
+
+  const resolvedSlaPct =
+    (redisUptime && 'sla24hPct' in redisUptime ? redisUptime.sla24hPct : undefined) ??
+    (redisUptime && 'sla24h' in redisUptime ? redisUptime.sla24h : undefined) ??
+    payload.overallSla24hPct ??
+    payload.uptime?.sla24h ??
+    DEFAULT_SLA_PCT;
 
   return {
     ...DEFAULT_REDIS_STATS,
@@ -460,11 +485,11 @@ function mapObservabilityToRedisStats(payload: ObservabilityApiResponse): RedisS
       payload.clusterHealth ??
       redisStats?.clusterHealth ??
       (diagnostics?.status === 'healthy' ? 'GREEN' : DEFAULT_REDIS_STATS.clusterHealth),
-    lastHeartbeat: new Date().toISOString(),
+    lastHeartbeat: syncedTimestamp,
     l1HitRatePct,
     l2HitRatePct,
     missRatePct,
-    slaPct: redisUptime?.sla24h ?? payload.uptime?.sla24h ?? DEFAULT_SLA_PCT,
+    slaPct: resolvedSlaPct,
     heartbeatTicks: normalizeHeartbeatTicks(redisUptime?.ticks),
     // Diagnostics
     usedMemoryMb,
@@ -572,7 +597,7 @@ function CommandAnalyticsPanel({
         {commands.slice(0, 5).map((cmd) => (
           <div key={cmd.name} className="flex justify-between">
             <span className="font-mono text-zinc-600">{cmd.name}</span>
-            <span className="font-mono text-cyan-700">{cmd.count.toLocaleString()}</span>
+            <span className="font-mono text-cyan-700">{cmd.count.toLocaleString('en-US')}</span>
           </div>
         ))}
       </div>
@@ -611,7 +636,9 @@ function EvictionPolicyPanel({ stats }: { readonly stats: RedisStats }) {
         </div>
         <div className="flex justify-between">
           <span className="text-zinc-600">Evicted Keys</span>
-          <span className="font-mono text-rose-700">{stats.evictedKeys.toLocaleString()}</span>
+          <span className="font-mono text-rose-700">
+            {stats.evictedKeys.toLocaleString('en-US')}
+          </span>
         </div>
         <div className="flex justify-between">
           <span className="text-zinc-600">Eviction Policy</span>
@@ -694,6 +721,10 @@ export default function RedisManagerPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string>('shift_001_cache');
   const [searchFilter, setSearchFilter] = useState('');
+  const [noticeBanner, setNoticeBanner] = useState<{
+    readonly tone: 'info' | 'warning';
+    readonly message: string;
+  } | null>(null);
 
   const fetchStats = useCallback(async () => {
     setIsLoading(true);
@@ -731,6 +762,25 @@ export default function RedisManagerPage() {
   }, [fetchStats]);
 
   const selectedKeyRecord = KEY_SAMPLE_RECORDS[selectedKey] ?? {};
+  const heartbeatMs = Date.parse(stats.lastHeartbeat);
+  const ttlExpiresIso = Number.isFinite(heartbeatMs)
+    ? new Date(heartbeatMs + SAMPLE_TTL_SECONDS * MS_PER_SECOND).toISOString()
+    : stats.lastHeartbeat;
+
+  const handleInspectKey = () => {
+    void fetchStats();
+    setNoticeBanner({
+      tone: 'info',
+      message: `Key "${selectedKey}" inspected and cluster telemetry refreshed from /api/admin/observability.`,
+    });
+  };
+
+  const handleDeleteKeyNotice = () => {
+    setNoticeBanner({
+      tone: 'warning',
+      message: `Destructive deletion for "${selectedKey}" is intentionally restricted to RedisInsight (:5540) or server-side tag invalidation.`,
+    });
+  };
 
   return (
     <div className="flex min-h-[calc(100vh-65px)] flex-col gap-6 bg-zinc-50 p-4 lg:p-6">
@@ -748,7 +798,9 @@ export default function RedisManagerPage() {
         </div>
         <button
           type="button"
-          onClick={fetchStats}
+          onClick={() => {
+            void fetchStats();
+          }}
           disabled={isLoading}
           className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-1.5 font-medium text-sm shadow-sm transition-colors hover:bg-zinc-100"
         >
@@ -756,6 +808,27 @@ export default function RedisManagerPage() {
           {isLoading ? 'Syncing...' : 'Refresh Cluster'}
         </button>
       </div>
+
+      {noticeBanner && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3 text-xs ${
+            noticeBanner.tone === 'warning'
+              ? 'border-amber-200 bg-amber-50 text-amber-900'
+              : 'border-indigo-200 bg-indigo-50 text-indigo-900'
+          }`}
+        >
+          <span>{noticeBanner.message}</span>
+          <button
+            type="button"
+            onClick={() => setNoticeBanner(null)}
+            className="rounded border border-current/20 px-2 py-0.5 font-medium text-[11px] hover:bg-white/60"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       <RedisUptimeSection stats={stats} />
 
@@ -783,21 +856,21 @@ export default function RedisManagerPage() {
         />
         <KPICard
           label="Last Heartbeat"
-          value={new Date(stats.lastHeartbeat).toLocaleTimeString()}
-          sub={new Date(stats.lastHeartbeat).toLocaleDateString()}
+          value={new Date(stats.lastHeartbeat).toLocaleTimeString('en-ZA')}
+          sub={new Date(stats.lastHeartbeat).toLocaleDateString('en-ZA')}
           color="indigo"
           icon={<Clock className="h-5 w-5 opacity-70" />}
         />
         <KPICard
           label="Keys (DB 0)"
-          value={stats.totalKeys.toLocaleString()}
+          value={stats.totalKeys.toLocaleString('en-US')}
           sub="Indexed"
           color="indigo"
           icon={<Key className="h-5 w-5 opacity-70" />}
         />
         <KPICard
           label="Ops / sec"
-          value={stats.opsPerSecond.toLocaleString()}
+          value={stats.opsPerSecond.toLocaleString('en-US')}
           sub="Live Telemetry"
           color="cyan"
           icon={<Activity className="h-5 w-5 opacity-70" />}
@@ -866,14 +939,14 @@ export default function RedisManagerPage() {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => alert(`Key ${selectedKey} reloaded`)}
+                  onClick={handleInspectKey}
                   className="rounded border border-zinc-200 bg-white px-3 py-1 text-xs hover:bg-zinc-50"
                 >
                   Inspect
                 </button>
                 <button
                   type="button"
-                  onClick={() => alert(`Key ${selectedKey} deleted`)}
+                  onClick={handleDeleteKeyNotice}
                   className="rounded border border-red-200 bg-red-50 px-3 py-1 text-red-600 text-xs hover:bg-red-100"
                 >
                   Delete
@@ -892,12 +965,10 @@ export default function RedisManagerPage() {
                 {JSON.stringify(
                   {
                     ...selectedKeyRecord,
-                    lastInspected: new Date().toISOString(),
+                    lastInspected: stats.lastHeartbeat,
                     metadata: {
                       ttl: SAMPLE_TTL_SECONDS,
-                      expires: new Date(
-                        Date.now() + SAMPLE_TTL_SECONDS * MS_PER_SECOND
-                      ).toISOString(),
+                      expires: ttlExpiresIso,
                       usage: {
                         reads: SAMPLE_READ_COUNT,
                         writes: SAMPLE_WRITE_COUNT,

@@ -9,6 +9,7 @@ import { updateTagInAction } from '@/lib/server-cache';
 const OFFICE_WORKSPACE_CACHE_TAG = 'dept:office:workspace';
 const OFFICE_ROUTE_PATH = '/office';
 const OFFICE_AUDIT_TABLE = 'office_documents';
+const OFFICE_AUDIT_QUERY_LIMIT = 20;
 const MIN_TITLE_LENGTH = 3;
 const MAX_TITLE_LENGTH = 140;
 const MIN_SUMMARY_LENGTH = 5;
@@ -120,12 +121,63 @@ const INITIAL_OFFICE_LAB_TOOLS: readonly OfficeLabToolStatus[] = [
   },
 ];
 
+const OfficeAuditPayloadSchema = SaveOfficeDocumentSchema.extend({
+  savedAt: z.string().optional(),
+});
+
+interface OfficeAuditLogRow {
+  readonly id: string;
+  readonly record_id: string | null;
+  readonly new_data: unknown;
+  readonly created_at: string;
+}
+
 export async function getOfficeWorkspaceSnapshot(): Promise<OfficeWorkspaceSnapshot> {
   let isAuthenticated = false;
+  let documents: readonly OfficeDocumentRecord[] = INITIAL_OFFICE_DOCUMENTS;
+
   try {
     const supabase = await createServerSupabaseClient();
     const authResponse = await supabase.auth.getUser();
     isAuthenticated = Boolean(authResponse.data?.user && !authResponse.error);
+
+    if (isAuthenticated && typeof supabase.from === 'function') {
+      const { data: auditRows, error: auditError } = await supabase
+        .from('audit_logs')
+        .select('id, record_id, new_data, created_at')
+        .eq('table_name', OFFICE_AUDIT_TABLE)
+        .order('created_at', { ascending: false })
+        .limit(OFFICE_AUDIT_QUERY_LIMIT);
+
+      if (!auditError && Array.isArray(auditRows)) {
+        const seenIds = new Set<string>();
+        const persistedDocs = auditRows.reduce<OfficeDocumentRecord[]>((acc, rawRow) => {
+          const row = rawRow as OfficeAuditLogRow;
+          const parsed = OfficeAuditPayloadSchema.safeParse(row.new_data);
+          const docId = row.record_id ?? row.id;
+          if (!parsed.success || seenIds.has(docId)) return acc;
+          seenIds.add(docId);
+          return [
+            ...acc,
+            {
+              id: docId,
+              title: parsed.data.title,
+              docType: parsed.data.docType,
+              summary: parsed.data.summary,
+              updatedAt: parsed.data.savedAt ?? row.created_at,
+              authorRole: 'Saved Office Record',
+            },
+          ];
+        }, []);
+
+        if (persistedDocs.length > 0) {
+          documents = [
+            ...persistedDocs,
+            ...INITIAL_OFFICE_DOCUMENTS.filter((doc) => !seenIds.has(doc.id)),
+          ];
+        }
+      }
+    }
   } catch {
     isAuthenticated = false;
   }
@@ -134,7 +186,7 @@ export async function getOfficeWorkspaceSnapshot(): Promise<OfficeWorkspaceSnaps
     departmentSlug: 'office',
     syncedAt: new Date().toISOString(),
     isAuthenticated,
-    documents: INITIAL_OFFICE_DOCUMENTS,
+    documents,
     labTools: INITIAL_OFFICE_LAB_TOOLS,
   };
 }

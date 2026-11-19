@@ -136,7 +136,7 @@ export async function fetchLiveDepartmentMetrics(
       result['control-room'] = {
         stats: {
           label: 'Loads',
-          value: total > 0 ? `${total.toLocaleString()}` : 'Active',
+          value: total > 0 ? `${total.toLocaleString('en-US')}` : 'Active',
         },
         trend: hours,
         status: 'active',
@@ -168,7 +168,7 @@ export async function fetchLiveDepartmentMetrics(
           label: 'Yield',
           value:
             totalCoal > 0
-              ? `${totalCoal.toLocaleString(undefined, { maximumFractionDigits: 0 })}t`
+              ? `${totalCoal.toLocaleString('en-US', { maximumFractionDigits: 0 })}t`
               : `${yieldPct}%`,
         },
         trend: coalSeries.length > 0 ? coalSeries : [totalCoal, totalWaste, totalMined],
@@ -181,7 +181,7 @@ export async function fetchLiveDepartmentMetrics(
           value:
             totalMined > 0
               ? `${yieldPct}%`
-              : `${totalCoal.toLocaleString(undefined, { maximumFractionDigits: 0 })}t`,
+              : `${totalCoal.toLocaleString('en-US', { maximumFractionDigits: 0 })}t`,
         },
         trend: coalSeries.length > 0 ? coalSeries : [totalCoal, totalMined],
         status: 'active',
@@ -190,7 +190,7 @@ export async function fetchLiveDepartmentMetrics(
       result['plant-inventory'] = {
         stats: {
           label: 'Stockpile',
-          value: `${Math.round(totalCoal).toLocaleString(undefined, { maximumFractionDigits: 0 })}t`,
+          value: `${Math.round(totalCoal).toLocaleString('en-US', { maximumFractionDigits: 0 })}t`,
         },
         trend: coalSeries.length > 0 ? coalSeries : [Math.round(totalCoal)],
         status: 'active',

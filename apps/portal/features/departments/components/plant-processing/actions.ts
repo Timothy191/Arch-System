@@ -396,7 +396,7 @@ export async function savePlantHourlySheetAction(
 
   return {
     success: true,
-    message: `Saved ${input.rows.length} hourly rows (${totalCleanCoal.toLocaleString()} t clean coal / ${totalDiscard.toLocaleString()} t discard) for ${input.date} (${input.shift.toUpperCase()} shift).`,
+    message: `Saved ${input.rows.length} hourly rows (${totalCleanCoal.toLocaleString('en-US')} t clean coal / ${totalDiscard.toLocaleString('en-US')} t discard) for ${input.date} (${input.shift.toUpperCase()} shift).`,
     savedAt,
   };
 }

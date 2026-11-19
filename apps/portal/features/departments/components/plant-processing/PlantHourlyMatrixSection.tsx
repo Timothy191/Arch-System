@@ -293,12 +293,12 @@ function formatStreamSummary(
     0
   );
   const summaryMap: Record<PlantGridStreamMeta['key'], string> = {
-    romFeedTonnes: `${totals.totalRom.toLocaleString()} t`,
-    plantFeedTonnes: `${totalPlantFeed.toLocaleString()} t`,
-    cycloneFeedTonnes: `${totalCycloneFeed.toLocaleString()} t`,
-    newProductScaleTonnes: `${totalNewProductScale.toLocaleString()} t`,
-    cleanCoalTonnes: `${totals.totalClean.toLocaleString()} t`,
-    discardTonnes: `${totals.totalDiscard.toLocaleString()} t`,
+    romFeedTonnes: `${totals.totalRom.toLocaleString('en-US')} t`,
+    plantFeedTonnes: `${totalPlantFeed.toLocaleString('en-US')} t`,
+    cycloneFeedTonnes: `${totalCycloneFeed.toLocaleString('en-US')} t`,
+    newProductScaleTonnes: `${totalNewProductScale.toLocaleString('en-US')} t`,
+    cleanCoalTonnes: `${totals.totalClean.toLocaleString('en-US')} t`,
+    discardTonnes: `${totals.totalDiscard.toLocaleString('en-US')} t`,
     yieldPct: `${totals.weightedYield.toFixed(DECIMALS_ONE)}%`,
     productAshPct: `${totals.avgAsh.toFixed(DECIMALS_ONE)}%`,
     cycloneRd: `${totals.avgRd.toFixed(DECIMALS_TWO)}`,

@@ -229,6 +229,8 @@ export const DEPARTMENT_ROUTES = [
 const RESTRICTED_ROUTES: Record<string, string[]> = {
   'access-control': ['access_control', 'admin', 'supervisor', 'operator'],
   'control-room': ['control_room_operator', 'admin', 'supervisor', 'operator'],
+  database: ['admin', 'manager'],
+  'hub/executive': ['admin', 'manager'],
   tools: ['admin', 'supervisor'],
   admin: ['admin'],
 };
@@ -457,7 +459,10 @@ async function enforceRouteAccess(
 
   // Check restricted top-level routes
   for (const [route, allowedRoles] of Object.entries(RESTRICTED_ROUTES)) {
-    if (pathname.startsWith(`/${route}`) && !allowedRoles.includes(userRole)) {
+    if (
+      (pathname === `/${route}` || pathname.startsWith(`/${route}/`)) &&
+      !allowedRoles.includes(userRole)
+    ) {
       return redirectWithError(request, 'unauthorized_department', client.response);
     }
   }

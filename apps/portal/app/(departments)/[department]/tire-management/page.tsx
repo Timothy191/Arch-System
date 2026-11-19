@@ -315,7 +315,7 @@ export default async function TireManagementPage({
                           )}
                         </td>
                         <td className="px-5 py-3.5 text-right font-mono text-[var(--text-secondary)] text-xs">
-                          {tire.installed_hours?.toLocaleString() || 0} hrs
+                          {tire.installed_hours?.toLocaleString('en-US') || 0} hrs
                         </td>
                       </tr>
                     );

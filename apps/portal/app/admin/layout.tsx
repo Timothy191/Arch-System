@@ -1,7 +1,7 @@
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
-import { N8nIcon } from '@repo/ui/N8nIcon';
-import { RedisIcon } from '@repo/ui/RedisIcon';
-import { Activity, ArrowLeft, Cpu, ShieldCheck } from 'lucide-react';
+import { N8nIcon } from '@repo/ui/components/N8nIcon';
+import { RedisIcon } from '@repo/ui/components/RedisIcon';
+import { Activity, ArrowLeft, Cloud, Cpu, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
@@ -74,6 +74,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/admin/observability" className={ADMIN_NAV_LINK_CLASS}>
               <Activity className="h-3.5 w-3.5 text-indigo-600" />
               Observability &amp; CI
+            </Link>
+            <Link href="/admin/cloudflare" className={ADMIN_NAV_LINK_CLASS}>
+              <Cloud className="h-3.5 w-3.5 text-orange-600" />
+              Cloudflare Edge
             </Link>
           </nav>
 

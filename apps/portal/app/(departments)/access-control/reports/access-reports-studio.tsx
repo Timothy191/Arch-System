@@ -151,7 +151,7 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
               Total Access Events
             </span>
             <div className="mt-1 font-black font-mono text-[var(--text-heading)] text-xl">
-              {data.summary.totalEvents.toLocaleString()}
+              {data.summary.totalEvents.toLocaleString('en-US')}
             </div>
             <span className="text-[10px] text-[var(--text-muted)]">Gate & turnstile scans</span>
           </div>
@@ -161,7 +161,7 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
               Granted Clearances
             </span>
             <div className="mt-1 font-black font-mono text-emerald-600 text-xl">
-              {data.summary.grantedCount.toLocaleString()}
+              {data.summary.grantedCount.toLocaleString('en-US')}
             </div>
             <span className="text-[10px] text-emerald-700/80">Authorized entries</span>
           </div>
@@ -171,7 +171,7 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
               Security Interlocks
             </span>
             <div className="mt-1 font-black font-mono text-amber-600 text-xl">
-              {data.summary.deniedCount.toLocaleString()}
+              {data.summary.deniedCount.toLocaleString('en-US')}
             </div>
             <span className="text-[10px] text-amber-700/80">Blocked attempts</span>
           </div>

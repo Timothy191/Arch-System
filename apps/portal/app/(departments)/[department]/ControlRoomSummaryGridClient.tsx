@@ -113,7 +113,7 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
         <div>
           <p className="system-label">Total Loads</p>
           <p className="mt-1 font-bold text-2xl text-text-heading">
-            {data.totalLoads.toLocaleString()}
+            {data.totalLoads.toLocaleString('en-US')}
           </p>
           <div
             data-testid="summary-kpi-separator-total-loads"
@@ -125,9 +125,9 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
           id="total-loads"
           title="Haulage Velocity"
           badgeLabel={`${loadsPerHour}/h`}
-          currentValue={`${loadsVal.toLocaleString()} ld`}
+          currentValue={`${loadsVal.toLocaleString('en-US')} ld`}
           avgValue={`${loadsPerHour}/h`}
-          peakValue={`${Math.round(loadsVal * 25).toLocaleString()} BCM`}
+          peakValue={`${Math.round(loadsVal * 25).toLocaleString('en-US')} BCM`}
           points={buildSparklinePoints(
             Math.min(96, Math.max(35, Math.round((loadsVal / 180) * 100)))
           )}

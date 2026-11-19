@@ -174,7 +174,7 @@ function generatePrintHtml(
                 ${exc.trucks.map((t) => `${t.truck_name}=${t.loads}`).join(', ')}
               </td>
               <td class="bold mono">${exc.total_loads}</td>
-              <td class="bold mono">${exc.material_type === 'TOPSOIL' ? `${exc.total_bcm.toLocaleString()} m³` : `${exc.total_tonnes.toLocaleString()} t`}</td>
+              <td class="bold mono">${exc.material_type === 'TOPSOIL' ? `${exc.total_bcm.toLocaleString('en-US')} m³` : `${exc.total_tonnes.toLocaleString('en-US')} t`}</td>
               <td class="mono">${exc.operating_hours}h</td>
               <td class="mono bold">${exc.rate_per_hour}</td>
               <td style="color: #b45309;">${exc.delays || '—'}</td>
@@ -202,14 +202,14 @@ function generatePrintHtml(
                 <td class="bold">${r.machine_name}</td>
                 <td class="mono">${r.start_smu} - ${r.end_smu}</td>
                 <td class="mono">${r.hours}h</td>
-                <td class="bold mono">${r.total_bcm.toLocaleString()} BCM</td>
+                <td class="bold mono">${r.total_bcm.toLocaleString('en-US')} BCM</td>
               </tr>
             `
               )
               .join('')}
             <tr style="background-color: #f1f5f9;">
               <td colspan="3" class="bold">Total Rollover Pushed</td>
-              <td class="bold mono">${rollover?.total_bcm?.toLocaleString() || 0} BCM</td>
+              <td class="bold mono">${rollover?.total_bcm?.toLocaleString('en-US') || 0} BCM</td>
             </tr>
           </tbody>
         </table>

@@ -155,7 +155,7 @@ export function CloudflareInfrastructureConsole() {
           <div className="flex items-center gap-3">
             {lastRefresh && (
               <span className="text-[11px] text-zinc-500">
-                Refreshed {new Date(lastRefresh).toLocaleTimeString()}
+                Refreshed {new Date(lastRefresh).toLocaleTimeString('en-ZA')}
               </span>
             )}
             <button
@@ -215,7 +215,7 @@ export function CloudflareInfrastructureConsole() {
                 <p className="text-[11px] text-zinc-500">Last synced</p>
                 <p className="font-mono text-sm text-zinc-900">
                   {summary.account.lastSyncedAt
-                    ? new Date(summary.account.lastSyncedAt).toLocaleString()
+                    ? new Date(summary.account.lastSyncedAt).toLocaleString('en-ZA')
                     : '—'}
                 </p>
               </div>
@@ -560,7 +560,7 @@ export function CloudflareInfrastructureConsole() {
           <div className="flex items-center justify-between text-[11px] text-zinc-500">
             <span className="flex items-center gap-1.5">
               <Clock className="h-3 w-3" />
-              Generated {new Date(summary.generatedAt).toLocaleString()}
+              Generated {new Date(summary.generatedAt).toLocaleString('en-ZA')}
             </span>
             <span className="flex items-center gap-1.5">
               <KeyRound className="h-3 w-3" />

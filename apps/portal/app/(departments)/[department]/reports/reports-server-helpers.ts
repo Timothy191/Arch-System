@@ -611,7 +611,7 @@ function buildShiftReportPhase2(ctx: ReturnType<typeof buildShiftReportPhase1>):
       siteGroupRole === 'excavator'
         ? formatExcavatorSummary(excSummary, bcmMoved)
         : siteGroupRole === 'rollover'
-          ? `Roll-over: ${Number(bcmMoved.toFixed(1)).toLocaleString()} BCM (${hours.toFixed(1)}h × 250 BCM/h${passes > 0 ? ` · ${passes} passes` : ''})`
+          ? `Roll-over: ${Number(bcmMoved.toFixed(1)).toLocaleString('en-US')} BCM (${hours.toFixed(1)}h × 250 BCM/h${passes > 0 ? ` · ${passes} passes` : ''})`
           : formatDumperSummary(dumperSummary, mLoads, bcmMoved);
 
     machineOperationLogs.push({
@@ -709,7 +709,7 @@ function buildShiftReportPhase2(ctx: ReturnType<typeof buildShiftReportPhase1>):
       engineeringDelayMinutes: 0,
       naturalDelayMinutes: 0,
       nonSiteDelayMinutes: 0,
-      excavatorActivity: `Roll-over: ${Number(rollBcm.toFixed(1)).toLocaleString()} BCM (${dr.hoursOperated.toFixed(1)}h × 250 BCM/h${dr.bladePasses > 0 ? ` · ${dr.bladePasses} passes` : ''})`,
+      excavatorActivity: `Roll-over: ${Number(rollBcm.toFixed(1)).toLocaleString('en-US')} BCM (${dr.hoursOperated.toFixed(1)}h × 250 BCM/h${dr.bladePasses > 0 ? ` · ${dr.bladePasses} passes` : ''})`,
       siteGroupRole: 'rollover',
       loadsCount: 0,
       bladePasses: dr.bladePasses,
@@ -921,9 +921,9 @@ export function buildEngineeringAndExportPayloads(params: {
     subtitle: `Generated on ${todayStr} — Date range: ${fromDateStr} to ${toDateStr}`,
     kpis: [
       { label: 'Total Hours', value: `${totalHours.toFixed(1)} h` },
-      { label: 'Total Loads', value: `${totalLoads.toLocaleString()}` },
+      { label: 'Total Loads', value: `${totalLoads.toLocaleString('en-US')}` },
       { label: 'Total Volume (BCM)', value: `${totalBcm.toFixed(1)} BCM` },
-      { label: 'Delay Minutes', value: `${totalDelayMin.toLocaleString()} min` },
+      { label: 'Delay Minutes', value: `${totalDelayMin.toLocaleString('en-US')} min` },
     ],
     tableHeaders: [
       'Date',

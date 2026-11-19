@@ -758,7 +758,7 @@ export function AccessLogsClient({
                     hour12: false,
                   })}
                   <span className="block text-[10px] text-[var(--text-muted)]">
-                    {new Date(logEntry.timestamp).toLocaleDateString()}
+                    {new Date(logEntry.timestamp).toLocaleDateString('en-US')}
                   </span>
                 </TableCell>
 
@@ -1058,7 +1058,7 @@ export function AccessLogsClient({
                   </div>
 
                   <span className="font-mono text-[10px] text-[var(--text-muted)]">
-                    {new Date(lastScanResult.scannedAt).toLocaleTimeString()}
+                    {new Date(lastScanResult.scannedAt).toLocaleTimeString('en-US')}
                   </span>
                 </div>
 
