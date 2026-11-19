@@ -10,7 +10,7 @@ Complete all 4 roadmap steps following the 20-cluster shared function/component/
 1. **Step 1 — Automated Duplicate-Symbol Regression Guard (`tools/audits/audit-ssot-duplicates.cjs`)**: Statically audit the monorepo to guarantee the 20 consolidated Single-Source-of-Truth (SSoT) symbols are declared exclusively in their canonical modules and never re-duplicated.
 2. **Step 2 — Shared `DepartmentFilterToolbar` Primitive (`@repo/ui`)**: Create a reusable light-mode glass toolbar component (`packages/ui/src/components/DepartmentFilterToolbar.tsx`) for department search, shift/status filtering, date-range selection, and CSV/action slots, exported via `@repo/ui/DepartmentFilterToolbar` and `@repo/ui`, and adopt it in department views.
 3. **Step 3 — Live Control Room W3C `Server-Timing` Telemetry Strip**: Create a shared W3C `Server-Timing` header parser (`apps/portal/lib/observability/server-timing-client.ts`) and surface live backend `Server-Timing` latency (`data-testid="scada-server-timing-badge"`) inside `ScadaPanel.tsx` from `/api/control-room/scada-status`, backed by unit tests.
-4. **Step 4 — Full 27-Gate Verification, Real-Layer Telemetry Comparison, Branch Sync & Production Release**: Verify 27/27 gates (`pnpm agent:verify`), run `pnpm perf:compare`, merge into `main`, push to `origin/main` (and active remote branches), and confirm Vercel Production deployment.
+4. **Step 4 — Full 28-Gate Verification, Real-Layer Telemetry Comparison, Branch Sync & Production Release**: Verify 28/28 gates (`pnpm agent:verify`), run `pnpm perf:compare`, merge into `main`, push to `origin/main` (and active remote branches), and confirm Vercel Production deployment.
 
 ---
 
@@ -27,4 +27,4 @@ Complete all 4 roadmap steps following the 20-cluster shared function/component/
 
 - `node tools/audits/audit-ssot-duplicates.cjs` exits `0` across all workspace files.
 - `pnpm --filter portal test` passes unit tests for `server-timing-client.test.ts`, `ControlRoomPanels.test.tsx`, and `DepartmentFilterToolbar.test.tsx`.
-- `pnpm agent:verify` passes **27/27 gates (`100% PASS`)**.
+- `pnpm agent:verify` passes **28/28 gates (`100% PASS`)**.

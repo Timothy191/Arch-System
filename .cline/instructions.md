@@ -1,7 +1,7 @@
 # Cline System Prompt — Arch-System
 
-> **Governing SSoT:** [`AGENTS.md`](file:///home/tim/Fork/Arch-System/AGENTS.md)  
-> **Agent Guide:** [`AGENTS.md`](file:///home/tim/Fork/Arch-System/.agents/GUIDE.md)  
+> **Governing SSoT:** [`AGENTS.md`](../AGENTS.md)  
+> **Agent Guide:** [`GUIDE.md`](../.agents/GUIDE.md)  
 > **Repository:** Arch-System (Plantcor / Arch OS) — Next.js 16 App Router + React 19 monorepo, pnpm 9.15.9, Turborepo 2.x, Node.js ≥ 24, cloud Supabase + local Redis.
 
 ## Core Directives

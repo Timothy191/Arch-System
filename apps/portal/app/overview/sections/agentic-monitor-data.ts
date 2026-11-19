@@ -413,7 +413,7 @@ export const AGENT_TASK_FEED: AgentTaskLog[] = [
     zarCost: 0.47,
     status: 'Verified',
     details:
-      'Aligned AgenticMonitor spend (R 5,000.00), 90% cache ratio, 150h engineering time, 75 bugs resolved, 27/27 quality gates, and updated schema & route topology.',
+      'Aligned AgenticMonitor spend (R 5,000.00), 90% cache ratio, 150h engineering time, 75 bugs resolved, 28/28 quality gates, and updated schema & route topology.',
   },
   {
     id: 'TASK-018',

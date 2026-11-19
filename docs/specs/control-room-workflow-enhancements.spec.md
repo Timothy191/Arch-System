@@ -33,7 +33,7 @@ Harden and unify the 24/7 mining Control Room operational workflows, navigation 
 
 - Preserve light-mode-only semantic tokens and `@repo/ui/GlassCard` styling.
 - Maintain all existing `data-testid` attributes and OpenTelemetry spans (`scada_machine_fetch`, `scada_realtime_subscription`).
-- Enforce zero TypeScript `any`, Biome formatting/lint rules, and 100% pass rate across `pnpm test:dept:control-room` and `pnpm agent:verify` (27/27 gates).
+- Enforce zero TypeScript `any`, Biome formatting/lint rules, and 100% pass rate across `pnpm test:dept:control-room` and `pnpm agent:verify` (28/28 gates).
 
 ## 5. Rollback Procedure
 

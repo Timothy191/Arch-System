@@ -108,7 +108,7 @@ const INSHELLISENSE_BINDINGS: readonly InshellisenseBinding[] = [
   {
     commandSpec: 'pnpm agent:verify',
     shellScope: 'bash / zsh',
-    description: '27-gate monorepo verification pipeline with AST, RLS, and contract drift checks',
+    description: '28-gate monorepo verification pipeline with AST, RLS, and contract drift checks',
   },
   {
     commandSpec: 'pnpm --filter portal test',

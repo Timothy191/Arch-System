@@ -2,11 +2,11 @@
 set -euo pipefail
 
 # Cline pre-flight check for SWE agent tasks
-# Verifies: Arch-System/ cwd, feature branch, A2A bus readiness, verification tooling available
+# Verifies: repository root cwd, feature branch, A2A bus readiness, verification tooling available
 
 repo="${QODER_PROJECT_DIR:-$PWD}"
-if [[ "$repo" != */Arch-System ]]; then
-  echo "cline-swe-pre-flight: not inside Arch-System/ — cd to /home/tim/Fork/Arch-System first" >&2
+if ! git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || [[ ! -f "$repo/AGENTS.md" || ! -f "$repo/package.json" ]]; then
+  echo "cline-swe-pre-flight: not at the Arch-System repository root — cd to the repository root first" >&2
   exit 1
 fi
 
@@ -25,9 +25,9 @@ if [[ ! -f .agents/a2a/bus/event-log.jsonl ]]; then
   exit 1
 fi
 
-# Verify SWE agent registry card exists
-if [[ ! -f .agents/a2a/registry/swe-agent.json ]]; then
-  echo "cline-swe-pre-flight: ERROR — SWE agent registry card not found" >&2
+# Verify the implementation agent registry card exists
+if [[ ! -f .agents/a2a/registry/spec-driven-implementer.json ]]; then
+  echo "cline-swe-pre-flight: ERROR — implementation agent registry card not found" >&2
   exit 1
 fi
 
@@ -37,6 +37,6 @@ if ! command -v pnpm >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "cline-swe-pre-flight: OK — branch='$branch', A2A bus ready, SWE agent registered, verification tooling available"
+echo "cline-swe-pre-flight: OK — branch='$branch', A2A bus ready, implementation agent registered, verification tooling available"
 
 exit 0

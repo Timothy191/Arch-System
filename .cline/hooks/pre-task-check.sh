@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Cline pre-task check: ensure we're in Arch-System/ and on a branch
+# Cline pre-task check: ensure we're at the repository root and on a branch
 repo="${QODER_PROJECT_DIR:-$PWD}"
-if [[ "$repo" != */Arch-System ]]; then
-  echo "cline-pre-task-check: not inside Arch-System/ — cd to /home/tim/Fork/Arch-System first" >&2
+if ! git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || [[ ! -f "$repo/AGENTS.md" || ! -f "$repo/package.json" ]]; then
+  echo "cline-pre-task-check: not at the Arch-System repository root — cd to the repository root first" >&2
   exit 1
 fi
 

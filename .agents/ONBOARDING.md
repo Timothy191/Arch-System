@@ -2,14 +2,13 @@
 
 > **Canonical Document:** `.agents/ONBOARDING.md`  
 > **Target Audience:** All AI Agents (Antigravity, Cursor, Codex, OpenCode, Claude Code, Subagents)  
-> **Governing SSoT:** `/home/tim/Fork/Arch-System/AGENTS.md` and `.agents/SYSTEMS.md`
+> **Governing SSoT:** [`AGENTS.md`](../AGENTS.md) and `.agents/SYSTEMS.md`
 
 ---
 
 ## 1. Lean Orientation & Context-Budget Invariant
 
-> [!IMPORTANT]
-> **DO NOT eager-read full documentation files into context.**
+> [!IMPORTANT] > **DO NOT eager-read full documentation files into context.**
 > Reading full `AGENTS.md`, `SYSTEMS.md`, and `GUIDE.md` consumes ~27,000 tokens before any work begins.
 > Query specific line ranges or symbols on demand using `read_file` (with `StartLine`/`EndLine`), structural search (`codemap` / `ast-grep`), or dynamic skills (`skills-mcp`).
 
@@ -17,8 +16,8 @@
 
 - **Project:** Arch-System (Plantcor / Arch OS) industrial mining-operations portal.
 - **Stack:** Next.js 16 App Router + React 19, Turborepo 2.x, pnpm 9.15.9, Supabase Postgres/Realtime CDC, Redis L1/L2.
-- **Governing SSoT:** [`AGENTS.md`](file:///home/tim/Fork/Arch-System/AGENTS.md) — query target sections on demand.
-- **Toolchain Mandate:** Node ≥ 24, commands run inside `Arch-System/` with mise path.
+- **Governing SSoT:** [`AGENTS.md`](../AGENTS.md) — query target sections on demand.
+- **Toolchain Mandate:** Node ≥ 24, commands run from this repository root with the pinned pnpm 9.15.9 toolchain.
 - **Verification Gate:** `pnpm agent:verify` (28 gates).
 
 ---
@@ -26,9 +25,9 @@
 ## 2. Hard Workspace Invariants (Absolute Rules)
 
 1. **NO ROOT RUNNER:**
-   - `/home/tim/Fork/package.json` is a zero-dependency delegation runner; its `preinstall` hook blocks root installs.
-   - **NEVER** run `pnpm install`, `pnpm build`, or `npm test` from `/home/tim/Fork`.
-   - Always run commands scoped inside `Arch-System/`, `skills-mcp/`, `memory-gateway-mcp/`, `slim-tooling-mcp/`, or `langgraph-mcp/` (see `.agents/config/federation.json`).
+   - In an optional federated checkout, the parent directory is a zero-dependency delegation runner; its `preinstall` hook blocks root installs.
+   - **NEVER** run `pnpm install`, `pnpm build`, or `npm test` from a parent workspace root.
+   - Always run commands from this repository root; sibling MCP servers are scoped only in a federated checkout.
 2. **ZERO EXTERNAL API COSTS:**
    - All LLM inference must use Google Gemini / Antigravity models (`GEMINI_API_KEY`).
    - All embeddings must run locally via `transformers.js` (`all-MiniLM-L6-v2`) in Ruflo.

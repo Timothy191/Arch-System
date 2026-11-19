@@ -23,7 +23,7 @@ Eliminate naming and spelling drift across all autonomous agents and repository 
 - **WHEN** `node tools/audits/audit-agentic-content.cjs --check` runs, **THE SYSTEM SHALL** verify that root `AGENT_TRACER.md` exists and is non-empty, that zero non-canonical root tracer variants or distributed sub-package `*/AGENT_TRACER.md` files exist anywhere in the workspace, and that all contract schemas, contract types, and SQL migrations follow canonical file-naming conventions.
 - **WHEN** any agent attempts to write a non-canonical tracer file (`AGENTS_TRACER.md`, `AGENTS-TRACER.md`) or a nested `*/AGENT_TRACER.md` via `Edit|Write`, **THE SYSTEM SHALL** block the write in `.qoder/hooks/protect-paths.sh` with exit code `2` (verified by synthetic probes in Gate 25 `audit-agent-permissions.cjs`).
 - **WHEN** any agent edits or writes a code or Markdown file via `Edit|Write` or stages files for commit (`lint-staged`), **THE SYSTEM SHALL** run Biome/Markdownlint/Prettier and `cspell` on the modified file(s).
-- **WHEN** `pnpm agent:verify` executes all 27 gates, **THE SYSTEM SHALL** pass 27/27 gates with `0` violations.
+- **WHEN** `pnpm agent:verify` executes all 28 gates, **THE SYSTEM SHALL** pass 28/28 gates with `0` violations.
 
 ---
 

@@ -10,7 +10,7 @@ description: Resolve a failing pnpm audit:rule-drift gate in Arch-System. Use wh
 ## 1. Which trees it compares
 
 - **Canonical:** `Arch-System/.agents/rules/` — the real files. Edit here only.
-- **Mirror:** `path.resolve(ROOT_DIR, '..') + '/.agents/rules'` → `/home/tim/Fork/.agents/rules/`. Each mirror entry must be a **live symlink** pointing at its canonical file.
+- **Mirror:** `path.resolve(ROOT_DIR, '..') + '/.agents/rules'` — the parent workspace's rule tree, present only in a federated checkout. Each mirror entry must be a **live symlink** pointing at its canonical file. In a standalone checkout the audit reports `No workspace mirror` and passes.
 
 Two things it deliberately does **not** touch, so leave them alone:
 
@@ -32,13 +32,13 @@ Comparison is a plain string equality — no hashing, no frontmatter normalizati
 
 ## 3. Fix
 
-Edit the canonical file, then relink from the parent workspace directory:
+Edit the canonical file, then (only in a federated checkout) relink from the parent workspace directory:
 
 ```bash
-# canonical edit first, e.g. Arch-System/.agents/rules/redis-capabilities.md
-cd /home/tim/Fork
+# canonical edit first, e.g. .agents/rules/redis-capabilities.md
+cd <federated-root>
 ln -sf ../../Arch-System/.agents/rules/<name>.md .agents/rules/<name>.md
-pnpm audit:rule-drift
+pnpm --dir Arch-System audit:rule-drift
 ```
 
 If the mirror was a stale copy, remove the regular file before linking. Never reverse the direction — mirror content is not a source of truth.

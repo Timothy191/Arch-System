@@ -5,7 +5,7 @@ description: Operational protocol for preflight context gathering, tool-output o
 
 # Context Engineering: Preflight Gathering & Compaction Protocol
 
-This skill operationalizes the **Context-First Execution & Auto-Compaction Mandate** ([`context-lifecycle-and-compaction.md`](file:///home/tim/Fork/.agents/rules/context-lifecycle-and-compaction.md)) with battle-tested patterns from industry context-engineering frameworks (`Agent-Skills-for-Context-Engineering`, `save-before-compact`, and `skills-mcp`).
+This skill operationalizes the **Context-First Execution & Auto-Compaction Mandate** ([`context-lifecycle-and-compaction.md`](../../rules/context-lifecycle-and-compaction.md)) with battle-tested patterns from industry context-engineering frameworks (`Agent-Skills-for-Context-Engineering`, `save-before-compact`, and `skills-mcp`).
 
 > **Core Optimization Target**: Optimize for **Tokens-Per-Task** (total tokens consumed from start to finish, including re-fetching and error-correction costs), never merely _Tokens-Per-Request_. Over-aggressive or unstructured compaction that forces an agent to re-read 10 files wastes more context than it saves.
 

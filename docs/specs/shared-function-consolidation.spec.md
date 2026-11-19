@@ -39,4 +39,4 @@ Eliminate redundant function, component, hook, and utility implementations acros
 1. `pnpm type-check` passes with 0 errors across all packages.
 2. `pnpm lint` (Biome + agent-rules) passes with 0 errors.
 3. `pnpm policy:check`, `pnpm cycles`, and `pnpm knip` report 0 boundary violations, 0 circular dependencies, and 0 unused exports.
-4. `pnpm agent:verify` passes all 27/27 gates.
+4. `pnpm agent:verify` passes all 28/28 gates.

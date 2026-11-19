@@ -225,7 +225,7 @@ App Router groups: `(auth)/`, `(departments)/[department]/`, `hub/`, `admin/`, `
 
 - **Always Branch First**: Create a dedicated feature/task branch (`git checkout -b <type>/<scope>`) before executing any user-provided actions. Perform all requested work autonomously on that branch.
 - **Zero Assumptions & 3-Option Uncertainty Prompt**: Never assume, guess, or invent requirements. If any uncertainty remains after grounded codebase inspection, immediately prompt the user with **exactly 3 clear options** (marking Option 1 `(Recommended)`).
-- **Commit to `main` & Deploy to GitHub + Vercel on Completion**: Upon passing verification gates (`pnpm agent:verify`), merge/commit verified work to `main`, push to GitHub (`git push origin main`), and push the production deployment to Vercel (`pnpm deploy:vercel:prod` / `vercel --prod --yes`).
+- **Release Approval Gate**: After `pnpm agent:verify` passes, obtain explicit user approval (or an authorized release CI trigger) before merging to `main`, pushing to GitHub (`git push origin main`), or deploying to Vercel (`pnpm deploy:vercel:prod` / `vercel --prod --yes`). Local verification and branch work remain autonomous.
 - **Conventional Commits**: Enforced via commitlint + Husky (lint-staged on commit, lint + type-check on push). Never use `--no-verify`.
 
 ### Agent Tracing

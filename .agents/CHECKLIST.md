@@ -33,11 +33,11 @@ Verify that core MCP servers respond correctly:
   curl -s http://192.168.0.215:3002/ | jq .
   # Must return {"message": "Firecrawl API", ...}
   ```
-- [x] **Codemap & CodeGraph AST Codebase Intelligence:**
+- [x] **CodeGraph AST Codebase Intelligence:**
   ```bash
-  /home/tim/.local/bin/codemap mcp --root /home/tim/Fork/Arch-System
   pnpm audit:code-intelligence
   ```
+  Query symbols and call graphs through the registered `codemap` MCP server when available; no local CLI path is assumed.
 - [x] **Persistent Knowledge Graph (`memory`):**
       Registered in `~/.gemini/antigravity-cli/mcp/mcp.json` and `~/.cursor/mcp.json`.
 - [x] **Chrome DevTools & Puppeteer:**
@@ -47,22 +47,21 @@ Verify that core MCP servers respond correctly:
 
 ## 3. Federated Services Verification
 
-Always run commands **inside each specific project directory**, never at `/home/tim/Fork`:
+Always run commands **inside the repository root** (or a sibling project directory in an optional federated checkout), never from a parent workspace root:
 
-- [ ] **Portal Monorepo (`Arch-System/`):**
+- [ ] **Portal Monorepo (this repository):**
   ```bash
-  cd /home/tim/Fork/Arch-System
   pnpm dev:quick      # Quick headless boot check
   pnpm agent:verify   # Lint, type-check, and unit tests
   ```
-- [ ] **Standalone MCP servers (`skills-mcp/`, `memory-gateway-mcp/`, `slim-tooling-mcp/`):**
+- [ ] **Optional federated sibling servers (`skills-mcp/`, `memory-gateway-mcp/`, `slim-tooling-mcp/`):**
   ```bash
-  cd /home/tim/Fork/<server> && pnpm run build && pnpm test
+  cd ../<server> && pnpm run build && pnpm test
   ```
-- [ ] **LangGraph MCP (`langgraph-mcp/`, Python):** see `langgraph-mcp/README.md` for its test command.
-- [ ] **Cross-Project Drift Audit:**
+- [ ] **LangGraph MCP (`langgraph-mcp/`, Python):** see `langgraph-mcp/README.md` for its test command (federated checkout only).
+- [ ] **Cross-Project Drift Audit (federated checkout only):**
   ```bash
-  node /home/tim/Fork/Arch-System/tools/zero-drift-watchdog/bin/federated-audit.mjs
+  node tools/zero-drift-watchdog/bin/federated-audit.mjs
   ```
 
 ---
@@ -72,4 +71,4 @@ Always run commands **inside each specific project directory**, never at `/home/
 - [ ] **L0 (Observer):** Autonomous read-only inspection.
 - [ ] **L1 (Advisor):** Autonomous brief/audit creation.
 - [ ] **L2 (Operator):** Code changes verified in worktree with quality gate score $\ge 90$.
-- [ ] **L3 (Executive):** Production deploy / DB schema migration — autonomous, no signed approval card required.
+- [ ] **L3 (Executive):** Production deploy / DB schema migration / push to `main` — requires explicit user approval (or an authorized release CI trigger).

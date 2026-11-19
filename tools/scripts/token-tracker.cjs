@@ -422,19 +422,21 @@ function analyzeRootInstructions() {
 
   for (const file of rootFiles) {
     const filePath = path.join(ROOT, file);
-    if (fs.existsSync(filePath)) {
-      const stat = fs.statSync(filePath);
-      const lstat = fs.lstatSync(filePath);
-      const isDupSymlink = seenInodes.has(stat.ino);
-      seenInodes.add(stat.ino);
-      if (!isDupSymlink) {
-        totalSize += stat.size;
-      }
-      breakdown.push({
-        file: lstat.isSymbolicLink() ? `${file} (symlink)` : file,
-        size: isDupSymlink ? 0 : stat.size,
-      });
+    if (!fs.existsSync(filePath)) continue;
+
+    const lstat = fs.lstatSync(filePath);
+    if (lstat.isSymbolicLink()) {
+      breakdown.push({ file: `${file} (symlink)`, size: 0 });
+      continue;
     }
+
+    const stat = fs.statSync(filePath);
+    const isDupInode = seenInodes.has(stat.ino);
+    seenInodes.add(stat.ino);
+    if (!isDupInode) {
+      totalSize += stat.size;
+    }
+    breakdown.push({ file, size: isDupInode ? 0 : stat.size });
   }
 
   return { totalSize, breakdown };

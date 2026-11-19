@@ -159,7 +159,7 @@ export default function AgenticMonitor() {
             </div>
             <p className="mt-1 text-[var(--text-muted)] text-xs">
               Real-time token economics, 90% prompt caching discounts (Claude Code, Google
-              Antigravity AGY 2.0, Copilot, Ollama), 27-gate verification telemetry, and ZAR cost
+              Antigravity AGY 2.0, Copilot, Ollama), 28-gate verification telemetry, and ZAR cost
               trajectories from Project Day 1 (Jun 15, 2026) to Today.
             </p>
           </div>
@@ -359,7 +359,7 @@ export default function AgenticMonitor() {
           <div className="mt-3 flex items-center justify-between border-[var(--border-subtle)] border-t pt-3 text-[11px]">
             <span className="text-[var(--text-muted)]">27-Gate Verification Passes</span>
             <span className="font-medium font-mono text-emerald-700">
-              27/27 Gates • {currentMetrics.qualityGateRuns} Runs (100%)
+              28/28 Gates • {currentMetrics.qualityGateRuns} Runs (100%)
             </span>
           </div>
         </div>

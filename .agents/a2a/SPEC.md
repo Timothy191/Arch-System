@@ -85,7 +85,7 @@ When a broad repository audit is initiated:
 
 ## 4. Message Envelopes & Schema Specifications
 
-All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/](file:///home/tim/Fork/Arch-System/.agents/a2a/schemas/):
+All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/](schemas/):
 
 ### 1. Task Handoff Envelope
 
@@ -108,7 +108,13 @@ All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/
     "recipientAgent": { "type": "string" },
     "phase": {
       "type": "string",
-      "enum": ["INGESTION", "DISCOVERY", "EXECUTION", "VERIFICATION", "COMPLETION"]
+      "enum": [
+        "INGESTION",
+        "DISCOVERY",
+        "EXECUTION",
+        "VERIFICATION",
+        "COMPLETION"
+      ]
     },
     "targetFiles": {
       "type": "array",
@@ -130,7 +136,14 @@ All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["taskId", "auditorAgent", "verdict", "score", "violations", "timestamp"],
+  "required": [
+    "taskId",
+    "auditorAgent",
+    "verdict",
+    "score",
+    "violations",
+    "timestamp"
+  ],
   "properties": {
     "taskId": { "type": "string" },
     "auditorAgent": { "type": "string" },
@@ -146,7 +159,10 @@ All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/
           "filePath": { "type": "string" },
           "lineNumber": { "type": "integer" },
           "description": { "type": "string" },
-          "severity": { "type": "string", "enum": ["CRITICAL", "WARNING", "INFO"] }
+          "severity": {
+            "type": "string",
+            "enum": ["CRITICAL", "WARNING", "INFO"]
+          }
         }
       }
     },
@@ -163,7 +179,7 @@ All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/
 
 ## 5. Event Bus & Audit Ledger (`.agents/a2a/bus/`)
 
-All cross-agent events are appended as immutable, single-line JSON records to [.agents/a2a/bus/event-log.jsonl](file:///home/tim/Fork/Arch-System/.agents/a2a/bus/event-log.jsonl):
+All cross-agent events are appended as immutable, single-line JSON records to [.agents/a2a/bus/event-log.jsonl](bus/event-log.jsonl):
 
 ```json
 {

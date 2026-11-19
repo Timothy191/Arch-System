@@ -1,6 +1,6 @@
 # architecture
 
-- Run all package, git, and verification commands inside `/home/tim/Fork/Arch-System` using Node.js >=24 and `pnpm@9.15.9` exclusively, never `npm`, `yarn`, or `bun`. Confidence: 0.99
+- Run all package, git, and verification commands from this repository root using Node.js >=24 and `pnpm@9.15.9` exclusively, never `npm`, `yarn`, or `bun`. Confidence: 0.99
 - Keep `apps/portal` as the sole Next.js 16 App Router deployable package using RSC-first pages and `proxy.ts` with per-request `x-nonce` and CSP instead of `middleware.ts`. Confidence: 0.98
 - Combine `'use cache'`, `cacheLife()`, and `cacheTag()` in cached Server Components with `withCache()` Redis L1/L2 read-through, and never access `cookies()`, `headers()`, or dynamic `searchParams` inside `'use cache'`. Confidence: 0.97
 - Enforce module layering boundaries: `apps/*` routes persistence through `@repo/supabase` (never `packages/database`), `packages/ui` remains strictly presentational without database or Supabase imports, `packages/theme` never imports `packages/ui`, and `tools/*` never imports runtime `@repo/supabase`. Confidence: 0.99

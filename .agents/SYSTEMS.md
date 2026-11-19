@@ -2,8 +2,8 @@
 
 > **Canonical Document:** `.agents/SYSTEMS.md`  
 > **Classification:** Systems Engineering, Agentic Toolchain, Swarm Topology & Memory SSoT  
-> **Target Scope:** Workspace (`/home/tim/Fork`), Portal Monorepo (`Arch-System`), and Federated Services  
-> **Last Updated:** 2026-11-06
+> **Target Scope:** This repository (`Arch-System`), with optional federated sibling services  
+> **Last Updated:** 2026-11-19
 
 ---
 
@@ -229,7 +229,7 @@ sequenceDiagram
 
 ### 4.3 Canonical Monorepo Agent Registry (`Arch-System/.agents/a2a/registry/`)
 
-`Arch-System/.agents/a2a/registry/` registers 18 specialist agent cards following the 9-pillar A2A schema (`core-coordinator.json`, `autonomous-orchestrator.json`, `autonomous-watchdog-supervisor.json`, `critique-council-reviewer.json`, `database-architect.json`, `ui-engineer.json`, `realtime-telemetry-engineer.json`, `resilience-field-engineer.json`, `security-quality-gatekeeper.json`, `system-simplifier.json`, `telemetry-codebase-architect.json`, `spec-breakdown-architect.json`, `spec-driven-implementer.json`, `ai-memory-curator.json`, `smart-indexer-agent.json`, `research-specialist.json`, `github-workflow-specialist.json`, `responder-orchestrator.json`). For parent federated workspace cards, see `/home/tim/Fork/.agents/a2a/registry/index.json`.
+`Arch-System/.agents/a2a/registry/` registers 18 specialist agent cards following the 9-pillar A2A schema (`core-coordinator.json`, `autonomous-orchestrator.json`, `autonomous-watchdog-supervisor.json`, `critique-council-reviewer.json`, `database-architect.json`, `ui-engineer.json`, `realtime-telemetry-engineer.json`, `resilience-field-engineer.json`, `security-quality-gatekeeper.json`, `system-simplifier.json`, `telemetry-codebase-architect.json`, `spec-breakdown-architect.json`, `spec-driven-implementer.json`, `ai-memory-curator.json`, `smart-indexer-agent.json`, `research-specialist.json`, `github-workflow-specialist.json`, `responder-orchestrator.json`). In a federated checkout, parent workspace cards live in the parent workspace's `.agents/a2a/registry/index.json`.
 
 ---
 
@@ -237,39 +237,41 @@ sequenceDiagram
 
 To balance high-velocity autonomy with industrial plant safety, actions are strictly partitioned into 4 authority tiers:
 
-| Tier   | Level     | Role Scope         | Capabilities & Permissions                                       | Sign-Off Requirements                                                           |
-| :----- | :-------- | :----------------- | :--------------------------------------------------------------- | :------------------------------------------------------------------------------ |
-| **L0** | Observer  | Telemetry & Audit  | Read-only inspection of logs, SCADA streams, and codebases.      | None. Fully autonomous.                                                         |
-| **L1** | Advisor   | Architecture & QA  | Generates documentation, analysis briefs, and suggested patches. | None. Cannot mutate repo files.                                                 |
-| **L2** | Operator  | Code & Feature Dev | Mutates code in isolated worktrees, runs Jest/Playwright tests.  | Automated quality gates must score $\ge 90$ points.                             |
-| **L3** | Executive | Production & DB    | Database migrations, production deployments, secret rotation.    | Autonomous — no signed approval card or Slack HITL bridge confirmation required |
+| Tier   | Level     | Role Scope         | Capabilities & Permissions                                       | Sign-Off Requirements                                                                             |
+| :----- | :-------- | :----------------- | :--------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ |
+| **L0** | Observer  | Telemetry & Audit  | Read-only inspection of logs, SCADA streams, and codebases.      | None. Fully autonomous.                                                                           |
+| **L1** | Advisor   | Architecture & QA  | Generates documentation, analysis briefs, and suggested patches. | None. Cannot mutate repo files.                                                                   |
+| **L2** | Operator  | Code & Feature Dev | Mutates code in isolated worktrees, runs Jest/Playwright tests.  | Automated quality gates must score $\ge 90$ points.                                               |
+| **L3** | Executive | Production & DB    | Database migrations, production deployments, secret rotation.    | Explicit user approval (or authorized release CI trigger) before merge to `main`, push, or deploy |
 
 ---
 
 ## 6. Federated Workspace Wiring & Service Map
 
-The workspace `/home/tim/Fork` coordinates five federated projects (per `.agents/config/federation.json`):
+This repository is the canonical Arch-System monorepo. It is self-contained; a parent workspace with sibling services is optional, not assumed:
 
 ```
-/home/tim/Fork
-├── Arch-System/               # Plantcor Mining Portal (Next.js 16 monorepo, Vercel: arch-system)
-├── skills-mcp/                # On-demand skill/context/persona registry (stdio MCP)
-├── memory-gateway-mcp/        # Unified multi-tier memory gateway (stdio MCP)
-├── slim-tooling-mcp/          # Upstream MCP proxy & payload compactor (stdio MCP)
-├── langgraph-mcp/             # LangGraph orchestration server (Python, stdio MCP)
-└── .agents/                   # Workspace-level Agent Operating System
+repository root/
+├── apps/portal/               # Plantcor Mining Portal (Next.js 16 app, Vercel: arch-system)
+├── packages/                  # Shared @repo/* libraries (contract, supabase, database, redis, ...)
+├── libs/                      # Feature slices (auth, departments, hub) and shared hooks
+├── tools/                     # Governance audits, policy compiler, and verification gates
+└── .agents/                   # Repository-level Agent Operating System
     ├── a2a/                   # Agent-to-Agent protocol bus, registry, and schemas
+    ├── context/               # Injectable architecture context slices
     ├── hooks/                 # Pre/post tool guards, budget checks, and tracing
-    ├── memory_base/           # Cross-project retrospectives and index
-    ├── rules/                 # Permanent cross-repo engineering mandates
-    ├── skills/                # Federation audit, contract sync, deployment skills
+    ├── memory_base/           # Retrospectives and context index
+    ├── rules/                 # Permanent engineering mandates
+    ├── skills/                # Leasable skills
     └── SYSTEMS.md             # This canonical architecture specification
 ```
+
+Optional federated siblings (outside this repository): `skills-mcp/`, `memory-gateway-mcp/`, `slim-tooling-mcp/`, `langgraph-mcp/`.
 
 ### Wiring Contracts
 
 1. **Redis:** `Arch-System/packages/redis` connects to local TCP Redis in development and serverless REST-compatible Redis in production.
-2. **MCP Registration:** `/home/tim/Fork/.mcp.json` registers the four first-party MCP siblings plus workspace utilities.
+2. **MCP Registration:** root `.mcp.json` registers workspace utilities; sibling MCP servers are registered only when the federated checkout exists.
 3. **Cross-Project Auditing:** `tools/zero-drift-watchdog/bin/federated-audit.mjs` executes automated drift assertions between TypeScript contracts across all siblings.
 4. **Local Web Scraping:** `http://192.168.0.215:3002/v2/scrape` provides free, unauthenticated markdown extraction exclusively for agent intelligence.
 
@@ -278,8 +280,7 @@ The workspace `/home/tim/Fork` coordinates five federated projects (per `.agents
 ## 7. Developer & Agent Cheat Sheet
 
 ```bash
-# === 1. Workspace & Monorepo Operations ===
-cd /home/tim/Fork/Arch-System
+# === 1. Repository Operations (from repository root) ===
 pnpm dev:quick                 # Headless quick boot (no Docker)
 pnpm dev:turbo                 # Portal dev server on 0.0.0.0:3000
 pnpm agent:verify              # Monorepo full verification (lint, typecheck, test)
