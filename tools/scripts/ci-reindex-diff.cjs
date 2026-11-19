@@ -7,11 +7,12 @@
  */
 
 const fs = require('node:fs');
+const os = require('node:os');
 const { execSync } = require('node:child_process');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const GRAPHIFY_BIN = '/home/tim/.local/bin/graphify';
+const GRAPHIFY_BIN = path.join(os.homedir(), '.local', 'bin', 'graphify');
 
 function syncSecondarySubstrates() {
   if (fs.existsSync(GRAPHIFY_BIN)) {

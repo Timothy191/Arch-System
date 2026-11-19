@@ -1,12 +1,12 @@
 ---
 name: testing-rules
-description: 'Jest 30, @swc/jest, Playwright SSoT, AAA structure, boundary-only mocking, and typed AppError verification.'
+description: "Jest 30, @swc/jest, Playwright SSoT, AAA structure, boundary-only mocking, and typed AppError verification."
 paths:
-  - '**/*.test.{ts,tsx,mjs}'
-  - '**/*.spec.{ts,tsx}'
-  - 'apps/portal/jest*.config.cjs'
-  - 'apps/portal/setupTests.ts'
-  - 'e2e/**/*'
+  - "**/*.test.{ts,tsx,mjs}"
+  - "**/*.spec.{ts,tsx}"
+  - "apps/portal/jest*.config.cjs"
+  - "apps/portal/setupTests.ts"
+  - "e2e/**/*"
 ---
 
 # Testing Standards & Mocking Rules
@@ -39,8 +39,9 @@ When writing or modifying unit, integration, or E2E tests across `apps/`, `packa
    - Verification harnesses (`agent-verify.sh`, linters, policy compiler) are immutable; modifying thresholds to simulate a pass is strictly prohibited.
 9. **Empirical Win Reproduction Protocol**:
    - Any claimed performance optimization (P50/P95 latency, query duration, token reduction) must be empirically reproduced across at least 2 consecutive benchmark runs against baseline before acceptance.
-10. **Evidence Receipts**:
+10. **Evidence Receipts & Changed-Files Coverage Ratchet**:
 
 - Write JUnit XML and NDJSON evidence to `.ci-local/agent-verify-evidence.json` on verification.
+- Run `pnpm test:coverage:changed` to enforce `>= 70%` line/statement coverage on modified or newly added `apps/portal` runtime files without breaking the legacy global baseline.
 
 See `skill://testing-rules` for full protocol details.

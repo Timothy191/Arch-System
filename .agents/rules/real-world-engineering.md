@@ -1,6 +1,6 @@
 ---
-description: 'Real-world engineering standards for industrial mining operations'
-paths: ['apps/**/*', 'packages/**/*', 'libs/**/*']
+description: "Real-world engineering standards for industrial mining operations"
+paths: ["apps/**/*", "packages/**/*", "libs/**/*"]
 ---
 
 # Real-World Engineering Standards
@@ -45,10 +45,10 @@ Never assume, guess, or proceed when required information is missing or ambiguou
 1. **Exhaustive Grounded Research First**: Inspect actual source files, AST call graphs (`ast-grep`, `codemap`), database migrations (`@repo/database`), and Zod contracts (`@repo/contract`), and consult primary documentation (`context7`).
 2. **Prompt With 3 Options When Uncertain**: At any time when uncertainty or ambiguity arises regarding requirements, architecture, or behavior, **STOP and prompt the user with 3 concrete options** (with Option 1 prefixed `(Recommended)`). Never invent requirements, silent defaults, or speculative logic.
 
-## 4b. Autonomous Branch, Merge to `main`, and GitHub + Vercel Push Lifecycle
+## 4b. Autonomous Branch, Verification & Approval-Gated Release Lifecycle
 
-1. **Always Create a Branch**: Before mutating files, create a dedicated task branch (`git checkout -b <type>/<scope>`) and execute all user-requested actions autonomously.
-2. **Verify, Commit to `main`, and Deploy**: Once all verification gates pass (`pnpm agent:verify`), merge/commit the verified changes into `main`, push to GitHub (`git push origin main`), and deploy to Vercel Production (`pnpm deploy:vercel:prod` / `vercel --prod --yes`).
+1. **Always Create a Branch**: Before mutating files, create a dedicated task branch (`git checkout -b <type>/<scope>`) and execute all user-requested implementation and verification actions autonomously.
+2. **Verify First, Gate Remote Release**: Run all local verification gates (`pnpm agent:verify`) autonomously, and require explicit user approval (or a dedicated release CI trigger) before merging to `main`, pushing to GitHub (`git push origin main`), or deploying to Vercel Production (`pnpm deploy:vercel:prod`).
 
 ## 5. Verification Before Claiming
 

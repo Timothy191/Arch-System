@@ -368,7 +368,7 @@ function formatHandoffMarkdown(payload) {
 
 - **VibeMon Tracking (Mandatory)**: \`./vibemon.sh\` — update via \`curl -fsSL https://vibemon.dev/install.sh | bash\` (\`pnpm vibemon:update\`), verify via \`pnpm vibemon:status\`, and emit lifecycle events via \`pnpm vibemon:track <event> <agent>\`
 - **Graphify Knowledge Graph**: \`graphify-out/graph.json\` — query via \`graphify path "<A>" "<B>"\`, \`graphify explain "<symbol>"\`, \`graphify section "<heading>"\`, or \`graphify update .\`
-- **CodeGraph Substrate**: \`/home/tim/local.db\` — verify with \`pnpm audit:code-intelligence\` and \`pnpm ci:reindex:diff\`
+- **CodeGraph Substrate**: \`$CODEGRAPH_DB\` / \`~/local.db\` — verify with \`pnpm audit:code-intelligence\` and \`pnpm ci:reindex:diff\`
 - **Swarm Vector Memory**: \`.swarm/memory.db\` — refresh via \`node tools/scripts/sync-vector-memory.mjs\`
 - **MCP Auto-Onboarding**: Call \`memory-gateway-mcp\` \`get_session_onboarding\` / \`search_unified_memory\` (4 tiers including \`knowledge_graph\`) and \`skills-mcp\` \`assemble_code_context_pack\`
 

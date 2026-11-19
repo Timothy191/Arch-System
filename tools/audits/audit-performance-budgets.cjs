@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Gate 18: Performance & Load Regression Auditor
+ * Gate 19: Performance & Load Regression Auditor
  *
  * Enforces deterministic performance budgets across CSS, bundles, Next.js data-fetching,
  * Turbopack chunk splitting, and k6 load/latency threshold contracts:
@@ -24,7 +24,7 @@ const path = require('node:path');
 const ROOT = path.join(__dirname, '..', '..');
 const NEXT_BUILD_DIR = path.join(ROOT, 'apps', 'portal', '.next');
 
-console.log('\n⚡ Initiating Gate 18: Performance & Load Regression Audit...\n');
+console.log('\n⚡ Initiating Gate 19: Performance & Load Regression Audit...\n');
 
 const violations = [];
 const warnings = [];
@@ -158,7 +158,7 @@ if (warnings.length > 0) {
 }
 
 if (violations.length > 0) {
-  console.error('❌ Gate 18 Performance & Load Regression Audit Failed:');
+  console.error('❌ Gate 19 Performance & Load Regression Audit Failed:');
   for (const v of violations) {
     console.error(`   • ${v}`);
   }
@@ -166,5 +166,5 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log('✅ Gate 18 Performance & Load Regression Audit Passed: 100% compliant!\n');
+console.log('✅ Gate 19 Performance & Load Regression Audit Passed: 100% compliant!\n');
 process.exit(0);

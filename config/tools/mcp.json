@@ -26,7 +26,7 @@
     },
     "codemap": {
       "command": "/home/tim/.local/bin/codemap",
-      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
+      "args": ["mcp", "--root", "."],
       "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
       "type": "stdio"
     },

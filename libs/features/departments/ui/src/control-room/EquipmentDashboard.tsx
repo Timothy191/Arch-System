@@ -163,7 +163,7 @@ export function EquipmentDashboard({ departmentId }: { departmentId: string }) {
 
                   <div className="mt-1 flex items-center justify-between border-arch-border-subtle border-t pt-3">
                     <div className="font-medium font-mono text-arch-text-secondary text-xs">
-                      {item.hour_meter.toLocaleString()} SMU
+                      {item.hour_meter.toLocaleString('en-US')} SMU
                     </div>
                     <button
                       type="button"
@@ -203,7 +203,9 @@ export function EquipmentDashboard({ departmentId }: { departmentId: string }) {
               <p className="text-arch-text-secondary text-xs">
                 Asset: <span className="font-medium font-mono">{breakdownTarget?.code}</span> (
                 <span className="capitalize">{breakdownTarget?.category}</span>) &bull; SMU:{' '}
-                <span className="font-mono">{breakdownTarget?.hour_meter?.toLocaleString()}</span>
+                <span className="font-mono">
+                  {breakdownTarget?.hour_meter?.toLocaleString('en-US')}
+                </span>
               </p>
             </div>
           </div>

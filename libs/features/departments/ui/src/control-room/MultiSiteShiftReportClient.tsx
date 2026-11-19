@@ -99,8 +99,8 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                       <div className="text-right">
                         <span className="font-bold font-mono text-arch-text-primary text-lg">
                           {exc.material_type === 'TOPSOIL'
-                            ? `${exc.total_bcm.toLocaleString()} m³`
-                            : `${exc.total_tonnes.toLocaleString()} t`}
+                            ? `${exc.total_bcm.toLocaleString('en-US')} m³`
+                            : `${exc.total_tonnes.toLocaleString('en-US')} t`}
                         </span>
                         <p className="text-[11px] text-arch-text-tertiary">
                           {exc.total_loads} Total Loads
@@ -168,7 +168,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                 Bulldozer Rollover Operations (Push Factor: 250 m³/h)
               </h3>
               <span className="font-bold font-mono text-accent-green text-sm">
-                Total: {rollover.total_bcm.toLocaleString()} BCM
+                Total: {rollover.total_bcm.toLocaleString('en-US')} BCM
               </span>
             </div>
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -182,7 +182,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                     {item.start_smu} - {item.end_smu} ({item.hours}h × {item.push_factor})
                   </p>
                   <p className="mt-1 font-mono font-semibold text-arch-brand-blue">
-                    {item.total_bcm.toLocaleString()} BCM
+                    {item.total_bcm.toLocaleString('en-US')} BCM
                   </p>
                 </div>
               ))}

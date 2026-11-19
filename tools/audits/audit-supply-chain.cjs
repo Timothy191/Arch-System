@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Gate 20: Dependency & Supply-Chain Security Auditor
+ * Gate 21: Dependency & Supply-Chain Security Auditor
  *
  * Enforces supply-chain security invariants across the Arch-System monorepo:
  *   1. Secret Exposure Scan: Loads regex rules from config/tools/.gitleaks.toml
@@ -24,7 +24,7 @@ const ROOT = path.join(__dirname, '..', '..');
 const GITLEAKS_CONFIG = path.join(ROOT, 'config', 'tools', '.gitleaks.toml');
 const LOCKFILE_PATH = path.join(ROOT, 'pnpm-lock.yaml');
 
-console.log('\n🔒 Initiating Gate 20: Dependency & Supply-Chain Security Audit...\n');
+console.log('\n🔒 Initiating Gate 21: Dependency & Supply-Chain Security Audit...\n');
 
 const violations = [];
 const warnings = [];
@@ -257,7 +257,18 @@ if (!fs.existsSync(LOCKFILE_PATH)) {
 
 // Execute pnpm audit --prod --audit-level=high
 const rootPkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-const ignoredGhsas = new Set(rootPkg?.pnpm?.auditConfig?.ignoreGhsas || []);
+const workspaceYamlPath = path.join(ROOT, 'pnpm-workspace.yaml');
+const workspaceYamlGhsas = [];
+if (fs.existsSync(workspaceYamlPath)) {
+  const yamlText = fs.readFileSync(workspaceYamlPath, 'utf8');
+  for (const match of yamlText.matchAll(/GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}/gi)) {
+    workspaceYamlGhsas.push(match[0]);
+  }
+}
+const ignoredGhsas = new Set([
+  ...(rootPkg?.pnpm?.auditConfig?.ignoreGhsas || []),
+  ...workspaceYamlGhsas,
+]);
 
 const auditResult = spawnSync('pnpm', ['audit', '--prod', '--audit-level=high', '--json'], {
   cwd: ROOT,
@@ -381,7 +392,7 @@ if (warnings.length > 0) {
 }
 
 if (violations.length > 0) {
-  console.error('❌ Gate 20 Supply-Chain Security Audit Failed:');
+  console.error('❌ Gate 21 Supply-Chain Security Audit Failed:');
   for (const v of violations) {
     console.error(`   • ${v}`);
   }
@@ -389,5 +400,5 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log('✅ Gate 20 Supply-Chain Security Audit Passed: 100% compliant!\n');
+console.log('✅ Gate 21 Supply-Chain Security Audit Passed: 100% compliant!\n');
 process.exit(0);

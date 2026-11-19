@@ -14,11 +14,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { DatabaseSync } = require('node:sqlite');
+const { resolveCodeGraphDbPath } = require('../lib/codegraph-path.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-// The index lives OUTSIDE the repo at <workspace-root>/local.db so it is not
-// tracked by git and survives across sessions. CODEGRAPH_DB overrides it.
-const DB_PATH = process.env.CODEGRAPH_DB || path.join(path.resolve(ROOT, '..', '..'), 'local.db');
+const DB_PATH = resolveCodeGraphDbPath(ROOT);
 const OUT_PATH = path.join(ROOT, '.agents', 'memory_base', 'index-snapshot.json');
 
 function main() {

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Gate 21: Production Observability & Resilience Auditor
+ * Gate 22: Production Observability & Resilience Auditor
  *
  * Verifies health/readiness/liveness probes, Prometheus metrics endpoints, OpenTelemetry
  * tracing instrumentation, Redis graceful degradation, and executes fault-injection tests:
@@ -23,7 +23,7 @@ const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..', '..');
 
-console.log('\n📡 Initiating Gate 21: Production Observability & Resilience Audit...\n');
+console.log('\n📡 Initiating Gate 22: Production Observability & Resilience Audit...\n');
 
 const violations = [];
 const warnings = [];
@@ -230,7 +230,7 @@ if (warnings.length > 0) {
 }
 
 if (violations.length > 0) {
-  console.error('❌ Gate 21 Production Observability & Resilience Audit Failed:');
+  console.error('❌ Gate 22 Production Observability & Resilience Audit Failed:');
   for (const v of violations) {
     console.error(`   • ${v}`);
   }
@@ -238,5 +238,5 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log('✅ Gate 21 Production Observability & Resilience Audit Passed: 100% compliant!\n');
+console.log('✅ Gate 22 Production Observability & Resilience Audit Passed: 100% compliant!\n');
 process.exit(0);

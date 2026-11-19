@@ -1,8 +1,8 @@
 # Repository Guidelines & Operational Directive
 
-> **Governing SSoT:** [`AGENTS.md`](file:///home/tim/Fork/Arch-System/AGENTS.md)  
+> **Governing SSoT:** [`AGENTS.md`](AGENTS.md)  
 > **Target Audience:** All AI Coding Agents (Antigravity, Cursor, Claude Code, OpenCode, Codex, Subagents)  
-> **Workspace:** `/home/tim/Fork/Arch-System` (Plantcor / Arch OS)
+> **Workspace:** Repository root (`Arch-System`, Plantcor / Arch OS)
 
 ---
 
@@ -16,7 +16,7 @@ Arch-System is a production industrial mining portal (SCADA telemetry, multi-dep
 2. **Layering Rules:** `apps/*` routes through `@repo/supabase` (never direct `packages/database`). `packages/ui` is pure presentation (no DB/Supabase imports). `packages/theme` is consumed by UI, never the reverse. `tools/*` never import runtime `@repo/supabase`.
 3. **Canonical 8-Step Server Action Sequence:** 1. Authenticate (`getAuthenticatedEmployee`) → 2. Authorize → 3. Validate (`@repo/contract` Zod) → 4. Rate-limit → 5. Execute → 6. Audit log → 7. Invalidate caches (`updateTagInAction`) → 8. Return typed result (before any `redirect()`).
 4. **Strict TypeScript & Zero Mock Data:** Zero `any`, zero `@ts-ignore`, real Supabase/Redis data schemas.
-5. **On-Demand Context:** DO NOT eager-read full documentation files. Query specific line ranges or symbols on demand via `read_file` or `codemap`.
+5. **On-Demand Context & Adaptive Thinking:** DO NOT eager-read full documentation files. Query specific line ranges or symbols on demand (`rg`, `read_file` ranges, `codemap`), and follow `.agents/rules/real-world-adaptive-execution.md` (scale effort L1/L2/L3 to risk without ever dropping quality).
 
 ---
 
@@ -26,11 +26,13 @@ Always run scoped inside `Arch-System/`:
 
 ```bash
 export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH:/home/tim/.cargo/bin"
-pnpm agent:verify       # Mandatory 28-gate verification suite (fails fast)
-pnpm type-check         # turbo type-check --concurrency=2
-pnpm lint               # turbo run lint (Biome per package)
-pnpm test               # turbo run test
-pnpm audit:compliance   # static invariant sweep
+pnpm env:check               # Validate local/target environment configuration
+pnpm agent:verify            # Mandatory 28-gate verification suite (fails fast)
+pnpm test:coverage:changed   # Enforce >= 70% coverage on changed portal runtime files
+pnpm type-check              # turbo type-check --concurrency=2
+pnpm lint                    # turbo run lint (Biome per package)
+pnpm test                    # turbo run test
+pnpm audit:compliance        # static invariant sweep
 ```
 
 ---
@@ -38,10 +40,10 @@ pnpm audit:compliance   # static invariant sweep
 ## 3. Autonomous Execution & Guardrails
 
 1. **Always Branch:** Start every task by creating a branch (`git checkout -b <type>/<scope>`).
-2. **Zero-Interruption Self-Healing:** Autonomously inspect errors, fix files, and re-verify until all 28 gates pass (`pnpm agent:verify`). Never stop to ask the user to fix test failures.
+2. **Zero-Interruption Self-Healing:** Autonomously inspect errors, fix files, and re-verify until all applicable gates pass (`pnpm agent:verify`). Never stop to ask the user to fix test failures.
 3. **Zero Speculation (3-Option Prompt):** Never invent requirements. When genuinely uncertain, prompt the user with 3 concrete options (Option 1 `(Recommended)`).
-4. **Autonomous Deployment:** On verified completion, merge to `main`, push to GitHub (`git push origin main`), and deploy to Vercel (`pnpm deploy:vercel:prod`).
+4. **Release Approval Gate:** Run local builds, audits, and verification autonomously; require explicit user approval (or a dedicated release CI trigger) before merging to `main`, running `git push origin main`, or deploying via `pnpm deploy:vercel:prod`.
 5. **Traceability:** Append ISO-8601 entries to root `AGENT_TRACER.md`.
 6. **VibeMon Tracking (Mandatory):** Keep VibeMon updated (`pnpm vibemon:update`) and emit session/task events via `pnpm vibemon:track` (`pnpm vibemon:status`).
 
-For full specifications, architecture catalogs, and API contracts, consult [`AGENTS.md`](file:///home/tim/Fork/Arch-System/AGENTS.md).
+For full specifications, architecture catalogs, and API contracts, consult [`AGENTS.md`](AGENTS.md).

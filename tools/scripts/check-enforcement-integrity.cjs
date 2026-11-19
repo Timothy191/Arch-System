@@ -18,9 +18,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execSync } = require('node:child_process');
 const { DatabaseSync } = require('node:sqlite');
+const { resolveCodeGraphDbPath } = require('../lib/codegraph-path.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const DB_PATH = process.env.CODEGRAPH_DB || path.join(path.resolve(ROOT, '..', '..'), 'local.db');
+const DB_PATH = resolveCodeGraphDbPath(ROOT);
+const STRICT_DB = process.env.CODEGRAPH_STRICT === '1';
 const SNAPSHOT = path.join(ROOT, '.agents', 'memory_base', 'index-snapshot.json');
 const SETTINGS = path.join(ROOT, '.qoder', 'settings.json');
 const PRE_PUSH = path.join(ROOT, '.husky', 'pre-push');
@@ -66,7 +68,26 @@ function check(name, ok, detail) {
   if (!fs.existsSync(SNAPSHOT)) {
     detail = 'snapshot missing — run pnpm ci:snapshot';
   } else if (!fs.existsSync(DB_PATH)) {
-    detail = `index DB missing at ${DB_PATH} — run pnpm ci:reindex`;
+    if (STRICT_DB) {
+      detail = `index DB missing at ${DB_PATH} — run pnpm ci:reindex`;
+    } else {
+      try {
+        const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
+        const valid =
+          typeof snap.entities === 'number' &&
+          snap.entities > 0 &&
+          typeof snap.relations === 'number' &&
+          typeof snap.files === 'number' &&
+          typeof snap.rangedRatio === 'number' &&
+          snap.rangedRatio >= 0.5;
+        ok = valid;
+        detail = valid
+          ? `standalone snapshot verified (no local DB at ${DB_PATH})`
+          : 'snapshot counts or rangedRatio invalid';
+      } catch (e) {
+        detail = `invalid snapshot JSON: ${e.message}`;
+      }
+    }
   } else {
     try {
       const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));

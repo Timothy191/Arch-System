@@ -2,14 +2,14 @@
 name: context-lifecycle-and-compaction
 description: Enforces context-first execution (gather context via research, user prompting, or codebase exploration before any action) and automatic post-output context compaction.
 paths:
-  - '**/*'
+  - "**/*"
 alwaysApply: true
 trigger: always_on
 ---
 
 # Context-First Execution & Auto-Compaction
 
-Every turn MUST follow this lifecycle. Details: [`context-engineering`](file:///home/tim/Fork/.agents/skills/context-engineering/SKILL.md) skill.
+Every turn MUST follow this lifecycle. Details: [`context-engineering`](.agents/skills/context-engineering/SKILL.md) skill.
 
 ## Phase 1: Context-First Gate
 

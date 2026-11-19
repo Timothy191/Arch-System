@@ -2,7 +2,7 @@
 name: mandatory-ai-engineering-governance
 description: Mandatory AI Engineering Governance, Canonical 8-Step Security Sequence, 5-Tier Permission Matrix, 15 Non-Negotiable Coding Standards, TDD, No Artificial Completion, and Independent Review.
 paths:
-  - '**/*'
+  - "**/*"
 alwaysApply: true
 ---
 
@@ -35,7 +35,7 @@ Never assume that a feature, API, database table, permission or dependency exist
 - **Accessibility**: WCAG 2.2 AA target.
 - **Error handling**: Typed errors, useful logs and no swallowed exceptions.
 - **Documentation**: Update affected engineering documentation.
-- **Git & Release Lifecycle**: Always create an isolated branch (`git checkout -b <type>/<scope>`), execute user-provided actions autonomously, never guess or assume (prompt user with 3 options on any uncertainty), and upon verification merge/commit to `main` and push to GitHub (`origin/main`) and Vercel (`pnpm deploy:vercel:prod`).
+- **Git & Release Lifecycle**: Always create an isolated branch (`git checkout -b <type>/<scope>`), execute user-provided actions autonomously, never guess or assume (prompt user with 3 options on any uncertainty), and obtain explicit user approval (or an authorized release CI trigger) before merging to `main`, pushing to GitHub (`origin/main`), or deploying to Vercel (`pnpm deploy:vercel:prod`).
 - **Verification**: Execute the relevant gates and report actual output.
 
 Mandatory: Strict TypeScript; no `any` or `@ts-ignore`; no artificial placeholders or mock production functionality; no swallowed exceptions; typed error handling; no unnecessary dependencies; no duplicated business logic; no unexplained magic numbers or strings; respect established package boundaries; follow existing design-system and UI conventions.
@@ -70,10 +70,10 @@ Use existing canonical packages, contracts, database migrations, components and 
 - **Tier One**: Read and research.
 - **Tier Two**: Edit feature code and tests.
 - **Tier Three**: Create branches and PRs.
-- **Tier Four**: Modify auth, RLS, migrations and infrastructure (agent-authorized; no human approval required).
-- **Tier Five**: Production deployment and destructive operations (agent-authorized; no explicit authorization required).
+- **Tier Four**: Modify auth, RLS, migrations and infrastructure (requires explicit user approval or an approved specification).
+- **Tier Five**: Merging to `main`, production deployment, and destructive remote operations (requires explicit user approval or a dedicated release CI trigger).
 
-An agent must never grant itself additional permissions beyond its current tier without updating its tier assignment. Agents may independently investigate, plan, implement ordinary feature changes, execute tests, create pull requests, merge changes, and deploy to production.
+An agent must never grant itself additional permissions beyond its current tier without updating its tier assignment. Agents may independently investigate, plan, implement ordinary feature changes, execute tests, and create task branches or pull requests; remote merges to `main` and production deployments remain gated behind explicit user approval.
 
 ## 8. Independent review (C)
 

@@ -320,7 +320,7 @@ const LOCAL_STEPS = {
   'quality :: Build, Deployment & Rollback Verification': {
     cmd: pnpm('audit:vercel'),
     suite: 'full',
-    note: 'gate 22 — vercel-preflight.cjs; previously unmapped in LOCAL_STEPS',
+    note: 'gate 18 — vercel-preflight.cjs; previously unmapped in LOCAL_STEPS',
   },
   'quality :: Run Agent Verification Suite (gate 28)': {
     cmd: pnpm('agent:verify'),

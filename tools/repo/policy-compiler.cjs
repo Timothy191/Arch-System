@@ -251,6 +251,18 @@ function writeOrCheck(filePath, content) {
     console.log(`✓ ${filePath}`);
     return true;
   } else {
+    if (fs.existsSync(filePath)) {
+      try {
+        const existing = stripVolatile(JSON.parse(fs.readFileSync(filePath, 'utf-8')));
+        const incoming = stripVolatile(JSON.parse(content));
+        if (JSON.stringify(existing, null, 2) === JSON.stringify(incoming, null, 2)) {
+          console.log(`✓ Unchanged ${filePath}`);
+          return true;
+        }
+      } catch {
+        // Re-write malformed or non-JSON file
+      }
+    }
     fs.writeFileSync(filePath, content, 'utf-8');
     console.log(`✓ Generated ${filePath}`);
     return true;
@@ -274,7 +286,7 @@ let allOk = true;
  * @returns {string} Formatted JSON string.
  */
 function generateJson(data) {
-  return JSON.stringify({ version: POLICY_VERSION, generatedAt: timestamp, ...data }, null, 2);
+  return `${JSON.stringify({ version: POLICY_VERSION, generatedAt: timestamp, ...data }, null, 2)}\n`;
 }
 
 const jsonOutputs = [
@@ -370,8 +382,12 @@ if (CHECK_MODE) {
   }
 } else {
   const eslintPath = path.join(OUTPUT_DIR, 'eslint-boundaries.generated.cjs');
-  fs.writeFileSync(eslintPath, eslintContent, 'utf-8');
-  console.log(`✓ Generated ${eslintPath}`);
+  if (fs.existsSync(eslintPath) && fs.readFileSync(eslintPath, 'utf-8') === eslintContent) {
+    console.log(`✓ Unchanged ${eslintPath}`);
+  } else {
+    fs.writeFileSync(eslintPath, eslintContent, 'utf-8');
+    console.log(`✓ Generated ${eslintPath}`);
+  }
 }
 
 if (CHECK_MODE && !allOk) {

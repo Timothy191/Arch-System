@@ -8,11 +8,18 @@
 # Code-Intelligence Substrate Integrity.
 #
 # Numbering note: gates 24 and 27 are not run_gate invocations — they are
-# self-recorded by tools/audits/verify-27-gates.cjs during the evidence-integrity
+# self-recorded by tools/audits/verify-gates.cjs during the evidence-integrity
 # epilogue (see that script's hasGate24 / hasGate27 guards). The manifest footer
 # is dynamic (${TOTAL_GATES}/${TOTAL_GATES}) so it tracks the real count.
 
 set -uo pipefail
+if command -v locale >/dev/null 2>&1 && locale -a 2>/dev/null | grep -qiE '^en_US\.(utf8|UTF-8)$'; then
+  export LC_ALL=en_US.UTF-8
+  export LANG=en_US.UTF-8
+else
+  export LC_ALL=C.UTF-8
+  export LANG=C.UTF-8
+fi
 
 FAST_MODE=false
 if [[ "${1:-}" == "--fast" ]]; then
@@ -155,26 +162,26 @@ if [[ "${FAST_MODE}" == "false" ]]; then
     "Run 'pnpm db:migrate:check' and 'pnpm lint:migrations' to resolve migration drift, rollback, or Squawk/RLS issues." \
     "mandatory" "RUNTIME_EMPIRICAL"
 
-  run_gate 22 "🚀" "Build, Deployment & Rollback Verification" \
+  run_gate 18 "🚀" "Build, Deployment & Rollback Verification" \
     "pnpm --filter portal build && node tools/scripts/vercel-preflight.cjs" \
     "Fix Next.js build errors or run 'pnpm audit:vercel' to fix Vercel monorepo preflight errors." \
     "mandatory" "RUNTIME_EMPIRICAL"
 
-  run_gate 18 "⚡" "Performance & Load Regression Budgets" \
+  run_gate 19 "⚡" "Performance & Load Regression Budgets" \
     "node tools/audits/audit-performance-budgets.cjs" \
     "Run 'pnpm audit:perf-budgets' to fix CSS/bundle size overruns, sequential waterfalls, or missing k6 SLA thresholds." \
     "mandatory" "RUNTIME_EMPIRICAL"
 
-  run_gate 19 "🎭" "End-to-End User Journey Coverage" \
+  run_gate 20 "🎭" "End-to-End User Journey Coverage" \
     "node tools/audits/audit-e2e-journeys.cjs && (if [[ \"\${RUN_LIVE_E2E:-0}\" == \"1\" ]]; then pnpm test:e2e -- --project=chromium --grep @smoke; fi)" \
     "Run 'pnpm audit:e2e-journeys' or 'RUN_LIVE_E2E=1 pnpm test:e2e' to fix missing E2E workflow coverage or failing smoke specs." \
     "mandatory" "RUNTIME_EMPIRICAL"
 
-  run_gate 20 "⛓️ " "Dependency & Supply-Chain Security" \
+  run_gate 21 "⛓️ " "Dependency & Supply-Chain Security" \
     "node tools/audits/audit-supply-chain.cjs" \
     "Run 'pnpm audit:supply-chain' to resolve exposed secrets, unsafe lifecycle scripts, or high/critical advisories."
 
-  run_gate 21 "📡" "Production Observability, Resilience & Redis Integration" \
+  run_gate 22 "📡" "Production Observability, Resilience & Redis Integration" \
     "node tools/audits/audit-observability-resilience.cjs" \
     "Run 'pnpm audit:resilience' or 'pnpm test:redis:integration' to fix health/readiness probes, OpenTelemetry spans, or Redis integration resilience." \
     "mandatory" "RUNTIME_EMPIRICAL"
@@ -185,10 +192,10 @@ if [[ "${FAST_MODE}" == "false" ]]; then
     "mandatory" "RUNTIME_EMPIRICAL"
 fi
 
-# ── Stage 3: AI Agent Governance, Hallucination & Evidence Gates (25–28) ─────
+# ── Stage 3: AI Agent Governance, Hallucination & Evidence Gates (24–28) ─────
 # Gates 24 and 27 are meta-gates: they verify the manifest produced by the run_gate
 # loop above, so they cannot be run_gate invocations. They are self-recorded by
-# tools/audits/verify-27-gates.cjs during the evidence-integrity epilogue below.
+# tools/audits/verify-gates.cjs during the evidence-integrity epilogue below.
 run_gate 25 "🛡️ " "Agent Execution & Tool Permissions" \
   "node tools/audits/audit-agent-permissions.cjs" \
   "Run 'pnpm audit:agent-permissions' to fix .qoder hook bindings or path/commit guard scripts."
@@ -223,11 +230,11 @@ if [[ "${FAST_MODE}" == "true" ]]; then
   VERIFY_FLAGS="--fast"
 fi
 echo -n "🔎 24 & 27. Evidence Integrity & Independent Reproducibility... "
-if node tools/audits/verify-27-gates.cjs --verify-manifest "${EVIDENCE_JSON}" ${VERIFY_FLAGS} > /dev/null 2>&1; then
+if node tools/audits/verify-gates.cjs --verify-manifest "${EVIDENCE_JSON}" ${VERIFY_FLAGS} > /dev/null 2>&1; then
   echo "✅ PASS"
 else
   echo "❌ FAIL"
-  echo "AGENT DIRECTIVE: Run 'node tools/audits/verify-27-gates.cjs --verify-manifest ${EVIDENCE_JSON}' to inspect evidence or reproducibility failures."
+  echo "AGENT DIRECTIVE: Run 'node tools/audits/verify-gates.cjs --verify-manifest ${EVIDENCE_JSON}' to inspect evidence or reproducibility failures."
   exit 1
 fi
 

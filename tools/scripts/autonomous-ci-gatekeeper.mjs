@@ -17,7 +17,12 @@ import path from 'node:path';
 
 const GITHUB_REPO = 'Timothy191/Arch-System';
 const REPO_ROOT = process.cwd();
-const DEFAULT_CODEGRAPH_DB = process.env.CODEGRAPH_DB || path.resolve(REPO_ROOT, '../../local.db');
+const HOME_CODEGRAPH_DB = path.join(os.homedir(), 'local.db');
+const DEFAULT_CODEGRAPH_DB =
+  process.env.CODEGRAPH_DB ||
+  (fs.existsSync(HOME_CODEGRAPH_DB)
+    ? HOME_CODEGRAPH_DB
+    : path.join(REPO_ROOT, '.ci-local', 'local.db'));
 const DEFAULT_FETCH_CONCURRENCY = '2';
 const DEFAULT_FETCH_RETRIES = '5';
 const DEFAULT_FETCH_TIMEOUT_MS = '120000';

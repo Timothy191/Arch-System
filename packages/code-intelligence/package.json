@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit",
     "lint": "biome check .",
     "lint:ci": "biome ci .",
-    "test": "if [ -f src/parser.test.ts ]; then node --test src/parser.test.ts; else echo 'No local test files'; fi",
+    "test": "if [ -f src/parser.test.ts ]; then if node -e 'process.exit(process.config.variables.node_use_amaro ? 0 : 1)'; then node --test src/parser.test.ts; else tsc && node --test dist/parser.test.js; fi; else echo 'No local test files'; fi",
     "test:watch": "node --test --watch src/parser.test.ts",
     "codegen": "tsc --build && echo 'Build complete'"
   },

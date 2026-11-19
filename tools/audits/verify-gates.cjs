@@ -7,21 +7,21 @@
  *   - Gate 24 (Evidence Integrity & Gate Enforcement): Ensures every preceding
  *     mandatory gate in `.ci-local/agent-verify-evidence.json` executed a real
  *     command, recorded a non-negative duration, captured a valid SHA-256 log
- *     digest, exited with code 0, and never silently skipped a mandatory check.
- *     Also emits a JUnit XML report (`.ci-local/agent-verify-junit.xml`) for CI
- *     artifact retention.
+ *     digest, exited with code 0, has unique sequential IDs, and never silently
+ *     skipped a mandatory check. Also emits a JUnit XML report
+ *     (`.ci-local/agent-verify-junit.xml`) for CI artifact retention.
  *   - Gate 27 (Reproducibility & Independent Verification): Independently
  *     verifies clean-environment reproducibility invariants (`pnpm@9.15.9` pin,
  *     `pnpm-lock.yaml` integrity, `turbo.json` task graph, `local-ci.mjs --list`
  *     execution plan) and computes an honest readiness classification:
- *       * `STATIC_AND_CONTRACT_VERIFIED` (when static, contract, unit, DB drift,
- *         and build artifact checks pass, while live runtime targets like k6
- *         saturation or live Playwright browser runs are not active in the shell)
+ *       * `STATIC_CONTRACT_AND_INTEGRATION_VERIFIED` (when static, contract,
+ *         unit, DB drift, and build artifact checks pass, while live runtime
+ *         targets like k6 saturation or live Playwright runs are inactive)
  *       * `FULL_RUNTIME_PRODUCTION_VERIFIED` (when live runtime targets were
  *         also executed and verified)
  *
  * Usage:
- *   node tools/audits/verify-27-gates.cjs --verify-manifest .ci-local/agent-verify-evidence.json
+ *   node tools/audits/verify-gates.cjs --verify-manifest .ci-local/agent-verify-evidence.json
  */
 
 const fs = require('node:fs');
@@ -80,6 +80,7 @@ if (manifest) {
     );
   }
 
+  const seenIds = new Set();
   for (const g of gates) {
     if (!g.id || !g.name || !g.command) {
       violations.push(
@@ -87,6 +88,11 @@ if (manifest) {
       );
       continue;
     }
+    if (seenIds.has(g.id)) {
+      violations.push(`Duplicate Gate ID #${g.id} found in evidence manifest.`);
+    }
+    seenIds.add(g.id);
+
     if (g.policy === 'mandatory' && g.status !== 'PASS') {
       violations.push(
         `Mandatory Gate #${g.id} (${g.name}) did not pass (status=${g.status}, exitCode=${g.exitCode})`
@@ -156,7 +162,6 @@ if (manifest && violations.length === 0) {
       ? 'FULL_RUNTIME_PRODUCTION_VERIFIED'
       : 'STATIC_CONTRACT_AND_INTEGRATION_VERIFIED';
 
-  const nowIso = new Date().toISOString();
   const selfDigest = crypto
     .createHash('sha256')
     .update(`${manifest.runId || 'run'}:${manifest.gates.length}:${readinessTier}`)
@@ -168,7 +173,7 @@ if (manifest && violations.length === 0) {
     manifest.gates.push({
       id: 24,
       name: 'Evidence Integrity & Gate Enforcement',
-      command: 'node tools/audits/verify-27-gates.cjs --verify-manifest',
+      command: 'node tools/audits/verify-gates.cjs --verify-manifest',
       policy: 'mandatory',
       status: 'PASS',
       exitCode: 0,
@@ -182,7 +187,7 @@ if (manifest && violations.length === 0) {
     manifest.gates.push({
       id: 27,
       name: 'Reproducibility & Independent Verification',
-      command: 'node tools/audits/verify-27-gates.cjs --verify-manifest',
+      command: 'node tools/audits/verify-gates.cjs --verify-manifest',
       policy: 'mandatory',
       status: 'PASS',
       exitCode: 0,
@@ -190,6 +195,26 @@ if (manifest && violations.length === 0) {
       outputSha256: selfDigest,
     });
   }
+
+  // Verify sequential gate-ID continuity (1..totalGates) in full runs
+  if (!isFastMode) {
+    const idSet = new Set(manifest.gates.map((g) => g.id));
+    for (let id = 1; id <= manifest.gates.length; id += 1) {
+      if (!idSet.has(id)) {
+        violations.push(`Missing sequential Gate ID #${id} in full verification manifest.`);
+      }
+    }
+  }
+}
+
+if (manifest && violations.length === 0) {
+  const nowIso = new Date().toISOString();
+  const liveLoadExecuted = process.env.RUN_LIVE_LOAD_TEST === '1';
+  const liveE2eExecuted = process.env.RUN_LIVE_E2E === '1';
+  const readinessTier =
+    liveLoadExecuted && liveE2eExecuted
+      ? 'FULL_RUNTIME_PRODUCTION_VERIFIED'
+      : 'STATIC_CONTRACT_AND_INTEGRATION_VERIFIED';
 
   const empiricalCount = manifest.gates.filter(
     (g) => g.evidenceType === 'RUNTIME_EMPIRICAL'
@@ -231,7 +256,7 @@ if (manifest && violations.length === 0) {
     .join('\n');
 
   const junitXml = `<?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Arch-System 27-Gate Verification Suite" tests="${manifest.gates.length}" failures="${manifest.failedGates}" time="${totalTimeSec}">
+<testsuites name="Arch-System ${manifest.gates.length}-Gate Verification Suite" tests="${manifest.gates.length}" failures="${manifest.failedGates}" time="${totalTimeSec}">
   <testsuite name="agent-verify" tests="${manifest.gates.length}" failures="${manifest.failedGates}" time="${totalTimeSec}" timestamp="${nowIso}">
 ${testCasesXml}
   </testsuite>

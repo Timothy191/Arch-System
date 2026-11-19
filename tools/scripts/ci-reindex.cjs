@@ -17,19 +17,11 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { execSync } = require('node:child_process');
+const { resolveCodeGraphDbPath, resolveCodeIntelSkillDir } = require('../lib/codegraph-path.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const HOME_ROOT = path.resolve(ROOT, '..', '..');
-const SKILL_DIR = fs.existsSync(
-  path.join(HOME_ROOT, '.agents', 'skills', 'code-intelligence', 'scripts')
-)
-  ? path.join(HOME_ROOT, '.agents', 'skills', 'code-intelligence', 'scripts')
-  : path.join(ROOT, '..', '.agents', 'skills', 'code-intelligence', 'scripts');
-const DB_PATH =
-  process.env.CODEGRAPH_DB ||
-  (fs.existsSync(path.join(HOME_ROOT, 'local.db'))
-    ? path.join(HOME_ROOT, 'local.db')
-    : path.join(path.resolve(ROOT, '..'), 'local.db'));
+const SKILL_DIR = resolveCodeIntelSkillDir(ROOT);
+const DB_PATH = resolveCodeGraphDbPath(ROOT);
 const REPO_ROOT = process.env.CODEGRAPH_REPO || ROOT;
 
 function run(label, cmd, opts) {

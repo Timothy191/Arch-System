@@ -37,6 +37,7 @@ START_DEV=false
 START_PROD=false
 START_INFRA=false
 BUILD_PROJECT=false
+REGENERATE_MODE=false
 
 for arg in "$@"; do
   case "$arg" in
@@ -45,6 +46,7 @@ for arg in "$@"; do
     --start|--prod|--production) START_PROD=true; BUILD_PROJECT=true ;;
     --infra|--tools) START_INFRA=true ;;
     --build) BUILD_PROJECT=true ;;
+    --regenerate) REGENERATE_MODE=true ;;
     --full)
       CLEAN_MODE=true
       START_INFRA=true
@@ -59,6 +61,7 @@ for arg in "$@"; do
       echo "  --clean, --reinstall   Wipe node_modules, cache, and perform clean reinstall"
       echo "  --infra, --tools       Download and start required Docker infrastructure (Redis, Postgres, etc.)"
       echo "  --build                Build the project"
+      echo "  --regenerate           Force regeneration of design tokens and policy artifacts"
       echo "  --dev                  Complete setup and launch development server"
       echo "  --start, --prod        Complete setup, run production build, and start server"
       echo "  --help, -h             Show this help message"
@@ -76,15 +79,15 @@ echo
 # ── 1. Check Node.js Runtime ──────────────────────────────────────────────────
 info "Checking runtime prerequisites..."
 if ! command -v node >/dev/null 2>&1; then
-  error "Node.js is not installed. Please install Node.js 20+ (recommended 22+) to proceed."
+  error "Node.js is not installed. Please install Node.js 24+ (see .nvmrc / mise.toml) to proceed."
   exit 1
 fi
 
 NODE_VERSION=$(node -v | tr -d 'v')
 NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1)
 
-if [ "$NODE_MAJOR" -lt 22 ]; then
-  error "Detected Node.js v${NODE_VERSION}. Node.js 22+ is required."
+if [ "$NODE_MAJOR" -lt 24 ]; then
+  error "Detected Node.js v${NODE_VERSION}. Node.js 24+ is required (see .nvmrc / mise.toml)."
   exit 1
 else
   success "Node.js v${NODE_VERSION} detected"
@@ -99,12 +102,16 @@ if ! command -v pnpm >/dev/null 2>&1; then
   fi
   if ! command -v pnpm >/dev/null 2>&1; then
     npm install -g pnpm@9.15.9 >/dev/null 2>&1 || {
-      error "Could not auto-install pnpm. Please install it with: npm install -g pnpm"
+      error "Could not auto-install pnpm. Please install it with: npm install -g pnpm@9.15.9"
       exit 1
     }
   fi
 fi
-success "pnpm $(pnpm -v) ready"
+PNPM_ACTUAL=$(pnpm -v 2>/dev/null || echo "unknown")
+if [ "$PNPM_ACTUAL" != "9.15.9" ]; then
+  warn "Active pnpm resolved to ${PNPM_ACTUAL} (pinned packageManager is pnpm@9.15.9; enable corepack or mise to avoid shim warnings)."
+fi
+success "pnpm ${PNPM_ACTUAL} ready"
 
 # ── 3. Clean / Reinstall (if requested) ───────────────────────────────────────
 if [ "$CLEAN_MODE" = true ]; then
@@ -173,11 +180,17 @@ if ! grep -q "^HOSTNAME=" "$PORTAL_ENV" 2>/dev/null; then
   echo "HOSTNAME=0.0.0.0" >> "$PORTAL_ENV"
 fi
 
-# ── 6. Sync Assets, Generate Tokens & Monorepo Policies ────────────────────────
-info "Compiling design tokens and verifying boundary policies..."
-node scripts/sync-assets-smart.cjs || true
-pnpm --filter @repo/theme codegen
-pnpm policy:gen
+# ── 6. Sync Assets, Verify Tokens & Monorepo Policies ─────────────────────────
+info "Verifying assets, design tokens, and boundary policies..."
+SKIP_VERSION_SYNC=1 node scripts/sync-assets-smart.cjs || true
+if [ "$REGENERATE_MODE" = true ] || [ ! -f "packages/theme/src/tokens/generated.ts" ] || [ ! -f "packages/theme/src/css/variables-generated.css" ]; then
+  pnpm --filter @repo/theme codegen
+fi
+if [ "$REGENERATE_MODE" = true ]; then
+  pnpm policy:gen
+else
+  pnpm policy:check || pnpm policy:gen
+fi
 success "Design tokens and workspace policies verified"
 
 # ── 6b. Agent MCP Server Onboarding & Synchronization ────────────────────────

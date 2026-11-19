@@ -2,7 +2,7 @@
 name: evidence-based-verification-and-security
 description: Security verification and evidence-level reporting invariants
 paths:
-  - '**/*'
+  - "**/*"
 alwaysApply: true
 ---
 
@@ -58,5 +58,5 @@ Building on unverified assumptions is a critical failure.
 Whenever a user prompt includes the word **`Audit`** (case-insensitive, including `audit` or `auditing`):
 
 1. Load and follow `.agents/skills/deep-audit/SKILL.md` (`lintsinghua/DeepAudit` 4-phase workflow: Reconnaissance -> AST/RAG Analysis -> Empirical Verification -> Orchestrator Report).
-2. Execute `pnpm audit:deep` and `pnpm audit:react-doctor` as baseline empirical verification alongside domain-targeted checks (`pnpm audit:compliance` / Jest security assertions).
+2. Execute `pnpm audit:compliance`, `pnpm policy:check`, and `pnpm agent:verify` (or `pnpm agent:verify:fast` during inner-loop audits) as baseline empirical verification alongside domain-targeted Jest security assertions.
 3. Report only empirically verified findings with `file:line`, severity (`P0`–`P3`), evidence level (`E1`–`E4`), and output digests.

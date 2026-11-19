@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Gate 19: End-to-End User Journeys Auditor
+ * Gate 20: End-to-End User Journeys Auditor
  *
  * Verifies complete Playwright E2E test coverage and configuration invariants across e2e/:
  *   1. Playwright Configuration: Verifies e2e/playwright.config.ts defines required device/browser
@@ -23,7 +23,7 @@ const ROOT = path.join(__dirname, '..', '..');
 const E2E_DIR = path.join(ROOT, 'e2e');
 const PLAYWRIGHT_CONFIG = path.join(E2E_DIR, 'playwright.config.ts');
 
-console.log('\n🎭 Initiating Gate 19: End-to-End User Journeys Audit...\n');
+console.log('\n🎭 Initiating Gate 20: End-to-End User Journeys Audit...\n');
 
 const violations = [];
 const warnings = [];
@@ -163,7 +163,7 @@ if (warnings.length > 0) {
 }
 
 if (violations.length > 0) {
-  console.error('❌ Gate 19 End-to-End User Journeys Audit Failed:');
+  console.error('❌ Gate 20 End-to-End User Journeys Audit Failed:');
   for (const v of violations) {
     console.error(`   • ${v}`);
   }
@@ -171,5 +171,5 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log('✅ Gate 19 End-to-End User Journeys Audit Passed: 100% compliant!\n');
+console.log('✅ Gate 20 End-to-End User Journeys Audit Passed: 100% compliant!\n');
 process.exit(0);

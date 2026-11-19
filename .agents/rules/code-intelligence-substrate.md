@@ -2,15 +2,15 @@
 name: code-intelligence-substrate
 description: CodeGraph index is the single source of truth for structural knowledge; enforce its integrity, never hand-edit it, and verify before claiming structural work
 paths:
-  - 'tools/scripts/ci-*.cjs'
-  - 'tools/audits/audit-code-intelligence-drift.cjs'
-  - '.agents/memory_base/index-snapshot.json'
+  - "tools/scripts/ci-*.cjs"
+  - "tools/audits/audit-code-intelligence-drift.cjs"
+  - ".agents/memory_base/index-snapshot.json"
 alwaysApply: false
 ---
 
 # Code-Intelligence Substrate
 
-The CodeGraph SQLite index (`/home/tim/local.db`, outside the git tree) is the **single
+The CodeGraph SQLite index (resolved via `CODEGRAPH_DB`, `~/local.db`, or `.ci-local/local.db`) is the **single
 source of truth** for structural knowledge across the repo. Every agent that claims to
 have _indexed_, _searched_, _impacted_, or _chunked_ the codebase is claiming to have
 used this substrate. It must be kept healthy by all agents.
@@ -52,7 +52,7 @@ The gate is **always applied**, not only when an agent remembers to run it:
 
 | Layer            | What it does                                                                                                                                                                                                                                 |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Edit-time hook   | `.qoder/hooks/code-intelligence-gate.sh` fires on every `Edit` / `Write` (registered in `.qoder/settings.json`). Non-blocking — prints a ⚠ drift advisory so the agent is informed at edit time.                                            |
+| Edit-time hook   | `.qoder/hooks/code-intelligence-gate.sh` fires on every `Edit` / `Write` (registered in `.qoder/settings.json`). Non-blocking — prints a ⚠ drift advisory so the agent is informed at edit time.                                             |
 | Pre-commit guard | `tools/scripts/check-enforcement-integrity.cjs` runs in `.husky/pre-commit`. Hard-blocks commits that would ship a disabled or bypassed enforcement layer (audit script, snapshot, hook registration, or magic-numbered pre-push fast-path). |
 | Protected paths  | `.qoder/hooks/protect-paths.sh` blocks direct edits to the enforcement SSoT files.                                                                                                                                                           |
 | Pre-push gate    | `.husky/pre-push` runs the full `agent-verify.sh`; its fast-path compares `passedGates === totalGates` (not a magic 27/28), so it stays valid as the suite grows.                                                                            |

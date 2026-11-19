@@ -2,7 +2,7 @@
 name: execution-guardrails
 description: Always-on pre-completion audits and quality gates for industrial-grade software
 paths:
-  - '**/*'
+  - "**/*"
 alwaysApply: true
 ---
 
@@ -16,7 +16,7 @@ Arch-System controls real mining operations. Every agent must:
 - **Strict Task Focus** — never explore unrelated code or files outside the user's explicit objective.
 - **Assume real-world consequences** — a wrong RLS policy or migration can halt production.
 - **Verify before claiming** — never assert "works" without empirical evidence (runtime tests, live probes).
-- **Own the full lifecycle** — always create a task branch (`git checkout -b <type>/<scope>`), perform all user-provided actions autonomously, never assume or guess (prompt the user with **3 options** at any point of uncertainty), and when complete and verified, commit/merge to `main` and push to both GitHub (`git push origin main`) and Vercel (`pnpm deploy:vercel:prod`).
+- **Own the full local lifecycle** — always create a task branch (`git checkout -b <type>/<scope>`), perform all user-provided implementation and verification actions autonomously, never assume or guess (prompt the user with **3 options** at any point of uncertainty), and obtain explicit user approval (or a dedicated release CI trigger) before merging to `main`, pushing to GitHub (`git push origin main`), or deploying to Vercel (`pnpm deploy:vercel:prod`).
 
 ## Anti-Assumption & 3-Option Uncertainty Mandate (CRITICAL)
 
@@ -51,7 +51,7 @@ Before marking any task complete, autonomously execute:
 - **Tooling Drift**: If `pnpm policy:check` fails on generated files, run `pnpm policy:gen` to regenerate.
 - **Agent Tracing**: Append ISO 8601 entries to the single root `AGENT_TRACER.md` ledger (never create per-package tracer files or non-canonical root tracer variants).
 - **Token & Bug Telemetry**: Record sessions via `pnpm token:record -- --agent <name> --input <n> --output <n> --bugs <n>` (or `pnpm agent:hook:post-task`).
-- **System Overview (`/overview`) Parity**: When adding migrations, routes, quality gates, or updating expenditure telemetry, keep `apps/portal/app/overview/` (`lib/data.ts`, `DatabaseSchema.tsx`, `TechStack.tsx`, `SystemArchitecture.tsx`, `OverviewHeaderVisuals.tsx`, `agentic-monitor-data.ts`) synchronized (`213` migrations, `27/27` gates, `PROJECT_MILESTONES` summing to `LIFETIME_METRICS` in `en-US` period format `R 5,000.00`).
+- **System Overview (`/overview`) Parity**: When adding migrations, routes, quality gates, or updating expenditure telemetry, keep `apps/portal/app/overview/` (`lib/data.ts`, `DatabaseSchema.tsx`, `TechStack.tsx`, `SystemArchitecture.tsx`, `OverviewHeaderVisuals.tsx`, `agentic-monitor-data.ts`) synchronized with live migration counts (`packages/database/migrations/*.sql`), the full `pnpm agent:verify` gate suite, and `PROJECT_MILESTONES` summing to `LIFETIME_METRICS` in `en-US` period format.
 - **Backlog Zero & Anti-Bloat Leases**: Complete outstanding tasks before new work; use `skills-mcp` acquire/return for dynamic context leasing.
 
 ## Fast Inner-Loop

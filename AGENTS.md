@@ -6,7 +6,7 @@
 
 Built as a **Next.js 16 App Router + React 19** monorepo (`pnpm@9.15.9`, Turborepo 2.x, TypeScript 5.9.3, Node.js >=24), it deploys to Vercel (`arch-system`) and connects to cloud-hosted **Supabase** (PostgreSQL 17, Auth, Realtime CDC) and **Redis** (local TCP in development; serverless REST compatible in production).
 
-**Repository topology**: `/home/tim/Fork/Arch-System` is a standalone Git repository (`github.com/Timothy191/Arch-System`). When checked out inside `/home/tim/Fork`, the parent directory acts as a zero-dependency federated wrapper (`pnpm install` is blocked in `Fork/`) alongside standalone MCP servers (`skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`, `langgraph-mcp`). Run all package, git, and verification commands inside `Arch-System/` unless editing a sibling MCP server.
+**Repository topology**: `Arch-System` (`github.com/Timothy191/Arch-System`) works as a standalone repository at its own checkout root (e.g., `/home/tim/Arch`), or optionally inside a federated parent workspace (`Fork/`) alongside sibling MCP servers (`skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`, `langgraph-mcp`). Run all package, git, and verification commands from the `Arch-System` repository root.
 
 ---
 
@@ -165,49 +165,66 @@ Extend or throw `AppError` subclasses from `@repo/errors` (`ValidationError` 400
 Protected Server Actions (`'use server'`) and Route Handlers follow this exact order: **1. Authenticate → 2. Authorize → 3. Validate (`@repo/contract`) → 4. Rate-limit → 5. Execute → 6. Audit log → 7. Invalidate caches → 8. Return typed result** (always invalidate before `redirect()`, which throws a control-flow exception):
 
 ```typescript
-'use server';
+"use server";
 
 import {
   shiftCloseoutSchema,
   type ShiftCloseoutInput,
-} from '@repo/contract/schemas/control-room.schema';
-import { AuthError, ForbiddenError, RateLimitError, ValidationError } from '@repo/errors';
-import { logger } from '@repo/logger/server';
-import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
-import { getAuthenticatedEmployee } from '@repo/supabase';
-import { createServerSupabaseClient } from '@repo/supabase/server';
-import { tagDepartment } from '@/lib/cache-tags';
-import { updateTag } from '@/lib/server-cache';
+} from "@repo/contract/schemas/control-room.schema";
+import {
+  AuthError,
+  ForbiddenError,
+  RateLimitError,
+  ValidationError,
+} from "@repo/errors";
+import { logger } from "@repo/logger/server";
+import {
+  FixedWindowStrategy,
+  MemoryStore,
+  RateLimiter,
+} from "@repo/rate-limiter";
+import { getAuthenticatedEmployee } from "@repo/supabase";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { tagDepartment } from "@/lib/cache-tags";
+import { updateTag } from "@/lib/server-cache";
 
 const closeoutLimiter = new RateLimiter({
   store: new MemoryStore(),
   strategy: new FixedWindowStrategy(),
   limit: 5,
   windowMs: 60_000,
-  keyPrefix: 'ratelimit:shift_closeout:',
+  keyPrefix: "ratelimit:shift_closeout:",
 });
 
 export async function submitShiftCloseout(rawInput: ShiftCloseoutInput) {
   const supabase = await createServerSupabaseClient();
   const principal = await getAuthenticatedEmployee(supabase);
-  if (!principal?.employee) throw new AuthError('Unauthorized');
-  if (!principal.employee.accessible_departments.includes('control-room')) {
-    throw new ForbiddenError('Insufficient department access');
+  if (!principal?.employee) throw new AuthError("Unauthorized");
+  if (!principal.employee.accessible_departments.includes("control-room")) {
+    throw new ForbiddenError("Insufficient department access");
   }
 
   const parsed = shiftCloseoutSchema.safeParse(rawInput);
   if (!parsed.success) {
-    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid input');
+    throw new ValidationError(
+      parsed.error.issues[0]?.message ?? "Invalid input"
+    );
   }
 
   const { allowed } = await closeoutLimiter.check(principal.user.id);
-  if (!allowed) throw new RateLimitError('Rate limit exceeded');
+  if (!allowed) throw new RateLimitError("Rate limit exceeded");
 
-  const { data: closeoutRecord, error } = await supabase.rpc('close_shift', parsed.data);
+  const { data: closeoutRecord, error } = await supabase.rpc(
+    "close_shift",
+    parsed.data
+  );
   if (error) throw error;
-  logger.info({ event: 'shift_closeout_submitted', actorId: principal.user.id });
+  logger.info({
+    event: "shift_closeout_submitted",
+    actorId: principal.user.id,
+  });
 
-  await updateTag(tagDepartment('control-room', 'shift-closeout'));
+  await updateTag(tagDepartment("control-room", "shift-closeout"));
   return { success: true as const, closeoutRecord };
 }
 ```
@@ -265,7 +282,7 @@ Always acquire external clients through factory functions to preserve pooling an
 
 ## Runtime/Tooling Preferences
 
-- **Node.js & pnpm**: Requires **Node.js `>=24.0.0`** (`.node-version` and `.nvmrc` pin `24`) and **`pnpm@9.15.9` exclusively** (`packageManager` in `package.json` — never `npm`, `yarn`, or `bun`). Shared dependencies use `pnpm-workspace.yaml` catalogs (`catalog:` and `catalogs.react19`), enforced by `pnpm deps:lint` (`syncpack`). If `pnpm` or `cargo` is missing from a non-login `PATH`:
+- **Node.js & pnpm**: Requires **Node.js `>=24.0.0`** (`.node-version`, `.nvmrc`, and `setup.sh` enforce `24`) and **`pnpm@9.15.9` exclusively** (`packageManager` in `package.json` — never `npm`, `yarn`, or `bun`). Keep `package.json#pnpm` intact while pinned to `pnpm@9.15.9` (`lockfileVersion: '9.0'`); enable `corepack` or `mise` if a global pnpm v10/v11 shim warns on `package.json#pnpm`. Shared dependencies use `pnpm-workspace.yaml` catalogs (`catalog:` and `catalogs.react19`), enforced by `pnpm deps:lint` (`syncpack`). If `pnpm` or `cargo` is missing from a non-login `PATH`:
 
   ```bash
   export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$HOME/.cargo/bin:$PATH"
@@ -275,13 +292,13 @@ Always acquire external clients through factory functions to preserve pooling an
   - **Rust `1.85.0`** (`tools/swarms-orchestrator/rust-toolchain.toml`, `cargo ... --locked`).
   - **Python `>=3.10`** (`packages/eval/pyproject.toml`, Poetry or `uv` for DeepEval/pytest; Ruff 100-col lint).
   - **Cloud Supabase + Local Redis**: Target cloud-hosted Supabase exclusively (do not start a local Supabase container stack); run local Redis via `pnpm redis:up` (`infra/docker/compose.redis.yml`).
-  - **Vercel**: Single canonical project `arch-system` (`vercel.json`; deploy via `pnpm deploy:vercel:prod` after `vercel link` to the correct account). Git auto-deploys from `main` on the account owning `arch-system-kappap.vercel.app`; the `server-management1` team's duplicate projects were deleted — do not relink them.
-- **Code-Intelligence substrate**: Prefer `codemap` and `ast-grep` for structural exploration. The CodeGraph SQLite index at `/home/tim/local.db` (baseline in `.agents/memory_base/index-snapshot.json`) is enforced by Gate 28 (`pnpm audit:code-intelligence`, requiring >= 50% ranged entities and exact baseline parity). Never hand-edit `local.db`; rebuild via `pnpm ci:reindex && pnpm ci:snapshot`.
+  - **Vercel**: Single canonical project `arch-system` (`vercel.json`; deploy via `pnpm deploy:vercel:prod` after `vercel link` and explicit user approval). Git auto-deploys from `main` on the account owning `arch-system-kappap.vercel.app`; the `server-management1` team's duplicate projects were deleted — do not relink them.
+- **Code-Intelligence substrate**: Prefer `codemap` and `ast-grep` for structural exploration. The CodeGraph SQLite index resolves via `CODEGRAPH_DB` → `~/local.db` → `.ci-local/local.db` (baseline in `.agents/memory_base/index-snapshot.json`) and is enforced by Gate 28 (`pnpm audit:code-intelligence`, validating >= 50% ranged entities and snapshot integrity; set `CODEGRAPH_STRICT=1` to require a live DB). Never hand-edit `local.db`; rebuild via `pnpm ci:reindex && pnpm ci:snapshot`.
 - **Hooks, MCP, & budgets**:
-  - Husky `pre-commit` runs `lint-staged`, skill checks, `validate:json`, and `check-enforcement-integrity.cjs` (`--no-verify` is blocked by `commit-guard.sh`). `pre-push` executes `agent-verify.sh` unless `.ci-local/agent-verify-evidence.json` recorded all 28 gates passing within 15 minutes (`FORCE_AGENT_VERIFY=1` bypasses cache).
+  - Husky `pre-commit` runs `lint-staged`, `pre-commit-guards.cjs` (protected `.env`/symlink/tracer paths + migration lint), skill checks, `validate:json`, and `check-enforcement-integrity.cjs` (`--no-verify` is blocked by `commit-guard.sh`). `pre-push` executes `agent-verify.sh` unless `.ci-local/agent-verify-evidence.json` recorded all gates passing within 15 minutes (`FORCE_AGENT_VERIFY=1` bypasses cache).
   - `.mcp.json` registers `supabase`, `codemap`, `chrome-devtools`, `context7`, and `frontend-checklist` (validated by `pnpm mcp:verify`).
-  - Environment files: `Arch-System/.env`, `apps/portal/.env` (validated in `libs/shared/utils/src/env.ts`), and `.env.tools`. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_KEY`, `SUPABASE_JWT_SECRET`, and `DATABASE*_URL` strictly server-only.
-  - `pnpm token:budget-check` enforces a `40,000`-byte inode-deduplicated ceiling across root instruction files (`AGENTS.md`, `CLAUDE.md`, `.claude.local.md`, `GEMINI.md`, `.cursorrules`).
+  - Environment files: optional root `.env`, `apps/portal/.env` (created by `./setup.sh` and validated in `libs/shared/utils/src/env.ts` and `pnpm env:check`), and `.env.tools`. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_KEY`, `SUPABASE_JWT_SECRET`, and `DATABASE*_URL` strictly server-only.
+  - `pnpm token:budget-check` enforces a `40,000`-byte inode-deduplicated ceiling across root instruction files (`AGENTS.md`, `CLAUDE.md`, `.claude.local.md`, `GEMINI.md`, `.cursorrules`). Execution rules for real-world code, zero-backlog WIP=1, and adaptive thinking per token live in `.agents/rules/real-world-adaptive-execution.md`.
   - **VibeMon Tracking (Mandatory)**: All agents must keep VibeMon updated via `./vibemon.sh update` (`pnpm vibemon:update`) and emit task/session telemetry via `./vibemon.sh` (`pnpm vibemon:track <event> <agent>`, verified via `pnpm vibemon:status`).
 
 ---
@@ -299,9 +316,9 @@ Always acquire external clients through factory functions to preserve pooling an
 
 ### Coverage expectations, conventions, & gotchas
 
-- **Coverage floor**: Enforced in `apps/portal/jest.config.cjs` (`lines: 40`, `branches: 27`, `functions: 28`, `statements: 40`). `pnpm test` does not collect coverage; run `pnpm --filter portal test -- --coverage` to verify thresholds locally.
+- **Coverage floor & ratchet**: Enforced in `apps/portal/jest.config.cjs` (`lines: 40`, `branches: 27`, `functions: 28`, `statements: 40`). `pnpm test` does not collect coverage; run `pnpm --filter portal test -- --coverage` for full baseline checks and `pnpm test:coverage:changed` to enforce `>= 70%` coverage on changed portal runtime files.
 - **Test style & mocking**: Co-locate `*.test.ts(x)` beside source files. Use BDD `describe('Given …')` / `it('When …, Then …')` or `it('should <outcome> when <condition>')` with Arrange-Act-Assert structure. Mock **only at network/service boundaries** (`@repo/supabase/*`, `@repo/redis`, `next/cache`), never internal domain logic.
 - **Non-obvious gotchas**:
   - **Portal `moduleNameMapper`**: Adding a new `@repo/*` package or explicit subpath export imported by `portal` requires a matching entry in `apps/portal/jest.config.cjs` (and `tsconfig.base.json`), otherwise Jest resolution fails.
-  - **Zero focused tests**: `test.only` and `describe.only` in `e2e/**/*.spec.ts` fail Gate 19 (`pnpm audit:e2e-journeys`).
+  - **Zero focused tests**: `test.only` and `describe.only` in `e2e/**/*.spec.ts` fail Gate 20 (`pnpm audit:e2e-journeys`).
   - **Visual snapshot masking**: Always mask live clocks and status badges (`[data-testid='clock']`, `scada-connection-status-badge`) in Playwright screenshot assertions.

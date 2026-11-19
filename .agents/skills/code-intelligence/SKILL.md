@@ -6,8 +6,8 @@ description: CodeGraph substrate — index, hybrid RRF search, TDAD impact analy
 # Code-Intelligence Substrate
 
 Operational protocol for the CodeGraph index: the single source of truth for structural
-knowledge across the Arch-System monorepo. The index is a SQLite DB at
-`/home/tim/local.db` (outside the git tree) holding 8,982 entities and 46,000 relations
+knowledge across the Arch-System monorepo. The index is a SQLite DB resolved via
+`CODEGRAPH_DB` -> `~/local.db` -> `.ci-local/local.db` holding 8,982 entities and 46,000 relations
 across 779 files, with `end_line` body ranges on 75.2% of entities.
 
 ## When to invoke
@@ -65,7 +65,7 @@ pass the repo path explicitly:
 
 ```bash
 python3 ~/.agents/skills/code-intelligence/scripts/hybrid_rrf_search.py \
-  "shift_closeout" --repo /home/tim/Fork/Arch-System
+  "shift_closeout" --repo .
 ```
 
 Graph relations outrank docs-only keyword matches. A relation like
@@ -130,7 +130,7 @@ keep it that way; none of them may be disabled, bypassed, or hand-edited:
 
 | Layer            | What it does                                                                                                                                                                                                                                                            |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Edit-time hook   | `.qoder/hooks/code-intelligence-gate.sh` fires on every `Edit` / `Write` (registered in `.qoder/settings.json`). Non-blocking — prints a ⚠ drift advisory so the agent is informed at edit time.                                                                       |
+| Edit-time hook   | `.qoder/hooks/code-intelligence-gate.sh` fires on every `Edit` / `Write` (registered in `.qoder/settings.json`). Non-blocking — prints a ⚠ drift advisory so the agent is informed at edit time.                                                                        |
 | Pre-commit guard | `pnpm audit:enforcement` (`tools/scripts/check-enforcement-integrity.cjs`) runs in `.husky/pre-commit`. Hard-blocks commits that would ship a disabled or bypassed enforcement layer (audit script, snapshot, hook registration, or magic-numbered pre-push fast-path). |
 | Protected paths  | `.qoder/hooks/protect-paths.sh` blocks direct edits to the enforcement SSoT files.                                                                                                                                                                                      |
 | Pre-push gate    | `.husky/pre-push` runs the full `agent-verify.sh`; its fast-path compares `passedGates === totalGates` (not a magic 27/28), so it stays valid as the suite grows.                                                                                                       |

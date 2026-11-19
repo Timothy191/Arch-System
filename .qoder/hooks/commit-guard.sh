@@ -20,4 +20,11 @@ if printf '%s' "$cmd" | grep -Eq '(^|[[:space:]])--no-gpg-sign([[:space:]]|$)'; 
   exit 2
 fi
 
+if printf '%s' "$cmd" | grep -q 'git push' && printf '%s' "$cmd" | grep -Eq '(^|[[:space:]])(-f|--force)([[:space:]]|$)' && ! printf '%s' "$cmd" | grep -q -- '--force-with-lease'; then
+  if printf '%s' "$cmd" | grep -Eq '(^|[[:space:]])(main|master)([[:space:]]|$)'; then
+    echo "Blocked: force-pushing directly to main/master is forbidden." >&2
+    exit 2
+  fi
+fi
+
 exit 0
