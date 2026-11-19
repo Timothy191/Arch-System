@@ -2,25 +2,25 @@
   "mcpServers": {
     "codemap": {
       "command": "/home/tim/.local/bin/codemap",
-      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
+      "args": ["mcp", "--root", "."],
       "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
       "type": "stdio"
     },
     "skills-mcp": {
       "command": "node",
-      "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
+      "args": ["../skills-mcp/dist/index.js"],
       "description": "On-demand Skill Registry & Ephemeral Skill Injection MCP Server",
       "type": "stdio"
     },
     "memory-gateway-mcp": {
       "command": "node",
-      "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
+      "args": ["../memory-gateway-mcp/dist/index.js"],
       "description": "Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs",
       "type": "stdio"
     },
     "slim-tooling-mcp": {
       "command": "node",
-      "args": ["/home/tim/Fork/slim-tooling-mcp/dist/index.js"],
+      "args": ["../slim-tooling-mcp/dist/index.js"],
       "description": "Token-saving tooling and codemod utilities MCP server",
       "type": "stdio"
     },

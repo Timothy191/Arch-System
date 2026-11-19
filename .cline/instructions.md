@@ -6,7 +6,7 @@
 
 ## Core Directives
 
-1. **Always branch first** — create a `git checkout -b <type>/<scope>` branch before any change.
+1. **Follow Universal 6-Step Flow** — follow [`.agents/rules/universal-agent-workflow.md`](../.agents/rules/universal-agent-workflow.md): assess → `- [ ]` 1-task-per-checkbox checklist & branch (`pnpm agent:start`) → complete all primary, related, and recommended items (`0` `[ ]` left) → verify → `pnpm agent:finish -- --message "..." --merge`.
 2. **Never duplicate canonical guidance** — this `.cline/` folder points to `AGENTS.md` and `.agents/`; do not inline their content here.
 3. **Run verification before completion** — `pnpm agent:verify` (28-gate suite), `pnpm type-check`, `pnpm lint`, `pnpm test`.
 4. **Trace every task** — append ISO-8601 entries to root `AGENT_TRACER.md` via `.cline/hooks/post-task-tracer.sh`.
@@ -42,5 +42,5 @@ For end-to-end software engineering tasks, route through `swe-agent`:
 4. **Traceability**: Every code mutation correlates with a task ID on `.agents/a2a/bus/event-log.jsonl`
 5. **Pre-flight**: `.cline/hooks/swe-pre-flight-check.sh` runs automatically on relevant edits
 
-**Agent directive**: `.agents/agents/swe-agent/agent.md`  
-**Registry card**: `.agents/a2a/registry/swe-agent.json`
+**Agent directive**: `.agents/agents/spec-driven-implementer.md`  
+**Registry card**: `.agents/a2a/registry/spec-driven-implementer.json`

@@ -10,5 +10,6 @@ This rule file is a thin pointer. All canonical repository guidance lives in:
 - [`AGENTS.md`](../../AGENTS.md) — architecture, domain, invariants, commands, conventions
 - [`.agents/GUIDE.md`](../../.agents/GUIDE.md) — agent operational guide, hooks, skills index
 - [`.agents/SYSTEMS.md`](../../.agents/SYSTEMS.md) — federated systems architecture & agent infrastructure
+- [`.agents/rules/universal-agent-workflow.md`](../../.agents/rules/universal-agent-workflow.md) — mandatory `[ ]` checklist → `pnpm agent:start` branch → complete all related items → verify → `pnpm agent:finish` clean-git closure
 
 Do not duplicate their content here. When uncertain, read the specific section of `AGENTS.md` relevant to the task at hand (on-demand context — never eager-read full documentation files).

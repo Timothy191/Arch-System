@@ -357,7 +357,7 @@ export default function AgenticMonitor() {
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between border-[var(--border-subtle)] border-t pt-3 text-[11px]">
-            <span className="text-[var(--text-muted)]">27-Gate Verification Passes</span>
+            <span className="text-[var(--text-muted)]">28-Gate Verification Passes</span>
             <span className="font-medium font-mono text-emerald-700">
               28/28 Gates • {currentMetrics.qualityGateRuns} Runs (100%)
             </span>

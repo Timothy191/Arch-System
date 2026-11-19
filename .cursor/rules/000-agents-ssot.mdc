@@ -13,3 +13,4 @@ All AI coding assistants (Claude Code, Cursor, Gemini, Copilot) operating within
 3. **Structured Thinking Mandate (STM-0)**: Engage the 5-phase Mandatory Thinking Protocol (`.agents/rules/structured-thinking-mandate.md`) before any non-trivial mutation.
 4. **Autonomous Self-Healing Loop**: If verification fails, autonomously diagnose and self-correct using AST tools or targeted edits. Never stop to ask for help on compile/test failures.
 5. **Quality Verification**: Always ensure `pnpm type-check` and `pnpm lint` pass before completing work.
+6. **Universal Checklist & Clean-Git Closure**: Follow `.agents/rules/universal-agent-workflow.md` (`[ ]` 1-task-per-checkbox -> branch via `pnpm agent:start` -> complete all related updates & recommendations -> verify -> `pnpm agent:finish -- --message "..." --merge`).

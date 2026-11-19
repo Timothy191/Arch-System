@@ -38,6 +38,19 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/scripts/agent-lifecycle.cjs clean-check",
+            "name": "cline-clean-check",
+            "statusMessage": "Checking checklist and git cleanliness",
+            "timeout": 15
+          }
+        ]
+      }
     ]
   },
   "permissions": {

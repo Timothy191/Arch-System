@@ -27,6 +27,13 @@ if [ -f .agents/memory_base/index.json ]; then
   " 2>/dev/null || true
 fi
 
+echo -e "\n### Universal Cross-Agent Flow (.agents/rules/universal-agent-workflow.md)"
+echo "- Flow: Assess -> Atomic [ ] Checklist (1 task = 1 checkbox) -> Branch (pnpm agent:start) -> Complete all primary, related & recommended items (0 [ ] left) -> Verify -> Safe commit/merge (pnpm agent:finish -- --message \"<type>(<scope>): <summary>\" --merge)."
+if [ -f .ci-local/active-checklist.md ]; then
+  echo -e "\n### Open Active Checklist (.ci-local/active-checklist.md)"
+  cat .ci-local/active-checklist.md
+fi
+
 echo -e "\n### Autonomous CI Gatekeeper (.agents/rules/autonomous-ci-gatekeeper.md)"
 echo "- GitHub Actions may be locked by billing. NEVER wait on GH Actions; after 'pnpm agent:verify' passes, run 'pnpm ci:gatekeeper --from-evidence' (or 'pnpm ci:gatekeeper --pr <N>') to publish required Commit Statuses via gh api."
 

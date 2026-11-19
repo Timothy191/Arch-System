@@ -7,10 +7,58 @@
  */
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
-const HOME = process.env.HOME || '/home/tim';
+const HOME = process.env.HOME || os.homedir() || '/home/tim';
+const REPO_ROOT = path.resolve(__dirname, '../..');
+const WORKSPACE_PARENT = path.resolve(REPO_ROOT, '..');
 const REGISTRY_PATH = path.join(__dirname, '../mcp/mcp-registry.json');
 const MCP_ENV_PATH = path.join(HOME, '.config/mcp-env');
+
+function resolvePlaceholders(value) {
+  if (typeof value === 'string') {
+    return value
+      .replace(/\$\{REPO_ROOT\}/g, REPO_ROOT)
+      .replace(/\$\{WORKSPACE_PARENT\}/g, WORKSPACE_PARENT)
+      .replace(/\$\{HOME\}/g, HOME);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => resolvePlaceholders(item));
+  }
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = resolvePlaceholders(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+function healStaleForkArgs(entry) {
+  if (!entry || typeof entry !== 'object') return false;
+  let changed = false;
+  const fixString = (s) =>
+    typeof s === 'string' && s.includes('/home/tim/Fork/Arch-System')
+      ? s.replace(/\/home\/tim\/Fork\/Arch-System/g, REPO_ROOT)
+      : s;
+
+  if (Array.isArray(entry.args)) {
+    entry.args = entry.args.map((a) => {
+      const next = fixString(a);
+      if (next !== a) changed = true;
+      return next;
+    });
+  }
+  if (Array.isArray(entry.command)) {
+    entry.command = entry.command.map((c) => {
+      const next = fixString(c);
+      if (next !== c) changed = true;
+      return next;
+    });
+  }
+  return changed;
+}
 
 // Parse flags
 const args = process.argv.slice(2);
@@ -131,12 +179,17 @@ for (const client of clientConfigs) {
   // configs; registry keeps their definitions as an optional catalog.
   const coreStdio = ['context7', 'codemap', 'chrome-devtools'];
   for (const toolName of coreStdio) {
+    if (config[containerKey][toolName] && !isCheckOnly) {
+      if (healStaleForkArgs(config[containerKey][toolName])) {
+        modified = true;
+      }
+    }
     if (!config[containerKey][toolName] && servers[toolName]) {
       missingServers.push(toolName);
       if (isCheckOnly) {
         totalIssues++;
       } else {
-        const sDef = servers[toolName];
+        const sDef = resolvePlaceholders(servers[toolName]);
         if (client.type === 'opencode') {
           config[containerKey][toolName] = {
             type: 'local',
@@ -170,7 +223,7 @@ for (const client of clientConfigs) {
       console.log('✅ PASS (Fully Registered)');
     }
   } else if (modified) {
-    fs.writeFileSync(client.path, JSON.stringify(config, null, 2));
+    fs.writeFileSync(client.path, `${JSON.stringify(config, null, 2)}\n`);
     console.log(`✅ SYNCHRONIZED (Added: ${missingServers.join(', ')})`);
   } else {
     console.log('✅ PASS (Fully Registered)');

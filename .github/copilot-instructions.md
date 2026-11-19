@@ -122,6 +122,7 @@ Commit both source and generated files in the same atomic change.
 
 - One commit per task; no amend/force-push without permission; never `--no-verify`.
 - Husky runs lint-staged on commit and lint + type-check on push.
+- Follow `.agents/rules/universal-agent-workflow.md`: assess -> break into `- [ ]` checkboxes (`1` task = `1` checkbox) -> branch (`pnpm agent:start`) -> finish all primary, related, and recommended items -> verify -> `pnpm agent:finish -- --message "<type>(<scope>): <summary>" --merge` (keep `git status` clean; require explicit approval before pushing to `origin/main`).
 
 ---
 

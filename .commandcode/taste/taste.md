@@ -42,3 +42,4 @@
 # tooling
 
 - Verify every change before completion using `pnpm agent:verify`, Command Code taste validation, and `pnpm biome check` (`pnpm lint`), and record workspace changes only in root `AGENT_TRACER.md`. Confidence: 0.98
+- Follow `.agents/rules/universal-agent-workflow.md` on every task: assess -> break into `- [ ]` checkboxes (`1` task = `1` checkbox) -> create a branch (`pnpm agent:start`) -> complete all primary, coupled setup/import, and recommended items until zero `[ ]` remain -> verify -> run `pnpm agent:finish -- --message "<type>(<scope>): <summary>" --merge` for clean git closure. Confidence: 0.99

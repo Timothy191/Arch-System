@@ -67,6 +67,19 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/scripts/agent-lifecycle.cjs clean-check",
+            "name": "agent-clean-check",
+            "statusMessage": "Checking checklist and git cleanliness",
+            "timeout": 15
+          }
+        ]
+      }
     ]
   }
 }

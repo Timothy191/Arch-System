@@ -27,6 +27,8 @@ Always run scoped inside `Arch-System/`:
 ```bash
 export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH:/home/tim/.cargo/bin"
 pnpm env:check               # Validate local/target environment configuration
+pnpm agent:start             # Branch off main + initialize [ ] checklist
+pnpm agent:finish            # Verify + safe commit + optional --ff-only --merge
 pnpm agent:verify            # Mandatory 28-gate verification suite (fails fast)
 pnpm test:coverage:changed   # Enforce >= 70% coverage on changed portal runtime files
 pnpm type-check              # turbo type-check --concurrency=2
@@ -39,10 +41,10 @@ pnpm audit:compliance        # static invariant sweep
 
 ## 3. Autonomous Execution & Guardrails
 
-1. **Always Branch:** Start every task by creating a branch (`git checkout -b <type>/<scope>`).
+1. **Universal Checklist & Clean-Git Flow:** Follow `.agents/rules/universal-agent-workflow.md`: assess -> break into `- [ ]` checkboxes (`1` task = `1` checkbox) -> branch (`pnpm agent:start`) -> complete all primary, related, and recommended items (`0` `[ ]` left) -> verify -> safe commit & `--ff-only` merge (`pnpm agent:finish -- --message "..." --merge`).
 2. **Zero-Interruption Self-Healing:** Autonomously inspect errors, fix files, and re-verify until all applicable gates pass (`pnpm agent:verify`). Never stop to ask the user to fix test failures.
 3. **Zero Speculation (3-Option Prompt):** Never invent requirements. When genuinely uncertain, prompt the user with 3 concrete options (Option 1 `(Recommended)`).
-4. **Release Approval Gate:** Run local builds, audits, and verification autonomously; require explicit user approval (or a dedicated release CI trigger) before merging to `main`, running `git push origin main`, or deploying via `pnpm deploy:vercel:prod`.
+4. **Remote Release Gate:** Run local verification and `--ff-only` branch cleanup autonomously; require explicit user approval (or a dedicated release CI trigger) before pushing to `origin/main` or deploying via `pnpm deploy:vercel:prod`.
 5. **Traceability:** Append ISO-8601 entries to root `AGENT_TRACER.md`.
 6. **VibeMon Tracking (Mandatory):** Keep VibeMon updated (`pnpm vibemon:update`) and emit session/task events via `pnpm vibemon:track` (`pnpm vibemon:status`).
 

@@ -6,6 +6,12 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-19T20:44:00+02:00] - Universal Cross-Agent Lifecycle Hooks, Dynamic MCP Root & Monitor Label Alignment (`chore/universal-agent-workflow-and-mcp-fix`)
+
+- **MCP Portability Fix ([`tools/mcp/mcp-registry.json`](tools/mcp/mcp-registry.json), [`tools/scripts/mcp-onboard.cjs`](tools/scripts/mcp-onboard.cjs), [`.gemini/settings.json`](.gemini/settings.json))**: Replaced hardcoded `/home/tim/Fork/...` paths with dynamic `${REPO_ROOT}` / `${WORKSPACE_PARENT}` / `${HOME}` placeholders in `mcp-registry.json`, added placeholder resolution and stale `/home/tim/Fork/Arch-System` self-healing in `mcp-onboard.cjs`, and verified `pnpm mcp:onboard && pnpm mcp:verify` passes across all 8 client targets.
+- **Monitor UI Parity ([`apps/portal/app/overview/sections/AgenticMonitor.tsx`](apps/portal/app/overview/sections/AgenticMonitor.tsx))**: Updated line 360 label from `27-Gate Verification Passes` to `28-Gate Verification Passes`.
+- **Universal Cross-Agent Workflow & Clean-Git Hooks ([`tools/scripts/agent-lifecycle.cjs`](tools/scripts/agent-lifecycle.cjs), [`.agents/rules/universal-agent-workflow.md`](.agents/rules/universal-agent-workflow.md), [`.claude/settings.json`](.claude/settings.json), [`.qoder/settings.json`](.qoder/settings.json), [`.cline/settings.json`](.cline/settings.json), [`.agents/hooks/`](.agents/hooks/), [`package.json`](package.json))**: Added `pnpm agent:start`, `pnpm agent:checklist`, `pnpm agent:clean-check`, and `pnpm agent:finish` enforcing Assess -> Atomic `[ ]` Checklist (1 task = 1 checkbox) -> Branch -> Complete All Primary, Related & Recommended Actions -> Verify -> Safe Commit & `--ff-only` Merge (`--push` still requires explicit approval). Wired Stop/session hooks and thin pointers across Antigravity, Claude Code, Cline, Command Code, Cursor, Qoder, OpenCode, and GitHub Copilot.
+
 ## [2026-11-19T19:41:00+02:00] - Standalone Workspace Onboarding & Agentic Content Portability Cleanup (`chore/ground-rules-and-workspace-hardening`)
 
 - **Onboarding:** `./setup.sh` completed with a clean tree; `pnpm env:check`, `pnpm policy:check`, `pnpm mcp:verify`, and `pnpm audit:code-intelligence` (standalone snapshot mode) passed. Baseline `pnpm agent:verify` was 28/28 PASS.

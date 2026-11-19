@@ -3,7 +3,9 @@
 # blocking and let the anti-drift audit decide on actual drift.
 cd "$(dirname "$0")/../.." || exit 1
 
-if [[ -n $(git status --porcelain) ]]; then
+if [[ -f tools/scripts/agent-lifecycle.cjs ]]; then
+  node tools/scripts/agent-lifecycle.cjs clean-check || true
+elif [[ -n $(git status --porcelain) ]]; then
   echo "[worktree-guard] Note: worktree has uncommitted changes."
 fi
 

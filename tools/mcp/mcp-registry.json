@@ -19,8 +19,8 @@
       "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
       "required": true,
       "category": "developer_tools",
-      "command": "/home/tim/.local/bin/codemap",
-      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
+      "command": "${HOME}/.local/bin/codemap",
+      "args": ["mcp", "--root", "${REPO_ROOT}"],
       "type": "stdio"
     },
     "code-intelligence": {
@@ -31,7 +31,7 @@
       "type": "remote",
       "url": "http://localhost:3001/mcp",
       "env": {
-        "CODEINTELLIGENCE_INDEX_PATH": "/home/tim/Fork/Arch-System/.code-intelligence-index"
+        "CODEINTELLIGENCE_INDEX_PATH": "${REPO_ROOT}/.code-intelligence-index"
       }
     },
     "chrome-devtools": {
@@ -84,7 +84,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "node",
-      "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
+      "args": ["${WORKSPACE_PARENT}/skills-mcp/dist/index.js"],
       "type": "stdio"
     },
     "memory-gateway-mcp": {
@@ -93,7 +93,7 @@
       "required": false,
       "category": "cognitive_and_memory",
       "command": "node",
-      "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
+      "args": ["${WORKSPACE_PARENT}/memory-gateway-mcp/dist/index.js"],
       "type": "stdio"
     },
     "slim-tooling-mcp": {
@@ -102,7 +102,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "node",
-      "args": ["/home/tim/Fork/slim-tooling-mcp/dist/index.js"],
+      "args": ["${WORKSPACE_PARENT}/slim-tooling-mcp/dist/index.js"],
       "type": "stdio"
     },
     "vibemon": {
