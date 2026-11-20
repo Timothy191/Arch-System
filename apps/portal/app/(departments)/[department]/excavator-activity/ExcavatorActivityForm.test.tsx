@@ -140,6 +140,12 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     fireEvent.click(plantBtn);
     expect(plantBtn).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('Regular Machine Mode (Plant)')).toBeInTheDocument();
+    const plantPanel = screen.getByTestId('plant-excavators-panel');
+    expect(plantPanel).toBeInTheDocument();
+    expect(plantPanel).toHaveTextContent('Plant');
+    expect(plantPanel).toHaveTextContent('EX-10');
+    expect(plantPanel).toHaveTextContent('Site: Main Pit');
+    expect(plantPanel).toHaveTextContent('Regular Machine · Plant');
 
     await waitFor(() => {
       expect(updateExcavatorAssignmentConfig).toHaveBeenCalledWith(
@@ -153,6 +159,12 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     fireEvent.click(otherBtn);
     expect(otherBtn).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('Regular Machine Mode (Other)')).toBeInTheDocument();
+    expect(screen.queryByTestId('plant-excavators-panel')).not.toBeInTheDocument();
+    const otherPanel = screen.getByTestId('other-excavators-panel');
+    expect(otherPanel).toBeInTheDocument();
+    expect(otherPanel).toHaveTextContent('Other');
+    expect(otherPanel).toHaveTextContent('EX-10');
+    expect(otherPanel).toHaveTextContent('Regular Machine · Other');
 
     await waitFor(() => {
       expect(updateExcavatorAssignmentConfig).toHaveBeenCalledWith(
@@ -162,6 +174,75 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
         })
       );
     });
+  });
+
+  it('lists all Plant and Other excavators in dedicated panels and supports activity selection & quick switch', async () => {
+    render(
+      <ExcavatorActivityForm
+        {...mockProps}
+        excavators={[
+          {
+            id: 'ex-10',
+            name: 'EX-10',
+            machine_type: 'Excavator',
+            serial_number: 'Hitachi 400',
+            site_id: 'site-1',
+          },
+          {
+            id: 'ex-20',
+            name: 'EX-20',
+            machine_type: 'Excavator',
+            serial_number: 'CAT 349',
+            site_id: 'site-2',
+          },
+        ]}
+        todayActivities={[
+          {
+            id: 'act-plant',
+            machine_id: 'ex-10',
+            shift_type: 'day',
+            site_id: 'site-1',
+            material_type: 'Plant - ROM Feed',
+            activity_date: '2026-10-23',
+          },
+          {
+            id: 'act-other',
+            machine_id: 'ex-20',
+            shift_type: 'day',
+            site_id: 'site-2',
+            material_type: 'Other - Trenching',
+            activity_date: '2026-10-23',
+          },
+        ]}
+      />
+    );
+
+    const plantPanel = screen.getByTestId('plant-excavators-panel');
+    expect(plantPanel).toHaveTextContent('EX-10');
+    expect(plantPanel).toHaveTextContent('Site: Main Pit');
+
+    const otherPanel = screen.getByTestId('other-excavators-panel');
+    expect(otherPanel).toHaveTextContent('EX-20');
+    expect(otherPanel).toHaveTextContent('Site: North Pit');
+
+    // Select activity inside Plant panel
+    const plantActivitySelect = screen.getByLabelText('Select Plant activity for EX-10');
+    fireEvent.change(plantActivitySelect, { target: { value: 'Crusher Feed' } });
+
+    await waitFor(() => {
+      expect(updateExcavatorAssignmentConfig).toHaveBeenCalledWith(
+        expect.objectContaining({
+          excavatorId: 'ex-10',
+          materialType: 'Plant',
+          materialSubCategory: 'Crusher Feed',
+        })
+      );
+    });
+
+    // Quick switch EX-10 from Plant to Waste -> removes Plant panel
+    fireEvent.click(screen.getByRole('button', { name: 'Switch EX-10 to Waste' }));
+    expect(screen.queryByTestId('plant-excavators-panel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('other-excavators-panel')).toBeInTheDocument();
   });
 
   it('supports Quick Add Block (+) with auto-formatting for block name and BLK-* code', async () => {

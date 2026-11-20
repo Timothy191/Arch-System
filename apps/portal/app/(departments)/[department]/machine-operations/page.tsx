@@ -1,5 +1,6 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
+import { getCurrentShift } from '@repo/utils';
 import dynamic from 'next/dynamic';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
@@ -56,7 +57,7 @@ export default async function MachineOperationsPage({
       .order('name'),
     supabase
       .from('machine_operations')
-      .select('machine_id, end_smu')
+      .select('machine_id, end_smu, shift_date, shift_type')
       .not('end_smu', 'is', null)
       .order('shift_date', { ascending: false })
       .order('end_smu', { ascending: false })
@@ -141,23 +142,39 @@ export default async function MachineOperationsPage({
     0
   );
 
+  const currentShift = getCurrentShift();
   const latestSMRMap = new Map<string, number>();
-  (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {
+  const previousShiftStopSmrMap = new Map<string, number>();
+  (
+    previousSMRs as Array<{
+      machine_id: string;
+      end_smu: number | null;
+      shift_date?: string | null;
+      shift_type?: string | null;
+    }> | null
+  )?.forEach((row) => {
     if (row.end_smu !== null && row.end_smu !== undefined) {
-      const currentMax = latestSMRMap.get(row.machine_id) ?? 0;
       const candidate = Number(row.end_smu);
+      const currentMax = latestSMRMap.get(row.machine_id) ?? 0;
       if (candidate > currentMax) {
         latestSMRMap.set(row.machine_id, candidate);
+      }
+      const isSameCurrentShift = row.shift_date === today && row.shift_type === currentShift;
+      if (!isSameCurrentShift && !previousShiftStopSmrMap.has(row.machine_id)) {
+        previousShiftStopSmrMap.set(row.machine_id, candidate);
       }
     }
   });
   (baselineSmrReadings as Array<{ meter_id: string; reading: number | null }> | null)?.forEach(
     (row) => {
       if (row.reading !== null && row.reading !== undefined && row.meter_id) {
-        const currentMax = latestSMRMap.get(row.meter_id) ?? 0;
         const candidate = Number(row.reading);
+        const currentMax = latestSMRMap.get(row.meter_id) ?? 0;
         if (candidate > currentMax) {
           latestSMRMap.set(row.meter_id, candidate);
+        }
+        if (!previousShiftStopSmrMap.has(row.meter_id)) {
+          previousShiftStopSmrMap.set(row.meter_id, candidate);
         }
       }
     }
@@ -175,10 +192,12 @@ export default async function MachineOperationsPage({
     ).site;
     const rawSite = Array.isArray(rawSiteProp) ? rawSiteProp[0] : rawSiteProp;
     const resolvedSite = rawSite || (m.site_id ? siteMap.get(m.site_id) : null);
+    const latestSmu = latestSMRMap.get(m.id) ?? null;
     return {
       ...m,
       site: resolvedSite ? { name: resolvedSite.name, site_code: resolvedSite.site_code } : null,
-      latest_smu: latestSMRMap.get(m.id) ?? null,
+      latest_smu: latestSmu,
+      previous_stop_smu: previousShiftStopSmrMap.get(m.id) ?? latestSmu,
     };
   });
 
@@ -311,11 +330,14 @@ export default async function MachineOperationsPage({
           }
         >
           <MachineOperationsFilterableTable
+            departmentId={deptId}
             machines={machinesWithSmu}
             operations={todayOperations || []}
             todayLoads={todayLoads || []}
             activeBreakdowns={activeBreakdowns || []}
             engineeringDelaysByMachine={engineeringDelaysByMachine}
+            operators={operators || []}
+            sites={sites || []}
           />
         </Suspense>
       </div>

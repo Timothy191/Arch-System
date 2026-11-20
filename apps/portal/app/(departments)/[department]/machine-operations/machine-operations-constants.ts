@@ -59,6 +59,7 @@ export interface MachineItem {
   serial_number: string | null;
   site_id?: string | null;
   latest_smu?: number | null;
+  previous_stop_smu?: number | null;
   bin_factor?: number | null;
   site?: { name: string; site_code?: string } | null;
   active?: boolean;

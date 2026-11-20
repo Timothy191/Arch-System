@@ -1,0 +1,208 @@
+'use client';
+
+import { GlassCard } from '@repo/ui/GlassCard';
+import { TrendingDown, TrendingUp } from 'lucide-react';
+import { Bar, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import type { SiteMachineGroup } from './machine-telemetry-helpers';
+
+interface MachineTelemetryPanelsClientProps {
+  readonly siteGroups: readonly SiteMachineGroup[];
+}
+
+const PANEL_CHART_HEIGHT = 88;
+const MINI_AXIS_TICK = { fill: 'var(--text-muted)', fontSize: 10 } as const;
+const MINI_TOOLTIP_STYLE = {
+  backgroundColor: 'var(--bg-primary)',
+  border: '1px solid var(--border-default)',
+  borderRadius: 8,
+  fontSize: 11,
+} as const;
+
+const STAT_BOX_CLASS =
+  'rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)]/70 px-2.5 py-2';
+const STAT_LABEL_CLASS = 'text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wide';
+const STAT_VALUE_CLASS = 'mt-0.5 font-semibold text-sm text-[var(--text-heading)] tabular-nums';
+
+export function MachineTelemetryPanelsClient({ siteGroups }: MachineTelemetryPanelsClientProps) {
+  if (siteGroups.length === 0) {
+    return (
+      <GlassCard>
+        <p className="py-8 text-center text-[var(--text-muted)] text-sm">
+          No machines registered for this department.
+        </p>
+      </GlassCard>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {siteGroups.map(({ siteKey, siteCode, siteName, machines: siteMachines }) => (
+        <div key={siteKey} className="space-y-3">
+          {/* Site heading */}
+          <div className="inline-flex items-center gap-2.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 px-3.5 py-1.5 shadow-card">
+            {siteCode ? (
+              <span className="inline-flex rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-mono text-[var(--accent-blue)] text-xs">
+                {siteCode}
+              </span>
+            ) : null}
+            <h3 className="font-medium text-[var(--text-heading)] text-sm">{siteName}</h3>
+            <span className="text-[var(--text-muted)] text-xs">
+              {siteMachines.length} machine{siteMachines.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {siteMachines.map((machine) => {
+              const { telemetry } = machine;
+              const isDeltaPositive = telemetry.hoursDeltaPct >= 0;
+              const formattedDelta = `${isDeltaPositive && telemetry.hoursDeltaPct > 0 ? '+' : ''}${telemetry.hoursDeltaPct.toFixed(1)}%`;
+
+              return (
+                <GlassCard key={machine.id} className="px-4 py-3.5">
+                  {/* Panel Header */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[var(--text-heading)] text-sm">
+                        {machine.name}
+                      </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <span className="rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
+                          {machine.machine_type}
+                        </span>
+                        {machine.bin_factor != null && machine.bin_factor > 0 && (
+                          <span className="rounded border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-mono text-[11px] text-[var(--accent-blue)]">
+                            Bin: {machine.bin_factor} BCM
+                          </span>
+                        )}
+                        {machine.serial_number && (
+                          <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                            {machine.serial_number}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <span
+                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-xs ${
+                        machine.active
+                          ? 'border-emerald-200/50 bg-emerald-50/70 text-emerald-700'
+                          : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)]'
+                      }`}
+                    >
+                      {machine.active && <span className="badge-pulse-dot bg-emerald-500" />}
+                      {machine.active ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+
+                  {/* Totals Strip: Hours Worked (+% Up/Down), Breakdowns, Tyre Activity */}
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    <div className={STAT_BOX_CLASS}>
+                      <p className={STAT_LABEL_CLASS}>Hours Worked</p>
+                      <p className={STAT_VALUE_CLASS}>
+                        {telemetry.totalHoursWorked.toLocaleString('en-US', {
+                          maximumFractionDigits: 1,
+                        })}{' '}
+                        h
+                      </p>
+                      <span
+                        aria-label={`Hours worked change ${formattedDelta} vs prior 7 days`}
+                        className={`mt-0.5 inline-flex items-center gap-0.5 font-medium text-[10px] tabular-nums ${
+                          isDeltaPositive ? 'text-accent-green' : 'text-accent-red'
+                        }`}
+                      >
+                        {isDeltaPositive ? (
+                          <TrendingUp className="h-3 w-3 shrink-0" aria-hidden="true" />
+                        ) : (
+                          <TrendingDown className="h-3 w-3 shrink-0" aria-hidden="true" />
+                        )}
+                        {formattedDelta}
+                      </span>
+                    </div>
+
+                    <div className={STAT_BOX_CLASS}>
+                      <p className={STAT_LABEL_CLASS}>Breakdowns</p>
+                      <p className={STAT_VALUE_CLASS}>{telemetry.totalBreakdowns}</p>
+                      <span className="mt-0.5 block text-[10px] text-[var(--text-muted)]">
+                        {telemetry.activeBreakdowns > 0
+                          ? `${telemetry.activeBreakdowns} active`
+                          : '0 open'}
+                      </span>
+                    </div>
+
+                    <div className={STAT_BOX_CLASS}>
+                      <p className={STAT_LABEL_CLASS}>Tyre Activity</p>
+                      <p className={STAT_VALUE_CLASS}>{telemetry.tireEventsCount}</p>
+                      <span className="mt-0.5 block text-[10px] text-[var(--text-muted)]">
+                        {telemetry.installedTiresCount} mounted
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Tyre & Breakdown Activity Mini Graph */}
+                  <div className="mt-3 border-[var(--border-subtle)] border-t pt-2.5">
+                    <div className="mb-1.5 flex items-center justify-between text-[10px] text-[var(--text-muted)]">
+                      <span className="font-medium uppercase tracking-wider">
+                        Tyre &amp; Breakdown Activity (7d)
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent-red)]" />
+                          BD
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent-amber)]" />
+                          Tyre
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent-blue)]" />
+                          Hrs
+                        </span>
+                      </div>
+                    </div>
+
+                    <ResponsiveContainer width="100%" height={PANEL_CHART_HEIGHT}>
+                      <ComposedChart data={telemetry.activitySeries}>
+                        <XAxis
+                          dataKey="day"
+                          tick={MINI_AXIS_TICK}
+                          stroke="var(--border-default)"
+                          interval="preserveStartEnd"
+                        />
+                        <YAxis yAxisId="events" hide allowDecimals={false} />
+                        <YAxis yAxisId="hours" orientation="right" hide />
+                        <Tooltip contentStyle={MINI_TOOLTIP_STYLE} />
+                        <Bar
+                          yAxisId="events"
+                          dataKey="breakdowns"
+                          name="Breakdowns"
+                          fill="var(--accent-red)"
+                          radius={[3, 3, 0, 0]}
+                        />
+                        <Bar
+                          yAxisId="events"
+                          dataKey="tireEvents"
+                          name="Tyre Events"
+                          fill="var(--accent-amber)"
+                          radius={[3, 3, 0, 0]}
+                        />
+                        <Line
+                          yAxisId="hours"
+                          type="monotone"
+                          dataKey="hours"
+                          name="Hours Worked"
+                          stroke="var(--accent-blue)"
+                          strokeWidth={1.75}
+                          dot={false}
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                </GlassCard>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

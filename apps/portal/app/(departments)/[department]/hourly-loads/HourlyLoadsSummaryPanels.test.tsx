@@ -207,4 +207,72 @@ describe('HourlyLoadsSummaryPanels', () => {
     fireEvent.click(screen.getByRole('button', { name: /Confirm & Add Split/i }));
     expect(onConfirmSplit).toHaveBeenCalledTimes(1);
   });
+
+  it('blocks HourCell edits and displays Engineering breakdown block in split modal when machine is on breakdown', () => {
+    const onStep = jest.fn();
+    const onDirectEdit = jest.fn();
+
+    render(
+      <table>
+        <tbody>
+          <tr>
+            <HourCell
+              value={4}
+              rowIndex={0}
+              hourProp="hour_01"
+              hourLabel="06"
+              editable={true}
+              isLocked={true}
+              isBlockedByBreakdown={true}
+              onStep={onStep}
+              onDirectEdit={onDirectEdit}
+            />
+          </tr>
+        </tbody>
+      </table>
+    );
+
+    const input = screen.getByRole('textbox', { name: '06:00 loads' });
+    expect(input).toBeDisabled();
+    expect(input).toHaveAttribute('readonly');
+    expect(screen.getByRole('button', { name: 'Decrease 06:00 loads' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Increase 06:00 loads' })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Increase 06:00 loads' }));
+    fireEvent.keyDown(input, { key: 'ArrowUp' });
+    fireEvent.change(input, { target: { value: '9' } });
+    fireEvent.blur(input);
+
+    expect(onStep).not.toHaveBeenCalled();
+    expect(onDirectEdit).not.toHaveBeenCalled();
+
+    render(
+      <HourlyLoadsSplitSection
+        isSplitModalOpen={true}
+        isSubmittingSplit={false}
+        splitMachineId="m-1"
+        splitExcavatorId="ex-1"
+        splitMaterial="Waste"
+        splitStartHour={4}
+        machines={[{ id: 'm-1', name: 'ADT-01', machine_type: 'ADT' }]}
+        excavators={[{ id: 'ex-1', name: 'EX-01', machine_type: 'Excavator' }]}
+        sites={[{ id: 's-1', name: 'Pit North', site_code: 'PN' }]}
+        excavatorSites={{ 'ex-1': 's-1' }}
+        hourLabels={['06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17']}
+        blockedMachineIds={new Set(['m-1'])}
+        onOpenSplitModal={jest.fn()}
+        onCloseSplitModal={jest.fn()}
+        onSplitMachineChange={jest.fn()}
+        onSplitExcavatorChange={jest.fn()}
+        onSplitMaterialChange={jest.fn()}
+        onSplitStartHourChange={jest.fn()}
+        onConfirmSplit={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText(/Breakdown booked by Engineering — split and load entry are blocked/i)
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Confirm & Add Split/i })).toBeDisabled();
+  });
 });

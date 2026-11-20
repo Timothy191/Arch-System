@@ -646,8 +646,7 @@ export function MachineOperationsForm({
                   ...prev,
                   machineId: nextMachineId,
                   siteId: prev.siteId || machineObj?.site_id || '',
-                  startSmu:
-                    machineObj?.latest_smu != null ? String(machineObj.latest_smu) : prev.startSmu,
+                  startSmu: machineObj?.latest_smu != null ? String(machineObj.latest_smu) : '',
                   endsOnBreakdown: hasActiveBreakdown || prev.endsOnBreakdown,
                   breakdownReason:
                     hasActiveBreakdown && engDelay?.reasons?.length
@@ -735,7 +734,7 @@ export function MachineOperationsForm({
                 Start SMR <span className="text-accent-red">*</span>
                 {selectedMachine?.latest_smu != null && (
                   <span className="ml-2 font-mono text-[13px] text-[var(--accent-blue)]">
-                    (Min: {Number(selectedMachine.latest_smu).toFixed(1)}h)
+                    (Min: {Number(selectedMachine.latest_smu).toFixed(1)}h · Carried over)
                   </span>
                 )}
               </label>
@@ -1237,17 +1236,17 @@ export function MachineOperationsForm({
           </button>
         </div>
 
-        {/* Operational Guidance Callout (Static high-contrast accessible design) */}
+        {/* Operational Guidance Callout (Static high-contrast white surface for maximum readability) */}
         <div
           role="note"
           aria-label="SMR logging guidance"
-          className="flex items-start gap-2.5 rounded-lg border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/5 px-3.5 py-2.5 text-[13px] text-neutral-800 leading-[18px]"
+          className="flex items-start gap-3 rounded-lg border border-[var(--border-default)] border-l-4 border-l-[var(--accent-blue)] bg-white px-4 py-3 text-[13px] text-slate-900 leading-[18px] shadow-xs"
         >
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-blue)]" aria-hidden="true" />
-          <p className="leading-relaxed">
-            <span className="font-semibold text-[var(--accent-blue)]">Operational Tip:</span> Stop
-            SMR is optional at start of shift. You can record operations immediately and add closing
-            SMR later. Shift hours and telemetry calculate automatically.
+          <p className="font-medium text-slate-900 leading-relaxed">
+            <span className="font-bold text-[var(--text-heading)]">Operational Tip:</span> Stop SMR
+            is optional at start of shift. You can record operations immediately and add closing SMR
+            later. Shift hours and telemetry calculate automatically.
           </p>
         </div>
       </form>

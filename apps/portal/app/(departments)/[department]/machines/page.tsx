@@ -8,23 +8,32 @@ import { withCache } from '@/lib/cache-utils';
 import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getDepartmentContext } from '~/lib/dept-context';
+import { MachineTelemetryPanelsClient } from './MachineTelemetryPanelsClient';
+import {
+  buildMachineTelemetryMap,
+  type DepartmentMachineRow,
+  groupMachinesBySite,
+  type MachinePanelTelemetry,
+  type RawMachineBreakdownRow,
+  type RawMachineHoursRow,
+  type RawMachineOpsRow,
+  type RawMachineTireInspectionRow,
+  type RawMachineTireRow,
+  shiftIsoDay,
+} from './machine-telemetry-helpers';
 
 const DRILL_RIG_MACHINE_TYPE = 'Drill Rig';
+const TWO_WEEK_WINDOW_DAYS = 13;
 
-interface MachineSiteSummary {
-  readonly name: string | null;
-  readonly site_code: string | null;
-}
-
-interface DepartmentMachineRow {
-  readonly id: string;
-  readonly name: string;
-  readonly machine_type: string;
-  readonly serial_number: string | null;
-  readonly bin_factor: number | null;
-  readonly active: boolean;
-  readonly created_at: string;
-  readonly site: MachineSiteSummary | MachineSiteSummary[] | null;
+async function safeTelemetryRows<TRow>(
+  fn: () => PromiseLike<{ data?: readonly unknown[] | null }>
+): Promise<TRow[]> {
+  try {
+    const res = await fn();
+    return (res?.data ?? []) as TRow[];
+  } catch {
+    return [];
+  }
 }
 
 async function loadDepartmentMachines(deptSlug: string): Promise<DepartmentMachineRow[]> {
@@ -62,6 +71,99 @@ async function getCachedDepartmentMachines(deptSlug: string): Promise<Department
   });
 }
 
+async function loadMachineActivityTelemetry(options: {
+  readonly deptSlug: string;
+  readonly today: string;
+  readonly machines: readonly DepartmentMachineRow[];
+}): Promise<Record<string, MachinePanelTelemetry>> {
+  const db = await createReadReplicaClient([]);
+  const windowStartDate = shiftIsoDay(options.today, -TWO_WEEK_WINDOW_DAYS);
+
+  const [breakdowns, tires, tireInspections, machineHours, machineOperations] = await Promise.all([
+    safeTelemetryRows<RawMachineBreakdownRow>(() =>
+      db
+        .from('breakdowns')
+        .select('id, machine_id, fleet_id, machine_name, status, date_in, created_at')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .limit(500)
+    ),
+    safeTelemetryRows<RawMachineTireRow>(() =>
+      db
+        .from('tires')
+        .select('id, machine_id, status, installed_at, removed_at, created_at')
+        .limit(1000)
+    ),
+    safeTelemetryRows<RawMachineTireInspectionRow>(() =>
+      db
+        .from('tire_inspections')
+        .select('id, tire_id, inspection_date, created_at')
+        .gte('inspection_date', windowStartDate)
+        .limit(1000)
+    ),
+    safeTelemetryRows<RawMachineHoursRow>(() =>
+      db
+        .from('machine_hours')
+        .select('machine_id, daily_log_date, hours_worked, created_at')
+        .gte('daily_log_date', windowStartDate)
+        .limit(2000)
+    ),
+    safeTelemetryRows<RawMachineOpsRow>(() =>
+      db
+        .from('machine_operations')
+        .select(
+          'machine_id, shift_date, daily_log_date, hours_worked, start_smu, end_smu, created_at'
+        )
+        .gte('shift_date', windowStartDate)
+        .limit(2000)
+    ),
+  ]);
+
+  return buildMachineTelemetryMap({
+    machines: options.machines,
+    breakdowns,
+    tires,
+    tireInspections,
+    machineHours,
+    machineOperations,
+    today: options.today,
+  });
+}
+
+async function getCachedMachineActivityTelemetry(options: {
+  readonly deptSlug: string;
+  readonly today: string;
+  readonly machines: readonly DepartmentMachineRow[];
+}): Promise<Record<string, MachinePanelTelemetry>> {
+  'use cache';
+
+  const telemetryTag = tagDepartment(options.deptSlug, 'machines-telemetry');
+
+  cacheLife('telemetry');
+
+  cacheTag(telemetryTag);
+  cacheTag('table:machines');
+  cacheTag('table:breakdowns');
+  cacheTag('table:tires');
+  cacheTag('table:tire_inspections');
+  cacheTag('table:machine_hours');
+  cacheTag('table:machine_operations');
+
+  return withCache(() => loadMachineActivityTelemetry(options), {
+    category: CacheCategory.METRICS,
+    keyParts: ['machines-telemetry-v1', options.deptSlug, options.today],
+    tags: [
+      telemetryTag,
+      'table:machines',
+      'table:breakdowns',
+      'table:tires',
+      'table:tire_inspections',
+      'table:machine_hours',
+      'table:machine_operations',
+    ],
+  });
+}
+
 export default async function MachinesPage({
   params,
 }: {
@@ -80,8 +182,13 @@ export default async function MachinesPage({
   }
 
   const machines = await getCachedDepartmentMachines(deptSlug);
+  const telemetryByMachineId =
+    machines.length > 0
+      ? await getCachedMachineActivityTelemetry({ deptSlug, today, machines })
+      : {};
 
-  const activeCount = machines.filter((m) => m.active).length;
+  const activeCount = machines.filter((machine) => machine.active).length;
+  const siteGroups = groupMachinesBySite({ machines, telemetryByMachineId, today });
 
   return (
     <div className="space-y-6">
@@ -132,105 +239,7 @@ export default async function MachinesPage({
         </GlassCard>
       </div>
 
-      {!machines || machines.length === 0 ? (
-        <GlassCard>
-          <p className="py-8 text-center text-[var(--text-muted)] text-sm">
-            No machines registered for this department.
-          </p>
-        </GlassCard>
-      ) : (
-        (() => {
-          // Group by site
-          type MachineRow = NonNullable<typeof machines>[number];
-          const siteMap = new Map<
-            string,
-            {
-              siteCode: string;
-              siteName: string;
-              machines: MachineRow[];
-            }
-          >();
-
-          for (const machine of machines) {
-            const site = Array.isArray(machine.site) ? machine.site[0] : machine.site;
-            const siteKey = site?.site_code ?? '__none__';
-            if (!siteMap.has(siteKey)) {
-              siteMap.set(siteKey, {
-                siteCode: site?.site_code ?? '',
-                siteName: site?.name ?? 'Unassigned',
-                machines: [],
-              });
-            }
-            siteMap.get(siteKey)!.machines.push(machine);
-          }
-
-          const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
-            if (a === '__none__') return 1;
-            if (b === '__none__') return -1;
-            return a.localeCompare(b);
-          });
-
-          return (
-            <div className="space-y-6">
-              {siteEntries.map(([siteKey, { siteCode, siteName, machines: sms }]) => (
-                <div key={siteKey} className="space-y-3">
-                  {/* Site heading */}
-                  <div className="inline-flex items-center gap-2.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 px-3.5 py-1.5 shadow-card">
-                    {siteCode ? (
-                      <span className="inline-flex rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-mono text-[var(--accent-blue)] text-xs">
-                        {siteCode}
-                      </span>
-                    ) : null}
-                    <h3 className="font-medium text-[var(--text-heading)] text-sm">{siteName}</h3>
-                    <span className="text-[var(--text-muted)] text-xs">
-                      {sms.length} machine{sms.length !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                    {sms.map((machine) => (
-                      <GlassCard key={machine.id} className="px-4 py-3.5">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="font-semibold text-[var(--text-heading)] text-sm">
-                              {machine.name}
-                            </p>
-                            <div className="mt-1 flex flex-wrap items-center gap-2">
-                              <span className="rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
-                                {machine.machine_type}
-                              </span>
-                              {machine.bin_factor != null && machine.bin_factor > 0 && (
-                                <span className="rounded border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-mono text-[11px] text-[var(--accent-blue)]">
-                                  Bin: {machine.bin_factor} BCM
-                                </span>
-                              )}
-                              {machine.serial_number && (
-                                <span className="font-mono text-[11px] text-[var(--text-muted)]">
-                                  {machine.serial_number}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <span
-                            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-xs ${
-                              machine.active
-                                ? 'border-emerald-200/50 bg-emerald-50/70 text-emerald-700'
-                                : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)]'
-                            }`}
-                          >
-                            {machine.active && <span className="badge-pulse-dot bg-emerald-500" />}
-                            {machine.active ? 'Active' : 'Inactive'}
-                          </span>
-                        </div>
-                      </GlassCard>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          );
-        })()
-      )}
+      <MachineTelemetryPanelsClient siteGroups={siteGroups} />
     </div>
   );
 }

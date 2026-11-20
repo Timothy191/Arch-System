@@ -411,4 +411,42 @@ describe('EngineeringOverviewTable', () => {
       )
     );
   });
+
+  it('renders refined SCADA Reporting Panels with progress bars, target thresholds, and delay breakdown pills', () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow, carryOverRow]}
+        operators={[]}
+      />
+    );
+
+    const panels = screen.getByTestId('engineering-reporting-panels');
+    expect(panels).toBeInTheDocument();
+
+    const fleetPanel = screen.getByTestId('reporting-panel-working-fleet');
+    expect(fleetPanel).toHaveTextContent('Working Fleet Count');
+    expect(fleetPanel).toHaveTextContent('2 Machines');
+    expect(fleetPanel).toHaveTextContent('Active: 1');
+    expect(fleetPanel).toHaveTextContent('Down: 1');
+
+    const smrPanel = screen.getByTestId('reporting-panel-total-smr');
+    expect(smrPanel).toHaveTextContent('Total SMR Worked');
+    expect(smrPanel).toHaveTextContent('8.4h');
+    expect(smrPanel).toHaveTextContent('/ 24h cap');
+
+    const availabilityPanel = screen.getByTestId('reporting-panel-availability');
+    expect(availabilityPanel).toHaveTextContent('Fleet Availability');
+    expect(availabilityPanel).toHaveTextContent('Target 85%');
+
+    const utilizationPanel = screen.getByTestId('reporting-panel-utilization');
+    expect(utilizationPanel).toHaveTextContent('Fleet Utilization');
+    expect(utilizationPanel).toHaveTextContent('Prod:');
+    expect(utilizationPanel).toHaveTextContent('Eng:');
+    expect(utilizationPanel).toHaveTextContent('Nat:');
+
+    expect(screen.getAllByRole('progressbar')).toHaveLength(4);
+  });
 });

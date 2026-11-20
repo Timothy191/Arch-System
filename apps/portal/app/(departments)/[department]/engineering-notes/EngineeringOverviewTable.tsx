@@ -1,7 +1,18 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import { AlertTriangle, CheckCircle2, RotateCcw, Save, ShieldAlert, Wrench } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Gauge,
+  RotateCcw,
+  Save,
+  ShieldAlert,
+  Truck,
+  Wrench,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -127,6 +138,17 @@ const HIGH_AVAILABILITY_THRESHOLD = 80;
 const MED_AVAILABILITY_THRESHOLD = 60;
 const HIGH_UTILIZATION_THRESHOLD = 75;
 const MED_UTILIZATION_THRESHOLD = 50;
+const AVAILABILITY_TARGET_PERCENT = 85;
+const UTILIZATION_TARGET_PERCENT = 75;
+const PERCENT_SCALE_MAX = 100;
+
+const REPORTING_CARD_CLASS =
+  'gold-steel-border gold-steel-border-slim flex flex-col justify-between gap-3 border border-[var(--border-default)] bg-white/95 p-4 shadow-xs';
+const REPORTING_LABEL_CLASS =
+  'font-bold text-[11px] text-[var(--text-secondary)] uppercase tracking-wider';
+const REPORTING_PILL_BASE =
+  'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono font-semibold text-[10px] tabular-nums';
+const REPORTING_TRACK_CLASS = 'relative h-2 w-full overflow-hidden rounded-full bg-slate-100';
 
 export function EngineeringOverviewTable({
   departmentId,
@@ -546,6 +568,15 @@ export function EngineeringOverviewTable({
         avgAvailability: 0,
         avgUtilization: 0,
         carryOverCount: 0,
+        operatingCount: 0,
+        standbyCount: 0,
+        breakdownCount: 0,
+        avgSmrPerMachine: 0,
+        maxFleetHours: 0,
+        smrCapacityPct: 0,
+        totalProductionDelayHours: 0,
+        totalNonProductionDelayHours: 0,
+        totalEngineeringDelayHours: 0,
       };
     }
 
@@ -553,22 +584,57 @@ export function EngineeringOverviewTable({
     let sumAvail = 0;
     let sumUtil = 0;
     let carryOverCount = 0;
+    let operatingCount = 0;
+    let breakdownCount = 0;
+    let totalProductionDelayHours = 0;
+    let totalNonProductionDelayHours = 0;
+    let totalEngineeringDelayHours = 0;
 
     for (const r of rows) {
       const m = computeMachineOverviewMetrics(r.startSmr, r.stopSmr, r.delays);
       sumSmr += m.totalSmrWorked;
       sumAvail += m.availabilityPercent;
       sumUtil += m.utilizationPercent;
+      totalProductionDelayHours += m.productionDelayHours;
+      totalNonProductionDelayHours += m.nonProductionDelayHours;
+      totalEngineeringDelayHours += m.engineeringDelayHours;
+
+      const isBreakdown =
+        Boolean(r.carryOverBreakdown) || r.endsOnBreakdown || r.delays.breakdown > 0;
       if (r.carryOverBreakdown || r.endsOnBreakdown) {
         carryOverCount++;
       }
+      if (isBreakdown) {
+        breakdownCount++;
+      } else if (m.totalSmrWorked > 0) {
+        operatingCount++;
+      }
     }
+
+    const maxFleetHours = rows.length * MAX_SHIFT_HOURS;
+    const standbyCount = Math.max(0, rows.length - operatingCount - breakdownCount);
+    const smrCapacityPct =
+      maxFleetHours > 0
+        ? Math.min(
+            PERCENT_SCALE_MAX,
+            Number(((sumSmr / maxFleetHours) * PERCENT_SCALE_MAX).toFixed(1))
+          )
+        : 0;
 
     return {
       totalSmrWorked: Number(sumSmr.toFixed(1)),
       avgAvailability: Number((sumAvail / rows.length).toFixed(1)),
       avgUtilization: Number((sumUtil / rows.length).toFixed(1)),
       carryOverCount,
+      operatingCount,
+      standbyCount,
+      breakdownCount,
+      avgSmrPerMachine: Number((sumSmr / rows.length).toFixed(1)),
+      maxFleetHours,
+      smrCapacityPct,
+      totalProductionDelayHours: Number(totalProductionDelayHours.toFixed(1)),
+      totalNonProductionDelayHours: Number(totalNonProductionDelayHours.toFixed(1)),
+      totalEngineeringDelayHours: Number(totalEngineeringDelayHours.toFixed(1)),
     };
   }, [rows]);
 
@@ -608,41 +674,269 @@ export function EngineeringOverviewTable({
     });
   }, [rows, searchQuery, selectedTypeFilter]);
 
+  const availabilityStatus =
+    fleetSummary.avgAvailability >= HIGH_AVAILABILITY_THRESHOLD
+      ? {
+          label: 'On Target',
+          toneClass: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+          barClass: 'bg-emerald-500',
+          valueClass: 'text-accent-green',
+        }
+      : fleetSummary.avgAvailability >= MED_AVAILABILITY_THRESHOLD
+        ? {
+            label: 'Watch',
+            toneClass: 'border-amber-200 bg-amber-50 text-amber-800',
+            barClass: 'bg-amber-500',
+            valueClass: 'text-amber-600',
+          }
+        : {
+            label: 'Critical',
+            toneClass: 'border-rose-200 bg-rose-50 text-rose-700',
+            barClass: 'bg-rose-500',
+            valueClass: 'text-rose-600',
+          };
+
+  const utilizationStatus =
+    fleetSummary.avgUtilization >= HIGH_UTILIZATION_THRESHOLD
+      ? {
+          label: 'Optimal',
+          toneClass: 'border-sky-200 bg-sky-50 text-sky-800',
+          barClass: 'bg-[var(--accent-blue)]',
+          valueClass: 'text-[var(--accent-blue)]',
+        }
+      : fleetSummary.avgUtilization >= MED_UTILIZATION_THRESHOLD
+        ? {
+            label: 'Moderate',
+            toneClass: 'border-amber-200 bg-amber-50 text-amber-800',
+            barClass: 'bg-amber-500',
+            valueClass: 'text-[var(--text-heading)]',
+          }
+        : {
+            label: 'Underutilized',
+            toneClass: 'border-slate-200 bg-slate-100 text-slate-700',
+            barClass: 'bg-slate-400',
+            valueClass: 'text-[var(--text-heading)]',
+          };
+
+  const operationalReadyPct =
+    rows.length > 0
+      ? Math.round(((rows.length - fleetSummary.breakdownCount) / rows.length) * PERCENT_SCALE_MAX)
+      : 0;
+
   return (
     <div className="space-y-4" data-testid="engineering-overview-ledger">
-      {/* Top KPI & Standard Allowances Header */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <GlassCard className="p-3.5">
-          <span className="block font-semibold text-[11px] text-[var(--text-secondary)] uppercase">
-            Working Fleet Count
-          </span>
-          <span className="mt-1 block font-bold font-mono text-[var(--text-heading)] text-xl">
-            {rows.length} Machines
-          </span>
+      {/* Refined SCADA Executive Reporting Panels */}
+      <div
+        data-testid="engineering-reporting-panels"
+        className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        {/* Panel 1: Working Fleet Count */}
+        <GlassCard data-testid="reporting-panel-working-fleet" className={REPORTING_CARD_CLASS}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className={REPORTING_LABEL_CLASS}>Working Fleet Count</span>
+              <span className="mt-1 block font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
+                {rows.length} Machines
+              </span>
+            </div>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+              <Truck className="h-4 w-4" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div
+              role="progressbar"
+              aria-label="Fleet operational readiness"
+              aria-valuenow={operationalReadyPct}
+              aria-valuemin={0}
+              aria-valuemax={PERCENT_SCALE_MAX}
+              className={REPORTING_TRACK_CLASS}
+            >
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                style={{ width: `${operationalReadyPct}%` }}
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span
+                className={`${REPORTING_PILL_BASE} border-emerald-200 bg-emerald-50 text-emerald-700`}
+              >
+                Active: {fleetSummary.operatingCount}
+              </span>
+              <span
+                className={`${REPORTING_PILL_BASE} border-slate-200 bg-slate-50 text-slate-700`}
+              >
+                Standby: {fleetSummary.standbyCount}
+              </span>
+              <span
+                className={`${REPORTING_PILL_BASE} ${
+                  fleetSummary.breakdownCount > 0
+                    ? 'border-rose-200 bg-rose-50 text-rose-700'
+                    : 'border-slate-200 bg-slate-50 text-slate-600'
+                }`}
+              >
+                Down: {fleetSummary.breakdownCount}
+              </span>
+            </div>
+          </div>
         </GlassCard>
-        <GlassCard className="p-3.5">
-          <span className="block font-semibold text-[11px] text-[var(--text-secondary)] uppercase">
-            Total SMR Worked
-          </span>
-          <span className="mt-1 block font-bold font-mono text-[var(--accent-blue)] text-xl">
-            {fleetSummary.totalSmrWorked.toFixed(1)}h
-          </span>
+
+        {/* Panel 2: Total SMR Worked */}
+        <GlassCard data-testid="reporting-panel-total-smr" className={REPORTING_CARD_CLASS}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className={REPORTING_LABEL_CLASS}>Total SMR Worked</span>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span className="font-bold font-mono text-2xl text-[var(--accent-blue)] tabular-nums">
+                  {fleetSummary.totalSmrWorked.toFixed(1)}h
+                </span>
+                <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+                  / {fleetSummary.maxFleetHours.toFixed(0)}h cap
+                </span>
+              </div>
+            </div>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sky-200 bg-sky-50 text-sky-700">
+              <Clock className="h-4 w-4" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div
+              role="progressbar"
+              aria-label="Shift SMR capacity logged"
+              aria-valuenow={fleetSummary.smrCapacityPct}
+              aria-valuemin={0}
+              aria-valuemax={PERCENT_SCALE_MAX}
+              className={REPORTING_TRACK_CLASS}
+            >
+              <div
+                className="h-full rounded-full bg-[var(--accent-blue)] transition-all duration-300"
+                style={{ width: `${fleetSummary.smrCapacityPct}%` }}
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <span className={`${REPORTING_PILL_BASE} border-sky-200 bg-sky-50 text-sky-800`}>
+                Avg {fleetSummary.avgSmrPerMachine.toFixed(1)}h / machine
+              </span>
+              <span
+                className={`${REPORTING_PILL_BASE} border-slate-200 bg-slate-50 text-slate-700`}
+              >
+                {fleetSummary.smrCapacityPct.toFixed(1)}% shift cap
+              </span>
+            </div>
+          </div>
         </GlassCard>
-        <GlassCard className="p-3.5">
-          <span className="block font-semibold text-[11px] text-[var(--text-secondary)] uppercase">
-            Fleet Availability
-          </span>
-          <span className="mt-1 block font-bold font-mono text-accent-green text-xl">
-            {fleetSummary.avgAvailability.toFixed(1)}%
-          </span>
+
+        {/* Panel 3: Fleet Availability */}
+        <GlassCard data-testid="reporting-panel-availability" className={REPORTING_CARD_CLASS}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className={REPORTING_LABEL_CLASS}>Fleet Availability</span>
+                <span className={`${REPORTING_PILL_BASE} ${availabilityStatus.toneClass}`}>
+                  {availabilityStatus.label}
+                </span>
+              </div>
+              <span
+                className={`mt-1 block font-bold font-mono text-2xl tabular-nums ${availabilityStatus.valueClass}`}
+              >
+                {fleetSummary.avgAvailability.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700">
+              <Activity className="h-4 w-4" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div
+              role="progressbar"
+              aria-label="Fleet availability percentage"
+              aria-valuenow={fleetSummary.avgAvailability}
+              aria-valuemin={0}
+              aria-valuemax={PERCENT_SCALE_MAX}
+              className={REPORTING_TRACK_CLASS}
+            >
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${availabilityStatus.barClass}`}
+                style={{ width: `${Math.min(PERCENT_SCALE_MAX, fleetSummary.avgAvailability)}%` }}
+              />
+              <span
+                aria-hidden="true"
+                title={`Target ${AVAILABILITY_TARGET_PERCENT}%`}
+                className="absolute inset-y-0 w-0.5 bg-slate-700/70"
+                style={{ left: `${AVAILABILITY_TARGET_PERCENT}%` }}
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <span className={`${REPORTING_PILL_BASE} border-rose-200 bg-rose-50 text-rose-700`}>
+                Eng: {fleetSummary.totalEngineeringDelayHours.toFixed(1)}h
+              </span>
+              <span
+                className={`${REPORTING_PILL_BASE} border-slate-200 bg-slate-50 text-slate-700`}
+              >
+                Target {AVAILABILITY_TARGET_PERCENT}% · {fleetSummary.breakdownCount} BD
+              </span>
+            </div>
+          </div>
         </GlassCard>
-        <GlassCard className="p-3.5">
-          <span className="block font-semibold text-[11px] text-[var(--text-secondary)] uppercase">
-            Fleet Utilization
-          </span>
-          <span className="mt-1 block font-bold font-mono text-[var(--text-heading)] text-xl">
-            {fleetSummary.avgUtilization.toFixed(1)}%
-          </span>
+
+        {/* Panel 4: Fleet Utilization */}
+        <GlassCard data-testid="reporting-panel-utilization" className={REPORTING_CARD_CLASS}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className={REPORTING_LABEL_CLASS}>Fleet Utilization</span>
+                <span className={`${REPORTING_PILL_BASE} ${utilizationStatus.toneClass}`}>
+                  {utilizationStatus.label}
+                </span>
+              </div>
+              <span
+                className={`mt-1 block font-bold font-mono text-2xl tabular-nums ${utilizationStatus.valueClass}`}
+              >
+                {fleetSummary.avgUtilization.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-amber-700">
+              <Gauge className="h-4 w-4" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div
+              role="progressbar"
+              aria-label="Fleet utilization percentage"
+              aria-valuenow={fleetSummary.avgUtilization}
+              aria-valuemin={0}
+              aria-valuemax={PERCENT_SCALE_MAX}
+              className={REPORTING_TRACK_CLASS}
+            >
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${utilizationStatus.barClass}`}
+                style={{ width: `${Math.min(PERCENT_SCALE_MAX, fleetSummary.avgUtilization)}%` }}
+              />
+              <span
+                aria-hidden="true"
+                title={`Target ${UTILIZATION_TARGET_PERCENT}%`}
+                className="absolute inset-y-0 w-0.5 bg-slate-700/70"
+                style={{ left: `${UTILIZATION_TARGET_PERCENT}%` }}
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className={`${REPORTING_PILL_BASE} border-sky-200 bg-sky-50 text-sky-800`}>
+                Prod: {fleetSummary.totalProductionDelayHours.toFixed(1)}h
+              </span>
+              <span className={`${REPORTING_PILL_BASE} border-rose-200 bg-rose-50 text-rose-700`}>
+                Eng: {fleetSummary.totalEngineeringDelayHours.toFixed(1)}h
+              </span>
+              <span
+                className={`${REPORTING_PILL_BASE} border-amber-200 bg-amber-50 text-amber-800`}
+              >
+                Nat: {fleetSummary.totalNonProductionDelayHours.toFixed(1)}h
+              </span>
+            </div>
+          </div>
         </GlassCard>
       </div>
 

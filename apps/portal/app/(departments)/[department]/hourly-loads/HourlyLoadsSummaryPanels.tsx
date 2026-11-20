@@ -4,7 +4,7 @@ import { AnimatedDialog } from '@repo/ui';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
-import { Activity, Lock, Minus, Plus, TrendingUp, Truck } from 'lucide-react';
+import { Activity, AlertTriangle, Lock, Minus, Plus, TrendingUp, Truck } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 import type { Excavator, HourlySlotSeries, Machine } from './hourly-loads-utils';
 import { HOUR_PROP, HOURS_12, type HourlyMaterial, type HourlyShift } from './loads-utils';
@@ -25,6 +25,7 @@ interface HourCellProps {
   hourLabel?: string;
   editable: boolean;
   isLocked: boolean;
+  isBlockedByBreakdown?: boolean;
   startHour?: number;
   endHour?: number;
   onStep: (rowIndex: number, hourProp: string, delta: number) => void;
@@ -38,6 +39,7 @@ export const HourCell = memo(function HourCell({
   hourLabel,
   editable,
   isLocked,
+  isBlockedByBreakdown = false,
   startHour,
   endHour,
   onStep,
@@ -52,20 +54,32 @@ export const HourCell = memo(function HourCell({
   if (!editable) {
     return (
       <td
-        className="bg-black/[0.02] px-1 py-2 text-center"
+        className={`px-1 py-2 text-center ${isBlockedByBreakdown ? 'bg-red-100/70' : 'bg-black/[0.02]'}`}
         title={
-          isLocked ? 'Segment locked' : `Active hours: ${startHour ?? 1}:00 - ${endHour ?? 12}:59`
+          isBlockedByBreakdown
+            ? 'Breakdown booked by Engineering'
+            : isLocked
+              ? 'Segment locked'
+              : `Active hours: ${startHour ?? 1}:00 - ${endHour ?? 12}:59`
         }
       >
-        <div className="flex items-center justify-center gap-1 text-[var(--text-muted)] opacity-60">
+        <div
+          className={`flex items-center justify-center gap-1 opacity-75 ${
+            isBlockedByBreakdown ? 'text-red-800' : 'text-[var(--text-muted)]'
+          }`}
+        >
           <span className="font-mono text-xs">{value > 0 ? value : '-'}</span>
-          <Lock className="h-2.5 w-2.5 opacity-50" />
+          <Lock className="h-2.5 w-2.5 opacity-60" />
         </div>
       </td>
     );
   }
 
   const commitValue = () => {
+    if (isBlockedByBreakdown) {
+      setLocalVal(String(value));
+      return;
+    }
     const parsed = parseInt(localVal, 10);
     const valid = Number.isNaN(parsed) ? 0 : Math.max(0, Math.min(100, parsed));
     setLocalVal(String(valid));
@@ -75,9 +89,13 @@ export const HourCell = memo(function HourCell({
   };
 
   return (
-    <td className="px-1 py-1.5 text-center">
+    <td className={`px-1 py-1.5 text-center ${isBlockedByBreakdown ? 'bg-red-50' : ''}`}>
       <div
-        className="inline-flex items-center justify-center gap-0.5 rounded border border-[var(--border-default)]/60 bg-[var(--bg-secondary)]/50 p-0.5 focus-within:border-[var(--accent-blue)] focus-within:ring-1 focus-within:ring-[var(--accent-blue)]"
+        className={`inline-flex items-center justify-center gap-0.5 rounded border p-0.5 ${
+          isBlockedByBreakdown
+            ? 'cursor-not-allowed border-red-300 bg-red-100/80 opacity-85'
+            : 'border-[var(--border-default)]/60 bg-[var(--bg-secondary)]/50 focus-within:border-[var(--accent-blue)] focus-within:ring-1 focus-within:ring-[var(--accent-blue)]'
+        }`}
         data-row={String(rowIndex)}
         data-hour={hourProp}
       >
@@ -88,12 +106,17 @@ export const HourCell = memo(function HourCell({
           data-action="down"
           onClick={(e) => {
             e.stopPropagation();
+            if (isBlockedByBreakdown) return;
             onStep(rowIndex, hourProp, -1);
           }}
-          disabled={value <= 0}
+          disabled={isBlockedByBreakdown || value <= 0}
           aria-label={`Decrease ${hourLabel}:00 loads`}
-          title={`Decrease ${hourLabel}:00 loads`}
-          className="inline-flex h-6 w-5 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)] disabled:cursor-not-allowed disabled:opacity-20"
+          title={
+            isBlockedByBreakdown
+              ? 'Blocked: Breakdown booked by Engineering'
+              : `Decrease ${hourLabel}:00 loads`
+          }
+          className="inline-flex h-6 w-5 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)] disabled:cursor-not-allowed disabled:opacity-30"
         >
           <Minus className="h-3 w-3" />
         </button>
@@ -102,9 +125,16 @@ export const HourCell = memo(function HourCell({
           inputMode="numeric"
           pattern="[0-9]*"
           value={localVal}
-          onChange={(e) => setLocalVal(e.target.value)}
+          disabled={isBlockedByBreakdown}
+          readOnly={isBlockedByBreakdown}
+          aria-label={`${hourLabel}:00 loads`}
+          onChange={(e) => {
+            if (isBlockedByBreakdown) return;
+            setLocalVal(e.target.value);
+          }}
           onBlur={commitValue}
           onKeyDown={(e) => {
+            if (isBlockedByBreakdown) return;
             if (e.key === 'Enter') {
               commitValue();
               (e.target as HTMLInputElement).blur();
@@ -116,7 +146,9 @@ export const HourCell = memo(function HourCell({
               onStep(rowIndex, hourProp, -1);
             }
           }}
-          className="w-7 bg-transparent py-0.5 text-center font-mono font-semibold text-[var(--text-heading)] text-xs focus:outline-none"
+          className={`w-7 bg-transparent py-0.5 text-center font-mono font-semibold text-xs focus:outline-none ${
+            isBlockedByBreakdown ? 'cursor-not-allowed text-red-900' : 'text-[var(--text-heading)]'
+          }`}
         />
         <button
           type="button"
@@ -125,12 +157,17 @@ export const HourCell = memo(function HourCell({
           data-action="up"
           onClick={(e) => {
             e.stopPropagation();
+            if (isBlockedByBreakdown) return;
             onStep(rowIndex, hourProp, 1);
           }}
-          disabled={value >= 100}
+          disabled={isBlockedByBreakdown || value >= 100}
           aria-label={`Increase ${hourLabel}:00 loads`}
-          title={`Increase ${hourLabel}:00 loads`}
-          className="inline-flex h-6 w-5 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)] disabled:cursor-not-allowed disabled:opacity-20"
+          title={
+            isBlockedByBreakdown
+              ? 'Blocked: Breakdown booked by Engineering'
+              : `Increase ${hourLabel}:00 loads`
+          }
+          className="inline-flex h-6 w-5 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)] disabled:cursor-not-allowed disabled:opacity-30"
         >
           <Plus className="h-3 w-3" />
         </button>
@@ -394,6 +431,7 @@ interface HourlyLoadsSplitSectionProps {
   sites: { id: string; name: string; site_code: string }[];
   excavatorSites: Record<string, string>;
   hourLabels: string[];
+  blockedMachineIds?: ReadonlySet<string>;
   onOpenSplitModal: () => void;
   onCloseSplitModal: () => void;
   onSplitMachineChange: (machineId: string) => void;
@@ -415,6 +453,7 @@ export function HourlyLoadsSplitSection({
   sites,
   excavatorSites,
   hourLabels,
+  blockedMachineIds,
   onOpenSplitModal,
   onCloseSplitModal,
   onSplitMachineChange,
@@ -423,6 +462,8 @@ export function HourlyLoadsSplitSection({
   onSplitStartHourChange,
   onConfirmSplit,
 }: HourlyLoadsSplitSectionProps) {
+  const isSplitMachineBlocked = Boolean(blockedMachineIds?.has(splitMachineId));
+
   return (
     <>
       {/* Bottom Action Area: Split Shift / Machine Lineup Change */}
@@ -464,14 +505,25 @@ export function HourlyLoadsSplitSection({
               value={splitMachineId}
               onChange={(e) => onSplitMachineChange(e.target.value)}
               disabled={isSubmittingSplit}
+              aria-label="Select Haul Truck"
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-medium text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
             >
-              {machines.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name} ({m.machine_type})
-                </option>
-              ))}
+              {machines.map((m) => {
+                const isBlocked = Boolean(blockedMachineIds?.has(m.id));
+                return (
+                  <option key={m.id} value={m.id} disabled={isBlocked}>
+                    {m.name} ({m.machine_type})
+                    {isBlocked ? ' — Breakdown booked by Engineering' : ''}
+                  </option>
+                );
+              })}
             </select>
+            {isSplitMachineBlocked && (
+              <p className="mt-1.5 flex items-center gap-1 rounded border border-red-300 bg-red-50 px-2 py-1 font-medium text-[11px] text-red-800">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-700" />
+                <span>Breakdown booked by Engineering — split and load entry are blocked.</span>
+              </p>
+            )}
           </div>
 
           {/* Excavator Selection */}
@@ -574,8 +626,8 @@ export function HourlyLoadsSplitSection({
             <button
               type="button"
               onClick={onConfirmSplit}
-              disabled={isSubmittingSplit}
-              className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-semibold text-white text-xs transition-all hover:bg-[var(--accent-blue)]/90 disabled:opacity-50"
+              disabled={isSubmittingSplit || isSplitMachineBlocked}
+              className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-semibold text-white text-xs transition-all hover:bg-[var(--accent-blue)]/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Plus className="h-3.5 w-3.5" />
               {isSubmittingSplit ? 'Adding Split...' : 'Confirm & Add Split'}

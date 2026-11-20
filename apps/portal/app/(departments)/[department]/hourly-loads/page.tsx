@@ -22,7 +22,7 @@ export default async function HourlyLoadsPage({
     department,
   });
 
-  // Parallel fetch of fleet dump trucks, excavators, today's loads, sites, mine blocks, excavator activities, and mineral registry
+  // Parallel fetch of fleet dump trucks, excavators, today's loads, sites, mine blocks, excavator activities, active breakdowns, and mineral registry
   const [
     { data: machines },
     { data: excavators },
@@ -30,6 +30,7 @@ export default async function HourlyLoadsPage({
     { data: sites },
     { data: mineBlocks },
     { data: excavatorActivities },
+    { data: activeBreakdowns },
     mineralRegistry,
   ] = await withAsyncSpan(
     'hourly_loads_load',
@@ -41,7 +42,7 @@ export default async function HourlyLoadsPage({
       const results = await Promise.all([
         supabase
           .from('machines')
-          .select('id, name, machine_type, bin_factor, site_id')
+          .select('id, name, machine_type, serial_number, bin_factor, site_id')
           .in('machine_type', [...HAUL_TRUCK_MACHINE_TYPES])
           .eq('active', true)
           .order('name'),
@@ -68,6 +69,11 @@ export default async function HourlyLoadsPage({
           .eq('department_id', deptId)
           .eq('activity_date', today)
           .order('created_at', { ascending: false }),
+        supabase
+          .from('breakdowns')
+          .select('id, fleet_id, machine_id, machine_name, reason, status, date_in, time_in')
+          .eq('status', 'active')
+          .is('deleted_at', null),
         getMineralRegistry(),
       ]);
       span?.setAttributes?.({
@@ -76,6 +82,7 @@ export default async function HourlyLoadsPage({
         machine_count: results[0].data?.length ?? 0,
         excavator_count: results[1].data?.length ?? 0,
         hourly_load_count: results[2].data?.length ?? 0,
+        active_breakdown_count: results[6].data?.length ?? 0,
       });
       return results;
     }
@@ -107,6 +114,7 @@ export default async function HourlyLoadsPage({
         sites={sites || []}
         mineBlocks={mineBlocks || []}
         excavatorActivities={excavatorActivities || []}
+        activeBreakdowns={activeBreakdowns || []}
         mineralRegistry={mineralRegistry}
         today={today}
         initialShift={getCurrentShift()}

@@ -3,7 +3,7 @@
 import { useSupabaseRealtime } from '@repo/shared/hooks';
 import { getBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Lock, Search, X } from 'lucide-react';
+import { AlertTriangle, Lock, Search, X } from 'lucide-react';
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
@@ -16,11 +16,14 @@ import {
   hourPropName,
 } from './HourlyLoadsSummaryPanels';
 import {
+  type ActiveBreakdownRecord,
   applyOptimisticAsyncSourcePatch,
+  buildActiveBreakdownByMachineMap,
   buildSyncSourceRows,
   computeHourlyLoadsTelemetry,
   DAY_HOUR_LABELS,
   type ExcavatorActivitySummary,
+  formatBreakdownReasonSubtitle,
   type HourlyLoadGridRow,
   type HourlyLoadsGridProps,
   NIGHT_HOUR_LABELS,
@@ -46,6 +49,7 @@ function HourlyLoadsGrid({
   sites,
   mineBlocks: _mineBlocks = [],
   excavatorActivities = [],
+  activeBreakdowns = [],
   mineralRegistry,
   today,
   initialShift,
@@ -83,12 +87,51 @@ function HourlyLoadsGrid({
   );
 
   // Split Modal State
+  const [breakdownsState, setBreakdownsState] = useState<ActiveBreakdownRecord[]>(activeBreakdowns);
+  useEffect(() => {
+    setBreakdownsState(activeBreakdowns);
+  }, [activeBreakdowns]);
+
+  const activeBreakdownByMachine = useMemo(
+    () => buildActiveBreakdownByMachineMap(machines, breakdownsState),
+    [machines, breakdownsState]
+  );
+
+  const blockedMachineIds = useMemo(
+    () => new Set(activeBreakdownByMachine.keys()),
+    [activeBreakdownByMachine]
+  );
+
   const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
-  const [splitMachineId, setSplitMachineId] = useState<string>(machines[0]?.id ?? '');
+  const [splitMachineId, setSplitMachineId] = useState<string>(
+    () =>
+      machines.find((m) => !buildActiveBreakdownByMachineMap(machines, activeBreakdowns).has(m.id))
+        ?.id ??
+      machines[0]?.id ??
+      ''
+  );
   const [splitExcavatorId, setSplitExcavatorId] = useState<string>(excavators[0]?.id ?? '');
   const [splitMaterial, setSplitMaterial] = useState<HourlyMaterial>('Waste');
   const [splitStartHour, setSplitStartHour] = useState<number>(2);
   const [isSubmittingSplit, setIsSubmittingSplit] = useState(false);
+
+  useSupabaseRealtime<ActiveBreakdownRecord & { deleted_at?: string | null }>({
+    supabaseClient: supabase,
+    table: 'breakdowns',
+    onChange: (payload) => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        const record = payload.new;
+        if (!record?.id) return;
+        const isActive = (record.status ?? '').toLowerCase() === 'active' && !record.deleted_at;
+        setBreakdownsState((prev) => {
+          const without = prev.filter((item) => item.id !== record.id);
+          return isActive ? [record, ...without] : without;
+        });
+      } else if (payload.eventType === 'DELETE' && payload.old.id) {
+        setBreakdownsState((prev) => prev.filter((item) => item.id !== payload.old.id));
+      }
+    },
+  });
 
   // AGENT-TRACE: Real-time synchronization of hourly_loads CDC events across operators
   useSupabaseRealtime<HourlyLoad>({
@@ -159,6 +202,7 @@ function HourlyLoadsGrid({
   const latestReceivedVersionRef = useRef<number>(0);
 
   useEffect(() => {
+    if (typeof Worker === 'undefined') return;
     workerRef.current = new Worker(new URL('./aggregation.worker.ts', import.meta.url));
     workerRef.current.onmessage = (
       e: MessageEvent<{ rows: HourlyLoadGridRow[]; version: number }>
@@ -174,7 +218,8 @@ function HourlyLoadsGrid({
     };
   }, []);
 
-  const isLargeDataset = machines.length > 50 || loadsState.length > 100;
+  const isLargeDataset =
+    typeof Worker !== 'undefined' && (machines.length > 50 || loadsState.length > 100);
 
   const syncSource = useMemo(
     () =>
@@ -369,7 +414,7 @@ function HourlyLoadsGrid({
   const handleCellChange = useCallback(
     async (rowIndex: number, hourProp: string, delta: number) => {
       const row = source[rowIndex];
-      if (!row) return;
+      if (!row || activeBreakdownByMachine.has(row.machineId)) return;
 
       const hourIndex = parseInt(hourProp.split('_')[1] ?? '0', 10) - 1;
       const hourNum = hourIndex + 1;
@@ -399,14 +444,14 @@ function HourlyLoadsGrid({
         }
       );
     },
-    [source, selectedShift, commitLoadChange]
+    [source, selectedShift, activeBreakdownByMachine, commitLoadChange]
   );
 
   // Handle toggling material type for a row
   const handleMaterialToggle = useCallback(
     async (rowIndex: number) => {
       const row = source[rowIndex];
-      if (!row || row.isLocked) return;
+      if (!row || row.isLocked || activeBreakdownByMachine.has(row.machineId)) return;
 
       const currentMaterial = row.materialType as HourlyMaterial;
       const newMaterial: HourlyMaterial = currentMaterial === 'Waste' ? 'Coal' : 'Waste';
@@ -428,14 +473,14 @@ function HourlyLoadsGrid({
         }
       );
     },
-    [source, selectedShift, commitLoadChange]
+    [source, selectedShift, activeBreakdownByMachine, commitLoadChange]
   );
 
   // Handle excavator assignment change for a row
   const handleExcavatorAssignment = useCallback(
     async (rowIndex: number, newExcavatorId: string | null) => {
       const row = source[rowIndex];
-      if (!row || row.isLocked) return;
+      if (!row || row.isLocked || activeBreakdownByMachine.has(row.machineId)) return;
 
       const currentExcavatorId = row.excavatorId || null;
       if (newExcavatorId === currentExcavatorId) return;
@@ -464,13 +509,17 @@ function HourlyLoadsGrid({
         }
       );
     },
-    [source, selectedShift, excavatorMaterials, commitLoadChange]
+    [source, selectedShift, excavatorMaterials, activeBreakdownByMachine, commitLoadChange]
   );
 
   // Handle split creation
   const handleCreateSplit = async () => {
     if (!splitMachineId) {
       toast.warning('Please select a haul truck to split.');
+      return;
+    }
+    if (activeBreakdownByMachine.has(splitMachineId)) {
+      toast.error('Cannot split machine loads: Breakdown booked by Engineering.');
       return;
     }
     if (splitStartHour < 2 || splitStartHour > 12) {
@@ -585,7 +634,7 @@ function HourlyLoadsGrid({
   const handleDirectNumberEdit = useCallback(
     async (rowIndex: number, hourProp: string, value: number) => {
       const row = source[rowIndex];
-      if (!row) return;
+      if (!row || activeBreakdownByMachine.has(row.machineId)) return;
 
       const hourIndex = parseInt(hourProp.split('_')[1] ?? '0', 10) - 1;
       const hourNum = hourIndex + 1;
@@ -615,7 +664,7 @@ function HourlyLoadsGrid({
         { hour_prop: hourProp, value: clampedValue, operation: 'direct_edit' }
       );
     },
-    [source, selectedShift, applyLoadState, commitLoadChange]
+    [source, selectedShift, activeBreakdownByMachine, applyLoadState, commitLoadChange]
   );
 
   const [machineSearch, setMachineSearch] = useState('');
@@ -822,59 +871,106 @@ function HourlyLoadsGrid({
                   filteredRows.map(({ row, originalRowIndex }) => {
                     const isLocked = Boolean(row.isLocked);
                     const isSplit = Boolean(row.isSplit);
+                    const activeBreakdown = activeBreakdownByMachine.get(row.machineId);
+                    const isBreakdownBlocked = Boolean(activeBreakdown);
+                    const isRowDisabled = isLocked || isBreakdownBlocked;
+                    const breakdownReason = formatBreakdownReasonSubtitle(activeBreakdown?.reason);
 
                     return (
                       <tr
                         key={row.rowKey || `row-${originalRowIndex}`}
-                        className={`transition-colors hover:bg-[var(--bg-secondary)]/40 ${
-                          isLocked ? 'bg-black/[0.015]' : ''
-                        }`}
+                        data-testid={`hourly-load-row-${row.machineId}`}
+                        data-breakdown-blocked={isBreakdownBlocked ? 'true' : undefined}
+                        aria-disabled={isBreakdownBlocked ? 'true' : undefined}
+                        className={
+                          isBreakdownBlocked
+                            ? 'border-red-300 border-y bg-red-50 text-red-900 transition-colors hover:bg-red-100/70'
+                            : `transition-colors hover:bg-[var(--bg-secondary)]/40 ${
+                                isLocked ? 'bg-black/[0.015]' : ''
+                              }`
+                        }
                       >
                         {/* Machine Column (sticky left) */}
-                        <td className="sticky left-0 z-10 bg-[var(--bg-primary)] px-3 py-2.5 font-medium shadow-[1px_0_0_0_var(--border-default)]">
-                          <div className="flex min-w-[140px] max-w-[180px] items-center gap-1.5">
-                            <span
-                              className={`truncate font-semibold text-xs ${
-                                isLocked
-                                  ? 'text-[var(--text-muted)] line-through decoration-black/20'
-                                  : 'text-[var(--text-heading)]'
-                              }`}
-                              title={row.machineName}
-                            >
-                              {row.machineName}
-                            </span>
-                            {isLocked ? (
+                        <td
+                          className={
+                            isBreakdownBlocked
+                              ? 'sticky left-0 z-10 border-red-300 border-r bg-red-50 px-3 py-2.5 font-medium text-red-900 shadow-[1px_0_0_0_var(--border-default)]'
+                              : 'sticky left-0 z-10 bg-[var(--bg-primary)] px-3 py-2.5 font-medium shadow-[1px_0_0_0_var(--border-default)]'
+                          }
+                        >
+                          <div className="flex min-w-[140px] max-w-[200px] flex-col gap-1">
+                            <div className="flex items-center gap-1.5">
                               <span
-                                className="inline-flex shrink-0 items-center gap-0.5 rounded bg-black/[0.06] px-1 py-0.5 font-semibold text-[10px] text-[var(--text-muted)]"
-                                title="Previous segment locked"
+                                className={`truncate font-semibold text-xs ${
+                                  isBreakdownBlocked
+                                    ? 'text-red-900'
+                                    : isLocked
+                                      ? 'text-[var(--text-muted)] line-through decoration-black/20'
+                                      : 'text-[var(--text-heading)]'
+                                }`}
+                                title={row.machineName}
                               >
-                                <Lock className="h-2.5 w-2.5" />
-                                Locked
+                                {row.machineName}
                               </span>
-                            ) : isSplit ? (
-                              <span className="shrink-0 rounded bg-[var(--accent-blue)]/15 px-1 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)]">
-                                Split
-                              </span>
-                            ) : null}
+                              {isLocked ? (
+                                <span
+                                  className="inline-flex shrink-0 items-center gap-0.5 rounded bg-black/[0.06] px-1 py-0.5 font-semibold text-[10px] text-[var(--text-muted)]"
+                                  title="Previous segment locked"
+                                >
+                                  <Lock className="h-2.5 w-2.5" />
+                                  Locked
+                                </span>
+                              ) : isSplit ? (
+                                <span className="shrink-0 rounded bg-[var(--accent-blue)]/15 px-1 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)]">
+                                  Split
+                                </span>
+                              ) : null}
+                            </div>
+                            {isBreakdownBlocked && (
+                              <div
+                                data-testid={`breakdown-note-${row.machineId}`}
+                                className="rounded border border-red-300 bg-red-100 px-1.5 py-1 text-[10px] text-red-900"
+                              >
+                                <div className="flex items-center gap-1 font-bold">
+                                  <AlertTriangle className="h-3 w-3 shrink-0 text-red-700" />
+                                  <span>Breakdown booked by Engineering</span>
+                                </div>
+                                {breakdownReason && (
+                                  <span
+                                    className="mt-0.5 block truncate font-medium text-red-700"
+                                    title={breakdownReason}
+                                  >
+                                    {breakdownReason}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </td>
 
                         {/* Excavator Assigned Column */}
-                        <td className="min-w-[150px] px-3 py-2.5">
+                        <td
+                          className={`min-w-[150px] px-3 py-2.5 ${isBreakdownBlocked ? 'bg-red-50' : ''}`}
+                        >
                           <select
                             data-row={String(originalRowIndex)}
                             data-action="select-excavator"
+                            aria-label={`Assign excavator for ${row.machineName}`}
                             value={row.excavatorId || ''}
                             onChange={(e) => {
                               e.stopPropagation();
+                              if (isBreakdownBlocked) return;
                               handleExcavatorAssignment(originalRowIndex, e.target.value || null);
                             }}
-                            disabled={isLocked}
-                            className={`w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-1 font-medium text-xs ${
-                              isLocked
-                                ? 'cursor-not-allowed text-[var(--text-muted)] opacity-60'
-                                : 'cursor-pointer text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]'
-                            } transition-colors`}
+                            disabled={isRowDisabled}
+                            aria-disabled={isBreakdownBlocked ? 'true' : undefined}
+                            className={`w-full rounded-md border px-2 py-1 font-medium text-xs transition-colors ${
+                              isBreakdownBlocked
+                                ? 'cursor-not-allowed border-red-300 bg-red-100/80 text-red-900 opacity-85'
+                                : isLocked
+                                  ? 'cursor-not-allowed border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)] opacity-60'
+                                  : 'cursor-pointer border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]'
+                            }`}
                           >
                             <option value="">Select Excavator</option>
                             {excavators
@@ -907,7 +1003,8 @@ function HourlyLoadsGrid({
                               hourProp={hourProp}
                               hourLabel={hourLabels[hourIdx] ?? ''}
                               editable={editable}
-                              isLocked={isLocked}
+                              isLocked={isRowDisabled}
+                              isBlockedByBreakdown={isBreakdownBlocked}
                               startHour={row.startHour}
                               endHour={row.endHour}
                               onStep={handleCellChange}
@@ -917,17 +1014,35 @@ function HourlyLoadsGrid({
                         })}
 
                         {/* Total Column */}
-                        <td className="min-w-[70px] px-3 py-2.5 text-right font-bold font-mono text-[var(--text-heading)] text-xs tabular-nums">
+                        <td
+                          className={`min-w-[70px] px-3 py-2.5 text-right font-bold font-mono text-xs tabular-nums ${
+                            isBreakdownBlocked
+                              ? 'bg-red-50 text-red-900'
+                              : 'text-[var(--text-heading)]'
+                          }`}
+                        >
                           {row.total ?? 0}
                         </td>
 
                         {/* Bin Factor & Total Material Columns */}
                         {hasBinFactors && (
                           <>
-                            <td className="min-w-[70px] px-2 py-2.5 text-right font-mono text-[var(--text-muted)] text-xs tabular-nums">
+                            <td
+                              className={`min-w-[70px] px-2 py-2.5 text-right font-mono text-xs tabular-nums ${
+                                isBreakdownBlocked
+                                  ? 'bg-red-50 text-red-800'
+                                  : 'text-[var(--text-muted)]'
+                              }`}
+                            >
                               {row.binFactor ?? '-'}
                             </td>
-                            <td className="min-w-[100px] px-3 py-2.5 text-right font-mono font-semibold text-[var(--text-heading)] text-xs tabular-nums">
+                            <td
+                              className={`min-w-[100px] px-3 py-2.5 text-right font-mono font-semibold text-xs tabular-nums ${
+                                isBreakdownBlocked
+                                  ? 'bg-red-50 text-red-900'
+                                  : 'text-[var(--text-heading)]'
+                              }`}
+                            >
                               {row.totalMaterial ?? '-'}
                             </td>
                           </>
@@ -983,7 +1098,14 @@ function HourlyLoadsGrid({
         sites={sites}
         excavatorSites={excavatorSites}
         hourLabels={hourLabels}
-        onOpenSplitModal={() => setIsSplitModalOpen(true)}
+        blockedMachineIds={blockedMachineIds}
+        onOpenSplitModal={() => {
+          if (!splitMachineId || blockedMachineIds.has(splitMachineId)) {
+            const firstAvailable = machines.find((m) => !blockedMachineIds.has(m.id))?.id ?? '';
+            setSplitMachineId(firstAvailable);
+          }
+          setIsSplitModalOpen(true);
+        }}
         onCloseSplitModal={() => !isSubmittingSplit && setIsSplitModalOpen(false)}
         onSplitMachineChange={setSplitMachineId}
         onSplitExcavatorChange={setSplitExcavatorId}

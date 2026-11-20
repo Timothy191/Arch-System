@@ -1,8 +1,15 @@
 'use client';
 
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import type { DataTableColumn } from '@repo/ui/components/ui/data-table';
 import { DataTable } from '@repo/ui/components/ui/data-table';
-import { Activity, AlertCircle, Clock, Drill, Gauge, Layers, Truck } from 'lucide-react';
+import { getOperationalToday } from '@repo/utils';
+import { getCurrentShift } from '@repo/utils/client';
+import { Activity, AlertCircle, Clock, Drill, Gauge, Layers, Plus, Truck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
 import { MachineOperationsFilterStrip } from './MachineOperationsSummaryStrip';
 import {
   type Breakdown,
@@ -31,6 +38,8 @@ export interface MachineTableRow {
   category: MachineCategory;
   start_smu: number | null;
   stop_smu: number | null;
+  is_start_smr_carried_over: boolean;
+  has_missing_hours: boolean;
   total_hours: number;
   operator: string | null;
   site: string | null;
@@ -47,12 +56,23 @@ export interface MachineTableRow {
   rawMachine: MachineItem;
 }
 
+export interface QuickLogHoursPayload {
+  machineId: string;
+  startSmr: number;
+  stopSmr: number;
+  hoursWorked: number;
+}
+
 export interface MachineOperationsFilterableTableProps {
+  departmentId?: string;
   machines: MachineItem[];
   operations: MachineOperation[];
   todayLoads?: HourlyLoadSummary[];
   activeBreakdowns?: Breakdown[];
   engineeringDelaysByMachine?: Record<string, { hours: number; reasons: string[]; status: string }>;
+  operators?: Array<{ id: string; full_name: string; employee_code: string }>;
+  sites?: Array<{ id: string; name: string; site_code: string }>;
+  onQuickLogHours?: (payload: QuickLogHoursPayload) => Promise<void> | void;
   onMachineSelect?: (machine: MachineItem) => void;
   onFilterStatusChange?: (status: FilterStatus) => void;
   onSearchQueryChange?: (query: string) => void;
@@ -60,6 +80,157 @@ export interface MachineOperationsFilterableTableProps {
 }
 
 const DOZER_PUSH_FACTOR_BCM_PER_HOUR = 250;
+const MAX_INLINE_SHIFT_HOURS = 14;
+const DEFAULT_INLINE_START_TIME = '06:00';
+const INLINE_HOURS_INPUT_CLASS =
+  'w-16 rounded-md border border-[var(--border-default)] bg-white px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs focus:border-[var(--accent-blue)] focus:outline-none';
+const INLINE_SMR_INPUT_CLASS =
+  'w-20 rounded-md border border-[var(--border-default)] bg-white px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs focus:border-[var(--accent-blue)] focus:outline-none';
+const INLINE_SAVE_BTN_CLASS =
+  'inline-flex cursor-pointer items-center gap-1 rounded-md bg-[var(--accent-blue)] px-2 py-1 font-semibold text-white text-[11px] transition-opacity hover:opacity-90 disabled:opacity-50';
+const CARRIED_OVER_BADGE_CLASS =
+  'inline-flex items-center rounded border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)]';
+
+interface SharedSmrColumnsOptions {
+  readonly inlineStartSmrDrafts: Record<string, string>;
+  readonly inlineHoursDrafts: Record<string, string>;
+  readonly savingMachineId: string | null;
+  readonly onStartSmrDraftChange: (machineId: string, val: string) => void;
+  readonly onHoursDraftChange: (machineId: string, val: string) => void;
+  readonly onSaveInlineHours: (row: MachineTableRow) => void;
+}
+
+function buildSharedSmrColumns(
+  options: SharedSmrColumnsOptions
+): DataTableColumn<MachineTableRow>[] {
+  return [
+    {
+      key: 'start_smu',
+      header: 'Start SMR',
+      cell: (row: MachineTableRow) => {
+        if (row.start_smu !== null) {
+          return (
+            <div className="flex flex-col items-end gap-0.5">
+              <span className="font-mono font-semibold text-[var(--text-heading)]">
+                {row.start_smu.toFixed(1)}
+              </span>
+              {row.is_start_smr_carried_over && (
+                <span
+                  data-testid={`carried-over-badge-${row.id}`}
+                  className={CARRIED_OVER_BADGE_CLASS}
+                >
+                  Carried Over
+                </span>
+              )}
+            </div>
+          );
+        }
+        return (
+          <div className="flex flex-col items-end gap-0.5" onClick={(e) => e.stopPropagation()}>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              placeholder="Start SMR"
+              aria-label={`Start SMR for ${row.name}`}
+              data-testid={`inline-start-smr-${row.id}`}
+              value={options.inlineStartSmrDrafts[row.id] ?? ''}
+              onChange={(e) => options.onStartSmrDraftChange(row.id, e.target.value)}
+              className={INLINE_SMR_INPUT_CLASS}
+            />
+            <span className="text-[10px] text-[var(--text-muted)]">No prev Stop SMR</span>
+          </div>
+        );
+      },
+      sortable: true,
+      align: 'right' as const,
+    },
+    {
+      key: 'stop_smu',
+      header: 'Stop SMR',
+      cell: (row: MachineTableRow) => {
+        if (row.stop_smu !== null) {
+          return (
+            <span className="font-mono text-[var(--text-heading)]">{row.stop_smu.toFixed(1)}</span>
+          );
+        }
+        const hoursDraft = Number.parseFloat(options.inlineHoursDrafts[row.id] ?? '');
+        const startDraft = Number.parseFloat(options.inlineStartSmrDrafts[row.id] ?? '');
+        const baseStart =
+          row.start_smu !== null ? row.start_smu : !Number.isNaN(startDraft) ? startDraft : 0;
+        if (!Number.isNaN(hoursDraft) && hoursDraft > 0) {
+          return (
+            <div className="flex flex-col items-end gap-0.5">
+              <span className="font-mono font-semibold text-[var(--accent-blue)]">
+                {(baseStart + hoursDraft).toFixed(1)}
+              </span>
+              <span className="text-[10px] text-[var(--text-muted)]">Preview</span>
+            </div>
+          );
+        }
+        return <span className="font-mono text-[var(--text-muted)]">—</span>;
+      },
+      sortable: true,
+      align: 'right' as const,
+    },
+    {
+      key: 'total_hours',
+      header: 'Hours',
+      cell: (row: MachineTableRow) => {
+        if (!row.has_missing_hours) {
+          return (
+            <span className="font-mono font-semibold text-accent-green">
+              {row.total_hours.toFixed(1)}h
+            </span>
+          );
+        }
+        return (
+          <div className="flex flex-col items-end gap-1" onClick={(e) => e.stopPropagation()}>
+            <span className="font-mono text-[11px] text-[var(--text-muted)]">
+              {row.total_hours.toFixed(1)}h
+            </span>
+            <div className="flex items-center justify-end gap-1">
+              <input
+                type="number"
+                step="0.1"
+                min="0.1"
+                max={MAX_INLINE_SHIFT_HOURS}
+                placeholder="+ hrs"
+                aria-label={`Add hours for ${row.name}`}
+                data-testid={`inline-add-hours-${row.id}`}
+                value={options.inlineHoursDrafts[row.id] ?? ''}
+                onChange={(e) => options.onHoursDraftChange(row.id, e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    options.onSaveInlineHours(row);
+                  }
+                }}
+                className={INLINE_HOURS_INPUT_CLASS}
+              />
+              <button
+                type="button"
+                disabled={options.savingMachineId === row.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  options.onSaveInlineHours(row);
+                }}
+                aria-label={`Save hours for ${row.name}`}
+                data-testid={`inline-save-hours-${row.id}`}
+                className={INLINE_SAVE_BTN_CLASS}
+              >
+                <Plus className="h-3 w-3" />
+                {options.savingMachineId === row.id ? '...' : 'Add'}
+              </button>
+            </div>
+          </div>
+        );
+      },
+      sortable: true,
+      align: 'right' as const,
+    },
+  ];
+}
 
 function renderStatusBadge(status: string) {
   switch (status) {
@@ -100,30 +271,59 @@ function renderStatusBadge(status: string) {
 }
 
 export function MachineOperationsFilterableTable({
+  departmentId,
   machines,
   operations,
   todayLoads = [],
   activeBreakdowns = [],
   engineeringDelaysByMachine,
+  operators = [],
+  sites = [],
+  onQuickLogHours,
   onMachineSelect,
   onFilterStatusChange,
   onSearchQueryChange,
   defaultCategory = 'all',
 }: MachineOperationsFilterableTableProps) {
+  const router = useRouter();
+  const supabase = useMemo(() => {
+    try {
+      return createBrowserSupabaseClient();
+    } catch {
+      return null;
+    }
+  }, []);
+
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [selectedCategory, setSelectedCategory] = useState<MachineCategory>(defaultCategory);
   const [searchQuery, setSearchQuery] = useState('');
+  const [inlineHoursDrafts, setInlineHoursDrafts] = useState<Record<string, string>>({});
+  const [inlineStartSmrDrafts, setInlineStartSmrDrafts] = useState<Record<string, string>>({});
+  const [savingMachineId, setSavingMachineId] = useState<string | null>(null);
+  const [localOperationOverrides, setLocalOperationOverrides] = useState<
+    Record<string, MachineOperation>
+  >({});
+
+  const effectiveOperations = useMemo(() => {
+    const overrideIds = new Set(Object.keys(localOperationOverrides));
+    if (overrideIds.size === 0) return operations;
+    const retained = operations.filter((op) => !overrideIds.has(op.machine_id));
+    return [...retained, ...Object.values(localOperationOverrides)];
+  }, [operations, localOperationOverrides]);
 
   // Prepare data mappings
-  const machineOps = useMemo(() => buildOperationsByMachineMap(operations), [operations]);
+  const machineOps = useMemo(
+    () => buildOperationsByMachineMap(effectiveOperations),
+    [effectiveOperations]
+  );
   const breakdownsByFleetId = useMemo(
     () => buildBreakdownsByFleetIdMap(activeBreakdowns),
     [activeBreakdowns]
   );
   const loadsByMachine = useMemo(() => buildLoadsByMachineMap(todayLoads), [todayLoads]);
   const fleetMachines = useMemo(
-    () => buildFleetMachinesList(machines, operations),
-    [machines, operations]
+    () => buildFleetMachinesList(machines, effectiveOperations),
+    [machines, effectiveOperations]
   );
 
   const allMachinesWithMeta = useMemo(() => {
@@ -156,6 +356,110 @@ export function MachineOperationsFilterableTable({
     onSearchQueryChange?.(query);
   };
 
+  const handleSaveInlineHours = async (row: MachineTableRow) => {
+    const rawHours = inlineHoursDrafts[row.id] ?? '';
+    const parsedHours = Number.parseFloat(rawHours);
+    if (Number.isNaN(parsedHours) || parsedHours <= 0 || parsedHours > MAX_INLINE_SHIFT_HOURS) {
+      toast.error(`Enter valid hours worked (0.1 to ${MAX_INLINE_SHIFT_HOURS}.0) for ${row.name}.`);
+      return;
+    }
+
+    const rawStart = inlineStartSmrDrafts[row.id] ?? '';
+    const parsedStart = rawStart.trim() ? Number.parseFloat(rawStart) : null;
+    if (parsedStart !== null && (Number.isNaN(parsedStart) || parsedStart < 0)) {
+      toast.error(`Enter a valid non-negative Start SMR for ${row.name}.`);
+      return;
+    }
+
+    const startSmr = row.start_smu !== null ? row.start_smu : (parsedStart ?? 0);
+    const stopSmr = Number((startSmr + parsedHours).toFixed(1));
+    const currentShift = getCurrentShift();
+    const existingOp = machineOps.get(row.id)?.slice(-1)[0];
+    const resolvedSiteId = existingOp?.site_id ?? row.rawMachine.site_id ?? sites[0]?.id ?? null;
+    const resolvedOperatorId = existingOp?.operator_id ?? operators[0]?.id ?? null;
+    const resolvedSiteName = row.site ?? sites.find((s) => s.id === resolvedSiteId)?.name ?? null;
+    const resolvedOperatorName =
+      row.operator ?? operators.find((o) => o.id === resolvedOperatorId)?.full_name ?? null;
+
+    setSavingMachineId(row.id);
+    try {
+      if (onQuickLogHours) {
+        await onQuickLogHours({
+          machineId: row.id,
+          startSmr,
+          stopSmr,
+          hoursWorked: parsedHours,
+        });
+      } else if (departmentId && supabase) {
+        const shiftDate = getOperationalToday('Africa/Johannesburg');
+        const payload = {
+          department_id: departmentId,
+          machine_id: row.id,
+          operator_id: resolvedOperatorId,
+          site_id: resolvedSiteId,
+          shift_date: shiftDate,
+          shift_type: currentShift,
+          start_time: existingOp?.start_time || DEFAULT_INLINE_START_TIME,
+          end_time: new Date().toTimeString().slice(0, 5),
+          start_smu: startSmr,
+          end_smu: stopSmr,
+          operational_status: 'ACTIVE',
+        };
+        const result =
+          existingOp?.id && !existingOp.id.startsWith('local-')
+            ? await supabase
+                .from('machine_operations')
+                .update(payload as never)
+                .eq('id', existingOp.id)
+                .select()
+                .single()
+            : await supabase
+                .from('machine_operations')
+                .insert(payload as never)
+                .select()
+                .single();
+        if (result.error) throw result.error;
+        await invalidateShiftSheetCache({ departmentId }).catch(() => {});
+        router.refresh();
+      }
+
+      setLocalOperationOverrides((prev) => ({
+        ...prev,
+        [row.id]: {
+          id: existingOp?.id ?? `local-${row.id}`,
+          machine_id: row.id,
+          operator_id: resolvedOperatorId,
+          site_id: resolvedSiteId,
+          shift_type: currentShift,
+          start_time: existingOp?.start_time ?? DEFAULT_INLINE_START_TIME,
+          end_time: new Date().toTimeString().slice(0, 5),
+          hours_worked: parsedHours,
+          start_smu: startSmr,
+          end_smu: stopSmr,
+          block_drilled: existingOp?.block_drilled ?? null,
+          meters_drilled: existingOp?.meters_drilled ?? null,
+          holes_drilled: existingOp?.holes_drilled ?? null,
+          machine: {
+            name: row.name,
+            machine_type: row.machine_type,
+            bin_factor: row.rawMachine.bin_factor ?? undefined,
+            serial_number: row.serial_number,
+          },
+          operator: resolvedOperatorName ? { full_name: resolvedOperatorName } : null,
+          site: resolvedSiteName ? { name: resolvedSiteName } : null,
+        },
+      }));
+      setInlineHoursDrafts((prev) => ({ ...prev, [row.id]: '' }));
+      toast.success(
+        `Logged ${parsedHours.toFixed(1)}h for ${row.name} (SMR ${startSmr.toFixed(1)} → ${stopSmr.toFixed(1)}).`
+      );
+    } catch {
+      toast.error(`Failed to save hours for ${row.name}. Please try again.`);
+    } finally {
+      setSavingMachineId(null);
+    }
+  };
+
   // Transform items into typed table rows
   const transformRow = (item: MachineWithMeta): MachineTableRow => {
     const machine = item.machine;
@@ -167,6 +471,14 @@ export function MachineOperationsFilterableTable({
     const isDrill = category === 'drill';
     const isAdt = category === 'adt';
     const isExcavator = category === 'excavator';
+
+    // Carried-over Start SMR resolution: prefer current operation's start_smu, else previous shift's Stop SMR
+    const opStartSmu = latestOp?.start_smu ?? ops[0]?.start_smu ?? null;
+    const carriedOverStartSmu = machine.previous_stop_smu ?? machine.latest_smu ?? null;
+    const effectiveStartSmr = opStartSmu ?? carriedOverStartSmu;
+    const isStartSmrCarriedOver = opStartSmu === null && carriedOverStartSmu !== null;
+    const effectiveStopSmr = latestOp?.end_smu ?? null;
+    const hasMissingHours = item.totalHours <= 0 || effectiveStopSmr === null;
 
     // ADT metrics
     const loadsCount = loadsByMachine.get(machine.id) || 0;
@@ -195,8 +507,10 @@ export function MachineOperationsFilterableTable({
       serial_number: machine.serial_number,
       status: item.status,
       category,
-      start_smu: latestOp?.start_smu ?? ops[0]?.start_smu ?? null,
-      stop_smu: latestOp?.end_smu ?? null,
+      start_smu: effectiveStartSmr,
+      stop_smu: effectiveStopSmr,
+      is_start_smr_carried_over: isStartSmrCarriedOver,
+      has_missing_hours: hasMissingHours,
       total_hours: item.totalHours,
       operator: latestOp?.operator?.full_name || null,
       site: machine.site?.name || latestOp?.site?.name || null,
@@ -217,40 +531,59 @@ export function MachineOperationsFilterableTable({
     onMachineSelect?.(row.rawMachine);
   };
 
+  const smrAndHoursColumns = buildSharedSmrColumns({
+    inlineStartSmrDrafts,
+    inlineHoursDrafts,
+    savingMachineId,
+    onStartSmrDraftChange: (machineId, val) =>
+      setInlineStartSmrDrafts((prev) => ({ ...prev, [machineId]: val })),
+    onHoursDraftChange: (machineId, val) =>
+      setInlineHoursDrafts((prev) => ({ ...prev, [machineId]: val })),
+    onSaveInlineHours: (row) => {
+      void handleSaveInlineHours(row);
+    },
+  });
+
+  const machineIdColumn: DataTableColumn<MachineTableRow> = {
+    key: 'name',
+    header: 'Machine ID',
+    cell: (row: MachineTableRow) => (
+      <span className="font-semibold text-[var(--text-heading)]">{row.name}</span>
+    ),
+    sortable: true,
+    align: 'left' as const,
+  };
+
+  const operatorColumn: DataTableColumn<MachineTableRow> = {
+    key: 'operator',
+    header: 'Operator',
+    cell: (row: MachineTableRow) => row.operator || 'Unassigned',
+    sortable: true,
+    align: 'left' as const,
+  };
+
+  const siteColumn: DataTableColumn<MachineTableRow> = {
+    key: 'site',
+    header: 'Site',
+    cell: (row: MachineTableRow) => row.site || '—',
+    sortable: true,
+    align: 'left' as const,
+  };
+
+  const statusColumn: DataTableColumn<MachineTableRow> = {
+    key: 'status',
+    header: 'Status',
+    cell: (row: MachineTableRow) => renderStatusBadge(row.status),
+    sortable: true,
+    align: 'center' as const,
+  };
+
   // Category columns definitions
 
   // 1. Dump Trucks (ADT): Loads, Bin Factor, Total BCM. NO Meters/Holes!
   const adtColumns = [
-    {
-      key: 'name',
-      header: 'Machine ID',
-      cell: (row: MachineTableRow) => (
-        <span className="font-semibold text-[var(--text-heading)]">{row.name}</span>
-      ),
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'start_smu',
-      header: 'Start SMR',
-      cell: (row: MachineTableRow) => (row.start_smu !== null ? row.start_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'stop_smu',
-      header: 'Stop SMR',
-      cell: (row: MachineTableRow) => (row.stop_smu !== null ? row.stop_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'total_hours',
-      header: 'Hours',
-      cell: (row: MachineTableRow) => `${row.total_hours.toFixed(1)}h`,
-      sortable: true,
-      align: 'right' as const,
-    },
+    machineIdColumn,
+    ...smrAndHoursColumns,
     {
       key: 'loads',
       header: 'Loads',
@@ -280,61 +613,15 @@ export function MachineOperationsFilterableTable({
       sortable: true,
       align: 'right' as const,
     },
-    {
-      key: 'operator',
-      header: 'Operator',
-      cell: (row: MachineTableRow) => row.operator || 'Unassigned',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'site',
-      header: 'Site',
-      cell: (row: MachineTableRow) => row.site || '—',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      cell: (row: MachineTableRow) => renderStatusBadge(row.status),
-      sortable: true,
-      align: 'center' as const,
-    },
+    operatorColumn,
+    siteColumn,
+    statusColumn,
   ];
 
   // 2. Drill Rigs: Holes, Meters, Penetration Rate (m/h), Block. NO Loads/Rollover!
   const drillColumns = [
-    {
-      key: 'name',
-      header: 'Machine ID',
-      cell: (row: MachineTableRow) => (
-        <span className="font-semibold text-[var(--text-heading)]">{row.name}</span>
-      ),
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'start_smu',
-      header: 'Start SMR',
-      cell: (row: MachineTableRow) => (row.start_smu !== null ? row.start_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'stop_smu',
-      header: 'Stop SMR',
-      cell: (row: MachineTableRow) => (row.stop_smu !== null ? row.stop_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'total_hours',
-      header: 'Hours',
-      cell: (row: MachineTableRow) => `${row.total_hours.toFixed(1)}h`,
-      sortable: true,
-      align: 'right' as const,
-    },
+    machineIdColumn,
+    ...smrAndHoursColumns,
     {
       key: 'holes_drilled',
       header: 'Holes',
@@ -375,61 +662,15 @@ export function MachineOperationsFilterableTable({
       sortable: true,
       align: 'left' as const,
     },
-    {
-      key: 'operator',
-      header: 'Operator',
-      cell: (row: MachineTableRow) => row.operator || 'Unassigned',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'site',
-      header: 'Site',
-      cell: (row: MachineTableRow) => row.site || '—',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      cell: (row: MachineTableRow) => renderStatusBadge(row.status),
-      sortable: true,
-      align: 'center' as const,
-    },
+    operatorColumn,
+    siteColumn,
+    statusColumn,
   ];
 
   // 3. Dozers: Activity (Roll Over/Other), Rollover (BCM). NO Meters/Holes!
   const dozerColumns = [
-    {
-      key: 'name',
-      header: 'Machine ID',
-      cell: (row: MachineTableRow) => (
-        <span className="font-semibold text-[var(--text-heading)]">{row.name}</span>
-      ),
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'start_smu',
-      header: 'Start SMR',
-      cell: (row: MachineTableRow) => (row.start_smu !== null ? row.start_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'stop_smu',
-      header: 'Stop SMR',
-      cell: (row: MachineTableRow) => (row.stop_smu !== null ? row.stop_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'total_hours',
-      header: 'Hours',
-      cell: (row: MachineTableRow) => `${row.total_hours.toFixed(1)}h`,
-      sortable: true,
-      align: 'right' as const,
-    },
+    machineIdColumn,
+    ...smrAndHoursColumns,
     {
       key: 'dozer_activity',
       header: 'Activity',
@@ -454,61 +695,15 @@ export function MachineOperationsFilterableTable({
       sortable: true,
       align: 'right' as const,
     },
-    {
-      key: 'operator',
-      header: 'Operator',
-      cell: (row: MachineTableRow) => row.operator || 'Unassigned',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'site',
-      header: 'Site',
-      cell: (row: MachineTableRow) => row.site || '—',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      cell: (row: MachineTableRow) => renderStatusBadge(row.status),
-      sortable: true,
-      align: 'center' as const,
-    },
+    operatorColumn,
+    siteColumn,
+    statusColumn,
   ];
 
   // 4. Excavators: Loads, Bin Factor, Material Moved
   const excavatorColumns = [
-    {
-      key: 'name',
-      header: 'Machine ID',
-      cell: (row: MachineTableRow) => (
-        <span className="font-semibold text-[var(--text-heading)]">{row.name}</span>
-      ),
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'start_smu',
-      header: 'Start SMR',
-      cell: (row: MachineTableRow) => (row.start_smu !== null ? row.start_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'stop_smu',
-      header: 'Stop SMR',
-      cell: (row: MachineTableRow) => (row.stop_smu !== null ? row.stop_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'total_hours',
-      header: 'Hours',
-      cell: (row: MachineTableRow) => `${row.total_hours.toFixed(1)}h`,
-      sortable: true,
-      align: 'right' as const,
-    },
+    machineIdColumn,
+    ...smrAndHoursColumns,
     {
       key: 'loads',
       header: 'Trucks Loaded',
@@ -525,40 +720,14 @@ export function MachineOperationsFilterableTable({
       sortable: true,
       align: 'right' as const,
     },
-    {
-      key: 'operator',
-      header: 'Operator',
-      cell: (row: MachineTableRow) => row.operator || 'Unassigned',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'site',
-      header: 'Site',
-      cell: (row: MachineTableRow) => row.site || '—',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      cell: (row: MachineTableRow) => renderStatusBadge(row.status),
-      sortable: true,
-      align: 'center' as const,
-    },
+    operatorColumn,
+    siteColumn,
+    statusColumn,
   ];
 
   // 5. Ancillary / Other: Standard columns
   const ancillaryColumns = [
-    {
-      key: 'name',
-      header: 'Machine ID',
-      cell: (row: MachineTableRow) => (
-        <span className="font-semibold text-[var(--text-heading)]">{row.name}</span>
-      ),
-      sortable: true,
-      align: 'left' as const,
-    },
+    machineIdColumn,
     {
       key: 'machine_type',
       header: 'Type',
@@ -566,48 +735,10 @@ export function MachineOperationsFilterableTable({
       sortable: true,
       align: 'left' as const,
     },
-    {
-      key: 'start_smu',
-      header: 'Start SMR',
-      cell: (row: MachineTableRow) => (row.start_smu !== null ? row.start_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'stop_smu',
-      header: 'Stop SMR',
-      cell: (row: MachineTableRow) => (row.stop_smu !== null ? row.stop_smu.toFixed(1) : '—'),
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'total_hours',
-      header: 'Hours',
-      cell: (row: MachineTableRow) => `${row.total_hours.toFixed(1)}h`,
-      sortable: true,
-      align: 'right' as const,
-    },
-    {
-      key: 'operator',
-      header: 'Operator',
-      cell: (row: MachineTableRow) => row.operator || 'Unassigned',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'site',
-      header: 'Site',
-      cell: (row: MachineTableRow) => row.site || '—',
-      sortable: true,
-      align: 'left' as const,
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      cell: (row: MachineTableRow) => renderStatusBadge(row.status),
-      sortable: true,
-      align: 'center' as const,
-    },
+    ...smrAndHoursColumns,
+    operatorColumn,
+    siteColumn,
+    statusColumn,
   ];
 
   const getColumnsForCategory = (cat: MachineCategory) => {

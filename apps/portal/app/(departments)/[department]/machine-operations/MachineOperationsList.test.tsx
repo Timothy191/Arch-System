@@ -1,10 +1,15 @@
 import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MachineOperationsFilterableTable } from './MachineOperationsFilterableTable';
 import { MachineOperationsForm } from './MachineOperationsForm';
 import { MachineOperationsKpiStrip } from './MachineOperationsKpiStrip';
 import { MachineOperationsList } from './MachineOperationsList';
+import {
+  calculateDelayDurationHours,
+  formatDelayEntriesFromDb,
+  validateDelayFormEntry,
+} from './machine-operations-constants';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -14,17 +19,41 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-jest.mock('@repo/supabase/client', () => ({
-  createBrowserSupabaseClient: () => ({
-    from: () => ({
-      insert: () => ({
-        select: () => ({
-          single: jest.fn().mockResolvedValue({ data: { id: 'op-new' }, error: null }),
+jest.mock('@repo/supabase/client', () => {
+  const makeSelectChain = () => {
+    const chain = {
+      eq: () => chain,
+      order: () => {
+        const res = Promise.resolve({ data: [], error: null });
+        Object.assign(res, {
+          limit: jest.fn().mockResolvedValue({ data: [], error: null }),
+        });
+        return res;
+      },
+      limit: jest.fn().mockResolvedValue({ data: [], error: null }),
+    };
+    return chain;
+  };
+  return {
+    createBrowserSupabaseClient: () => ({
+      from: () => ({
+        select: () => makeSelectChain(),
+        insert: () => ({
+          select: () => ({
+            single: jest.fn().mockResolvedValue({ data: { id: 'op-new' }, error: null }),
+          }),
+        }),
+        update: () => ({
+          eq: () => ({
+            select: () => ({
+              single: jest.fn().mockResolvedValue({ data: { id: 'op-upd' }, error: null }),
+            }),
+          }),
         }),
       }),
     }),
-  }),
-}));
+  };
+});
 
 jest.mock('@/actions/shift-sheet-cache', () => ({
   invalidateShiftSheetCache: jest.fn().mockResolvedValue(undefined),
@@ -506,6 +535,8 @@ describe('MachineOperationsList', () => {
       const callout = screen.getByRole('note', { name: /SMR logging guidance/i });
       expect(callout).toBeInTheDocument();
       expect(callout.className).not.toContain('animate-pulse');
+      expect(callout.className).toContain('bg-white');
+      expect(callout.className).toContain('text-slate-900');
       expect(screen.getByText(/Operational Tip:/i)).toBeInTheDocument();
       expect(screen.getByText(/Stop SMR is optional at start of shift/i)).toBeInTheDocument();
     });
@@ -688,6 +719,218 @@ describe('MachineOperationsList', () => {
       // Dozer does NOT have Holes or Meters
       expect(dozerSection).not.toHaveTextContent('Holes');
       expect(dozerSection).not.toHaveTextContent('Meters');
+    });
+
+    it('displays carried-over Start SMR from previous shift Stop SMR and allows adding new hours inline when absent', async () => {
+      const onQuickLogHours = jest.fn().mockResolvedValue(undefined);
+
+      render(
+        <MachineOperationsFilterableTable
+          departmentId="dept-cr"
+          machines={[
+            {
+              id: 'adt-carried',
+              name: 'DT-305',
+              machine_type: 'Dump Truck',
+              serial_number: 'SN-305',
+              bin_factor: 28,
+              previous_stop_smu: 2450.5,
+              latest_smu: 2450.5,
+            },
+            {
+              id: 'adt-no-smr',
+              name: 'DT-306',
+              machine_type: 'Dump Truck',
+              serial_number: 'SN-306',
+              bin_factor: 28,
+              previous_stop_smu: null,
+              latest_smu: null,
+            },
+          ]}
+          operations={[]}
+          onQuickLogHours={onQuickLogHours}
+        />
+      );
+
+      // Carried-over Start SMR is visible with Carried Over badge instead of —
+      expect(screen.getByText('2450.5')).toBeInTheDocument();
+      expect(screen.getByTestId('carried-over-badge-adt-carried')).toHaveTextContent(
+        'Carried Over'
+      );
+
+      // Add new hours inline for machine with carried-over Start SMR
+      const hoursInputCarried = screen.getByTestId('inline-add-hours-adt-carried');
+      fireEvent.change(hoursInputCarried, { target: { value: '8.5' } });
+      expect(screen.getByText('2459.0')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('inline-save-hours-adt-carried'));
+      await waitFor(() => {
+        expect(onQuickLogHours).toHaveBeenCalledWith({
+          machineId: 'adt-carried',
+          startSmr: 2450.5,
+          stopSmr: 2459.0,
+          hoursWorked: 8.5,
+        });
+      });
+
+      // Machine without previous Stop SMR renders inline Start SMR + Add hours inputs
+      const inlineStartInput = screen.getByTestId('inline-start-smr-adt-no-smr');
+      const hoursInputNoSmr = screen.getByTestId('inline-add-hours-adt-no-smr');
+      fireEvent.change(inlineStartInput, { target: { value: '100' } });
+      fireEvent.change(hoursInputNoSmr, { target: { value: '6' } });
+      fireEvent.click(screen.getByTestId('inline-save-hours-adt-no-smr'));
+
+      await waitFor(() => {
+        expect(onQuickLogHours).toHaveBeenCalledWith({
+          machineId: 'adt-no-smr',
+          startSmr: 100,
+          stopSmr: 106,
+          hoursWorked: 6,
+        });
+      });
+    });
+
+    it('submits MachineOperationsForm with validation and carried-over Start SMR', async () => {
+      render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={[
+            {
+              id: 'dz-22',
+              name: 'BD-22',
+              machine_type: 'Dozer',
+              serial_number: 'SN-BD22',
+              site_id: 'site-a',
+              latest_smu: 1271,
+            },
+            {
+              id: 'ex-101',
+              name: 'EX-101',
+              machine_type: 'Excavator',
+              serial_number: 'SN-EX101',
+              site_id: 'site-a',
+            },
+          ]}
+          operators={[{ id: 'op-1', full_name: 'Sam Dozer', employee_code: 'OP-BD01' }]}
+          sites={[{ id: 'site-a', name: 'Pit North', site_code: 'BKF' }]}
+          todayOperations={[]}
+        />
+      );
+
+      // Submit empty form triggers validation errors
+      fireEvent.click(screen.getByRole('button', { name: /Save Operation/i }));
+      expect(screen.getByText('Select a machine')).toBeInTheDocument();
+
+      // Select Dozer with latest_smu -> carries over Start SMR
+      const selects = screen.getAllByRole('combobox');
+      fireEvent.change(selects[0]!, { target: { value: 'dz-22' } });
+      expect(screen.getByText(/Carried over/i)).toBeInTheDocument();
+
+      // Switch to Excavator without latest_smu -> clears Start SMR instead of leaking 1271
+      fireEvent.change(selects[0]!, { target: { value: 'ex-101' } });
+      const startInput = screen.getAllByRole('spinbutton')[0] as HTMLInputElement;
+      expect(startInput.value).toBe('');
+
+      // Switch back to Dozer, select operator & site, enter Stop SMR and submit
+      fireEvent.change(selects[0]!, { target: { value: 'dz-22' } });
+      fireEvent.change(selects[1]!, { target: { value: 'op-1' } });
+      fireEvent.change(selects[2]!, { target: { value: 'site-a' } });
+      const stopInput = screen.getAllByRole('spinbutton')[1]!;
+      fireEvent.change(stopInput, { target: { value: '1279' } });
+      expect(screen.getByText('8.00h')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /Save Operation/i }));
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Hide Delay Entries/i })).toBeInTheDocument();
+      });
+
+      // Toggle delay entries section + Dozer preset + breakdown carry-over
+      fireEvent.click(screen.getByRole('button', { name: /Hide Delay Entries/i }));
+      expect(screen.getByRole('button', { name: /Add Delay Entries/i })).toBeInTheDocument();
+      fireEvent.change(selects[0]!, { target: { value: 'dz-22' } });
+      fireEvent.click(screen.getByTestId('dozer-activity-other'));
+      fireEvent.click(screen.getByRole('button', { name: 'Stockpile Push' }));
+      fireEvent.click(screen.getByTestId('machine-ops-ends-on-breakdown'));
+      fireEvent.change(screen.getByLabelText('Breakdown carry-over reason'), {
+        target: { value: 'Coolant hose leak' },
+      });
+      const stopInput2 = screen.getAllByRole('spinbutton')[1]!;
+      fireEvent.change(stopInput2, { target: { value: '1275' } });
+      fireEvent.click(screen.getByRole('button', { name: /Save Operation/i }));
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Hide Delay Entries/i })).toBeInTheDocument();
+      });
+    });
+
+    it('validates and formats delay entries via machine-operations-constants helpers', () => {
+      const hours = calculateDelayDurationHours('2026-11-20T08:00', '2026-11-20T09:30');
+      expect(hours).toBe(1.5);
+
+      const formatted = formatDelayEntriesFromDb([
+        {
+          id: 'del-1',
+          delay_category_id: 'cat-1',
+          delay_start_time: '2026-11-20T08:00:00.000Z',
+          delay_end_time: '2026-11-20T09:00:00.000Z',
+          is_manual_override: false,
+          manual_duration_hours: null,
+          description: 'Refueling',
+          status: 'draft',
+        },
+      ]);
+      expect(formatted).toHaveLength(1);
+      expect(formatted[0]?.status).toBe('draft');
+
+      expect(
+        validateDelayFormEntry(
+          {
+            delay_category_id: '',
+            delay_start_time: '2026-11-20T08:00',
+            delay_end_time: '2026-11-20T09:00',
+            is_manual_override: false,
+            manual_duration_hours: null,
+            description: null,
+            status: 'draft',
+          },
+          0,
+          [],
+          0
+        )
+      ).toBe('Category is required');
+
+      expect(
+        validateDelayFormEntry(
+          {
+            delay_category_id: 'cat-1',
+            delay_start_time: '2026-11-20T08:00',
+            delay_end_time: '2026-11-20T07:00',
+            is_manual_override: false,
+            manual_duration_hours: null,
+            description: null,
+            status: 'draft',
+          },
+          0,
+          [],
+          0
+        )
+      ).toBe('End time must be after start time');
+
+      expect(
+        validateDelayFormEntry(
+          {
+            delay_category_id: 'cat-1',
+            delay_start_time: '2026-11-20T08:00',
+            delay_end_time: '',
+            is_manual_override: true,
+            manual_duration_hours: 5,
+            description: null,
+            status: 'draft',
+          },
+          0,
+          [],
+          8
+        )
+      ).toContain('Total delay hours cannot exceed 12h shift limit');
     });
   });
 });

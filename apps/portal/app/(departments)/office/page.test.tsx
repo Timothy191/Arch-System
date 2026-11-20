@@ -1,9 +1,13 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { toast } from 'sonner';
 import {
+  getOfficeSopLiveReportData,
   getOfficeWorkspaceSnapshot,
   saveOfficeDocumentAction,
 } from '~/features/departments/components/office/actions';
+import { OfficeSopPdfDocument } from '~/features/departments/components/office/OfficeSopPdfDocument';
+import { downloadOfficeSopPdf } from '~/features/departments/components/office/office-pdf-export';
 import OfficeDocumentsPage from './documents/page';
 import OfficeError from './error';
 import OfficeLayout from './layout';
@@ -12,13 +16,46 @@ import OfficePage from './page';
 import OfficePanelsPage from './panels/page';
 
 const mockGetUser = jest.fn();
+const mockFrom = jest.fn();
+const mockToBlob = jest.fn();
 
 jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(async () => ({
     auth: {
       getUser: () => mockGetUser(),
     },
+    from: (tableName: string) => mockFrom(tableName),
   })),
+}));
+
+jest.mock('@react-pdf/renderer', () => ({
+  Document: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-pdf-document">{children}</div>
+  ),
+  Page: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-pdf-page">{children}</div>
+  ),
+  View: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Text: ({
+    children,
+    render: renderProp,
+  }: {
+    children?: React.ReactNode;
+    render?: (ctx: { pageNumber: number; totalPages: number }) => string;
+  }) => <span>{renderProp ? renderProp({ pageNumber: 1, totalPages: 1 }) : children}</span>,
+  StyleSheet: {
+    create: <T extends Record<string, unknown>>(styles: T): T => styles,
+  },
+  pdf: jest.fn(() => ({
+    toBlob: () => mockToBlob(),
+  })),
+}));
+
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
 }));
 
 jest.mock('@/lib/audit', () => ({
@@ -55,12 +92,32 @@ jest.mock('@/lib/errors/error-logger', () => ({
   logError: jest.fn(),
 }));
 
+function buildSupabaseQueryChain(rows: readonly Record<string, unknown>[]) {
+  const result = { data: rows, error: null };
+  const chain: Record<string, jest.Mock> = {};
+  chain.select = jest.fn(() => chain);
+  chain.eq = jest.fn(() => chain);
+  chain.order = jest.fn(() => chain);
+  chain.limit = jest.fn(async () => result);
+  return chain;
+}
+
 describe('Office Department & AI Productivity Suite Route Module', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'operator-uuid-1', email: 'superintendent@arch.local' } },
       error: null,
+    });
+    mockFrom.mockImplementation(() => buildSupabaseQueryChain([]));
+    mockToBlob.mockResolvedValue(new Blob(['%PDF-1.4'], { type: 'application/pdf' }));
+    Object.defineProperty(URL, 'createObjectURL', {
+      writable: true,
+      value: jest.fn(() => 'blob:http://localhost/sop-report'),
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      writable: true,
+      value: jest.fn(),
     });
   });
 
@@ -85,6 +142,12 @@ describe('Office Department & AI Productivity Suite Route Module', () => {
         screen.getByRole('tab', { name: /Executive Shift Presentation Deck/i })
       ).toBeInTheDocument();
 
+      // SOP Auto-Download card indicator
+      expect(
+        screen.getByTestId('office-doc-card-office-doc-shift-handover-sop')
+      ).toBeInTheDocument();
+      expect(screen.getByText('Auto-Download Live PDF Template')).toBeInTheDocument();
+
       // 2. Inshellisense Terminal IDE Panel
       expect(screen.getByTestId('inshellisense-terminal-panel')).toBeInTheDocument();
       expect(screen.getByText('Inshellisense Terminal IDE')).toBeInTheDocument();
@@ -102,6 +165,42 @@ describe('Office Department & AI Productivity Suite Route Module', () => {
       expect(screen.getByText('Request Proxy')).toBeInTheDocument();
       expect(screen.getByText('Dual-Tier Redis Cache')).toBeInTheDocument();
       expect(screen.getByText('Department Workspace')).toBeInTheDocument();
+    });
+
+    it('auto-downloads the live populated SOP PDF template when clicking the Executive Shift Handover SOP card', async () => {
+      const jsx = await OfficePage();
+      render(jsx);
+
+      const createdAnchors: HTMLAnchorElement[] = [];
+      const originalCreateElement = document.createElement.bind(document);
+      const createElementSpy = jest
+        .spyOn(document, 'createElement')
+        .mockImplementation((tagName: string) => {
+          const element = originalCreateElement(tagName);
+          if (tagName === 'a') {
+            jest.spyOn(element as HTMLAnchorElement, 'click').mockImplementation(() => {});
+            createdAnchors.push(element as HTMLAnchorElement);
+          }
+          return element;
+        });
+
+      const sopCard = screen.getByTestId('office-doc-card-office-doc-shift-handover-sop');
+      fireEvent.click(sopCard);
+
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent(
+          'Auto-downloaded live PDF report for "Executive Shift Handover & Safety Escalation SOP"'
+        );
+      });
+
+      const downloadAnchor = createdAnchors.find((anchor) => anchor.download.length > 0);
+      expect(mockToBlob).toHaveBeenCalledTimes(1);
+      expect(downloadAnchor?.download).toMatch(
+        /^Executive-Shift-Handover-Safety-SOP-\d{4}-\d{2}-\d{2}\.pdf$/
+      );
+      expect(toast.success).toHaveBeenCalled();
+
+      createElementSpy.mockRestore();
     });
 
     it('switches GenOffice tabs and saves a new Office artifact via saveOfficeDocumentAction', async () => {
@@ -139,7 +238,96 @@ describe('Office Department & AI Productivity Suite Route Module', () => {
     });
   });
 
-  describe('Office Server Actions (actions.ts)', () => {
+  describe('Office Server Actions & Live SOP PDF Template (actions.ts, OfficeSopPdfDocument)', () => {
+    it('aggregates live Supabase operational data in getOfficeSopLiveReportData', async () => {
+      const nowIso = new Date().toISOString();
+      mockFrom.mockImplementation((tableName: string) => {
+        if (tableName === 'breakdowns') {
+          return buildSupabaseQueryChain([
+            {
+              id: 'bd-1',
+              fleet_id: 'EX-201',
+              machine_name: 'CAT 6030 Excavator',
+              status: 'open',
+              reason: 'Hydraulic boom hose rupture',
+              delay_hours: 3.5,
+              date_in: nowIso.slice(0, 10),
+              created_at: nowIso,
+            },
+          ]);
+        }
+        if (tableName === 'tires') {
+          return buildSupabaseQueryChain([
+            { id: 't-1', status: 'installed' },
+            { id: 't-2', status: 'critical' },
+          ]);
+        }
+        if (tableName === 'access_logs') {
+          return buildSupabaseQueryChain([
+            {
+              id: 'al-1',
+              direction: 'IN',
+              gate_location: 'North Turnstile',
+              access_granted: true,
+              scanned_at: nowIso,
+            },
+          ]);
+        }
+        if (tableName === 'visitors') {
+          return buildSupabaseQueryChain([
+            { id: 'v-1', status: 'checked_in', check_in_time: nowIso, check_out_time: null },
+          ]);
+        }
+        if (tableName === 'daily_logs') {
+          return buildSupabaseQueryChain([
+            {
+              id: 'dl-1',
+              shift: 'Day',
+              log_date: nowIso.slice(0, 10),
+              notes: 'Pit B haul road graded and cleared',
+            },
+          ]);
+        }
+        return buildSupabaseQueryChain([]);
+      });
+
+      const reportData = await getOfficeSopLiveReportData();
+      expect(reportData.dataSourceStatus).toBe('live_supabase');
+      expect(reportData.activeBreakdownsCount).toBe(1);
+      expect(reportData.recent24hBreakdownsCount).toBe(1);
+      expect(reportData.recentBreakdowns[0]?.fleetLabel).toBe('CAT 6030 Excavator');
+      expect(reportData.installedTiresCount).toBe(2);
+      expect(reportData.criticalTiresCount).toBe(1);
+      expect(reportData.recentAccessScansCount).toBe(1);
+      expect(reportData.checkedInVisitorsCount).toBe(1);
+      expect(reportData.recentDailyLogsCount).toBe(1);
+      expect(reportData.latestShiftNote).toContain('Pit B haul road graded and cleared');
+
+      render(<OfficeSopPdfDocument reportData={reportData} />);
+      expect(screen.getByTestId('mock-pdf-document')).toBeInTheDocument();
+      expect(screen.getByText('CAT 6030 Excavator')).toBeInTheDocument();
+      expect(screen.getByText('LIVE SUPABASE SYNC VERIFIED')).toBeInTheDocument();
+    });
+
+    it('falls back cleanly to template_baseline when unauthenticated and handles PDF export failure', async () => {
+      mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+
+      const baselineReport = await getOfficeSopLiveReportData({
+        documentId: 'custom-doc',
+        documentTitle: 'Shift Cost Brief',
+        documentType: 'spreadsheet',
+      });
+      expect(baselineReport.dataSourceStatus).toBe('template_baseline');
+      expect(baselineReport.activeBreakdownsCount).toBe(0);
+
+      mockToBlob.mockRejectedValueOnce(new Error('Renderer worker unavailable'));
+      const didDownload = await downloadOfficeSopPdf({ reportData: baselineReport });
+      expect(didDownload).toBe(false);
+      expect(toast.error).toHaveBeenCalledWith(
+        'Failed to generate live SOP PDF (Renderer worker unavailable).'
+      );
+    });
+
     it('returns initial documents and lab tools snapshot from getOfficeWorkspaceSnapshot', async () => {
       const snapshot = await getOfficeWorkspaceSnapshot();
       expect(snapshot.departmentSlug).toBe('office');

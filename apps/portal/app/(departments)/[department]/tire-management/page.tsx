@@ -1,3 +1,4 @@
+/* cspell:ignore Tyre */
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
   AlertTriangle,
@@ -12,6 +13,15 @@ import {
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
+import { TireActivityManagerClient } from './TireActivityManagerClient';
+import {
+  CRITICAL_TREAD_DEPTH_MM,
+  classifyTireActivityType,
+  type TireInspectionActivity,
+  type TireLatestInspection,
+  type TireMachineOption,
+  type TireRecord,
+} from './tire-constants';
 
 export default async function TireManagementPage({
   params,
@@ -22,43 +32,82 @@ export default async function TireManagementPage({
   const { department: deptSlug } = await params;
   requireDepartment(deptSlug, 'engineering');
 
-  const { supabase } = await getDepartmentContext({
+  const { supabase, today } = await getDepartmentContext({
     department: deptSlug,
   });
 
-  const [{ data: tiresData }, { data: inspectionsData }] = await Promise.all([
-    supabase
-      .from('tires')
-      .select(
-        'id, serial_number, brand, size, position, status, installed_at, installed_hours, machines(id, name, serial_number)'
-      )
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('tire_inspections')
-      .select('id, tire_id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes')
-      .order('inspection_date', { ascending: false })
-      .limit(50),
-  ]);
+  const [{ data: tiresData }, { data: inspectionsData }, { data: machinesData }] =
+    await Promise.all([
+      supabase
+        .from('tires')
+        .select(
+          'id, serial_number, brand, size, position, status, machine_id, installed_at, installed_hours, removed_at, removed_hours, scrapped_reason, machines(id, name, serial_number)'
+        )
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('tire_inspections')
+        .select(
+          'id, tire_id, inspection_date, tread_depth_mm, pressure_psi, condition_status, current_smu, notes'
+        )
+        .order('inspection_date', { ascending: false })
+        .limit(50),
+      supabase
+        .from('machines')
+        .select('id, name, machine_type, serial_number, active')
+        .order('name'),
+    ]);
 
-  const inspectionsByTire = new Map<string, NonNullable<typeof inspectionsData>[number]>();
+  const inspectionsByTire = new Map<string, TireLatestInspection>();
   for (const insp of inspectionsData || []) {
     if (!inspectionsByTire.has(insp.tire_id)) {
       inspectionsByTire.set(insp.tire_id, insp);
     }
   }
 
-  const tires = (tiresData || []).map((t) => {
+  const tires: TireRecord[] = (tiresData || []).map((t) => {
     const machine = Array.isArray(t.machines) ? t.machines[0] : t.machines;
     const latestInspection = inspectionsByTire.get(t.id);
     return {
       ...t,
+      machine_id: t.machine_id ?? machine?.id ?? null,
       machineName: machine?.name || 'Unassigned',
       latestInspection,
     };
   });
 
-  // Performance Optimization: Calculate total, installed, inventory, and critical counts in a single pass O(N) loop
-  // instead of multiple array .filter() passes over tires.
+  const tireLookup = new Map(tires.map((t) => [t.id, t]));
+  const recentActivities: TireInspectionActivity[] = (inspectionsData || []).map((insp) => {
+    const tire = tireLookup.get(insp.tire_id);
+    return {
+      id: insp.id,
+      tire_id: insp.tire_id,
+      serial_number: tire?.serial_number ?? 'Unknown Serial',
+      brand: tire?.brand ?? '',
+      size: tire?.size ?? '',
+      machineName: tire?.machineName ?? 'Unassigned',
+      position: tire?.position ?? '—',
+      inspection_date: insp.inspection_date,
+      tread_depth_mm: Number(insp.tread_depth_mm) || 0,
+      pressure_psi: Number(insp.pressure_psi) || 0,
+      condition_status: insp.condition_status,
+      current_smu: insp.current_smu != null ? Number(insp.current_smu) : null,
+      notes: insp.notes ?? null,
+      activityType: classifyTireActivityType(insp.notes),
+    };
+  });
+
+  const machines: TireMachineOption[] = (machinesData || [])
+    .filter((m) => (m as { active?: boolean | null }).active !== false)
+    .map((m) => ({
+      id: m.id,
+      name: m.name,
+      machine_type: m.machine_type,
+      serial_number: m.serial_number ?? null,
+    }));
+
+  const resolvedToday = today || new Date().toISOString().slice(0, 10);
+
+  // Performance Optimization: Single-pass O(N) metric aggregation across fleet tires.
   const totalTires = tires.length;
   let installedTires = 0;
   let inventoryTires = 0;
@@ -70,7 +119,7 @@ export default async function TireManagementPage({
       if (
         t.latestInspection &&
         (t.latestInspection.condition_status === 'critical' ||
-          Number(t.latestInspection.tread_depth_mm) < 15)
+          Number(t.latestInspection.tread_depth_mm) < CRITICAL_TREAD_DEPTH_MM)
       ) {
         criticalTires++;
       }
@@ -167,6 +216,14 @@ export default async function TireManagementPage({
         </GlassCard>
       </div>
 
+      {/* Interactive Tyre Activity Logger & Activity Ledger */}
+      <TireActivityManagerClient
+        machines={machines}
+        tires={tires}
+        recentActivities={recentActivities}
+        todayStr={resolvedToday}
+      />
+
       {/* Tires Table */}
       <div className="space-y-4">
         <h3 className="font-semibold text-[var(--text-heading)] text-lg">Tire Fleet Status</h3>
@@ -176,8 +233,7 @@ export default async function TireManagementPage({
               <CircleDot className="mx-auto h-10 w-10 text-[var(--text-muted)] opacity-50" />
               <p className="font-medium text-[var(--text-heading)] text-sm">No Tires Registered</p>
               <p className="mx-auto max-w-sm text-[var(--text-muted)] text-xs">
-                Tire telemetry and maintenance records are managed through Admin fleet provisioning
-                and the engineering workshop.
+                Use Log Tyre Activity above to mount replacement tyres or register fleet spares.
               </p>
             </div>
           </GlassCard>
@@ -242,7 +298,7 @@ export default async function TireManagementPage({
                     const psi = tire.latestInspection
                       ? Number(tire.latestInspection.pressure_psi)
                       : null;
-                    const isLowTread = tread !== null && tread < 15;
+                    const isLowTread = tread !== null && tread < CRITICAL_TREAD_DEPTH_MM;
                     const isCritical =
                       tire.latestInspection?.condition_status === 'critical' || isLowTread;
 

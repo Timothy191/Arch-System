@@ -8,8 +8,10 @@ import {
   Briefcase,
   CheckCircle2,
   Compass,
+  FileDown,
   FileSpreadsheet,
   FileText,
+  Loader2,
   Presentation,
   Save,
   Terminal,
@@ -18,10 +20,12 @@ import Link from 'next/link';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import {
+  getOfficeSopLiveReportData,
   type OfficeDocumentRecord,
   type OfficeDocumentType,
   saveOfficeDocumentAction,
 } from './actions';
+import { downloadOfficeSopPdf } from './office-pdf-export';
 
 type OfficeWorkspaceMode = 'dashboard' | 'panels' | 'documents';
 
@@ -32,6 +36,7 @@ interface OfficeWorkspaceClientProps {
 }
 
 const OFFICE_DOCUMENTS_STORAGE_KEY = 'arch_office_documents_v1';
+const SOP_DOCUMENT_ID = 'office-doc-shift-handover-sop';
 const GENOFFICE_REPO_URL = 'https://github.com/genspark-ai/genoffice';
 const INSHELLISENSE_REPO_URL = 'https://github.com/microsoft/inshellisense';
 const TRAIL_CODE_REPO_URL = 'https://github.com/trailhq/Trail-Code';
@@ -47,6 +52,9 @@ const GOLD_INPUT_CONTROL_CLASS =
 
 const GOLD_PRIMARY_BTN_CLASS =
   'gold-steel-border gold-steel-border-slim inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-semibold text-white text-xs transition-opacity hover:opacity-90 disabled:opacity-50';
+
+const ARTIFACT_CARD_BTN_CLASS =
+  'group flex w-full cursor-pointer items-start justify-between gap-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/60 p-2.5 text-left text-xs transition-colors hover:border-[var(--accent-blue)] hover:bg-white disabled:cursor-wait disabled:opacity-70';
 
 interface QuickNavRoute {
   readonly href: string;
@@ -159,7 +167,7 @@ const TRAIL_CODE_PATHWAYS: readonly TrailCodePathway[] = [
 
 const SEED_OFFICE_DOCUMENTS: readonly OfficeDocumentRecord[] = [
   {
-    id: 'office-doc-shift-handover-sop',
+    id: SOP_DOCUMENT_ID,
     title: 'Executive Shift Handover & Safety Escalation SOP',
     docType: 'document',
     summary:
@@ -206,6 +214,7 @@ export function OfficeWorkspaceClient({
     'Consolidated ROM coal production, wash plant dense-medium recovery, and shift engineering handover notes.'
   );
   const [isSavingDocument, setIsSavingDocument] = useState<boolean>(false);
+  const [downloadingDocId, setDownloadingDocId] = useState<string | null>(null);
   const [saveFeedbackMessage, setSaveFeedbackMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -225,6 +234,34 @@ export function OfficeWorkspaceClient({
 
   const selectedTabDescriptor =
     GENOFFICE_TABS.find((tab) => tab.id === activeGenOfficeTab) ?? GENOFFICE_TABS[0]!;
+
+  async function handleDownloadDocumentPdf(docEntry: OfficeDocumentRecord) {
+    setDownloadingDocId(docEntry.id);
+    setSaveFeedbackMessage(null);
+    try {
+      const liveReportData = await getOfficeSopLiveReportData({
+        documentId: docEntry.id,
+        documentTitle: docEntry.title,
+        documentSummary: docEntry.summary,
+        documentType: docEntry.docType,
+        authorRole: docEntry.authorRole,
+        updatedAt: docEntry.updatedAt,
+      });
+
+      const didDownload = await downloadOfficeSopPdf({ reportData: liveReportData });
+      if (didDownload) {
+        setSaveFeedbackMessage(
+          `Auto-downloaded live PDF report for "${docEntry.title}" (${liveReportData.operationalDate})`
+        );
+      } else {
+        setSaveFeedbackMessage(`Could not auto-download PDF for "${docEntry.title}"`);
+      }
+    } catch {
+      setSaveFeedbackMessage(`Could not generate live PDF for "${docEntry.title}"`);
+    } finally {
+      setDownloadingDocId(null);
+    }
+  }
 
   async function handleSaveOfficeDocument(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -404,23 +441,58 @@ export function OfficeWorkspaceClient({
             </p>
 
             <div className="mt-4 space-y-2 border-[var(--border-subtle)] border-t pt-3">
-              <div className="font-semibold text-[var(--text-heading)] text-xs">
-                Recent Executive Artifacts ({documentsList.length})
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-semibold text-[var(--text-heading)] text-xs">
+                  Recent Executive Artifacts ({documentsList.length})
+                </span>
+                <span className="font-mono text-[10px] text-[var(--accent-blue)]">
+                  Click any card to auto-download live PDF
+                </span>
               </div>
-              {documentsList.map((docEntry) => (
-                <div
-                  key={docEntry.id}
-                  className="flex items-start justify-between gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/60 p-2.5 text-xs"
-                >
-                  <div>
-                    <div className="font-semibold text-[var(--text-heading)]">{docEntry.title}</div>
-                    <div className="mt-0.5 text-[var(--text-secondary)]">{docEntry.summary}</div>
-                  </div>
-                  <Badge variant="blue" size="sm">
-                    {docEntry.docType}
-                  </Badge>
-                </div>
-              ))}
+
+              {documentsList.map((docEntry) => {
+                const isSopTemplate = docEntry.id === SOP_DOCUMENT_ID;
+                const isDownloadingThis = downloadingDocId === docEntry.id;
+
+                return (
+                  <button
+                    key={docEntry.id}
+                    type="button"
+                    data-testid={`office-doc-card-${docEntry.id}`}
+                    aria-label={`Auto-download live PDF report for ${docEntry.title}`}
+                    disabled={downloadingDocId !== null}
+                    onClick={() => handleDownloadDocumentPdf(docEntry)}
+                    className={ARTIFACT_CARD_BTN_CLASS}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5 font-semibold text-[var(--text-heading)]">
+                        <span>{docEntry.title}</span>
+                      </div>
+                      <div className="mt-0.5 text-[var(--text-secondary)]">{docEntry.summary}</div>
+                      <div className="mt-1.5 inline-flex items-center gap-1 font-medium text-[11px] text-[var(--accent-blue)]">
+                        {isDownloadingThis ? (
+                          <>
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <span>Generating Live PDF...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FileDown className="h-3 w-3" />
+                            <span>
+                              {isSopTemplate
+                                ? 'Auto-Download Live PDF Template'
+                                : 'Download Live PDF Report'}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <Badge variant={isSopTemplate ? 'green' : 'blue'} size="sm">
+                      {docEntry.docType}
+                    </Badge>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

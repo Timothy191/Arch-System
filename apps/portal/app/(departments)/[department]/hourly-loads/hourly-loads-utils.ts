@@ -12,8 +12,20 @@ export interface Machine {
   id: string;
   name: string;
   machine_type: string;
+  serial_number?: string | null;
   bin_factor?: number | null;
   site_id?: string | null;
+}
+
+export interface ActiveBreakdownRecord {
+  id: string;
+  fleet_id?: string | null;
+  machine_id?: string | null;
+  machine_name?: string | null;
+  reason?: string | null;
+  status?: string | null;
+  date_in?: string | null;
+  time_in?: string | null;
 }
 
 export interface Excavator {
@@ -48,6 +60,7 @@ export interface HourlyLoadsGridProps {
   sites: { id: string; name: string; site_code: string }[];
   mineBlocks?: MineBlockOption[];
   excavatorActivities?: ExcavatorActivitySummary[];
+  activeBreakdowns?: ActiveBreakdownRecord[];
   mineralRegistry?: {
     waste: string[];
     coal: string[];
@@ -329,4 +342,63 @@ export function computeHourlyLoadsTelemetry(
     peakHour: peak,
     maxHourLoads: maxLoads,
   };
+}
+
+function normalizeMatchToken(value: string | null | undefined): string {
+  return (value ?? '').trim().toUpperCase();
+}
+
+/**
+ * Matches active Engineering breakdown records to fleet hauling machines by
+ * machine_id, normalized fleet_id (serial_number / name / id), or normalized machine_name.
+ */
+export function buildActiveBreakdownByMachineMap(
+  machines: readonly Machine[],
+  activeBreakdowns: readonly ActiveBreakdownRecord[]
+): Map<string, ActiveBreakdownRecord> {
+  const result = new Map<string, ActiveBreakdownRecord>();
+  if (!machines.length || !activeBreakdowns.length) return result;
+
+  const activeRecords = activeBreakdowns.filter(
+    (b) => (b.status ?? 'active').trim().toLowerCase() === 'active'
+  );
+  if (!activeRecords.length) return result;
+
+  const byMachineId = new Map<string, ActiveBreakdownRecord>();
+  const byToken = new Map<string, ActiveBreakdownRecord>();
+
+  for (const bd of activeRecords) {
+    if (bd.machine_id && !byMachineId.has(bd.machine_id)) {
+      byMachineId.set(bd.machine_id, bd);
+    }
+    const fleetToken = normalizeMatchToken(bd.fleet_id);
+    if (fleetToken && !byToken.has(fleetToken)) {
+      byToken.set(fleetToken, bd);
+    }
+    const nameToken = normalizeMatchToken(bd.machine_name);
+    if (nameToken && !byToken.has(nameToken)) {
+      byToken.set(nameToken, bd);
+    }
+  }
+
+  for (const machine of machines) {
+    const matched =
+      byMachineId.get(machine.id) ??
+      byToken.get(normalizeMatchToken(machine.id)) ??
+      (machine.serial_number
+        ? byToken.get(normalizeMatchToken(machine.serial_number))
+        : undefined) ??
+      byToken.get(normalizeMatchToken(machine.name));
+    if (matched) {
+      result.set(machine.id, matched);
+    }
+  }
+
+  return result;
+}
+
+export function formatBreakdownReasonSubtitle(reason: string | null | undefined): string | null {
+  if (!reason) return null;
+  const cleaned = reason.replace(/\s*\[Shift Delay:\s*[\d.]+h\]/gi, '').trim();
+  return cleaned || null;
 }
