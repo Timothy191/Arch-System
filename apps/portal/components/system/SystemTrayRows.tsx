@@ -372,31 +372,41 @@ interface SystemNotificationItem {
   unread: boolean;
 }
 
-const DEFAULT_NOTIFICATIONS: SystemNotificationItem[] = [
-  {
-    id: 'clearance-unlinked',
-    title: 'Employee Clearance Notice',
-    message: 'No personnel record linked to your account.',
-    unread: true,
-  },
-];
-
 export function TaskbarNotificationBell({ embedded = false }: { embedded?: boolean } = {}) {
-  const [items, setItems] = useState<SystemNotificationItem[]>(DEFAULT_NOTIFICATIONS);
+  const [items, setItems] = useState<SystemNotificationItem[]>([]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    try {
-      const saved = window.localStorage.getItem('arch-system-notification-items');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          setItems(parsed);
-        }
+    let cancelled = false;
+
+    async function loadLiveNotifications() {
+      try {
+        const { createBrowserSupabaseClient } = await import('@repo/supabase/client');
+        const supabase = createBrowserSupabaseClient();
+        const { data, error } = await supabase
+          .from('breakdowns')
+          .select('id, reason, status, created_at')
+          .in('status', ['open', 'in_progress'])
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (cancelled || error || !Array.isArray(data)) return;
+
+        setItems(
+          data.map((row) => ({
+            id: `breakdown-${String(row.id)}`,
+            title: row.status === 'open' ? 'Open Breakdown Alert' : 'Breakdown In Progress',
+            message: typeof row.reason === 'string' && row.reason ? row.reason : 'Active breakdown',
+            unread: row.status === 'open',
+          }))
+        );
+      } catch {
+        // Leave notifications empty if Supabase client is unavailable
       }
-    } catch {
-      // ignore storage errors
     }
+
+    void loadLiveNotifications();
 
     const handleNotification = (event: Event) => {
       const custom = event as CustomEvent<SystemNotificationItem>;
@@ -405,34 +415,23 @@ export function TaskbarNotificationBell({ embedded = false }: { embedded?: boole
 
       setItems((prev) => {
         const exists = prev.some((item) => item.id === detail.id);
-        const next = exists
+        return exists
           ? prev.map((item) => (item.id === detail.id ? { ...item, ...detail } : item))
           : [detail, ...prev];
-        try {
-          window.localStorage.setItem('arch-system-notification-items', JSON.stringify(next));
-        } catch {
-          // ignore
-        }
-        return next;
       });
     };
 
     window.addEventListener('arch-system-notification', handleNotification);
-    return () => window.removeEventListener('arch-system-notification', handleNotification);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('arch-system-notification', handleNotification);
+    };
   }, []);
 
   const unreadCount = items.filter((i) => i.unread).length;
 
   const markAllRead = () => {
-    setItems((prev) => {
-      const next = prev.map((item) => ({ ...item, unread: false }));
-      try {
-        window.localStorage.setItem('arch-system-notification-items', JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return next;
-    });
+    setItems((prev) => prev.map((item) => ({ ...item, unread: false })));
   };
 
   return (

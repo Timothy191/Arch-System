@@ -5,11 +5,8 @@ import { Columns2, Maximize2, Minimize2, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { type SplitService, useSplitWindow } from '@/hooks/useSplitWindow';
-import { GitHubMockView } from './SplitWindowGitHubView';
 import { SplitWindowGoogleCalendarView } from './SplitWindowGoogleCalendarView';
-import { SplitWindowGoogleDocsView } from './SplitWindowGoogleDocsView';
 import { SplitWindowGoogleSheetsView } from './SplitWindowGoogleSheetsView';
-import { WhatsAppWebView } from './SplitWindowWhatsAppView';
 import { SERVICE_META } from './split-window-data';
 
 interface SplitWindowLayoutProps {
@@ -188,9 +185,6 @@ export const SplitWindowLayout = function SplitWindowLayout({ children }: SplitW
 
         {/* Split Pane Contents */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          {activeTab?.service === 'github' && <GitHubMockView />}
-          {activeTab?.service === 'whatsapp' && <WhatsAppWebView />}
-          {activeTab?.service === 'google-docs' && <SplitWindowGoogleDocsView />}
           {activeTab?.service === 'google-calendar' && <SplitWindowGoogleCalendarView />}
           {activeTab?.service === 'google-sheets' && <SplitWindowGoogleSheetsView />}
         </div>

@@ -22,14 +22,12 @@ const insertCalls: { table: string; args: Record<string, unknown> }[] = [];
 mockFrom.mockImplementation((table: string) => {
   const result = resultsByTable[table] ?? { data: [], error: null };
   return {
-    select: jest.fn().mockReturnValue({
-      // .not("col", "in", subquery) — resolves the main query result
-      not: jest.fn().mockResolvedValue(result),
-      // subqueries like .select("id").eq("active", true) are only used as values
-      eq: jest.fn().mockReturnValue({}),
-    }),
-    insert: jest.fn().mockImplementation((args: Record<string, unknown>) => {
-      insertCalls.push({ table, args });
+    select: jest.fn().mockResolvedValue(result),
+    insert: jest.fn().mockImplementation((args: unknown) => {
+      const rows = Array.isArray(args) ? args : [args];
+      for (const row of rows) {
+        insertCalls.push({ table, args: row as Record<string, unknown> });
+      }
       return Promise.resolve({ error: null });
     }),
   };

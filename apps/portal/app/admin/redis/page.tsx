@@ -27,12 +27,12 @@ const REDIS_ICON_LG_PX = 24;
 const REDIS_ICON_SM_PX = 18;
 const KPI_GRID_COLUMNS = 4;
 const HEARTBEAT_TICK_COUNT = 90;
-const DEFAULT_TOTAL_KEYS = 84392;
-const DEFAULT_OPS_PER_SECOND = 2400;
-const DEFAULT_SLA_PCT = 99.98;
-const DEFAULT_L1_HIT_RATE_PCT = 94.2;
-const DEFAULT_L2_HIT_RATE_PCT = 88.6;
-const DEFAULT_MISS_RATE_PCT = 5.8;
+const DEFAULT_TOTAL_KEYS = 0;
+const DEFAULT_OPS_PER_SECOND = 0;
+const DEFAULT_SLA_PCT = 0;
+const DEFAULT_L1_HIT_RATE_PCT = 0;
+const DEFAULT_L2_HIT_RATE_PCT = 0;
+const DEFAULT_MISS_RATE_PCT = 0;
 const DEFAULT_LATENCY_MS = 4;
 const PERCENT_MULTIPLIER = 100;
 const JSON_INDENT_SPACES = 2;
@@ -41,16 +41,16 @@ const MS_PER_SECOND = 1000;
 const SAMPLE_READ_COUNT = 12847;
 const SAMPLE_WRITE_COUNT = 3921;
 const SAMPLE_COMMAND_COUNT = 16768;
-const SAMPLE_ACTIVE_MACHINES = 14;
-const SAMPLE_TOTAL_TONS_MOVED = 15400;
-const SAMPLE_DRILL_DEPTH_METERS = 42.5;
-const SAMPLE_DRILL_RPM = 120;
-const SAMPLE_VIBRATION_G = 0.8;
-const SAMPLE_RATE_LIMIT_MAX = 100;
-const SAMPLE_RATE_LIMIT_REMAINING = 98;
+const _SAMPLE_ACTIVE_MACHINES = 14;
+const _SAMPLE_TOTAL_TONS_MOVED = 15400;
+const _SAMPLE_DRILL_DEPTH_METERS = 42.5;
+const _SAMPLE_DRILL_RPM = 120;
+const _SAMPLE_VIBRATION_G = 0.8;
+const _SAMPLE_RATE_LIMIT_MAX = 100;
+const _SAMPLE_RATE_LIMIT_REMAINING = 98;
 const SAMPLE_RATE_LIMIT_WINDOW_S = 60;
-const SAMPLE_QUEUED_EVENTS = 4;
-const SAMPLE_SUBSCRIBERS = 2;
+const _SAMPLE_QUEUED_EVENTS = 4;
+const _SAMPLE_SUBSCRIBERS = 2;
 const DEFAULT_SLOWLOG_COUNT = 12;
 const DEFAULT_EVICTED_KEYS = 42;
 const DEFAULT_HIT_RATE_RATIO = 0.94;
@@ -76,7 +76,7 @@ const SAMPLE_COMMAND_NAMES = [
   'PUBLISH',
 ];
 const SAMPLE_COMMAND_COUNTS = [3245, 2891, 1567, 1423, 987, 654, 432, 321, 234, 156];
-const DEFAULT_HEARTBEAT_ISO = '2026-11-19T00:00:00.000Z';
+const _DEFAULT_HEARTBEAT_ISO = '2026-11-19T00:00:00.000Z';
 const SAMPLE_SLOWLOG_COMMANDS = [
   {
     command: 'LRANGE',
@@ -239,7 +239,7 @@ const DEFAULT_HEARTBEAT_TICKS: readonly HeartbeatTick[] = Array.from(
   })
 );
 
-const DEFAULT_ALERTS: readonly {
+const _DEFAULT_ALERTS: readonly {
   readonly ruleId: string;
   readonly label: string;
   readonly state: AlertState;
@@ -272,72 +272,33 @@ const DEFAULT_ALERTS: readonly {
 ];
 
 const DEFAULT_REDIS_STATS: RedisStats = {
-  connected: true,
-  host: 'redis-cluster.live',
+  connected: false,
+  host: 'redis',
   port: '6379',
-  activeQueues: ['n8n-workflow-queue'],
-  memoryAllocated: '48.6 MB',
-  peakMemory: '64.0 MB',
+  activeQueues: [],
+  memoryAllocated: '0.0 MB',
+  peakMemory: '0.0 MB',
   totalKeys: DEFAULT_TOTAL_KEYS,
   opsPerSecond: DEFAULT_OPS_PER_SECOND,
-  clusterHealth: 'GREEN',
-  lastHeartbeat: DEFAULT_HEARTBEAT_ISO,
+  clusterHealth: 'RED',
+  lastHeartbeat: '',
   l1HitRatePct: DEFAULT_L1_HIT_RATE_PCT,
   l2HitRatePct: DEFAULT_L2_HIT_RATE_PCT,
   missRatePct: DEFAULT_MISS_RATE_PCT,
   slaPct: DEFAULT_SLA_PCT,
-  heartbeatTicks: DEFAULT_HEARTBEAT_TICKS,
-  // Diagnostics defaults
-  usedMemoryMb: DEFAULT_USED_MEMORY_MB,
-  maxMemoryMb: DEFAULT_MAX_MEMORY_MB,
-  fragmentationRatio: DEFAULT_FRAGMENTATION_RATIO,
-  evictedKeys: DEFAULT_EVICTED_KEYS,
-  hitRateRatio: DEFAULT_HIT_RATE_RATIO,
-  slowlogCount: DEFAULT_SLOWLOG_COUNT,
+  heartbeatTicks: [],
+  usedMemoryMb: 0,
+  maxMemoryMb: 0,
+  fragmentationRatio: 0,
+  evictedKeys: 0,
+  hitRateRatio: 0,
+  slowlogCount: 0,
   replicationRole: DEFAULT_REPLICATION_ROLE,
-  connectedSlaves: DEFAULT_CONNECTED_SLAVES,
+  connectedSlaves: 0,
   maxmemoryPolicy: DEFAULT_MAXMEMORY_POLICY,
-  commands: SAMPLE_COMMAND_NAMES.map((name, i) => ({
-    name,
-    count: SAMPLE_COMMAND_COUNTS[i] ?? 0,
-  })),
-  slowlog: SAMPLE_SLOWLOG_COMMANDS,
-  alerts: DEFAULT_ALERTS,
-};
-
-const KEY_SAMPLE_RECORDS: Record<string, Record<string, unknown>> = {
-  shift_001_cache: {
-    shiftId: 'shift_001',
-    foreman: 'Timothy Oniel',
-    email: 'admin@plantcormining.os',
-    role: 'admin',
-    activeMachines: SAMPLE_ACTIVE_MACHINES,
-    totalTonsMoved: SAMPLE_TOTAL_TONS_MOVED,
-    status: 'ACTIVE',
-  },
-  user_session_abc123: {
-    userId: 'usr_timothy_admin',
-    email: 'admin@plantcormining.os',
-    role: 'admin',
-    lastActive: DEFAULT_HEARTBEAT_ISO,
-    ip: '10.0.0.4',
-  },
-  telemetry_dump_r1: {
-    pitSection: 'Brakfontein Extension 3',
-    drillDepthMeters: SAMPLE_DRILL_DEPTH_METERS,
-    rpm: SAMPLE_DRILL_RPM,
-    vibrationG: SAMPLE_VIBRATION_G,
-  },
-  rate_limit_api: {
-    limit: SAMPLE_RATE_LIMIT_MAX,
-    remaining: SAMPLE_RATE_LIMIT_REMAINING,
-    windowSeconds: SAMPLE_RATE_LIMIT_WINDOW_S,
-  },
-  pubsub_drilling_event: {
-    topic: 'drilling:telemetry:v1',
-    eventsQueued: SAMPLE_QUEUED_EVENTS,
-    subscribers: SAMPLE_SUBSCRIBERS,
-  },
+  commands: [],
+  slowlog: [],
+  alerts: [],
 };
 
 const TICK_STATUS_CLASSES: Record<HeartbeatStatus, string> = {
@@ -719,12 +680,54 @@ export default function RedisManagerPage() {
   const [searchHealth, setSearchHealth] =
     useState<RediSearchHealthState>(DEFAULT_REDISEARCH_HEALTH);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedKey, setSelectedKey] = useState<string>('shift_001_cache');
+  const [liveKeys, setLiveKeys] = useState<string[]>([]);
+  const [selectedKey, setSelectedKey] = useState<string>('');
+  const [inspectedKeyData, setInspectedKeyData] = useState<{
+    key: string;
+    type: string;
+    ttlSeconds: number;
+    value: unknown;
+  } | null>(null);
   const [searchFilter, setSearchFilter] = useState('');
   const [noticeBanner, setNoticeBanner] = useState<{
     readonly tone: 'info' | 'warning';
     readonly message: string;
   } | null>(null);
+
+  const inspectRedisKeys = useCallback(
+    async (pattern: string, keyToInspect?: string | null) => {
+      try {
+        const params = new URLSearchParams({ pattern: pattern || '*' });
+        if (keyToInspect) {
+          params.set('key', keyToInspect);
+        }
+        const res = await fetch(`/api/admin/redis/inspect?${params.toString()}`);
+        if (!res.ok) return;
+        const payload = (await res.json()) as {
+          connected?: boolean;
+          keys?: string[];
+          inspected?: {
+            key: string;
+            type: string;
+            ttlSeconds: number;
+            value: unknown;
+          } | null;
+        };
+        if (Array.isArray(payload.keys)) {
+          setLiveKeys(payload.keys);
+          if (!keyToInspect && payload.keys.length > 0 && !selectedKey) {
+            setSelectedKey(payload.keys[0] ?? '');
+          }
+        }
+        if (payload.inspected) {
+          setInspectedKeyData(payload.inspected);
+        }
+      } catch {
+        // Leave liveKeys unchanged if inspection endpoint is unreachable
+      }
+    },
+    [selectedKey]
+  );
 
   const fetchStats = useCallback(async () => {
     setIsLoading(true);
@@ -732,6 +735,7 @@ export default function RedisManagerPage() {
       const [obsResult, healthResult] = await Promise.allSettled([
         fetch('/api/admin/observability'),
         fetch('/api/health/redis'),
+        inspectRedisKeys('*', selectedKey || null),
       ]);
       if (obsResult.status === 'fulfilled' && obsResult.value.ok) {
         const payload = (await obsResult.value.json()) as ObservabilityApiResponse;
@@ -755,23 +759,29 @@ export default function RedisManagerPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [inspectRedisKeys, selectedKey]);
 
   useEffect(() => {
-    fetchStats();
+    void fetchStats();
   }, [fetchStats]);
 
-  const selectedKeyRecord = KEY_SAMPLE_RECORDS[selectedKey] ?? {};
+  const selectedKeyRecord = inspectedKeyData?.value ?? null;
   const heartbeatMs = Date.parse(stats.lastHeartbeat);
-  const ttlExpiresIso = Number.isFinite(heartbeatMs)
-    ? new Date(heartbeatMs + SAMPLE_TTL_SECONDS * MS_PER_SECOND).toISOString()
-    : stats.lastHeartbeat;
+  const ttlExpiresIso =
+    inspectedKeyData && inspectedKeyData.ttlSeconds > 0
+      ? new Date(Date.now() + inspectedKeyData.ttlSeconds * MS_PER_SECOND).toISOString()
+      : Number.isFinite(heartbeatMs)
+        ? stats.lastHeartbeat
+        : 'N/A';
 
   const handleInspectKey = () => {
+    void inspectRedisKeys(searchFilter.trim() || '*', selectedKey || null);
     void fetchStats();
     setNoticeBanner({
       tone: 'info',
-      message: `Key "${selectedKey}" inspected and cluster telemetry refreshed from /api/admin/observability.`,
+      message: selectedKey
+        ? `Inspected live Redis key "${selectedKey}" and refreshed cluster telemetry.`
+        : 'Refreshed live Redis key list and cluster telemetry.',
     });
   };
 
@@ -906,23 +916,32 @@ export default function RedisManagerPage() {
               className="mb-4 w-full rounded-md border border-zinc-200 bg-white/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <div className="flex-1 overflow-auto rounded-md border border-zinc-200 bg-white/30">
-              <ul className="divide-y divide-zinc-100">
-                {Object.keys(KEY_SAMPLE_RECORDS)
-                  .filter((keyName) => keyName.toLowerCase().includes(searchFilter.toLowerCase()))
-                  .map((keyName) => (
-                    <li
-                      key={keyName}
-                      onClick={() => setSelectedKey(keyName)}
-                      className={`cursor-pointer px-3 py-2 font-mono text-sm transition-colors ${
-                        selectedKey === keyName
-                          ? 'bg-indigo-50 font-semibold text-indigo-700'
-                          : 'text-zinc-700 hover:bg-zinc-100/50'
-                      }`}
-                    >
-                      {keyName}
-                    </li>
-                  ))}
-              </ul>
+              {liveKeys.length === 0 ? (
+                <div className="px-3 py-6 text-center text-xs text-zinc-500">
+                  No matching live Redis keys found.
+                </div>
+              ) : (
+                <ul className="divide-y divide-zinc-100">
+                  {liveKeys
+                    .filter((keyName) => keyName.toLowerCase().includes(searchFilter.toLowerCase()))
+                    .map((keyName) => (
+                      <li
+                        key={keyName}
+                        onClick={() => {
+                          setSelectedKey(keyName);
+                          void inspectRedisKeys(searchFilter.trim() || '*', keyName);
+                        }}
+                        className={`cursor-pointer px-3 py-2 font-mono text-sm transition-colors ${
+                          selectedKey === keyName
+                            ? 'bg-indigo-50 font-semibold text-indigo-700'
+                            : 'text-zinc-700 hover:bg-zinc-100/50'
+                        }`}
+                      >
+                        {keyName}
+                      </li>
+                    ))}
+                </ul>
+              )}
             </div>
           </GlassCard>
         </div>
@@ -931,9 +950,12 @@ export default function RedisManagerPage() {
           <GlassCard variant="window" className="flex flex-1 flex-col">
             <div className="flex items-center justify-between border-zinc-100 border-b bg-zinc-50/50 px-4 py-3">
               <div>
-                <h3 className="font-mono font-semibold text-sm text-zinc-800">{selectedKey}</h3>
+                <h3 className="font-mono font-semibold text-sm text-zinc-800">
+                  {selectedKey || 'No key selected'}
+                </h3>
                 <p className="text-xs text-zinc-500 uppercase">
-                  Type: Hash • TTL: 3600s • Size: 12.3KB
+                  Type: {inspectedKeyData?.type ?? 'unknown'} • TTL:{' '}
+                  {inspectedKeyData ? `${inspectedKeyData.ttlSeconds}s` : 'N/A'}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -954,13 +976,6 @@ export default function RedisManagerPage() {
               </div>
             </div>
             <div className="flex-1 overflow-auto bg-white/40 p-4 font-mono text-sm text-zinc-800">
-              <div className="mb-2 flex gap-2 text-xs text-zinc-500">
-                <span>Hash Structure</span>
-                <span>•</span>
-                <span>Created: 2 hours ago</span>
-                <span>•</span>
-                <span>Accessed: 5 mins ago</span>
-              </div>
               <pre className="rounded border border-zinc-200 bg-zinc-50/50 p-3">
                 {JSON.stringify(
                   {

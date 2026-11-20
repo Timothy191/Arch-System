@@ -11,12 +11,18 @@ export async function GET(req: Request) {
 
   try {
     const jobId = randomUUID();
-    // Triggers n8n to sweep Fleet SMU (Service Meter Unit) hours against PM schedules (250hr, 500hr, etc)
-    await Promise.allSettled([
+    const [dispatchResult] = await Promise.allSettled([
       triggerTrackedWorkflow(jobId, '/webhook/pm-smu-sweep', {
         timestamp: new Date().toISOString(),
       }),
     ]);
+
+    if (dispatchResult.status === 'rejected') {
+      return NextResponse.json(
+        { success: false, error: 'Failed to dispatch PM SMU sweep workflow', jobId },
+        { status: 502 }
+      );
+    }
     return NextResponse.json({ success: true, message: 'PM SMU sweep initiated', jobId });
   } catch (_error) {
     return NextResponse.json({ success: false }, { status: 500 });

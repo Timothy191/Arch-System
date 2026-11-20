@@ -157,14 +157,54 @@ function isErrorLogRecord(record: Readonly<Record<string, unknown>>): boolean {
   );
 }
 
-function appendDrainBatchSummary(summary: VercelDrainBatchSummary): void {
+import { getRedisClient } from '@repo/redis';
+
+const VERCEL_DRAINS_REDIS_KEY = 'arch:telemetry:vercel_drains';
+let skipRedisForTest = false;
+
+async function appendDrainBatchSummary(summary: VercelDrainBatchSummary): Promise<void> {
   recentDrainBatches.unshift(summary);
   if (recentDrainBatches.length > MAX_RECENT_DRAIN_BATCHES) {
     recentDrainBatches.length = MAX_RECENT_DRAIN_BATCHES;
   }
+  if (skipRedisForTest) return;
+  try {
+    const redis = await getRedisClient();
+    if (redis?.isOpen) {
+      await redis.lPush(VERCEL_DRAINS_REDIS_KEY, JSON.stringify(summary));
+      await redis.lTrim(VERCEL_DRAINS_REDIS_KEY, 0, MAX_RECENT_DRAIN_BATCHES - 1);
+    }
+  } catch {
+    // Keep in-memory buffer when Redis is unavailable
+  }
+}
+
+async function readRecentDrainBatches(): Promise<VercelDrainBatchSummary[]> {
+  if (skipRedisForTest) return recentDrainBatches;
+  try {
+    const redis = await getRedisClient();
+    if (redis?.isOpen) {
+      const rawItems = await redis.lRange(VERCEL_DRAINS_REDIS_KEY, 0, MAX_RECENT_DRAIN_BATCHES - 1);
+      if (Array.isArray(rawItems) && rawItems.length > 0) {
+        return rawItems
+          .map((item) => {
+            try {
+              return JSON.parse(item) as VercelDrainBatchSummary;
+            } catch {
+              return null;
+            }
+          })
+          .filter((item): item is VercelDrainBatchSummary => item !== null);
+      }
+    }
+  } catch {
+    // Fall back to in-memory buffer
+  }
+  return recentDrainBatches;
 }
 
 export function clearRecentVercelDrainBatchesForTest(): void {
+  skipRedisForTest = true;
   recentDrainBatches.length = 0;
 }
 
@@ -237,7 +277,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     errorLogCount,
   };
 
-  appendDrainBatchSummary(summary);
+  await appendDrainBatchSummary(summary);
   recordJobExecution('drain.vercel', 0, true);
 
   logger.info(
@@ -272,14 +312,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     });
   }
 
+  const batches = await readRecentDrainBatches();
+
   return NextResponse.json(
     {
       ok: true,
       endpoint: '/api/drains/vercel',
       supportedFormats: ['application/json', 'application/x-ndjson'],
       supportedLogSources: VERCEL_LOG_DRAIN_SOURCES,
-      recentBatchesCount: recentDrainBatches.length,
-      recentBatches: recentDrainBatches,
+      recentBatchesCount: batches.length,
+      recentBatches: batches,
     },
     { status: HTTP_STATUS_OK, headers: verifyHeaders }
   );

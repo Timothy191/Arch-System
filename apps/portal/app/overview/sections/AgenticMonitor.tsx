@@ -477,7 +477,12 @@ export default function AgenticMonitor() {
         </div>
       </div>
 
-      <AgenticMonitorSpendAndFeed selectedAgent={selectedAgent} filteredFeed={filteredFeed} />
+      <AgenticMonitorSpendAndFeed
+        selectedAgent={selectedAgent}
+        filteredFeed={filteredFeed}
+        totalZarCost={currentMetrics.zarCost}
+        totalUsdCost={currentMetrics.usdCost}
+      />
     </div>
   );
 }

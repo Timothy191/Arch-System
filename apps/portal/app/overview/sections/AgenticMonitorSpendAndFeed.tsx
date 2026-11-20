@@ -10,9 +10,13 @@ const CURRENCY_DECIMALS = 2;
 export function AgenticMonitorSpendAndFeed({
   selectedAgent,
   filteredFeed,
+  totalZarCost = 0,
+  totalUsdCost = 0,
 }: {
   selectedAgent: string;
   filteredFeed: AgentTaskLog[];
+  totalZarCost?: number;
+  totalUsdCost?: number;
 }) {
   return (
     <>
@@ -77,7 +81,20 @@ export function AgenticMonitorSpendAndFeed({
             </h3>
           </div>
           <span className="font-mono text-[var(--text-muted)] text-xs">
-            Total Incurred: <strong className="text-emerald-700">R 5,000.00 ZAR</strong> (~$269.98
+            Total Incurred:{' '}
+            <strong className="text-emerald-700">
+              R{' '}
+              {totalZarCost.toLocaleString('en-US', {
+                minimumFractionDigits: CURRENCY_DECIMALS,
+                maximumFractionDigits: CURRENCY_DECIMALS,
+              })}{' '}
+              ZAR
+            </strong>{' '}
+            (~$
+            {totalUsdCost.toLocaleString('en-US', {
+              minimumFractionDigits: CURRENCY_DECIMALS,
+              maximumFractionDigits: CURRENCY_DECIMALS,
+            })}{' '}
             USD)
           </span>
         </div>

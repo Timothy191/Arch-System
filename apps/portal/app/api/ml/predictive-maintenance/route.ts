@@ -114,7 +114,7 @@ export async function GET() {
 
     const { data: machines } = await supabase
       .from('machines')
-      .select('id, name, machine_type, active')
+      .select('id, name, machine_type, active, current_smu')
       .in('id', candidateMachineIds);
 
     const machineRows = (machines as MachineRow[] | null) ?? [];

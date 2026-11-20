@@ -112,32 +112,40 @@ jest.mock('~/app/actions', () => ({
   logout: jest.fn(),
 }));
 
+jest.mock('@repo/supabase/client', () => ({
+  createBrowserSupabaseClient: jest.fn(() => ({
+    from: jest.fn(() => ({
+      select: jest.fn().mockReturnThis(),
+      in: jest.fn().mockReturnThis(),
+      is: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue({
+        data: [
+          {
+            id: 'bd-1',
+            reason: 'Excavator hydraulic leak',
+            status: 'open',
+            created_at: new Date().toISOString(),
+          },
+          {
+            id: 'bd-2',
+            reason: 'Crusher belt alignment',
+            status: 'in_progress',
+            created_at: new Date().toISOString(),
+          },
+        ],
+        error: null,
+      }),
+    })),
+  })),
+}));
+
 describe('ServicesDropdown', () => {
   beforeEach(() => {
-    // Clear persisted widget position
     window.localStorage.removeItem('arch-services-pos');
-    // Seed safety alerts in localStorage
-    window.localStorage.setItem(
-      'arch-safety-alerts',
-      JSON.stringify([
-        {
-          id: 'sa-1',
-          severity: 'warning',
-          message: 'High dust levels — Pit B',
-          timestamp: Date.now() - 3600000,
-        },
-        {
-          id: 'sa-2',
-          severity: 'info',
-          message: 'Blasting hold lifted — Sector 4',
-          timestamp: Date.now() - 7200000,
-        },
-      ])
-    );
   });
 
   afterEach(() => {
-    window.localStorage.removeItem('arch-safety-alerts');
     window.localStorage.removeItem('arch-services-pos');
   });
 
@@ -189,35 +197,14 @@ describe('ServicesDropdown', () => {
     });
   });
 
-  it('renders power options when open', async () => {
+  it('renders session options when open', async () => {
     render(<ServicesDropdown />);
     const trigger = screen.getByRole('button', { name: /system tray/i });
     fireEvent.click(trigger);
 
     await waitFor(() => {
-      expect(screen.getByText('Lock Screen')).toBeInTheDocument();
-      expect(screen.getByText('Sleep')).toBeInTheDocument();
       expect(screen.getByText('Log Out')).toBeInTheDocument();
       expect(screen.getByText('Restart…')).toBeInTheDocument();
-      expect(screen.getByText('Shut Down…')).toBeInTheDocument();
-    });
-  });
-
-  it('shows lock screen overlay and dismisses on click', async () => {
-    render(<ServicesDropdown />);
-    const trigger = screen.getByRole('button', { name: /system tray/i });
-    fireEvent.click(trigger);
-
-    const lockItem = screen.getByText('Lock Screen');
-    fireEvent.click(lockItem);
-
-    await waitFor(() => {
-      expect(screen.getByText('Click anywhere to unlock')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('Click anywhere to unlock'));
-    await waitFor(() => {
-      expect(screen.queryByText('Click anywhere to unlock')).not.toBeInTheDocument();
     });
   });
 
@@ -228,19 +215,6 @@ describe('ServicesDropdown', () => {
 
     const logoutButton = screen.getByText('Log Out');
     expect(logoutButton.closest('form')).toBeInTheDocument();
-  });
-
-  it('shows shut down overlay', async () => {
-    render(<ServicesDropdown />);
-    const trigger = screen.getByRole('button', { name: /system tray/i });
-    fireEvent.click(trigger);
-
-    const shutDownItem = screen.getByText('Shut Down…');
-    fireEvent.click(shutDownItem);
-
-    await waitFor(() => {
-      expect(screen.getByText('It is now safe to turn off your computer.')).toBeInTheDocument();
-    });
   });
 
   it('renders View and Safety submenus and their contents', async () => {
@@ -255,7 +229,6 @@ describe('ServicesDropdown', () => {
       expect(screen.getByText('Toggle Fullscreen')).toBeInTheDocument();
       expect(screen.getByText('Control Room Telemetry')).toBeInTheDocument();
       expect(screen.getByText('Control Room Dashboard')).toBeInTheDocument();
-      expect(screen.getByText('Emergency Line')).toBeInTheDocument();
     });
   });
 

@@ -13,12 +13,19 @@ export async function GET(req: Request) {
     // We would typically query the Supabase DB here for badges expiring in exactly 48h
     // For the background job, we can just trigger the n8n orchestrator which handles the query and email blast natively.
     const jobId = randomUUID();
-    await Promise.allSettled([
+    const [dispatchResult] = await Promise.allSettled([
       triggerTrackedWorkflow(jobId, '/webhook/contractor-expiry-check', {
         target_hours: 48,
         run_timestamp: new Date().toISOString(),
       }),
     ]);
+
+    if (dispatchResult.status === 'rejected') {
+      return NextResponse.json(
+        { success: false, error: 'Failed to dispatch contractor expiry workflow', jobId },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json({
       success: true,

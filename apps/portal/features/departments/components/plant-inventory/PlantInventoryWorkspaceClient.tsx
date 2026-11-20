@@ -90,16 +90,14 @@ export function PlantInventoryWorkspaceClient({
   const [usageOperator, setUsageOperator] = useState('Plant Shift Supervisor');
   const [usageFeedback, setUsageFeedback] = useState<string | null>(null);
 
-  // Hydrate persisted inventory & usage history from localStorage and remote Supabase on mount
+  // Hydrate persisted inventory & usage history from remote Supabase (with localStorage offline fallback)
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    let hasLocalStock = false;
     try {
       const rawStock = window.localStorage.getItem(STOCK_STORAGE_KEY);
       if (rawStock) {
         const parsed = JSON.parse(rawStock) as PlantInventoryStockItem[];
         if (Array.isArray(parsed) && parsed.length > 0) {
-          hasLocalStock = true;
           setStockItems(parsed);
         }
       }
@@ -114,24 +112,21 @@ export function PlantInventoryWorkspaceClient({
       // Ignore storage read errors in restricted environments
     }
 
-    if (!hasLocalStock) {
-      let active = true;
-      void getPlantInventoryWorkspaceData()
-        .then((remote) => {
-          if (!active || !remote) return;
-          if (remote.items.length > 0) {
-            setStockItems(remote.items);
-          }
-          if (remote.usage.length > 0) {
-            setUsageHistory(remote.usage);
-          }
-        })
-        .catch(() => undefined);
-      return () => {
-        active = false;
-      };
-    }
-    return undefined;
+    let active = true;
+    void getPlantInventoryWorkspaceData()
+      .then((remote) => {
+        if (!active || !remote) return;
+        if (remote.items.length > 0) {
+          setStockItems(remote.items);
+        }
+        if (remote.usage.length > 0) {
+          setUsageHistory(remote.usage);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
   }, []);
 
   const persistStockItems = (nextItems: PlantInventoryStockItem[]) => {

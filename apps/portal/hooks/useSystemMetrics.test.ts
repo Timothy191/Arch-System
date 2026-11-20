@@ -12,7 +12,7 @@ describe('useSystemMetrics hook', () => {
 
   it('should initialize metrics properly', () => {
     const { result } = renderHook(() => useSystemMetrics());
-    expect(result.current.websocketLatency).toBeGreaterThanOrEqual(12);
+    expect(result.current.websocketLatency).toBeGreaterThanOrEqual(0);
     expect(result.current.serverTimeSAST).toMatch(/^\d{2}:\d{2}:\d{2}$/);
     expect(['A', 'B', 'C']).toContain(result.current.currentShift.shift);
   });
@@ -29,14 +29,20 @@ describe('useSystemMetrics hook', () => {
     expect(nextTime).not.toBe(initialTime);
   });
 
-  it('should update latency after latency interval', () => {
+  it('should poll health endpoint on latency interval', async () => {
+    const mockFetch = jest.fn().mockResolvedValue({ ok: true });
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
+
     const { result } = renderHook(() => useSystemMetrics());
 
-    act(() => {
-      jest.advanceTimersByTime(3000);
+    await act(async () => {
+      jest.advanceTimersByTime(15_000);
     });
 
-    // Check that latency is updated (might be the same, but it should be called)
-    expect(result.current.websocketLatency).toBeGreaterThanOrEqual(12);
+    expect(mockFetch).toHaveBeenCalledWith('/api/health/live', {
+      method: 'GET',
+      cache: 'no-store',
+    });
+    expect(result.current.websocketLatency).toBeGreaterThanOrEqual(0);
   });
 });

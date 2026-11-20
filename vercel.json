@@ -24,10 +24,6 @@
       "schedule": "0 2 * * *"
     },
     {
-      "path": "/api/cron/research-briefing",
-      "schedule": "0 7 * * *"
-    },
-    {
       "path": "/api/cron/webhook-deliveries",
       "schedule": "0 8 * * *"
     }

@@ -23,19 +23,12 @@ export function BreakdownCharts({
   mtbfData = [],
   serviceTriggers = [],
 }: BreakdownChartsProps) {
-  // Combine MTTR and MTBF into unified chart series if mtbfData is available
-  const reliabilityChartData =
-    mtbfData.length > 0
-      ? mtbfData.map((d) => ({
-          category: d.category,
-          'MTTR (hrs)': d.mttrHours,
-          'MTBF (hrs)': d.mtbfHours,
-        }))
-      : mttrData.map((d) => ({
-          category: d.machine,
-          'MTTR (hrs)': d.hours,
-          'MTBF (hrs)': Math.round(d.hours * 18.5), // Predictive baseline fallback
-        }));
+  // Use only real MTBF data when available
+  const reliabilityChartData = mtbfData.map((d) => ({
+    category: d.category,
+    'MTTR (hrs)': d.mttrHours,
+    'MTBF (hrs)': d.mtbfHours,
+  }));
 
   return (
     <div className="space-y-6">

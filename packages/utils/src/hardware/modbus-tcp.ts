@@ -115,7 +115,7 @@ export class ModbusTcpClient extends EventEmitter {
     const protocolId = response.readUInt16BE(2);
     const _length = response.readUInt16BE(4);
     const unitId = response.readUInt8(6); // Unit ID is 1 byte at offset 6
-    const functionCode = response.readUInt8(8);
+    const functionCode = response.readUInt8(7);
 
     if (transactionId !== expectedTransactionId) {
       throw new Error(
@@ -131,7 +131,7 @@ export class ModbusTcpClient extends EventEmitter {
 
     // Exception response: function code has high bit set
     if (functionCode & 0x80) {
-      const exceptionCode = response.readUInt8(9);
+      const exceptionCode = response.readUInt8(8);
       throw new Error(
         `Modbus exception: function code 0x${functionCode.toString(16)}, exception code 0x${exceptionCode.toString(16)}`
       );
@@ -140,8 +140,8 @@ export class ModbusTcpClient extends EventEmitter {
       throw new Error(`Modbus unexpected function code: 0x${functionCode.toString(16)}`);
     }
 
-    const byteCount = response.readUInt8(9);
-    const registerData = response.subarray(10, 10 + byteCount);
+    const byteCount = response.readUInt8(8);
+    const registerData = response.subarray(9, 9 + byteCount);
 
     if (registerData.length !== byteCount) {
       throw new Error(
@@ -161,10 +161,10 @@ export class ModbusTcpClient extends EventEmitter {
   }
 
   private processResponseBuffer(): void {
-    while (this.responseBuffer.length >= 7) {
-      // Need at least MBAP header (7 bytes) to read length
+    while (this.responseBuffer.length >= 6) {
+      // Need at least MBAP prefix (6 bytes: TxID[2] + ProtoID[2] + Length[2]) to read length
       const length = this.responseBuffer.readUInt16BE(4);
-      const totalFrameSize = 7 + length; // MBAP header (7) + length field value
+      const totalFrameSize = 6 + length; // Length field already includes the 1-byte Unit ID
 
       if (this.responseBuffer.length < totalFrameSize) {
         break; // Incomplete frame, wait for more data

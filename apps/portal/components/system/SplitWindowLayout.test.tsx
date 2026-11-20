@@ -4,7 +4,6 @@ import { SplitWindowLayout } from './SplitWindowLayout';
 
 describe('SplitWindowLayout', () => {
   beforeEach(() => {
-    // Reset store state before each test
     useSplitWindow.setState({
       isOpen: false,
       tabs: [],
@@ -32,17 +31,14 @@ describe('SplitWindowLayout', () => {
     await act(async () => {
       window.dispatchEvent(
         new CustomEvent('open-split-view', {
-          detail: { service: 'whatsapp' },
+          detail: { service: 'google-calendar' },
         })
       );
     });
 
     await waitFor(() => {
-      expect(screen.getByText('WhatsApp')).toBeInTheDocument();
-      expect(screen.getByTestId('whatsapp-live-web-iframe')).toHaveAttribute(
-        'src',
-        'https://web.whatsapp.com/'
-      );
+      expect(screen.getByTestId('tab-google-calendar')).toBeInTheDocument();
+      expect(screen.getByText('Google Calendar & Schedule')).toBeInTheDocument();
     });
   });
 
@@ -54,13 +50,17 @@ describe('SplitWindowLayout', () => {
     );
 
     await act(async () => {
-      window.dispatchEvent(new CustomEvent('open-split-view', { detail: { service: 'github' } }));
-      window.dispatchEvent(new CustomEvent('open-split-view', { detail: { service: 'whatsapp' } }));
+      window.dispatchEvent(
+        new CustomEvent('open-split-view', { detail: { service: 'google-calendar' } })
+      );
+      window.dispatchEvent(
+        new CustomEvent('open-split-view', { detail: { service: 'google-sheets' } })
+      );
     });
 
     await waitFor(() => {
-      expect(screen.getByText('GitHub')).toBeInTheDocument();
-      expect(screen.getByText('WhatsApp')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-google-calendar')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-google-sheets')).toBeInTheDocument();
     });
   });
 
@@ -72,13 +72,17 @@ describe('SplitWindowLayout', () => {
     );
 
     await act(async () => {
-      window.dispatchEvent(new CustomEvent('open-split-view', { detail: { service: 'whatsapp' } }));
-      window.dispatchEvent(new CustomEvent('open-split-view', { detail: { service: 'whatsapp' } }));
+      window.dispatchEvent(
+        new CustomEvent('open-split-view', { detail: { service: 'google-calendar' } })
+      );
+      window.dispatchEvent(
+        new CustomEvent('open-split-view', { detail: { service: 'google-calendar' } })
+      );
     });
 
     await waitFor(() => {
-      const whatsAppTabs = screen.getAllByText('WhatsApp');
-      expect(whatsAppTabs).toHaveLength(1);
+      const calendarTabs = screen.getAllByTestId('tab-google-calendar');
+      expect(calendarTabs).toHaveLength(1);
     });
   });
 
@@ -90,17 +94,19 @@ describe('SplitWindowLayout', () => {
     );
 
     await act(async () => {
-      window.dispatchEvent(new CustomEvent('open-split-view', { detail: { service: 'whatsapp' } }));
+      window.dispatchEvent(
+        new CustomEvent('open-split-view', { detail: { service: 'google-calendar' } })
+      );
     });
 
-    const closeButton = await waitFor(() => screen.getByTestId('close-tab-whatsapp'));
+    const closeButton = await waitFor(() => screen.getByTestId('close-tab-google-calendar'));
 
     await act(async () => {
       fireEvent.click(closeButton);
     });
 
     await waitFor(() => {
-      expect(screen.queryByText('WhatsApp')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('tab-google-calendar')).not.toBeInTheDocument();
     });
   });
 
@@ -112,8 +118,12 @@ describe('SplitWindowLayout', () => {
     );
 
     await act(async () => {
-      window.dispatchEvent(new CustomEvent('open-split-view', { detail: { service: 'github' } }));
-      window.dispatchEvent(new CustomEvent('open-split-view', { detail: { service: 'whatsapp' } }));
+      window.dispatchEvent(
+        new CustomEvent('open-split-view', { detail: { service: 'google-calendar' } })
+      );
+      window.dispatchEvent(
+        new CustomEvent('open-split-view', { detail: { service: 'google-sheets' } })
+      );
     });
 
     const closeAllButton = await waitFor(() => screen.getByLabelText('Close all tabs'));
@@ -123,54 +133,8 @@ describe('SplitWindowLayout', () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByText('GitHub')).not.toBeInTheDocument();
-      expect(screen.queryByText('WhatsApp')).not.toBeInTheDocument();
-    });
-  });
-
-  it('opens Google Docs tab and renders scratchpad and templates', async () => {
-    render(
-      <SplitWindowLayout>
-        <div>Main</div>
-      </SplitWindowLayout>
-    );
-
-    await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent('open-split-view', {
-          detail: { service: 'google-docs' },
-        })
-      );
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Google Docs')).toBeInTheDocument();
-      expect(screen.getByText('Google Docs Workspace')).toBeInTheDocument();
-      expect(screen.getByText('Live Scratchpad & Editor')).toBeInTheDocument();
-      expect(screen.getByText('Mining Templates')).toBeInTheDocument();
-    });
-  });
-
-  it('opens Google Calendar tab and renders live shift schedule controls', async () => {
-    render(
-      <SplitWindowLayout>
-        <div>Main</div>
-      </SplitWindowLayout>
-    );
-
-    await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent('open-split-view', {
-          detail: { service: 'google-calendar' },
-        })
-      );
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('tab-google-calendar')).toBeInTheDocument();
-      expect(screen.getByText('Google Calendar & Schedule')).toBeInTheDocument();
-      expect(screen.getByText('Live Site Calendar')).toBeInTheDocument();
-      expect(screen.getByText('Quick Shift Event')).toBeInTheDocument();
+      expect(screen.queryByTestId('tab-google-calendar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('tab-google-sheets')).not.toBeInTheDocument();
     });
   });
 });

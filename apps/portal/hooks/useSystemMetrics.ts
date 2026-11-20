@@ -4,7 +4,7 @@ import { getThreeShift } from '@repo/utils/client';
 import { useEffect, useState } from 'react';
 
 interface SystemMetrics {
-  websocketLatency: number; // mock latency in ms
+  websocketLatency: number; // measured HTTP/API round-trip latency in ms (0 when unmeasured)
   serverTimeSAST: string; // SAST formatted time string HH:MM:SS
   currentShift: {
     shift: 'A' | 'B' | 'C';
@@ -16,7 +16,7 @@ interface SystemMetrics {
 }
 
 const INITIAL_FALLBACK: SystemMetrics = {
-  websocketLatency: 15,
+  websocketLatency: 0,
   serverTimeSAST: '00:00:00',
   currentShift: { shift: 'A', label: 'Morning Shift', start: '06:00', end: '14:00' },
   online: true,
@@ -29,7 +29,7 @@ export function useSystemMetrics(): SystemMetrics {
     // Set initial real time right after mount
     const now = new Date();
     setMetrics({
-      websocketLatency: 15,
+      websocketLatency: 0,
       serverTimeSAST: now.toLocaleTimeString('en-US', {
         timeZone: 'Africa/Johannesburg',
         hour12: false,
@@ -76,28 +76,35 @@ export function useSystemMetrics(): SystemMetrics {
       });
     }, 1000);
 
-    // Simulate websocket latency update every 3 seconds
-    const updateLatency = () => {
-      const base = 12;
-      const jitter = Math.floor(Math.random() * 15);
-      const spike = Math.random() > 0.95 ? Math.floor(Math.random() * 45) : 0; // 5% chance of spike
-      const newLatency = base + jitter + spike;
+    let isCancelled = false;
 
-      setMetrics((prev) => {
-        if (prev.websocketLatency === newLatency) {
-          return prev;
-        }
-        return {
-          ...prev,
-          websocketLatency: newLatency,
-        };
-      });
+    // Measure real server round-trip latency every 15 seconds
+    const measureLatency = async () => {
+      if (typeof fetch !== 'function') return;
+      const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      try {
+        await fetch('/api/health/live', { method: 'GET', cache: 'no-store' });
+        if (isCancelled) return;
+        const elapsed =
+          (typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt;
+        const measuredLatency = Math.max(1, Math.round(elapsed));
+        setMetrics((prev) =>
+          prev.websocketLatency === measuredLatency
+            ? prev
+            : { ...prev, websocketLatency: measuredLatency }
+        );
+      } catch {
+        // Leave previous latency unchanged if probe fails
+      }
     };
 
-    updateLatency();
-    const latencyInterval = setInterval(updateLatency, 3000);
+    void measureLatency();
+    const latencyInterval = setInterval(() => {
+      void measureLatency();
+    }, 15_000);
 
     return () => {
+      isCancelled = true;
       clearInterval(clockInterval);
       clearInterval(latencyInterval);
       if (typeof window !== 'undefined') {

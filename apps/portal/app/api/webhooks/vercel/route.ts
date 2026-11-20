@@ -90,11 +90,16 @@ export interface ProcessedVercelWebhookRecord {
 
 const recentWebhookEvents: ProcessedVercelWebhookRecord[] = [];
 
+import { getRedisClient } from '@repo/redis';
+
+const VERCEL_WEBHOOKS_REDIS_KEY = 'arch:telemetry:vercel_webhooks';
+const _skipRedisForTest = false;
+
 const ACTION_DESCRIPTION_BY_CATEGORY: Readonly<Record<VercelWebhookCategory, string>> = {
-  deployment: 'Recorded deployment lifecycle telemetry and updated release state audit trail',
-  project: 'Recorded project configuration/environment change in platform governance log',
-  flags: 'Synchronized Edge Config feature-flag / segment state transition',
-  firewall: 'Elevated Vercel Firewall attack telemetry alert to security monitoring store',
+  deployment: 'Recorded deployment lifecycle webhook event in Redis telemetry log',
+  project: 'Recorded project configuration/environment webhook event in Redis telemetry log',
+  flags: 'Recorded feature-flag / segment webhook event in Redis telemetry log',
+  firewall: 'Recorded Vercel Firewall alert webhook event in Redis telemetry log',
 };
 
 function resolveWebhookSecret(): string | undefined {
@@ -126,11 +131,47 @@ function extractTargetMetadata(payload: Readonly<Record<string, unknown>>): {
   return { targetName, targetUrl };
 }
 
-function appendRecentWebhookRecord(record: ProcessedVercelWebhookRecord): void {
+async function appendRecentWebhookRecord(record: ProcessedVercelWebhookRecord): Promise<void> {
   recentWebhookEvents.unshift(record);
   if (recentWebhookEvents.length > MAX_RECENT_WEBHOOK_EVENTS) {
     recentWebhookEvents.length = MAX_RECENT_WEBHOOK_EVENTS;
   }
+  try {
+    const redis = await getRedisClient();
+    if (redis?.isOpen) {
+      await redis.lPush(VERCEL_WEBHOOKS_REDIS_KEY, JSON.stringify(record));
+      await redis.lTrim(VERCEL_WEBHOOKS_REDIS_KEY, 0, MAX_RECENT_WEBHOOK_EVENTS - 1);
+    }
+  } catch {
+    // Keep in-memory buffer when Redis is unavailable
+  }
+}
+
+async function readRecentWebhookRecords(): Promise<ProcessedVercelWebhookRecord[]> {
+  try {
+    const redis = await getRedisClient();
+    if (redis?.isOpen) {
+      const rawItems = await redis.lRange(
+        VERCEL_WEBHOOKS_REDIS_KEY,
+        0,
+        MAX_RECENT_WEBHOOK_EVENTS - 1
+      );
+      if (Array.isArray(rawItems) && rawItems.length > 0) {
+        return rawItems
+          .map((item) => {
+            try {
+              return JSON.parse(item) as ProcessedVercelWebhookRecord;
+            } catch {
+              return null;
+            }
+          })
+          .filter((item): item is ProcessedVercelWebhookRecord => item !== null);
+      }
+    }
+  } catch {
+    // Fall back to in-memory buffer
+  }
+  return recentWebhookEvents;
 }
 
 export function clearRecentVercelWebhookEventsForTest(): void {
@@ -210,7 +251,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     actionTaken,
   };
 
-  appendRecentWebhookRecord(processedRecord);
+  await appendRecentWebhookRecord(processedRecord);
   recordJobExecution(`webhook.vercel.${category}`, 0, true);
 
   const triggeredIntegrations = await dispatchIntegrationEventTriggers({
@@ -245,6 +286,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return authError;
   }
 
+  const events = await readRecentWebhookRecords();
+
   return NextResponse.json(
     {
       ok: true,
@@ -252,8 +295,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       signatureHeader: 'x-vercel-signature',
       algorithm: 'HMAC-SHA1',
       supportedEvents: VERCEL_WEBHOOK_EVENT_TYPES,
-      recentEventsCount: recentWebhookEvents.length,
-      recentEvents: recentWebhookEvents,
+      recentEventsCount: events.length,
+      recentEvents: events,
     },
     { status: HTTP_STATUS_OK }
   );

@@ -4,7 +4,6 @@
 
 import { GET as getContractorExpiry } from '@/app/api/cron/contractor-expiry/route';
 import { GET as getPreventativeMaintenance } from '@/app/api/cron/preventative-maintenance/route';
-import { GET as getResearchBriefing } from '@/app/api/cron/research-briefing/route';
 import { GET as getShiftHandoff } from '@/app/api/cron/shift-handoff/route';
 import { authorizeCronRequest } from './cron-auth';
 
@@ -94,7 +93,6 @@ describe('authorizeCronRequest & Scheduled Cron Route Authentication', () => {
   it.each([
     ['contractor-expiry', getContractorExpiry],
     ['preventative-maintenance', getPreventativeMaintenance],
-    ['research-briefing', getResearchBriefing],
     ['shift-handoff', getShiftHandoff],
   ])(
     'scheduled route /api/cron/%s authenticates valid Bearer token and rejects invalid calls',

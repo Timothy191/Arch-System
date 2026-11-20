@@ -2,7 +2,13 @@
 
 import type { ShiftCloseoutInput } from '@repo/contract/schemas/control-room.schema';
 import { shiftCloseoutSchema } from '@repo/contract/schemas/control-room.schema';
-import { AuthError, isAppError, RateLimitError, ValidationError } from '@repo/errors';
+import {
+  AuthError,
+  DatabaseError,
+  isAppError,
+  RateLimitError,
+  ValidationError,
+} from '@repo/errors';
 import { getRedisClient } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 
@@ -162,16 +168,10 @@ export async function submitShiftCloseout(
         .single();
 
       if (fallbackError) {
-        // Return success with payload confirmation even if database table is mock/offline
-        return {
-          success: true,
-          data: {
-            shiftId: payload.shiftId,
-            status: 'closed',
-            verifiedBy: payload.supervisorId,
-            timestamp: new Date().toISOString(),
-          },
-        };
+        throw new DatabaseError('Failed to persist shift closeout to database.', {
+          cause: new Error(fallbackError.message),
+          context: { shiftId: payload.shiftId, supervisorId: payload.supervisorId },
+        });
       }
 
       return {

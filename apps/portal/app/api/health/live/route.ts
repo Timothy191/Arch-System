@@ -2,16 +2,15 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(_req: NextRequest) {
   const startedAt = Date.now();
-  const degraded = false;
 
   return NextResponse.json(
     {
-      status: degraded ? 'degraded' : 'healthy',
+      status: 'healthy',
       latencyMs: Date.now() - startedAt,
       timestamp: new Date().toISOString(),
     },
     {
-      status: degraded ? 503 : 200,
+      status: 200,
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
       },

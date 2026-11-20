@@ -40,7 +40,7 @@ describe('POST /api/workflows/dispatch', () => {
     expect(res.status).toBe(401);
   });
 
-  it('enqueues workflow when authorized with valid Bearer token', async () => {
+  it('returns 503 when authorized but workflow queue is not configured', async () => {
     process.env.DISPATCH_API_KEY = 'dispatch-secret-token';
     const req = new NextRequest('http://localhost:3000/api/workflows/dispatch', {
       method: 'POST',
@@ -52,9 +52,10 @@ describe('POST /api/workflows/dispatch', () => {
       }),
     });
     const res = await POST(req);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
     const body = await res.json();
-    expect(body.success).toBe(true);
+    expect(body.success).toBe(false);
+    expect(body.queueStatus).toBe('unavailable');
     expect(body.jobId).toBe('idem_shift-closeout-001');
   });
 });

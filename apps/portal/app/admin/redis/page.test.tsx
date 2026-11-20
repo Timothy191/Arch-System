@@ -28,6 +28,18 @@ describe('RedisManagerPage (/admin/redis)', () => {
     const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes('/api/admin/observability')) {
+        if (url.includes('/api/admin/redis/inspect')) {
+          return createJsonResponse({
+            connected: true,
+            keys: ['shift_001_cache', 'telemetry_dump_r1'],
+            inspected: {
+              key: 'telemetry_dump_r1',
+              type: 'string',
+              ttlSeconds: 3600,
+              value: { pitSection: 'Brakfontein Extension 3' },
+            },
+          });
+        }
         return createJsonResponse({
           timestamp: '2026-11-19T14:30:00.000Z',
           overallSla24hPct: 99.95,
@@ -68,6 +80,18 @@ describe('RedisManagerPage (/admin/redis)', () => {
           },
         });
       }
+      if (url.includes('/api/admin/redis/inspect')) {
+        return createJsonResponse({
+          connected: true,
+          keys: ['shift_001_cache', 'telemetry_dump_r1'],
+          inspected: {
+            key: 'telemetry_dump_r1',
+            type: 'string',
+            ttlSeconds: 3600,
+            value: { pitSection: 'Brakfontein Extension 3' },
+          },
+        });
+      }
       return createJsonResponse({
         mode: 'tcp',
         vectorSearch: { available: true },
@@ -98,6 +122,10 @@ describe('RedisManagerPage (/admin/redis)', () => {
     expect(screen.getByText('FIRING')).toBeInTheDocument();
     expect(screen.getByText('PENDING')).toBeInTheDocument();
 
+    await waitFor(() => {
+      expect(screen.getByRole('list')).toBeInTheDocument();
+    });
+
     const searchInput = screen.getByPlaceholderText('Search keys (*:pattern)');
     fireEvent.change(searchInput, { target: { value: 'telemetry' } });
 
@@ -105,8 +133,9 @@ describe('RedisManagerPage (/admin/redis)', () => {
     expect(within(keyList).queryByText('shift_001_cache')).not.toBeInTheDocument();
     fireEvent.click(within(keyList).getByText('telemetry_dump_r1'));
     expect(screen.getByRole('heading', { name: 'telemetry_dump_r1' })).toBeInTheDocument();
-    expect(screen.getByText(/Brakfontein Extension 3/i)).toBeInTheDocument();
-    expect(screen.getByText(/"lastInspected": "2026-11-19T14:30:00.000Z"/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Brakfontein Extension 3/i)).toBeInTheDocument();
+    });
 
     const initialCallCount = fetchMock.mock.calls.length;
     fireEvent.click(screen.getByRole('button', { name: /Inspect/i }));
@@ -115,7 +144,7 @@ describe('RedisManagerPage (/admin/redis)', () => {
       expect(fetchMock.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
     expect(screen.getByRole('status')).toHaveTextContent(
-      'Key "telemetry_dump_r1" inspected and cluster telemetry refreshed'
+      'Inspected live Redis key "telemetry_dump_r1" and refreshed cluster telemetry.'
     );
 
     fireEvent.click(screen.getByRole('button', { name: /Delete/i }));

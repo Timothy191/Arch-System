@@ -28,43 +28,60 @@ export const orphanedRecordDetectionFn = inngest.createFunction(
     const issues: { type: string; count: number; details: string[] }[] = [];
 
     try {
-      // AGENT-TRACE: Check machine operations without valid machine_id
-      const { data: invalidMachineOps, error: opsError } = await serviceRole
-        .from('machine_operations')
-        .select('id, machine_id, operator_id, shift_date')
-        .not('machine_id', 'in', serviceRole.from('machines').select('id'));
+      const [
+        { data: machines, error: machinesError },
+        { data: operators, error: operatorsError },
+        { data: departments, error: departmentsError },
+        { data: machineOps, error: opsError },
+        { data: hourlyLoads, error: loadsError },
+        { data: shiftStatuses, error: shiftError },
+      ] = await Promise.all([
+        serviceRole.from('machines').select('id, active'),
+        serviceRole.from('operators').select('id'),
+        serviceRole.from('departments').select('id'),
+        serviceRole.from('machine_operations').select('id, machine_id, operator_id, shift_date'),
+        serviceRole.from('hourly_loads').select('id, machine_id, load_date, shift_type'),
+        serviceRole.from('shift_status').select('id, department_id, shift_date'),
+      ]);
 
+      if (machinesError) throw machinesError;
+      if (operatorsError) throw operatorsError;
+      if (departmentsError) throw departmentsError;
       if (opsError) throw opsError;
+      if (loadsError) throw loadsError;
+      if (shiftError) throw shiftError;
 
-      if (invalidMachineOps && invalidMachineOps.length > 0) {
+      const allMachineIds = new Set((machines ?? []).map((m) => m.id));
+      const activeMachineIds = new Set((machines ?? []).filter((m) => m.active).map((m) => m.id));
+      const validOperatorIds = new Set((operators ?? []).map((o) => o.id));
+      const validDepartmentIds = new Set((departments ?? []).map((d) => d.id));
+
+      const invalidMachineOps = (machineOps ?? []).filter(
+        (op) => op.machine_id && !allMachineIds.has(op.machine_id)
+      );
+      if (invalidMachineOps.length > 0) {
         issues.push({
           type: 'invalid_machine_id_in_operations',
           count: invalidMachineOps.length,
           details: invalidMachineOps.map((op) => `ID: ${op.id}, Machine ID: ${op.machine_id}`),
         });
 
-        // AGENT-TRACE: Flag these records for admin review
-        for (const op of invalidMachineOps) {
-          await serviceRole.from('data_integrity_issues').insert({
+        await serviceRole.from('data_integrity_issues').insert(
+          invalidMachineOps.map((op) => ({
             issue_type: 'orphaned_record',
             table_name: 'machine_operations',
             record_id: op.id,
             description: `Invalid machine_id: ${op.machine_id}`,
             severity: 'high',
             created_at: new Date().toISOString(),
-          });
-        }
+          }))
+        );
       }
 
-      // AGENT-TRACE: Check hourly loads without matching machine operation
-      const { data: orphanedLoads, error: loadsError } = await serviceRole
-        .from('hourly_loads')
-        .select('id, machine_id, load_date, shift_type')
-        .not('machine_id', 'in', serviceRole.from('machines').select('id').eq('active', true));
-
-      if (loadsError) throw loadsError;
-
-      if (orphanedLoads && orphanedLoads.length > 0) {
+      const orphanedLoads = (hourlyLoads ?? []).filter(
+        (load) => load.machine_id && !activeMachineIds.has(load.machine_id)
+      );
+      if (orphanedLoads.length > 0) {
         issues.push({
           type: 'hourly_loads_orphaned_machine',
           count: orphanedLoads.length,
@@ -73,56 +90,44 @@ export const orphanedRecordDetectionFn = inngest.createFunction(
           ),
         });
 
-        // AGENT-TRACE: Flag these records for admin review
-        for (const load of orphanedLoads) {
-          await serviceRole.from('data_integrity_issues').insert({
+        await serviceRole.from('data_integrity_issues').insert(
+          orphanedLoads.map((load) => ({
             issue_type: 'orphaned_record',
             table_name: 'hourly_loads',
             record_id: load.id,
             description: `Machine not active or doesn't exist: ${load.machine_id}`,
             severity: 'medium',
             created_at: new Date().toISOString(),
-          });
-        }
+          }))
+        );
       }
 
-      // AGENT-TRACE: Check for machine operations without valid operator
-      const { data: invalidOps, error: invalidOpsError } = await serviceRole
-        .from('machine_operations')
-        .select('id, operator_id, shift_date')
-        .not('operator_id', 'in', serviceRole.from('operators').select('id'));
-
-      if (invalidOpsError) throw invalidOpsError;
-
-      if (invalidOps && invalidOps.length > 0) {
+      const invalidOps = (machineOps ?? []).filter(
+        (op) => op.operator_id && !validOperatorIds.has(op.operator_id)
+      );
+      if (invalidOps.length > 0) {
         issues.push({
           type: 'invalid_operator_id_in_operations',
           count: invalidOps.length,
           details: invalidOps.map((op) => `ID: ${op.id}, Operator ID: ${op.operator_id}`),
         });
 
-        // AGENT-TRACE: Flag these records for admin review
-        for (const op of invalidOps) {
-          await serviceRole.from('data_integrity_issues').insert({
+        await serviceRole.from('data_integrity_issues').insert(
+          invalidOps.map((op) => ({
             issue_type: 'orphaned_record',
             table_name: 'machine_operations',
             record_id: op.id,
             description: `Invalid operator_id: ${op.operator_id}`,
             severity: 'high',
             created_at: new Date().toISOString(),
-          });
-        }
+          }))
+        );
       }
 
-      // AGENT-TRACE: Check shift_status without valid department
-      const { data: invalidShiftStatus, error: shiftError } = await serviceRole
-        .from('shift_status')
-        .select('id, department_id, shift_date')
-        .not('department_id', 'in', serviceRole.from('departments').select('id'));
-
-      if (shiftError) throw shiftError;
-
-      if (invalidShiftStatus && invalidShiftStatus.length > 0) {
+      const invalidShiftStatus = (shiftStatuses ?? []).filter(
+        (shift) => shift.department_id && !validDepartmentIds.has(shift.department_id)
+      );
+      if (invalidShiftStatus.length > 0) {
         issues.push({
           type: 'invalid_department_id_in_shift_status',
           count: invalidShiftStatus.length,
@@ -131,17 +136,16 @@ export const orphanedRecordDetectionFn = inngest.createFunction(
           ),
         });
 
-        // AGENT-TRACE: Flag these records for admin review
-        for (const shift of invalidShiftStatus) {
-          await serviceRole.from('data_integrity_issues').insert({
+        await serviceRole.from('data_integrity_issues').insert(
+          invalidShiftStatus.map((shift) => ({
             issue_type: 'orphaned_record',
             table_name: 'shift_status',
             record_id: shift.id,
             description: `Invalid department_id: ${shift.department_id}`,
             severity: 'high',
             created_at: new Date().toISOString(),
-          });
-        }
+          }))
+        );
       }
 
       const result = {

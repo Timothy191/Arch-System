@@ -87,10 +87,48 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const { hours, temp, rpm } = await req.json();
-    const h = hours ?? 150.0;
-    const t = temp ?? 55.0;
-    const r = rpm ?? 1000.0;
+    const body = (await req.json().catch(() => ({}))) as {
+      departmentId?: string;
+      hours?: number;
+      temp?: number;
+      rpm?: number;
+    };
+
+    let h = typeof body.hours === 'number' ? body.hours : null;
+    let t = typeof body.temp === 'number' ? body.temp : null;
+    let r = typeof body.rpm === 'number' ? body.rpm : null;
+
+    if (h === null || t === null || r === null) {
+      let query = supabase
+        .from('machine_telemetry')
+        .select('engine_temp, engine_rpm, recorded_at')
+        .order('recorded_at', { ascending: false })
+        .limit(1);
+
+      if (typeof body.departmentId === 'string' && body.departmentId.length > 0) {
+        query = query.eq('department_id', body.departmentId);
+      }
+
+      const { data: latestRows, error: telemetryError } = await query;
+      if (telemetryError) {
+        return NextResponse.json(
+          { error: `Failed to query machine telemetry: ${telemetryError.message}` },
+          { status: 500 }
+        );
+      }
+
+      const latest = latestRows?.[0];
+      if (!latest) {
+        return NextResponse.json(
+          { error: 'No live machine telemetry readings available for analysis' },
+          { status: 404 }
+        );
+      }
+
+      t = t ?? Number(latest.engine_temp ?? 55.0);
+      r = r ?? Number(latest.engine_rpm ?? 1000.0);
+      h = h ?? 150.0;
+    }
 
     // Direct path targeting our compiled native Rust release executable
     const binaryPath = path.join(
@@ -142,14 +180,12 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
     logError(err, {
       context: 'rust_telemetry_plugin',
     });
-    return NextResponse.json({
-      wearIndex: 45.2,
-      probability: 48.6,
-      rulHours: 780.0,
-      status: 'warning',
-      isNative: false,
-      error: err instanceof Error ? err.message : 'Native Rust pipeline runtime exception',
-    });
+    return NextResponse.json(
+      {
+        error: err instanceof Error ? err.message : 'Native Rust pipeline runtime exception',
+      },
+      { status: 500 }
+    );
   }
 }
 

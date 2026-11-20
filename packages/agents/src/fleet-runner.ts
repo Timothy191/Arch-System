@@ -33,19 +33,30 @@ export class AgentFleetRunner {
       'systemSimplifier',
     ];
 
-    const agents: SpecialistPersona[] = agentKeys
-      .map((key) => SPECIALIST_PERSONAS[key])
-      .filter((agent): agent is SpecialistPersona => agent !== undefined);
+    const personaFileMatcher: Record<string, (_filePath: string) => boolean> = {
+      databaseArchitect: (fp) =>
+        fp.endsWith('.sql') || fp.includes('database') || fp.includes('supabase'),
+      uiEngineer: (fp) => fp.endsWith('.tsx') || fp.endsWith('.css') || fp.includes('/ui/'),
+      securityAndQualityGate: () => true,
+      systemSimplifier: () => true,
+    };
 
-    agents.forEach((agent) => {
+    const personaKeys = agentKeys.filter((key) => SPECIALIST_PERSONAS[key] !== undefined);
+    let evaluatedPassCount = 0;
+
+    personaKeys.forEach((agentKey) => {
+      const agent = SPECIALIST_PERSONAS[agentKey] as SpecialistPersona;
+      const matcher = personaFileMatcher[agentKey] ?? (() => true);
+      const scopedFiles = filesToAudit.filter((f) => matcher(f.filePath));
       const findings: string[] = [];
       let agentPassed = true;
 
-      filesToAudit.forEach(({ filePath, content }) => {
+      scopedFiles.forEach(({ filePath, content }) => {
         const auditResult = QualityGate.auditContent(content, filePath);
         totalScore += auditResult.score;
+        evaluatedPassCount += 1;
 
-        if (!auditResult.passed) {
+        if (!auditResult.passed && agentKey !== 'systemSimplifier') {
           agentPassed = false;
           auditResult.criticalViolations.forEach((v) => {
             findings.push(
@@ -54,14 +65,18 @@ export class AgentFleetRunner {
           });
         }
 
-        auditResult.warnings.forEach((w) => {
-          findings.push(
-            `Warning: [${w.ruleId}] in ${filePath}:${w.lineNumber || 0} - ${w.description}`
-          );
-        });
+        if (agentKey === 'systemSimplifier' || agentKey === 'securityAndQualityGate') {
+          auditResult.warnings.forEach((w) => {
+            findings.push(
+              `Warning: [${w.ruleId}] in ${filePath}:${w.lineNumber || 0} - ${w.description}`
+            );
+          });
+        }
       });
 
-      if (findings.length === 0) {
+      if (scopedFiles.length === 0) {
+        findings.push('No files in this audit batch matched this specialist domain.');
+      } else if (findings.length === 0) {
         findings.push('Zero architectural or quality defects detected in assigned domain.');
       }
 
@@ -77,10 +92,7 @@ export class AgentFleetRunner {
       });
     });
 
-    const averageScore =
-      filesToAudit.length > 0
-        ? Math.round(totalScore / (agents.length * filesToAudit.length))
-        : 100;
+    const averageScore = evaluatedPassCount > 0 ? Math.round(totalScore / evaluatedPassCount) : 100;
 
     if (averageScore < 90) {
       recommendations.push('Execute ReflectionEngine auto-remediation loop on failing modules.');
@@ -94,7 +106,7 @@ export class AgentFleetRunner {
 
     return {
       timestamp: new Date().toISOString(),
-      totalAgentsDeployed: agents.length,
+      totalAgentsDeployed: personaKeys.length,
       overallScore: averageScore,
       domainAudits,
       recommendations,

@@ -40,7 +40,15 @@ export async function POST(req: NextRequest) {
 
   const activeQueue = getWorkflowQueue();
   if (!activeQueue) {
-    return NextResponse.json({ success: true, jobId, queueStatus: 'simulated', details: jobData });
+    return NextResponse.json(
+      {
+        success: false,
+        queueStatus: 'unavailable',
+        jobId,
+        message: 'Workflow queue is not configured',
+      },
+      { status: 503 }
+    );
   }
 
   try {

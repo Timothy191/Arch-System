@@ -130,16 +130,6 @@ export function BreakdownsDashboard({
       }
     }
 
-    // Ensure fallback baseline categories if no historical data
-    if (calculatedMtbf.length === 0) {
-      calculatedMtbf.push(
-        { category: 'Excavator', mttrHours: 4.2, mtbfHours: 120, failureCount: 3 },
-        { category: 'Haul Truck', mttrHours: 6.8, mtbfHours: 95, failureCount: 5 },
-        { category: 'Dozer', mttrHours: 3.1, mtbfHours: 160, failureCount: 2 },
-        { category: 'Drill Rig', mttrHours: 5.5, mtbfHours: 110, failureCount: 4 }
-      );
-    }
-
     return { mtbfData: calculatedMtbf, serviceTriggers: triggers };
   }, [breakdowns]);
 

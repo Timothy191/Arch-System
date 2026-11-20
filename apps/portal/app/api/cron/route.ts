@@ -35,11 +35,6 @@ export const REGISTERED_VERCEL_CRONS: readonly CronScheduleDescriptor[] = [
     description: 'Daily plant and mobile equipment preventative maintenance work-order generator',
   },
   {
-    path: '/api/cron/research-briefing',
-    schedule: '0 7 * * *',
-    description: 'Daily autonomous executive and operations research briefing dispatch',
-  },
-  {
     path: '/api/cron/webhook-deliveries',
     schedule: '*/5 * * * *',
     description: 'Process queued webhook deliveries from database triggers',

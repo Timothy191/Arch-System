@@ -19,15 +19,20 @@ export async function POST(req: Request) {
       // Trigger the background n8n webhook for Emergency Muster
       const jobId = crypto.randomUUID();
 
-      // Fire-and-forget background execution
-      // using Promise.allSettled to ensure zero-waterfall and non-blocking I/O
-      await Promise.allSettled([
+      const [dispatchResult] = await Promise.allSettled([
         triggerTrackedWorkflow(jobId, '/webhook/emergency-muster', {
           alertType: alert.alert_type,
           severity: alert.severity,
           distance: alert.distance_km,
         }),
       ]);
+
+      if (dispatchResult.status === 'rejected') {
+        return NextResponse.json(
+          { success: false, error: 'Failed to dispatch emergency muster workflow', jobId },
+          { status: 502 }
+        );
+      }
 
       return NextResponse.json(
         {

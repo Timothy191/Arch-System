@@ -15,12 +15,10 @@ interface RustTelemetryData {
   isNative?: boolean;
 }
 
-// Sensor telemetry inputs (simulated)
-const DEFAULT_SENSORS = { hours: 220.0, temp: 72.5, rpm: 1150.0 };
-
 // React UI Dashboard component
-function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: string }) {
+function RustTelemetryWidget({ departmentId }: { departmentId: string }) {
   const [data, setData] = useState<RustTelemetryData | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,14 +27,15 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
         const response = await fetch('/api/plugins/rust-telemetry', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(DEFAULT_SENSORS),
+          body: JSON.stringify({ departmentId }),
         });
 
+        const result = await response.json().catch(() => ({}));
         if (response.ok) {
-          const result = await response.json();
           setData(result);
+          setErrorMessage(null);
         } else {
-          throw new APIError('API call failed', {
+          throw new APIError(typeof result?.error === 'string' ? result.error : 'API call failed', {
             statusCode: response.status,
             context: {
               endpoint: 'rust-telemetry',
@@ -45,22 +44,16 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
           });
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Failed to contact native engine';
-        setData({
-          wearIndex: 45.2,
-          probability: 48.6,
-          rulHours: 780.0,
-          status: 'warning',
-          isNative: false,
-          error: message,
-        });
+        const message = err instanceof Error ? err.message : 'Failed to contact telemetry engine';
+        setData(null);
+        setErrorMessage(message);
       } finally {
         setLoading(false);
       }
     }
 
     fetchRustTelemetry();
-  }, []);
+  }, [departmentId]);
 
   const isCritical = data?.status === 'critical';
   const isWarning = data?.status === 'warning';
@@ -87,6 +80,10 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
             <Skeleton className="h-8 w-1/3" />
             <Skeleton className="h-2 w-full" />
           </div>
+        ) : errorMessage || !data ? (
+          <p className="text-muted-foreground text-xs">
+            {errorMessage ?? 'No telemetry data available.'}
+          </p>
         ) : (
           <>
             <div className="grid grid-cols-2 gap-4">

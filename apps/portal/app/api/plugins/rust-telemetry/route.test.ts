@@ -78,13 +78,13 @@ describe('POST /api/plugins/rust-telemetry', () => {
       expect(body.status).toBe('critical');
     });
 
-    it('uses default values when body fields are absent', async () => {
+    it('returns 404 when body fields are absent and no telemetry exists', async () => {
       const req = makeRequest({});
       const res = await POST(req);
       const body = await res.json();
 
-      expect(res.status).toBe(200);
-      expect(body.isNative).toBe(false);
+      expect([404, 500]).toContain(res.status);
+      expect(body.error).toBeDefined();
     });
 
     it('rulHours is zero for very high hours input', async () => {
@@ -96,17 +96,16 @@ describe('POST /api/plugins/rust-telemetry', () => {
   });
 
   describe('error handling', () => {
-    it('returns fallback values and 200 on unexpected error', async () => {
+    it('returns 500 error on unexpected runtime failure instead of fake fallback values', async () => {
       existsSync.mockImplementation(() => {
         throw new Error('fs crash');
       });
 
-      const req = makeRequest({ hours: 100 });
+      const req = makeRequest({ hours: 100, temp: 70, rpm: 1100 });
       const res = await POST(req);
       const body = await res.json();
 
-      expect(res.status).toBe(200);
-      expect(body.isNative).toBe(false);
+      expect(res.status).toBe(500);
       expect(body.error).toBeDefined();
     });
   });

@@ -1,11 +1,9 @@
 import { inngest } from '@repo/utils/inngest';
 import { serve } from 'inngest/next';
-import { autonomousScadaSimulationFn } from '@/lib/jobs/autonomous-scada-simulation';
 import { dailyPdfReportGenerationFn } from '@/lib/jobs/daily-pdf-report-generation';
 import { generateEmbeddingFn } from '@/lib/jobs/embedding-generation';
 import { machineBreakdownNotificationFn } from '@/lib/jobs/machine-breakdown-notification';
 import { memoryPersistFn } from '@/lib/jobs/memory-persist';
-import { monthlyExcelReportFn } from '@/lib/jobs/monthly-excel-report';
 import { orphanedRecordDetectionFn } from '@/lib/jobs/orphaned-record-detection';
 import { outboxDrainFn } from '@/lib/jobs/outbox-drain';
 import { generateReportFn } from '@/lib/jobs/report-generation';
@@ -22,7 +20,6 @@ export const { GET, POST, PUT } = serve({
   functions: [
     syncPlaybackFn,
     outboxDrainFn,
-    autonomousScadaSimulationFn,
     generateReportFn,
     generateEmbeddingFn,
     memoryPersistFn,
@@ -33,6 +30,5 @@ export const { GET, POST, PUT } = serve({
     shiftRolloverNotificationFn,
     dailyPdfReportGenerationFn,
     machineBreakdownNotificationFn,
-    monthlyExcelReportFn,
   ],
 });

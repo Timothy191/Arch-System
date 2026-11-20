@@ -122,7 +122,7 @@ async function probeFuxaEndpoint(fuxaUrl: string): Promise<ServiceProbeResult> {
 }
 
 function resolveOverallStatus(
-  statuses: readonly [ServiceHealthStatus, ServiceHealthStatus, ServiceHealthStatus]
+  statuses: readonly [ServiceHealthStatus, ServiceHealthStatus, ServiceHealthStatus | null]
 ): ServiceHealthStatus {
   const [supabaseStatus, redisStatus, fuxaStatus] = statuses;
   if (supabaseStatus === 'unhealthy') {
@@ -145,16 +145,16 @@ export async function GET() {
   ]);
 
   const fuxaResult: ServiceProbeResult = fuxaProbeResult ?? {
-    status: redisResult.status,
-    latencyMs: redisResult.latencyMs,
-    ...(redisResult.error ? { error: redisResult.error } : {}),
+    status: 'degraded',
+    latencyMs: 0,
+    error: 'FUXA_URL is not configured',
   };
 
   const totalLatencyMs = Date.now() - startedAt;
   const overallStatus = resolveOverallStatus([
     supabaseResult.status,
     redisResult.status,
-    fuxaResult.status,
+    fuxaUrl ? fuxaResult.status : null,
   ]);
 
   const responsePayload: HealthCheckResponse = {

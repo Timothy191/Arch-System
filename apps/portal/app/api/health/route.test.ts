@@ -18,11 +18,16 @@ const { getRedisClient, isServerlessRedis } = require('@repo/redis');
 describe('GET /api/health', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.FUXA_URL = 'https://fuxa.example.com';
     isServerlessRedis.mockReturnValue(false);
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
     }) as any;
+  });
+
+  afterEach(() => {
+    delete process.env.FUXA_URL;
   });
 
   it('returns healthy status response when all services respond cleanly', async () => {
@@ -51,6 +56,27 @@ describe('GET /api/health', () => {
     expect(json.services.fuxa.status).toBe('healthy');
     expect(typeof json.latencyMs).toBe('number');
     expect(new Date(json.timestamp).getTime()).not.toBeNaN();
+  });
+
+  it('reports fuxa as degraded when FUXA_URL is not configured', async () => {
+    delete process.env.FUXA_URL;
+    createServerSupabaseClient.mockResolvedValue({
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue({ data: [{ id: 'm-1' }], error: null }),
+    });
+
+    getRedisClient.mockResolvedValue({
+      isOpen: true,
+      ping: jest.fn().mockResolvedValue('PONG'),
+    });
+
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.status).toBe('healthy');
+    expect(json.services.fuxa.status).toBe('degraded');
+    expect(json.services.fuxa.error).toBe('FUXA_URL is not configured');
   });
 
   it('reports serverless-rest mode when Redis transport uses REST adapter', async () => {

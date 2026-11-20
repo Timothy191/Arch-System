@@ -30,9 +30,6 @@ export const OPERATIONAL_TIMEZONE = 'Africa/Johannesburg';
 const CALENDAR_EMBED_ENDPOINT = 'https://calendar.google.com/calendar/embed';
 const CALENDAR_EMBED_MODE = 'MONTH';
 
-/** Default fallback public calendar ID for demo / testing when none configured */
-export const DEFAULT_SITE_CALENDAR_SRC = 'en.sa#holiday@group.v.calendar.google.com';
-
 /**
  * Public calendar id (or comma-separated ids) the site wants framed. Public
  * calendar ids are not secrets, so a `NEXT_PUBLIC_` variable is appropriate.
@@ -44,7 +41,7 @@ export const SITE_CALENDAR_EMBED_SRC = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_E
  * been configured for the deployment.
  */
 export function getSiteCalendarEmbedUrl(calendarSrc?: string | null): string | null {
-  const trimmed = calendarSrc?.trim() || DEFAULT_SITE_CALENDAR_SRC;
+  const trimmed = calendarSrc?.trim();
   if (!trimmed) return null;
 
   const params = new URLSearchParams({
