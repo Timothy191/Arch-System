@@ -120,7 +120,14 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
 
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
-  const [showWeeklyForecast, setShowWeeklyForecast] = useState(false);
+  const [forecastMode, setForecastMode] = useState<'closed' | 'hourly' | 'weekly'>('closed');
+
+  const isForecastExpanded = forecastMode !== 'closed';
+  const currentHourPrefix = `${String(new Date().getHours()).padStart(2, '0')}:`;
+
+  const toggleForecastMode = (target: 'hourly' | 'weekly') => {
+    setForecastMode((prev) => (prev === target ? 'closed' : target));
+  };
 
   const shift = useMemo(() => getShiftInfo(), []);
   const safety = useSafetyAlerts();
@@ -159,7 +166,7 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
         if (!nextOpen) {
-          setShowWeeklyForecast(false);
+          setForecastMode('closed');
         }
       }}
     >
@@ -191,7 +198,7 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
       <DropdownMenuContent
         className={cn(
           'z-popover rounded-xl border border-black/[0.08] bg-white/95 py-2 shadow-window backdrop-blur-2xl transition-[width] duration-150',
-          showWeeklyForecast ? 'w-80' : 'w-64'
+          isForecastExpanded ? 'w-80' : 'w-64'
         )}
         align="end"
         sideOffset={5}
@@ -201,13 +208,13 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
           {/* Weather */}
           <button
             type="button"
-            onClick={() => setShowWeeklyForecast((prev) => !prev)}
-            aria-expanded={showWeeklyForecast}
+            onClick={() => toggleForecastMode('weekly')}
+            aria-expanded={forecastMode === 'weekly'}
             aria-label="Toggle 7-day weather forecast"
             data-testid="weather-panel-toggle"
             className={cn(
               'rounded-lg border p-2 text-left transition-colors hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50',
-              showWeeklyForecast
+              forecastMode === 'weekly'
                 ? 'border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/5'
                 : 'border-black/[0.04] bg-black/[0.02]'
             )}
@@ -232,8 +239,27 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
             )}
           </button>
 
-          {/* Shift */}
-          <div className="rounded-lg border border-black/[0.04] bg-black/[0.02] p-2">
+          {/* Shift (click for full hourly forecast breakdown) */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => toggleForecastMode('hourly')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleForecastMode('hourly');
+              }
+            }}
+            aria-expanded={forecastMode === 'hourly'}
+            aria-label="Toggle hourly weather forecast for the day"
+            data-testid="shift-hourly-forecast-toggle"
+            className={cn(
+              'cursor-pointer rounded-lg border p-2 transition-colors hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50',
+              forecastMode === 'hourly'
+                ? 'border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/5'
+                : 'border-black/[0.04] bg-black/[0.02]'
+            )}
+          >
             <div className="flex items-center gap-2">
               {shift.isDay ? (
                 <Sun className="h-4 w-4 shrink-0 text-[var(--accent-orange)]" />
@@ -254,12 +280,12 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
           {/* Wind / Visibility */}
           <button
             type="button"
-            onClick={() => setShowWeeklyForecast((prev) => !prev)}
-            aria-expanded={showWeeklyForecast}
+            onClick={() => toggleForecastMode('weekly')}
+            aria-expanded={forecastMode === 'weekly'}
             aria-label="Toggle 7-day weather forecast from conditions"
             className={cn(
               'col-span-2 rounded-lg border p-2 text-left transition-colors hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50',
-              showWeeklyForecast
+              forecastMode === 'weekly'
                 ? 'border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/5'
                 : 'border-black/[0.04] bg-black/[0.02]'
             )}
@@ -285,20 +311,99 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
             )}
           </button>
 
-          {showWeeklyForecast && (
+          {isForecastExpanded && (
             <div
-              data-testid="weekly-weather-forecast-panel"
-              className="col-span-2 space-y-1.5 rounded-lg border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/[0.04] p-2.5"
+              data-testid={
+                forecastMode === 'hourly'
+                  ? 'hourly-weather-forecast-panel'
+                  : 'weekly-weather-forecast-panel'
+              }
+              className="col-span-2 space-y-2 rounded-lg border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/[0.04] p-2.5"
             >
-              <div className="flex items-center justify-between border-black/[0.06] border-b pb-1">
-                <span className="font-semibold text-[11px] text-[var(--text-heading)]">
-                  7-Day Site Forecast
-                </span>
-                <span className="text-[10px] text-[var(--text-muted)]">
+              <div className="flex items-center justify-between gap-2 border-black/[0.06] border-b pb-1.5">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setForecastMode('hourly')}
+                    className={cn(
+                      'rounded px-2 py-0.5 font-semibold text-[10.5px] transition-colors',
+                      forecastMode === 'hourly'
+                        ? 'bg-[var(--accent-blue)] text-white'
+                        : 'text-[var(--text-secondary)] hover:bg-black/[0.05]'
+                    )}
+                  >
+                    Hourly Today
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForecastMode('weekly')}
+                    className={cn(
+                      'rounded px-2 py-0.5 font-semibold text-[10.5px] transition-colors',
+                      forecastMode === 'weekly'
+                        ? 'bg-[var(--accent-blue)] text-white'
+                        : 'text-[var(--text-secondary)] hover:bg-black/[0.05]'
+                    )}
+                  >
+                    7-Day
+                  </button>
+                </div>
+                <span className="truncate text-[10px] text-[var(--text-muted)]">
                   {weather?.location.name ?? 'Delmas, Mpumalanga'}
                 </span>
               </div>
-              {weather?.daily && weather.daily.length > 0 ? (
+
+              {forecastMode === 'hourly' ? (
+                weather?.hourly && weather.hourly.length > 0 ? (
+                  <div className="max-h-52 space-y-1 overflow-y-auto pr-0.5">
+                    {weather.hourly.map((slot) => {
+                      const isCurrentHour = slot.hourLabel.startsWith(currentHourPrefix);
+                      return (
+                        <div
+                          key={slot.time}
+                          className={cn(
+                            'flex items-center justify-between gap-2 rounded-md px-1.5 py-1 text-[11px]',
+                            isCurrentHour
+                              ? 'border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10'
+                              : 'hover:bg-black/[0.03]'
+                          )}
+                        >
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <span className="w-10 shrink-0 font-mono font-semibold text-[10.5px] text-[var(--text-heading)] tabular-nums">
+                              {slot.hourLabel}
+                            </span>
+                            <span className="text-sm leading-none" aria-hidden="true">
+                              {slot.icon}
+                            </span>
+                            <span className="truncate text-[10px] text-[var(--text-muted)]">
+                              {slot.description}
+                            </span>
+                            {isCurrentHour && (
+                              <span className="rounded bg-[var(--accent-blue)] px-1 py-0.5 font-bold text-[8.5px] text-white uppercase">
+                                Now
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2 font-mono text-[10.5px] tabular-nums">
+                            {slot.precipitationProbability > 0 && (
+                              <span className="text-[var(--accent-blue)]">
+                                {slot.precipitationProbability}%
+                              </span>
+                            )}
+                            <span className="text-[var(--text-muted)]">{slot.windSpeed}km/h</span>
+                            <span className="font-semibold text-[var(--text-heading)]">
+                              {slot.temperature}°C
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="py-1 text-[11px] text-[var(--text-muted)]">
+                    Hourly forecast unavailable.
+                  </p>
+                )
+              ) : weather?.daily && weather.daily.length > 0 ? (
                 <div className="space-y-1">
                   {weather.daily.map((day) => (
                     <div

@@ -6,6 +6,12 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-20T10:50:00+02:00] - `/login` Telemetry Backdrop, Hourly Forecast & Calendar Polish (`feat/login-telemetry-weather-calendar`)
+
+- **Opencast Mining Video & Animation Backdrop ([`LoginVideoStage.tsx`](<apps/portal/app/(auth)/login/LoginVideoStage.tsx>))**: Preserved all text/telemetry copy inside `aside[aria-label="System telemetry and identity"]` while expanding multi-source opencast drilling/production/overview video streams, adding amber/emerald strata color washes, subtle scanline pulse, and animated `Pit Feed Live` beacons.
+- **Full Hourly Weather Breakdown ([`weather-api.ts`](libs/shared/data-access/src/weather-api.ts), [`ServicesDropdown.tsx`](apps/portal/components/nav/ServicesDropdown.tsx))**: Added `hourly` Open-Meteo parsing (`HourlyForecast[]`) and made the shift summary card (`Day Shift / Night Shift` remaining) interactive to toggle today's hour-by-hour forecast breakdown (plus `Hourly Today` / `7-Day` switcher).
+- **Calendar & Clock Popover Redesign ([`SystemClock.tsx`](apps/portal/components/clock/SystemClock.tsx))**: Upgraded the calendar/clock popover with rounded glass header, weekend tinting, active `Today` jump action, cardinal clock dial markers, and `SAST · UTC+2` digital time readout.
+
 ## [2026-11-20T10:15:00+02:00] - Executive Dashboard Redesign (`feat/executive-dashboard-redesign`)
 
 - **Executive Command Redesign ([`apps/portal/app/hub/executive/page.tsx`](apps/portal/app/hub/executive/page.tsx), [`executive-data.ts`](apps/portal/app/hub/executive/executive-data.ts), [`executive-metrics.ts`](apps/portal/app/hub/executive/executive-metrics.ts))**: Extracted pure MTD/30-day aggregation helpers and extended the cached `getExecutiveData()` query (`executive-v3`) with real `machines` mix/availability, `employees` departmental breakdown, `breakdowns` MTD counts/hours, and `production_monthly_targets` attainment/pace while preserving `get_production_summary` error surfacing (`role="alert"` and `—` placeholders).

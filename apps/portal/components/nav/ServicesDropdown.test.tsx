@@ -83,6 +83,41 @@ jest.mock('@/lib/weather-api', () => ({
       icon: '⛅',
       timestamp: new Date().toISOString(),
       location: { lat: -26.35914, lon: 28.79267, name: 'Delmas, Mpumalanga' },
+      daily: [
+        {
+          date: '2026-11-20',
+          maxTemp: 27,
+          minTemp: 14,
+          weatherCode: 1,
+          description: 'Mainly clear',
+          icon: '🌤️',
+          precipitation: 0,
+        },
+      ],
+      hourly: [
+        {
+          time: '2026-11-20T08:00',
+          hourLabel: '08:00',
+          temperature: 21,
+          weatherCode: 1,
+          description: 'Mainly clear',
+          icon: '🌤️',
+          windSpeed: 12,
+          precipitationProbability: 10,
+          isDay: true,
+        },
+        {
+          time: '2026-11-20T14:00',
+          hourLabel: '14:00',
+          temperature: 27,
+          weatherCode: 2,
+          description: 'Partly cloudy',
+          icon: '⛅',
+          windSpeed: 16,
+          precipitationProbability: 25,
+          isDay: true,
+        },
+      ],
     })
   ),
   getWindDirection: jest.fn((deg: number) => {
@@ -259,9 +294,28 @@ describe('ServicesDropdown', () => {
 
     fireEvent.click(weatherToggle);
     expect(screen.getByTestId('weekly-weather-forecast-panel')).toBeInTheDocument();
-    expect(screen.getByText('7-Day Site Forecast')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '7-Day' })).toBeInTheDocument();
+    expect(screen.getByText('27°')).toBeInTheDocument();
 
     fireEvent.click(weatherToggle);
     expect(screen.queryByTestId('weekly-weather-forecast-panel')).not.toBeInTheDocument();
+  });
+
+  it('toggles the full hourly weather forecast breakdown when the shift card is clicked', async () => {
+    render(<ServicesDropdown />);
+    fireEvent.click(screen.getByRole('button', { name: /system tray/i }));
+
+    const shiftToggle = await screen.findByTestId('shift-hourly-forecast-toggle');
+    expect(screen.queryByTestId('hourly-weather-forecast-panel')).not.toBeInTheDocument();
+
+    fireEvent.click(shiftToggle);
+    expect(screen.getByTestId('hourly-weather-forecast-panel')).toBeInTheDocument();
+    expect(screen.getByText('08:00')).toBeInTheDocument();
+    expect(screen.getByText('14:00')).toBeInTheDocument();
+    expect(screen.getByText('27°C')).toBeInTheDocument();
+    expect(screen.getByText('25%')).toBeInTheDocument();
+
+    fireEvent.keyDown(shiftToggle, { key: 'Enter' });
+    expect(screen.queryByTestId('hourly-weather-forecast-panel')).not.toBeInTheDocument();
   });
 });

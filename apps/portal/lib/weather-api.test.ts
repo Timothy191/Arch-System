@@ -199,6 +199,14 @@ describe('fetchWeather', () => {
           temperature_2m_min: [14, 12, 11, 10, 13],
           precipitation_sum: [0, 0.2, 0, 12.4, 0],
         },
+        hourly: {
+          time: ['2026-05-17T12:00', '2026-05-17T13:00', '2026-05-18T00:00'],
+          weather_code: [1, 2, 0],
+          temperature_2m: [23.6, 25.1, 14.0],
+          wind_speed_10m: [14.4, 18.2, 8.0],
+          precipitation_probability: [10, 20, 0],
+          is_day: [1, 1, 0],
+        },
       }),
     } as unknown as Response);
 
@@ -214,6 +222,14 @@ describe('fetchWeather', () => {
     expect(result.daily).toHaveLength(5);
     expect(result.daily![0]!.date).toBe('2026-05-17');
     expect(result.daily![3]!.description).toBe('Moderate rain');
+    expect(result.hourly).toHaveLength(2);
+    expect(result.hourly![0]).toMatchObject({
+      hourLabel: '12:00',
+      temperature: 24,
+      windSpeed: 14,
+      precipitationProbability: 10,
+      isDay: true,
+    });
   });
 
   it('rounds temperature values', async () => {

@@ -24,6 +24,19 @@ export interface WeatherData {
     name?: string;
   };
   daily?: DailyForecast[];
+  hourly?: HourlyForecast[];
+}
+
+export interface HourlyForecast {
+  time: string;
+  hourLabel: string;
+  temperature: number;
+  weatherCode: number;
+  description: string;
+  icon: string;
+  windSpeed: number;
+  precipitationProbability: number;
+  isDay: boolean;
 }
 
 export interface DailyForecast {
@@ -104,7 +117,7 @@ export async function fetchWeather(
 
   const url = useApiRoute
     ? '/api/weather'
-    : `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`;
+    : `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,weather_code,precipitation_probability,wind_speed_10m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`;
 
   const response = await fetch(url, { next: { revalidate: 300 } }); // Cache 5 minutes
 
@@ -137,6 +150,34 @@ export async function fetchWeather(
     };
   });
 
+  // Parse hourly forecast for the current operational day (up to 24 hours)
+  const currentDatePrefix =
+    typeof current.time === 'string' && current.time.length >= 10 ? current.time.slice(0, 10) : '';
+  const rawHourlyTimes: string[] = Array.isArray(data.hourly?.time) ? data.hourly.time : [];
+  const hourlyIndices = rawHourlyTimes
+    .map((timeStr, idx) => ({ timeStr, idx }))
+    .filter(({ timeStr }) => !currentDatePrefix || timeStr.startsWith(currentDatePrefix))
+    .slice(0, 24);
+
+  const hourly: HourlyForecast[] = hourlyIndices.map(({ timeStr, idx }) => {
+    const code = Number(data.hourly.weather_code?.[idx] ?? current.weather_code);
+    const info = getWeatherDescription(code);
+    const timePart = timeStr.includes('T') ? (timeStr.split('T')[1] ?? timeStr) : timeStr;
+    return {
+      time: timeStr,
+      hourLabel: timePart.slice(0, 5),
+      temperature: Math.round(Number(data.hourly.temperature_2m?.[idx] ?? current.temperature_2m)),
+      weatherCode: code,
+      description: info.description,
+      icon: info.icon,
+      windSpeed: Math.round(Number(data.hourly.wind_speed_10m?.[idx] ?? current.wind_speed_10m)),
+      precipitationProbability: Math.round(
+        Number(data.hourly.precipitation_probability?.[idx] ?? 0)
+      ),
+      isDay: Number(data.hourly.is_day?.[idx] ?? 1) === 1,
+    };
+  });
+
   return {
     temperature: Math.round(current.temperature_2m),
     feelsLike: Math.round(current.apparent_temperature),
@@ -149,6 +190,7 @@ export async function fetchWeather(
     timestamp: current.time,
     location: { lat, lon, name: locationName },
     daily,
+    hourly,
   };
 }
 
