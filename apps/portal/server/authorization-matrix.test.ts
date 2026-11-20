@@ -61,6 +61,7 @@ const DEPT_UUID_MAP: Record<string, string> = {
   'access-control': '00000000-0000-4000-8000-000000000005',
   engineering: '00000000-0000-4000-8000-000000000006',
   'control-room': '00000000-0000-4000-8000-000000000007',
+  presentation: '00000000-0000-4000-8000-000000000008',
 };
 
 function setupProxySession(options: {
@@ -163,6 +164,10 @@ describe('Gate 16 — Module-Level Authorization Matrix (Control Room, Plant, En
       '/database/panels',
       '/hub/executive',
       '/admin',
+      '/presentation',
+      '/presentation/documentation',
+      '/presentation/architecture',
+      '/presentation/investor-pack',
     ])('redirects unauthenticated requests on %s to /login', async (routePath) => {
       const res = await proxy(makeProxyRequest(routePath, false));
       expect(res.status).toBe(307);
@@ -233,6 +238,31 @@ describe('Gate 16 — Module-Level Authorization Matrix (Control Room, Plant, En
       });
       const res = await proxy(makeProxyRequest('/plant-processing'));
       expect(res.status).not.toBe(307);
+    });
+
+    it('enforces RBAC & tenant isolation for /presentation routes', async () => {
+      for (const presentationPath of ['/presentation', '/presentation/investor-pack']) {
+        for (const privilegedRole of ['admin', 'manager']) {
+          setupProxySession({ role: privilegedRole, departmentSlug: 'drilling' });
+          const allowedRes = await proxy(makeProxyRequest(presentationPath));
+          expect(allowedRes.status).not.toBe(307);
+        }
+
+        for (const deptSlug of ['production', 'drilling']) {
+          setupProxySession({ role: 'operator', departmentSlug: deptSlug });
+          const deniedRes = await proxy(makeProxyRequest(presentationPath));
+          expect(deniedRes.status).toBe(307);
+          expect(deniedRes.headers.get('location')).toContain('error=unauthorized_department');
+        }
+
+        setupProxySession({
+          role: 'operator',
+          departmentSlug: 'drilling',
+          accessibleSlugs: ['presentation'],
+        });
+        const grantedRes = await proxy(makeProxyRequest(presentationPath));
+        expect(grantedRes.status).not.toBe(307);
+      }
     });
 
     it('blocks operator from /{dept}/tools while allowing supervisor and admin', async () => {

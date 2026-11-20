@@ -9,6 +9,7 @@ import {
   FileSpreadsheet,
   FileText,
   Pickaxe,
+  Presentation,
   ScanFace,
   StickyNote,
   TowerControl,
@@ -127,6 +128,14 @@ export const DEPARTMENTS_LIST = [
     iconColor: 'text-dept-production',
     bgColor: 'bg-dept-production/10 hover:bg-dept-production/15',
     description: 'Supabase PostgreSQL, RLS & schemas',
+  },
+  {
+    name: 'presentation',
+    displayName: 'Presentation',
+    icon: Presentation,
+    iconColor: 'text-accent-gold',
+    bgColor: 'bg-accent-gold/10 hover:bg-accent-gold/15',
+    description: 'CEO & investor briefing deck & docs',
   },
 ] as const;
 

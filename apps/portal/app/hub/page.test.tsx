@@ -180,6 +180,19 @@ jest.mock('@repo/departments/data-access', () => ({
       actions: [{ label: 'Office Workspace', href: '/office' }],
     },
     {
+      name: 'executive',
+      displayName: 'Executive Dashboard',
+      route: '/hub/executive',
+      icon: 'BarChart3',
+      description: 'Executive briefing and KPIs',
+      color: 'amber',
+      type: 'standard',
+      status: 'active',
+      stats: { label: 'Sync', value: '99.4%' },
+      trend: [95, 96, 97, 98, 99, 99, 100, 100],
+      actions: [{ label: 'Open Executive', href: '/hub/executive' }],
+    },
+    {
       name: 'presentation',
       displayName: 'Presentation',
       route: '/presentation',
@@ -349,6 +362,7 @@ describe('HubPage — graceful degradation', () => {
       'control-room',
       'overview',
       'office',
+      'executive',
       'presentation',
     ]);
   });

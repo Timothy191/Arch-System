@@ -448,6 +448,38 @@ export const DEPARTMENTS = [
     ],
     roles: ['admin', 'super_admin', 'executive'],
   },
+
+  {
+    id: 'presentation',
+    name: 'Presentation',
+    slug: 'presentation',
+    description:
+      'Prebuilt executive & investor briefing deck, system documentation & architecture walkthroughs',
+    color: '#d97706',
+    routes: [
+      {
+        path: '/presentation',
+        name: 'Presentation Deck',
+        description: 'Executive & investor presentation deck',
+      },
+      {
+        path: '/presentation/documentation',
+        name: 'System Documentation',
+        description: 'Platform architecture & operational documentation',
+      },
+      {
+        path: '/presentation/architecture',
+        name: 'Architecture & Modules',
+        description: 'System topology & module breakdown walkthrough',
+      },
+      {
+        path: '/presentation/investor-pack',
+        name: 'Investor Pack & PDF',
+        description: 'Printable investor pack & PDF export briefing',
+      },
+    ],
+    roles: ['admin', 'manager', 'executive'],
+  },
 ];
 
 // Navigation graph nodes and edges for XYFlow

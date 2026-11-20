@@ -569,8 +569,18 @@ describe('proxy', () => {
       expect(invRes.headers.get('location')).toContain('unauthorized_department');
     });
 
-    it('enforces RBAC for /presentation (allows admin & manager, redirects unassigned operator)', async () => {
+    it('enforces RBAC for /presentation (allows admin, manager & explicit presentation grant; blocks unassigned and production-only operators)', async () => {
       expect(DEPARTMENT_ROUTES).toContain('presentation');
+
+      buildProxyMock({
+        employee: {
+          role: 'admin',
+          department_id: 'dept-drilling',
+          accessible_departments: [],
+        },
+      });
+      const adminRes = await proxy(makeRequest('/presentation'));
+      expect(adminRes.status).not.toBe(307);
 
       buildProxyMock({
         employee: {
@@ -588,12 +598,37 @@ describe('proxy', () => {
           department_id: 'dept-drilling',
           accessible_departments: [],
         },
-        deptData: { id: 'dept-production' },
+        deptData: { id: 'dept-presentation' },
       });
       (cacheGet as jest.Mock).mockResolvedValue(null);
-      const operatorRes = await proxy(makeRequest('/presentation'));
-      expect(operatorRes.status).toBe(307);
-      expect(operatorRes.headers.get('location')).toContain('unauthorized_department');
+      const unassignedRes = await proxy(makeRequest('/presentation'));
+      expect(unassignedRes.status).toBe(307);
+      expect(unassignedRes.headers.get('location')).toContain('unauthorized_department');
+
+      buildProxyMock({
+        employee: {
+          role: 'operator',
+          department_id: 'dept-production',
+          accessible_departments: [],
+        },
+        deptData: { id: 'dept-presentation' },
+      });
+      (cacheGet as jest.Mock).mockResolvedValue(null);
+      const productionOnlyRes = await proxy(makeRequest('/presentation'));
+      expect(productionOnlyRes.status).toBe(307);
+      expect(productionOnlyRes.headers.get('location')).toContain('unauthorized_department');
+
+      buildProxyMock({
+        employee: {
+          role: 'operator',
+          department_id: 'dept-drilling',
+          accessible_departments: ['dept-presentation'],
+        },
+        deptData: { id: 'dept-presentation' },
+      });
+      (cacheGet as jest.Mock).mockResolvedValue(null);
+      const grantedRes = await proxy(makeRequest('/presentation'));
+      expect(grantedRes.status).not.toBe(307);
     });
 
     it('falls back to production department UUID when plant-processing or plant-inventory row is not yet seeded', async () => {

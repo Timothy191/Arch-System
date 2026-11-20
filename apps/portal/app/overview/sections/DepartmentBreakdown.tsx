@@ -10,6 +10,7 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  BookOpen,
   Bot,
   Building2,
   ClipboardCheck,
@@ -23,6 +24,7 @@ import {
   LifeBuoy,
   Network,
   Pickaxe,
+  Presentation,
   Printer,
   QrCode,
   RefreshCw,
@@ -73,6 +75,10 @@ const routeIcons: Record<string, React.ReactNode> = {
   'Agentic Monitor': <Bot className="h-4 w-4" />,
   Schemas: <Database className="h-4 w-4" />,
   Panels: <Activity className="h-4 w-4" />,
+  'Presentation Deck': <Presentation className="h-4 w-4" />,
+  'System Documentation': <BookOpen className="h-4 w-4" />,
+  'Architecture & Modules': <Network className="h-4 w-4" />,
+  'Investor Pack & PDF': <FileText className="h-4 w-4" />,
 };
 
 export default function DepartmentBreakdown() {

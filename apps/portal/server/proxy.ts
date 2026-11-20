@@ -295,12 +295,7 @@ async function resolveDeptUuid(
     return data.id;
   }
 
-  if (
-    slug === 'plant-processing' ||
-    slug === 'plant-inventory' ||
-    slug === 'office' ||
-    slug === 'presentation'
-  ) {
+  if (slug === 'plant-processing' || slug === 'plant-inventory' || slug === 'office') {
     const fallbackQuery = supabase.from('departments').select('id').eq('name', 'production');
     const { data: fallbackData } = await (typeof fallbackQuery.maybeSingle === 'function'
       ? fallbackQuery.maybeSingle()

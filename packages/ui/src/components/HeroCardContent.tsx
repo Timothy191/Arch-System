@@ -202,6 +202,18 @@ function getHeroTelemetrySeries(
         fillId: 'grad-executive',
         points: [74, 78, 81, 84, 87, 89, 91, 93, 95, 97, 98, 99],
       };
+    case 'presentation':
+      return {
+        title: 'Executive Briefing & Platform Readiness',
+        unit: 'slides',
+        currentValue: stats?.value || '12 Slides',
+        deltaBadge: 'Investor Ready',
+        peakValue: '12/12',
+        avgValue: '100%',
+        strokeColor: goldStroke,
+        fillId: 'grad-presentation',
+        points: [78, 82, 85, 88, 90, 92, 94, 96, 97, 98, 99, 100],
+      };
     default:
       return {
         title: 'Central Operations Telemetry',
@@ -1093,7 +1105,9 @@ export function HeroCardContent({
                     ? { label: 'System Compliance: 100% [100%]', width: '100%' }
                     : panel.name === 'executive'
                       ? { label: 'Reconciliation Target: 99.4% [99%]', width: '99%' }
-                      : { label: 'Target: 1,300m [95%]', width: '95%' };
+                      : panel.name === 'presentation'
+                        ? { label: 'Briefing Deck: 12 / 12 Slides [100%]', width: '100%' }
+                        : { label: 'Target: 1,300m [95%]', width: '95%' };
 
   const isViewLogs =
     panel.primary.label.toLowerCase().includes('log') ||
