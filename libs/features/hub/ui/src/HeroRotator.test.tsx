@@ -495,4 +495,28 @@ describe('HeroRotator', () => {
     expect(screen.getByText('Availability Target: 95.0% [95%]')).toBeInTheDocument();
     expect(screen.getByText('Fleet Availability & Utilization')).toBeInTheDocument();
   });
+
+  it('aliases presentation hero video and poster to overview media', () => {
+    const presentationDept: Department = {
+      name: 'presentation',
+      displayName: 'Presentation',
+      route: '/presentation',
+      icon: 'Presentation',
+      description: 'CEO and investor presentation deck',
+      color: 'amber',
+      type: 'standard',
+      status: 'active',
+      stats: { label: 'Briefing', value: '12 Slides' },
+    };
+
+    render(<HeroRotator {...baseProps} departments={[presentationDept]} />);
+
+    const video = screen.getByTestId('hero-video-presentation');
+    expect(video).toHaveAttribute('src', '/images/departments/overview.mp4');
+    expect(video).toHaveAttribute('poster', '/images/departments/overview.webp');
+
+    fireEvent.click(screen.getByLabelText('Next highlight'));
+    expect(screen.getByTestId('hero-dept-icon-presentation')).toBeInTheDocument();
+    expect(screen.getByText('CEO and investor presentation deck')).toBeInTheDocument();
+  });
 });

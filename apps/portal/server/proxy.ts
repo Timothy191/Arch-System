@@ -200,6 +200,7 @@ function isValidRedirect(path: string): boolean {
     /^\/control-room(\/|$)/, // Control room department
     /^\/availability-utilization(\/|$)/, // Availability & Utilization department
     /^\/office(\/|$)/, // Office department
+    /^\/presentation(\/|$)/, // Presentation department
     /^\/database(\/|$)/, // Database department
     /^\/hub/, // Hub
     /^\/admin(\/|$)/, // Admin
@@ -224,6 +225,7 @@ export const DEPARTMENT_ROUTES = [
   'control-room',
   'availability-utilization',
   'office',
+  'presentation',
 ];
 
 const RESTRICTED_ROUTES: Record<string, string[]> = {
@@ -293,7 +295,12 @@ async function resolveDeptUuid(
     return data.id;
   }
 
-  if (slug === 'plant-processing' || slug === 'plant-inventory' || slug === 'office') {
+  if (
+    slug === 'plant-processing' ||
+    slug === 'plant-inventory' ||
+    slug === 'office' ||
+    slug === 'presentation'
+  ) {
     const fallbackQuery = supabase.from('departments').select('id').eq('name', 'production');
     const { data: fallbackData } = await (typeof fallbackQuery.maybeSingle === 'function'
       ? fallbackQuery.maybeSingle()
@@ -485,9 +492,11 @@ async function enforceRouteAccess(
 
   // Check department isolation
   if (topSegment && DEPARTMENT_ROUTES.includes(topSegment)) {
-    // PERF: admins can access every department, so the slug → UUID lookup
-    // (a Redis/DB round-trip on every navigation) is unnecessary for them.
-    if (userRole === 'admin') return null;
+    // PERF: admins can access every department, and managers always have access
+    // to the executive Presentation briefing module without a DB round-trip.
+    if (userRole === 'admin' || (topSegment === 'presentation' && userRole === 'manager')) {
+      return null;
+    }
 
     // PERF: Fast-path static department UUID match (0ms, zero network round-trips)
     // when the user's primary or accessible departments match the canonical static UUID.

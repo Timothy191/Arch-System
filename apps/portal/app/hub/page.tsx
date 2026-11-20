@@ -24,7 +24,7 @@ import { cacheLife, cacheTag } from '@/lib/server-cache';
 export const metadata: Metadata = {
   title: 'Hub — Arch Systems',
   description:
-    'Central operations portal for Arch Systems industrial complexes. Access administration, access control, production, drilling, plant & processing, plant inventory, engineering, control room, system overview, and database dashboards.',
+    'Central operations portal for Arch Systems industrial complexes. Access administration, access control, production, drilling, plant & processing, plant inventory, engineering, control room, system overview, presentation, office, and database dashboards.',
 };
 
 async function getDashboardCounts(today: string) {
@@ -183,6 +183,7 @@ export default async function HubPage() {
       'database',
       'availability-utilization',
       'office',
+      'presentation',
       'executive',
     ] as const) {
       const sysDept = DEPARTMENTS.find((d) => d.name === sysModuleName);
@@ -206,6 +207,7 @@ export default async function HubPage() {
     'overview',
     'database',
     'office',
+    'presentation',
     'executive',
   ];
 

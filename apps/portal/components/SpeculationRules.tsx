@@ -21,6 +21,8 @@ const SPECULATED_ROUTE_PATTERNS = [
   '/availability-utilization/*',
   '/office',
   '/office/*',
+  '/presentation',
+  '/presentation/*',
   '/overview',
   '/overview/*',
 ] as const;

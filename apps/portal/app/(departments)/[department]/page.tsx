@@ -6,6 +6,7 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
+import { getCachedPresentationSnapshot } from '~/features/departments/components/presentation/presentation-data';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { ControlRoomQuickNav } from '../control-room/components/ControlRoomQuickNav';
 import { ControlRoomSubtabs } from '../control-room/components/ControlRoomSubtabs';
@@ -49,6 +50,14 @@ const OfficeWorkspaceClient = dynamic(
   () =>
     import('~/features/departments/components/office/OfficeWorkspaceClient').then(
       (mod) => mod.OfficeWorkspaceClient
+    ),
+  { loading: () => <WorkspaceSkeleton /> }
+);
+
+const PresentationWorkspaceClient = dynamic(
+  () =>
+    import('~/features/departments/components/presentation/PresentationWorkspaceClient').then(
+      (mod) => mod.PresentationWorkspaceClient
     ),
   { loading: () => <WorkspaceSkeleton /> }
 );
@@ -171,6 +180,15 @@ export default async function DepartmentDashboard({
     return (
       <ErrorBoundary context="Department Dashboard: office">
         <OfficeWorkspaceClient mode="dashboard" today={today} />
+      </ErrorBoundary>
+    );
+  }
+
+  if (deptSlug === 'presentation') {
+    const snapshot = await getCachedPresentationSnapshot();
+    return (
+      <ErrorBoundary context="Department Dashboard: presentation">
+        <PresentationWorkspaceClient mode="deck" snapshot={snapshot} />
       </ErrorBoundary>
     );
   }

@@ -78,9 +78,11 @@ export function HeroRotator({
                             ? 'SYSTEM ARCHITECTURE // ARCH-OS'
                             : dept.name === 'database'
                               ? 'SUPABASE POSTGRESQL // DB-CORE'
-                              : dept.name === 'executive'
-                                ? 'EXECUTIVE ANALYTICS // EXEC-BI01'
-                                : 'FIELD OPERATIONS // MINE-UNIT';
+                              : dept.name === 'presentation'
+                                ? 'EXECUTIVE BRIEFING // INVESTOR-DECK'
+                                : dept.name === 'executive'
+                                  ? 'EXECUTIVE ANALYTICS // EXEC-BI01'
+                                  : 'FIELD OPERATIONS // MINE-UNIT';
 
       const assetSubtitle =
         dept.name === 'drilling'
@@ -98,13 +100,13 @@ export function HeroRotator({
         image:
           dept.name === 'reports'
             ? '/images/departments/control-room.webp'
-            : dept.name === 'executive' || dept.name === 'office'
+            : dept.name === 'executive' || dept.name === 'office' || dept.name === 'presentation'
               ? '/images/departments/overview.webp'
               : `/images/departments/${dept.name}.webp`,
         video:
           dept.name === 'reports'
             ? '/images/departments/control-room.mp4'
-            : dept.name === 'executive' || dept.name === 'office'
+            : dept.name === 'executive' || dept.name === 'office' || dept.name === 'presentation'
               ? '/images/departments/overview.mp4'
               : `/images/departments/${dept.name}.mp4`,
         stats: dept.stats || { label: 'Telemetry', value: 'Online' },

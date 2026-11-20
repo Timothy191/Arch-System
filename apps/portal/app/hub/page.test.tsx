@@ -179,6 +179,19 @@ jest.mock('@repo/departments/data-access', () => ({
       trend: [92, 94, 95, 96, 97, 98, 99, 100],
       actions: [{ label: 'Office Workspace', href: '/office' }],
     },
+    {
+      name: 'presentation',
+      displayName: 'Presentation',
+      route: '/presentation',
+      icon: 'Presentation',
+      description: 'CEO and investor presentation deck',
+      color: 'amber',
+      type: 'standard',
+      status: 'active',
+      stats: { label: 'Briefing', value: '12 Slides' },
+      trend: [94, 95, 96, 97, 98, 99, 100, 100],
+      actions: [{ label: 'Launch Presentation', href: '/presentation' }],
+    },
   ],
   fetchLiveDepartmentMetrics: jest.fn(async () => ({})),
 }));
@@ -336,6 +349,7 @@ describe('HubPage — graceful degradation', () => {
       'control-room',
       'overview',
       'office',
+      'presentation',
     ]);
   });
 });

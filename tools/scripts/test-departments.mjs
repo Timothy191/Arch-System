@@ -213,6 +213,18 @@ const DEPARTMENT_MATRIX = [
     e2eSpecs: ['e2e/department-navigation.spec.ts'],
   },
   {
+    slug: 'presentation',
+    displayName: 'Presentation',
+    route: '/presentation',
+    entryFile: 'apps/portal/app/(departments)/presentation/page.tsx',
+    proxyPattern: '/presentation',
+    portalTests: [
+      'app/(departments)/presentation/page.test.tsx',
+      'features/departments/components/presentation/presentation-data.test.ts',
+    ],
+    e2eSpecs: ['e2e/department-navigation.spec.ts'],
+  },
+  {
     slug: 'executive',
     displayName: 'Executive Dashboard',
     route: '/hub/executive',

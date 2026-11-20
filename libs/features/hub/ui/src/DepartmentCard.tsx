@@ -15,6 +15,7 @@ import {
   type LucideIcon,
   Monitor,
   Package,
+  Presentation,
   ShieldCheck,
   Wrench,
 } from 'lucide-react';
@@ -52,6 +53,7 @@ const DEPARTMENT_ICON_MAP: Record<string, LucideIcon> = {
   Database,
   Briefcase,
   BarChart3,
+  Presentation,
 };
 
 function ArchBookmarkIcon({ isPinned, className }: { isPinned: boolean; className?: string }) {
@@ -109,6 +111,7 @@ const FALLBACK_BANNER_SRC = '/images/departments/overview.jpg';
 const DEPARTMENT_BANNER_ALIASES: Record<string, string> = {
   executive: 'overview',
   office: 'overview',
+  presentation: 'overview',
   reports: 'control-room',
 };
 

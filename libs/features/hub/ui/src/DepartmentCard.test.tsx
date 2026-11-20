@@ -204,5 +204,17 @@ describe('DepartmentCard', () => {
       '.uiverse-card-banner img'
     ) as HTMLImageElement;
     expect(extractBannerSrc(reportsImg)).toBe('/images/departments/control-room-card.webp');
+
+    const presentationDept: Department = {
+      ...mockDepartment,
+      name: 'presentation',
+      displayName: 'Presentation',
+      route: '/presentation',
+    };
+    const { container: presContainer } = render(
+      <DepartmentCard department={presentationDept} index={2} />
+    );
+    const presImg = presContainer.querySelector('.uiverse-card-banner img') as HTMLImageElement;
+    expect(extractBannerSrc(presImg)).toBe('/images/departments/overview-card.webp');
   });
 });

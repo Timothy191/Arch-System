@@ -5,6 +5,7 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  BookOpen,
   Briefcase,
   CheckSquare,
   ChevronRight,
@@ -25,6 +26,7 @@ import {
   Monitor,
   Pickaxe,
   Pin,
+  Presentation,
   Printer,
   QrCode,
   Radio,
@@ -73,6 +75,8 @@ const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>
   QrCode,
   LifeBuoy,
   Briefcase,
+  BookOpen,
+  Presentation,
 };
 
 interface Tab {

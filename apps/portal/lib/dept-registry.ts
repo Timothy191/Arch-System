@@ -20,6 +20,7 @@ const PRODUCTION_FALLBACK_SLUGS = new Set([
   'overview',
   'availability-utilization',
   'office',
+  'presentation',
 ]);
 
 async function resolveDeptId(slug: string): Promise<string | null> {

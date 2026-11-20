@@ -262,6 +262,25 @@ export const DEPARTMENTS: Department[] = [
       { label: 'Shift Reports', href: '/control-room/reports' },
     ],
   },
+  {
+    name: 'presentation',
+    displayName: 'Presentation',
+    route: '/presentation',
+    icon: 'Presentation',
+    description:
+      'Prebuilt executive & investor briefing deck, live platform telemetry, architecture walkthroughs & system documentation',
+    color: 'amber',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Briefing', value: '12 Slides' },
+    trend: [94, 95, 96, 97, 98, 99, 100, 100],
+    actions: [
+      { label: 'Launch Presentation', href: '/presentation' },
+      { label: 'System Docs', href: '/presentation/documentation' },
+      { label: 'Investor Pack PDF', href: '/presentation/investor-pack' },
+    ],
+  },
 ];
 
 export const PRODUCTIVITY_TOOLS = [
@@ -430,6 +449,13 @@ export const OFFICE_TABS = [
   { name: 'history', label: 'History', icon: 'History' },
 ] as const;
 
+export const PRESENTATION_TABS = [
+  { name: 'dashboard', label: 'Presentation Deck', icon: 'Presentation' },
+  { name: 'documentation', label: 'System Documentation', icon: 'BookOpen' },
+  { name: 'architecture', label: 'Architecture & Modules', icon: 'Layers' },
+  { name: 'investor-pack', label: 'Investor Pack & PDF', icon: 'FileText' },
+] as const;
+
 const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
@@ -444,6 +470,7 @@ const DEPARTMENT_TABS_MAP: Record<
   'plant-inventory': PLANT_INVENTORY_TABS,
   'availability-utilization': AVAILABILITY_UTILIZATION_TABS,
   office: OFFICE_TABS,
+  presentation: PRESENTATION_TABS,
 };
 
 /**

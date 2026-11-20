@@ -294,6 +294,7 @@
     "test:dept:overview": "node tools/scripts/test-departments.mjs --dept=overview",
     "test:dept:database": "node tools/scripts/test-departments.mjs --dept=database",
     "test:dept:office": "node tools/scripts/test-departments.mjs --dept=office",
+    "test:dept:presentation": "node tools/scripts/test-departments.mjs --dept=presentation",
     "test:dept:executive": "node tools/scripts/test-departments.mjs --dept=executive",
     "test:redis:integration": "REDIS_URL=redis://127.0.0.1:6379 REDIS_INTEGRATION=1 pnpm --filter @repo/redis test:integration && REDIS_URL=redis://127.0.0.1:6379 REDIS_INTEGRATION=1 pnpm --filter portal test:integration",
     "test:speed-insights": "pnpm --filter portal test:speed-insights",

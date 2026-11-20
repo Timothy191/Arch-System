@@ -569,6 +569,33 @@ describe('proxy', () => {
       expect(invRes.headers.get('location')).toContain('unauthorized_department');
     });
 
+    it('enforces RBAC for /presentation (allows admin & manager, redirects unassigned operator)', async () => {
+      expect(DEPARTMENT_ROUTES).toContain('presentation');
+
+      buildProxyMock({
+        employee: {
+          role: 'manager',
+          department_id: 'dept-drilling',
+          accessible_departments: [],
+        },
+      });
+      const managerRes = await proxy(makeRequest('/presentation'));
+      expect(managerRes.status).not.toBe(307);
+
+      buildProxyMock({
+        employee: {
+          role: 'operator',
+          department_id: 'dept-drilling',
+          accessible_departments: [],
+        },
+        deptData: { id: 'dept-production' },
+      });
+      (cacheGet as jest.Mock).mockResolvedValue(null);
+      const operatorRes = await proxy(makeRequest('/presentation'));
+      expect(operatorRes.status).toBe(307);
+      expect(operatorRes.headers.get('location')).toContain('unauthorized_department');
+    });
+
     it('falls back to production department UUID when plant-processing or plant-inventory row is not yet seeded', async () => {
       const { supabase } = buildProxyMock({
         employee: {

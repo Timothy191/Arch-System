@@ -4,6 +4,7 @@ import {
   OFFICE_TABS,
   PLANT_INVENTORY_TABS,
   PLANT_PROCESSING_TABS,
+  PRESENTATION_TABS,
   PRODUCTIVITY_TOOLS,
 } from './departments';
 
@@ -70,6 +71,7 @@ describe('DEPARTMENTS registry', () => {
     expect(departmentNames).toContain('admin');
     expect(departmentNames).toContain('overview');
     expect(departmentNames).toContain('office');
+    expect(departmentNames).toContain('presentation');
     expect(departmentNames).toContain('executive');
     expect(departmentNames).not.toContain('safety');
     expect(departmentNames).not.toContain('training');
@@ -129,6 +131,17 @@ describe('DEPARTMENTS registry', () => {
       'daily-log',
       'reports',
       'history',
+    ]);
+  });
+
+  it('returns dedicated Presentation tabs (Deck, System Documentation, Architecture, Investor Pack)', () => {
+    const tabs = getDepartmentTabs('presentation');
+    expect(tabs).toBe(PRESENTATION_TABS);
+    expect(tabs.map((t) => t.name)).toEqual([
+      'dashboard',
+      'documentation',
+      'architecture',
+      'investor-pack',
     ]);
   });
 
