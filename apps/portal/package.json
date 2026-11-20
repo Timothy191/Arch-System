@@ -42,7 +42,6 @@
     "@upstash/blob": "^0.0.14",
     "@vercel/analytics": "^2.0.1",
     "@vercel/otel": "^2.3.0",
-    "@vercel/queue": "^0.8.0",
     "@vercel/speed-insights": "^2.0.0",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.7.8",
