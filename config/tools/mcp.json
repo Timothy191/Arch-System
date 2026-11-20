@@ -2,13 +2,13 @@
   "mcpServers": {
     "skills-mcp": {
       "command": "node",
-      "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
+      "args": ["${WORKSPACE_PARENT}/skills-mcp/dist/index.js"],
       "description": "Anti-bloat on-demand skill, context & persona registry MCP server",
       "type": "stdio"
     },
     "memory-gateway-mcp": {
       "command": "node",
-      "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
+      "args": ["${WORKSPACE_PARENT}/memory-gateway-mcp/dist/index.js"],
       "description": "Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs",
       "type": "stdio"
     },

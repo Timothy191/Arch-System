@@ -98,10 +98,10 @@ An exhaustive, evidence-based, read-only UI/UX forensic audit of the Arch-System
 
 All detailed forensic documentation is available in `docs/reports/`:
 
-- [`ui-forensic-report.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-forensic-report.md) — Master comprehensive forensic report (33 sections)
-- [`ui-component-inventory.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-component-inventory.md) — 57 components + shell + domain inventory
-- [`ui-design-tokens.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-design-tokens.md) — Style Dictionary, token compilation, and semantic drift
-- [`ui-branding-assets.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-branding-assets.md) — 30+ static files, logos, font 404, and video assets
-- [`ui-route-screen-inventory.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-route-screen-inventory.md) — 17 routes, layout hierarchy, and screen states
-- [`ui-dependencies-and-libraries.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-dependencies-and-libraries.md) — Full dependency matrix and library evaluations
-- [`ui-technical-debt.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-technical-debt.md) — Prioritized remediation backlog (P0 to P3)
+- [`ui-forensic-report.md`](ui-forensic-report.md) — Master comprehensive forensic report (33 sections)
+- [`ui-component-inventory.md`](ui-component-inventory.md) — 57 components + shell + domain inventory
+- [`ui-design-tokens.md`](ui-design-tokens.md) — Style Dictionary, token compilation, and semantic drift
+- [`ui-branding-assets.md`](ui-branding-assets.md) — 30+ static files, logos, font 404, and video assets
+- [`ui-route-screen-inventory.md`](ui-route-screen-inventory.md) — 17 routes, layout hierarchy, and screen states
+- [`ui-dependencies-and-libraries.md`](ui-dependencies-and-libraries.md) — Full dependency matrix and library evaluations
+- [`ui-technical-debt.md`](ui-technical-debt.md) — Prioritized remediation backlog (P0 to P3)

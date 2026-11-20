@@ -1899,7 +1899,7 @@ flowchart TD
     shortLabel: 'Package Structure',
     category: 'Module Hierarchy',
     subtitle:
-      'Federated workspace root (/home/tim/Fork) and Arch-System monorepo directory structure, standalone MCP servers, and XDG-compliant module layout.',
+      'Optional federated workspace parent (../) and Arch-System monorepo directory structure, standalone MCP servers, and XDG-compliant module layout.',
     accentColor: '#0284c7',
     kpis: [
       {
@@ -1932,7 +1932,7 @@ flowchart TD
         id: 'struct-root',
         step: 'ROOT 01',
         title: 'Federated Workspace Root',
-        role: '/home/tim/Fork (Makefile + .mcp.json)',
+        role: 'Workspace Parent (Makefile + .mcp.json)',
         detail:
           'Zero-dependency delegation runner hosting root automation (tools/federated-pipeline, federation-watchdog) and 4 standalone MCPs.',
         protocol: 'Delegation Runner',
@@ -2096,7 +2096,7 @@ flowchart TD
 
 ## 📂 Root & Monorepo Structure Overview
 
-- \`/home/tim/Fork\` (Federated Root): Zero-dependency delegation runner, \`Makefile\`, \`.mcp.json\`, standalone MCP servers (\`skills-mcp\`, \`memory-gateway-mcp\`, \`slim-tooling-mcp\`, \`langgraph-mcp\`), and \`tools/{federated-pipeline,federation-watchdog,mcp-harness}\`.
+- \`Workspace Parent (../)\` (Optional Federated Root): Zero-dependency delegation runner, \`Makefile\`, \`.mcp.json\`, standalone MCP servers (\`skills-mcp\`, \`memory-gateway-mcp\`, \`slim-tooling-mcp\`, \`langgraph-mcp\`), and \`tools/{federated-pipeline,federation-watchdog,mcp-harness}\`.
 - \`Arch-System/apps/\`: Unified portal application (\`apps/portal\`)
 - \`Arch-System/packages/\`: Shared infrastructure packages (\`ui\`, \`theme\`, \`supabase\`, \`database\`, \`contract\`, \`redis\`, \`rate-limiter\`, \`errors\`, \`logger\`, \`utils\`, \`agents\`, \`eval\`, \`typescript-config\`)
 - \`Arch-System/libs/\`: Domain feature libraries (\`features/hub\`, \`features/departments\`, \`features/auth\`) + \`shared/{data-access,hooks,utils}\`

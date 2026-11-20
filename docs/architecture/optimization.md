@@ -47,7 +47,7 @@ Next.js provides built-in abstractions and compiler-level integrations designed 
 Built-in components abstract away the complexity of implementing common UI optimizations:
 
 - **Images (`next/image`)**: Built on the native `<img>` element. The Image Component optimizes images for performance by lazy loading and automatically resizing images based on device size, preventing Cumulative Layout Shift (CLS), and serving modern formats (WebP/AVIF).
-- **Link (`next/link`)**: Built on the native `<a>` tags. The Link Component prefetches pages in the background for faster and smoother client-side page transitions (paired with `partialPrefetching: true` and `<SpeculationRules />` in [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx)).
+- **Link (`next/link`)**: Built on the native `<a>` tags. The Link Component prefetches pages in the background for faster and smoother client-side page transitions (paired with `partialPrefetching: true` and `<SpeculationRules />` in [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx)).
 - **Scripts (`next/script`)**: Built on the native `<script>` tags. The Script Component gives you fine-grained control over loading and execution of third-party scripts (`beforeInteractive`, `afterInteractive`, `lazyOnload`, `worker`).
 
 ### Metadata
@@ -59,32 +59,32 @@ The Metadata API in Next.js allows you to modify the `<head>` element of a page 
 1. **Config-based Metadata**: Export a static `metadata` object or a dynamic `generateMetadata` function in a `layout.tsx` (`layout.js`) or `page.tsx` (`page.js`) file.
 2. **File-based Metadata**: Add static or dynamically generated special files (`favicon.ico`, `icon`, `apple-icon`, `opengraph-image`, `twitter-image`, `robots.txt`, `sitemap.xml`) to route segments.
 
-Additionally, you can create dynamic Open Graph Images using JSX and CSS with the `ImageResponse` constructor from `next/og` (implemented in [apps/portal/app/opengraph-image.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/opengraph-image.tsx)).
+Additionally, you can create dynamic Open Graph Images using JSX and CSS with the `ImageResponse` constructor from `next/og` (implemented in [apps/portal/app/opengraph-image.tsx](../../apps/portal/app/opengraph-image.tsx)).
 
 ### Static Assets
 
-The Next.js `/public` folder ([apps/portal/public](file:///home/tim/Fork/Arch-System/apps/portal/public)) is used to serve static assets like images, icons, service workers, manifests, and background media. Files inside `/public` are cached by CDN providers and edge nodes so they are delivered efficiently. In Arch-System, root canonical assets are synchronized into `apps/portal/public` prior to every build via [scripts/sync-assets-smart.cjs](file:///home/tim/Fork/Arch-System/scripts/sync-assets-smart.cjs).
+The Next.js `/public` folder ([apps/portal/public](../../apps/portal/public)) is used to serve static assets like images, icons, service workers, manifests, and background media. Files inside `/public` are cached by CDN providers and edge nodes so they are delivered efficiently. In Arch-System, root canonical assets are synchronized into `apps/portal/public` prior to every build via [scripts/sync-assets-smart.cjs](../../scripts/sync-assets-smart.cjs).
 
 ### Analytics and Monitoring
 
-For large-scale production applications, Next.js integrates with analytics and monitoring tools to measure and diagnose runtime performance through **Speed Insights**, **Instrumentation** ([apps/portal/instrumentation.ts](file:///home/tim/Fork/Arch-System/apps/portal/instrumentation.ts)), and **OpenTelemetry** (`@vercel/otel` + `@opentelemetry/sdk-trace-base`).
+For large-scale production applications, Next.js integrates with analytics and monitoring tools to measure and diagnose runtime performance through **Speed Insights**, **Instrumentation** ([apps/portal/instrumentation.ts](../../apps/portal/instrumentation.ts)), and **OpenTelemetry** (`@vercel/otel` + `@opentelemetry/sdk-trace-base`).
 
 ### Optimization & Configuration Matrix
 
-| Capability                | Next.js Module / Feature                                                     | Arch-System Implementation                                                                                                                                                                                                                                                              |
-| :------------------------ | :--------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Images**                | Optimize images with the built-in `next/image` component                     | [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs) (`images.localPatterns`, `images.remotePatterns`) & [RouteBackground.tsx](file:///home/tim/Fork/Arch-System/apps/portal/components/RouteBackground.tsx)                                    |
-| **Fonts**                 | Optimize web fonts with built-in `next/font` loaders                         | `IBM_Plex_Sans`, `JetBrains_Mono`, `Space_Grotesk` in [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx#L64-L89)                                                                                                                                |
-| **Scripts**               | Optimize 3rd-party scripts with the built-in `Script` component              | `next/script` + CSP `x-nonce` forwarding via [apps/portal/proxy.ts](file:///home/tim/Fork/Arch-System/apps/portal/proxy.ts)                                                                                                                                                             |
-| **Metadata**              | Use the Metadata API to define metadata in any layout or page                | `metadata` & `viewport` in [layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx#L113-L162), [opengraph-image.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/opengraph-image.tsx), [robots.ts](file:///home/tim/Fork/Arch-System/apps/portal/app/robots.ts) |
-| **Static Assets**         | Serve static files in the `public` directory                                 | [apps/portal/public/](file:///home/tim/Fork/Arch-System/apps/portal/public) + [scripts/sync-assets-smart.cjs](file:///home/tim/Fork/Arch-System/scripts/sync-assets-smart.cjs)                                                                                                          |
-| **Bundle Analyzer**       | Analyze JavaScript bundle sizes with `@next/bundle-analyzer`                 | Configured in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L4) (`ANALYZE=true pnpm build`)                                                                                                                                               |
-| **Lazy Loading**          | Lazy load imported libraries and React Client Components                     | [LazyHeavyComponents.tsx](file:///home/tim/Fork/Arch-System/apps/portal/components/dynamic/LazyHeavyComponents.tsx) & [LAZY_LOADING_GUIDE.md](file:///home/tim/Fork/Arch-System/apps/portal/LAZY_LOADING_GUIDE.md)                                                                      |
-| **Analytics**             | Measure and track page performance using Next.js Speed Insights & Web Vitals | `<Analytics />` + `<SpeedInsights />` in [layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx#L275-L276) & [speed-insights.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/observability/speed-insights.ts)                                                  |
-| **Instrumentation**       | Run code at server startup in your Next.js app                               | `register()` & `onRequestError()` in [apps/portal/instrumentation.ts](file:///home/tim/Fork/Arch-System/apps/portal/instrumentation.ts)                                                                                                                                                 |
-| **OpenTelemetry**         | Instrument your Next.js app with OpenTelemetry spans & exporters             | `@vercel/otel` + `OTLPTraceExporter` in [apps/portal/instrumentation.ts](file:///home/tim/Fork/Arch-System/apps/portal/instrumentation.ts#L80-L93)                                                                                                                                      |
-| **Third Party Libraries** | Optimize third-party libraries with `@next/third-parties`                    | Compatible alongside `@vercel/analytics/next` and `@vercel/speed-insights/next`                                                                                                                                                                                                         |
-| **TypeScript**            | TypeScript-first development experience & Next.js TS plugin                  | [apps/portal/tsconfig.json](file:///home/tim/Fork/Arch-System/apps/portal/tsconfig.json) & [packages/typescript-config/nextjs.json](file:///home/tim/Fork/Arch-System/packages/typescript-config/nextjs.json)                                                                           |
+| Capability                | Next.js Module / Feature                                                     | Arch-System Implementation                                                                                                                                                                          |
+| :------------------------ | :--------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Images**                | Optimize images with the built-in `next/image` component                     | [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs) (`images.localPatterns`, `images.remotePatterns`) & [RouteBackground.tsx](../../apps/portal/components/RouteBackground.tsx)        |
+| **Fonts**                 | Optimize web fonts with built-in `next/font` loaders                         | `IBM_Plex_Sans`, `JetBrains_Mono`, `Space_Grotesk` in [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L64-L89)                                                                        |
+| **Scripts**               | Optimize 3rd-party scripts with the built-in `Script` component              | `next/script` + CSP `x-nonce` forwarding via [apps/portal/proxy.ts](../../apps/portal/proxy.ts)                                                                                                     |
+| **Metadata**              | Use the Metadata API to define metadata in any layout or page                | `metadata` & `viewport` in [layout.tsx](../../apps/portal/app/layout.tsx#L113-L162), [opengraph-image.tsx](../../apps/portal/app/opengraph-image.tsx), [robots.ts](../../apps/portal/app/robots.ts) |
+| **Static Assets**         | Serve static files in the `public` directory                                 | [apps/portal/public/](../../apps/portal/public) + [scripts/sync-assets-smart.cjs](../../scripts/sync-assets-smart.cjs)                                                                              |
+| **Bundle Analyzer**       | Analyze JavaScript bundle sizes with `@next/bundle-analyzer`                 | Configured in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L4) (`ANALYZE=true pnpm build`)                                                                                       |
+| **Lazy Loading**          | Lazy load imported libraries and React Client Components                     | [LazyHeavyComponents.tsx](../../apps/portal/components/dynamic/LazyHeavyComponents.tsx) & [LAZY_LOADING_GUIDE.md](../../apps/portal/LAZY_LOADING_GUIDE.md)                                          |
+| **Analytics**             | Measure and track page performance using Next.js Speed Insights & Web Vitals | `<Analytics />` + `<SpeedInsights />` in [layout.tsx](../../apps/portal/app/layout.tsx#L275-L276) & [speed-insights.ts](../../apps/portal/lib/observability/speed-insights.ts)                      |
+| **Instrumentation**       | Run code at server startup in your Next.js app                               | `register()` & `onRequestError()` in [apps/portal/instrumentation.ts](../../apps/portal/instrumentation.ts)                                                                                         |
+| **OpenTelemetry**         | Instrument your Next.js app with OpenTelemetry spans & exporters             | `@vercel/otel` + `OTLPTraceExporter` in [apps/portal/instrumentation.ts](../../apps/portal/instrumentation.ts#L80-L93)                                                                              |
+| **Third Party Libraries** | Optimize third-party libraries with `@next/third-parties`                    | Compatible alongside `@vercel/analytics/next` and `@vercel/speed-insights/next`                                                                                                                     |
+| **TypeScript**            | TypeScript-first development experience & Next.js TS plugin                  | [apps/portal/tsconfig.json](../../apps/portal/tsconfig.json) & [packages/typescript-config/nextjs.json](../../packages/typescript-config/nextjs.json)                                               |
 
 ---
 
@@ -305,9 +305,9 @@ export default function Background() {
 
 ### Arch-System Codebase Implementation (`apps/portal`)
 
-1. **`next.config.mjs` Image Configuration** ([apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L116-L150)):
+1. **`next.config.mjs` Image Configuration** ([apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L116-L150)):
    - Defines `formats: ['image/avif', 'image/webp']`, `minimumCacheTTL: 14400`, `qualities: [75]`, strict SVG sandboxing (`contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"`), `localPatterns` (`/images/**`, `/background/**`, `/error-pages/**`, `/icons/**`, `/logo.svg`, `/whatsapp-logo.jpeg`), and `remotePatterns` (`*.supabase.co`, `*.supabase.in`, `res.cloudinary.com`, `*.whatsapp.net`, `*.whatsapp.com`).
-2. **LCP Background Poster Optimization** ([apps/portal/components/RouteBackground.tsx](file:///home/tim/Fork/Arch-System/apps/portal/components/RouteBackground.tsx#L29-L52)):
+2. **LCP Background Poster Optimization** ([apps/portal/components/RouteBackground.tsx](../../apps/portal/components/RouteBackground.tsx#L29-L52)):
    - Serves viewport-specific WebP posters (`/background/global-background-poster-mobile.webp` for `<=767px` and `/background/global-background-poster.webp` for desktop) with `fetchPriority="high"` and `decoding="async"`, while deferring background video mounting until after browser idle (`requestIdleCallback`) and skipping video on `prefers-reduced-motion: reduce`, `saveData`, or `2g`/`3g` pit links.
 
 ---
@@ -450,7 +450,7 @@ const roboto = localFont({
 
 `next/font` integrates seamlessly with Tailwind CSS through CSS variables:
 
-1. **Define CSS Variables in [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx#L64-L89)**:
+1. **Define CSS Variables in [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L64-L89)**:
 
 ```tsx title="apps/portal/app/layout.tsx"
 import { IBM_Plex_Sans, JetBrains_Mono, Space_Grotesk } from "next/font/google";
@@ -503,7 +503,7 @@ export default function RootLayout({
 }
 ```
 
-2. **Bind CSS Variables in Tailwind Configuration** ([packages/theme/src/tailwind.preset.ts](file:///home/tim/Fork/Arch-System/packages/theme/src/tailwind.preset.ts)):
+2. **Bind CSS Variables in Tailwind Configuration** ([packages/theme/src/tailwind.preset.ts](../../packages/theme/src/tailwind.preset.ts)):
 
 ```js title="tailwind.config.js"
 /** @type {import('tailwindcss').Config} */
@@ -534,7 +534,7 @@ You can now apply `font-sans`, `font-mono`, and `font-display` utility classes a
   - **Unique Page (`page.tsx`)**: Preloaded only on that unique route.
   - **Nested Layout (`layout.tsx`)**: Preloaded on all routes wrapped by the layout.
   - **Root Layout (`app/layout.tsx`)**: Preloaded on all routes.
-  - _Arch-System Production Note_: In [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx#L55-L63), all three fonts (`--font-sans` ~40 KB, `--font-display` ~22 KB, `--font-mono` ~31 KB) set `preload: false` because `next/font` otherwise injects preload `Link` headers into RSC prefetches, which Chrome flags as unused preloads during client navigations.
+  - _Arch-System Production Note_: In [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L55-L63), all three fonts (`--font-sans` ~40 KB, `--font-display` ~22 KB, `--font-mono` ~31 KB) set `preload: false` because `next/font` otherwise injects preload `Link` headers into RSC prefetches, which Chrome flags as unused preloads during client navigations.
 - **Reusing Fonts**: Every call to `localFont()` or a Google font function hosts a separate font instance. Always call the font loader once in a single shared file (`app/layout.tsx` or `app/fonts.ts`), export it as a constant, and reference its CSS variable or `className`.
 
 ---
@@ -622,7 +622,7 @@ export default function Page() {
 
 ### Additional Attributes & CSP Nonce Forwarding
 
-Additional DOM attributes such as `nonce` or `data-*` are automatically forwarded to the underlying `<script>` element. In Arch-System, [apps/portal/proxy.ts](file:///home/tim/Fork/Arch-System/apps/portal/proxy.ts) generates a per-request cryptographic nonce (`x-nonce` header) for strict Content Security Policy enforcement:
+Additional DOM attributes such as `nonce` or `data-*` are automatically forwarded to the underlying `<script>` element. In Arch-System, [apps/portal/proxy.ts](../../apps/portal/proxy.ts) generates a per-request cryptographic nonce (`x-nonce` header) for strict Content Security Policy enforcement:
 
 ```tsx title="app/page.tsx"
 import Script from "next/script";
@@ -655,7 +655,7 @@ Both static `metadata` and dynamic `generateMetadata` exports are **supported ex
 
 #### 1. Static Metadata Object (`export const metadata: Metadata`)
 
-In Arch-System, the canonical static `metadata` and `viewport` objects are exported from [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx#L113-L162):
+In Arch-System, the canonical static `metadata` and `viewport` objects are exported from [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L113-L162):
 
 ```tsx title="apps/portal/app/layout.tsx"
 import type { Metadata, Viewport } from "next";
@@ -730,12 +730,12 @@ export async function generateMetadata(
 
 Next.js recognizes the following special metadata files in `app/` (and static icons in `public/`). **File-based metadata has higher priority than config-based metadata** and overrides matching config fields:
 
-| Special File Convention                         | Supported Formats / Code Files                                                          | Purpose & Arch-System Setup                                                                                                                                                                                                                                                                                |
-| :---------------------------------------------- | :-------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`favicon.ico`, `apple-icon.jpg`, `icon.jpg`** | `.ico`, `.jpg`, `.jpeg`, `.png`, `.svg`, or dynamic `.tsx`/`.ts` (`ImageResponse`)      | Browser tab favicon and Apple touch icons. Served from [apps/portal/public/favicon.ico](file:///home/tim/Fork/Arch-System/apps/portal/public/favicon.ico) and `/icons/icon-192x192.png`, `/icons/icon-512x512.png` in [manifest.json](file:///home/tim/Fork/Arch-System/apps/portal/public/manifest.json). |
-| **`opengraph-image.jpg` & `twitter-image.jpg`** | `.jpg`, `.jpeg`, `.png`, `.gif`, or dynamic `opengraph-image.tsx` / `twitter-image.tsx` | Social & operator chat preview cards (1200×630). Dynamically generated at build time in [apps/portal/app/opengraph-image.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/opengraph-image.tsx), which also supplies the Twitter `summary_large_image` card via Next.js file-convention fallback.     |
-| **`robots.txt`**                                | Static `robots.txt` or dynamic `robots.ts` (`MetadataRoute.Robots`)                     | Crawler directives. Implemented in [apps/portal/app/robots.ts](file:///home/tim/Fork/Arch-System/apps/portal/app/robots.ts) (`userAgent: '*', disallow: '/'`) paired with `X-Robots-Tag: noindex, nofollow, noarchive, nosnippet` in `next.config.mjs`.                                                    |
-| **`sitemap.xml`**                               | Static `sitemap.xml` or dynamic `sitemap.ts` (`MetadataRoute.Sitemap`)                  | XML route index for search engines. (Intentionally omitted for authenticated SCADA routes per [apps/portal/app/robots.ts](file:///home/tim/Fork/Arch-System/apps/portal/app/robots.ts#L4-L8); template pattern provided below).                                                                            |
+| Special File Convention                         | Supported Formats / Code Files                                                          | Purpose & Arch-System Setup                                                                                                                                                                                                                                                |
+| :---------------------------------------------- | :-------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`favicon.ico`, `apple-icon.jpg`, `icon.jpg`** | `.ico`, `.jpg`, `.jpeg`, `.png`, `.svg`, or dynamic `.tsx`/`.ts` (`ImageResponse`)      | Browser tab favicon and Apple touch icons. Served from [apps/portal/public/favicon.ico](../../apps/portal/public/favicon.ico) and `/icons/icon-192x192.png`, `/icons/icon-512x512.png` in [manifest.json](../../apps/portal/public/manifest.json).                         |
+| **`opengraph-image.jpg` & `twitter-image.jpg`** | `.jpg`, `.jpeg`, `.png`, `.gif`, or dynamic `opengraph-image.tsx` / `twitter-image.tsx` | Social & operator chat preview cards (1200×630). Dynamically generated at build time in [apps/portal/app/opengraph-image.tsx](../../apps/portal/app/opengraph-image.tsx), which also supplies the Twitter `summary_large_image` card via Next.js file-convention fallback. |
+| **`robots.txt`**                                | Static `robots.txt` or dynamic `robots.ts` (`MetadataRoute.Robots`)                     | Crawler directives. Implemented in [apps/portal/app/robots.ts](../../apps/portal/app/robots.ts) (`userAgent: '*', disallow: '/'`) paired with `X-Robots-Tag: noindex, nofollow, noarchive, nosnippet` in `next.config.mjs`.                                                |
+| **`sitemap.xml`**                               | Static `sitemap.xml` or dynamic `sitemap.ts` (`MetadataRoute.Sitemap`)                  | XML route index for search engines. (Intentionally omitted for authenticated SCADA routes per [apps/portal/app/robots.ts](../../apps/portal/app/robots.ts#L4-L8); template pattern provided below).                                                                        |
 
 #### Programmatic File-Based Metadata Implementations (`robots.ts`, `sitemap.ts`, `icon.tsx`, `apple-icon.tsx`, `twitter-image.tsx`)
 
@@ -821,7 +821,7 @@ export { alt, contentType, default, size } from "./opengraph-image";
 
 ### Dynamic Image Generation (`ImageResponse` from `next/og`)
 
-The `ImageResponse` constructor generates dynamic images using JSX and CSS via Satori and Resvg. In [apps/portal/app/opengraph-image.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/opengraph-image.tsx), Arch-System generates a 1200×630 industrial light-mode Open Graph card displaying the six core mining modules (`Control Room`, `Drilling`, `Production`, `Engineering`, `Access Control`, `Database`):
+The `ImageResponse` constructor generates dynamic images using JSX and CSS via Satori and Resvg. In [apps/portal/app/opengraph-image.tsx](../../apps/portal/app/opengraph-image.tsx), Arch-System generates a 1200×630 industrial light-mode Open Graph card displaying the six core mining modules (`Control Room`, `Drilling`, `Production`, `Engineering`, `Access Control`, `Database`):
 
 ```tsx title="apps/portal/app/opengraph-image.tsx"
 import { ImageResponse } from "next/og";
@@ -902,7 +902,7 @@ export default async function Page() {
 
 - **Reference URL**: `https://nextjs.org/docs/14/app/building-your-application/optimizing/static-assets`
 
-Next.js serves static files under the `public` directory at the application root ([apps/portal/public](file:///home/tim/Fork/Arch-System/apps/portal/public)). Files inside `public` are referenced starting from the base URL (`/`):
+Next.js serves static files under the `public` directory at the application root ([apps/portal/public](../../apps/portal/public)). Files inside `public` are referenced starting from the base URL (`/`):
 
 ```tsx title="components/BrandLogo.tsx"
 import Image from "next/image";
@@ -916,7 +916,7 @@ export function BrandLogo() {
 
 ### Caching Headers
 
-Next.js applies immutable caching headers to fingerprinted static assets, and Arch-System augments `/images/:path*`, `/background/:path*`, and `/manifest.json` with explicit CDN `Cache-Control` directives in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L325-L350):
+Next.js applies immutable caching headers to fingerprinted static assets, and Arch-System augments `/images/:path*`, `/background/:path*`, and `/manifest.json` with explicit CDN `Cache-Control` directives in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L325-L350):
 
 ```http
 Cache-Control: public, max-age=31536000, immutable
@@ -938,7 +938,7 @@ Cache-Control: public, max-age=31536000, immutable
 
 ### Configuration in Arch-System
 
-`@next/bundle-analyzer` (`^16.2.3`) is installed in `apps/portal/package.json` and wired in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L4):
+`@next/bundle-analyzer` (`^16.2.3`) is installed in `apps/portal/package.json` and wired in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L4):
 
 ```js title="apps/portal/next.config.mjs"
 import withBundleAnalyzer from "@next/bundle-analyzer";
@@ -966,14 +966,14 @@ Additionally, Arch-System enforces automated bundle size budgets via:
 pnpm monitor:bundle
 ```
 
-And compile-time barrel tree-shaking via `experimental.optimizePackageImports` in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L238-L270) covering `lucide-react`, `framer-motion`, `@tremor/react`, `@xyflow/react`, `recharts`, `date-fns`, `@radix-ui/*`, and `@repo/*`.
+And compile-time barrel tree-shaking via `experimental.optimizePackageImports` in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L238-L270) covering `lucide-react`, `framer-motion`, `@tremor/react`, `@xyflow/react`, `recharts`, `date-fns`, `@radix-ui/*`, and `@repo/*`.
 
 ---
 
 ## 8. Lazy Loading (`next/dynamic`, `React.lazy()`, and `<Suspense>`)
 
 - **Reference URL**: `https://nextjs.org/docs/14/app/building-your-application/optimizing/lazy-loading`
-- **Codebase Guide**: [apps/portal/LAZY_LOADING_GUIDE.md](file:///home/tim/Fork/Arch-System/apps/portal/LAZY_LOADING_GUIDE.md)
+- **Codebase Guide**: [apps/portal/LAZY_LOADING_GUIDE.md](../../apps/portal/LAZY_LOADING_GUIDE.md)
 
 Lazy loading in Next.js improves initial loading performance by decreasing the amount of JavaScript needed to render a route. It defers loading of **Client Components** and imported libraries until they are needed.
 
@@ -1020,7 +1020,7 @@ flowchart TD
 
 #### 1. Deferring Layout Chrome (`apps/portal/app/layout.tsx`)
 
-In [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx#L22-L50), `HeaderWidgets`, `CommandBar`, and `MacMenuBar` are loaded via `next/dynamic` so `framer-motion` and command-palette dependencies are excluded from the critical initial chunk:
+In [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L22-L50), `HeaderWidgets`, `CommandBar`, and `MacMenuBar` are loaded via `next/dynamic` so `framer-motion` and command-palette dependencies are excluded from the critical initial chunk:
 
 ```tsx title="apps/portal/app/layout.tsx"
 import dynamic from "next/dynamic";
@@ -1047,7 +1047,7 @@ const CommandBar = dynamic(() =>
 
 #### 2. Skipping SSR for Heavy Client Components (`ssr: false`)
 
-In [apps/portal/components/dynamic/LazyHeavyComponents.tsx](file:///home/tim/Fork/Arch-System/apps/portal/components/dynamic/LazyHeavyComponents.tsx), heavy visualization libraries (`DataGrid` ~900KB, `WorkflowBuilder` ~300KB, `TelemetryChart` ~200KB — saving **~1.4MB** from the initial bundle) use `ssr: false` with custom loading skeletons:
+In [apps/portal/components/dynamic/LazyHeavyComponents.tsx](../../apps/portal/components/dynamic/LazyHeavyComponents.tsx), heavy visualization libraries (`DataGrid` ~900KB, `WorkflowBuilder` ~300KB, `TelemetryChart` ~200KB — saving **~1.4MB** from the initial bundle) use `ssr: false` with custom loading skeletons:
 
 ```tsx title="apps/portal/components/dynamic/LazyHeavyComponents.tsx"
 "use client";
@@ -1123,13 +1123,13 @@ const ClientComponent = dynamic(() =>
 ## 9. Analytics & Web Vitals (`TTFB`, `FCP`, `LCP`, `FID`, `CLS`, `INP`)
 
 - **Reference URL**: `https://nextjs.org/docs/14/app/building-your-application/optimizing/analytics`
-- **Codebase Engine**: [apps/portal/lib/observability/speed-insights.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/observability/speed-insights.ts)
+- **Codebase Engine**: [apps/portal/lib/observability/speed-insights.ts](../../apps/portal/lib/observability/speed-insights.ts)
 
 Next.js provides built-in support for measuring and reporting real-user performance metrics via the `useReportWebVitals` hook (`next/web-vitals`) and Vercel's managed `<SpeedInsights />` / `<Analytics />` components.
 
 ### Core & Supplemental Web Vitals Reference
 
-[Web Vitals](https://web.dev/vitals/) capture the real-world user experience of a web page. All six Web Vitals are tracked and evaluated in Arch-System's [SPEED_INSIGHTS_THRESHOLDS](file:///home/tim/Fork/Arch-System/apps/portal/lib/observability/speed-insights.ts#L20-L28):
+[Web Vitals](https://web.dev/vitals/) capture the real-world user experience of a web page. All six Web Vitals are tracked and evaluated in Arch-System's [SPEED_INSIGHTS_THRESHOLDS](../../apps/portal/lib/observability/speed-insights.ts#L20-L28):
 
 | Metric   | Full Name                                                                                    | What It Measures                                                                              | Good Threshold | Needs Improvement | Poor Threshold |    RES Weight in Arch-System    |
 | :------- | :------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------- | :------------: | :---------------: | :------------: | :-----------------------------: |
@@ -1183,7 +1183,7 @@ export function WebVitals() {
 ## 10. Instrumentation (`instrumentation.ts`)
 
 - **Reference URL**: `https://nextjs.org/docs/14/app/building-your-application/optimizing/instrumentation`
-- **Codebase Implementation**: [apps/portal/instrumentation.ts](file:///home/tim/Fork/Arch-System/apps/portal/instrumentation.ts)
+- **Codebase Implementation**: [apps/portal/instrumentation.ts](../../apps/portal/instrumentation.ts)
 
 Instrumentation integrates monitoring, performance baseline loading, and distributed tracing tools into your application at server bootstrap time.
 
@@ -1193,7 +1193,7 @@ Instrumentation integrates monitoring, performance baseline loading, and distrib
    - In Next.js 14, instrumentation is experimental and requires `experimental.instrumentationHook = true;` in `next.config.js`.
    - In Next.js 15/16 (used by Arch-System), `instrumentation.ts` `register()` and `onRequestError()` are natively supported at the root without requiring the experimental flag.
 2. **File Placement**:
-   - The `instrumentation.ts` (or `.js`) file **must** be placed in the **root directory** of the Next.js app ([apps/portal/instrumentation.ts](file:///home/tim/Fork/Arch-System/apps/portal/instrumentation.ts)) — never inside `app/` or `pages/`. (If a project uses a `src/` folder, place it inside `src/` alongside `app/` and `pages/`).
+   - The `instrumentation.ts` (or `.js`) file **must** be placed in the **root directory** of the Next.js app ([apps/portal/instrumentation.ts](../../apps/portal/instrumentation.ts)) — never inside `app/` or `pages/`. (If a project uses a `src/` folder, place it inside `src/` alongside `app/` and `pages/`).
 3. **`pageExtensions` Matching**:
    - If you configure `pageExtensions` in `next.config.mjs` to add a custom suffix, update the `instrumentation` filename to match.
 4. **Colocating Side-Effect Imports & Runtime Branching (`NEXT_RUNTIME`)**:
@@ -1213,7 +1213,7 @@ export async function register() {
 
 ### Arch-System `apps/portal/instrumentation.ts` Lifecycle
 
-In [apps/portal/instrumentation.ts](file:///home/tim/Fork/Arch-System/apps/portal/instrumentation.ts):
+In [apps/portal/instrumentation.ts](../../apps/portal/instrumentation.ts):
 
 1. Captures cold-start duration (`performanceMonitor.recordStartupTime(...)`).
 2. Loads committed performance baselines from `lib/performance/performance-baselines.json` when `process.env.NEXT_RUNTIME === 'nodejs'`.
@@ -1233,7 +1233,7 @@ OpenTelemetry provides a vendor-neutral observability standard (_Traces_, _Spans
 
 #### Option A: `@vercel/otel` (Used in `apps/portal/instrumentation.ts`)
 
-[apps/portal/instrumentation.ts](file:///home/tim/Fork/Arch-System/apps/portal/instrumentation.ts#L80-L93) combines `@vercel/otel` with `@opentelemetry/exporter-trace-otlp-http` and `BatchSpanProcessor`:
+[apps/portal/instrumentation.ts](../../apps/portal/instrumentation.ts#L80-L93) combines `@vercel/otel` with `@opentelemetry/exporter-trace-otlp-http` and `BatchSpanProcessor`:
 
 ```ts title="apps/portal/instrumentation.ts"
 export async function register(): Promise<void> {
@@ -1337,26 +1337,26 @@ Next.js automatically instruments 10 span types with standard HTTP semantic conv
 ## 12. Project Configuration & TypeScript Architecture
 
 - **Reference URL**: `https://nextjs.org/docs/14/app/building-your-application/configuring/typescript`
-- **Codebase Configs**: [apps/portal/tsconfig.json](file:///home/tim/Fork/Arch-System/apps/portal/tsconfig.json), [packages/typescript-config/nextjs.json](file:///home/tim/Fork/Arch-System/packages/typescript-config/nextjs.json), [packages/typescript-config/base.json](file:///home/tim/Fork/Arch-System/packages/typescript-config/base.json)
+- **Codebase Configs**: [apps/portal/tsconfig.json](../../apps/portal/tsconfig.json), [packages/typescript-config/nextjs.json](../../packages/typescript-config/nextjs.json), [packages/typescript-config/base.json](../../packages/typescript-config/base.json)
 
 ### Next.js Customization Capabilities Overview
 
-| Configuration Area                         | Purpose                                                               | Arch-System Implementation                                                                                                                                                                                                           |
-| :----------------------------------------- | :-------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TypeScript**                             | TypeScript-first development experience + IDE plugin                  | TypeScript `5.9.3`, strict mode (`strict: true`, `noUncheckedIndexedAccess: true`), `"plugins": [{ "name": "next" }, { "name": "workflow" }]`                                                                                        |
-| **Linter (Biome / ESLint)**                | Conformance & code quality rules                                      | Enforced via **Biome 2.5.14** root tasks (`//#lint:ci`, `//#check`) + `tools/audits/*`                                                                                                                                               |
-| **Environment Variables**                  | Type-safe server & client (`NEXT_PUBLIC_*`) env vars                  | Validated via `@t3-oss/env-nextjs` + Zod in `apps/portal/env/`                                                                                                                                                                       |
-| **Absolute Imports & Module Path Aliases** | Remap import paths (`@/*`, `~/*`, `@repo/*`)                          | Configured in [apps/portal/tsconfig.json](file:///home/tim/Fork/Arch-System/apps/portal/tsconfig.json#L12-L50)                                                                                                                       |
-| **MDX**                                    | Write JSX inside Markdown documentation files                         | Supported for engineering docs and interactive runbooks                                                                                                                                                                              |
-| **`src` Directory**                        | Alternative to root `app/` directory                                  | Arch-System uses root `apps/portal/app/` for App Router and `packages/*/src/` for shared libraries                                                                                                                                   |
-| **Draft Mode**                             | Toggle between static and dynamic rendering for headless CMS previews | Controlled via App Router `draftMode()` cookie helper                                                                                                                                                                                |
-| **Content Security Policy (CSP)**          | Mitigate XSS and data injection attacks                               | Per-request nonce CSP in [apps/portal/proxy.ts](file:///home/tim/Fork/Arch-System/apps/portal/proxy.ts) + baseline headers in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L308-L318) |
+| Configuration Area                         | Purpose                                                               | Arch-System Implementation                                                                                                                                                   |
+| :----------------------------------------- | :-------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TypeScript**                             | TypeScript-first development experience + IDE plugin                  | TypeScript `5.9.3`, strict mode (`strict: true`, `noUncheckedIndexedAccess: true`), `"plugins": [{ "name": "next" }, { "name": "workflow" }]`                                |
+| **Linter (Biome / ESLint)**                | Conformance & code quality rules                                      | Enforced via **Biome 2.5.14** root tasks (`//#lint:ci`, `//#check`) + `tools/audits/*`                                                                                       |
+| **Environment Variables**                  | Type-safe server & client (`NEXT_PUBLIC_*`) env vars                  | Validated via `@t3-oss/env-nextjs` + Zod in `apps/portal/env/`                                                                                                               |
+| **Absolute Imports & Module Path Aliases** | Remap import paths (`@/*`, `~/*`, `@repo/*`)                          | Configured in [apps/portal/tsconfig.json](../../apps/portal/tsconfig.json#L12-L50)                                                                                           |
+| **MDX**                                    | Write JSX inside Markdown documentation files                         | Supported for engineering docs and interactive runbooks                                                                                                                      |
+| **`src` Directory**                        | Alternative to root `app/` directory                                  | Arch-System uses root `apps/portal/app/` for App Router and `packages/*/src/` for shared libraries                                                                           |
+| **Draft Mode**                             | Toggle between static and dynamic rendering for headless CMS previews | Controlled via App Router `draftMode()` cookie helper                                                                                                                        |
+| **Content Security Policy (CSP)**          | Mitigate XSS and data injection attacks                               | Per-request nonce CSP in [apps/portal/proxy.ts](../../apps/portal/proxy.ts) + baseline headers in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L308-L318) |
 
 ### TypeScript Deep Dive
 
 #### 1. Next.js TypeScript Plugin
 
-Next.js includes a custom TypeScript language service plugin (`{ "name": "next" }` in [apps/portal/tsconfig.json](file:///home/tim/Fork/Arch-System/apps/portal/tsconfig.json#L4-L11)) that provides:
+Next.js includes a custom TypeScript language service plugin (`{ "name": "next" }` in [apps/portal/tsconfig.json](../../apps/portal/tsconfig.json#L4-L11)) that provides:
 
 - Warnings when invalid values are passed to route segment config options (`dynamic`, `revalidate`, `runtime`).
 - In-context documentation and autocomplete for Next.js APIs.
@@ -1410,17 +1410,17 @@ function DepartmentNavCard<T extends string>({
 
 1. **Zero Manual Boundary Serialization in RSCs**: Server Components fetch data directly on the server without serializing through `getServerSideProps` / `_app` props. Values such as `Date`, `Map`, and `Set` can be used directly inside Server Components.
 2. **Database-to-UI Type Continuity**: Arch-System combines generated Supabase types (`@repo/database`), Kysely (`@repo/supabase/kysely`), and canonical Zod schemas (`@repo/contract`) enforced by Gate 5 (`pnpm audit:drift`) for complete end-to-end type safety from PostgreSQL migrations to React 19 forms.
-3. **Server-to-Client Serialization & Tainting**: Data passed via props from a Server Component to a `'use client'` component is serialized by React Flight. `experimental.taint: true` in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L231) prevents raw database clients or secret tokens from crossing the RSC boundary.
+3. **Server-to-Client Serialization & Tainting**: Data passed via props from a Server Component to a `'use client'` component is serialized by React Flight. `experimental.taint: true` in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L231) prevents raw database clients or secret tokens from crossing the RSC boundary.
 
 #### 5. Path Aliases (`paths`) and JSDoc Config Typing
 
-- **Path Aliases**: [apps/portal/tsconfig.json](file:///home/tim/Fork/Arch-System/apps/portal/tsconfig.json#L12-L50) maps `@/*` and `~/*` to `./*` and maps every `@repo/*` package directly to its `src/index.ts` entrypoint so `tsc --noEmit` and Turbopack resolve workspace types without intermediate build steps.
-- **Type Checking `next.config.mjs`**: Use JSDoc `/** @type {import('next').NextConfig} */` (as in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L26)) for IDE type checking.
+- **Path Aliases**: [apps/portal/tsconfig.json](../../apps/portal/tsconfig.json#L12-L50) maps `@/*` and `~/*` to `./*` and maps every `@repo/*` package directly to its `src/index.ts` entrypoint so `tsc --noEmit` and Turbopack resolve workspace types without intermediate build steps.
+- **Type Checking `next.config.mjs`**: Use JSDoc `/** @type {import('next').NextConfig} */` (as in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L26)) for IDE type checking.
 
 #### 6. Incremental Type Checking, Build Error Guards & Custom Type Declarations
 
 - **Incremental Type Checking**: Enabled in `tsconfig.json` to cache type-check graphs across runs (`pnpm turbo run type-check`).
-- **Disallowing `ignoreBuildErrors` in CI**: In [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L89-L94), `typescript.ignoreBuildErrors` is strictly locked to `false` in CI:
+- **Disallowing `ignoreBuildErrors` in CI**: In [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L89-L94), `typescript.ignoreBuildErrors` is strictly locked to `false` in CI:
   ```js title="apps/portal/next.config.mjs"
   typescript: {
     ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === 'true' && process.env.CI !== 'true',
@@ -1657,7 +1657,7 @@ export default async function DepartmentPage(
 
 ### Dynamic Segments with Cache Components (`cacheComponents: true`)
 
-Arch-System enables `cacheComponents: true` in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L30). Under Cache Components, handling dynamic `params` follows two patterns depending on whether `generateStaticParams` is used:
+Arch-System enables `cacheComponents: true` in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L30). Under Cache Components, handling dynamic `params` follows two patterns depending on whether `generateStaticParams` is used:
 
 #### Pattern 1: Without `generateStaticParams` (Runtime `params` inside `<Suspense>`)
 
@@ -1772,7 +1772,7 @@ export async function GET(
 
 ## 15. Root Layout Architecture & Caveats (`app/layout.tsx`)
 
-- **Codebase Root Layout**: [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx)
+- **Codebase Root Layout**: [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx)
 
 The `app` directory **must** include a root layout (`app/layout.tsx`):
 
@@ -1835,7 +1835,7 @@ Because `loading.tsx` sits **below** `layout.tsx` in the component tree, `loadin
 
 - **Without Cache Components**: Navigation blocks until the layout finishes rendering.
 - **With Cache Components (`cacheComponents: true`, active in Arch-System)**: Uncached or runtime data access (`cookies()`, `headers()`, auth session lookups) inside `layout.tsx` **must** be wrapped in its own explicit `<Suspense>` boundary so the static layout shell streams immediately.
-- **Arch-System Implementation**: In [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx#L203-L208), the authenticated operator badge (`<MenuIdentity />`) is wrapped in `<Suspense fallback={<MenuIdentitySkeleton />}>` inside `<MacMenuBar />` so the root layout shell never blocks navigation.
+- **Arch-System Implementation**: In [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L203-L208), the authenticated operator badge (`<MenuIdentity />`) is wrapped in `<Suspense fallback={<MenuIdentitySkeleton />}>` inside `<MacMenuBar />` so the root layout shell never blocks navigation.
 
 ```tsx title="apps/portal/app/layout.tsx"
 <MacMenuBar
@@ -2025,19 +2025,19 @@ As monorepo applications grow, controlling memory consumption during `next dev`,
 
 ### Memory Optimization Techniques & Diagnostics Matrix
 
-| Strategy / Flag                                         | Configuration / Command                                                                                                       | How It Optimizes or Diagnoses Memory                                                                                                                            |
-| :------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1. Turbopack Memory Eviction & FS Cache**             | Default in Next.js 16 (verified by [audit-turbopack.cjs](file:///home/tim/Fork/Arch-System/tools/audits/audit-turbopack.cjs)) | Never set `turbopackMemoryEviction: false`. Turbopack streams compilation artifacts to `.next/cache/turbopack` (`464 MB`) and evicts cold graph nodes from RAM. |
-| **2. Reduce Dependencies**                              | `pnpm next analyze` / `pnpm knip`                                                                                             | Prunes unused packages and heavy transitive dependencies from the module graph.                                                                                 |
-| **3. Webpack Memory Optimizations**                     | `experimental: { webpackMemoryOptimizations: true }` (`v15.0.0+`)                                                             | Reduces peak heap allocation when using Webpack builds with minimal compile-time overhead.                                                                      |
-| **4. Debug Build Memory Usage**                         | `next build --experimental-debug-memory-usage` (`v14.2.0+`)                                                                   | Prints continuous heap usage and GC stats during `next build` and automatically captures heap snapshots near memory limits (or on `kill -SIGUSR2 <pid>`).       |
-| **5. Record a Node.js Heap Profile**                    | `node --heap-prof node_modules/next/dist/bin/next build`                                                                      | Generates a `.heapprofile` file at build completion that can be loaded in Chrome DevTools → **Memory** tab.                                                     |
-| **6. Live Heap Snapshot Inspection**                    | `NODE_OPTIONS=--inspect pnpm --filter portal build` (or `--inspect-brk`)                                                      | Exposes the V8 inspector port so Chrome DevTools can capture and compare retained heap snapshots in real time.                                                  |
-| **7. Webpack Build Worker**                             | `experimental: { webpackBuildWorker: true }` (`v14.1.0+`)                                                                     | Runs Webpack compilations in an isolated Node.js worker process to lower main-process memory retention.                                                         |
-| **8. Disable Disk Webpack Cache in RAM-Constrained CI** | `config.cache = Object.freeze({ type: 'memory' })`                                                                            | Prevents large serialized filesystem cache buffers from accumulating in memory during custom Webpack builds.                                                    |
-| **9. Decouple Type Checking from Build Step**           | `SKIP_TYPE_CHECK=true` (local only; CI runs `pnpm turbo run type-check`)                                                      | Avoids running `tsc` concurrently inside `next build` on memory-constrained machines while keeping CI type-check gates strict.                                  |
-| **10. Disable Source Maps During Prerender/Build**      | `productionBrowserSourceMaps: false`, `experimental: { serverSourceMaps: false, enablePrerenderSourceMaps: false }`           | Eliminates source-map AST retention during the `"Generating static pages"` prerender phase.                                                                     |
-| **11. Disable Preloading Entries on Server Start**      | `experimental: { preloadEntriesOnStart: false }`                                                                              | Prevents Next.js from preloading every page's JS modules into memory at server startup, reducing initial cold-boot RAM footprint.                               |
+| Strategy / Flag                                         | Configuration / Command                                                                                             | How It Optimizes or Diagnoses Memory                                                                                                                            |
+| :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Turbopack Memory Eviction & FS Cache**             | Default in Next.js 16 (verified by [audit-turbopack.cjs](../../tools/audits/audit-turbopack.cjs))                   | Never set `turbopackMemoryEviction: false`. Turbopack streams compilation artifacts to `.next/cache/turbopack` (`464 MB`) and evicts cold graph nodes from RAM. |
+| **2. Reduce Dependencies**                              | `pnpm next analyze` / `pnpm knip`                                                                                   | Prunes unused packages and heavy transitive dependencies from the module graph.                                                                                 |
+| **3. Webpack Memory Optimizations**                     | `experimental: { webpackMemoryOptimizations: true }` (`v15.0.0+`)                                                   | Reduces peak heap allocation when using Webpack builds with minimal compile-time overhead.                                                                      |
+| **4. Debug Build Memory Usage**                         | `next build --experimental-debug-memory-usage` (`v14.2.0+`)                                                         | Prints continuous heap usage and GC stats during `next build` and automatically captures heap snapshots near memory limits (or on `kill -SIGUSR2 <pid>`).       |
+| **5. Record a Node.js Heap Profile**                    | `node --heap-prof node_modules/next/dist/bin/next build`                                                            | Generates a `.heapprofile` file at build completion that can be loaded in Chrome DevTools → **Memory** tab.                                                     |
+| **6. Live Heap Snapshot Inspection**                    | `NODE_OPTIONS=--inspect pnpm --filter portal build` (or `--inspect-brk`)                                            | Exposes the V8 inspector port so Chrome DevTools can capture and compare retained heap snapshots in real time.                                                  |
+| **7. Webpack Build Worker**                             | `experimental: { webpackBuildWorker: true }` (`v14.1.0+`)                                                           | Runs Webpack compilations in an isolated Node.js worker process to lower main-process memory retention.                                                         |
+| **8. Disable Disk Webpack Cache in RAM-Constrained CI** | `config.cache = Object.freeze({ type: 'memory' })`                                                                  | Prevents large serialized filesystem cache buffers from accumulating in memory during custom Webpack builds.                                                    |
+| **9. Decouple Type Checking from Build Step**           | `SKIP_TYPE_CHECK=true` (local only; CI runs `pnpm turbo run type-check`)                                            | Avoids running `tsc` concurrently inside `next build` on memory-constrained machines while keeping CI type-check gates strict.                                  |
+| **10. Disable Source Maps During Prerender/Build**      | `productionBrowserSourceMaps: false`, `experimental: { serverSourceMaps: false, enablePrerenderSourceMaps: false }` | Eliminates source-map AST retention during the `"Generating static pages"` prerender phase.                                                                     |
+| **11. Disable Preloading Entries on Server Start**      | `experimental: { preloadEntriesOnStart: false }`                                                                    | Prevents Next.js from preloading every page's JS modules into memory at server startup, reducing initial cold-boot RAM footprint.                               |
 
 ---
 
@@ -2074,7 +2074,7 @@ Integrated directly with Turbopack's Rust module graph, `next analyze` inspects 
 
 ### 2. `@next/bundle-analyzer` Plugin for Webpack
 
-Configured in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L4) via `withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })` and triggered via:
+Configured in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L4) via `withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })` and triggered via:
 
 ```bash
 ANALYZE=true pnpm build
@@ -2084,7 +2084,7 @@ ANALYZE=true pnpm build
 
 #### Strategy A: Packages with Many Exports (`optimizePackageImports`)
 
-Barrel files that re-export hundreds of icons or UI primitives (`lucide-react`, `@radix-ui/*`, `@repo/ui`) are tree-shaken at compile time via `experimental.optimizePackageImports` in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L238-L270):
+Barrel files that re-export hundreds of icons or UI primitives (`lucide-react`, `@radix-ui/*`, `@repo/ui`) are tree-shaken at compile time via `experimental.optimizePackageImports` in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L238-L270):
 
 ```js title="apps/portal/next.config.mjs"
 experimental: {
@@ -2127,7 +2127,7 @@ export async function ServerCodeBlock({ code }: { code: string }) {
 
 #### Strategy C: Opting Server-Only Packages Out of Bundling (`serverExternalPackages`)
 
-Packages imported in Server Components and Route Handlers that use native Node.js bindings or dynamic `require()` calls can be opted out of bundling via `serverExternalPackages` in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L223):
+Packages imported in Server Components and Route Handlers that use native Node.js bindings or dynamic `require()` calls can be opted out of bundling via `serverExternalPackages` in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L223):
 
 ```js title="apps/portal/next.config.mjs"
 const nextConfig = {
@@ -2154,15 +2154,15 @@ Arch-System runs 100% on the **Next.js 16 App Router** (`apps/portal/app/`) unde
 
 ### 2. Pages Router to App Router Architectural Mapping
 
-| Legacy `pages/` Convention                      | Modern `app/` Convention in Arch-System                                                                                                                                           | Key Behavioral Difference                                                                                                                                 |
-| :---------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pages/_app.tsx` + `pages/_document.tsx`        | [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx) (Root Layout) + `ClientProviders.tsx`                                                  | Root Layout is a Server Component defining `<html>` and `<body>`; React Context providers live in a `'use client'` child wrapper (`ClientProviders.tsx`). |
-| `Page.getLayout = (page) => ...`                | Nested `app/(departments)/[department]/layout.tsx`                                                                                                                                | Native nested Server Component layouts that persist state across child navigations.                                                                       |
-| `next/head` (`<Head><title>...</title></Head>`) | `export const metadata: Metadata` / `generateMetadata()`                                                                                                                          | Built-in streaming-safe SEO and Open Graph Metadata API.                                                                                                  |
-| `pages/index.tsx`, `pages/blog/[slug].tsx`      | `app/page.tsx`, `app/blog/[slug]/page.tsx`                                                                                                                                        | Pages are **Server Components by default**; interactive state lives in leaf `'use client'` components.                                                    |
-| `pages/404.tsx`                                 | [apps/portal/app/not-found.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/not-found.tsx)                                                                                  | Triggered automatically or via `notFound()` from `next/navigation`.                                                                                       |
-| `pages/_error.tsx`                              | [apps/portal/app/error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/error.tsx) & [global-error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/global-error.tsx) | Granular per-segment React Error Boundaries (`error.tsx`) plus root `global-error.tsx`.                                                                   |
-| `pages/api/*.ts`                                | `app/api/.../route.ts` (Route Handlers) & Server Actions                                                                                                                          | Standard Web `Request` / `Response` APIs (`export async function GET/POST(request: Request)`).                                                            |
+| Legacy `pages/` Convention                      | Modern `app/` Convention in Arch-System                                                                                   | Key Behavioral Difference                                                                                                                                 |
+| :---------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pages/_app.tsx` + `pages/_document.tsx`        | [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx) (Root Layout) + `ClientProviders.tsx`                      | Root Layout is a Server Component defining `<html>` and `<body>`; React Context providers live in a `'use client'` child wrapper (`ClientProviders.tsx`). |
+| `Page.getLayout = (page) => ...`                | Nested `app/(departments)/[department]/layout.tsx`                                                                        | Native nested Server Component layouts that persist state across child navigations.                                                                       |
+| `next/head` (`<Head><title>...</title></Head>`) | `export const metadata: Metadata` / `generateMetadata()`                                                                  | Built-in streaming-safe SEO and Open Graph Metadata API.                                                                                                  |
+| `pages/index.tsx`, `pages/blog/[slug].tsx`      | `app/page.tsx`, `app/blog/[slug]/page.tsx`                                                                                | Pages are **Server Components by default**; interactive state lives in leaf `'use client'` components.                                                    |
+| `pages/404.tsx`                                 | [apps/portal/app/not-found.tsx](../../apps/portal/app/not-found.tsx)                                                      | Triggered automatically or via `notFound()` from `next/navigation`.                                                                                       |
+| `pages/_error.tsx`                              | [apps/portal/app/error.tsx](../../apps/portal/app/error.tsx) & [global-error.tsx](../../apps/portal/app/global-error.tsx) | Granular per-segment React Error Boundaries (`error.tsx`) plus root `global-error.tsx`.                                                                   |
+| `pages/api/*.ts`                                | `app/api/.../route.ts` (Route Handlers) & Server Actions                                                                  | Standard Web `Request` / `Response` APIs (`export async function GET/POST(request: Request)`).                                                            |
 
 ### 3. Migrating Routing Hooks (`next/router` → `next/navigation`)
 
@@ -2208,7 +2208,7 @@ pnpm add @next/third-parties@latest
 
 ### Arch-System First-Party Telemetry Script Proxy
 
-In [apps/portal/app/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx#L275-L276), Arch-System loads Vercel Analytics via a first-party relative script path (`<Analytics scriptSrc="/va/script.js" />`) alongside `<SpeedInsights />` so telemetry scripts respect the strict Content Security Policy (`script-src 'self' https://va.vercel-scripts.com`) and avoid third-party DNS/TLS handshake overhead.
+In [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L275-L276), Arch-System loads Vercel Analytics via a first-party relative script path (`<Analytics scriptSrc="/va/script.js" />`) alongside `<SpeedInsights />` so telemetry scripts respect the strict Content Security Policy (`script-src 'self' https://va.vercel-scripts.com`) and avoid third-party DNS/TLS handshake overhead.
 
 ---
 
@@ -2237,7 +2237,7 @@ Next.js has built-in support for loading environment variables from `.env*` file
 
 ### 2. Absolute Imports and Module Path Aliases (`tsconfig.json`)
 
-Configured via `compilerOptions.paths` in [apps/portal/tsconfig.json](file:///home/tim/Fork/Arch-System/apps/portal/tsconfig.json#L12-L50):
+Configured via `compilerOptions.paths` in [apps/portal/tsconfig.json](../../apps/portal/tsconfig.json#L12-L50):
 
 ```json title="apps/portal/tsconfig.json"
 {
@@ -2298,28 +2298,28 @@ A Content Security Policy protects the portal against Cross-Site Scripting (XSS)
 Arch-System implements a **two-layer CSP architecture**:
 
 1. **Per-Request Edge Proxy (`apps/portal/proxy.ts`)**:
-   - [apps/portal/proxy.ts](file:///home/tim/Fork/Arch-System/apps/portal/proxy.ts#L12-L32) generates a per-request Base64 cryptographic nonce (`Buffer.from(crypto.randomUUID()).toString('base64')`) and attaches both `Content-Security-Policy` and `x-nonce` headers to the response.
+   - [apps/portal/proxy.ts](../../apps/portal/proxy.ts#L12-L32) generates a per-request Base64 cryptographic nonce (`Buffer.from(crypto.randomUUID()).toString('base64')`) and attaches both `Content-Security-Policy` and `x-nonce` headers to the response.
    - Server Components can read the active nonce via `(await headers()).get('x-nonce')` and pass it to `<Script nonce={nonce} />` or inline `<script nonce={nonce}>` elements.
 2. **Global Static & API Route Headers (`apps/portal/next.config.mjs`)**:
-   - [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L272-L320) applies baseline security headers (`Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `X-Robots-Tag`, and `Content-Security-Policy` / `Content-Security-Policy-Report-Only` reporting to `/api/csp-violations`) across all routes, including static assets and API routes excluded from the proxy matcher.
+   - [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L272-L320) applies baseline security headers (`Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `X-Robots-Tag`, and `Content-Security-Policy` / `Content-Security-Policy-Report-Only` reporting to `/api/csp-violations`) across all routes, including static assets and API routes excluded from the proxy matcher.
 
 ---
 
 ## 23. Linking, Navigating, Speculation Rules & Dual-Tier Cache Architecture (`'use cache'`, `cacheLife`, `updateTag`)
 
 - **Codebase Files**:
-  - [apps/portal/components/SpeculationRules.tsx](file:///home/tim/Fork/Arch-System/apps/portal/components/SpeculationRules.tsx)
-  - [apps/portal/lib/server-cache.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/server-cache.ts)
-  - [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L29-L31)
+  - [apps/portal/components/SpeculationRules.tsx](../../apps/portal/components/SpeculationRules.tsx)
+  - [apps/portal/lib/server-cache.ts](../../apps/portal/lib/server-cache.ts)
+  - [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L29-L31)
 
 ### 1. Multi-Tier Navigation Acceleration
 
 Arch-System combines three navigation acceleration layers so switching between mining department dashboards (`/hub`, `/drilling`, `/production`, `/control-room`, `/engineering`, `/access-control`) achieves near-instant transitions:
 
-1. **Next.js 16 Partial Prefetching (`partialPrefetching: true`)** & **Client Router Cache (`staleTimes: { dynamic: 30, static: 300 }`)** in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L30-L31).
-2. **Browser Speculation Rules API (`<script type="speculationrules">`)** in [apps/portal/components/SpeculationRules.tsx](file:///home/tim/Fork/Arch-System/apps/portal/components/SpeculationRules.tsx):
+1. **Next.js 16 Partial Prefetching (`partialPrefetching: true`)** & **Client Router Cache (`staleTimes: { dynamic: 30, static: 300 }`)** in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L30-L31).
+2. **Browser Speculation Rules API (`<script type="speculationrules">`)** in [apps/portal/components/SpeculationRules.tsx](../../apps/portal/components/SpeculationRules.tsx):
    - Prerenders and prefetches all core department routes (`/hub`, `/drilling/*`, `/production/*`, `/control-room/*`, `/engineering/*`, `/access-control/*`, `/overview/*`) at `eagerness: "moderate"` (on pointer hover/down) while explicitly excluding `/login*`, `/api/*`, and `/admin*`.
-3. **Server-Side Dual-Tier Caching (`'use cache'` + `cacheLife` + Redis L1/L2)** in [apps/portal/lib/server-cache.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/server-cache.ts):
+3. **Server-Side Dual-Tier Caching (`'use cache'` + `cacheLife` + Redis L1/L2)** in [apps/portal/lib/server-cache.ts](../../apps/portal/lib/server-cache.ts):
    - Synchronizes 8 named `cacheLife` profiles (`telemetry`, `departments`, `reports`, `max`, `hours`, `minutes`, `realtime`, `default`) between `apps/portal/next.config.mjs` and `apps/portal/lib/server-cache.ts`.
    - Server Actions call `updateTag()` / `updateTagInAction()` **before** any `redirect()` to invalidate both the Next.js Data Cache (read-your-writes) and distributed Redis L1/L2 cache tags (`cacheInvalidateTags`).
 
@@ -2329,13 +2329,13 @@ Arch-System combines three navigation acceleration layers so switching between m
 
 Based on auditing the `Arch-System` monorepo against all sections of this guide, the following prioritized engineering steps (`P0`–`P2`) have been executed and verified across the workspace:
 
-| Priority | Target Area & Files                                                                                                                                                                                                                                                                                                                                                                                                               | Previous State in Codebase                                                                                                                                                                                                                              | Executed Action & Status                                                                                                                                                                                                                                                                                                                                                                  | Measured Impact                                                                                                                           |
-| :------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
-|  **P0**  | **Build-Time WebP Derivative Resizing for `/hub` Banners**<br>[scripts/sync-assets-smart.cjs](file:///home/tim/Fork/Arch-System/scripts/sync-assets-smart.cjs) & [DepartmentCard.tsx](file:///home/tim/Fork/Arch-System/libs/features/hub/ui/src/DepartmentCard.tsx#L216-L238)                                                                                                                                                    | `images.unoptimized: true` is enabled in `next.config.mjs` to avoid Vercel on-demand image billing; `.webp` department banners were `1280x720` (`1,309 KB` total, `93–185 KB` each) even though `/hub` card banners render inside `~380 px` containers. | **COMPLETED**: Wired `ensureOptimizedDepartmentWebpBanners()` using `sharp` inside [scripts/sync-assets-smart.cjs](file:///home/tim/Fork/Arch-System/scripts/sync-assets-smart.cjs) to generate `768x432` (2x Retina 16:9) WebP derivatives (`quality: 76, effort: 6, smartSubsampling: true`) for all 11 department images (`37–72 KB` each).                                            | **-60% WebP byte transfer (`1,309 KB` → `521 KB`, and -67% vs `1,575 KB` JPEGs)** on `/hub` with **$0** Vercel image transformation cost. |
-| **P1a**  | **Per-Request `x-nonce` Forwarding & `<SpeculationRules />` Nonce Support**<br>[apps/portal/proxy.ts](file:///home/tim/Fork/Arch-System/apps/portal/proxy.ts#L12-L31) & [SpeculationRules.tsx](file:///home/tim/Fork/Arch-System/apps/portal/components/SpeculationRules.tsx)                                                                                                                                                     | `proxy.ts` set `x-nonce` only on the outgoing response headers after `handleProxy`, and `<SpeculationRules />` lacked a `nonce` prop.                                                                                                                   | **COMPLETED**: Updated [apps/portal/proxy.ts](file:///home/tim/Fork/Arch-System/apps/portal/proxy.ts) to attach `x-nonce` to both incoming `request.headers` (for Server Components reading `(await headers()).get('x-nonce')`) and `response.headers`, and added `nonce?: string` prop support to `<SpeculationRules />`.                                                                | Enables strict per-request nonce propagation across Server Components and `<script type="speculationrules">`.                             |
-| **P1b**  | **Automate Turbopack `next analyze export` JSONL Graph Export**<br>[apps/portal/package.json](file:///home/tim/Fork/Arch-System/apps/portal/package.json#L91)                                                                                                                                                                                                                                                                     | Next.js `16.4.3` supports `next analyze --output --snapshot` and `next analyze export`, but `apps/portal/package.json` lacked a dedicated script.                                                                                                       | **COMPLETED**: Added `"analyze:turbopack": "next analyze --output --snapshot latest && next analyze export --snapshot latest > ../../.ci-local/bundle-graph.jsonl"` to [apps/portal/package.json](file:///home/tim/Fork/Arch-System/apps/portal/package.json).                                                                                                                            | Gives developers and AI agents deterministic JSONL import-chain diagnostics without starting a browser server.                            |
-| **P2a**  | **Adopt Global `PageProps<'/route'>` & `LayoutProps<'/route'>` Helpers**<br>[layout.tsx](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/layout.tsx>), [breakdowns/page.tsx](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/breakdowns/page.tsx>), [delays/page.tsx](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/delays/page.tsx>) | Route pages and layouts manually declared `{ params: Promise<{ department: string }> }`.                                                                                                                                                                | **COMPLETED**: Adopted Next.js 16's generated global `LayoutProps<'/[department]'>`, `PageProps<'/[department]/breakdowns'>`, and `PageProps<'/[department]/delays'>` helpers, verified via `pnpm --filter portal type-check`.                                                                                                                                                            | Zero-boilerplate, compiler-verified route parameter and parallel-slot typing synchronized via `next typegen`.                             |
-| **P2b**  | **Zero-`any` Burn-Down & Promotion of `suspicious/noExplicitAny` to `"error"`**<br>[biome.json](file:///home/tim/Fork/Arch-System/biome.json) & [openrouter.ts](file:///home/tim/Fork/Arch-System/packages/utils/src/openrouter.ts)                                                                                                                                                                                               | `correctness.noUnusedVariables: "error"`, `correctness.noUnusedImports: "error"`, and `linter.domains.types: "recommended"` were enforced at `"error"`, while `suspicious.noExplicitAny` was at `"warn"`.                                               | **COMPLETED**: Replaced `any` in [packages/utils/src/openrouter.ts](file:///home/tim/Fork/Arch-System/packages/utils/src/openrouter.ts), [packages/utils/src/fulcra.ts](file:///home/tim/Fork/Arch-System/packages/utils/src/fulcra.ts), [apps/portal/app/error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/error.tsx), and promoted `noExplicitAny: "error"` in `biome.json`. | Enforces `suspicious.noExplicitAny: "error"` across production source files in `~105ms >>> FULL TURBO`.                                   |
+| Priority | Target Area & Files                                                                                                                                                                                                                                                                                                                           | Previous State in Codebase                                                                                                                                                                                                                              | Executed Action & Status                                                                                                                                                                                                                                                                                           | Measured Impact                                                                                                                           |
+| :------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+|  **P0**  | **Build-Time WebP Derivative Resizing for `/hub` Banners**<br>[scripts/sync-assets-smart.cjs](../../scripts/sync-assets-smart.cjs) & [DepartmentCard.tsx](../../libs/features/hub/ui/src/DepartmentCard.tsx#L216-L238)                                                                                                                        | `images.unoptimized: true` is enabled in `next.config.mjs` to avoid Vercel on-demand image billing; `.webp` department banners were `1280x720` (`1,309 KB` total, `93–185 KB` each) even though `/hub` card banners render inside `~380 px` containers. | **COMPLETED**: Wired `ensureOptimizedDepartmentWebpBanners()` using `sharp` inside [scripts/sync-assets-smart.cjs](../../scripts/sync-assets-smart.cjs) to generate `768x432` (2x Retina 16:9) WebP derivatives (`quality: 76, effort: 6, smartSubsampling: true`) for all 11 department images (`37–72 KB` each). | **-60% WebP byte transfer (`1,309 KB` → `521 KB`, and -67% vs `1,575 KB` JPEGs)** on `/hub` with **$0** Vercel image transformation cost. |
+| **P1a**  | **Per-Request `x-nonce` Forwarding & `<SpeculationRules />` Nonce Support**<br>[apps/portal/proxy.ts](../../apps/portal/proxy.ts#L12-L31) & [SpeculationRules.tsx](../../apps/portal/components/SpeculationRules.tsx)                                                                                                                         | `proxy.ts` set `x-nonce` only on the outgoing response headers after `handleProxy`, and `<SpeculationRules />` lacked a `nonce` prop.                                                                                                                   | **COMPLETED**: Updated [apps/portal/proxy.ts](../../apps/portal/proxy.ts) to attach `x-nonce` to both incoming `request.headers` (for Server Components reading `(await headers()).get('x-nonce')`) and `response.headers`, and added `nonce?: string` prop support to `<SpeculationRules />`.                     | Enables strict per-request nonce propagation across Server Components and `<script type="speculationrules">`.                             |
+| **P1b**  | **Automate Turbopack `next analyze export` JSONL Graph Export**<br>[apps/portal/package.json](../../apps/portal/package.json#L91)                                                                                                                                                                                                             | Next.js `16.4.3` supports `next analyze --output --snapshot` and `next analyze export`, but `apps/portal/package.json` lacked a dedicated script.                                                                                                       | **COMPLETED**: Added `"analyze:turbopack": "next analyze --output --snapshot latest && next analyze export --snapshot latest > ../../.ci-local/bundle-graph.jsonl"` to [apps/portal/package.json](../../apps/portal/package.json).                                                                                 | Gives developers and AI agents deterministic JSONL import-chain diagnostics without starting a browser server.                            |
+| **P2a**  | **Adopt Global `PageProps<'/route'>` & `LayoutProps<'/route'>` Helpers**<br>[layout.tsx](<../../apps/portal/app/(departments)/[department]/layout.tsx>), [breakdowns/page.tsx](<../../apps/portal/app/(departments)/[department]/breakdowns/page.tsx>), [delays/page.tsx](<../../apps/portal/app/(departments)/[department]/delays/page.tsx>) | Route pages and layouts manually declared `{ params: Promise<{ department: string }> }`.                                                                                                                                                                | **COMPLETED**: Adopted Next.js 16's generated global `LayoutProps<'/[department]'>`, `PageProps<'/[department]/breakdowns'>`, and `PageProps<'/[department]/delays'>` helpers, verified via `pnpm --filter portal type-check`.                                                                                     | Zero-boilerplate, compiler-verified route parameter and parallel-slot typing synchronized via `next typegen`.                             |
+| **P2b**  | **Zero-`any` Burn-Down & Promotion of `suspicious/noExplicitAny` to `"error"`**<br>[biome.json](../../biome.json) & [openrouter.ts](../../packages/utils/src/openrouter.ts)                                                                                                                                                                   | `correctness.noUnusedVariables: "error"`, `correctness.noUnusedImports: "error"`, and `linter.domains.types: "recommended"` were enforced at `"error"`, while `suspicious.noExplicitAny` was at `"warn"`.                                               | **COMPLETED**: Replaced `any` in [packages/utils/src/openrouter.ts](../../packages/utils/src/openrouter.ts), [packages/utils/src/fulcra.ts](../../packages/utils/src/fulcra.ts), [apps/portal/app/error.tsx](../../apps/portal/app/error.tsx), and promoted `noExplicitAny: "error"` in `biome.json`.              | Enforces `suspicious.noExplicitAny: "error"` across production source files in `~105ms >>> FULL TURBO`.                                   |
 
 ---
 
@@ -2348,8 +2348,8 @@ Based on auditing the `Arch-System` monorepo against all sections of this guide,
   - `/docs/app/api-reference/config/next-config-js/cacheComponents`
   - `/docs/app/guides/instant-navigation`
 - **Codebase Files**:
-  - [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L29-L65)
-  - [apps/portal/lib/server-cache.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/server-cache.ts)
+  - [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L29-L65)
+  - [apps/portal/lib/server-cache.ts](../../apps/portal/lib/server-cache.ts)
 
 Caching stores the result of data fetching and server computations so that subsequent requests for the same data or UI slice are served immediately without repeating database queries or RSC rendering work.
 
@@ -2368,7 +2368,7 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-- Always set `partialPrefetching` explicitly (`true` in [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L30)). Leaving it unset logs a warning because the initial release of Cache Components did not include Partial Prefetching.
+- Always set `partialPrefetching` explicitly (`true` in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L30)). Leaving it unset logs a warning because the initial release of Cache Components did not include Partial Prefetching.
 - **Route Handlers with Cache Components**: `GET` Route Handlers (`app/api/.../route.ts`) follow the exact same model as pages and layouts—they run at request time by default, and you can extract slow or shared computations into helper functions marked with `'use cache'` to include them in the prerender or shared server cache.
 
 ### 2. The `'use cache'` Directive
@@ -2687,9 +2687,9 @@ export default function VersionFooter() {
   - `/docs/app/api-reference/functions/updateTag`
   - `/docs/app/api-reference/functions/revalidatePath`
 - **Codebase Files**:
-  - [apps/portal/lib/server-cache.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/server-cache.ts)
-  - [apps/portal/lib/cache-tags.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/cache-tags.ts)
-  - [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L42-L65)
+  - [apps/portal/lib/server-cache.ts](../../apps/portal/lib/server-cache.ts)
+  - [apps/portal/lib/cache-tags.ts](../../apps/portal/lib/cache-tags.ts)
+  - [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L42-L65)
 
 Cached data can be revalidated in two complementary ways:
 
@@ -2718,7 +2718,7 @@ Call `cacheLife()` inside a `'use cache'` function or component to configure thr
 
 #### Custom `cacheLife` Profiles in Arch-System (`apps/portal/next.config.mjs` & `apps/portal/lib/server-cache.ts`)
 
-Arch-System defines 8 domain-tuned profiles synchronized between [apps/portal/next.config.mjs](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs#L42-L65) and [apps/portal/lib/server-cache.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/server-cache.ts#L28-L52):
+Arch-System defines 8 domain-tuned profiles synchronized between [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L42-L65) and [apps/portal/lib/server-cache.ts](../../apps/portal/lib/server-cache.ts#L28-L52):
 
 | Arch-System Profile | `stale` | `revalidate` | `expire` | Domain Role                                             |
 | :------------------ | :-----: | :----------: | :------: | :------------------------------------------------------ |
@@ -2738,7 +2738,7 @@ Arch-System defines 8 domain-tuned profiles synchronized between [apps/portal/ne
 
 #### Step 1: Tag Cached Data with `cacheTag`
 
-Call `cacheTag()` inside any `'use cache'` function to attach one or more semantic tags (see [apps/portal/lib/cache-tags.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/cache-tags.ts) for canonical helpers `scopedTag`, `tagTenant`, `tagDepartment`, `tagTable`, `tagAuthUser`):
+Call `cacheTag()` inside any `'use cache'` function to attach one or more semantic tags (see [apps/portal/lib/cache-tags.ts](../../apps/portal/lib/cache-tags.ts) for canonical helpers `scopedTag`, `tagTenant`, `tagDepartment`, `tagTable`, `tagAuthUser`):
 
 ```tsx
 import { cacheLife, cacheTag } from "@/lib/server-cache";
@@ -2755,12 +2755,12 @@ export async function getShiftCloseoutSummary(deptId: string) {
 
 Next.js 16 provides two distinct tag invalidation functions with different consistency guarantees:
 
-| Feature             | `updateTag(tag)`                                                                                                                              | `revalidateTag(tag, profile)` (e.g. `revalidateTag(tag, 'max')`)                                                                                                 |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Allowed Context** | **Server Actions (`'use server'`) only**                                                                                                      | **Server Actions AND Route Handlers (`app/api/.../route.ts`)**                                                                                                   |
-| **Behavior**        | **Immediate expiration (Read-Your-Own-Writes)** — next read waits for fresh data in the same request                                          | **Stale-While-Revalidate (SWR)** — serves stale entry while refreshing in background                                                                             |
-| **Best Used When**  | Operator submits a form (e.g. Shift Closeout, Breakdown Log) and expects immediate UI consistency                                             | Background webhook, cron job, or external integration notifies of data updates                                                                                   |
-| **Arch-System API** | `await updateTagInAction(tag)` ([apps/portal/lib/server-cache.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/server-cache.ts#L63-L90)) | `await revalidateTagInRouteHandler(tag, 'max')` ([apps/portal/lib/server-cache.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/server-cache.ts#L146-L170)) |
+| Feature             | `updateTag(tag)`                                                                                                  | `revalidateTag(tag, profile)` (e.g. `revalidateTag(tag, 'max')`)                                                                     |
+| :------------------ | :---------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **Allowed Context** | **Server Actions (`'use server'`) only**                                                                          | **Server Actions AND Route Handlers (`app/api/.../route.ts`)**                                                                       |
+| **Behavior**        | **Immediate expiration (Read-Your-Own-Writes)** — next read waits for fresh data in the same request              | **Stale-While-Revalidate (SWR)** — serves stale entry while refreshing in background                                                 |
+| **Best Used When**  | Operator submits a form (e.g. Shift Closeout, Breakdown Log) and expects immediate UI consistency                 | Background webhook, cron job, or external integration notifies of data updates                                                       |
+| **Arch-System API** | `await updateTagInAction(tag)` ([apps/portal/lib/server-cache.ts](../../apps/portal/lib/server-cache.ts#L63-L90)) | `await revalidateTagInRouteHandler(tag, 'max')` ([apps/portal/lib/server-cache.ts](../../apps/portal/lib/server-cache.ts#L146-L170)) |
 
 > [!IMPORTANT] > **Always Invalidate Before `redirect()`**: In Server Actions, `redirect()` throws an internal Next.js control-flow exception. Always call `await updateTagInAction(...)` **before** calling `redirect('/target')`:
 >
@@ -2807,12 +2807,12 @@ revalidatePath("/(departments)/[department]", "layout"); // Revalidates layout +
   - `/docs/app/api-reference/functions/notFound`
   - `/docs/app/api-reference/file-conventions/not-found`
 - **Codebase Files**:
-  - [apps/portal/app/error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/error.tsx)
-  - [apps/portal/app/global-error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/global-error.tsx)
-  - [apps/portal/app/not-found.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/not-found.tsx)
-  - [apps/portal/app/(departments)/[department]/error.tsx](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/error.tsx>)
-  - [apps/portal/app/hub/error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/hub/error.tsx)
-  - [packages/errors/src/index.ts](file:///home/tim/Fork/Arch-System/packages/errors/src/index.ts)
+  - [apps/portal/app/error.tsx](../../apps/portal/app/error.tsx)
+  - [apps/portal/app/global-error.tsx](../../apps/portal/app/global-error.tsx)
+  - [apps/portal/app/not-found.tsx](../../apps/portal/app/not-found.tsx)
+  - [apps/portal/app/(departments)/[department]/error.tsx](<../../apps/portal/app/(departments)/[department]/error.tsx>)
+  - [apps/portal/app/hub/error.tsx](../../apps/portal/app/hub/error.tsx)
+  - [packages/errors/src/index.ts](../../packages/errors/src/index.ts)
 
 Errors in Next.js App Router applications fall into two distinct categories:
 
@@ -2887,7 +2887,7 @@ export function ShiftNoteForm() {
 When fetching data inside a Server Component:
 
 - Conditionally render an inline error state or call `redirect('/login')` if an expected status occurs.
-- If a route parameter (`/[department]`) does not match a valid resource (such as an unknown department slug in [apps/portal/app/(departments)/[department]/layout.tsx](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/layout.tsx#L26-L27>)), call `notFound()` from `next/navigation` to render the nearest [`not-found.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/not-found.tsx) boundary with a `404` HTTP status code.
+- If a route parameter (`/[department]`) does not match a valid resource (such as an unknown department slug in [apps/portal/app/(departments)/[department]/layout.tsx](<../../apps/portal/app/(departments)/[department]/layout.tsx#L26-L27>)), call `notFound()` from `next/navigation` to render the nearest [`not-found.tsx`](../../apps/portal/app/not-found.tsx) boundary with a `404` HTTP status code.
 
 ### 2. Handling Uncaught Exceptions
 
@@ -2896,14 +2896,14 @@ When fetching data inside a Server Component:
 Adding an `error.tsx` (`'use client'`) file inside a route segment wraps that segment's `page.tsx` and nested children in a React Error Boundary while keeping the parent `layout.tsx` interactive:
 
 - **Arch-System Hierarchy**:
-  - Root segment boundary: [apps/portal/app/error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/error.tsx) (dependency-light, code-splits Sentry structured logging and `reportClientLog` to `public.system_logs`, uses `isAppError` type guards from `@repo/errors`).
-  - Department segment boundary: [apps/portal/app/(departments)/[department]/error.tsx](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/error.tsx>).
-  - Hub segment boundary: [apps/portal/app/hub/error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/hub/error.tsx).
+  - Root segment boundary: [apps/portal/app/error.tsx](../../apps/portal/app/error.tsx) (dependency-light, code-splits Sentry structured logging and `reportClientLog` to `public.system_logs`, uses `isAppError` type guards from `@repo/errors`).
+  - Department segment boundary: [apps/portal/app/(departments)/[department]/error.tsx](<../../apps/portal/app/(departments)/[department]/error.tsx>).
+  - Hub segment boundary: [apps/portal/app/hub/error.tsx](../../apps/portal/app/hub/error.tsx).
 - Note: In Next.js 16, `error.tsx` receives `{ error, reset, unstable_retry }` (or `{ error: unknown, retry: () => void }`) to re-render the failed route segment without a full browser reload.
 
 #### Fine-Grained Component Error Boundaries (`catchError` from `next/error`)
 
-When you need a reusable, component-level error boundary inside a page (so a single widget failure does not take down the entire route segment) or want to pass custom props into the fallback UI, use `catchError` from `next/error` (or Arch-System's [apps/portal/components/ErrorBoundary.tsx](file:///home/tim/Fork/Arch-System/apps/portal/components/ErrorBoundary.tsx)):
+When you need a reusable, component-level error boundary inside a page (so a single widget failure does not take down the entire route segment) or want to pass custom props into the fallback UI, use `catchError` from `next/error` (or Arch-System's [apps/portal/components/ErrorBoundary.tsx](../../apps/portal/components/ErrorBoundary.tsx)):
 
 ```tsx title="Component-Level Error Boundary with catchError"
 "use client";
@@ -2956,10 +2956,10 @@ React Error Boundaries **do not** automatically catch errors thrown inside stand
 
 #### Global Root Error Boundary (`app/global-error.tsx`)
 
-An `error.tsx` file cannot catch errors thrown inside the same segment's `layout.tsx` because the error boundary is nested _inside_ the layout. To catch uncaught exceptions in the root `app/layout.tsx`, define [`apps/portal/app/global-error.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/global-error.tsx):
+An `error.tsx` file cannot catch errors thrown inside the same segment's `layout.tsx` because the error boundary is nested _inside_ the layout. To catch uncaught exceptions in the root `app/layout.tsx`, define [`apps/portal/app/global-error.tsx`](../../apps/portal/app/global-error.tsx):
 
 - `global-error.tsx` **must** be a Client Component (`'use client'`) and **must** render its own `<html>` and `<body>` tags because it replaces the root layout when active.
-- In [apps/portal/app/global-error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/global-error.tsx), Arch-System uses zero external UI dependencies (`@repo/ui` and `framer-motion` are intentionally excluded) and self-contained inline light-mode styles (`background: '#f3f4f6'`) so the catastrophic fallback renders reliably even if CSS or chunk loading fails.
+- In [apps/portal/app/global-error.tsx](../../apps/portal/app/global-error.tsx), Arch-System uses zero external UI dependencies (`@repo/ui` and `framer-motion` are intentionally excluded) and self-contained inline light-mode styles (`background: '#f3f4f6'`) so the catastrophic fallback renders reliably even if CSS or chunk loading fails.
 
 ---
 
@@ -2972,21 +2972,21 @@ An `error.tsx` file cannot catch errors thrown inside the same segment's `layout
   - **`rehype`**: `https://github.com/rehypejs/rehype`
   - **Markdoc**: `https://markdoc.dev/docs/nextjs`
 - **Relevant Codebase Touchpoints**:
-  - [apps/portal/app/docs/page.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/docs/page.tsx) & [apps/portal/app/docs/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/docs/layout.tsx)
-  - [apps/portal/app/overview/sections/DocumentationMaps.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/overview/sections/DocumentationMaps.tsx)
-  - [apps/portal/lib/ai/external-content-indexer.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/external-content-indexer.ts) & [apps/portal/lib/ai/chunking.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/chunking.ts)
-  - [packages/ui/.storybook/main.ts](file:///home/tim/Fork/Arch-System/packages/ui/.storybook/main.ts)
+  - [apps/portal/app/docs/page.tsx](../../apps/portal/app/docs/page.tsx) & [apps/portal/app/docs/layout.tsx](../../apps/portal/app/docs/layout.tsx)
+  - [apps/portal/app/overview/sections/DocumentationMaps.tsx](../../apps/portal/app/overview/sections/DocumentationMaps.tsx)
+  - [apps/portal/lib/ai/external-content-indexer.ts](../../apps/portal/lib/ai/external-content-indexer.ts) & [apps/portal/lib/ai/chunking.ts](../../apps/portal/lib/ai/chunking.ts)
+  - [packages/ui/.storybook/main.ts](../../packages/ui/.storybook/main.ts)
   - `docs/operations/**` & `docs/runbooks/control-room/*.md` (80+ operational Markdown manuals)
 
 ### 1. Executive Comparison Matrix
 
-| Technology      | Core Architecture                                                               | Current Footprint in Arch-System                                                                                                                                 | Where It Is Helpful in Arch-System                                                                                                                                                                                                                      | When NOT to Use It in Arch-System                                                                                                                      |
-| :-------------- | :------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MDX**         | Compiles Markdown + embedded JSX (`import`/`export`) into executable React code | `@mdx-js/react@3.1.1` installed in `node_modules`; enabled in [packages/ui/.storybook/main.ts](file:///home/tim/Fork/Arch-System/packages/ui/.storybook/main.ts) | **Storybook Component Docs (`packages/ui`)** & developer-authored interactive `/docs` pages that embed `@repo/ui` components (`<GlassCard>`, `<CodeBlock>`, `<Collapse>`, `<Book>`).                                                                    | **Never** use runtime MDX compilation (`evaluate`) on untrusted operator/shift notes (`daily_logs`, `engineering_notes`) or LLM output (RCE/XSS risk). |
-| **`@next/mdx`** | Next.js Webpack/Turbopack loader for `.md`/`.mdx` routes + `mdx-components.tsx` | Documented in Section 16; `@tailwindcss/typography` (`0.5.16`) already installed in `apps/portal/package.json`                                                   | **Compile-time `.mdx` App Router pages** when paired with **`experimental.mdxRs: { mdxType: 'gfm' }`** (Rust SWC compiler, zero JS plugin serialization overhead under Turbopack).                                                                      | Avoid configuring non-serializable JS function plugins in `next.config.mjs` when running `next dev --turbopack` / `next build`.                        |
-| **`remark`**    | Unified Markdown AST (**mdast**) parser, linter & transformer                   | Conceptual pipeline used by `docs/` audits and AI indexing                                                                                                       | **AST-aware RAG chunking** in [apps/portal/lib/ai/chunking.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/chunking.ts) (splitting by heading depth without severing code blocks/tables) & CI runbook linting (`remark-lint`, `remark-gfm`).   | Do not ship `remark` parser bundles to `'use client'` components; run strictly in Server Components, Server Actions, or build scripts.                 |
-| **`rehype`**    | Unified HTML AST (**hast**) transformer, syntax highlighter & sanitizer         | Server-side HTML transformation layer                                                                                                                            | **XSS sanitization (`rehype-sanitize`)** for Operations Copilot / LLM markdown responses, heading anchor generation (`rehype-slug`), and zero-client-JS syntax highlighting (`@shikijs/rehype`).                                                        | Do not run heavy Shiki syntax grammars on the client thread; cache rendered output in Server Components with `'use cache'`.                            |
-| **Markdoc**     | Stripe's **data-only** Markdown parser + schema validator + React renderer      | Pure-function AST library (`Markdoc.parse` → `Markdoc.transform` → `Markdoc.renderers.react`)                                                                    | **Safety-Critical Industrial SOPs & Control-Room Runbooks (`docs/runbooks/control-room/*.md`)**: Validates custom tags (`{% callout %}`) against a strict schema in CI and works natively inside Next.js 16 `'use cache'` RSCs without bundler loaders! | Not needed for Storybook stories where `@mdx-js/react` is already standard.                                                                            |
+| Technology      | Core Architecture                                                               | Current Footprint in Arch-System                                                                                                     | Where It Is Helpful in Arch-System                                                                                                                                                                                                                      | When NOT to Use It in Arch-System                                                                                                                      |
+| :-------------- | :------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MDX**         | Compiles Markdown + embedded JSX (`import`/`export`) into executable React code | `@mdx-js/react@3.1.1` installed in `node_modules`; enabled in [packages/ui/.storybook/main.ts](../../packages/ui/.storybook/main.ts) | **Storybook Component Docs (`packages/ui`)** & developer-authored interactive `/docs` pages that embed `@repo/ui` components (`<GlassCard>`, `<CodeBlock>`, `<Collapse>`, `<Book>`).                                                                    | **Never** use runtime MDX compilation (`evaluate`) on untrusted operator/shift notes (`daily_logs`, `engineering_notes`) or LLM output (RCE/XSS risk). |
+| **`@next/mdx`** | Next.js Webpack/Turbopack loader for `.md`/`.mdx` routes + `mdx-components.tsx` | Documented in Section 16; `@tailwindcss/typography` (`0.5.16`) already installed in `apps/portal/package.json`                       | **Compile-time `.mdx` App Router pages** when paired with **`experimental.mdxRs: { mdxType: 'gfm' }`** (Rust SWC compiler, zero JS plugin serialization overhead under Turbopack).                                                                      | Avoid configuring non-serializable JS function plugins in `next.config.mjs` when running `next dev --turbopack` / `next build`.                        |
+| **`remark`**    | Unified Markdown AST (**mdast**) parser, linter & transformer                   | Conceptual pipeline used by `docs/` audits and AI indexing                                                                           | **AST-aware RAG chunking** in [apps/portal/lib/ai/chunking.ts](../../apps/portal/lib/ai/chunking.ts) (splitting by heading depth without severing code blocks/tables) & CI runbook linting (`remark-lint`, `remark-gfm`).                               | Do not ship `remark` parser bundles to `'use client'` components; run strictly in Server Components, Server Actions, or build scripts.                 |
+| **`rehype`**    | Unified HTML AST (**hast**) transformer, syntax highlighter & sanitizer         | Server-side HTML transformation layer                                                                                                | **XSS sanitization (`rehype-sanitize`)** for Operations Copilot / LLM markdown responses, heading anchor generation (`rehype-slug`), and zero-client-JS syntax highlighting (`@shikijs/rehype`).                                                        | Do not run heavy Shiki syntax grammars on the client thread; cache rendered output in Server Components with `'use cache'`.                            |
+| **Markdoc**     | Stripe's **data-only** Markdown parser + schema validator + React renderer      | Pure-function AST library (`Markdoc.parse` → `Markdoc.transform` → `Markdoc.renderers.react`)                                        | **Safety-Critical Industrial SOPs & Control-Room Runbooks (`docs/runbooks/control-room/*.md`)**: Validates custom tags (`{% callout %}`) against a strict schema in CI and works natively inside Next.js 16 `'use cache'` RSCs without bundler loaders! | Not needed for Storybook stories where `@mdx-js/react` is already standard.                                                                            |
 
 ### 2. Deep-Dive Assessment per Tool
 
@@ -2996,12 +2996,12 @@ An `error.tsx` file cannot catch errors thrown inside the same segment's `layout
   1. `packages/ui/.storybook/main.ts` already globs `../src/components/**/*.@(mdx|stories.@(js|jsx|ts|tsx))` with `@mdx-js/react@3.1.1` (React 19). Authoring `.mdx` documentation alongside `@repo/ui` primitives (`GlassCard.mdx`, `DepartmentLayout.mdx`) works out of the box with zero new dependencies.
   2. In `apps/portal`, `@tailwindcss/typography` is already installed in `apps/portal/package.json`. If file-based `.mdx` routes are added under `apps/portal/app/docs/`, enabling `experimental: { mdxRs: { mdxType: 'gfm' } }` with `@next/mdx` compiles GitHub Flavored Markdown (tables, strikethrough, task lists, autolinks) in **Rust** inside Turbopack (`next dev --turbopack` and `next build`) without needing JavaScript `remark-gfm` plugins.
 - **Key Limitation / Risk**:
-  - Because `@next/mdx` treats `.mdx` files as **module code** at bundle time, dynamically rendering the 80+ existing `.md` files in `/home/tim/Fork/Arch-System/docs/runbooks/` or `codebase-maps/` via `@next/mdx` dynamic `import()` requires bundling every `.md` file into the Next.js server compilation graph.
+  - Because `@next/mdx` treats `.mdx` files as **module code** at bundle time, dynamically rendering the 80+ existing `.md` files in `./docs/runbooks/` or `codebase-maps/` via `@next/mdx` dynamic `import()` requires bundling every `.md` file into the Next.js server compilation graph.
 
 #### B. `remark` (`https://github.com/remarkjs/remark`) & `rehype` (`https://github.com/rehypejs/rehype`)
 
 - **High-Value Use Case 1 — Upgrading RAG Chunking (`apps/portal/lib/ai/chunking.ts`)**:
-  - In [apps/portal/lib/ai/chunking.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/chunking.ts) and [external-content-indexer.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/external-content-indexer.ts), Markdown heading boundary detection (`findMarkdownHeadingBoundary`) splits `.md` / `.mdx` runbooks on `\n#{1,6}` heading boundaries while keeping fenced code blocks intact inside each vector chunk.
+  - In [apps/portal/lib/ai/chunking.ts](../../apps/portal/lib/ai/chunking.ts) and [external-content-indexer.ts](../../apps/portal/lib/ai/external-content-indexer.ts), Markdown heading boundary detection (`findMarkdownHeadingBoundary`) splits `.md` / `.mdx` runbooks on `\n#{1,6}` heading boundaries while keeping fenced code blocks intact inside each vector chunk.
 - **High-Value Use Case 2 — Defense-in-Depth Sanitization (`rehype-sanitize`)**:
   - When rendering AI Operations Copilot responses or operator shift handover notes as formatted HTML, piping `remark-parse` → `remark-rehype` → **`rehype-sanitize`** → `rehype-stringify` guarantees strict allowlist sanitization on the server before reaching the browser DOM.
 

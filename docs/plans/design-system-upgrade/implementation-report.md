@@ -11,15 +11,15 @@
 ### Phase 1: Typography & Iconography Foundation
 
 1. **IBM Plex Sans Primary Typeface (`@repo/theme` & `portal`)**:
-   - Updated [`apps/portal/app/layout.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/layout.tsx) to load `IBM_Plex_Sans` (`400`, `500`, `600`, `700`) via `next/font/google` as `--font-sans`, preserving `Inter` (`--font-inter`), `Outfit` (`--font-outfit`), `JetBrains_Mono` (`--font-mono`), and `Anurati` (`font-anurati`).
-   - Updated [`packages/theme/src/tokens/typography.ts`](file:///home/tim/Fork/Arch-System/packages/theme/src/tokens/typography.ts) and [`packages/theme/src/tailwind/preset.ts`](file:///home/tim/Fork/Arch-System/packages/theme/src/tailwind/preset.ts) to include `IBM Plex Sans` in the canonical `sans` and `heading` font stacks.
+   - Updated [`apps/portal/app/layout.tsx`](../../../apps/portal/app/layout.tsx) to load `IBM_Plex_Sans` (`400`, `500`, `600`, `700`) via `next/font/google` as `--font-sans`, preserving `Inter` (`--font-inter`), `Outfit` (`--font-outfit`), `JetBrains_Mono` (`--font-mono`), and `Anurati` (`font-anurati`).
+   - Updated [`packages/theme/src/tokens/typography.ts`](../../../packages/theme/src/tokens/typography.ts) and [`packages/theme/src/tailwind/preset.ts`](../../../packages/theme/src/tailwind/preset.ts) to include `IBM Plex Sans` in the canonical `sans` and `heading` font stacks.
 2. **Central Lucide Icon Registry (`@repo/ui/icons/department-icons`)**:
-   - Created [`packages/ui/src/icons/department-icons.ts`](file:///home/tim/Fork/Arch-System/packages/ui/src/icons/department-icons.ts):
+   - Created [`packages/ui/src/icons/department-icons.ts`](../../../packages/ui/src/icons/department-icons.ts):
      - `DEPARTMENT_ICON_REGISTRY`: Canonical Lucide icons for `admin` (`Wrench`), `access-control` (`ShieldCheck`), `production` (`Factory`), `drilling` (`Drill`), `plant-processing` (`Factory`), `plant-inventory` (`Package`), `engineering` (`Wrench`), `control-room` (`TowerControl`), `fleet` (`Truck`), `database` (`Database`), `finance` (`CreditCard`), `safety` (`HardHat`), `hr` (`GraduationCap`), `analytics` (`Orbit`), `exploration` (`Compass`), and `energy` (`Orbit`).
      - `ACTION_ICON_REGISTRY`: Standardized action symbols (`search`, `add`, `edit`, `view`, `export`, `import`, `history`, `settings`, `notifications`, `filter`, `sort`, `refresh`, `print`, `user`, `users`, `logout`, `moreHorizontal`, `moreVertical`, chevrons, `maximize`, `minimize`).
      - `STATUS_ICON_REGISTRY`: Standardized operational status symbols (`success`, `confirmed`, `warning`, `error`, `critical`, `info`, `online`, `offline`, `active`, `standby`, `stopped`, `maintenance`, `reset`, `power`, `shield`, `lock`).
      - Helper functions: `getDepartmentIcon()`, `getActionIcon()`, `getStatusIcon()`.
-   - Wired `getDepartmentIcon()` into [`libs/features/hub/ui/src/DepartmentCard.tsx`](file:///home/tim/Fork/Arch-System/libs/features/hub/ui/src/DepartmentCard.tsx) and [`packages/ui/src/components/DepartmentLayout.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/DepartmentLayout.tsx) (replacing the hardcoded `<BarChart3 />` in the department sidebar header with the active department's canonical icon).
+   - Wired `getDepartmentIcon()` into [`libs/features/hub/ui/src/DepartmentCard.tsx`](../../../libs/features/hub/ui/src/DepartmentCard.tsx) and [`packages/ui/src/components/DepartmentLayout.tsx`](../../../packages/ui/src/components/DepartmentLayout.tsx) (replacing the hardcoded `<BarChart3 />` in the department sidebar header with the active department's canonical icon).
 
 ### Phase 2 & 3: Shared Operational UI Primitives in `@repo/ui`
 

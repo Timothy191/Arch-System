@@ -20,7 +20,9 @@
      - In `control-room/page.tsx`, mount:
        ```tsx
        export default async function ControlRoomPage() {
-         const { deptId, dept, today } = await getDepartmentContext({ department: 'control-room' });
+         const { deptId, dept, today } = await getDepartmentContext({
+           department: "control-room",
+         });
          return (
            <ErrorBoundary context="Control Room Dashboard">
              <div className="space-y-6">
@@ -28,7 +30,11 @@
                <Suspense fallback={<SummaryGridSkeleton />}>
                  <ControlRoomSummaryGridClient deptId={deptId} today={today} />
                </Suspense>
-               <ControlRoomWidgets deptId={deptId} deptSlug="control-room" today={today} />
+               <ControlRoomWidgets
+                 deptId={deptId}
+                 deptSlug="control-room"
+                 today={today}
+               />
              </div>
            </ErrorBoundary>
          );
@@ -38,18 +44,22 @@
 
 ### 1.2 Department Navigation Tabs Configuration
 
-- **Target File:** [`libs/features/departments/data-access/src/departments.ts`](file:///home/tim/Fork/Arch-System/libs/features/departments/data-access/src/departments.ts#L203-L211)
+- **Target File:** [`libs/features/departments/data-access/src/departments.ts`](../../../libs/features/departments/data-access/src/departments.ts#L203-L211)
 - **Specification:** Update `CONTROL_ROOM_TABS` to include all active workflows:
   ```typescript
   export const CONTROL_ROOM_TABS = [
-    { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
-    { name: 'hourly-loads', label: 'Hourly Loads', icon: 'Clock' },
-    { name: 'machine-operations', label: 'Machine Ops', icon: 'Cpu' },
-    { name: 'shift-compilation', label: 'Shift Handover', icon: 'ClipboardCheck' },
-    { name: 'shift-coverage', label: 'Roster & Coverage', icon: 'Users' },
-    { name: 'engineering-notes', label: 'Eng Notes', icon: 'ClipboardList' },
-    { name: 'excavator-activity', label: 'Excavator', icon: 'Pickaxe' },
-    { name: 'reports', label: 'Reports', icon: 'FileText' },
+    { name: "dashboard", label: "Dashboard", icon: "BarChart2" },
+    { name: "hourly-loads", label: "Hourly Loads", icon: "Clock" },
+    { name: "machine-operations", label: "Machine Ops", icon: "Cpu" },
+    {
+      name: "shift-compilation",
+      label: "Shift Handover",
+      icon: "ClipboardCheck",
+    },
+    { name: "shift-coverage", label: "Roster & Coverage", icon: "Users" },
+    { name: "engineering-notes", label: "Eng Notes", icon: "ClipboardList" },
+    { name: "excavator-activity", label: "Excavator", icon: "Pickaxe" },
+    { name: "reports", label: "Reports", icon: "FileText" },
   ] as const;
   ```
 
@@ -65,11 +75,11 @@
   ```typescript
   // Query latest closing SMR per machine from machine_operations or smr_readings
   const { data: previousSMRs } = await supabase
-    .from('machine_operations')
-    .select('machine_id, end_smu')
-    .eq('department_id', deptId)
-    .not('end_smu', 'is', null)
-    .order('shift_date', { ascending: false });
+    .from("machine_operations")
+    .select("machine_id, end_smu")
+    .eq("department_id", deptId)
+    .not("end_smu", "is", null)
+    .order("shift_date", { ascending: false });
 
   const latestSMRMap = new Map<string, number>();
   previousSMRs?.forEach((row) => {
@@ -93,7 +103,7 @@
 
 ### 2.2 SMR Schema Tolerance & Overrun Management
 
-- **Target File:** [`packages/contract/src/schemas/machine-ledger.schema.ts`](file:///home/tim/Fork/Arch-System/packages/contract/src/schemas/machine-ledger.schema.ts#L33-L41)
+- **Target File:** [`packages/contract/src/schemas/machine-ledger.schema.ts`](../../../packages/contract/src/schemas/machine-ledger.schema.ts#L33-L41)
 - **Specification:**
 
   ```typescript
@@ -112,12 +122,14 @@
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Closing SMR (${data.closing_smr}) cannot be less than opening SMR (${data.opening_smr}).`,
-          path: ['closing_smr'],
+          path: ["closing_smr"],
         });
         return;
       }
 
-      const operating_hours = Number((data.closing_smr - data.opening_smr).toFixed(2));
+      const operating_hours = Number(
+        (data.closing_smr - data.opening_smr).toFixed(2)
+      );
       const total_allocated = Number(
         (operating_hours + data.breakdown_hours + data.delay_hours).toFixed(2)
       );
@@ -127,13 +139,13 @@
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Total allocated time (${total_allocated}h) exceeds the 12.5h shift maximum window.`,
-          path: ['closing_smr'],
+          path: ["closing_smr"],
         });
       } else if (total_allocated > 12.0 && !data.overrun_reason?.trim()) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Shift time (${total_allocated}h) exceeds 12h. An overrun reason (e.g. refuel/queue) is required.`,
-          path: ['overrun_reason'],
+          path: ["overrun_reason"],
         });
       }
     });
@@ -141,7 +153,7 @@
 
 ### 2.3 SMR Inputs in Machine Operations Form
 
-- **Target File:** [`MachineOperationsForm.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx>)
+- **Target File:** [`MachineOperationsForm.tsx`](<../../../apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx>)
 - **Specification:**
   - Add numeric fields for `start_smu` and `end_smu`.
   - Include both in the insert/update payload:
@@ -167,7 +179,7 @@
 
 ### 3.1 Persistent Dockable Sidebar (Jakob's & Fitts's Law)
 
-- **Target File:** [`packages/ui/src/components/DepartmentLayout.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/DepartmentLayout.tsx)
+- **Target File:** [`packages/ui/src/components/DepartmentLayout.tsx`](../../../packages/ui/src/components/DepartmentLayout.tsx)
 - **Specification:**
   - Delete mouse proximity detection (`clientX <= 36`) and `w-12` invisible trigger overlay.
   - Implement two explicit states:
@@ -179,7 +191,7 @@
 
 ### 3.2 Stepper Target Enlargement & Direct Input (Fitts's Law & WCAG 2.5.8)
 
-- **Target File:** [`HourlyLoadsGrid.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx#L817-L870>)
+- **Target File:** [`HourlyLoadsGrid.tsx`](<../../../apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx#L817-L870>)
 - **Specification:**
   - Enlarge the stepper container to $32 \times 32\text{px}$ minimum clickable bounds with hit-slop:
     ```tsx
@@ -192,7 +204,9 @@
       >
         <Minus className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
       </button>
-      <span className="font-mono text-sm font-bold w-7 text-center">{loadValue}</span>
+      <span className="font-mono text-sm font-bold w-7 text-center">
+        {loadValue}
+      </span>
       <button
         type="button"
         data-action="up"
@@ -207,7 +221,7 @@
 
 ### 3.3 Confirmation Dialog on Breakdown Reporting (Norman's Mistake Prevention)
 
-- **Target File:** [`EquipmentDashboard.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/EquipmentDashboard.tsx#L165-L173)
+- **Target File:** [`EquipmentDashboard.tsx`](../../../libs/features/departments/ui/src/control-room/EquipmentDashboard.tsx#L165-L173)
 - **Specification:**
   - Increase button height: `px-4 py-2 text-xs font-semibold rounded-lg h-10`.
   - Add state `confirmMachine: FleetItem | null`.
@@ -227,7 +241,7 @@
 
 ### 4.1 Live SCADA Integration & Telemetry Health
 
-- **Target File:** [`ScadaPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ScadaPanel.tsx)
+- **Target File:** [`ScadaPanel.tsx`](../../../apps/portal/features/departments/components/control-room/ScadaPanel.tsx)
 - **Specification:**
   - Consume `/api/control-room/scada-status` via React Query:
     ```typescript
@@ -236,10 +250,10 @@
       refetch,
       isFetching,
     } = useQuery({
-      queryKey: ['scada-status'],
+      queryKey: ["scada-status"],
       queryFn: async () => {
-        const res = await fetch('/api/control-room/scada-status');
-        if (!res.ok) throw new Error('SCADA gateway unreachable');
+        const res = await fetch("/api/control-room/scada-status");
+        if (!res.ok) throw new Error("SCADA gateway unreachable");
         return res.json();
       },
       refetchInterval: 5000,
@@ -253,7 +267,7 @@
 
 ### 4.2 Alarm Acknowledgement State Machine (ANSI/ISA-18.2)
 
-- **Target File:** [`AlertPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/AlertPanel.tsx)
+- **Target File:** [`AlertPanel.tsx`](../../../apps/portal/features/departments/components/control-room/AlertPanel.tsx)
 - **Specification:**
   - Style critical alarms with high-contrast banners (`bg-red-600 text-white font-bold`).
   - Add `onAcknowledge(alarmId)` trigger:
@@ -263,7 +277,7 @@
 
 ### 4.3 Safety Checklist Database Persistence
 
-- **Target File:** [`ControlRoomChecklistWidget.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ControlRoomChecklistWidget.tsx)
+- **Target File:** [`ControlRoomChecklistWidget.tsx`](../../../apps/portal/features/departments/components/control-room/ControlRoomChecklistWidget.tsx)
 - **Specification:**
   - Fetch shift checklist state from `/api/control-room/shift-checklist?departmentId={deptId}&date={date}&shift={shift}`.
   - On toggle, mutate record in PostgreSQL `control_room_shift_reports`.
@@ -279,27 +293,30 @@
 
 ### 4.4 Offline Queueing Logic Fix
 
-- **Target File:** [`ShiftCloseoutForm.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/control-room/components/ShiftCloseoutForm.tsx#L78-L94>)
+- **Target File:** [`ShiftCloseoutForm.tsx`](<../../../apps/portal/app/(departments)/control-room/components/ShiftCloseoutForm.tsx#L78-L94>)
 - **Specification:**
   ```typescript
   if (isOnline && !isDegraded) {
     try {
-      const res = await fetch('/api/control-room/shift-closeout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+      const res = await fetch("/api/control-room/shift-closeout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+        },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Closeout failed');
-      toast.success('Shift closeout submitted and locked.');
-      router.push('/control-room/shift-compilation');
+      if (!res.ok) throw new Error("Closeout failed");
+      toast.success("Shift closeout submitted and locked.");
+      router.push("/control-room/shift-compilation");
     } catch {
       // Fallback to offline queue on network drop
       enqueue({ ...mutationConfig });
-      toast.warning('Network unstable: Closeout stored in offline queue.');
+      toast.warning("Network unstable: Closeout stored in offline queue.");
     }
   } else {
     enqueue({ ...mutationConfig });
-    toast.warning('Offline mode: Closeout saved to local queue.');
+    toast.warning("Offline mode: Closeout saved to local queue.");
   }
   ```
 

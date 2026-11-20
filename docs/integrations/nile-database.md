@@ -15,34 +15,34 @@ Configured in `.env.local` (and exported by Vercel storage integrations):
 
 ### 1. Nile Server SDK (`@niledatabase/server`)
 
-Located at [`apps/portal/lib/nile/server.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/nile/server.ts):
+Located at [`apps/portal/lib/nile/server.ts`](../../apps/portal/lib/nile/server.ts):
 
 ```typescript
-import { nile, getTenantNile } from '@/lib/nile';
+import { nile, getTenantNile } from "@/lib/nile";
 
 // Global query across tenants
-const tenants = await nile.query('SELECT id, name FROM tenants ORDER BY name;');
+const tenants = await nile.query("SELECT id, name FROM tenants ORDER BY name;");
 
 // Tenant-scoped instance with automatic isolation
-const tenantDb = await getTenantNile('tenant-uuid', 'user-uuid');
-const todos = await tenantDb.db.query('SELECT * FROM tasks ORDER BY title;');
+const tenantDb = await getTenantNile("tenant-uuid", "user-uuid");
+const todos = await tenantDb.db.query("SELECT * FROM tasks ORDER BY title;");
 ```
 
 ### 2. Drizzle ORM (`drizzle-orm/node-postgres`)
 
-Located at [`apps/portal/lib/nile/drizzle.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/nile/drizzle.ts):
+Located at [`apps/portal/lib/nile/drizzle.ts`](../../apps/portal/lib/nile/drizzle.ts):
 
 ```typescript
-import { nileDb, verifyNileConnection } from '@/lib/nile';
+import { nileDb, verifyNileConnection } from "@/lib/nile";
 
 // Execute queries via Drizzle
 const health = await verifyNileConnection();
-console.log('Nile status:', health);
+console.log("Nile status:", health);
 ```
 
 ### 3. Prisma Multi-Schema
 
-Located at [`apps/portal/lib/nile/schema.prisma`](file:///home/tim/Fork/Arch-System/apps/portal/lib/nile/schema.prisma):
+Located at [`apps/portal/lib/nile/schema.prisma`](../../apps/portal/lib/nile/schema.prisma):
 
 ```prisma
 generator client {

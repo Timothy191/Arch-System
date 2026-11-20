@@ -15,7 +15,7 @@
   - Mount `ControlRoomHeader`.
   - Mount `ControlRoomSummaryGridClient`.
   - Mount `ControlRoomWidgets` containing re-ordered widgets.
-- [x] **TASK-1.1.3:** Register missing routes in [`libs/features/departments/data-access/src/departments.ts`](file:///home/tim/Fork/Arch-System/libs/features/departments/data-access/src/departments.ts#L203-L211):
+- [x] **TASK-1.1.3:** Register missing routes in [`libs/features/departments/data-access/src/departments.ts`](../../../libs/features/departments/data-access/src/departments.ts#L203-L211):
   - Add `shift-compilation` ("Shift Handover").
   - Add `shift-coverage` ("Roster & Coverage").
   - Add `shift-closeout` ("Shift Closeout").
@@ -23,14 +23,14 @@
 ### 1.2 Fix SMR Initialization & Validation Tolerance
 
 - [x] **TASK-1.2.1:** In `apps/portal/app/(departments)/control-room/shift-closeout/page.tsx`, resolve opening SMR dynamically from previous shift's `end_smu` instead of defaulting to `0`.
-- [x] **TASK-1.2.2:** Update [`packages/contract/src/schemas/machine-ledger.schema.ts`](file:///home/tim/Fork/Arch-System/packages/contract/src/schemas/machine-ledger.schema.ts#L33-L41):
+- [x] **TASK-1.2.2:** Update [`packages/contract/src/schemas/machine-ledger.schema.ts`](../../../packages/contract/src/schemas/machine-ledger.schema.ts#L33-L41):
   - Expand maximum shift window from 12.0h to 12.5h with operational tolerance.
   - Require `overrun_reason` string if allocated hours exceed 12.0h.
-- [x] **TASK-1.2.3:** In [`MachineOperationsForm.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx>), add `start_smu` and `end_smu` inputs so `hours_worked` computes automatically in PostgreSQL.
+- [x] **TASK-1.2.3:** In [`MachineOperationsForm.tsx`](<../../../apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx>), add `start_smu` and `end_smu` inputs so `hours_worked` computes automatically in PostgreSQL.
 
 ### 1.3 Fix Offline Queue & Connectivity Logic
 
-- [x] **TASK-1.3.1:** In [`ShiftCloseoutForm.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/control-room/components/ShiftCloseoutForm.tsx#L78-L95>), update `handleSubmit`:
+- [x] **TASK-1.3.1:** In [`ShiftCloseoutForm.tsx`](<../../../apps/portal/app/(departments)/control-room/components/ShiftCloseoutForm.tsx#L78-L95>), update `handleSubmit`:
   - Attempt direct POST to `/api/control-room/shift-closeout` when `isOnline && !isDegraded`.
   - Fallback to `enqueue()` only on network error or offline status.
 - [x] **TASK-1.3.2:** In `ShiftCloseoutForm.tsx` (lines 109–113), consume `isDegraded` to display high-latency alert banner; display disconnected badge when `!isOnline`.
@@ -38,7 +38,7 @@
 
 ### 1.4 Purge Thread-Blocking `alert()` Calls
 
-- [x] **TASK-1.4.1:** In [`HourlyLoadsGrid.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx>) (lines 370, 483, 496, 533, 947, 958), replace all native `alert(...)` with `toast.error(...)` or `toast.warning(...)` from `sonner`.
+- [x] **TASK-1.4.1:** In [`HourlyLoadsGrid.tsx`](<../../../apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx>) (lines 370, 483, 496, 533, 947, 958), replace all native `alert(...)` with `toast.error(...)` or `toast.warning(...)` from `sonner`.
 
 ---
 
@@ -56,7 +56,7 @@
 
 ### 2.1 Persistent Dockable Sidebar
 
-- [x] **TASK-2.1.1:** In [`DepartmentLayout.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/DepartmentLayout.tsx#L128-L165):
+- [x] **TASK-2.1.1:** In [`DepartmentLayout.tsx`](../../../packages/ui/src/components/DepartmentLayout.tsx#L128-L165):
   - Add pin toggle with `localStorage` persistence.
   - Sidebar remains docked (`translate-x-0`) when pinned.
   - Main container uses dynamic `pl-64` when pinned, preventing any overlap on main workspace tables.
@@ -64,20 +64,20 @@
 
 ### 2.2 Fitts's Law Steppers & Touch Targets
 
-- [x] **TASK-2.2.1:** In [`HourlyLoadsGrid.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx#L817-L870>):
+- [x] **TASK-2.2.1:** In [`HourlyLoadsGrid.tsx`](<../../../apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx#L817-L870>):
   - Enlarge load stepper buttons from 10px to at least $32 \times 32\text{px}$ touch targets.
   - Add explicit `aria-label` tags for screen readers.
   - Implement keyboard arrow increment support on focused cells.
-- [x] **TASK-2.2.2:** In [`EquipmentDashboard.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/EquipmentDashboard.tsx#L165-L173):
+- [x] **TASK-2.2.2:** In [`EquipmentDashboard.tsx`](../../../libs/features/departments/ui/src/control-room/EquipmentDashboard.tsx#L165-L173):
   - Enlarge "Report Breakdown" button to 44px height (`px-4 py-2 text-xs font-semibold rounded-lg`).
   - Add confirmation dialog (`AnimatedDialog`) requiring confirmation before dispatching maintenance escalation.
 
 ### 2.3 Telemetry Viewport Prioritization & Real-Time SCADA
 
-- [x] **TASK-2.3.1:** In [`ControlRoomWidgets.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/ControlRoomWidgets.tsx#L50-L89>):
+- [x] **TASK-2.3.1:** In [`ControlRoomWidgets.tsx`](<../../../apps/portal/app/(departments)/[department]/ControlRoomWidgets.tsx#L50-L89>):
   - Reorder layout: Move `ScadaPanel` and `AlertPanel` to the top row immediately below the summary KPIs.
   - Move `ShiftCoverageSectionClient` and `ControlRoomChecklistWidget` below SCADA.
-- [x] **TASK-2.3.2:** In [`ScadaPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ScadaPanel.tsx):
+- [x] **TASK-2.3.2:** In [`ScadaPanel.tsx`](../../../apps/portal/features/departments/components/control-room/ScadaPanel.tsx):
   - Connect to `/api/control-room/scada-status` to reflect real Redis & FUXA gateway health.
   - Wire manual refresh button `onClick`.
   - Display actual status (Stream Active, Degraded with latency, or Breaker Tripped).
@@ -98,13 +98,13 @@
 
 ### 3.1 Shift Checklist Database Persistence
 
-- [x] **TASK-3.1.1:** In [`ControlRoomChecklistWidget.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ControlRoomChecklistWidget.tsx):
+- [x] **TASK-3.1.1:** In [`ControlRoomChecklistWidget.tsx`](../../../apps/portal/features/departments/components/control-room/ControlRoomChecklistWidget.tsx):
   - Persist checked states to PostgreSQL via dedicated API / Supabase mutation.
   - Wire "Proceed to Shift Closeout" button to navigate to `/control-room/shift-closeout` with checklist reference.
 
 ### 3.2 ISA-18.2 Alarm Acknowledgement State Machine
 
-- [x] **TASK-3.2.1:** In [`AlertPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/AlertPanel.tsx):
+- [x] **TASK-3.2.1:** In [`AlertPanel.tsx`](../../../apps/portal/features/departments/components/control-room/AlertPanel.tsx):
   - Update styles for critical alarms with high-contrast banners (`bg-red-600 text-white font-bold`).
   - Add functional `[Acknowledge]` action with operator comments modal.
   - Log acknowledgement timestamp and operator ID to audit trail.
@@ -112,9 +112,9 @@
 ### 3.3 Design Token Theming Normalization & Dark NOC Support
 
 - [x] **TASK-3.3.1:** Purge hardcoded `bg-white/70`, `bg-neutral-50`, `text-neutral-900` in:
-  - [`FleetKpiTable.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/FleetKpiTable.tsx)
-  - [`ProductionSummaryCard.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/ProductionSummaryCard.tsx)
-  - [`TireAlertsBanner.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/TireAlertsBanner.tsx)
+  - [`FleetKpiTable.tsx`](../../../libs/features/departments/ui/src/control-room/FleetKpiTable.tsx)
+  - [`ProductionSummaryCard.tsx`](../../../libs/features/departments/ui/src/control-room/ProductionSummaryCard.tsx)
+  - [`TireAlertsBanner.tsx`](../../../libs/features/departments/ui/src/control-room/TireAlertsBanner.tsx)
 - [x] **TASK-3.3.2:** Migrate all deprecated `arch-*` classes in `EquipmentDashboard.tsx` to CSS custom property tokens (`var(--surface-*)`, `var(--text-*)`).
 - [x] **TASK-3.3.3:** Add dark-theme contrast variables for night shift (18:00–06:00) control room lighting. (Superseded by Light-Mode Only Invariant — semantic OKLCH tokens enforced)
 

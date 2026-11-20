@@ -6,7 +6,7 @@ This report audits the typography system across the `Arch-System` federated mono
 
 ## 2. Monorepo Structure & Application Entry Points
 
-- **Monorepo Topology:** Turborepo + pnpm workspace root (`/home/tim/Fork`), application core (`Arch-System`).
+- **Monorepo Topology:** Standalone Turborepo + pnpm monorepo (`Arch-System`) with optional federated workspace parent (`../`).
 - **Application App Router Entry:** `Arch-System/apps/portal/app/layout.tsx`.
 - **CSS Design System Core:**
   - `Arch-System/packages/theme/src/css/variables.css` (CSS custom properties, `:root`)
@@ -39,11 +39,13 @@ This report audits the typography system across the `Arch-System` federated mono
 ## 5. CSS Custom Properties (`packages/theme/src/css/variables.css`)
 
 ```css
---font-sans: 'IBM Plex Sans', Arial, Helvetica, sans-serif;
---font-inter: 'Inter', 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
---font-outfit: 'Outfit', ui-sans-serif, system-ui, sans-serif;
---font-anurati: 'Anurati', var(--font-outfit), var(--font-sans), sans-serif;
---font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+--font-sans: "IBM Plex Sans", Arial, Helvetica, sans-serif;
+--font-inter: "Inter", "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  sans-serif;
+--font-outfit: "Outfit", ui-sans-serif, system-ui, sans-serif;
+--font-anurati: "Anurati", var(--font-outfit), var(--font-sans), sans-serif;
+--font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+  Consolas, monospace;
 ```
 
 ## 6. Baseline Verification Results

@@ -177,8 +177,8 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
 3. **Display & Heading Font:** `Anurati` declared in `packages/theme/src/css/typography.css`:
    ```css
    @font-face {
-     font-family: 'Anurati';
-     src: url('/fonts/Anurati-Regular.otf') format('opentype');
+     font-family: "Anurati";
+     src: url("/fonts/Anurati-Regular.otf") format("opentype");
      font-weight: normal;
      font-style: normal;
      font-display: swap;
@@ -189,7 +189,7 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
    h4,
    h5,
    h6 {
-     font-family: 'Anurati', sans-serif;
+     font-family: "Anurati", sans-serif;
      text-transform: uppercase;
    }
    ```
@@ -322,7 +322,7 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
   In `libs/features/hub/ui/src/HeroRotator.tsx`:
   ```tsx
   // 3D Three.js implementation currently bypassed for 2D Framer Motion rotator
-  import { GenericHeroRotator } from './GenericHeroRotator';
+  import { GenericHeroRotator } from "./GenericHeroRotator";
   export function HeroRotator(props: HeroRotatorProps) {
     return <GenericHeroRotator {...props} />;
   }
@@ -566,13 +566,13 @@ Arch-System Monorepo UI Architecture
 
 The complete UI/UX forensic audit is recorded across 7 canonical report files located in `docs/reports/`:
 
-1. [`docs/reports/ui-forensic-report.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-forensic-report.md) — Master Executive Forensic Report.
-2. [`docs/reports/ui-component-inventory.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-component-inventory.md) — Comprehensive inventory of all 57 components in `@repo/ui`, shell components, and domain widgets.
-3. [`docs/reports/ui-design-tokens.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-design-tokens.md) — Complete token audit, Style Dictionary analysis, and semantic drift documentation.
-4. [`docs/reports/ui-route-screen-inventory.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-route-screen-inventory.md) — Screen-by-screen audit of all 17 portal routes and layouts.
-5. [`docs/reports/ui-dependencies-and-libraries.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-dependencies-and-libraries.md) — Master dependency audit and library evaluation table.
-6. [`docs/reports/ui-branding-assets.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-branding-assets.md) — Static asset inventory, font analysis, and brand identity audit.
-7. [`docs/reports/ui-technical-debt.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-technical-debt.md) — Prioritized technical debt register with remediation plans.
+1. [`docs/reports/ui-forensic-report.md`](ui-forensic-report.md) — Master Executive Forensic Report.
+2. [`docs/reports/ui-component-inventory.md`](ui-component-inventory.md) — Comprehensive inventory of all 57 components in `@repo/ui`, shell components, and domain widgets.
+3. [`docs/reports/ui-design-tokens.md`](ui-design-tokens.md) — Complete token audit, Style Dictionary analysis, and semantic drift documentation.
+4. [`docs/reports/ui-route-screen-inventory.md`](ui-route-screen-inventory.md) — Screen-by-screen audit of all 17 portal routes and layouts.
+5. [`docs/reports/ui-dependencies-and-libraries.md`](ui-dependencies-and-libraries.md) — Master dependency audit and library evaluation table.
+6. [`docs/reports/ui-branding-assets.md`](ui-branding-assets.md) — Static asset inventory, font analysis, and brand identity audit.
+7. [`docs/reports/ui-technical-debt.md`](ui-technical-debt.md) — Prioritized technical debt register with remediation plans.
 
 ---
 

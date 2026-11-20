@@ -96,6 +96,7 @@ Quick navigation guide for Arch-Systems documentation.
 ### Deployment
 
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Comprehensive deployment guide
+
   - Quick start for local, staging, and production
   - **Automated production setup via `scripts/setup-production-environment.sh`**
   - Docker deployment
@@ -126,7 +127,6 @@ Arch-System/
 │   ├── 03-audit-reports/     # Audit reports and RLS analysis
 │   ├── 04-specifications/    # API and contract blueprints
 │   ├── 05-wiki/              # Comprehensive technical wiki
-│   ├── 06-archives/          # Historical documentation
 │   ├── 07-agentic-systems/   # Agentic system documentation
 │   ├── 08-guides/            # Operational guides and handbooks
 │   ├── 09-tools/             # Documentation tools and generators
