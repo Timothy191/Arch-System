@@ -2,6 +2,8 @@
  * @jest-environment node
  */
 
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { GET, REGISTERED_VERCEL_CRONS } from './route';
 
 const TEST_CRON_SECRET = 'super-secret-vercel-cron-token-2026';
@@ -63,5 +65,16 @@ describe('GET /api/cron', () => {
         schedule: '0 10 * * *',
       })
     );
+  });
+
+  it('keeps REGISTERED_VERCEL_CRONS aligned with vercel.json crons', () => {
+    const vercelConfigPath = resolve(process.cwd(), '../../vercel.json');
+    const vercelConfig = JSON.parse(readFileSync(vercelConfigPath, 'utf8')) as {
+      crons: Array<{ path: string; schedule: string }>;
+    };
+
+    expect(
+      REGISTERED_VERCEL_CRONS.map((job) => ({ path: job.path, schedule: job.schedule }))
+    ).toEqual(vercelConfig.crons);
   });
 });

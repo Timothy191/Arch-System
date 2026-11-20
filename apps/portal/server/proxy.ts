@@ -318,7 +318,14 @@ function isPublicBypassPath(pathname: string): boolean {
     return true;
   }
 
-  if (pathname.startsWith('/reset-password') || pathname.startsWith('/update-password')) {
+  if (
+    pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/update-password') ||
+    pathname === '/offline' ||
+    pathname.startsWith('/offline/') ||
+    pathname === '/privacy' ||
+    pathname.startsWith('/privacy/')
+  ) {
     return true;
   }
 

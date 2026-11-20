@@ -7,32 +7,29 @@ export const warmupLatency = new Trend('warmup_latency_ms');
 export const warmupRequests = new Counter('warmup_requests');
 
 export const options = {
-  scenarios: [
-    {
-      name: 'cold_pass',
+  scenarios: {
+    cold_pass: {
       executor: 'constant-vus',
       exec: 'coldWarmup',
       vus: 1,
       duration: '30s',
       startTime: '0s',
     },
-    {
-      name: 'warm_pass',
+    warm_pass: {
       executor: 'constant-vus',
       exec: 'warmWarmup',
       vus: 1,
       duration: '30s',
       startTime: '31s',
     },
-    {
-      name: 'saturated',
+    saturated: {
       executor: 'constant-vus',
       exec: 'saturated',
       vus: 5,
       duration: '20s',
       startTime: '0s',
     },
-  ],
+  },
   thresholds: {
     warmup_latency_ms: ['p(95)<350', 'p(99)<700'],
     warmup_passes: ['rate>0.95'],
@@ -81,4 +78,8 @@ function runPass(passName) {
   if (!passed) {
     console.warn(`${passName} pass failed: ${failures.join(' | ')}`);
   }
+}
+
+export default function () {
+  runPass('default');
 }

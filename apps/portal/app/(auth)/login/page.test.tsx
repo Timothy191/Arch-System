@@ -94,6 +94,7 @@ describe('LoginPage Server Component', () => {
     expect(asideMiningVideo).toBeInTheDocument();
 
     expect(screen.queryByTestId('login-video-pause-toggle')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Arch OS · v/i)).not.toBeInTheDocument();
   });
 
   it('renders the heading with the theme token class and eve banner without telemetry pill', async () => {

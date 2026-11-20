@@ -155,11 +155,8 @@ async function sendToMonitoring(entry: ErrorLogEntry): Promise<void> {
   // AGENT-TRACE: In production, skip console output — Sentry handles error capture.
   // In development, log to console for local debugging.
   if (process.env.NODE_ENV !== 'production') {
-    // eslint-disable-next-line no-console
     const logMethod =
-      entry.severity === 'error' || entry.severity === 'fatal'
-        ? console.error // eslint-disable-line no-console
-        : console.warn; // eslint-disable-line no-console
+      entry.severity === 'error' || entry.severity === 'fatal' ? console.error : console.warn;
 
     logMethod(`[${entry.severity.toUpperCase()}] ${entry.code || 'UNKNOWN'}: ${entry.message}`, {
       timestamp: entry.timestamp,

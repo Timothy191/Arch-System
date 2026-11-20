@@ -2,6 +2,8 @@
  * @jest-environment node
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
 import { NextRequest } from 'next/server';
 import { proxy as edgeProxy } from '../proxy';
 import {
@@ -443,6 +445,26 @@ describe('proxy', () => {
     expect(res.headers.get('location')).toContain('/login');
   });
 
+  it('exempts /offline and /privacy routes from authentication while gating prefix lookalikes', async () => {
+    const { supabase } = buildProxyMock();
+
+    const offlineRes = await proxy(makeRequest('/offline', false));
+    expect(offlineRes.status).not.toBe(307);
+
+    const privacyRes = await proxy(makeRequest('/privacy', false));
+    expect(privacyRes.status).not.toBe(307);
+
+    expect(supabase.auth.getClaims).not.toHaveBeenCalled();
+
+    const offlineLookalikeRes = await proxy(makeRequest('/offline-admin', false));
+    expect(offlineLookalikeRes.status).toBe(307);
+    expect(offlineLookalikeRes.headers.get('location')).toContain('/login');
+
+    const privacyLookalikeRes = await proxy(makeRequest('/privacy_admin', false));
+    expect(privacyLookalikeRes.status).toBe(307);
+    expect(privacyLookalikeRes.headers.get('location')).toContain('/login');
+  });
+
   it('redirects unauthenticated requests on unknown application routes to /login', async () => {
     buildProxyMock();
     const req = makeRequest('/unknown-feature-path', false);
@@ -460,11 +482,14 @@ describe('proxy', () => {
     const csp = res.headers.get('Content-Security-Policy');
     expect(csp).toBeDefined();
     expect(csp).toContain('https://api.open-meteo.com');
+    expect(csp).toContain('https://us.cloud.langfuse.com');
+    expect(csp).toContain('https://*.r2.cloudflarestorage.com');
     expect(csp).toContain("connect-src 'self'");
     expect(csp).not.toContain('connect-src *');
+    expect(csp).not.toContain('scada.example.com');
   });
 
-  it('omits unsafe-eval and localhost origins from CSP in production', async () => {
+  it('omits unsafe-eval, localhost, and tunnel origins from CSP in production', async () => {
     const originalEnv = process.env.NODE_ENV;
     Object.defineProperty(process.env, 'NODE_ENV', { value: 'production', configurable: true });
     try {
@@ -477,10 +502,45 @@ describe('proxy', () => {
       expect(csp).not.toContain("'unsafe-eval'");
       expect(csp).not.toContain('http://localhost:*');
       expect(csp).not.toContain('http://127.0.0.1:*');
+      expect(csp).not.toContain('ngrok-free.app');
+      expect(csp).not.toContain('scada.example.com');
+      expect(csp).toContain("object-src 'none'");
+      expect(csp).toContain("base-uri 'self'");
+      expect(csp).toContain("form-action 'self'");
       expect(res.headers.get('x-nonce')).toBeTruthy();
     } finally {
       Object.defineProperty(process.env, 'NODE_ENV', { value: originalEnv, configurable: true });
     }
+  });
+
+  it('aligns next.config.mjs CSP directives and excludes localhost/tunnel origins in production', () => {
+    const nextConfigPath = path.resolve(__dirname, '../next.config.mjs');
+    const nextConfigSource = fs.readFileSync(nextConfigPath, 'utf8');
+
+    const prodMatch = nextConfigSource.match(
+      /key:\s*'Content-Security-Policy',\s*value:\s*"([^"]+)"/
+    );
+    expect(prodMatch).not.toBeNull();
+    const prodCsp = prodMatch?.[1] ?? '';
+    expect(prodCsp).not.toContain('localhost');
+    expect(prodCsp).not.toContain('127.0.0.1');
+    expect(prodCsp).not.toContain('ngrok-free.app');
+    expect(prodCsp).not.toContain('scada.example.com');
+    expect(prodCsp).toContain("object-src 'none'");
+    expect(prodCsp).toContain("base-uri 'self'");
+    expect(prodCsp).toContain("form-action 'self'");
+    expect(prodCsp).toContain('https://us.cloud.langfuse.com');
+    expect(prodCsp).toContain('https://*.r2.cloudflarestorage.com');
+
+    const devMatch = nextConfigSource.match(
+      /key:\s*'Content-Security-Policy-Report-Only',\s*value:\s*"([^"]+)"/
+    );
+    expect(devMatch).not.toBeNull();
+    const devCsp = devMatch?.[1] ?? '';
+    expect(devCsp).not.toContain('scada.example.com');
+    expect(devCsp).toContain("object-src 'none'");
+    expect(devCsp).toContain("base-uri 'self'");
+    expect(devCsp).toContain("form-action 'self'");
   });
 
   describe('plant-processing and plant-inventory RBAC isolation', () => {

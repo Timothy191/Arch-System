@@ -203,9 +203,6 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
               />
               <span>{password.length > 0 ? 'Credentials ready' : 'Encrypted session handoff'}</span>
             </span>
-            <kbd className="rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 font-mono text-[13px] text-zinc-600 leading-[18px]">
-              Enter ↵
-            </kbd>
           </div>
           {passwordError && (
             <div

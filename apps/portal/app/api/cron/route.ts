@@ -20,9 +20,8 @@ export const REGISTERED_VERCEL_CRONS: readonly CronScheduleDescriptor[] = [
   },
   {
     path: '/api/cron/shift-handoff',
-    schedule: '45 5,17 * * *',
-    description:
-      'Shift handoff summary aggregation 15 minutes prior to 06:00 and 18:00 shift change',
+    schedule: '45 5 * * *',
+    description: 'Daily shift handoff summary aggregation 15 minutes prior to 06:00 shift change',
   },
   {
     path: '/api/cron/contractor-expiry',
@@ -36,8 +35,8 @@ export const REGISTERED_VERCEL_CRONS: readonly CronScheduleDescriptor[] = [
   },
   {
     path: '/api/cron/webhook-deliveries',
-    schedule: '*/5 * * * *',
-    description: 'Process queued webhook deliveries from database triggers',
+    schedule: '0 8 * * *',
+    description: 'Daily processing of queued webhook deliveries from database triggers',
   },
 ] as const;
 

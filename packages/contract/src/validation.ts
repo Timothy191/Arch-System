@@ -96,19 +96,11 @@ export async function validateBody<T>(schema: z.ZodType<T>, request: Request): P
 export function withValidation<T>(
   schema: z.ZodType<T>,
   handler: (
-    // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
     request: Request,
-    // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
     data: T,
-    // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
     context: { params: Promise<unknown> }
   ) => Promise<Response> | Response
-): (
-  // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
-  request: Request,
-  // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
-  context: { params: Promise<unknown> }
-) => Promise<Response> {
+): (request: Request, context: { params: Promise<unknown> }) => Promise<Response> {
   return async (request: Request, context: { params: Promise<unknown> }): Promise<Response> => {
     try {
       const data = await validateBody(schema, request);
@@ -148,19 +140,11 @@ export function withValidation<T>(
 export function withQueryValidation<T>(
   schema: z.ZodType<T>,
   handler: (
-    // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
     request: Request,
-    // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
     query: T,
-    // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
     context: { params: Promise<unknown> }
   ) => Promise<Response> | Response
-): (
-  // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
-  request: Request,
-  // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
-  context: { params: Promise<unknown> }
-) => Promise<Response> {
+): (request: Request, context: { params: Promise<unknown> }) => Promise<Response> {
   return async (request: Request, context: { params: Promise<unknown> }): Promise<Response> => {
     try {
       const url = new URL(request.url);

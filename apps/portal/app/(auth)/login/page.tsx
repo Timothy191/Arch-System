@@ -10,7 +10,6 @@ import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { LoginForm } from '@/features/auth/components/LoginForm';
-import { APP_VERSION } from '@/lib/version';
 import { LoginVideoStage } from './LoginVideoStage';
 
 const ALERT_ICON_STROKE_WIDTH = 1.5;
@@ -199,9 +198,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                       </span>
                       <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
                     </div>
-                    <span className="rounded-md border border-arch-accent-blue/25 bg-arch-accent-blue/10 px-2.5 py-0.5 font-mono font-semibold text-[13px] text-arch-accent-blue tabular-nums leading-[18px]">
-                      Arch OS · v{APP_VERSION}
-                    </span>
                   </div>
                   <h2 className="mt-2.5 font-display font-semibold text-[var(--text-heading)] text-xl text-zinc-900 tracking-tight">
                     Sign in to your account

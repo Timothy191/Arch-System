@@ -2,16 +2,22 @@
  * @jest-environment node
  */
 import { NextRequest } from 'next/server';
+import { getWorkflowQueue } from '@/lib/workflows/queue';
 import { POST } from './route';
 
-jest.mock('bullmq', () => ({
-  Queue: jest.fn().mockImplementation(() => ({
-    add: jest.fn().mockResolvedValue({ id: 'wf_test_1' }),
-  })),
+jest.mock('@/lib/workflows/queue', () => ({
+  getWorkflowQueue: jest.fn(() => null),
 }));
+
+const mockedGetWorkflowQueue = getWorkflowQueue as jest.MockedFunction<typeof getWorkflowQueue>;
 
 describe('POST /api/workflows/dispatch', () => {
   const originalEnv = process.env.NODE_ENV;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedGetWorkflowQueue.mockReturnValue(null);
+  });
 
   afterEach(() => {
     delete process.env.DISPATCH_API_KEY;

@@ -72,7 +72,7 @@ describe('LoginForm (@repo/auth/ui)', () => {
   });
 
   it('should render email and password inputs, light-mode glass styling, and visitor QR trigger', () => {
-    render(<LoginForm />);
+    const { container } = render(<LoginForm />);
 
     const emailInput = screen.getByPlaceholderText('username@arch-systems.io');
     const passwordInput = screen.getByPlaceholderText('••••••••');
@@ -90,6 +90,8 @@ describe('LoginForm (@repo/auth/ui)', () => {
 
     expect(screen.getByTestId('enterprise-auth-addons')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Visitor QR Code/i })).toBeInTheDocument();
+    expect(screen.queryByText(/Enter ↵/i)).not.toBeInTheDocument();
+    expect(container.querySelector('kbd')).toBeNull();
   });
 
   it('should prefill email from searchParams and allow clearing via the clear button', () => {
