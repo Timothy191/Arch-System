@@ -47,7 +47,18 @@ export function BadgesRegistryClient({
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(badges[0]?.id ?? null);
   const [isPending, startTransition] = useTransition();
 
-  const selectedBadge = badges.find((b) => b.id === selectedBadgeId) ?? null;
+  const selectedBadge = badges.find((b) => b.id === selectedBadgeId) ?? badges[0] ?? null;
+
+  function formatBadgeDate(isoTimestamp: string | null): string | null {
+    if (!isoTimestamp) return null;
+    const parsed = new Date(isoTimestamp);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
 
   function handleRevokeSelected() {
     if (!selectedBadge?.is_active) return;
@@ -167,6 +178,16 @@ export function BadgesRegistryClient({
                 <span className="max-w-full truncate text-[var(--text-muted)] text-xs">
                   {selectedBadge.entity_name}
                 </span>
+                {(selectedBadge.issued_at || selectedBadge.expires_at) && (
+                  <div className="flex flex-wrap items-center justify-center gap-2 text-[var(--text-muted)] text-xs">
+                    {formatBadgeDate(selectedBadge.issued_at) && (
+                      <span>Issued: {formatBadgeDate(selectedBadge.issued_at)}</span>
+                    )}
+                    {formatBadgeDate(selectedBadge.expires_at) && (
+                      <span>Expires: {formatBadgeDate(selectedBadge.expires_at)}</span>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="mt-4 flex h-48 w-48 items-center justify-center rounded-xl bg-[var(--bg-secondary)] p-3 shadow-card">

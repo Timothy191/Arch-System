@@ -1,41 +1,147 @@
 import { Breadcrumb, BreadcrumbItem } from '@repo/ui/components/ui/breadcrumb';
 import { connection } from 'next/server';
 import {
+  type AccessLogDateRange,
+  type AccessLogFilterQueryRow,
+  type AllEmployeesAttendanceRegisterResult,
+  type EmployeeAttendanceSummary,
   getAccessLogsWithFilters,
+  getAllEmployeesAttendanceRegister,
   getEmployeeAttendanceSummary,
   getPersonnelListForFilter,
+  type PersonnelListFilterEntry,
 } from '../actions';
 import { AccessLogsClient, type ResolvedAccessLog } from './AccessLogsClient';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 100;
 
-interface AccessLogWithBadgeRelation {
-  id: string;
-  scanned_at: string;
-  gate_location: string;
-  access_granted: boolean;
-  denial_reason: string | null;
-  access_type: string;
-  direction: string;
-  alcohol_tested?: string | null;
-  operator?: string | null;
-  device_id?: string | null;
-  badge?: {
-    id: string;
-    qr_code: string;
-    rfid_code: string | null;
-    entity_type: string;
-    personnel?: {
-      id: string;
-      first_name: string;
-      surname: string;
-      emp_code: string;
-      job_title: string;
-    } | null;
-    visitor?: { id: string; first_name: string; surname: string; company: string } | null;
-    fleet?: { fleet_code: string; registration_number: string } | null;
-  } | null;
+const VALID_DIRECTIONS = new Set<'IN' | 'OUT' | 'ALL'>(['IN', 'OUT', 'ALL']);
+const VALID_STATUS_FILTERS = new Set<'GRANTED' | 'DENIED' | 'ALL'>(['GRANTED', 'DENIED', 'ALL']);
+const VALID_DATE_RANGES = new Set<AccessLogDateRange>([
+  'TODAY',
+  'WEEK',
+  'MONTH',
+  'QUARTER',
+  'YEAR',
+  'ALL',
+]);
+
+function parsePositiveInt(rawValue: string | undefined, fallback: number, max?: number): number {
+  if (!rawValue) return fallback;
+  const parsed = Number.parseInt(rawValue, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return max !== undefined ? Math.min(parsed, max) : parsed;
+}
+
+function resolveStatusLabel(isGranted: boolean, denialReason: string | null): string {
+  if (isGranted) return 'Granted';
+  if (!denialReason) return 'Denied';
+  const reasonLower = denialReason.toLowerCase();
+  if (reasonLower.includes('expired')) return 'Expired Credential';
+  if (reasonLower.includes('tailgate')) return 'Tailgate Alert';
+  return 'Denied';
+}
+
+function resolveEntityDetails(logRow: AccessLogFilterQueryRow): {
+  readonly entityName: string;
+  readonly entityType: string;
+  readonly personnelId: string | null;
+  readonly idNumber: string | null;
+  readonly empCode: string | null;
+  readonly jobTitle: string | null;
+  readonly company: string | null;
+} {
+  const badge = logRow.badge;
+
+  if (badge?.personnel) {
+    const personnelName = [badge.personnel.first_name, badge.personnel.surname]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    return {
+      entityName: personnelName || 'Employee',
+      entityType: 'Employee',
+      personnelId: badge.personnel.id ?? null,
+      idNumber: badge.personnel.id_number ?? null,
+      empCode: badge.personnel.emp_code ?? null,
+      jobTitle: badge.personnel.job_title ?? null,
+      company: null,
+    };
+  }
+
+  if (badge?.visitor) {
+    const splitName = [badge.visitor.first_name, badge.visitor.surname]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    const visitorName = splitName || badge.visitor.name?.trim() || 'Visitor';
+    return {
+      entityName: visitorName,
+      entityType: 'Visitor',
+      personnelId: null,
+      idNumber: badge.visitor.id_number ?? null,
+      empCode: null,
+      jobTitle: badge.visitor.company ? `Visitor • ${badge.visitor.company}` : 'Visitor',
+      company: badge.visitor.company ?? null,
+    };
+  }
+
+  if (badge?.fleet) {
+    return {
+      entityName: badge.fleet.fleet_code ? `Fleet: ${badge.fleet.fleet_code}` : 'Fleet Vehicle',
+      entityType: 'Fleet',
+      personnelId: null,
+      idNumber: null,
+      empCode: badge.fleet.registration_number ?? null,
+      jobTitle: 'Fleet Asset',
+      company: null,
+    };
+  }
+
+  return {
+    entityName: logRow.denial_reason?.toLowerCase().includes('unrecognized')
+      ? 'Unrecognized Credential'
+      : 'Unknown Entity',
+    entityType: badge?.entity_type ?? logRow.access_type ?? 'Unknown',
+    personnelId: null,
+    idNumber: null,
+    empCode: null,
+    jobTitle: null,
+    company: null,
+  };
+}
+
+function mapAccessLogRowToResolved(logRow: AccessLogFilterQueryRow): ResolvedAccessLog {
+  const badge = logRow.badge;
+  const entity = resolveEntityDetails(logRow);
+  const isGranted = Boolean(logRow.access_granted);
+  const denialReason = logRow.denial_reason ?? null;
+  const rawDirection = typeof logRow.direction === 'string' ? logRow.direction.trim() : '';
+
+  return {
+    id: logRow.id,
+    timestamp: logRow.scanned_at ?? null,
+    entityName: entity.entityName,
+    entityType: entity.entityType,
+    personnelId: entity.personnelId,
+    idNumber: entity.idNumber,
+    empCode: entity.empCode,
+    jobTitle: entity.jobTitle,
+    company: entity.company,
+    qrCodeId: badge?.qr_code ?? badge?.rfid_code ?? 'N/A',
+    rfidCode: badge?.rfid_code ?? null,
+    zone: logRow.gate_location?.trim() || 'Unknown Gate',
+    accessMethod: logRow.access_type?.trim() || 'QR Scan',
+    status: resolveStatusLabel(isGranted, denialReason),
+    isGranted,
+    denialReason,
+    direction: rawDirection ? rawDirection.toUpperCase() : 'UNKNOWN',
+    alcoholTested: logRow.alcohol_tested?.trim() || 'Not Recorded',
+    operator: logRow.operator ?? null,
+    deviceId: logRow.device_id ?? null,
+  };
 }
 
 export default async function AccessLogsPage({
@@ -53,73 +159,75 @@ export default async function AccessLogsPage({
 }) {
   await connection();
   const params = await searchParams;
-  const page = parseInt(params.page || String(DEFAULT_PAGE), 10);
-  const pageSize = parseInt(params.pageSize || String(DEFAULT_PAGE_SIZE), 10);
-  const employeeId = params.employeeId || null;
-  const searchQuery = params.search || null;
-  const direction = (params.direction as 'IN' | 'OUT' | 'ALL') || 'ALL';
-  const statusFilter = (params.status as 'GRANTED' | 'DENIED' | 'ALL') || 'ALL';
-  const dateRange = (params.dateRange as 'TODAY' | 'WEEK' | 'MONTH' | 'ALL') || 'ALL';
+  const page = parsePositiveInt(params.page, DEFAULT_PAGE);
+  const pageSize = parsePositiveInt(params.pageSize, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+  const employeeId = params.employeeId?.trim() || null;
+  const searchQuery = params.search?.trim() || null;
 
-  // Fetch personnel list for filtering and initial logs in parallel
-  const [personnelList, logsResult, attendanceSummary] = await Promise.all([
-    getPersonnelListForFilter(),
-    getAccessLogsWithFilters({
-      employeeId,
-      page,
-      pageSize,
-      searchQuery,
-      direction,
-      statusFilter,
-      dateRange,
-    }),
-    employeeId ? getEmployeeAttendanceSummary(employeeId) : Promise.resolve(null),
-  ]);
+  const rawDirection = params.direction?.toUpperCase() as 'IN' | 'OUT' | 'ALL' | undefined;
+  const direction = rawDirection && VALID_DIRECTIONS.has(rawDirection) ? rawDirection : 'ALL';
 
-  const rawLogs = (logsResult.logs ?? []) as unknown as AccessLogWithBadgeRelation[];
+  const rawStatus = params.status?.toUpperCase() as 'GRANTED' | 'DENIED' | 'ALL' | undefined;
+  const statusFilter = rawStatus && VALID_STATUS_FILTERS.has(rawStatus) ? rawStatus : 'ALL';
 
-  const resolvedLogs: ResolvedAccessLog[] = rawLogs.map((log) => {
-    const badge = log.badge;
-    let entityName = 'Unknown Entity';
-    let entityType: string = badge?.entity_type ?? 'Unknown';
-    let personnelIdentifier: string | null = null;
+  const rawDateRange = params.dateRange?.toUpperCase() as AccessLogDateRange | undefined;
+  const dateRange: AccessLogDateRange =
+    rawDateRange && VALID_DATE_RANGES.has(rawDateRange) ? rawDateRange : 'ALL';
 
-    if (badge?.personnel) {
-      entityName = `${badge.personnel.first_name} ${badge.personnel.surname}`;
-      entityType = 'Employee';
-      personnelIdentifier = badge.personnel.id;
-    } else if (badge?.visitor) {
-      entityName = `${badge.visitor.first_name} ${badge.visitor.surname}`;
-      entityType = 'Visitor';
-    } else if (badge?.fleet) {
-      entityName = `Fleet: ${badge.fleet.fleet_code}`;
-      entityType = 'Fleet';
-    }
+  const warningMessages: string[] = [];
 
-    let status = log.access_granted ? 'Granted' : 'Denied';
-    if (!log.access_granted && log.denial_reason) {
-      const reasonLower = log.denial_reason.toLowerCase();
-      if (reasonLower.includes('expired')) {
-        status = 'Expired Credential';
-      } else if (reasonLower.includes('tailgate')) {
-        status = 'Tailgate Alert';
-      }
-    }
+  const [personnelSettled, logsSettled, summarySettled, registerSettled] = await Promise.allSettled(
+    [
+      getPersonnelListForFilter(),
+      getAccessLogsWithFilters({
+        employeeId,
+        page,
+        pageSize,
+        searchQuery,
+        direction,
+        statusFilter,
+        dateRange,
+      }),
+      employeeId ? getEmployeeAttendanceSummary(employeeId, dateRange) : Promise.resolve(null),
+      getAllEmployeesAttendanceRegister({
+        dateRange: dateRange === 'ALL' ? 'QUARTER' : dateRange,
+        search: searchQuery,
+      }),
+    ]
+  );
 
-    return {
-      id: log.id,
-      timestamp: log.scanned_at,
-      entityName,
-      entityType,
-      personnelId: personnelIdentifier,
-      qrCodeId: badge?.qr_code ?? badge?.rfid_code ?? 'N/A',
-      zone: log.gate_location,
-      accessMethod: log.access_type ?? 'QR Scan',
-      status,
-      denialReason: log.denial_reason,
-      direction: log.direction,
-    };
-  });
+  const personnelList: PersonnelListFilterEntry[] =
+    personnelSettled.status === 'fulfilled' ? personnelSettled.value : [];
+  if (personnelSettled.status === 'rejected') {
+    warningMessages.push('Personnel filter directory could not be loaded.');
+  }
+
+  const logsResult =
+    logsSettled.status === 'fulfilled'
+      ? logsSettled.value
+      : { logs: [], totalCount: 0, queryWarning: 'Access logs temporarily unavailable.' };
+  if (logsSettled.status === 'rejected') {
+    warningMessages.push('Access logs query recovered with an empty result set.');
+  } else if (logsResult.queryWarning) {
+    warningMessages.push(logsResult.queryWarning);
+  }
+
+  const attendanceSummary: EmployeeAttendanceSummary | null =
+    summarySettled.status === 'fulfilled' ? summarySettled.value : null;
+  if (summarySettled.status === 'fulfilled' && summarySettled.value?.queryWarning) {
+    warningMessages.push(summarySettled.value.queryWarning);
+  }
+
+  const initialAttendanceRegister: AllEmployeesAttendanceRegisterResult | null =
+    registerSettled.status === 'fulfilled' ? registerSettled.value : null;
+  if (registerSettled.status === 'fulfilled' && registerSettled.value?.queryWarning) {
+    warningMessages.push(registerSettled.value.queryWarning);
+  }
+
+  const rawLogs = (logsResult.logs ?? []) as unknown as AccessLogFilterQueryRow[];
+  const resolvedLogs: ResolvedAccessLog[] = rawLogs.map(mapAccessLogRowToResolved);
+  const initialQueryWarning =
+    warningMessages.length > 0 ? Array.from(new Set(warningMessages)).join(' ') : null;
 
   return (
     <div className="space-y-6">
@@ -135,6 +243,9 @@ export default async function AccessLogsPage({
         personnelList={personnelList}
         initialEmployeeId={employeeId}
         initialAttendanceSummary={attendanceSummary}
+        initialAttendanceRegister={initialAttendanceRegister}
+        initialDateRange={dateRange}
+        initialQueryWarning={initialQueryWarning}
       />
     </div>
   );

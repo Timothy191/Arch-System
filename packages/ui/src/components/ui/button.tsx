@@ -112,26 +112,39 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ? 'button'
         : (type as 'button' | 'submit' | 'reset'));
 
-    const Comp = asChild ? Slot : 'button';
+    const buttonClassName = cn(
+      buttonVariants({
+        variant: resolvedVariant,
+        size,
+        shape,
+      }),
+      shadow && 'shadow-lg hover:shadow-xl',
+      svgOnly && 'aspect-square p-0',
+      className
+    );
 
     const isInteractiveDisabled = disabled || loading;
 
+    if (asChild) {
+      return (
+        <Slot
+          ref={ref}
+          aria-busy={loading ? 'true' : undefined}
+          className={buttonClassName}
+          {...props}
+        >
+          {children}
+        </Slot>
+      );
+    }
+
     return (
-      <Comp
+      <button
         ref={ref}
-        type={asChild ? undefined : htmlButtonType}
+        type={htmlButtonType}
         disabled={isInteractiveDisabled}
         aria-busy={loading ? 'true' : undefined}
-        className={cn(
-          buttonVariants({
-            variant: resolvedVariant,
-            size,
-            shape,
-          }),
-          shadow && 'shadow-lg hover:shadow-xl',
-          svgOnly && 'aspect-square p-0',
-          className
-        )}
+        className={buttonClassName}
         {...props}
       >
         {loading && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" aria-hidden="true" />}
@@ -146,7 +159,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             {suffix}
           </span>
         )}
-      </Comp>
+      </button>
     );
   }
 );

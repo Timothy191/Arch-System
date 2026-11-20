@@ -86,7 +86,7 @@ export function Neo300EmployeeEditorModal({
             <UserPlus className="h-4 w-4 text-[var(--accent-blue)]" />
             {editorMode === 'create'
               ? 'Register New Employee & Provision Access Card'
-              : `Edit Employee Card Profile & Photo (${formState.emp_code})`}
+              : `Edit Employee Card Profile & Photo (${formState.coy_number || formState.emp_code})`}
           </h3>
           <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
             Saves directly to <code className="font-mono">personnel</code>, issues active{' '}
@@ -199,22 +199,28 @@ export function Neo300EmployeeEditorModal({
           </div>
 
           <div>
-            <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
-              Employee Code *
+            <label
+              htmlFor="neo300-coy-number"
+              className="mb-1 block font-medium text-[var(--text-secondary)] text-xs"
+            >
+              Coy Number *
             </label>
             <input
+              id="neo300-coy-number"
               type="text"
               required
-              value={formState.emp_code}
+              value={formState.coy_number ?? formState.emp_code}
               onChange={(e) => {
-                const code = e.target.value.toUpperCase();
+                const coyValue = e.target.value;
+                const qrSuffix = coyValue.trim().replace(/\s+/g, '-').toUpperCase();
                 setFormState((prev) => ({
                   ...prev,
-                  emp_code: code,
-                  qr_code: `EMP-${code}`,
+                  coy_number: coyValue,
+                  emp_code: coyValue,
+                  qr_code: qrSuffix ? `EMP-${qrSuffix}` : prev.qr_code,
                 }));
               }}
-              placeholder="e.g. EMP-0105"
+              placeholder="e.g. Brak 0043"
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm"
             />
           </div>

@@ -28,6 +28,13 @@ interface Neo300PrinterQueuePanelProps {
   onCancelJob: (jobId: string) => void;
 }
 
+function formatCardExpiryDate(value: string | null | undefined): string {
+  if (!value) return 'Not Set';
+  const trimmed = value.trim();
+  if (!trimmed) return 'Not Set';
+  return trimmed.slice(0, 10);
+}
+
 export function Neo300PrinterQueuePanel({
   selectedEmp,
   printer,
@@ -38,12 +45,15 @@ export function Neo300PrinterQueuePanel({
   onCancelJob,
 }: Neo300PrinterQueuePanelProps) {
   const [cardSide, setCardSide] = useState<'front' | 'back'>('front');
-  const [cardTemplate, setCardTemplate] = useState<'digital' | 'plantcor'>('digital');
+  const [cardTemplate, setCardTemplate] = useState<'digital' | 'plantcor'>('plantcor');
 
   const isMedicalValid =
     selectedEmp?.medical_expiry && new Date(selectedEmp.medical_expiry) > new Date();
   const isInductionValid =
     selectedEmp?.induction_expiry && new Date(selectedEmp.induction_expiry) > new Date();
+  const medicalDateText = formatCardExpiryDate(selectedEmp?.medical_expiry);
+  const inductionDateText = formatCardExpiryDate(selectedEmp?.induction_expiry);
+  const resolvedCoyNumber = selectedEmp?.coy_number || selectedEmp?.emp_code || '';
 
   return (
     <div className="space-y-4 lg:col-span-7">
@@ -143,14 +153,27 @@ export function Neo300PrinterQueuePanel({
                 <span className="absolute top-[128px] left-[55px] font-semibold text-[10px] text-slate-900">
                   {selectedEmp.job_title || 'Site Operator'}
                 </span>
-                <span className="absolute top-[148px] left-[295px] font-bold font-mono text-[10px] text-slate-900">
-                  {selectedEmp.emp_code}
+                <span
+                  data-testid="plantcor-card-coy-number"
+                  className="absolute top-[148px] left-[295px] font-bold font-mono text-[10px] text-slate-900"
+                >
+                  {resolvedCoyNumber}
                 </span>
-                <span className="absolute top-[181px] left-[55px] font-semibold text-[10px] text-slate-900">
-                  {isMedicalValid ? 'PASS' : 'EXPIRED'}
+                <span
+                  data-testid="plantcor-card-medical-date"
+                  className={`absolute top-[181px] left-[55px] font-mono font-semibold text-[10px] ${
+                    isMedicalValid ? 'text-slate-900' : 'text-red-700'
+                  }`}
+                >
+                  {medicalDateText}
                 </span>
-                <span className="absolute top-[181px] left-[190px] font-semibold text-[10px] text-slate-900">
-                  {isInductionValid ? 'VALID' : 'DUE'}
+                <span
+                  data-testid="plantcor-card-induction-date"
+                  className={`absolute top-[181px] left-[190px] font-mono font-semibold text-[10px] ${
+                    isInductionValid ? 'text-slate-900' : 'text-amber-700'
+                  }`}
+                >
+                  {inductionDateText}
                 </span>
               </div>
             ) : (
@@ -179,7 +202,7 @@ export function Neo300PrinterQueuePanel({
                       </div>
 
                       <span className="rounded border border-blue-400/30 bg-blue-500/20 px-2 py-0.5 font-mono text-[10px] text-blue-300">
-                        {selectedEmp.emp_code}
+                        COY: {resolvedCoyNumber}
                       </span>
                     </div>
 
@@ -231,7 +254,7 @@ export function Neo300PrinterQueuePanel({
                             }`}
                           >
                             <Stethoscope className="h-2.5 w-2.5" />
-                            Med: {isMedicalValid ? 'PASS' : 'EXP'}
+                            Med: {medicalDateText}
                           </span>
                           <span
                             className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-medium text-[9px] ${
@@ -241,7 +264,7 @@ export function Neo300PrinterQueuePanel({
                             }`}
                           >
                             <FileCheck2 className="h-2.5 w-2.5" />
-                            Induct: {isInductionValid ? 'OK' : 'DUE'}
+                            Induct: {inductionDateText}
                           </span>
                         </div>
                       </div>

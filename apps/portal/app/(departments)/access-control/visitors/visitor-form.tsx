@@ -3,11 +3,13 @@
 import { Button } from '@repo/ui/components/ui/button';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Loader2, Plus, Users } from 'lucide-react';
+import { Clock, Loader2, Plus, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
 import { registerVisitor } from '../actions';
+import { VISITOR_AUTO_EXIT_HOURS } from './visitor-auto-exit';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -34,6 +36,7 @@ function SubmitButton() {
 }
 
 export function VisitorForm() {
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,10 +45,12 @@ export function VisitorForm() {
     try {
       const result = await registerVisitor(formData);
       if (result.success) {
+        const badgeSuffix = result.qrCode ? ` Badge: ${result.qrCode}` : '';
         toast.success('Visitor registered successfully', {
-          description: `${formData.get('first_name')} ${formData.get('surname')} has been checked in.`,
+          description: `${formData.get('first_name')} ${formData.get('surname')} has been checked in.${badgeSuffix}`,
         });
         formRef.current?.reset();
+        router.refresh();
       } else {
         setError('Failed to register visitor. Please try again.');
         toast.error('Registration failed');
@@ -131,7 +136,15 @@ export function VisitorForm() {
           />
         </div>
 
-        {error && <p className="mt-2 font-medium text-red-500 text-xs">{error}</p>}
+        <div className="flex items-start gap-2 rounded-lg border border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 p-2.5 text-[var(--text-secondary)] text-xs">
+          <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--accent-amber)]" />
+          <span>
+            Temporary visitor badges expire after 8 hours, and visitors are automatically checked
+            out after {VISITOR_AUTO_EXIT_HOURS} hours on-site.
+          </span>
+        </div>
+
+        {error && <p className="mt-2 font-medium text-[var(--accent-red)] text-xs">{error}</p>}
 
         <div className="pt-4">
           <SubmitButton />

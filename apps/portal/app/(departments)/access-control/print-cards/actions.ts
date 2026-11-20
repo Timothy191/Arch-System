@@ -20,6 +20,7 @@ export interface Neo300Printer {
 export interface EmployeeCardProfile {
   id: string;
   emp_code: string;
+  coy_number?: string | null;
   first_name: string;
   surname: string;
   id_number: string;
@@ -45,6 +46,7 @@ export interface CardStudioDepartment {
 export interface UpsertEmployeeCardInput {
   id?: string;
   emp_code: string;
+  coy_number?: string | null;
   first_name: string;
   surname: string;
   id_number: string;
@@ -269,6 +271,8 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
     return {
       id: p.id,
       emp_code: p.emp_code,
+      coy_number:
+        ((p as Record<string, unknown>).coy_number as string | null | undefined) ?? p.emp_code,
       first_name: p.first_name,
       surname: p.surname,
       id_number: p.id_number,
@@ -296,7 +300,7 @@ export async function upsertEmployeeForCardPrinting(
 ): Promise<EmployeeCardProfile> {
   const { supabase, employee } = await assertAccessControlRole();
 
-  const empCode = input.emp_code.trim().toUpperCase();
+  const empCode = (input.coy_number?.trim() || input.emp_code).trim();
   const firstName = input.first_name.trim();
   const surname = input.surname.trim();
   const idNumber = input.id_number.trim();
@@ -304,7 +308,7 @@ export async function upsertEmployeeForCardPrinting(
   const targetDeptId = input.department_id || employee.department_id || null;
 
   if (!empCode || !firstName || !surname || !idNumber) {
-    throw new DatabaseError('Employee Code, First Name, Surname, and ID Number are required', {
+    throw new DatabaseError('Coy Number, First Name, Surname, and ID Number are required', {
       table: 'personnel',
     });
   }
@@ -354,7 +358,7 @@ export async function upsertEmployeeForCardPrinting(
   }
 
   // Ensure active badge (QR + RFID) is provisioned for the card
-  const desiredQr = input.qr_code?.trim() || `EMP-${empCode}`;
+  const desiredQr = input.qr_code?.trim() || `EMP-${empCode.replace(/\s+/g, '-').toUpperCase()}`;
   const desiredRfid = input.rfid_code?.trim() || null;
 
   const { data: existingBadge } = await supabase
@@ -419,6 +423,7 @@ export async function upsertEmployeeForCardPrinting(
   return {
     id: personnelId!,
     emp_code: empCode,
+    coy_number: empCode,
     first_name: firstName,
     surname,
     id_number: idNumber,

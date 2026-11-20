@@ -47,6 +47,7 @@ export function Neo300PrintStudio({
 
   const [formState, setFormState] = useState<UpsertEmployeeCardInput>({
     emp_code: '',
+    coy_number: '',
     first_name: '',
     surname: '',
     id_number: '',
@@ -66,6 +67,7 @@ export function Neo300PrintStudio({
     setEditorMode('create');
     setFormState({
       emp_code: nextCode,
+      coy_number: nextCode,
       first_name: '',
       surname: '',
       id_number: '',
@@ -87,6 +89,7 @@ export function Neo300PrintStudio({
     setFormState({
       id: emp.id,
       emp_code: emp.emp_code,
+      coy_number: emp.coy_number || emp.emp_code,
       first_name: emp.first_name,
       surname: emp.surname,
       id_number: emp.id_number,
@@ -305,7 +308,7 @@ export function Neo300PrintStudio({
                           {emp.first_name} {emp.surname}
                         </p>
                         <p className="truncate text-[var(--text-muted)] text-xs">
-                          {emp.emp_code} • {emp.job_title || 'Personnel'}
+                          COY: {emp.coy_number || emp.emp_code} • {emp.job_title || 'Personnel'}
                         </p>
                       </div>
                     </div>
