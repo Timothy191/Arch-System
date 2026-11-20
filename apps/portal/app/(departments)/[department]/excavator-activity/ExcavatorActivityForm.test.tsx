@@ -123,6 +123,7 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
           departmentId: 'dept-1',
           excavatorId: 'ex-10',
           materialType: 'Coal',
+          materialSubCategory: null,
         })
       );
     });

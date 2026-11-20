@@ -285,11 +285,17 @@ export async function updateExcavatorAssignmentConfig(
         throw new Error('Unauthorized');
       }
 
-      const validated = updateExcavatorAssignmentConfigSchema.parse(rawInput);
+      const normalizedInput: UpdateExcavatorAssignmentConfigInput = {
+        ...rawInput,
+        materialSubCategory:
+          rawInput.materialSubCategory === '' ? null : rawInput.materialSubCategory,
+      };
+      const validated = updateExcavatorAssignmentConfigSchema.parse(normalizedInput);
       assertDepartmentAccess(principal.employee, validated.departmentId, [
         'admin',
         'operator',
         'supervisor',
+        'manager',
       ]);
 
       const serviceClient = createServiceRoleClient();

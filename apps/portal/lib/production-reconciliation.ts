@@ -9,7 +9,7 @@ type ReconciliationLevel = 'stable' | 'minor' | 'moderate' | 'critical';
  * Reconciliation Drift Thresholds (%)
  * Based on industrial auditing standards for open-cast mining.
  */
-const RECONCILIATION_THRESHOLDS = {
+export const RECONCILIATION_THRESHOLDS = {
   minor: 5, // 5% variance - Warning
   moderate: 10, // 10% variance - Action Required
   critical: 15, // 15% variance - Audit Trigger

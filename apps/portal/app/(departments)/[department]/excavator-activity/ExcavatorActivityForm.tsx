@@ -720,7 +720,7 @@ export function ExcavatorActivityForm({
           siteId: transition.currentSiteId,
           blockMinedId: transition.currentBlockId,
           materialType: newMaterial,
-          materialSubCategory: transition.nextSubCategory,
+          materialSubCategory: transition.nextSubCategory || null,
         });
         notifyRegularMachineMaterial(excavators, { excavatorId, newMaterial });
         startTransition(() => {

@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Stethoscope,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { QRCodeSection } from '../card-actions/qr-section';
@@ -37,6 +38,7 @@ export function Neo300PrinterQueuePanel({
   onCancelJob,
 }: Neo300PrinterQueuePanelProps) {
   const [cardSide, setCardSide] = useState<'front' | 'back'>('front');
+  const [cardTemplate, setCardTemplate] = useState<'digital' | 'plantcor'>('digital');
 
   const isMedicalValid =
     selectedEmp?.medical_expiry && new Date(selectedEmp.medical_expiry) > new Date();
@@ -73,6 +75,30 @@ export function Neo300PrinterQueuePanel({
             <div className="flex items-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-1">
               <button
                 type="button"
+                onClick={() => setCardTemplate('digital')}
+                className={`rounded px-2.5 py-1 font-medium text-xs transition-colors ${
+                  cardTemplate === 'digital'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+                }`}
+              >
+                Digital
+              </button>
+              <button
+                type="button"
+                onClick={() => setCardTemplate('plantcor')}
+                className={`rounded px-2.5 py-1 font-medium text-xs transition-colors ${
+                  cardTemplate === 'plantcor'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+                }`}
+              >
+                Plantcor Card
+              </button>
+            </div>
+            <div className="flex items-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-1">
+              <button
+                type="button"
                 onClick={() => setCardSide('front')}
                 className={`rounded px-3 py-1 font-medium text-xs transition-colors ${
                   cardSide === 'front'
@@ -99,138 +125,168 @@ export function Neo300PrinterQueuePanel({
 
         {selectedEmp ? (
           <div className="flex w-full flex-col items-center gap-6">
-            {/* ── Card Canvas (Realistic CR80 Styling) ── */}
-            <div className="relative h-[240px] w-[380px] select-none overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 p-5 text-white shadow-2xl transition-all">
-              {/* Holographic Security Overlay Pattern */}
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] opacity-10 [background-size:12px_12px]" />
-              <div className="pointer-events-none absolute -top-16 -right-16 h-36 w-36 rounded-full bg-blue-500/20 blur-2xl" />
+            {cardTemplate === 'plantcor' ? (
+              <div className="relative h-[240px] w-[380px] select-none overflow-hidden rounded-2xl border border-[var(--border-default)] bg-white shadow-xl">
+                <Image
+                  src="/images/access-card-template.jpeg"
+                  alt="Plantcor Pty Ltd Access Card Template"
+                  fill
+                  sizes="380px"
+                  className="object-cover"
+                />
+                <span className="absolute top-[69px] left-[55px] font-bold text-[10px] text-slate-900">
+                  {selectedEmp.first_name} {selectedEmp.surname}
+                </span>
+                <span className="absolute top-[69px] left-[180px] font-mono font-semibold text-[10px] text-slate-900">
+                  {selectedEmp.id_number || 'Verified'}
+                </span>
+                <span className="absolute top-[128px] left-[55px] font-semibold text-[10px] text-slate-900">
+                  {selectedEmp.job_title || 'Site Operator'}
+                </span>
+                <span className="absolute top-[148px] left-[295px] font-bold font-mono text-[10px] text-slate-900">
+                  {selectedEmp.emp_code}
+                </span>
+                <span className="absolute top-[181px] left-[55px] font-semibold text-[10px] text-slate-900">
+                  {isMedicalValid ? 'PASS' : 'EXPIRED'}
+                </span>
+                <span className="absolute top-[181px] left-[190px] font-semibold text-[10px] text-slate-900">
+                  {isInductionValid ? 'VALID' : 'DUE'}
+                </span>
+              </div>
+            ) : (
+              /* ── Card Canvas (Realistic CR80 Styling) ── */
+              <div className="relative h-[240px] w-[380px] select-none overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 p-5 text-white shadow-2xl transition-all">
+                {/* Holographic Security Overlay Pattern */}
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] opacity-10 [background-size:12px_12px]" />
+                <div className="pointer-events-none absolute -top-16 -right-16 h-36 w-36 rounded-full bg-blue-500/20 blur-2xl" />
 
-              {cardSide === 'front' ? (
-                <div className="relative flex h-full flex-col justify-between">
-                  {/* Card Header */}
-                  <div className="flex items-center justify-between border-white/15 border-b pb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500 font-bold text-white text-xs shadow-sm">
-                        <ShieldCheck className="h-4 w-4" />
+                {cardSide === 'front' ? (
+                  <div className="relative flex h-full flex-col justify-between">
+                    {/* Card Header */}
+                    <div className="flex items-center justify-between border-white/15 border-b pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500 font-bold text-white text-xs shadow-sm">
+                          <ShieldCheck className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <span className="bg-gradient-to-r from-blue-200 to-indigo-100 bg-clip-text font-extrabold text-transparent text-xs uppercase tracking-wider">
+                            PLANTCOR MINING
+                          </span>
+                          <span className="block font-mono text-[8px] text-blue-300 tracking-widest">
+                            SITE ACCESS CLEARANCE
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="bg-gradient-to-r from-blue-200 to-indigo-100 bg-clip-text font-extrabold text-transparent text-xs uppercase tracking-wider">
-                          PLANTCOR MINING
-                        </span>
-                        <span className="block font-mono text-[8px] text-blue-300 tracking-widest">
-                          SITE ACCESS CLEARANCE
-                        </span>
-                      </div>
+
+                      <span className="rounded border border-blue-400/30 bg-blue-500/20 px-2 py-0.5 font-mono text-[10px] text-blue-300">
+                        {selectedEmp.emp_code}
+                      </span>
                     </div>
 
-                    <span className="rounded border border-blue-400/30 bg-blue-500/20 px-2 py-0.5 font-mono text-[10px] text-blue-300">
-                      {selectedEmp.emp_code}
-                    </span>
-                  </div>
+                    {/* Card Body: Photo & Identity */}
+                    <div className="my-auto flex items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => onEditEmployee(selectedEmp)}
+                        title="Click to upload or update employee photo"
+                        className="relative flex h-24 w-20 shrink-0 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-white/30 bg-slate-800 shadow-inner hover:border-blue-400"
+                      >
+                        {selectedEmp.photo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={selectedEmp.photo_url}
+                            alt={`${selectedEmp.first_name} ${selectedEmp.surname}`}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <>
+                            <span className="font-bold text-2xl text-slate-300">
+                              {selectedEmp.first_name[0]}
+                              {selectedEmp.surname[0]}
+                            </span>
+                            <span className="mt-1 text-[7px] text-blue-300 uppercase tracking-wider">
+                              + ADD PHOTO
+                            </span>
+                          </>
+                        )}
+                      </button>
 
-                  {/* Card Body: Photo & Identity */}
-                  <div className="my-auto flex items-center gap-4">
-                    <button
-                      type="button"
-                      onClick={() => onEditEmployee(selectedEmp)}
-                      title="Click to upload or update employee photo"
-                      className="relative flex h-24 w-20 shrink-0 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-white/30 bg-slate-800 shadow-inner hover:border-blue-400"
-                    >
-                      {selectedEmp.photo_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={selectedEmp.photo_url}
-                          alt={`${selectedEmp.first_name} ${selectedEmp.surname}`}
-                          className="h-full w-full object-cover"
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <h4 className="truncate font-bold text-base text-white leading-tight">
+                          {selectedEmp.first_name} {selectedEmp.surname}
+                        </h4>
+                        <p className="truncate font-medium text-blue-200 text-xs">
+                          {selectedEmp.job_title || 'Site Operator'}
+                        </p>
+                        <p className="font-mono text-[10px] text-slate-300">
+                          NAT ID: {selectedEmp.id_number || 'Verified'}
+                        </p>
+
+                        <div className="flex items-center gap-2 pt-2">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-medium text-[9px] ${
+                              isMedicalValid
+                                ? 'border-emerald-400/30 bg-emerald-500/20 text-emerald-300'
+                                : 'border-red-400/30 bg-red-500/20 text-red-300'
+                            }`}
+                          >
+                            <Stethoscope className="h-2.5 w-2.5" />
+                            Med: {isMedicalValid ? 'PASS' : 'EXP'}
+                          </span>
+                          <span
+                            className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-medium text-[9px] ${
+                              isInductionValid
+                                ? 'border-emerald-400/30 bg-emerald-500/20 text-emerald-300'
+                                : 'border-amber-400/30 bg-amber-500/20 text-amber-300'
+                            }`}
+                          >
+                            <FileCheck2 className="h-2.5 w-2.5" />
+                            Induct: {isInductionValid ? 'OK' : 'DUE'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* QR Code section */}
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-white p-1 shadow-md">
+                        <QRCodeSection
+                          data={selectedEmp.qr_code || `EMP-${selectedEmp.emp_code}`}
+                          size={56}
                         />
-                      ) : (
-                        <>
-                          <span className="font-bold text-2xl text-slate-300">
-                            {selectedEmp.first_name[0]}
-                            {selectedEmp.surname[0]}
-                          </span>
-                          <span className="mt-1 text-[7px] text-blue-300 uppercase tracking-wider">
-                            + ADD PHOTO
-                          </span>
-                        </>
-                      )}
-                    </button>
-
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <h4 className="truncate font-bold text-base text-white leading-tight">
-                        {selectedEmp.first_name} {selectedEmp.surname}
-                      </h4>
-                      <p className="truncate font-medium text-blue-200 text-xs">
-                        {selectedEmp.job_title || 'Site Operator'}
-                      </p>
-                      <p className="font-mono text-[10px] text-slate-300">
-                        NAT ID: {selectedEmp.id_number || 'Verified'}
-                      </p>
-
-                      <div className="flex items-center gap-2 pt-2">
-                        <span
-                          className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-medium text-[9px] ${
-                            isMedicalValid
-                              ? 'border-emerald-400/30 bg-emerald-500/20 text-emerald-300'
-                              : 'border-red-400/30 bg-red-500/20 text-red-300'
-                          }`}
-                        >
-                          <Stethoscope className="h-2.5 w-2.5" />
-                          Med: {isMedicalValid ? 'PASS' : 'EXP'}
-                        </span>
-                        <span
-                          className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-medium text-[9px] ${
-                            isInductionValid
-                              ? 'border-emerald-400/30 bg-emerald-500/20 text-emerald-300'
-                              : 'border-amber-400/30 bg-amber-500/20 text-amber-300'
-                          }`}
-                        >
-                          <FileCheck2 className="h-2.5 w-2.5" />
-                          Induct: {isInductionValid ? 'OK' : 'DUE'}
-                        </span>
                       </div>
                     </div>
 
-                    {/* QR Code section */}
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-white p-1 shadow-md">
-                      <QRCodeSection
-                        data={selectedEmp.qr_code || `EMP-${selectedEmp.emp_code}`}
-                        size={56}
-                      />
+                    {/* Card Footer */}
+                    <div className="flex items-center justify-between border-white/10 border-t pt-1 font-mono text-[8px] text-slate-300">
+                      <span>DEPT: {selectedEmp.department_name?.toUpperCase()}</span>
+                      <span>{selectedEmp.area?.toUpperCase() || 'MAIN COMPLEX'} • RFID</span>
                     </div>
                   </div>
+                ) : (
+                  /* Back of Card Preview */
+                  <div className="relative flex h-full flex-col justify-between py-1">
+                    {/* Magnetic Stripe representation */}
+                    <div className="-mx-5 my-1 h-8 w-full bg-black/90 px-5" />
 
-                  {/* Card Footer */}
-                  <div className="flex items-center justify-between border-white/10 border-t pt-1 font-mono text-[8px] text-slate-300">
-                    <span>DEPT: {selectedEmp.department_name?.toUpperCase()}</span>
-                    <span>{selectedEmp.area?.toUpperCase() || 'MAIN COMPLEX'} • RFID</span>
-                  </div>
-                </div>
-              ) : (
-                /* Back of Card Preview */
-                <div className="relative flex h-full flex-col justify-between py-1">
-                  {/* Magnetic Stripe representation */}
-                  <div className="-mx-5 my-1 h-8 w-full bg-black/90 px-5" />
+                    <div className="space-y-2 px-1 font-mono text-[8px] text-slate-300">
+                      <p className="leading-tight">
+                        This credential is property of Plantcor Mining. Unauthorized possession,
+                        duplication, or transfer is strictly prohibited. If found, please return to
+                        the Security Access Gate.
+                      </p>
+                      <div className="flex items-center justify-between rounded border border-white/10 bg-black/30 p-2 text-[9px]">
+                        <span>Emergency Security Hotline:</span>
+                        <span className="font-bold text-white">+27 (0) 11 902 4400</span>
+                      </div>
+                    </div>
 
-                  <div className="space-y-2 px-1 font-mono text-[8px] text-slate-300">
-                    <p className="leading-tight">
-                      This credential is property of Plantcor Mining. Unauthorized possession,
-                      duplication, or transfer is strictly prohibited. If found, please return to
-                      the Security Access Gate.
-                    </p>
-                    <div className="flex items-center justify-between rounded border border-white/10 bg-black/30 p-2 text-[9px]">
-                      <span>Emergency Security Hotline:</span>
-                      <span className="font-bold text-white">+27 (0) 11 902 4400</span>
+                    <div className="flex items-center justify-between border-white/10 border-t pt-2 font-mono text-[8px] text-slate-300">
+                      <span>MAGICARD SECURE HOLOPRINT</span>
+                      <span>SER: {selectedEmp.id.substring(0, 12).toUpperCase()}</span>
                     </div>
                   </div>
-
-                  <div className="flex items-center justify-between border-white/10 border-t pt-2 font-mono text-[8px] text-slate-300">
-                    <span>MAGICARD SECURE HOLOPRINT</span>
-                    <span>SER: {selectedEmp.id.substring(0, 12).toUpperCase()}</span>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Print Dispatch Action Button */}
             <div className="flex w-full max-w-[380px] flex-wrap items-center gap-3">

@@ -77,8 +77,13 @@ jest.mock('@/features/analytics/components/PDFDownloadButton', () => ({
   PDFDownloadButton: () => <button type="button">Download PDF</button>,
 }));
 
-jest.mock('@/features/analytics/components/ProductionTrendChartWrapper', () => ({
-  ProductionTrendChart: () => <div data-testid="production-trend-chart" />,
+jest.mock('./ExecutiveChartsLazy', () => ({
+  ExecutiveCharts: ({ summaryAvailable }: { summaryAvailable: boolean }) =>
+    summaryAvailable ? (
+      <div data-testid="production-trend-chart" />
+    ) : (
+      <p>Production summary unavailable</p>
+    ),
 }));
 
 import ExecutiveDashboardPage from './page';
@@ -111,20 +116,34 @@ function createReadReplicaMock(rpcResponse: RpcResponse) {
       builder.gte = jest.fn(() => builder);
       builder.is = jest.fn(async () => {
         if (table === 'machines') {
-          return { data: null, count: filtered ? 8 : 10, error: null };
+          return {
+            data: [{ machine_type: 'Excavator', active: true }],
+            count: filtered ? 8 : 10,
+            error: null,
+          };
         }
         if (table === 'employees') {
-          return { data: null, count: 12, error: null };
+          return {
+            data: [{ departments: { display_name: 'Mining' } }],
+            count: 12,
+            error: null,
+          };
         }
         if (table === 'breakdowns') {
           return {
-            data: [{ id: 'breakdown-1', status: 'active' }],
+            data: [
+              { id: 'breakdown-1', status: 'active', machine_type: 'Excavator', duration_hours: 4 },
+            ],
             count: null,
             error: null,
           };
         }
         return { data: [], count: null, error: null };
       });
+      builder.maybeSingle = jest.fn(async () => ({
+        data: null,
+        error: null,
+      }));
       builder.single = jest.fn(async () => ({
         data: { role: 'manager' },
         error: null,
