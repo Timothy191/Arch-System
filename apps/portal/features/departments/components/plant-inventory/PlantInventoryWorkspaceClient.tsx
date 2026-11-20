@@ -18,12 +18,14 @@ import {
   updatePlantInventoryAmountsAction,
   upsertPlantInventoryItemAction,
 } from './actions';
+import { PlantInventoryPdfReportView } from './PlantInventoryPdfReportView';
+import { PlantInventoryReportsDashboard } from './PlantInventoryReportsDashboard';
 import {
   PlantInventoryItemListView,
-  PlantInventoryReportsView,
   PlantInventoryStockRequiredView,
   PlantInventoryUsageHistoryView,
 } from './PlantInventorySecondaryViews';
+import type { PlantInventoryReportTab } from './plant-inventory-analytics';
 import {
   formatQty,
   getStockStatusBadgeClass,
@@ -47,9 +49,11 @@ export {
 export function PlantInventoryWorkspaceClient({
   mode,
   today,
+  initialReportTab = 'dashboard',
 }: {
   mode: PlantInventoryViewMode;
   today: string;
+  initialReportTab?: PlantInventoryReportTab;
 }) {
   const [stockItems, setStockItems] = useState<PlantInventoryStockItem[]>(() => [
     ...INITIAL_PLANT_STOCK_ITEMS,
@@ -915,12 +919,21 @@ export function PlantInventoryWorkspaceClient({
 
   // ─── 5. REPORTS (/plant-inventory/reports) ─────────────────────────────────
   if (mode === 'reports') {
+    if (initialReportTab === 'pdf-report') {
+      return (
+        <PlantInventoryPdfReportView
+          today={today}
+          stockItems={stockItems}
+          usageHistory={usageHistory}
+        />
+      );
+    }
     return (
-      <PlantInventoryReportsView
+      <PlantInventoryReportsDashboard
         today={today}
-        stockRequiredItems={stockRequiredItems}
-        equipmentList={equipmentList}
-        equipmentMetrics={equipmentMetrics}
+        stockItems={stockItems}
+        usageHistory={usageHistory}
+        onRestockItem={handleRestockItem}
       />
     );
   }

@@ -1,8 +1,29 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import type React from 'react';
 import {
   INITIAL_PLANT_STOCK_ITEMS,
   PlantInventoryWorkspaceClient,
 } from './PlantInventoryWorkspaceClient';
+
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
+}));
+
+jest.mock('@react-pdf/renderer', () => ({
+  Document: ({ children }: { children?: React.ReactNode }) => (
+    <div data-testid="plant-inventory-pdf-doc">{children}</div>
+  ),
+  Page: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  View: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Text: ({ children }: { children?: React.ReactNode }) => <span>{children}</span>,
+  StyleSheet: { create: (styles: unknown) => styles },
+  pdf: jest.fn(() => ({
+    toBlob: jest.fn().mockResolvedValue(new Blob(['%PDF-1.4'], { type: 'application/pdf' })),
+  })),
+}));
 
 describe('PlantInventoryWorkspaceClient', () => {
   beforeEach(() => {
@@ -164,6 +185,57 @@ describe('PlantInventoryWorkspaceClient', () => {
       expect(
         screen.getByRole('heading', { name: 'Consumption by Plant Equipment' })
       ).toBeInTheDocument();
+    });
+
+    it('When initialReportTab="pdf-report", Then it renders the Plant Inventory PDF Report view', () => {
+      render(
+        <PlantInventoryWorkspaceClient
+          mode="reports"
+          today="2026-10-22"
+          initialReportTab="pdf-report"
+        />
+      );
+
+      expect(
+        screen.getByRole('heading', { name: 'Plant Inventory PDF Report' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('article', { name: 'Plant Inventory PDF Report Preview' })
+      ).toBeInTheDocument();
+    });
+
+    it('When initialReportTab switches between dashboard and pdf-report, Then it rerenders the corresponding view', () => {
+      const { rerender } = render(
+        <PlantInventoryWorkspaceClient
+          mode="reports"
+          today="2026-10-22"
+          initialReportTab="dashboard"
+        />
+      );
+
+      expect(screen.getByRole('heading', { name: 'Reports' })).toBeInTheDocument();
+
+      rerender(
+        <PlantInventoryWorkspaceClient
+          mode="reports"
+          today="2026-10-22"
+          initialReportTab="pdf-report"
+        />
+      );
+
+      expect(
+        screen.getByRole('heading', { name: 'Plant Inventory PDF Report' })
+      ).toBeInTheDocument();
+
+      rerender(
+        <PlantInventoryWorkspaceClient
+          mode="reports"
+          today="2026-10-22"
+          initialReportTab="dashboard"
+        />
+      );
+
+      expect(screen.getByRole('heading', { name: 'Reports' })).toBeInTheDocument();
     });
   });
 });

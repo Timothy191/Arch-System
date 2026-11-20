@@ -35,7 +35,14 @@ export default async function ReportsPage({
   const { from: fromParam, to: toParam, tab: tabParam } = await searchParams;
   if (deptSlug === 'plant-inventory') {
     const { today } = await getDepartmentContext({ department: deptSlug });
-    return <PlantInventoryWorkspaceClient mode="reports" today={today} />;
+    const initialReportTab = tabParam === 'pdf-report' ? 'pdf-report' : 'dashboard';
+    return (
+      <PlantInventoryWorkspaceClient
+        mode="reports"
+        today={today}
+        initialReportTab={initialReportTab}
+      />
+    );
   }
   const initialTab: ReportSubtab =
     tabParam === 'pdf-report' ||

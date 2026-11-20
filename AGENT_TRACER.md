@@ -6,6 +6,12 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-20T09:55:00+02:00] - Plant Inventory Executive Reports Dashboard & PDF Report (`feat/plant-inventory-reports-and-pdf`)
+
+- **Reports Dashboard Redesign (`/plant-inventory/reports`)**: Replaced the minimal `PlantInventoryReportsView` with [`PlantInventoryReportsDashboard.tsx`](apps/portal/features/departments/components/plant-inventory/PlantInventoryReportsDashboard.tsx) (executive command header, search/category/equipment/status filters, 5 KPI cards with progress bars, category health and shift consumption intelligence, prioritized replenishment demand with `Mark Restocked`, equipment consumption table, recent consumption audit log, CSV and PDF export).
+- **Department PDF Report (`/plant-inventory/reports?tab=pdf-report`)**: Added [`PlantInventoryPdfReportView.tsx`](apps/portal/features/departments/components/plant-inventory/PlantInventoryPdfReportView.tsx) (A4 live preview studio with category/equipment/scope/zoom controls and print) and the vector [`PlantInventoryPdfDocument.tsx`](apps/portal/features/departments/components/plant-inventory/PlantInventoryPdfDocument.tsx) generated on demand via dynamically imported `@react-pdf/renderer` in [`plant-inventory-export.ts`](apps/portal/features/departments/components/plant-inventory/plant-inventory-export.ts); shared pure analytics in [`plant-inventory-analytics.ts`](apps/portal/features/departments/components/plant-inventory/plant-inventory-analytics.ts). The reports RSC page now forwards `tab=pdf-report` as `initialReportTab`.
+- **Dependabot**: Enabled auto-merge on `#259` (blocked only by required checks while GitHub Actions billing is locked); posted `defer_major_bump` triage on `#258` and `#260`.
+
 ## [2026-11-20T09:16:00+02:00] - `/login` Design Feedback, CSP/Cron Hardening & Test Isolation (`feat/login-feedback-and-hardening`)
 
 - **`/login` Design Feedback ([`apps/portal/app/(auth)/login/page.tsx`](<apps/portal/app/(auth)/login/page.tsx>), [`libs/features/auth/ui/src/LoginForm.tsx`](libs/features/auth/ui/src/LoginForm.tsx))**: Removed the `Arch OS · v{APP_VERSION}` badge `<span>` (and unused `APP_VERSION` import) from `LoginPage` and removed the `<kbd>Enter ↵</kbd>` element from `LoginForm`, preserving `login-taskbar-brand-pill` and session handoff status text, with regression assertions in [`page.test.tsx`](<apps/portal/app/(auth)/login/page.test.tsx>) and [`LoginForm.test.tsx`](libs/features/auth/ui/src/LoginForm.test.tsx).
