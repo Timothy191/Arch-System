@@ -3,17 +3,17 @@
   "description": "Shared Agent Coordination engine and specialists using MCP and OpenAI/Together APIs",
   "version": "1.0.0",
   "dependencies": {
-    "@babel/core": "^8.0.6",
-    "@babel/preset-typescript": "^8.0.1",
-    "@babel/traverse": "^8.0.7",
+    "@babel/core": "^8.1.2",
+    "@babel/preset-typescript": "^8.0.7",
+    "@babel/traverse": "^8.1.2",
     "@openrouter/ai-sdk-provider": "^3.1.0",
     "@opentelemetry/api": "catalog:",
     "@repo/logger": "1.0.0",
     "@supabase/supabase-js": "catalog:",
     "ai": "^7.0.140",
-    "gpt-tokenizer": "^4.0.0",
-    "langfuse": "^3.38.20",
-    "openai": "^4.82.0",
+    "gpt-tokenizer": "^4.1.2",
+    "langfuse": "^3.39.2",
+    "openai": "^7.57.0",
     "zod": "catalog:"
   },
   "devDependencies": {
