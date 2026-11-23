@@ -72,3 +72,45 @@ export const adminOperationalTargetsSchema = z.object({
 
 export type OperationalTargetWindow = z.infer<typeof operationalTargetWindowSchema>;
 export type AdminOperationalTargets = z.infer<typeof adminOperationalTargetsSchema>;
+
+export const employeeGenderSchema = z.enum(['male', 'female', 'other']);
+export type EmployeeGender = z.infer<typeof employeeGenderSchema>;
+
+export const employeeRecordTypeSchema = z.enum(['user', 'employee']);
+export type EmployeeRecordType = z.infer<typeof employeeRecordTypeSchema>;
+
+export const departmentPermissionSchema = z.object({
+  read: z.boolean(),
+  write: z.boolean(),
+});
+export type DepartmentPermission = z.infer<typeof departmentPermissionSchema>;
+
+export const departmentPermissionsMapSchema = z.record(z.string(), departmentPermissionSchema);
+export type DepartmentPermissionsMap = z.infer<typeof departmentPermissionsMapSchema>;
+
+export const upsertAdminEmployeeSchema = z.object({
+  id: z.string().nullable().optional(),
+  record_type: employeeRecordTypeSchema.optional().default('employee'),
+  names: z.string().max(120),
+  surname: z.string().max(120),
+  full_name: z.string().max(240),
+  gender: employeeGenderSchema.or(z.literal('')).nullable().optional(),
+  birthday: z
+    .string()
+    .regex(/^(\d{4}-\d{2}-\d{2})?$/, 'Birthday must use YYYY-MM-DD format')
+    .optional()
+    .default(''),
+  id_number: z.string().max(64),
+  job_title: z.string().max(120),
+  area: z.string().max(120),
+  medical_expiry: z.string().max(32),
+  induction_expiry: z.string().max(32),
+  coy_number: z.string().max(64),
+  qr_code: z.string().max(128),
+  photo_url: z.string(),
+  role: z.string().min(1).max(64),
+  department_id: z.string().nullable(),
+  accessible_departments: z.array(z.string()),
+  department_permissions: departmentPermissionsMapSchema.optional().default({}),
+});
+export type UpsertAdminEmployeeSchemaInput = z.infer<typeof upsertAdminEmployeeSchema>;

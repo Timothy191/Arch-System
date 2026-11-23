@@ -256,6 +256,100 @@ describe('admin UsersTab server actions', () => {
       });
     });
 
+    it('hydrates department_permissions, gender, date_of_birth, and record_type from employee_department_access', async () => {
+      createServerSupabaseClient.mockResolvedValue({
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: { id: 'admin-auth-id' } },
+            error: null,
+          }),
+        },
+        from: jest.fn((table: string) => {
+          if (table === 'employees') {
+            return {
+              select: jest.fn((cols: string) => {
+                if (cols === 'role') {
+                  return {
+                    eq: jest.fn().mockReturnValue({
+                      single: jest.fn().mockResolvedValue({
+                        data: { role: 'admin' },
+                        error: null,
+                      }),
+                    }),
+                  };
+                }
+                return {
+                  order: jest.fn().mockResolvedValue({
+                    data: [
+                      {
+                        id: 'emp-rw',
+                        auth_id: null,
+                        record_type: 'user',
+                        full_name: 'Lerato Khumalo',
+                        gender: 'female',
+                        date_of_birth: '1994-09-18T00:00:00Z',
+                        employee_code: 'COY-3003',
+                        role: 'operator',
+                        department_id: 'dept-drill',
+                        accessible_departments: ['dept-drill', 'dept-prod'],
+                        created_at: '2026-02-01T00:00:00Z',
+                        departments: { display_name: 'Drilling' },
+                      },
+                    ],
+                    error: null,
+                  }),
+                };
+              }),
+            };
+          }
+          if (table === 'departments') {
+            return {
+              select: jest.fn().mockResolvedValue({
+                data: [
+                  { id: 'dept-drill', display_name: 'Drilling' },
+                  { id: 'dept-prod', display_name: 'Production' },
+                ],
+                error: null,
+              }),
+            };
+          }
+          if (table === 'personnel') {
+            return {
+              select: jest.fn().mockResolvedValue({
+                data: [],
+                error: null,
+              }),
+            };
+          }
+          if (table === 'employee_department_access') {
+            return {
+              select: jest.fn().mockResolvedValue({
+                data: [
+                  { employee_id: 'emp-rw', department_id: 'dept-drill', access_level: 'operate' },
+                  { employee_id: 'emp-rw', department_id: 'dept-prod', access_level: 'read' },
+                ],
+                error: null,
+              }),
+            };
+          }
+          return {};
+        }),
+      });
+
+      const result = await getUsersAdminData();
+      expect(result.employees).toHaveLength(1);
+      expect(result.employees[0]).toMatchObject({
+        record_type: 'user',
+        gender: 'female',
+        date_of_birth: '1994-09-18',
+        accessible_departments: ['dept-drill', 'dept-prod'],
+        department_permissions: {
+          'dept-drill': { read: true, write: true },
+          'dept-prod': { read: true, write: false },
+        },
+      });
+    });
+
     it('falls back to core columns while preserving employee_code when extended columns are missing', async () => {
       const empUpdatePayloads: Array<Record<string, unknown>> = [];
       const persUpdatePayloads: Array<Record<string, unknown>> = [];
@@ -385,6 +479,195 @@ describe('admin UsersTab server actions', () => {
         emp_code: 'COY-1001',
         id_number: '8501015009087',
         job_title: 'Shift Boss',
+      });
+    });
+
+    it('persists record_type, gender, birthday and syncs employee_department_access read/operate rows', async () => {
+      const empUpdates: Array<Record<string, unknown>> = [];
+      const accessDeletes: unknown[] = [];
+      const accessUpserts: unknown[] = [];
+
+      createServerSupabaseClient.mockResolvedValue({
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: { id: 'admin-auth-id' } },
+            error: null,
+          }),
+        },
+        from: jest.fn((table: string) => {
+          if (table === 'employees') {
+            return {
+              select: jest.fn((cols: string) => {
+                if (cols === 'role') {
+                  return {
+                    eq: jest.fn().mockReturnValue({
+                      single: jest.fn().mockResolvedValue({
+                        data: { role: 'admin' },
+                        error: null,
+                      }),
+                    }),
+                  };
+                }
+                return {
+                  eq: jest.fn().mockReturnValue({
+                    maybeSingle: jest.fn().mockResolvedValue({
+                      data: { id: 'emp-1' },
+                      error: null,
+                    }),
+                  }),
+                };
+              }),
+              update: jest.fn((payload: Record<string, unknown>) => {
+                empUpdates.push(payload);
+                return { eq: jest.fn().mockResolvedValue({ error: null }) };
+              }),
+            };
+          }
+          if (table === 'employee_department_access') {
+            return {
+              select: jest.fn().mockReturnValue({
+                eq: jest.fn().mockResolvedValue({
+                  data: [{ department_id: 'dept-old' }],
+                  error: null,
+                }),
+              }),
+              delete: jest.fn().mockReturnValue({
+                eq: jest.fn().mockReturnValue({
+                  in: jest.fn((col: string, ids: string[]) => {
+                    accessDeletes.push({ col, ids });
+                    return Promise.resolve({ error: null });
+                  }),
+                }),
+              }),
+              upsert: jest.fn((rows: unknown) => {
+                accessUpserts.push(rows);
+                return Promise.resolve({ error: null });
+              }),
+            };
+          }
+          if (table === 'personnel') {
+            return {
+              select: jest.fn().mockReturnValue({
+                eq: jest.fn().mockReturnValue({
+                  maybeSingle: jest.fn().mockResolvedValue({
+                    data: { id: 'pers-1' },
+                    error: null,
+                  }),
+                }),
+              }),
+              update: jest.fn().mockReturnValue({
+                eq: jest.fn().mockResolvedValue({ error: null }),
+              }),
+            };
+          }
+          if (table === 'badges') {
+            return {
+              select: jest.fn().mockReturnValue({
+                eq: jest.fn().mockReturnValue({
+                  maybeSingle: jest.fn().mockResolvedValue({
+                    data: { id: 'badge-1' },
+                    error: null,
+                  }),
+                }),
+              }),
+              update: jest.fn().mockReturnValue({
+                eq: jest.fn().mockResolvedValue({ error: null }),
+              }),
+            };
+          }
+          return {};
+        }),
+      });
+
+      const res = await upsertEmployeeAdmin({
+        id: 'emp-1',
+        record_type: 'user',
+        names: 'Lerato',
+        surname: 'Khumalo',
+        full_name: 'Lerato Khumalo',
+        gender: 'female',
+        birthday: '1994-09-18',
+        id_number: '9409180000081',
+        job_title: 'Control Officer',
+        area: 'Control Room',
+        medical_expiry: '2027-06-01',
+        induction_expiry: '2027-07-01',
+        coy_number: 'COY-4001',
+        qr_code: 'QR-COY-4001',
+        photo_url: '',
+        role: 'operator',
+        department_id: 'dept-drill',
+        accessible_departments: ['dept-drill', 'dept-prod'],
+        department_permissions: {
+          'dept-drill': { read: true, write: true },
+          'dept-prod': { read: true, write: false },
+        },
+      });
+
+      expect(res).toEqual({ success: true });
+      expect(empUpdates[0]).toMatchObject({
+        record_type: 'user',
+        gender: 'female',
+        date_of_birth: '1994-09-18',
+        accessible_departments: ['dept-drill', 'dept-prod'],
+      });
+      expect(accessDeletes).toEqual([{ col: 'department_id', ids: ['dept-old'] }]);
+      expect(accessUpserts[0]).toEqual([
+        expect.objectContaining({
+          employee_id: 'emp-1',
+          department_id: 'dept-drill',
+          access_level: 'operate',
+        }),
+        expect.objectContaining({
+          employee_id: 'emp-1',
+          department_id: 'dept-prod',
+          access_level: 'read',
+        }),
+      ]);
+    });
+
+    it('rejects invalid birthday format via Zod contract validation', async () => {
+      createServerSupabaseClient.mockResolvedValue({
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: { id: 'admin-auth-id' } },
+            error: null,
+          }),
+        },
+        from: jest.fn(() => ({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: { role: 'admin' },
+                error: null,
+              }),
+            }),
+          }),
+        })),
+      });
+
+      const res = await upsertEmployeeAdmin({
+        names: 'Sipho',
+        surname: 'Dlamini',
+        full_name: 'Sipho Dlamini',
+        gender: 'other',
+        birthday: '18-09-1994',
+        id_number: '9409180000081',
+        job_title: 'Operator',
+        area: 'Pit Area',
+        medical_expiry: '',
+        induction_expiry: '',
+        coy_number: 'COY-5001',
+        qr_code: '',
+        photo_url: '',
+        role: 'operator',
+        department_id: null,
+        accessible_departments: [],
+      });
+
+      expect(res).toEqual({
+        success: false,
+        error: 'Birthday must use YYYY-MM-DD format',
       });
     });
   });

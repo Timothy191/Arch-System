@@ -54,8 +54,18 @@ export {
   adminDataUpdateSchema,
   adminOperationalTargetsSchema,
   adminUpdateSiteSchema,
+  type DepartmentPermission,
+  type DepartmentPermissionsMap,
+  departmentPermissionSchema,
+  departmentPermissionsMapSchema,
+  type EmployeeGender,
+  type EmployeeRecordType,
+  employeeGenderSchema,
+  employeeRecordTypeSchema,
   type OperationalTargetWindow,
   operationalTargetWindowSchema,
+  type UpsertAdminEmployeeSchemaInput,
+  upsertAdminEmployeeSchema,
 } from './schemas/admin.schema';
 export {
   aiChatSchema,

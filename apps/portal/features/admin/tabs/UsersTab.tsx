@@ -1,5 +1,6 @@
 'use client';
 
+import type { DepartmentPermission, EmployeeGender, EmployeeRecordType } from '@repo/contract';
 import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
@@ -17,13 +18,34 @@ import {
   upsertEmployeeAdmin,
 } from './actions';
 import { DEFAULT_ADMIN_AREAS, getSavedAdminAreas } from './DepartmentsTab';
+import {
+  AccountTypeSelectorBox,
+  EmployeeAccessPermissionsSection,
+} from './EmployeeAccessPermissionsSection';
 
 type Employee = AdminEmployeeRecord;
 
+const LABEL_CLASS = 'mb-2 block font-medium text-[var(--text-body)] text-sm';
+const INPUT_CLASS =
+  'w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]';
+const MONO_INPUT_CLASS =
+  'w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)]';
+const TABLE_HEADER_CELL_CLASS =
+  'px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider';
+
+const GENDER_OPTIONS: ReadonlyArray<{ readonly value: EmployeeGender; readonly label: string }> = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+];
+
 interface EmployeeFormPayload {
+  record_type: EmployeeRecordType;
   names: string;
   surname: string;
   full_name: string;
+  gender: EmployeeGender | '';
+  birthday: string;
   id_number: string;
   job_title: string;
   area: string;
@@ -35,6 +57,7 @@ interface EmployeeFormPayload {
   role: string;
   department_id: string | null;
   accessible_departments: string[];
+  department_permissions: Record<string, DepartmentPermission>;
 }
 
 function formatDateShort(dateStr: string | null | undefined): string {
@@ -42,6 +65,26 @@ function formatDateShort(dateStr: string | null | undefined): string {
   const parsed = new Date(dateStr);
   if (Number.isNaN(parsed.getTime())) return '—';
   return parsed.toISOString().split('T')[0] ?? '—';
+}
+
+function formatGenderLabel(gender: EmployeeGender | null | undefined): string | null {
+  if (gender === 'male') return 'Male';
+  if (gender === 'female') return 'Female';
+  if (gender === 'other') return 'Other';
+  return null;
+}
+
+function buildInitialPermissions(employee: Employee | null): Record<string, DepartmentPermission> {
+  const result: Record<string, DepartmentPermission> = {
+    ...(employee?.department_permissions ?? {}),
+  };
+  for (const deptId of employee?.accessible_departments ?? []) {
+    if (!deptId) continue;
+    if (!(deptId in result)) {
+      result[deptId] = { read: true, write: true };
+    }
+  }
+  return result;
 }
 
 export function UsersTab() {
@@ -139,46 +182,25 @@ export function UsersTab() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-[var(--border-default)] border-b">
-                <th
-                  scope="col"
-                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
-                >
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
                   Employee
                 </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
-                >
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
                   Coy / ID Number
                 </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
-                >
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
                   Job Title & Area
                 </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
-                >
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
                   Department & Access
                 </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
-                >
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
                   Medical / Induction
                 </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
-                >
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
                   QR Code & Role
                 </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-right font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
-                >
+                <th scope="col" className={`${TABLE_HEADER_CELL_CLASS} text-right`}>
                   Actions
                 </th>
               </tr>
@@ -204,6 +226,17 @@ export function UsersTab() {
                       emp.departments?.display_name ??
                       'Unassigned')
                     : (emp.departments?.display_name ?? 'Unassigned');
+                  const genderLabel = formatGenderLabel(emp.gender);
+                  const birthdayFormatted = emp.date_of_birth
+                    ? formatDateShort(emp.date_of_birth)
+                    : null;
+                  const recordTypeLabel = emp.record_type === 'user' ? 'User' : 'Employee';
+                  const permissionsMap = emp.department_permissions ?? {};
+                  const accessibleCount = emp.accessible_departments?.length || 0;
+                  const writeCount = Object.values(permissionsMap).filter(
+                    (perm) => perm.write
+                  ).length;
+                  const readOnlyCount = Math.max(0, accessibleCount - writeCount);
 
                   return (
                     <tr key={emp.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
@@ -227,11 +260,20 @@ export function UsersTab() {
                             )}
                           </div>
                           <div>
-                            <div className="font-medium text-[var(--text-heading)] text-sm">
-                              {emp.full_name}
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-[var(--text-heading)] text-sm">
+                                {emp.full_name}
+                              </span>
+                              <span className="rounded bg-[var(--bg-secondary)] px-1.5 py-0.5 font-medium text-[10px] text-[var(--text-muted)]">
+                                {recordTypeLabel}
+                              </span>
                             </div>
                             <div className="text-[var(--text-muted)] text-xs">
                               {emp.first_name || '—'} {emp.last_name || ''}
+                              {genderLabel ? ` · ${genderLabel}` : ''}
+                              {birthdayFormatted && birthdayFormatted !== '—'
+                                ? ` · Born ${birthdayFormatted}`
+                                : ''}
                             </div>
                           </div>
                         </div>
@@ -253,7 +295,9 @@ export function UsersTab() {
                       <td className="px-4 py-3.5">
                         <div className="text-[var(--text-heading)] text-sm">{primaryDept}</div>
                         <div className="text-[var(--text-muted)] text-xs">
-                          {emp.accessible_departments?.length || 0} accessible depts
+                          {accessibleCount === 0
+                            ? '0 accessible depts'
+                            : `${accessibleCount} depts (${writeCount} R/W, ${readOnlyCount} R)`}
                         </div>
                       </td>
                       <td className="px-4 py-3.5">
@@ -313,7 +357,10 @@ export function UsersTab() {
       </GlassCard>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-[var(--border-default)] bg-[var(--bg-primary)]">
+        <DialogContent
+          aria-describedby={undefined}
+          className="max-h-[90vh] max-w-2xl overflow-y-auto border-[var(--border-default)] bg-[var(--bg-primary)]"
+        >
           <DialogHeader>
             <DialogTitle>{editingEmployee ? 'Edit Employee' : 'Add Employee'}</DialogTitle>
           </DialogHeader>
@@ -346,10 +393,20 @@ function EditEmployeeForm({
   const initialFirstParts = (employee?.full_name || '').trim().split(/\s+/);
   const defaultNames = employee?.first_name ?? initialFirstParts[0] ?? '';
   const defaultSurname = employee?.last_name ?? initialFirstParts.slice(1).join(' ') ?? '';
+  const defaultRecordType: EmployeeRecordType =
+    employee?.record_type ??
+    (employee?.auth_id || (employee?.accessible_departments?.length ?? 0) > 0
+      ? 'user'
+      : 'employee');
 
+  const [recordType, setRecordType] = useState<EmployeeRecordType>(defaultRecordType);
   const [names, setNames] = useState(defaultNames);
   const [surname, setSurname] = useState(defaultSurname);
   const [fullName, setFullName] = useState(employee?.full_name || '');
+  const [gender, setGender] = useState<EmployeeGender | ''>(employee?.gender ?? '');
+  const [birthday, setBirthday] = useState<string>(
+    employee?.date_of_birth ? (employee.date_of_birth.split('T')[0] ?? '') : ''
+  );
   const [idNumber, setIdNumber] = useState(employee?.national_id || '');
   const [jobTitle, setJobTitle] = useState(employee?.job_title || '');
   const [area, setArea] = useState(employee?.areas?.[0] || '');
@@ -367,25 +424,28 @@ function EditEmployeeForm({
   const [accessibleDepts, setAccessibleDepts] = useState<string[]>(
     employee?.accessible_departments || []
   );
+  const [departmentPermissions, setDepartmentPermissions] = useState<
+    Record<string, DepartmentPermission>
+  >(() => buildInitialPermissions(employee));
   const [availableAreas, setAvailableAreas] = useState<string[]>([...DEFAULT_ADMIN_AREAS]);
 
   useEffect(() => {
     setAvailableAreas(getSavedAdminAreas());
   }, []);
 
-  const handleNamesChange = (val: string) => {
-    setNames(val);
-    setFullName(`${val} ${surname}`.trim());
+  const handleNamesChange = (nextNames: string) => {
+    setNames(nextNames);
+    setFullName(`${nextNames} ${surname}`.trim());
   };
 
-  const handleSurnameChange = (val: string) => {
-    setSurname(val);
-    setFullName(`${names} ${val}`.trim());
+  const handleSurnameChange = (nextSurname: string) => {
+    setSurname(nextSurname);
+    setFullName(`${names} ${nextSurname}`.trim());
   };
 
-  const handleFullNameChange = (val: string) => {
-    setFullName(val);
-    const parts = val.trim().split(/\s+/);
+  const handleFullNameChange = (nextFullName: string) => {
+    setFullName(nextFullName);
+    const parts = nextFullName.trim().split(/\s+/);
     setNames(parts[0] || '');
     setSurname(parts.slice(1).join(' ') || '');
   };
@@ -418,13 +478,82 @@ function EditEmployeeForm({
     reader.readAsDataURL(file);
   };
 
+  const toggleAccessibleDept = (deptId: string) => {
+    const isSelected = accessibleDepts.includes(deptId);
+    if (isSelected) {
+      setAccessibleDepts((prev) => prev.filter((id) => id !== deptId));
+      setDepartmentPermissions((prev) => {
+        const nextPermissions = { ...prev };
+        delete nextPermissions[deptId];
+        return nextPermissions;
+      });
+      return;
+    }
+
+    setAccessibleDepts((prev) => [...prev, deptId]);
+    setDepartmentPermissions((prev) => ({
+      ...prev,
+      [deptId]: prev[deptId] ?? { read: true, write: true },
+    }));
+  };
+
+  const handleUpdatePermission = (options: {
+    readonly departmentId: string;
+    readonly mode: 'read' | 'write';
+  }) => {
+    const { departmentId: targetDeptId, mode } = options;
+    const current = departmentPermissions[targetDeptId] ?? { read: false, write: false };
+
+    if (mode === 'read') {
+      if (current.read) {
+        setAccessibleDepts((prev) => prev.filter((id) => id !== targetDeptId));
+        setDepartmentPermissions((prev) => {
+          const nextPermissions = { ...prev };
+          delete nextPermissions[targetDeptId];
+          return nextPermissions;
+        });
+        return;
+      }
+      if (!accessibleDepts.includes(targetDeptId)) {
+        setAccessibleDepts((prev) => [...prev, targetDeptId]);
+      }
+      setDepartmentPermissions((prev) => ({
+        ...prev,
+        [targetDeptId]: { read: true, write: current.write },
+      }));
+      return;
+    }
+
+    const nextWrite = !current.write;
+    if (!accessibleDepts.includes(targetDeptId)) {
+      setAccessibleDepts((prev) => [...prev, targetDeptId]);
+    }
+    setDepartmentPermissions((prev) => ({
+      ...prev,
+      [targetDeptId]: { read: true, write: nextWrite },
+    }));
+  };
+
+  const handleApplyBulkWrite = (canWrite: boolean) => {
+    setDepartmentPermissions((prev) => {
+      const nextPermissions: Record<string, DepartmentPermission> = { ...prev };
+      for (const deptId of accessibleDepts) {
+        nextPermissions[deptId] = { read: true, write: canWrite };
+      }
+      return nextPermissions;
+    });
+  };
+
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const combinedFullName = fullName.trim() || `${names.trim()} ${surname.trim()}`.trim();
     onSubmit({
+      record_type: recordType,
       names,
       surname,
       full_name: combinedFullName,
+      gender,
+      birthday,
       id_number: idNumber,
       job_title: jobTitle,
       area,
@@ -436,20 +565,17 @@ function EditEmployeeForm({
       role,
       department_id: departmentId || null,
       accessible_departments: accessibleDepts,
+      department_permissions: departmentPermissions,
     });
-  };
-
-  const toggleAccessibleDept = (deptId: string) => {
-    setAccessibleDepts((prev) =>
-      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId]
-    );
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <AccountTypeSelectorBox recordType={recordType} onChange={setRecordType} />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="names" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
+          <label htmlFor="names" className={LABEL_CLASS}>
             Names
           </label>
           <input
@@ -457,16 +583,13 @@ function EditEmployeeForm({
             type="text"
             value={names}
             onChange={(e) => handleNamesChange(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+            className={INPUT_CLASS}
             placeholder="Enter first name(s)"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="surname"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
+          <label htmlFor="surname" className={LABEL_CLASS}>
             Surname
           </label>
           <input
@@ -474,17 +597,14 @@ function EditEmployeeForm({
             type="text"
             value={surname}
             onChange={(e) => handleSurnameChange(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+            className={INPUT_CLASS}
             placeholder="Enter surname"
           />
         </div>
       </div>
 
       <div>
-        <label
-          htmlFor="fullName"
-          className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-        >
+        <label htmlFor="fullName" className={LABEL_CLASS}>
           Full Name
         </label>
         <input
@@ -492,17 +612,55 @@ function EditEmployeeForm({
           type="text"
           value={fullName}
           onChange={(e) => handleFullNameChange(e.target.value)}
-          className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+          className={INPUT_CLASS}
           placeholder="Enter full name"
         />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label
-            htmlFor="idNumber"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
+          <span className={LABEL_CLASS}>Gender</span>
+          <div role="radiogroup" aria-label="Gender" className="grid grid-cols-3 gap-2">
+            {GENDER_OPTIONS.map((option) => {
+              const isSelected = gender === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  data-testid={`gender-${option.value}`}
+                  onClick={() => setGender(isSelected ? '' : option.value)}
+                  className={`rounded border px-2.5 py-2 font-medium text-sm transition-colors ${
+                    isSelected
+                      ? 'border-[var(--accent-emerald)] bg-[var(--accent-emerald)] text-[var(--bg-void)]'
+                      : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] hover:border-[var(--border-strong)]'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="birthday" className={LABEL_CLASS}>
+            Birthday
+          </label>
+          <input
+            id="birthday"
+            type="date"
+            value={birthday}
+            onChange={(e) => setBirthday(e.target.value)}
+            className={INPUT_CLASS}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="idNumber" className={LABEL_CLASS}>
             Id Number
           </label>
           <input
@@ -510,16 +668,13 @@ function EditEmployeeForm({
             type="text"
             value={idNumber}
             onChange={(e) => setIdNumber(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)]"
+            className={MONO_INPUT_CLASS}
             placeholder="Enter ID / passport number"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="coyNumber"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
+          <label htmlFor="coyNumber" className={LABEL_CLASS}>
             Coy Number
           </label>
           <input
@@ -527,7 +682,7 @@ function EditEmployeeForm({
             type="text"
             value={coyNumber}
             onChange={(e) => setCoyNumber(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)]"
+            className={MONO_INPUT_CLASS}
             placeholder="e.g. COY-1042 / EMP-1042"
           />
         </div>
@@ -535,10 +690,7 @@ function EditEmployeeForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label
-            htmlFor="jobTitle"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
+          <label htmlFor="jobTitle" className={LABEL_CLASS}>
             Job Title
           </label>
           <input
@@ -546,20 +698,20 @@ function EditEmployeeForm({
             type="text"
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+            className={INPUT_CLASS}
             placeholder="e.g. Excavator Operator"
           />
         </div>
 
         <div>
-          <label htmlFor="area" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
+          <label htmlFor="area" className={LABEL_CLASS}>
             Area
           </label>
           <select
             id="area"
             value={area}
             onChange={(e) => setArea(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+            className={INPUT_CLASS}
           >
             <option value="">Select area</option>
             {availableAreas.map((areaName) => (
@@ -573,10 +725,7 @@ function EditEmployeeForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label
-            htmlFor="medicalExpiry"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
+          <label htmlFor="medicalExpiry" className={LABEL_CLASS}>
             Medical Expiry
           </label>
           <input
@@ -584,15 +733,12 @@ function EditEmployeeForm({
             type="date"
             value={medicalExpiry}
             onChange={(e) => setMedicalExpiry(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+            className={INPUT_CLASS}
           />
         </div>
 
         <div>
-          <label
-            htmlFor="inductionExpiry"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
+          <label htmlFor="inductionExpiry" className={LABEL_CLASS}>
             Induction Expiry
           </label>
           <input
@@ -600,13 +746,13 @@ function EditEmployeeForm({
             type="date"
             value={inductionExpiry}
             onChange={(e) => setInductionExpiry(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+            className={INPUT_CLASS}
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="qrCode" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
+        <label htmlFor="qrCode" className={LABEL_CLASS}>
           QR Code
         </label>
         <div className="flex gap-2">
@@ -629,7 +775,7 @@ function EditEmployeeForm({
       </div>
 
       <div>
-        <label htmlFor="photo" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
+        <label htmlFor="photo" className={LABEL_CLASS}>
           Photo
         </label>
         <div className="flex items-center gap-3">
@@ -665,14 +811,14 @@ function EditEmployeeForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="role" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
+          <label htmlFor="role" className={LABEL_CLASS}>
             Role
           </label>
           <select
             id="role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+            className={INPUT_CLASS}
           >
             <option value="operator">Operator</option>
             <option value="supervisor">Supervisor</option>
@@ -682,17 +828,14 @@ function EditEmployeeForm({
         </div>
 
         <div>
-          <label
-            htmlFor="department"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
+          <label htmlFor="department" className={LABEL_CLASS}>
             Primary Department
           </label>
           <select
             id="department"
             value={departmentId}
             onChange={(e) => setDepartmentId(e.target.value)}
-            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+            className={INPUT_CLASS}
           >
             <option value="">Select department</option>
             {departments.map((dept) => (
@@ -704,27 +847,16 @@ function EditEmployeeForm({
         </div>
       </div>
 
-      <div>
-        <label className="mb-2 block font-medium text-[var(--text-body)] text-sm">
-          Accessible Departments
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          {departments.map((dept) => (
-            <button
-              key={dept.id}
-              type="button"
-              onClick={() => toggleAccessibleDept(dept.id)}
-              className={`rounded border px-3 py-2 text-left text-sm ${
-                accessibleDepts.includes(dept.id)
-                  ? 'border-[var(--accent-emerald)] bg-[var(--accent-emerald)] text-[var(--bg-void)]'
-                  : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-body)]'
-              }`}
-            >
-              {dept.display_name}
-            </button>
-          ))}
-        </div>
-      </div>
+      <EmployeeAccessPermissionsSection
+        recordType={recordType}
+        departments={departments}
+        accessibleDepartments={accessibleDepts}
+        departmentPermissions={departmentPermissions}
+        onRecordTypeChange={setRecordType}
+        onToggleDepartment={toggleAccessibleDept}
+        onUpdatePermission={handleUpdatePermission}
+        onApplyBulkWrite={handleApplyBulkWrite}
+      />
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
@@ -734,7 +866,7 @@ function EditEmployeeForm({
           type="submit"
           className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
         >
-          {employee ? 'Save Changes' : 'Add Employee'}
+          {employee ? 'Save Changes' : recordType === 'user' ? 'Add User' : 'Add Employee'}
         </Button>
       </div>
     </form>
