@@ -42,7 +42,6 @@ const HUB_ROUTE_PREFIX = '/hub/';
 const DOCUMENT_HIDDEN_STATE = 'hidden';
 
 const DEPARTMENT_WEBP_ASSETS: readonly string[] = [
-  '/background/global-background-poster.webp',
   '/images/departments/overview-card.webp',
   '/images/departments/admin-card.webp',
   '/images/departments/access-control-card.webp',

@@ -249,6 +249,7 @@ export interface HealthState {
   db: 'ok' | 'degraded' | 'unavailable' | 'disabled';
   redis: 'ok' | 'degraded' | 'unavailable' | 'disabled';
   fuxa: 'ok' | 'degraded' | 'unavailable' | 'disabled';
+  fuxaMode?: 'external' | 'in-codebase';
   responseTime: number;
   timestamp: string;
   loading: boolean;
@@ -292,18 +293,29 @@ export function mapHealthResponseToState(json: RawHealthApiResponse): HealthStat
     down: 'error',
   } as const;
 
-  const overallStatus = json.status
+  const dbStatus = mapServiceStatus(json.services?.supabase ?? json.services?.supabase_realtime);
+  const redisStatus = mapServiceStatus(json.services?.redis);
+  const isInCodebaseScadaActive =
+    json.services?.fuxa?.error === 'FUXA_URL is not configured' && redisStatus === 'ok';
+  const fuxaStatus = isInCodebaseScadaActive
+    ? 'ok'
+    : mapServiceStatus(json.services?.fuxa ?? json.services?.redis);
+
+  const rawOverallStatus = json.status
     ? (statusMap[json.status as keyof typeof statusMap] ?? 'error')
     : 'error';
+  const overallStatus =
+    isInCodebaseScadaActive && rawOverallStatus === 'degraded' && dbStatus === 'ok'
+      ? 'healthy'
+      : rawOverallStatus;
   const rawLatency = json.latencyMs ?? json.latency_ms ?? 0;
 
   return {
     status: overallStatus,
-    db: mapServiceStatus(json.services?.supabase ?? json.services?.supabase_realtime),
-    redis: mapServiceStatus(json.services?.redis),
-    // AGENT-TRACE: SCADA (FUXA) uses reverse-flow Redis tag ingest (/api/scada/tags);
-    // prefer explicit services.fuxa and fall back to services.redis when rolling across deploys.
-    fuxa: mapServiceStatus(json.services?.fuxa ?? json.services?.redis),
+    db: dbStatus,
+    redis: redisStatus,
+    fuxa: fuxaStatus,
+    fuxaMode: isInCodebaseScadaActive ? 'in-codebase' : 'external',
     responseTime: rawLatency > 0 ? rawLatency : overallStatus !== 'error' ? 1 : 0,
     timestamp: json.timestamp ?? json.last_check ?? '',
     loading: false,

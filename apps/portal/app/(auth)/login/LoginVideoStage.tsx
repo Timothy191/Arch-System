@@ -29,8 +29,7 @@ export function LoginVideoStage() {
         <source src="/images/departments/drilling.mp4" type="video/mp4" />
         <source src="/images/departments/production.mp4" type="video/mp4" />
         <source src="/images/departments/overview.mp4" type="video/mp4" />
-        <source src="/background/video-loop.webm" type="video/webm" />
-        <source src="/background/video-loop.mp4" type="video/mp4" />
+        <source src="/background/global-background.mp4" type="video/mp4" />
       </video>
       <div className={VIDEO_COLOR_WASH_CLASS} aria-hidden="true" />
       <div className={STRATA_GRID_CLASS} aria-hidden="true" />

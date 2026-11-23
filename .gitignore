@@ -333,6 +333,9 @@ graphify-out/
 .vibemon/
 .agents/mcp_config.json
 .clai/
+.freebuff/
+.autohand/
+.codewhale/
 .commandcode/*
 !.commandcode/taste/
 .commandcode/taste/*

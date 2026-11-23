@@ -18,15 +18,45 @@ jest.mock('@repo/supabase/server', () => ({
   getUserSafely: jest.fn(),
 }));
 
-jest.mock('@repo/ui/components/N8nIcon', () => ({
-  N8nIcon: () => <span data-testid="n8n-icon" />,
-}));
-
-jest.mock('@repo/ui/components/RedisIcon', () => ({
-  RedisIcon: () => <span data-testid="redis-icon" />,
+jest.mock('@repo/ui/DepartmentLayout', () => ({
+  DepartmentLayout: ({
+    department,
+    tabs,
+    children,
+  }: {
+    department: unknown;
+    tabs: readonly unknown[];
+    children: React.ReactNode;
+  }) => (
+    <div
+      data-testid="mock-department-layout"
+      data-department-name={String((department as { name?: string })?.name)}
+    >
+      <nav aria-label="Admin sidebar tabs">
+        {(tabs as { name: string; label: string }[]).map((tab) => (
+          <a key={tab.name} href={`/admin/${tab.name}`}>
+            {tab.label}
+          </a>
+        ))}
+      </nav>
+      {children}
+    </div>
+  ),
 }));
 
 const { createServerSupabaseClient, getUserSafely } = jest.requireMock('@repo/supabase/server');
+
+const mockSupabaseForRole = (role: string) => {
+  createServerSupabaseClient.mockResolvedValue({
+    from: jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          single: jest.fn().mockResolvedValue({ data: { role } }),
+        }),
+      }),
+    }),
+  });
+};
 
 describe('AdminLayout', () => {
   beforeEach(() => {
@@ -45,51 +75,39 @@ describe('AdminLayout', () => {
 
   it('redirects non-admin operators to /', async () => {
     getUserSafely.mockResolvedValue({ id: 'user-1', email: 'op@plantcor.com' });
-    createServerSupabaseClient.mockResolvedValue({
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: { role: 'operator' } }),
-          }),
-        }),
-      }),
-    });
+    mockSupabaseForRole('operator');
 
     await expect(AdminLayout({ children: <div>Child</div> })).rejects.toThrow('NEXT_REDIRECT:/');
     expect(redirect).toHaveBeenCalledWith('/');
   });
 
-  it('renders admin header links including Cloudflare Edge when role is admin', async () => {
+  it('renders the admin department layout with sidebar tabs', async () => {
     getUserSafely.mockResolvedValue({ id: 'admin-1', email: 'admin@plantcor.com' });
-    createServerSupabaseClient.mockResolvedValue({
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: { role: 'admin' } }),
-          }),
-        }),
-      }),
-    });
+    mockSupabaseForRole('admin');
 
     const jsx = await AdminLayout({ children: <div data-testid="admin-child">Body</div> });
     render(jsx);
 
     expect(screen.getByTestId('admin-child')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Cloudflare Edge/i })).toHaveAttribute(
-      'href',
-      '/admin/cloudflare'
+    expect(screen.getByTestId('mock-department-layout')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-department-layout')).toHaveAttribute(
+      'data-department-name',
+      'admin'
     );
-    expect(screen.getByRole('link', { name: /n8n Workflows/i })).toHaveAttribute(
-      'href',
-      '/admin/workflows'
-    );
-    expect(screen.getByRole('link', { name: /RedisInsight/i })).toHaveAttribute(
-      'href',
-      '/admin/redis'
-    );
-    expect(screen.getByRole('link', { name: /Observability & CI/i })).toHaveAttribute(
-      'href',
-      '/admin/observability'
-    );
+
+    const sidebar = screen.getByRole('navigation', { name: /Admin sidebar tabs/i });
+    expect(sidebar).toBeInTheDocument();
+
+    const linkPairs = [
+      [/Cloudflare Edge/i, '/admin/cloudflare'],
+      [/n8n Workflows/i, '/admin/workflows'],
+      [/RedisInsight/i, '/admin/redis'],
+      [/Observability & CI/i, '/admin/observability'],
+      [/AI Metrics/i, '/admin/ai-metrics'],
+      [/General/i, '/admin/dashboard'],
+    ] as const;
+    for (const [name, href] of linkPairs) {
+      expect(screen.getByRole('link', { name })).toHaveAttribute('href', href);
+    }
   });
 });

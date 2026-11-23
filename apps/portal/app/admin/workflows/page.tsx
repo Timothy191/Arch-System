@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { CriticalWorkflowsCanvas } from './CriticalWorkflowsCanvas';
 
 const KPI_GRID_COLUMNS = 3;
 const PERCENT_MULTIPLIER = 100;
@@ -291,6 +292,8 @@ export default function WorkflowsPage() {
           icon={<TrendingUp className="h-5 w-5 opacity-70" />}
         />
       </KPIGrid>
+
+      <CriticalWorkflowsCanvas />
 
       {jobs.length === 0 ? (
         <GlassCard variant="window" className="flex flex-col items-start gap-3 p-6">

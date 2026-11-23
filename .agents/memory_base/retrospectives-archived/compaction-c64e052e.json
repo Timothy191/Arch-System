@@ -1,0 +1,34 @@
+{
+  "id": "compaction-c64e052e",
+  "timestamp": "2026-11-23T07:22:34.004Z",
+  "taskTag": "compaction-standard-c64e052e",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/packages/ui/src/icons/admin-icons.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/layout.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/components/AdminTabs.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/workflows/CriticalWorkflowsCanvas.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/redis/RedisVisualPanels.tsx\"",
+    "\"/home/tim/Fork/Arch-System/packages/ui/package.json\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/jest.config.cjs\"",
+    "\"/home/tim/Fork/Arch-System/packages/ui/src/components/DepartmentLayout.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/workflows/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/redis/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/ai/metrics/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/AIMetricsDashboard.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/workflows/CriticalWorkflowsCanvas.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/workflows/page.test.tsx\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (302 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 158565,
+    "cacheHitRatio": 0.9583,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

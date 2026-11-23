@@ -1,3 +1,4 @@
+/* cspell:ignore requestfailed */
 import { expect, test } from '@playwright/test';
 
 test('light-mode liquid glass background should be pure white with rgba tint', async ({ page }) => {
@@ -48,7 +49,7 @@ test('light-mode liquid glass background should be pure white with rgba tint', a
     };
   });
 
-  expect(videoState.src).toMatch(/video-loop|global-background/);
+  expect(videoState.src).toMatch(/\/background\/global-background\.mp4/);
 
   // 4. SOTA Synthetic Performance & Layout Stability Probe
   const perfMetrics = await page.evaluate(() => {

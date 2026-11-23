@@ -1,3 +1,4 @@
+/* cspell:ignore zwevvryv */
 import { expect, test } from '@playwright/test';
 import { loginWithTestUser } from '../helpers/auth';
 
@@ -188,7 +189,7 @@ test.describe('Asset Integrity & CSP Gating', () => {
           if (!video) return [];
           return Array.from(video.querySelectorAll('source')).map((s) => s.src);
         });
-        expect(sourceUrls.some((u) => u.includes('/background/video-loop'))).toBe(true);
+        expect(sourceUrls.some((u) => u.includes('/background/global-background.mp4'))).toBe(true);
       }
       expect(mediaRequestBlocked).toBe(false);
     }

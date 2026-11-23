@@ -456,6 +456,21 @@ export const PRESENTATION_TABS = [
   { name: 'investor-pack', label: 'Investor Pack & PDF', icon: 'FileText' },
 ] as const;
 
+/**
+ * Administration console sidebar — mirrors the canonical department layout
+ * instead of the legacy horizontal header navigation.
+ */
+export const ADMIN_DEPARTMENT = DEPARTMENTS.find((department) => department.name === 'admin')!;
+
+export const ADMIN_TABS = [
+  { name: 'dashboard', label: 'General', icon: 'Settings' },
+  { name: 'workflows', label: 'n8n Workflows', icon: 'Workflow' },
+  { name: 'redis', label: 'RedisInsight', icon: 'Database' },
+  { name: 'ai-metrics', label: 'AI Metrics', icon: 'Activity' },
+  { name: 'observability', label: 'Observability & CI', icon: 'Monitor' },
+  { name: 'cloudflare', label: 'Cloudflare Edge', icon: 'Cloud' },
+] as const;
+
 const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
@@ -471,6 +486,7 @@ const DEPARTMENT_TABS_MAP: Record<
   'availability-utilization': AVAILABILITY_UTILIZATION_TABS,
   office: OFFICE_TABS,
   presentation: PRESENTATION_TABS,
+  admin: ADMIN_TABS,
 };
 
 /**

@@ -3,7 +3,7 @@
 import { render, waitFor } from '@testing-library/react';
 import { ServiceWorkerRegister, shouldWarmPreviewVideos } from './ServiceWorkerRegister';
 
-const EXPECTED_CARD_ASSETS_COUNT = 12;
+const EXPECTED_CARD_ASSETS_COUNT = 11;
 const EXPECTED_PREVIEW_VIDEOS_COUNT = 4;
 const HIGH_TIER_CORES = 8;
 const HIGH_TIER_MEMORY_GB = 8;
@@ -168,8 +168,7 @@ describe('ServiceWorkerRegister', () => {
     );
     const videoUrls = fetchedUrls.filter((url) => url.endsWith(VIDEO_EXTENSION));
 
-    expect(fetchedUrls).toContain('/background/global-background-poster.webp');
-    expect(departmentImageUrls).toHaveLength(EXPECTED_CARD_ASSETS_COUNT - 1);
+    expect(departmentImageUrls).toHaveLength(EXPECTED_CARD_ASSETS_COUNT);
     for (const imageUrl of departmentImageUrls) {
       expect(imageUrl.endsWith(CARD_BANNER_SUFFIX)).toBe(true);
     }

@@ -22,6 +22,11 @@ import {
   Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import {
+  AnimatedUptimeStrip,
+  RedisKeyInspectorVisual,
+  RedisTelemetryGauges,
+} from './RedisVisualPanels';
 
 const REDIS_ICON_LG_PX = 24;
 const REDIS_ICON_SM_PX = 18;
@@ -35,7 +40,6 @@ const DEFAULT_L2_HIT_RATE_PCT = 0;
 const DEFAULT_MISS_RATE_PCT = 0;
 const DEFAULT_LATENCY_MS = 4;
 const PERCENT_MULTIPLIER = 100;
-const JSON_INDENT_SPACES = 2;
 const SAMPLE_TTL_SECONDS = 3600;
 const MS_PER_SECOND = 1000;
 const SAMPLE_READ_COUNT = 12847;
@@ -301,12 +305,6 @@ const DEFAULT_REDIS_STATS: RedisStats = {
   alerts: [],
 };
 
-const TICK_STATUS_CLASSES: Record<HeartbeatStatus, string> = {
-  UP: 'bg-emerald-500',
-  DEGRADED: 'bg-amber-500',
-  DOWN: 'bg-rose-500',
-};
-
 function computeHitRatePct(hits?: number, misses?: number, fallbackPct = DEFAULT_L1_HIT_RATE_PCT) {
   const safeHits = hits ?? 0;
   const safeMisses = misses ?? 0;
@@ -469,33 +467,7 @@ function mapObservabilityToRedisStats(payload: ObservabilityApiResponse): RedisS
 }
 
 function RedisUptimeSection({ stats }: { readonly stats: RedisStats }) {
-  return (
-    <GlassCard variant="window" className="p-4" data-testid="admin-redis-uptime-section">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-emerald-600" />
-          <h3 className="font-semibold text-sm text-zinc-800">
-            90-Tick Redis &amp; Runtime Uptime Heartbeat Strip
-          </h3>
-        </div>
-        <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-mono font-semibold text-emerald-700 text-xs">
-          24h SLA: {stats.slaPct}%
-        </span>
-      </div>
-      <div
-        className="grid auto-cols-fr grid-flow-col gap-0.5"
-        aria-label="90-tick Redis uptime heartbeat strip"
-      >
-        {stats.heartbeatTicks.map((tick) => (
-          <span
-            key={tick.index}
-            title={`Tick #${tick.index + 1}: ${tick.status} (${tick.latencyMs}ms)`}
-            className={`h-6 rounded-xs transition-opacity hover:opacity-80 ${TICK_STATUS_CLASSES[tick.status]}`}
-          />
-        ))}
-      </div>
-    </GlassCard>
-  );
+  return <AnimatedUptimeStrip ticks={stats.heartbeatTicks} slaPct={stats.slaPct} />;
 }
 
 function AlertStatusPanel({ alerts }: { alerts: RedisStats['alerts'] }) {
@@ -793,7 +765,7 @@ export default function RedisManagerPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-65px)] flex-col gap-6 bg-zinc-50 p-4 lg:p-6">
+    <div className="flex min-h-[calc(100vh-65px)] flex-col gap-6 bg-transparent p-4 lg:p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center rounded-lg border border-rose-500/20 bg-rose-500/10 p-2 text-rose-600">
@@ -901,21 +873,65 @@ export default function RedisManagerPage() {
         />
       </KPIGrid>
 
+      <RedisTelemetryGauges
+        healthPct={stats.clusterHealth === 'GREEN' ? 95 : 78}
+        usedMemoryMb={stats.usedMemoryMb}
+        maxMemoryMb={stats.maxMemoryMb}
+        l1HitRatePct={stats.l1HitRatePct}
+        opsPerSecond={stats.opsPerSecond}
+      />
+
       <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-4 lg:col-span-1">
           <GlassCard variant="spotlight" className="flex flex-1 flex-col p-4">
-            <div className="mb-4 flex items-center gap-2 text-rose-600">
-              <RedisIcon size={REDIS_ICON_SM_PX} />
-              <h3 className="font-semibold text-zinc-800">Key Browser</h3>
+            <div className="mb-3 flex items-center justify-between gap-2 text-rose-600">
+              <div className="flex items-center gap-2">
+                <RedisIcon size={REDIS_ICON_SM_PX} />
+                <h3 className="font-semibold text-zinc-800">Key Browser</h3>
+              </div>
+              <span className="rounded-full bg-zinc-100 px-2 py-0.5 font-mono text-[11px] text-zinc-700">
+                {
+                  liveKeys.filter((k) => k.toLowerCase().includes(searchFilter.toLowerCase()))
+                    .length
+                }{' '}
+                keys
+              </span>
             </div>
-            <input
-              type="text"
-              value={searchFilter}
-              onChange={(event) => setSearchFilter(event.target.value)}
-              placeholder="Search keys (*:pattern)"
-              className="mb-4 w-full rounded-md border border-zinc-200 bg-white/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <div className="flex-1 overflow-auto rounded-md border border-zinc-200 bg-white/30">
+            <div className="relative mb-2.5">
+              <input
+                type="text"
+                value={searchFilter}
+                onChange={(event) => setSearchFilter(event.target.value)}
+                placeholder="Search keys (*:pattern)"
+                className="w-full rounded-md border border-zinc-200 bg-white/60 px-3 py-2 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              {searchFilter && (
+                <button
+                  type="button"
+                  onClick={() => setSearchFilter('')}
+                  className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] text-zinc-600 hover:bg-zinc-200"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {(['', 'arch:__tags__', 'auth', 'cache'] as const).map((prefix) => (
+                <button
+                  key={prefix || 'all'}
+                  type="button"
+                  onClick={() => setSearchFilter(prefix)}
+                  className={`rounded-full px-2 py-0.5 font-mono text-[10px] transition-colors ${
+                    searchFilter === prefix
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                  }`}
+                >
+                  {prefix || 'All'}
+                </button>
+              ))}
+            </div>
+            <div className="max-h-[420px] flex-1 overflow-auto rounded-md border border-zinc-200 bg-white/40">
               {liveKeys.length === 0 ? (
                 <div className="px-3 py-6 text-center text-xs text-zinc-500">
                   No matching live Redis keys found.
@@ -931,13 +947,19 @@ export default function RedisManagerPage() {
                           setSelectedKey(keyName);
                           void inspectRedisKeys(searchFilter.trim() || '*', keyName);
                         }}
-                        className={`cursor-pointer px-3 py-2 font-mono text-sm transition-colors ${
+                        title={keyName}
+                        className={`flex cursor-pointer items-center gap-2 px-3 py-2 font-mono text-xs transition-colors ${
                           selectedKey === keyName
                             ? 'bg-indigo-50 font-semibold text-indigo-700'
-                            : 'text-zinc-700 hover:bg-zinc-100/50'
+                            : 'text-zinc-700 hover:bg-zinc-100/60'
                         }`}
                       >
-                        {keyName}
+                        <span
+                          className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                            selectedKey === keyName ? 'bg-indigo-600' : 'bg-zinc-300'
+                          }`}
+                        />
+                        <span className="truncate">{keyName}</span>
                       </li>
                     ))}
                 </ul>
@@ -949,8 +971,8 @@ export default function RedisManagerPage() {
         <div className="flex flex-col gap-4 lg:col-span-2">
           <GlassCard variant="window" className="flex flex-1 flex-col">
             <div className="flex items-center justify-between border-zinc-100 border-b bg-zinc-50/50 px-4 py-3">
-              <div>
-                <h3 className="font-mono font-semibold text-sm text-zinc-800">
+              <div className="min-w-0 pr-3">
+                <h3 className="truncate font-mono font-semibold text-sm text-zinc-800">
                   {selectedKey || 'No key selected'}
                 </h3>
                 <p className="text-xs text-zinc-500 uppercase">
@@ -958,7 +980,7 @@ export default function RedisManagerPage() {
                   {inspectedKeyData ? `${inspectedKeyData.ttlSeconds}s` : 'N/A'}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex shrink-0 gap-2">
                 <button
                   type="button"
                   onClick={handleInspectKey}
@@ -975,28 +997,18 @@ export default function RedisManagerPage() {
                 </button>
               </div>
             </div>
-            <div className="flex-1 overflow-auto bg-white/40 p-4 font-mono text-sm text-zinc-800">
-              <pre className="rounded border border-zinc-200 bg-zinc-50/50 p-3">
-                {JSON.stringify(
-                  {
-                    ...selectedKeyRecord,
-                    lastInspected: stats.lastHeartbeat,
-                    metadata: {
-                      ttl: SAMPLE_TTL_SECONDS,
-                      expires: ttlExpiresIso,
-                      usage: {
-                        reads: SAMPLE_READ_COUNT,
-                        writes: SAMPLE_WRITE_COUNT,
-                        commands: SAMPLE_COMMAND_COUNT,
-                      },
-                      tags: ['production', 'mining', 'operational'],
-                    },
-                  },
-                  null,
-                  JSON_INDENT_SPACES
-                )}
-              </pre>
-            </div>
+            <RedisKeyInspectorVisual
+              selectedKey={selectedKey}
+              keyType={inspectedKeyData?.type ?? 'unknown'}
+              ttlSeconds={inspectedKeyData?.ttlSeconds ?? 0}
+              ttlExpiresIso={ttlExpiresIso}
+              lastInspected={stats.lastHeartbeat}
+              selectedKeyRecord={selectedKeyRecord}
+              sampleTtlSeconds={SAMPLE_TTL_SECONDS}
+              sampleReadCount={SAMPLE_READ_COUNT}
+              sampleWriteCount={SAMPLE_WRITE_COUNT}
+              sampleCommandCount={SAMPLE_COMMAND_COUNT}
+            />
           </GlassCard>
         </div>
       </div>

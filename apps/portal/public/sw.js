@@ -16,7 +16,6 @@ const PRECACHE_ASSETS = [
   '/',
   '/manifest.webmanifest',
   '/favicon.ico',
-  '/background/global-background-poster.webp',
   '/images/departments/overview.webp',
 ];
 

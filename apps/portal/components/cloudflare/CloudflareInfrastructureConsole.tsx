@@ -117,22 +117,51 @@ function _SectionCard({
 }
 
 export function CloudflareInfrastructureConsole() {
+  const [autoPoll, setAutoPoll] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<string | null>(null);
 
   const summaryQuery = useQuery({
     queryKey: ['cloudflare', 'summary'],
     queryFn: () => fetchJson<CloudflareSummaryResponse>('/api/cloudflare/summary'),
+    refetchInterval: autoPoll ? 30_000 : false,
+    staleTime: 15_000,
   });
 
   const summary = summaryQuery.data;
 
   const handleRefresh = () => {
-    void summaryQuery.refetch();
-    setLastRefresh(new Date().toISOString());
+    void summaryQuery.refetch().finally(() => {
+      setLastRefresh(new Date().toISOString());
+    });
   };
 
   const isLoading = summaryQuery.isLoading;
   const isError = summaryQuery.isError;
+  const isFetching = summaryQuery.isFetching;
+
+  const subsystemModes = summary
+    ? [
+        summary.account.mode,
+        summary.zeroTrust.mode,
+        summary.tunnel.mode,
+        summary.workers.mode,
+        summary.queues.mode,
+        summary.turnstile.mode,
+        summary.aiGateway.mode,
+        summary.r2.mode,
+        summary.securityCentre.mode,
+      ]
+    : [];
+  const liveCount = subsystemModes.filter((m) => m === 'live').length;
+  const stabilityLabel = !summary
+    ? 'Checking'
+    : summary.account.mode === 'live'
+      ? (summary.account.latencyMs ?? 0) < 1500
+        ? 'Stable'
+        : 'High Latency'
+      : summary.account.mode === 'unconfigured'
+        ? 'Standby (Unconfigured)'
+        : 'Degraded';
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
@@ -152,18 +181,36 @@ export function CloudflareInfrastructureConsole() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             {lastRefresh && (
               <span className="text-[11px] text-zinc-500">
                 Refreshed {new Date(lastRefresh).toLocaleTimeString('en-ZA')}
               </span>
             )}
+            {summary && (
+              <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 font-mono text-[11px] text-zinc-700">
+                {stabilityLabel} · {liveCount}/9 live
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => setAutoPoll((prev) => !prev)}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-medium text-xs transition-colors ${
+                autoPoll
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                  : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
+              }`}
+            >
+              <Activity className="h-3.5 w-3.5" />
+              {autoPoll ? 'Auto-Poll 30s' : 'Manual Poll'}
+            </button>
             <button
               type="button"
               onClick={handleRefresh}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 font-medium text-xs text-zinc-700 hover:bg-zinc-50"
+              disabled={isFetching}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 font-medium text-xs text-zinc-700 hover:bg-zinc-50 disabled:opacity-60"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
+              <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? 'animate-spin' : ''}`} />
               Refresh
             </button>
           </div>

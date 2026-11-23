@@ -1,0 +1,24 @@
+{
+  "id": "compaction-9fce1b14",
+  "timestamp": "2026-11-23T11:16:51.070Z",
+  "taskTag": "compaction-standard-9fce1b14",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/AGENT_TRACER.md\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/weather-production-loss.ts\"",
+    "\"/home/tim/Fork/Arch-System/e2e/visual/asset-integrity.spec.ts\"",
+    "\"/home/tim/Fork/Arch-System/e2e/visual/theme.smoke.spec.ts\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (446 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 205286,
+    "cacheHitRatio": 0.8441,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

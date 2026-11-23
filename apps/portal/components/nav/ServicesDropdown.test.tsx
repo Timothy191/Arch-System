@@ -285,23 +285,24 @@ describe('ServicesDropdown', () => {
     });
   });
 
-  it('toggles the 7-day weather forecast panel when the weather card is clicked', async () => {
+  it('opens the 7-day weather forecast panel by default and displays the rain production loss engine', async () => {
     render(<ServicesDropdown />);
     fireEvent.click(screen.getByRole('button', { name: /system tray/i }));
 
     const weatherToggle = await screen.findByTestId('weather-panel-toggle');
+    expect(screen.getByTestId('weekly-weather-forecast-panel')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '7-Day' })).toBeInTheDocument();
+    expect(screen.getByText('27°')).toBeInTheDocument();
+    expect(screen.getByTestId('rain-production-loss-engine')).toBeInTheDocument();
+
+    fireEvent.click(weatherToggle);
     expect(screen.queryByTestId('weekly-weather-forecast-panel')).not.toBeInTheDocument();
 
     fireEvent.click(weatherToggle);
     expect(screen.getByTestId('weekly-weather-forecast-panel')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '7-Day' })).toBeInTheDocument();
-    expect(screen.getByText('27°')).toBeInTheDocument();
-
-    fireEvent.click(weatherToggle);
-    expect(screen.queryByTestId('weekly-weather-forecast-panel')).not.toBeInTheDocument();
   });
 
-  it('toggles the full hourly weather forecast breakdown when the shift card is clicked', async () => {
+  it('switches to the full hourly weather forecast breakdown when the shift card is clicked', async () => {
     render(<ServicesDropdown />);
     fireEvent.click(screen.getByRole('button', { name: /system tray/i }));
 

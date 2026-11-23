@@ -9,6 +9,7 @@ import {
   SystemTrayPill,
   VolumeControlRow,
 } from './SystemTray';
+import { WifiNetworkPopover } from './SystemTrayRows';
 
 jest.mock('@repo/utils/client', () => ({
   analytics: { track: jest.fn() },
@@ -282,5 +283,84 @@ describe('SystemTrayPill (Unified Control Room Taskbar)', () => {
     for (const sep of separators) {
       expect(sep).toHaveClass('text-accent-gold');
     }
+
+    // 6. Dedicated Wi-Fi Menu Trigger
+    const wifiBtn = screen.getByTestId('taskbar-wifi-trigger');
+    expect(wifiBtn).toBeInTheDocument();
+    expect(wifiBtn).toHaveAttribute('aria-label', 'Wi-Fi and Network Menu');
+  });
+
+  it('resolves in-codebase SCADA tag server as ok when FUXA_URL is unset and Redis is healthy', () => {
+    const mapped = mapHealthResponseToState({
+      status: 'degraded',
+      latencyMs: 55,
+      services: {
+        supabase: { status: 'healthy', latencyMs: 40 },
+        redis: { status: 'healthy', latencyMs: 12 },
+        fuxa: { status: 'degraded', latencyMs: 0, error: 'FUXA_URL is not configured' },
+      },
+    });
+    expect(mapped.status).toBe('healthy');
+    expect(mapped.fuxa).toBe('ok');
+    expect(mapped.fuxaMode).toBe('in-codebase');
+  });
+
+  it('renders Golden Gold styling on VolumeControlRow and network action buttons on NetworkStatusRow', () => {
+    const { container } = render(
+      <>
+        <VolumeControlRow volume={75} muted={false} toggleMute={jest.fn()} adjust={jest.fn()} />
+        <NetworkStatusRow
+          online={true}
+          effectiveType="4g"
+          connType="wifi"
+          downlink={6.8}
+          rtt={250}
+          supported={true}
+        />
+      </>
+    );
+
+    expect(screen.getByTestId('volume-control-row')).toHaveClass('border-accent-gold/30');
+    expect(container.querySelector('input[type="range"]')).toHaveClass(
+      'accent-[var(--accent-gold)]'
+    );
+
+    const tunnelBtn = screen.getByTestId('network-cf-tunnel-toggle');
+    expect(tunnelBtn).toHaveTextContent('CF Tunnel');
+    fireEvent.click(tunnelBtn);
+    expect(tunnelBtn).toHaveTextContent('CF Tunnel On');
+
+    expect(screen.getByTestId('network-speed-test-button')).toBeInTheDocument();
+    expect(screen.getByTestId('network-troubleshoot-button')).toBeInTheDocument();
+  });
+
+  it('opens dedicated Wi-Fi menu and synchronizes Cloudflare Tunnel state with NetworkStatusRow', () => {
+    window.localStorage.removeItem('arch-cf-tunnel-enabled');
+    window.localStorage.removeItem('arch-wifi-profile');
+
+    render(
+      <WifiNetworkPopover
+        network={{
+          online: true,
+          effectiveType: '4g',
+          connType: 'wifi',
+          downlink: 12.4,
+          rtt: 45,
+          supported: true,
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('taskbar-wifi-trigger'));
+    expect(screen.getByTestId('taskbar-wifi-menu')).toBeInTheDocument();
+    expect(screen.getByText('Cloudflare-ZeroTrust-Tunnel')).toBeInTheDocument();
+
+    const connectButtons = screen.getAllByRole('button', { name: 'Connect' });
+    fireEvent.click(connectButtons[0]!);
+    expect(screen.getByTestId('network-cf-tunnel-toggle')).toHaveTextContent('CF Tunnel On');
+
+    const remainingConnectButtons = screen.getAllByRole('button', { name: 'Connect' });
+    fireEvent.click(remainingConnectButtons[0]!);
+    expect(screen.getByTestId('network-cf-tunnel-toggle')).toHaveTextContent('CF Tunnel');
   });
 });

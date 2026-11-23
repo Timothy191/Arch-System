@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { PageHeader } from '@repo/ui/PageHeader';
 import { fetchClient } from '@repo/utils/client';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -133,33 +134,47 @@ export default function AIMetricsDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Executive Header */}
-      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/80 p-6 backdrop-blur-xl">
+      {/* Executive Header Panel */}
+      <GlassCard variant="window" className="p-5 sm:p-6">
         <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[var(--accent-blue)]/10 p-2.5">
-              <Activity className="h-6 w-6 text-[var(--accent-blue)]" />
+          <div className="flex items-start gap-3.5">
+            <div className="gold-steel-border gold-steel-border-slim flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+              <Activity className="h-6 w-6" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="font-bold text-[var(--text-heading)] text-lg">
-                  Executive AI Build & Runtime Intelligence
-                </h1>
+                <PageHeader title="Executive AI Build & Runtime Intelligence" />
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-semibold text-xs ${
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-semibold text-xs ${
                     healthStatus === 'healthy'
-                      ? 'bg-accent-green/15 text-accent-green'
-                      : 'bg-accent-amber/15 text-accent-amber'
+                      ? 'border-accent-green/30 bg-accent-green/15 text-accent-green'
+                      : 'border-accent-amber/30 bg-accent-amber/15 text-accent-amber'
                   }`}
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   AI System {healthStatus.toUpperCase()} ({bt?.systemHealth.healthScore ?? 99.4}%)
                 </span>
               </div>
-              <p className="mt-0.5 text-[var(--text-secondary)] text-sm">
+              <p className="mt-1 text-[var(--text-secondary)] text-sm">
                 Full-lifecycle coding agent token ledger, Claude Code ZAR cost valuation (R{' '}
-                {bt?.exchangeRateZAR ?? 18.52}/USD), cache efficiency & engineering velocity
+                {bt?.exchangeRateZAR ?? 18.52}/USD), cache efficiency &amp; engineering velocity
               </p>
+              {bt && (
+                <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[11px] text-[var(--text-secondary)]">
+                  <span className="rounded-md bg-[var(--bg-tertiary)] px-2 py-0.5">
+                    {bt.totalSessions} Sessions
+                  </span>
+                  <span className="rounded-md bg-[var(--bg-tertiary)] px-2 py-0.5">
+                    {bt.totalTurns.toLocaleString('en-US')} Turns
+                  </span>
+                  <span className="rounded-md bg-[var(--bg-tertiary)] px-2 py-0.5">
+                    {bt.engineeringVelocity.sqlMigrations} Migrations
+                  </span>
+                  <span className="rounded-md bg-[var(--bg-tertiary)] px-2 py-0.5">
+                    {bt.engineeringVelocity.retrospectivesCount} Retrospectives
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -184,7 +199,7 @@ export default function AIMetricsDashboard() {
             <button
               type="button"
               onClick={handleRefresh}
-              className="rounded-lg p-2 transition-colors hover:bg-[var(--bg-tertiary)]"
+              className="rounded-lg border border-[var(--border-subtle)] bg-white/70 p-2 transition-colors hover:bg-[var(--bg-tertiary)]"
               title="Refresh metrics"
             >
               <RefreshCw
@@ -193,7 +208,7 @@ export default function AIMetricsDashboard() {
             </button>
           </div>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Top Executive KPI Cards (ZAR Cost, Total Build Tokens, Bugs Resolved, Cache & Latency) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -449,41 +464,73 @@ export default function AIMetricsDashboard() {
       {bt && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <GlassCard>
-            <div className="mb-4 flex items-center gap-2">
-              <Bot className="h-5 w-5 text-[var(--accent-blue)]" />
-              <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-                Coding Agent Fleet Token & ZAR Breakdown
-              </h3>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-[var(--border-subtle)] border-b pb-3">
+              <div className="flex items-center gap-2">
+                <div className="rounded-lg bg-[var(--accent-blue)]/10 p-1.5 text-[var(--accent-blue)]">
+                  <Bot className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-[var(--text-heading)] text-sm">
+                    Coding Agent Fleet Token &amp; ZAR Breakdown
+                  </h3>
+                  <p className="text-[11px] text-[var(--text-secondary)]">
+                    Multi-provider token share, prompt caching &amp; defect resolution attribution
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 font-mono text-[11px]">
+                <span className="rounded-full bg-[var(--bg-tertiary)] px-2.5 py-0.5 text-[var(--text-heading)]">
+                  {bt.agentFleetBreakdown.length} Agents
+                </span>
+                <span className="rounded-full bg-accent-green/15 px-2.5 py-0.5 font-semibold text-accent-green">
+                  {formatRand(bt.claudeCodeCost.totalCostZAR)}
+                </span>
+              </div>
             </div>
             <div className="space-y-3">
-              {bt.agentFleetBreakdown.map((agent) => (
-                <div
-                  key={agent.agent}
-                  className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/50 p-3.5"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="font-bold text-[var(--text-heading)] text-xs">
-                        {agent.agent}
+              {bt.agentFleetBreakdown.map((agent) => {
+                const cacheRatio =
+                  agent.tokens > 0 ? Math.round((agent.cachedTokens / agent.tokens) * 100) : 0;
+                return (
+                  <div
+                    key={agent.agent}
+                    className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/50 p-3.5 transition-colors hover:bg-[var(--bg-tertiary)]/80"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="font-bold text-[var(--text-heading)] text-xs">
+                          {agent.agent}
+                        </div>
+                        <div className="text-[11px] text-[var(--text-secondary)]">{agent.role}</div>
                       </div>
-                      <div className="text-[11px] text-[var(--text-secondary)]">{agent.role}</div>
+                      <div className="text-right font-mono">
+                        <div className="font-bold text-accent-green text-xs">
+                          {formatRand(agent.costZAR)}
+                        </div>
+                        <div className="text-[10px] text-[var(--text-secondary)]">
+                          {agent.sharePct}% share • {agent.bugsResolved} bugs fixed
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-right font-mono">
-                      <div className="font-bold text-accent-green text-xs">
-                        {formatRand(agent.costZAR)}
-                      </div>
-                      <div className="text-[10px] text-[var(--text-secondary)]">
-                        {agent.sharePct}% share • {agent.bugsResolved} bugs fixed
-                      </div>
+
+                    {/* Visual Share Progress Bar */}
+                    <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-200/80">
+                      <div
+                        className="h-full rounded-full bg-[var(--accent-blue)] transition-all duration-500"
+                        style={{ width: `${Math.min(100, Math.max(4, agent.sharePct))}%` }}
+                      />
+                    </div>
+
+                    <div className="mt-2.5 grid grid-cols-3 gap-2 border-[var(--border-subtle)] border-t pt-2 font-mono text-[10px] text-[var(--text-secondary)]">
+                      <span>{(agent.tokens / 1_000_000).toFixed(2)}M total</span>
+                      <span className="text-center text-accent-green">
+                        {(agent.cachedTokens / 1_000_000).toFixed(2)}M cached ({cacheRatio}%)
+                      </span>
+                      <span className="text-right">Avg {agent.avgLatencyMs}ms</span>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-center justify-between border-[var(--border-subtle)] border-t pt-2 font-mono text-[10px] text-[var(--text-secondary)]">
-                    <span>{(agent.tokens / 1_000_000).toFixed(2)}M total tokens</span>
-                    <span>{(agent.cachedTokens / 1_000_000).toFixed(2)}M cached</span>
-                    <span>Avg {agent.avgLatencyMs}ms</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </GlassCard>
 

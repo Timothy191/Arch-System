@@ -35,6 +35,18 @@ const PROMETHEUS_PRESETS = [
     query: 'portal_cache_latency_ms{metric="p95"}',
     unit: 'ms',
   },
+  {
+    id: 'cache_hit_ratio',
+    label: 'Cache Hit Ratio',
+    query: 'portal_cache_hit_ratio',
+    unit: '%',
+  },
+  {
+    id: 'cache_latency_avg',
+    label: 'Cache Avg Latency',
+    query: 'portal_cache_latency_ms{metric="avg"}',
+    unit: 'ms',
+  },
 ] as const;
 
 interface ProbeResult<T> {
@@ -47,6 +59,7 @@ interface ProbeResult<T> {
 async function probeJson<T>(options: {
   url: string;
   headers?: Record<string, string>;
+  acceptStatuses?: readonly number[];
 }): Promise<ProbeResult<T>> {
   const startedAt = Date.now();
   try {
@@ -56,7 +69,7 @@ async function probeJson<T>(options: {
       cache: 'no-store',
     });
     const latencyMs = Date.now() - startedAt;
-    if (!response.ok) {
+    if (!response.ok && !options.acceptStatuses?.includes(response.status)) {
       return {
         isReachable: false,
         latencyMs,
@@ -64,7 +77,7 @@ async function probeJson<T>(options: {
         detail: `HTTP ${response.status}`,
       };
     }
-    const payload = (await response.json()) as T;
+    const payload = response.ok ? ((await response.json().catch(() => null)) as T | null) : null;
     return {
       isReachable: true,
       latencyMs,
@@ -189,7 +202,10 @@ export async function fetchObservabilitySummary(): Promise<ObservabilitySummaryR
 
   const [otelProbe, promProbe, grafanaResult, woodpeckerProbe] = await Promise.all([
     otelEndpoint
-      ? probeJson<Record<string, unknown>>({ url: otelEndpoint.replace(/\/$/, '') })
+      ? probeJson<Record<string, unknown>>({
+          url: (process.env.OTEL_HEALTHCHECK_URL || otelEndpoint).replace(/\/$/, ''),
+          acceptStatuses: [404, 405],
+        })
       : Promise.resolve(null),
     prometheusUrl
       ? probeJson<{ status?: string }>({
@@ -264,11 +280,17 @@ export async function fetchObservabilitySummary(): Promise<ObservabilitySummaryR
         )
       : [];
 
+  const totalCacheRequests = cacheStats.hits + cacheStats.misses;
+  const hitRatioPct =
+    totalCacheRequests > 0 ? Math.round((cacheStats.hits / totalCacheRequests) * 1000) / 10 : 100;
+
   const fallbackValues: Record<(typeof PROMETHEUS_PRESETS)[number]['id'], number> = {
     cache_hits_l1: cacheStats.l1Hits,
     cache_hits_l2: cacheStats.l2Hits,
     cache_misses: cacheStats.misses,
     cache_latency_p95: cacheStats.p95LatencyMs,
+    cache_hit_ratio: hitRatioPct,
+    cache_latency_avg: cacheStats.avgLatencyMs,
   };
 
   const metrics: PrometheusMetricSample[] = PROMETHEUS_PRESETS.map((preset, index) => {
@@ -388,6 +410,41 @@ export async function fetchObservabilityCi(): Promise<ObservabilityCiResponse> {
     startedAt: entry.updated_at ?? null,
     url: entry.target_url ?? null,
   }));
+
+  if (pipelines.length === 0) {
+    const actionsProbe = await probeJson<{
+      workflow_runs?: Array<{
+        id: number;
+        run_number: number;
+        head_branch: string;
+        head_sha: string;
+        display_title?: string;
+        name?: string;
+        status?: string;
+        conclusion?: string | null;
+        created_at?: string;
+        html_url?: string;
+      }>;
+    }>({
+      url: `https://api.github.com/repos/${repoSlug}/actions/runs?per_page=6`,
+      headers: githubHeaders,
+    });
+
+    for (const run of actionsProbe.payload?.workflow_runs ?? []) {
+      const derivedStatus = run.conclusion ?? run.status;
+      pipelines.push({
+        id: run.id,
+        number: run.run_number,
+        branch: run.head_branch || 'main',
+        commitSha: (run.head_sha || 'main').slice(0, 8),
+        message: run.display_title || run.name || 'GitHub Actions Workflow',
+        status: mapCiStatus(derivedStatus),
+        source: 'github-status',
+        startedAt: run.created_at ?? null,
+        url: run.html_url ?? null,
+      });
+    }
+  }
 
   return {
     generatedAt: new Date().toISOString(),

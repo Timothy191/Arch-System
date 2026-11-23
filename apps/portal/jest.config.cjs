@@ -69,6 +69,7 @@ module.exports = {
     '^@repo/ui/FormFields$': '<rootDir>/../../packages/ui/src/components/FormFields.tsx',
     '^@repo/ui/DepartmentLayout$':
       '<rootDir>/../../packages/ui/src/components/DepartmentLayout.tsx',
+    '^@repo/ui/admin-icons$': '<rootDir>/../../packages/ui/src/icons/admin-icons.tsx',
     '^@repo/ui/KPI$': '<rootDir>/../../packages/ui/src/components/KPI.tsx',
     '^@repo/ui/Clock$': '<rootDir>/../../packages/ui/src/components/Clock.tsx',
     '^@repo/ui/PageHeader$': '<rootDir>/../../packages/ui/src/components/PageHeader.tsx',

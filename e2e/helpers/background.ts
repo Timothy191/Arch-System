@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 
-/** The global RouteBackground's LCP image — proves the background is mounted. */
-export const ROUTE_BG_SELECTOR = '#route-bg-light-image';
+/** The global RouteBackground's video element — proves the background is mounted. */
+export const ROUTE_BG_SELECTOR = '#route-bg-light-video';
 
 export interface OpaqueLayer {
   tag: string;

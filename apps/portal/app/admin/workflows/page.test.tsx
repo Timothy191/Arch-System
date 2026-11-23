@@ -99,10 +99,15 @@ describe('WorkflowsPage (/admin/workflows)', () => {
   });
 
   it('refreshes telemetry via /api/admin/observability when clicking Refresh Telemetry and handles errors inline', async () => {
-    const fetchMock = jest
-      .fn()
-      .mockResolvedValueOnce(
-        createJsonResponse({
+    let observabilityCallCount = 0;
+    const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      if (url.includes('/api/webhooks')) {
+        return createJsonResponse({ webhooks: [] });
+      }
+      observabilityCallCount += 1;
+      if (observabilityCallCount === 1) {
+        return createJsonResponse({
           uptime: { sla24h: 99.85 },
           workflows: {
             jobs: [
@@ -114,10 +119,10 @@ describe('WorkflowsPage (/admin/workflows)', () => {
               },
             ],
           },
-        })
-      )
-      .mockResolvedValueOnce(
-        createJsonResponse({
+        });
+      }
+      if (observabilityCallCount === 2) {
+        return createJsonResponse({
           overallSla24hPct: 99.98,
           workflows: [
             {
@@ -127,9 +132,10 @@ describe('WorkflowsPage (/admin/workflows)', () => {
               lastDurationMs: 42,
             },
           ],
-        })
-      )
-      .mockResolvedValueOnce(createJsonResponse({ error: 'Upstream down' }, false, 500));
+        });
+      }
+      return createJsonResponse({ error: 'Upstream down' }, false, 500);
+    });
 
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
@@ -156,5 +162,25 @@ describe('WorkflowsPage (/admin/workflows)', () => {
       );
     });
     expect(alertSpy).not.toHaveBeenCalled();
+  });
+
+  it('renders critical webhooks & workflows on the left and updates the n8n flow visual on selection', async () => {
+    globalThis.fetch = jest.fn(async () =>
+      createJsonResponse({
+        timestamp: '2026-11-19T12:00:00.000Z',
+        overallSla24hPct: 100,
+        workflows: [],
+      })
+    ) as unknown as typeof fetch;
+
+    render(<WorkflowsPage />);
+
+    const panel = await screen.findByTestId('critical-workflows-panel');
+    expect(panel).toBeInTheDocument();
+    expect(screen.getByText('Shift Closeout Hook')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /SCADA Telemetry Anomaly Escalation/i }));
+    expect(screen.getByText('SCADA CDC Stream')).toBeInTheDocument();
+    expect(screen.getByText('Engineering Ticket')).toBeInTheDocument();
   });
 });

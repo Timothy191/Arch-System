@@ -1,0 +1,34 @@
+{
+  "id": "compaction-7bc74ed1",
+  "timestamp": "2026-11-23T08:19:35.698Z",
+  "taskTag": "compaction-standard-7bc74ed1",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/weather-production-loss.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/weather-production-loss.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/observability/observability-clients.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/observability/ObservabilityConsole.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/cloudflare/CloudflareInfrastructureConsole.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/nav/ServicesDropdown.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/clock/SystemClock.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/system/system-tray-hooks.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/system/SystemTrayRows.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/system/SystemTray.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/nav/ServicesDropdown.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/clock/SystemClock.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/system/SystemTray.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/weather-production-loss.ts\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (302 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 167740,
+    "cacheHitRatio": 0.9641,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

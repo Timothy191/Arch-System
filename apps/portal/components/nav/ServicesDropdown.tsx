@@ -16,6 +16,7 @@ import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import {
   ClipboardList,
+  CloudRain,
   CloudSun,
   LogOut,
   Maximize2,
@@ -28,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { fetchWeather, getWindDirection, type WeatherData } from '@/lib/weather-api';
+import { calculateRainProductionLoss } from '@/lib/weather-production-loss';
 import { logout } from '~/app/actions';
 
 function formatForecastDay(dateStr: string): string {
@@ -120,7 +122,7 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
 
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
-  const [forecastMode, setForecastMode] = useState<'closed' | 'hourly' | 'weekly'>('closed');
+  const [forecastMode, setForecastMode] = useState<'closed' | 'hourly' | 'weekly'>('weekly');
 
   const isForecastExpanded = forecastMode !== 'closed';
   const currentHourPrefix = `${String(new Date().getHours()).padStart(2, '0')}:`;
@@ -131,6 +133,16 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
 
   const shift = useMemo(() => getShiftInfo(), []);
   const safety = useSafetyAlerts();
+  const rainLoss = useMemo(
+    () =>
+      weather
+        ? calculateRainProductionLoss({
+            weather,
+            hoursRemaining: shift.hoursRemaining,
+          })
+        : null,
+    [weather, shift.hoursRemaining]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -165,8 +177,8 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
-        if (!nextOpen) {
-          setForecastMode('closed');
+        if (nextOpen) {
+          setForecastMode('weekly');
         }
       }}
     >
@@ -310,6 +322,66 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
               </div>
             )}
           </button>
+
+          {rainLoss && (
+            <div
+              data-testid="rain-production-loss-engine"
+              className={cn(
+                'col-span-2 rounded-lg border p-2 text-left',
+                rainLoss.riskLevel === 'critical'
+                  ? 'border-rose-300/70 bg-rose-50/70'
+                  : rainLoss.riskLevel === 'high'
+                    ? 'border-amber-300/70 bg-amber-50/70'
+                    : rainLoss.riskLevel === 'moderate'
+                      ? 'border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/[0.05]'
+                      : 'border-emerald-200/70 bg-emerald-50/40'
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <CloudRain
+                    className={cn(
+                      'h-3.5 w-3.5 shrink-0',
+                      rainLoss.riskLevel === 'critical'
+                        ? 'text-rose-600'
+                        : rainLoss.riskLevel === 'high'
+                          ? 'text-amber-600'
+                          : rainLoss.riskLevel === 'moderate'
+                            ? 'text-[var(--accent-blue)]'
+                            : 'text-emerald-600'
+                    )}
+                  />
+                  <span className="font-semibold text-[11px] text-[var(--text-heading)]">
+                    Rain Production Impact
+                  </span>
+                </div>
+                <span
+                  className={cn(
+                    'rounded-full px-1.5 py-0.5 font-semibold text-[9.5px] uppercase',
+                    rainLoss.riskLevel === 'critical'
+                      ? 'bg-rose-100 text-rose-700'
+                      : rainLoss.riskLevel === 'high'
+                        ? 'bg-amber-100 text-amber-700'
+                        : rainLoss.riskLevel === 'moderate'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-emerald-100 text-emerald-700'
+                  )}
+                >
+                  {rainLoss.riskLevel}
+                </span>
+              </div>
+              <div className="mt-1 flex items-center justify-between font-mono text-[10.5px] text-[var(--text-heading)]">
+                <span>
+                  Shift Loss: -{rainLoss.estimatedLostTonsToday} t ({rainLoss.shiftLossPercent}% ·{' '}
+                  {rainLoss.estimatedLostHoursToday}h)
+                </span>
+                <span className="text-[var(--text-muted)]">7d: -{rainLoss.weeklyLostTons} t</span>
+              </div>
+              <p className="mt-0.5 text-[9.5px] text-[var(--text-secondary)] leading-snug">
+                {rainLoss.recommendation}
+              </p>
+            </div>
+          )}
 
           {isForecastExpanded && (
             <div

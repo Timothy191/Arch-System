@@ -14,8 +14,6 @@ import {
   Volume1,
   Volume2,
   VolumeX,
-  Wifi,
-  WifiOff,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -30,6 +28,7 @@ import {
   ServerHealthRow,
   TaskbarNotificationBell,
   VolumeControlRow,
+  WifiNetworkPopover,
 } from './SystemTrayRows';
 import {
   formatTimeSeconds,
@@ -86,9 +85,6 @@ const SystemTrayPillInner = function SystemTrayPillInner({
     volume.muted || volume.volume === 0 ? VolumeX : volume.volume < 50 ? Volume1 : Volume2;
   const volumeColor =
     volume.muted || volume.volume === 0 ? 'text-[var(--text-muted)]' : 'text-accent-gold';
-
-  const ConnIcon = !network.online ? WifiOff : Wifi;
-  const connColor = network.online ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]';
 
   const BatteryIcon = battery.charging
     ? BatteryCharging
@@ -195,14 +191,6 @@ const SystemTrayPillInner = function SystemTrayPillInner({
             >
               |
             </span>
-            <ConnIcon className={cn('h-3.5 w-3.5', connColor)} />
-            <span
-              aria-hidden="true"
-              data-testid="system-tray-gold-separator"
-              className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-            >
-              |
-            </span>
             <div className="flex items-center gap-0.5">
               <BatteryIcon className={cn('h-3.5 w-3.5', batteryColor)} />
               {battery.supported && battery.level !== null && (
@@ -277,6 +265,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
                 db={health.db}
                 redis={health.redis}
                 fuxa={health.fuxa}
+                fuxaMode={health.fuxaMode}
                 responseTime={health.responseTime}
                 loading={health.loading}
               />
@@ -309,6 +298,16 @@ const SystemTrayPillInner = function SystemTrayPillInner({
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>
+
+      <span
+        aria-hidden="true"
+        data-testid="system-tray-gold-separator"
+        className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+      >
+        |
+      </span>
+
+      <WifiNetworkPopover network={network} embedded />
 
       <span
         aria-hidden="true"

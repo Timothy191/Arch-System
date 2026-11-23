@@ -94,6 +94,21 @@ export function ObservabilityConsole() {
 
   const summary = summaryQuery.data;
   const ciData = ciQuery.data;
+  const isRefreshing = summaryQuery.isFetching || ciQuery.isFetching;
+  const activeEmbedUrl = selectedEmbedUrl ?? summary?.dashboards[0]?.embedUrl ?? null;
+
+  const totalCacheRequests =
+    (summary?.cacheSnapshot.hits ?? 0) + (summary?.cacheSnapshot.misses ?? 0);
+  const cacheHitRatePct =
+    totalCacheRequests > 0
+      ? Math.round(((summary?.cacheSnapshot.hits ?? 0) / totalCacheRequests) * 1000) / 10
+      : 100;
+  const l1SharePct =
+    (summary?.cacheSnapshot.hits ?? 0) > 0
+      ? Math.round(
+          ((summary?.cacheSnapshot.l1Hits ?? 0) / (summary?.cacheSnapshot.hits ?? 1)) * 100
+        )
+      : 0;
 
   const handleRefresh = () => {
     void summaryQuery.refetch();
@@ -105,34 +120,71 @@ export function ObservabilityConsole() {
       <GlassCard className="p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent-gold/30 bg-accent-gold/10 text-accent-gold">
               <Activity className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="font-semibold text-lg text-zinc-900">
+              <h1 className="font-semibold text-[var(--text-heading)] text-lg">
                 Native Observability &amp; CI Layer
               </h1>
-              <p className="text-xs text-zinc-600">
+              <p className="text-[var(--text-secondary)] text-xs">
                 OTel Collector, Prometheus, Grafana &amp; Woodpecker CI unified in Arch-System light
                 mode ({summary?.deploymentTarget ?? 'vercel'}).
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleRefresh}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 font-medium text-xs text-zinc-700 hover:bg-zinc-50"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Refresh Telemetry
-          </button>
+          <div className="flex items-center gap-3">
+            {summary?.generatedAt && (
+              <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                Synced {new Date(summary.generatedAt).toLocaleTimeString('en-ZA')}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-white px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs shadow-sm transition-colors hover:bg-zinc-50 disabled:opacity-60"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh Telemetry
+            </button>
+          </div>
         </div>
       </GlassCard>
 
+      {summaryQuery.isError && (
+        <GlassCard className="border-rose-200 bg-rose-50/70 p-4">
+          <div className="flex items-center justify-between gap-3 text-rose-700 text-xs">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 shrink-0" />
+              <span>
+                Unable to load observability summary. Check session permissions or retry telemetry
+                sync.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="rounded-md border border-rose-300 bg-white px-2.5 py-1 font-medium text-rose-700 hover:bg-rose-50"
+            >
+              Retry
+            </button>
+          </div>
+        </GlassCard>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {(summary?.services ?? []).map((service) => (
-          <ServiceStatusCard key={service.id} service={service} />
-        ))}
+        {summaryQuery.isLoading
+          ? Array.from({ length: 4 }).map((_, idx) => (
+              <GlassCard key={`obs-skeleton-${idx}`} className="animate-pulse p-4">
+                <div className="h-4 w-28 rounded bg-zinc-200/80" />
+                <div className="mt-3 h-3 w-full rounded bg-zinc-100" />
+                <div className="mt-4 h-3 w-20 rounded bg-zinc-100" />
+              </GlassCard>
+            ))
+          : (summary?.services ?? []).map((service) => (
+              <ServiceStatusCard key={service.id} service={service} />
+            ))}
       </div>
 
       <Tabs defaultValue="golden-signals" className="w-full">
@@ -183,36 +235,99 @@ export function ObservabilityConsole() {
             {summary?.dashboards.length ? (
               <div className="flex flex-col gap-4">
                 <div className="flex flex-wrap gap-2">
-                  {summary.dashboards.map((dash) => (
-                    <button
-                      key={dash.uid}
-                      type="button"
-                      onClick={() => setSelectedEmbedUrl(dash.embedUrl)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 font-medium text-xs text-zinc-800 hover:bg-zinc-50"
-                    >
-                      <span>{dash.title}</span>
-                      <ExternalLink className="h-3 w-3 text-zinc-400" />
-                    </button>
-                  ))}
+                  {summary.dashboards.map((dash) => {
+                    const isSelected = activeEmbedUrl === dash.embedUrl;
+                    return (
+                      <button
+                        key={dash.uid}
+                        type="button"
+                        onClick={() => setSelectedEmbedUrl(dash.embedUrl)}
+                        className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium text-xs transition-colors ${
+                          isSelected
+                            ? 'border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]'
+                            : 'border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50'
+                        }`}
+                      >
+                        <span>{dash.title}</span>
+                        <ExternalLink className="h-3 w-3 text-zinc-400" />
+                      </button>
+                    );
+                  })}
                 </div>
-                {selectedEmbedUrl && (
+                {activeEmbedUrl && (
                   <iframe
                     title="Grafana Light-Mode Dashboard"
-                    src={selectedEmbedUrl}
+                    src={activeEmbedUrl}
                     className="h-[560px] w-full rounded-xl border border-zinc-200 bg-white"
                   />
                 )}
               </div>
             ) : (
-              <div className="flex flex-col gap-2 text-xs text-zinc-600">
-                <p className="font-medium text-sm text-zinc-900">
-                  Native Light-Mode Telemetry Active
-                </p>
-                <p>
-                  Configure <code>GRAFANA_URL</code> and <code>GRAFANA_API_KEY</code> in Vercel to
-                  stream Grafana dashboards in light-mode kiosk view alongside the native Golden
-                  Signal cards above.
-                </p>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5 rounded-xl border border-amber-200/80 bg-amber-50/50 p-3.5 text-xs text-zinc-700">
+                  <p className="font-semibold text-sm text-zinc-900">
+                    Native Light-Mode Telemetry Active
+                  </p>
+                  <p>
+                    Configure <code>GRAFANA_URL</code> and <code>GRAFANA_API_KEY</code> (plus
+                    optional <code>GRAFANA_PUBLIC_URL</code>) in Vercel to stream external Grafana
+                    dashboards in light-mode kiosk view alongside the native telemetry panels below.
+                  </p>
+                </div>
+
+                {summary && (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="rounded-xl border border-black/[0.06] bg-white/80 p-4">
+                      <p className="font-medium text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+                        Cache Hit Efficiency
+                      </p>
+                      <p className="mt-1 font-mono font-semibold text-2xl text-[var(--text-heading)]">
+                        {cacheHitRatePct}%
+                      </p>
+                      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
+                        <div
+                          className="h-full rounded-full bg-emerald-500 transition-all"
+                          style={{ width: `${Math.min(100, cacheHitRatePct)}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-[11px] text-[var(--text-secondary)]">
+                        {summary.cacheSnapshot.hits} hits · {summary.cacheSnapshot.misses} misses
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl border border-black/[0.06] bg-white/80 p-4">
+                      <p className="font-medium text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+                        L1 / L2 Cache Tier Split
+                      </p>
+                      <p className="mt-1 font-mono font-semibold text-2xl text-[var(--text-heading)]">
+                        {l1SharePct}% L1
+                      </p>
+                      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-indigo-100">
+                        <div
+                          className="h-full rounded-full bg-indigo-500 transition-all"
+                          style={{ width: `${l1SharePct}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-[11px] text-[var(--text-secondary)]">
+                        L1: {summary.cacheSnapshot.l1Hits} · L2 Redis:{' '}
+                        {summary.cacheSnapshot.l2Hits}
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl border border-black/[0.06] bg-white/80 p-4">
+                      <p className="font-medium text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+                        Cache Latency Profile
+                      </p>
+                      <p className="mt-1 font-mono font-semibold text-2xl text-[var(--text-heading)]">
+                        {summary.cacheSnapshot.p95LatencyMs.toFixed(1)} ms
+                      </p>
+                      <p className="mt-2 text-[11px] text-[var(--text-secondary)]">
+                        Avg: {summary.cacheSnapshot.avgLatencyMs.toFixed(1)} ms · p95:{' '}
+                        {summary.cacheSnapshot.p95LatencyMs.toFixed(1)} ms
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </GlassCard>

@@ -178,10 +178,10 @@ describe('proxy', () => {
     // Should return the raw response (not a redirect)
     expect(res.status).not.toBe(307);
 
-    const webpReq = makeRequest('/background/global-background-poster.webp', false);
-    const webpRes = await proxy(webpReq);
-    expect(webpRes).toBeDefined();
-    expect(webpRes.status).not.toBe(307);
+    const bgVideoReq = makeRequest('/background/global-background.mp4', false);
+    const bgVideoRes = await proxy(bgVideoReq);
+    expect(bgVideoRes).toBeDefined();
+    expect(bgVideoRes.status).not.toBe(307);
 
     const vaFallbackReq = makeRequest('/c137cbcc62ce02d8/script.js', false);
     const vaFallbackRes = await proxy(vaFallbackReq);

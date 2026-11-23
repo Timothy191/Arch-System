@@ -63,12 +63,10 @@ async function runAudit() {
       !/<div\s+[^>]*role="[^"]+"[^>]*aria-label="Reveal dock"/i.test(html);
     console.log(`  - Prohibited Generic Div ARIA: ${prohibitedDivAria ? '❌ FOUND' : '✅ CLEAN'}`);
 
-    // Check preloaded poster
-    const hasPreloadedPoster =
-      html.includes('global-background-poster.webp') &&
-      (html.includes('rel="preload"') || html.includes('fetchPriority="high"'));
+    // Check background video presence
+    const hasBackgroundVideo = html.includes('global-background.mp4');
     console.log(
-      `  - Optimized Poster Preload: ${hasPreloadedPoster ? '✅ PRESENT (94 KB WebP)' : 'ℹ️ Standard'}`
+      `  - Global Background Video: ${hasBackgroundVideo ? '✅ PRESENT (global-background.mp4)' : 'ℹ️ Deferred/Client-mounted'}`
     );
 
     // Check heavy video omission on login

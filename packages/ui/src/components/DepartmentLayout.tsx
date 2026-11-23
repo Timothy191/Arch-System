@@ -13,6 +13,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Clock,
+  Cloud,
   Cpu,
   CreditCard,
   Database,
@@ -35,11 +36,13 @@ import {
   ShieldCheck,
   Undo2,
   Users,
+  Workflow,
   Wrench,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ADMIN_SUBTAB_ICONS } from '../icons/admin-icons';
 import { getDepartmentIcon } from '../icons/department-icons';
 import { cn } from '../lib/utils';
 import { Logo } from './Logo';
@@ -77,6 +80,8 @@ const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>
   Briefcase,
   BookOpen,
   Presentation,
+  Workflow,
+  Cloud,
 };
 
 interface Tab {
@@ -109,6 +114,21 @@ const SUBTAB_LINK_ACTIVE =
   'gold-steel-border gold-steel-border-slim border-accent-amber/50 bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs ring-1 ring-accent-amber/25 ring-inset';
 const SUBTAB_LINK_INACTIVE =
   'border-transparent font-medium text-[var(--text-heading)] hover:border-accent-amber/30 hover:bg-white/80 hover:text-[var(--accent-blue)]';
+
+const ADMIN_GENERAL_SUBTABS = [
+  { key: 'users', label: 'Users' },
+  { key: 'departments', label: 'Departments' },
+  { key: 'fleet', label: 'Fleet' },
+  { key: 'sites', label: 'Sites & Blocks' },
+  { key: 'minerals', label: 'Minerals' },
+  { key: 'targets', label: 'Targets' },
+  { key: 'integrations', label: 'Integrations' },
+  { key: 'webhooks', label: 'Webhooks' },
+  { key: 'audit-logs', label: 'Audit Logs' },
+  { key: 'system-logs', label: 'System Logs' },
+  { key: 'settings', label: 'Settings' },
+  { key: 'external-content', label: 'External Content' },
+] as const;
 
 export function DepartmentLayout({ department, tabs, children }: DepartmentLayoutProps) {
   const pathname = usePathname();
@@ -347,6 +367,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
             const href = tab.name === 'dashboard' ? basePath : `${basePath}/${tab.name}`;
             const hasDashboardSubtabs =
               tab.name === 'dashboard' && department.name === 'control-room';
+            const hasAdminGeneralSubtabs = tab.name === 'dashboard' && department.name === 'admin';
+            const hasAnyDashboardSubtabs = hasDashboardSubtabs || hasAdminGeneralSubtabs;
             const isShiftCloseoutSubtabActive =
               hasDashboardSubtabs && pathname === `${basePath}/shift-closeout`;
             const isShiftOperationsSubtabActive =
@@ -392,7 +414,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                   <Link
                     href={href}
                     onClick={() => {
-                      if (hasDashboardSubtabs) {
+                      if (hasAnyDashboardSubtabs) {
                         setIsDashboardExpanded(true);
                       }
                       if (tab.name === 'reports') {
@@ -415,7 +437,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                     )}
                     <span className="flex-1 truncate">{tab.label}</span>
                   </Link>
-                  {hasDashboardSubtabs && (
+                  {hasAnyDashboardSubtabs && (
                     <button
                       type="button"
                       data-testid="dashboard-subtabs-toggle"
@@ -527,6 +549,43 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       />
                       <span>Shift Closeout</span>
                     </Link>
+                  </div>
+                )}
+                {hasAdminGeneralSubtabs && isDashboardExpanded && (
+                  <div
+                    data-testid="admin-general-subtabs"
+                    className="mt-0.5 ml-4 space-y-0.5 border-[var(--accent-blue)]/25 border-l-2 pl-4"
+                  >
+                    {ADMIN_GENERAL_SUBTABS.map((subtab) => {
+                      const isSubtabActive =
+                        pathname === basePath &&
+                        (activeTabParam === subtab.key ||
+                          (!activeTabParam && subtab.key === 'users'));
+                      const SubIcon = ADMIN_SUBTAB_ICONS[subtab.key];
+                      return (
+                        <Link
+                          key={subtab.key}
+                          href={`${basePath}?tab=${subtab.key}`}
+                          data-testid={`admin-subtab-${subtab.key}`}
+                          className={cn(
+                            SUBTAB_LINK_BASE,
+                            isSubtabActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
+                          )}
+                        >
+                          {SubIcon && (
+                            <SubIcon
+                              className={cn(
+                                'h-3.5 w-3.5 shrink-0 transition-colors',
+                                isSubtabActive
+                                  ? 'text-[var(--accent-blue)]'
+                                  : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
+                              )}
+                            />
+                          )}
+                          <span className="truncate">{subtab.label}</span>
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
                 {tab.name === 'reports' && isReportsExpanded && (

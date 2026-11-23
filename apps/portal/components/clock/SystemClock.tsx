@@ -1,24 +1,73 @@
 'use client';
 
 import * as Popover from '@radix-ui/react-popover';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { cn } from '@repo/ui/lib/utils';
+import { Hammer, Wrench } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const ACTIVE_POPOVER_TICK_MS = 1000;
 const CLOSED_PILL_TICK_MS = 15000;
+const DEFAULT_DAILY_TARGET_TONS = 2400;
 const CALENDAR_NAV_BUTTON_CLASS =
   'flex h-6 w-6 items-center justify-center rounded-lg font-bold text-[12px] text-[var(--text-secondary)] transition-colors hover:bg-white hover:shadow-sm';
 
-function formatJohannesburgClockLabel(now: Date): string {
-  const timePart = now.toLocaleTimeString('en-GB', {
-    timeZone: 'Africa/Johannesburg',
+type ClockTimezoneMode = 'sast' | 'utc' | 'local';
+
+interface DayOperationalStatus {
+  readonly targetState?: 'met' | 'missed';
+  readonly hasBreakdown: boolean;
+}
+
+const TIMEZONE_META: Readonly<
+  Record<
+    ClockTimezoneMode,
+    { readonly label: string; readonly iana?: string; readonly badge: string }
+  >
+> = {
+  sast: { label: 'SAST', iana: 'Africa/Johannesburg', badge: 'SAST · UTC+2' },
+  utc: { label: 'UTC', iana: 'UTC', badge: 'UTC · UTC+0' },
+  local: { label: 'Local', badge: 'LOCAL · DEVICE' },
+};
+
+function getTimePartsForZone(
+  now: Date,
+  mode: ClockTimezoneMode
+): {
+  hours: number;
+  minutes: number;
+  seconds: number;
+} {
+  const iana = TIMEZONE_META[mode].iana;
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: iana,
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
     hour12: false,
+  }).formatToParts(now);
+
+  const read = (type: 'hour' | 'minute' | 'second') =>
+    Number(parts.find((p) => p.type === type)?.value ?? 0);
+
+  return {
+    hours: read('hour') % 24,
+    minutes: read('minute'),
+    seconds: read('second'),
+  };
+}
+
+function formatClockPillLabel(now: Date, mode: ClockTimezoneMode, hour12: boolean): string {
+  const iana = TIMEZONE_META[mode].iana;
+  const timePart = now.toLocaleTimeString('en-GB', {
+    timeZone: iana,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12,
   });
 
   const dayPart = now.toLocaleDateString('en-GB', {
-    timeZone: 'Africa/Johannesburg',
+    timeZone: iana,
     weekday: 'short',
   });
 
@@ -30,6 +79,35 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
   const [timeStr, setTimeStr] = useState<string>('');
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
+  const [timezoneMode, setTimezoneMode] = useState<ClockTimezoneMode>(() => {
+    if (typeof window === 'undefined') return 'sast';
+    const stored = window.localStorage.getItem('arch-clock-timezone');
+    return stored === 'utc' || stored === 'local' ? stored : 'sast';
+  });
+  const [hour12, setHour12] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem('arch-clock-hour12') === 'true';
+  });
+  const [dayStatusMap, setDayStatusMap] = useState<Readonly<Record<string, DayOperationalStatus>>>(
+    {}
+  );
+
+  const selectTimezone = (nextMode: ClockTimezoneMode) => {
+    setTimezoneMode(nextMode);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('arch-clock-timezone', nextMode);
+    }
+  };
+
+  const toggleHour12 = () => {
+    setHour12((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('arch-clock-hour12', String(next));
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     function updateClock() {
@@ -37,7 +115,7 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
       if (isOpen) {
         setTime(now);
       }
-      const formatted = formatJohannesburgClockLabel(now);
+      const formatted = formatClockPillLabel(now, timezoneMode, hour12);
       setTimeStr((prev) => (prev === formatted ? prev : formatted));
     }
 
@@ -45,7 +123,89 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
     const tickIntervalMs = isOpen ? ACTIVE_POPOVER_TICK_MS : CLOSED_PILL_TICK_MS;
     const interval = setInterval(updateClock, tickIntervalMs);
     return () => clearInterval(interval);
-  }, [isOpen]);
+  }, [isOpen, timezoneMode, hour12]);
+
+  const viewYear = calendarDate.getFullYear();
+  const viewMonth = calendarDate.getMonth();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+
+    async function loadMonthOperationalStatus() {
+      const monthPadded = String(viewMonth + 1).padStart(2, '0');
+      const lastDay = new Date(viewYear, viewMonth + 1, 0).getDate();
+      const monthStart = `${viewYear}-${monthPadded}-01`;
+      const monthEnd = `${viewYear}-${monthPadded}-${String(lastDay).padStart(2, '0')}`;
+
+      try {
+        const supabase = createBrowserSupabaseClient();
+        const [{ data: dailyLogs }, { data: breakdowns }] = await Promise.all([
+          supabase
+            .from('daily_logs')
+            .select('id, log_date, production_logs(coal_tonnes, waste_tonnes)')
+            .gte('log_date', monthStart)
+            .lte('log_date', monthEnd),
+          supabase
+            .from('breakdowns')
+            .select('id, date_in, created_at')
+            .is('deleted_at', null)
+            .gte('created_at', `${monthStart}T00:00:00.000Z`)
+            .lte('created_at', `${monthEnd}T23:59:59.999Z`),
+        ]);
+
+        if (cancelled) return;
+
+        const nextMap: Record<string, DayOperationalStatus> = {};
+        const totalsByDate = new Map<string, number>();
+
+        if (Array.isArray(dailyLogs)) {
+          for (const row of dailyLogs) {
+            const dateKey = String(row.log_date ?? '').slice(0, 10);
+            if (!dateKey) continue;
+            const prodEntries = Array.isArray(row.production_logs)
+              ? row.production_logs
+              : row.production_logs
+                ? [row.production_logs]
+                : [];
+            let dayTotal = totalsByDate.get(dateKey) ?? 0;
+            for (const entry of prodEntries) {
+              dayTotal += Number(entry.coal_tonnes ?? 0) + Number(entry.waste_tonnes ?? 0);
+            }
+            totalsByDate.set(dateKey, dayTotal);
+          }
+        }
+
+        for (const [dateKey, totalTons] of totalsByDate.entries()) {
+          nextMap[dateKey] = {
+            targetState: totalTons >= DEFAULT_DAILY_TARGET_TONS ? 'met' : 'missed',
+            hasBreakdown: false,
+          };
+        }
+
+        if (Array.isArray(breakdowns)) {
+          for (const bd of breakdowns) {
+            const dateKey = String(bd.date_in ?? bd.created_at ?? '').slice(0, 10);
+            if (!dateKey) continue;
+            const existing = nextMap[dateKey];
+            nextMap[dateKey] = {
+              targetState: existing?.targetState,
+              hasBreakdown: true,
+            };
+          }
+        }
+
+        setDayStatusMap(nextMap);
+      } catch {
+        // Leave calendar operational markers empty when Supabase client is unavailable
+      }
+    }
+
+    void loadMonthOperationalStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, viewYear, viewMonth]);
 
   if (!timeStr) {
     return (
@@ -54,8 +214,6 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
   }
 
   const today = new Date();
-  const viewYear = calendarDate.getFullYear();
-  const viewMonth = calendarDate.getMonth();
   const isCurrentMonth = viewYear === today.getFullYear() && viewMonth === today.getMonth();
 
   const monthLabel = calendarDate.toLocaleString('en-US', { month: 'long' });
@@ -81,9 +239,7 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
   const nextYear = () => setCalendarDate(new Date(viewYear + 1, viewMonth, 1));
   const jumpToToday = () => setCalendarDate(new Date());
 
-  const hours = time.getHours();
-  const minutes = time.getMinutes();
-  const seconds = time.getSeconds();
+  const { hours, minutes, seconds } = getTimePartsForZone(time, timezoneMode);
 
   const hourDeg = ((hours % 12) / 12) * 360 + (minutes / 60) * 30;
   const minuteDeg = (minutes / 60) * 360 + (seconds / 60) * 6;
@@ -197,24 +353,76 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
                   viewYear === today.getFullYear();
                 const dayOfWeek = new Date(viewYear, viewMonth, day).getDay();
                 const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayStatus = dayStatusMap[dateKey];
 
                 return (
                   <div
                     key={`day-${day}`}
                     aria-current={isToday ? 'date' : undefined}
+                    title={
+                      dayStatus
+                        ? `${dayStatus.targetState === 'met' ? 'Target met' : dayStatus.targetState === 'missed' ? 'Target missed' : 'No production log'}${dayStatus.hasBreakdown ? ' · Engineering breakdown' : ''}`
+                        : undefined
+                    }
                     className={cn(
-                      'flex h-7 w-7 items-center justify-center rounded-lg font-medium text-[11px] tabular-nums transition-colors',
+                      'relative flex h-7 w-7 items-center justify-center rounded-lg font-medium text-[11px] tabular-nums transition-colors',
                       isToday
                         ? 'bg-[var(--accent-blue)] font-bold text-white shadow-card ring-2 ring-[var(--accent-blue)]/25'
-                        : isWeekend
-                          ? 'bg-black/[0.02] text-[var(--text-secondary)] hover:bg-black/[0.06]'
-                          : 'text-[var(--text-heading)] hover:bg-black/[0.05]'
+                        : dayStatus?.hasBreakdown
+                          ? 'bg-rose-50/90 text-rose-900 ring-1 ring-rose-400/75 hover:bg-rose-100/80'
+                          : isWeekend
+                            ? 'bg-black/[0.02] text-[var(--text-secondary)] hover:bg-black/[0.06]'
+                            : 'text-[var(--text-heading)] hover:bg-black/[0.05]'
                     )}
                   >
-                    {day}
+                    <span>{day}</span>
+                    {dayStatus?.targetState && (
+                      <Hammer
+                        data-testid={
+                          dayStatus.targetState === 'met'
+                            ? `calendar-target-met-${day}`
+                            : `calendar-target-missed-${day}`
+                        }
+                        className={cn(
+                          'absolute bottom-0.5 left-0.5 h-2.5 w-2.5',
+                          isToday
+                            ? dayStatus.targetState === 'met'
+                              ? 'text-emerald-200'
+                              : 'text-rose-200'
+                            : dayStatus.targetState === 'met'
+                              ? 'text-emerald-600'
+                              : 'text-rose-600'
+                        )}
+                      />
+                    )}
+                    {dayStatus?.hasBreakdown && (
+                      <Wrench
+                        data-testid={`calendar-breakdown-spanner-${day}`}
+                        className={cn(
+                          'absolute right-0.5 bottom-0.5 h-2.5 w-2.5',
+                          isToday ? 'text-rose-200' : 'text-rose-600'
+                        )}
+                      />
+                    )}
                   </div>
                 );
               })}
+            </div>
+
+            <div className="mt-2.5 flex items-center justify-between border-black/[0.06] border-t pt-2 text-[9px] text-[var(--text-muted)]">
+              <span className="inline-flex items-center gap-1">
+                <Hammer className="h-2.5 w-2.5 text-emerald-600" />
+                Target Met
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Hammer className="h-2.5 w-2.5 text-rose-600" />
+                Missed
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Wrench className="h-2.5 w-2.5 text-rose-600" />
+                Breakdown
+              </span>
             </div>
           </div>
 
@@ -253,18 +461,52 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
               />
             </div>
 
-            <div className="mt-3 rounded-lg border border-black/[0.06] bg-black/[0.03] px-2.5 py-1 text-center">
+            <div className="mt-3 w-full rounded-lg border border-black/[0.06] bg-black/[0.03] px-2.5 py-1 text-center">
               <div className="select-all font-mono font-semibold text-[12px] text-[var(--text-heading)] tabular-nums">
                 {time.toLocaleTimeString('en-US', {
+                  timeZone: TIMEZONE_META[timezoneMode].iana,
                   hour: '2-digit',
                   minute: '2-digit',
                   second: '2-digit',
-                  hour12: false,
+                  hour12,
                 })}
               </div>
               <div className="font-mono text-[9px] text-[var(--text-muted)] uppercase tracking-wider">
-                SAST · UTC+2
+                {TIMEZONE_META[timezoneMode].badge}
               </div>
+            </div>
+
+            <div className="mt-2 flex w-full items-center justify-between gap-1">
+              <div
+                className="flex flex-1 rounded-lg border border-black/[0.06] bg-black/[0.02] p-0.5"
+                role="group"
+                aria-label="Clock timezone"
+              >
+                {(['sast', 'utc', 'local'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => selectTimezone(mode)}
+                    aria-pressed={timezoneMode === mode}
+                    className={cn(
+                      'flex-1 rounded-md px-1.5 py-0.5 font-mono font-semibold text-[9px] uppercase transition-colors',
+                      timezoneMode === mode
+                        ? 'bg-[var(--accent-blue)] text-white shadow-sm'
+                        : 'text-[var(--text-secondary)] hover:bg-black/[0.04]'
+                    )}
+                  >
+                    {TIMEZONE_META[mode].label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={toggleHour12}
+                aria-label="Toggle 12 or 24 hour format"
+                className="rounded-lg border border-black/[0.06] bg-black/[0.02] px-1.5 py-1 font-mono font-semibold text-[9px] text-[var(--text-secondary)] transition-colors hover:bg-black/[0.05]"
+              >
+                {hour12 ? '12H' : '24H'}
+              </button>
             </div>
           </div>
         </Popover.Content>

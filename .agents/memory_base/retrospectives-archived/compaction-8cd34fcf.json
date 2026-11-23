@@ -1,0 +1,30 @@
+{
+  "id": "compaction-8cd34fcf",
+  "timestamp": "2026-11-23T08:34:15.169Z",
+  "taskTag": "compaction-standard-8cd34fcf",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/RouteBackground.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(auth)/login/LoginVideoStage.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/public/sw.js\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/ServiceWorkerRegister.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/ServiceWorkerRegister.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/server/proxy.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/e2e/helpers/background.ts\"",
+    "\"/home/tim/Fork/Arch-System/e2e/visual/asset-integrity.spec.ts\"",
+    "\"/home/tim/Fork/Arch-System/tools/audits/browser-devtools-audit.cjs\"",
+    "\"/home/tim/Fork/Arch-System/e2e/visual/theme.smoke.spec.ts\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (424 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 352256,
+    "cacheHitRatio": 0.8662,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}
