@@ -266,13 +266,13 @@ describe('Gate 16 — Module-Level Authorization Matrix (Control Room, Plant, En
     });
 
     it('blocks operator from /{dept}/tools while allowing supervisor and admin', async () => {
-      setupProxySession({ role: 'operator', departmentSlug: 'drilling' });
-      const denied = await proxy(makeProxyRequest('/drilling/tools'));
+      setupProxySession({ role: 'operator', departmentSlug: 'engineering' });
+      const denied = await proxy(makeProxyRequest('/engineering/tools'));
       expect(denied.status).toBe(307);
       expect(denied.headers.get('location')).toContain('error=unauthorized_department');
 
-      setupProxySession({ role: 'supervisor', departmentSlug: 'drilling' });
-      const allowed = await proxy(makeProxyRequest('/drilling/tools'));
+      setupProxySession({ role: 'supervisor', departmentSlug: 'engineering' });
+      const allowed = await proxy(makeProxyRequest('/engineering/tools'));
       expect(allowed.status).not.toBe(307);
     });
 

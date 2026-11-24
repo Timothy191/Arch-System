@@ -113,11 +113,6 @@ export const DEPARTMENTS = [
         name: 'Reports',
         description: 'Aggregate data + CSV',
       },
-      {
-        path: '/drilling/tools',
-        name: 'Tools',
-        description: 'Flowise / tool embeds',
-      },
     ],
     roles: ['drilling_operator', 'supervisor', 'admin'],
   },

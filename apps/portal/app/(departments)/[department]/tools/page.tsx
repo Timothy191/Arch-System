@@ -47,7 +47,11 @@ export default async function ToolsPage({
 }) {
   await connection();
   const { department } = await params;
-  if (department === 'plant-processing' || department === 'production') {
+  if (
+    department === 'plant-processing' ||
+    department === 'production' ||
+    department === 'drilling'
+  ) {
     redirect(`/${department}`);
   }
 
