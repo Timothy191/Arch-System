@@ -6,6 +6,15 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-24T10:48:00+02:00] - Upgrade Hub Active Site Pins to Interactive 3D Canvas Globe (`feat/hub-3d-globe`)
+
+- **3D Perspective Geometry & Earth Landmass Engine ([`globe-math.ts`](packages/ui/src/components/globe-math.ts))**: Added true 3D spherical projection, yaw/pitch orbit rotation, `targetOrbitForLatLon` camera focusing, shortest-angle interpolation, Fibonacci sphere sampling (`FIBONACCI_DOT_COUNT = 2400`) filtered via ray-casting continental coastline polygons (`isLandCoordinate`), and elevated 3D spherical linear interpolation geodesic arcs (`sampleGeodesicArc`).
+- **Modular 3D Canvas Renderer ([`globe-renderer.ts`](packages/ui/src/components/globe-renderer.ts))**: Replaced the flat 2D SVG disc with a multi-pass high-DPI 2D Canvas 3D renderer featuring grounded contact shadow, atmospheric halo, split back/front-occluded brushed-gold orbital ring with traveling satellite, off-center studio key-lit sphere volume gradient, 3D graticule, Lambert-shaded front/translucent-back Earth continent dot matrix, animated geodesic telemetry pulses, surface-normal pin stems with foreshortened pulsing beacons, and depth-sorted frosted label callouts (`renderGlobe3DFrame`).
+- **Interactive 3D Globe UI & Tests ([`GlobePins.tsx`](packages/ui/src/components/GlobePins.tsx), [`GlobePins.test.tsx`](apps/portal/components/GlobePins.test.tsx))**: Built pointer drag-to-orbit with inertia damping, pin hit-testing, click-to-fly site selector buttons, Pause/Resume & Reset View controls, reduced-motion handling, live coordinate readout HUD, and synchronous initial paint; added geometry and React Testing Library unit tests (`1/1` suite, `4/4` tests).
+- **Verification**: `GlobePins.test.tsx` (`4/4` tests), `@repo/hub/ui` (`3/3` suites, `32/32` tests), `pnpm lint` (`1,824` files), `pnpm lint:spelling` (`2,191` files, `0` issues), `pnpm md:lint`, `pnpm type-check` (`24/24` tasks), and `pnpm audit:compliance` (`0` violations).
+
+---
+
 ## [2026-11-24T10:00:00+02:00] - `/hub` Design Feedback: Operational Globe Pins + Hero Banner for Core Modules (`feat/hub-globe-hero-banner`)
 
 - **Operational Globe Pins ([`GlobePins.tsx`](packages/ui/src/components/GlobePins.tsx), [`HeroRotator.tsx`](apps/portal/app/hub/HeroRotator.tsx), [`index.ts`](packages/ui/src/index.ts))**: Replaced the static "Operational subsystem indicators" div with a dependency-free SVG orthographic globe (`GlobePins`) wired into the central command panel of `HeroRotator.tsx`. Five pinned site markers (Pit Viper 351, Dispatch Room, Wash Plant 01, Fleet AV 01, DB Core) rotate on a slow 120ms auto-rotation loop with backside culling, depth-sorted far-to-near rendering, hover tooltips, and a gold rim glow. Exported `GlobePins` from `@repo/ui` package index. Biome + tsc clean.
