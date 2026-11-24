@@ -182,58 +182,65 @@ export function createWebGLGlobeRenderer(canvas: HTMLCanvasElement): WebGLGlobeR
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
+  const glContext = gl;
+  const activateProgram = glContext.useProgram.bind(glContext);
   let hasTextureUploaded = false;
 
   return {
     setTextureImage: (image: HTMLImageElement) => {
-      if (!gl || image.naturalWidth === 0 || image.naturalHeight === 0) return;
+      if (image.naturalWidth === 0 || image.naturalHeight === 0) return;
       try {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        glContext.bindTexture(glContext.TEXTURE_2D, texture);
+        glContext.pixelStorei(glContext.UNPACK_FLIP_Y_WEBGL, 1);
+        glContext.texImage2D(
+          glContext.TEXTURE_2D,
+          0,
+          glContext.RGBA,
+          glContext.RGBA,
+          glContext.UNSIGNED_BYTE,
+          image
+        );
         hasTextureUploaded = true;
       } catch {
         // Ignore cross-origin or decode upload failure; keeps fallback appearance
       }
     },
     render: ({ widthPx, heightPx, dpr, orbit }: WebGLGlobeRenderOptions) => {
-      if (!gl) return false;
       const physWidth = Math.max(1, Math.round(widthPx * dpr));
       const physHeight = Math.max(1, Math.round(heightPx * dpr));
       const minDim = Math.min(widthPx, heightPx);
       const radiusPx = Math.max(MIN_SPHERE_RADIUS_PX, minDim * GLOBE_SPHERE_FILL_RATIO) * dpr;
 
-      gl.viewport(0, 0, physWidth, physHeight);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      glContext.viewport(0, 0, physWidth, physHeight);
+      glContext.clearColor(0, 0, 0, 0);
+      glContext.clear(glContext.COLOR_BUFFER_BIT);
+      glContext.enable(glContext.BLEND);
+      glContext.blendFunc(glContext.SRC_ALPHA, glContext.ONE_MINUS_SRC_ALPHA);
 
-      gl.useProgram(program);
-      gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
-      gl.enableVertexAttribArray(posAttr);
-      gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
+      activateProgram(program);
+      glContext.bindBuffer(glContext.ARRAY_BUFFER, quadBuffer);
+      glContext.enableVertexAttribArray(posAttr);
+      glContext.vertexAttribPointer(posAttr, 2, glContext.FLOAT, false, 0, 0);
 
-      gl.uniform2f(centerLoc, physWidth * 0.5, physHeight * 0.5);
-      gl.uniform1f(radiusLoc, radiusPx);
-      gl.uniform1f(cameraDistLoc, CAMERA_DISTANCE_MULT);
-      gl.uniform2f(orbitLoc, orbit.yawRad, orbit.pitchRad);
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.uniform1i(textureLoc, 0);
-      gl.uniform1f(hasTextureLoc, hasTextureUploaded ? 1 : 0);
+      glContext.uniform2f(centerLoc, physWidth * 0.5, physHeight * 0.5);
+      glContext.uniform1f(radiusLoc, radiusPx);
+      glContext.uniform1f(cameraDistLoc, CAMERA_DISTANCE_MULT);
+      glContext.uniform2f(orbitLoc, orbit.yawRad, orbit.pitchRad);
+      glContext.activeTexture(glContext.TEXTURE0);
+      glContext.bindTexture(glContext.TEXTURE_2D, texture);
+      glContext.uniform1i(textureLoc, 0);
+      glContext.uniform1f(hasTextureLoc, hasTextureUploaded ? 1 : 0);
 
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      glContext.drawArrays(glContext.TRIANGLE_STRIP, 0, 4);
       return hasTextureUploaded;
     },
     dispose: () => {
-      if (!gl) return;
       try {
-        gl.deleteTexture(texture);
-        gl.deleteBuffer(quadBuffer);
-        gl.deleteProgram(program);
-        gl.deleteShader(vertexShader);
-        gl.deleteShader(fragmentShader);
+        glContext.deleteTexture(texture);
+        glContext.deleteBuffer(quadBuffer);
+        glContext.deleteProgram(program);
+        glContext.deleteShader(vertexShader);
+        glContext.deleteShader(fragmentShader);
       } catch {
         // Ignore context loss teardown errors
       }
