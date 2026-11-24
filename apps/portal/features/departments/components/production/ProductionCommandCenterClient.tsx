@@ -16,7 +16,6 @@ import {
 import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { classifyReconciliationDrift, RECONCILIATION_UI } from '~/lib/production-reconciliation';
 import type { ProductionMonthReportData } from './actions';
 import { getProductionDepartmentData, upsertMonthlyProductionTarget } from './actions';
 
@@ -24,6 +23,14 @@ interface ProductionCommandCenterClientProps {
   initialData: ProductionMonthReportData;
   deptId: string;
 }
+
+const SOURCE_TILE_CLASS =
+  'rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3';
+const ACTION_PILL_LINK_CLASS =
+  'rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all hover:border-[var(--accent-blue)]';
+const TH_RIGHT_CLASS = 'px-3 py-2.5 text-right';
+const TD_NUM_MUTED_CLASS = 'px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]';
+const TD_NUM_EMPTY_CLASS = 'px-3 py-2.5 text-right font-mono text-[var(--text-muted)]';
 
 export function ProductionCommandCenterClient({
   initialData,
@@ -87,6 +94,7 @@ export function ProductionCommandCenterClient({
   const handleExportCsv = () => {
     const headers = [
       'Date',
+      'Status',
       'Day Shift Coal (t)',
       'Night Shift Coal (t)',
       'Total Coal (t)',
@@ -94,15 +102,16 @@ export function ProductionCommandCenterClient({
       'Night Shift Waste (t)',
       'Total Waste (t)',
       'Haul Loads',
-      'Haul BCM',
-      'Excavator BCM',
-      'Dozer Push BCM',
-      'Total BCM',
+      'Haul Pit BCM',
+      'Excavator Pit BCM',
+      'Dozer Rollover BCM',
+      'Total Pit BCM',
       'Fleet SMR Hours',
       'Strip Ratio (W:C)',
     ];
     const rows = report.dailyRows.map((r) => [
       r.date,
+      r.hasData ? 'Captured' : 'No data captured',
       r.dayShiftCoalTonnes,
       r.nightShiftCoalTonnes,
       r.totalCoalTonnes,
@@ -129,12 +138,8 @@ export function ProductionCommandCenterClient({
   };
 
   const { totals, target } = report;
-  const driftLevel = classifyReconciliationDrift(totals.reconciliationDriftPct);
-  const driftUI = RECONCILIATION_UI[driftLevel];
   const passedMonthOption = report.availableMonths[1];
 
-  // Performance Optimization: Single-pass memoized aggregation of shift totals
-  // to avoid inline .reduce() array traversals on table renders.
   const monthlyShiftTotals = useMemo(() => {
     let dayShiftCoal = 0;
     let nightShiftCoal = 0;
@@ -153,23 +158,22 @@ export function ProductionCommandCenterClient({
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="font-bold text-2xl text-[var(--text-heading)] tracking-tight">
-                Production Command &amp; Monthly Reconciliation
+                Production Command &amp; Pit BCM Ledger
               </h2>
               <Badge
                 variant="outline"
                 className="border-emerald-500/25 bg-emerald-500/10 font-mono text-emerald-700 text-xs"
               >
-                Auto-Pulled Multi-Source SSoT
+                Auto-Pulled Pit BCM SSoT
               </Badge>
             </div>
             <p className="mt-1 text-[var(--text-secondary)] text-xs">
-              Automatically aggregates ROM Coal, Overburden Waste, Haul Truck Loads, Excavator BCM,
-              and Dozer Push across Control Room &amp; Production logs.
+              Automatically aggregates Pit BCM Moved, ROM Coal, Overburden Waste, Haul Truck Loads,
+              Excavator Pit BCM, and Dozer Rollover across Control Room &amp; Production logs.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {/* Quick-jump to Passed Month Report */}
             {passedMonthOption && (
               <Button
                 type="button"
@@ -294,7 +298,7 @@ export function ProductionCommandCenterClient({
 
             <div>
               <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
-                Monthly Bank Volume Target (BCM) *
+                Monthly Pit BCM Target *
               </label>
               <input
                 type="number"
@@ -348,9 +352,8 @@ export function ProductionCommandCenterClient({
         </GlassCard>
       )}
 
-      {/* ── Monthly Target vs Actual Progress Cards (Coal, Waste, BCM, Strip Ratio) ── */}
+      {/* ── Monthly Target vs Actual Progress Cards (Coal, Waste, Pit BCM, Strip Ratio) ── */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {/* Card 1: Monthly Coal vs Target */}
         <GlassCard className="space-y-3 p-5">
           <div className="flex items-center justify-between">
             <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
@@ -383,7 +386,6 @@ export function ProductionCommandCenterClient({
           </p>
         </GlassCard>
 
-        {/* Card 2: Monthly Waste vs Target */}
         <GlassCard className="space-y-3 p-5">
           <div className="flex items-center justify-between">
             <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
@@ -416,11 +418,10 @@ export function ProductionCommandCenterClient({
           </p>
         </GlassCard>
 
-        {/* Card 3: Total Extraction BCM */}
         <GlassCard className="space-y-3 p-5">
           <div className="flex items-center justify-between">
             <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
-              Total Bank Volume (BCM)
+              Pit BCM Moved ({report.selectedMonth})
             </span>
             <Badge variant="outline" className="font-mono text-xs">
               {totals.bcmTargetProgressPct}% of Plan
@@ -450,7 +451,6 @@ export function ProductionCommandCenterClient({
           </p>
         </GlassCard>
 
-        {/* Card 4: Strip Ratio & Fleet SMR Hours */}
         <GlassCard className="space-y-3 p-5">
           <div className="flex items-center justify-between">
             <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
@@ -484,116 +484,86 @@ export function ProductionCommandCenterClient({
         </GlassCard>
       </div>
 
-      {/* ── Auto-Pulled Source Breakdown & Reconciliation Drift Banner ── */}
+      {/* ── Pit BCM Moved Only Upstream Source Breakdown & Quick Navigation ── */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <GlassCard className="flex flex-col justify-between gap-3 p-4 lg:col-span-7">
-          <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
-              <Layers className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
-              Auto-Synchronized Upstream Data Sources
-            </h3>
-            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] text-emerald-700">
-              Live Pipeline Active
+        <GlassCard className="flex flex-col justify-between gap-4 p-5 lg:col-span-12">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                <Layers className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+                Auto-Synchronized Upstream Sources — Pit BCM Moved Only
+              </h3>
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
+                Production accounting is anchored exclusively on Pit BCM Moved across haulage,
+                excavation, dozer rollover, and fleet SMR hours.
+              </p>
+            </div>
+            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[11px] text-emerald-700">
+              Pit BCM SSoT Active
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-2.5 text-xs sm:grid-cols-4">
-            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+
+          <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
+            <div className={SOURCE_TILE_CLASS}>
               <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
-                1. Hourly Loads
+                1. Haul Truck Pit BCM
               </p>
-              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
-                {totals.haulTruckLoads.toLocaleString('en-US')} loads
+              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)] text-sm">
+                {totals.haulTruckBcm.toLocaleString('en-US')} BCM
+              </p>
+              <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+                {totals.haulTruckLoads.toLocaleString('en-US')} loads moved
               </p>
             </div>
-            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+            <div className={SOURCE_TILE_CLASS}>
               <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
-                2. Excavator BCM
+                2. Excavator Pit BCM
               </p>
-              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
+              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)] text-sm">
                 {totals.excavatorBcm.toLocaleString('en-US')} BCM
               </p>
+              <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Direct bench excavation</p>
             </div>
-            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+            <div className={SOURCE_TILE_CLASS}>
               <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
-                3. Dozer Rollover
+                3. Dozer Rollover Pit BCM
               </p>
-              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
+              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)] text-sm">
                 {totals.dozerPushBcm.toLocaleString('en-US')} BCM
               </p>
+              <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+                Overburden push rollover
+              </p>
             </div>
-            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+            <div className={SOURCE_TILE_CLASS}>
               <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                 4. Fleet SMR Ops
               </p>
-              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
+              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)] text-sm">
                 {totals.fleetOperatingHours.toLocaleString('en-US')} hrs
               </p>
+              <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Verified machine hours</p>
             </div>
           </div>
-        </GlassCard>
 
-        <GlassCard
-          className={`flex flex-col justify-between border-l-4 p-4 lg:col-span-5 ${
-            driftLevel === 'critical'
-              ? 'border-accent-red'
-              : driftLevel === 'moderate'
-                ? 'border-accent-orange'
-                : driftLevel === 'minor'
-                  ? 'border-accent-amber'
-                  : 'border-accent-green'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-                Weighbridge vs. Survey BCM Reconciliation
-              </h3>
-              <p className="mt-0.5 text-[var(--text-muted)] text-xs">{driftUI.description}</p>
-            </div>
-            <div className="text-right">
-              <span
-                className={`font-bold font-mono text-lg ${
-                  driftLevel === 'critical'
-                    ? 'text-accent-red'
-                    : driftLevel === 'moderate'
-                      ? 'text-accent-orange'
-                      : driftLevel === 'minor'
-                        ? 'text-accent-amber'
-                        : 'text-accent-green'
-                }`}
-              >
-                {totals.reconciliationDriftPct > 0 ? '+' : ''}
-                {totals.reconciliationDriftPct.toFixed(2)}%
-              </span>
-              <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
-                {driftUI.label}
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 pt-2">
+          <div className="flex flex-wrap items-center gap-2 border-[var(--border-subtle)] border-t pt-3">
             <Link
               href="/production/daily-log"
               className="rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-medium text-white text-xs transition-all hover:bg-[var(--accent-blue)]/90"
             >
-              + Log Weighbridge Override
+              Production Targets
             </Link>
-            <Link
-              href="/production/hourly-loads"
-              className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all"
-            >
+            <Link href="/production/hourly-loads" className={ACTION_PILL_LINK_CLASS}>
               Hourly Loads Matrix
             </Link>
-            <Link
-              href="/production/reports"
-              className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all"
-            >
+            <Link href="/production/reports" className={ACTION_PILL_LINK_CLASS}>
               Detailed Shift Logs
             </Link>
           </div>
         </GlassCard>
       </div>
 
-      {/* ── Daily & Passed Month Production Report Table ── */}
+      {/* ── Daily & Passed Month Full-Calendar Production Report Table ── */}
       <GlassCard className="space-y-4 p-5">
         <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div>
@@ -602,8 +572,9 @@ export function ProductionCommandCenterClient({
               {report.monthLabel} — Automated Daily Production &amp; Stripping Ledger
             </h3>
             <p className="text-[var(--text-muted)] text-xs">
-              Showing {report.dailyRows.length} active production day(s) for {report.monthLabel}.
-              Switch month above at any time to inspect passed-month reports.
+              Showing full month (all {totals.totalDaysInMonth} days) for {report.monthLabel} —{' '}
+              {totals.daysLogged} active production day(s) captured. Switch month above at any time
+              to inspect passed-month reports.
             </p>
           </div>
           <Button
@@ -624,50 +595,67 @@ export function ProductionCommandCenterClient({
             <thead className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)] font-mono text-[11px] text-[var(--text-secondary)] uppercase">
               <tr>
                 <th className="px-3 py-2.5">Date</th>
-                <th className="px-3 py-2.5 text-right">Day Coal (t)</th>
-                <th className="px-3 py-2.5 text-right">Night Coal (t)</th>
+                <th className={TH_RIGHT_CLASS}>Day Coal (t)</th>
+                <th className={TH_RIGHT_CLASS}>Night Coal (t)</th>
                 <th className="px-3 py-2.5 text-right font-bold text-emerald-700">
                   Total Coal (t)
                 </th>
                 <th className="px-3 py-2.5 text-right font-bold text-blue-700">Total Waste (t)</th>
-                <th className="px-3 py-2.5 text-right">Strip Ratio</th>
-                <th className="px-3 py-2.5 text-right">Haul Loads</th>
-                <th className="px-3 py-2.5 text-right">Total BCM</th>
-                <th className="px-3 py-2.5 text-right">Fleet SMR (h)</th>
+                <th className={TH_RIGHT_CLASS}>Strip Ratio</th>
+                <th className={TH_RIGHT_CLASS}>Haul Loads</th>
+                <th className={TH_RIGHT_CLASS}>Pit BCM</th>
+                <th className={TH_RIGHT_CLASS}>Fleet SMR (h)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">
-              {report.dailyRows.map((row) => (
-                <tr key={row.date} className="hover:bg-[var(--bg-secondary)]/50">
-                  <td className="px-3 py-2.5 font-medium font-mono text-[var(--text-heading)]">
-                    {row.date}
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
-                    {row.dayShiftCoalTonnes.toLocaleString('en-US')}
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
-                    {row.nightShiftCoalTonnes.toLocaleString('en-US')}
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-mono font-semibold text-emerald-700">
-                    {row.totalCoalTonnes.toLocaleString('en-US')}
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-mono font-semibold text-blue-700">
-                    {row.totalWasteTonnes.toLocaleString('en-US')}
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-heading)]">
-                    {row.stripRatio.toFixed(2)}:1
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
-                    {row.haulTruckLoads.toLocaleString('en-US')}
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-medium font-mono text-[var(--text-heading)]">
-                    {row.totalBcm.toLocaleString('en-US')}
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
-                    {row.fleetOperatingHours.toFixed(1)}h
-                  </td>
-                </tr>
-              ))}
+              {report.dailyRows.map((row) =>
+                row.hasData ? (
+                  <tr key={row.date} className="hover:bg-[var(--bg-secondary)]/50">
+                    <td className="px-3 py-2.5 font-medium font-mono text-[var(--text-heading)]">
+                      {row.date}
+                    </td>
+                    <td className={TD_NUM_MUTED_CLASS}>
+                      {row.dayShiftCoalTonnes.toLocaleString('en-US')}
+                    </td>
+                    <td className={TD_NUM_MUTED_CLASS}>
+                      {row.nightShiftCoalTonnes.toLocaleString('en-US')}
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-mono font-semibold text-emerald-700">
+                      {row.totalCoalTonnes.toLocaleString('en-US')}
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-mono font-semibold text-blue-700">
+                      {row.totalWasteTonnes.toLocaleString('en-US')}
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-mono text-[var(--text-heading)]">
+                      {row.stripRatio.toFixed(2)}:1
+                    </td>
+                    <td className={TD_NUM_MUTED_CLASS}>
+                      {row.haulTruckLoads.toLocaleString('en-US')}
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-medium font-mono text-[var(--text-heading)]">
+                      {row.totalBcm.toLocaleString('en-US')}
+                    </td>
+                    <td className={TD_NUM_MUTED_CLASS}>{row.fleetOperatingHours.toFixed(1)}h</td>
+                  </tr>
+                ) : (
+                  <tr key={row.date} className="bg-[var(--bg-secondary)]/30 opacity-75">
+                    <td className="px-3 py-2.5 font-mono text-[var(--text-muted)]">
+                      <span>{row.date}</span>
+                      <span className="ml-2 inline-flex rounded-full border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-2 py-0.5 font-sans text-[10px] text-[var(--text-muted)]">
+                        No data captured
+                      </span>
+                    </td>
+                    <td className={TD_NUM_EMPTY_CLASS}>—</td>
+                    <td className={TD_NUM_EMPTY_CLASS}>—</td>
+                    <td className={TD_NUM_EMPTY_CLASS}>—</td>
+                    <td className={TD_NUM_EMPTY_CLASS}>—</td>
+                    <td className={TD_NUM_EMPTY_CLASS}>—</td>
+                    <td className={TD_NUM_EMPTY_CLASS}>—</td>
+                    <td className={TD_NUM_EMPTY_CLASS}>—</td>
+                    <td className={TD_NUM_EMPTY_CLASS}>—</td>
+                  </tr>
+                )
+              )}
               {report.dailyRows.length === 0 && (
                 <tr>
                   <td colSpan={9} className="py-8 text-center text-[var(--text-muted)]">

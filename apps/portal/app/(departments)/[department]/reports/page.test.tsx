@@ -50,6 +50,37 @@ jest.mock('~/features/departments/components/plant-processing/PlantHistoryDataba
   ),
 }));
 
+jest.mock('~/features/departments/components/production/actions', () => ({
+  getProductionPerformanceData: jest.fn(async () => ({
+    selectedMonth: '2026-10',
+    monthLabel: 'October 2026',
+    availableMonths: [],
+    targets: {},
+    shiftRows: [],
+    dailyRows: [],
+    weeklyRows: [],
+    monthlyRows: [],
+    delayGroups: [],
+    foremanSummary: {},
+  })),
+}));
+
+jest.mock('~/features/departments/components/production/ProductionReportsWorkspace', () => ({
+  ProductionReportsWorkspace: ({
+    deptId,
+    initialTab,
+    initialData,
+  }: {
+    deptId: string;
+    initialTab?: string;
+    initialData: { monthLabel: string };
+  }) => (
+    <div data-testid="production-reports-workspace">
+      {deptId}:{initialTab ?? 'foreman'}:{initialData.monthLabel}
+    </div>
+  ),
+}));
+
 jest.mock('./ReportsDashboardClient', () => ({
   ReportsDashboardClient: ({
     departmentSlug,
@@ -213,6 +244,39 @@ describe('ReportsPage ([department]/reports/page.tsx)', () => {
     render(jsx);
 
     expect(screen.getByTestId('plant-processing-reports')).toHaveTextContent('2026-10-22');
+  });
+
+  it('renders ProductionReportsWorkspace for production with foreman default and honors tab=pdf-report', async () => {
+    (getDepartmentContext as jest.Mock).mockResolvedValueOnce({
+      dept: { name: 'production', displayName: 'Production', type: 'standard' },
+      deptId: 'dept-prod',
+      today: '2026-10-22',
+    });
+
+    const defaultJsx = await ReportsPage({
+      params: Promise.resolve({ department: 'production' }),
+      searchParams: Promise.resolve({}),
+    });
+    const { unmount } = render(defaultJsx);
+    expect(screen.getByTestId('production-reports-workspace')).toHaveTextContent(
+      'dept-prod:foreman:October 2026'
+    );
+    unmount();
+
+    (getDepartmentContext as jest.Mock).mockResolvedValueOnce({
+      dept: { name: 'production', displayName: 'Production', type: 'standard' },
+      deptId: 'dept-prod',
+      today: '2026-10-22',
+    });
+
+    const pdfJsx = await ReportsPage({
+      params: Promise.resolve({ department: 'production' }),
+      searchParams: Promise.resolve({ tab: 'pdf-report' }),
+    });
+    render(pdfJsx);
+    expect(screen.getByTestId('production-reports-workspace')).toHaveTextContent(
+      'dept-prod:pdf-report:October 2026'
+    );
   });
 
   it('renders ReportsDashboardClient for standard department with latestSmr, active machine filter, and operators', async () => {

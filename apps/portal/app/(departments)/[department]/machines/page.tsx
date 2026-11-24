@@ -7,6 +7,8 @@ import { connection } from 'next/server';
 import { withCache } from '@/lib/cache-utils';
 import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
+import { getProductionMachinesTargetReport } from '~/features/departments/components/production/actions';
+import { ProductionMachinesTargetPanel } from '~/features/departments/components/production/ProductionMachinesTargetPanel';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { MachineTelemetryPanelsClient } from './MachineTelemetryPanelsClient';
 import {
@@ -179,6 +181,10 @@ export default async function MachinesPage({
   });
   if (deptSlug === 'plant-inventory') {
     return <PlantInventoryWorkspaceClient mode="item-list" today={today} />;
+  }
+  if (deptSlug === 'production') {
+    const productionMachinesReport = await getProductionMachinesTargetReport(today);
+    return <ProductionMachinesTargetPanel report={productionMachinesReport} />;
   }
 
   const machines = await getCachedDepartmentMachines(deptSlug);

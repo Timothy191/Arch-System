@@ -9,6 +9,8 @@ import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantHistoryDatabaseClient } from '~/features/departments/components/plant-processing/PlantHistoryDatabaseClient';
+import { getProductionPerformanceData } from '~/features/departments/components/production/actions';
+import { ProductionPerformanceClient } from '~/features/departments/components/production/ProductionPerformanceClient';
 import { getDepartmentContext } from '~/lib/dept-context';
 
 const DEFAULT_HISTORY_WINDOW_DAYS = 30;
@@ -218,6 +220,11 @@ export default async function HistoryPage({
         initialDelays={plantData.initialDelays}
       />
     );
+  }
+
+  if (deptSlug === 'production') {
+    const performanceData = await getProductionPerformanceData(undefined, deptId);
+    return <ProductionPerformanceClient initialData={performanceData} deptId={deptId} />;
   }
 
   const defaultFrom =

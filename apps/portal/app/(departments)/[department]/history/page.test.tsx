@@ -58,6 +58,35 @@ jest.mock('~/features/departments/components/plant-processing/PlantHistoryDataba
   ),
 }));
 
+jest.mock('~/features/departments/components/production/actions', () => ({
+  getProductionPerformanceData: jest.fn(async () => ({
+    selectedMonth: '2026-10',
+    monthLabel: 'October 2026',
+    availableMonths: [],
+    targets: {},
+    shiftRows: [],
+    dailyRows: [],
+    weeklyRows: [],
+    monthlyRows: [],
+    delayGroups: [],
+    foremanSummary: {},
+  })),
+}));
+
+jest.mock('~/features/departments/components/production/ProductionPerformanceClient', () => ({
+  ProductionPerformanceClient: ({
+    deptId,
+    initialData,
+  }: {
+    deptId: string;
+    initialData: { monthLabel: string };
+  }) => (
+    <div data-testid="production-performance-history">
+      {deptId}:{initialData.monthLabel}
+    </div>
+  ),
+}));
+
 describe('HistoryPage ([department]/history/page.tsx)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -95,6 +124,24 @@ describe('HistoryPage ([department]/history/page.tsx)', () => {
     render(jsx);
 
     expect(screen.getByTestId('plant-processing-history')).toHaveTextContent('2026-10-22');
+  });
+
+  it('renders ProductionPerformanceClient for production', async () => {
+    (getDepartmentContext as jest.Mock).mockResolvedValueOnce({
+      dept: { name: 'production', type: 'standard' },
+      deptId: 'dept-prod',
+      today: '2026-10-22',
+    });
+
+    const jsx = await HistoryPage({
+      params: Promise.resolve({ department: 'production' }),
+      searchParams: Promise.resolve({}),
+    });
+    render(jsx);
+
+    expect(screen.getByTestId('production-performance-history')).toHaveTextContent(
+      'dept-prod:October 2026'
+    );
   });
 
   it('renders control room shift history with explicit en-US load totals and en-ZA timestamps', async () => {
