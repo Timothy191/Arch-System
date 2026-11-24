@@ -30,6 +30,7 @@ const clientEnvShape = {
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   NEXT_PUBLIC_FUXA_URL: z.string().url().optional(),
   NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: z.string().optional(),
+  NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY: z.string().min(1).optional(),
 };
 
 const serverEnvShape = {
@@ -110,6 +111,17 @@ const serverEnvShape = {
   WOODPECKER_URL: z.string().url().optional(),
   WOODPECKER_TOKEN: z.string().min(1).optional(),
   METRICS_SCRAPE_TOKEN: z.string().min(1).optional(),
+
+  // ── Cloudflare Edge & Zero Trust ───────────────────────────────────
+  CLOUDFLARE_ACCOUNT_ID: z.string().min(1).optional(),
+  CLOUDFLARE_API_TOKEN: z.string().min(1).optional(),
+  CLOUDFLARE_ZONE_ID: z.string().min(1).optional(),
+  CLOUDFLARE_TUNNEL_ID: z.string().min(1).optional(),
+  CLOUDFLARE_TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
+  CLOUDFLARE_AI_GATEWAY_ENABLED: z
+    .string()
+    .default('false')
+    .transform((v) => v === 'true'),
   GITHUB_REPOSITORY: z.string().optional(),
   GITHUB_TOKEN: z.string().optional(),
   ENABLE_DB_TRACING: z
@@ -185,6 +197,8 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
       NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
       NEXT_PUBLIC_FUXA_URL: process.env.NEXT_PUBLIC_FUXA_URL,
       NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,
+      NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY:
+        process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY,
       SUPABASE_URL: process.env.SUPABASE_URL,
       SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
       SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
@@ -230,6 +244,12 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
       WOODPECKER_URL: process.env.WOODPECKER_URL,
       WOODPECKER_TOKEN: process.env.WOODPECKER_TOKEN,
       METRICS_SCRAPE_TOKEN: process.env.METRICS_SCRAPE_TOKEN,
+      CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
+      CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN,
+      CLOUDFLARE_ZONE_ID: process.env.CLOUDFLARE_ZONE_ID,
+      CLOUDFLARE_TUNNEL_ID: process.env.CLOUDFLARE_TUNNEL_ID,
+      CLOUDFLARE_TURNSTILE_SECRET_KEY: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
+      CLOUDFLARE_AI_GATEWAY_ENABLED: process.env.CLOUDFLARE_AI_GATEWAY_ENABLED,
       GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY,
       GITHUB_TOKEN: process.env.GITHUB_TOKEN,
       ENABLE_DB_TRACING: process.env.ENABLE_DB_TRACING,
@@ -278,6 +298,8 @@ function parseEnv(): EnvVars {
     FLOWISE_URL: process.env.FLOWISE_URL,
     NEXT_PUBLIC_FUXA_URL: process.env.NEXT_PUBLIC_FUXA_URL,
     NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,
+    NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY:
+      process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY,
     ENABLE_LOAD_ADAPTIVE_TEST: process.env.ENABLE_LOAD_ADAPTIVE_TEST,
     DISABLE_RATE_LIMIT: process.env.DISABLE_RATE_LIMIT,
     RATE_LIMIT_IP_WHITELIST: process.env.RATE_LIMIT_IP_WHITELIST,
@@ -300,6 +322,12 @@ function parseEnv(): EnvVars {
     WOODPECKER_URL: process.env.WOODPECKER_URL,
     WOODPECKER_TOKEN: process.env.WOODPECKER_TOKEN,
     METRICS_SCRAPE_TOKEN: process.env.METRICS_SCRAPE_TOKEN,
+    CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
+    CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN,
+    CLOUDFLARE_ZONE_ID: process.env.CLOUDFLARE_ZONE_ID,
+    CLOUDFLARE_TUNNEL_ID: process.env.CLOUDFLARE_TUNNEL_ID,
+    CLOUDFLARE_TURNSTILE_SECRET_KEY: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
+    CLOUDFLARE_AI_GATEWAY_ENABLED: process.env.CLOUDFLARE_AI_GATEWAY_ENABLED,
     GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     DISABLE_CORS: process.env.DISABLE_CORS,

@@ -1,13 +1,10 @@
 {
   "id": "compaction-9fce1b14",
-  "timestamp": "2026-11-24T05:43:49.562Z",
+  "timestamp": "2026-11-24T06:23:25.903Z",
   "taskTag": "compaction-standard-9fce1b14",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:execute_full_compact",
   "affectedFiles": [
-    "\"/home/tim/Fork/Arch-System/packages/database/migrations/228_add_employee_profile_fields.sql\"",
-    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/actions.ts\"",
-    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/EmployeeAccessPermissionsSection.tsx\"",
     "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/UsersTab.tsx\"",
     "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/UsersTab.test.tsx\"",
     "\"/home/tim/Fork/Arch-System/packages/database/migrations/229_enrich_fleet_machines_metadata.sql\"",
@@ -19,17 +16,20 @@
     "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/fleet-utils.test.ts\"",
     "\"/home/tim/Fork/Arch-System/libs/features/hub/ui/src/DepartmentReviews.test.tsx\"",
     "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/FleetTab.test.tsx\"",
-    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/actions/fleet.test.ts\""
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/actions/fleet.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/api/csv-utils.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/departments-utils.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/DepartmentsTab.tsx\""
   ],
   "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
-  "resolution": "Persisted bounded SKILL.state (463 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "resolution": "Persisted bounded SKILL.state (449 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
   "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
   "metrics": {
     "mode": "standard",
     "decision": "execute_full_compact",
-    "latestInputTokens": 458102,
-    "cacheHitRatio": 0.8571,
-    "checkpointCount": 1,
+    "latestInputTokens": 281463,
+    "cacheHitRatio": 0.8702,
+    "checkpointCount": 2,
     "avoidedCacheRebuildTokens": 0
   }
 }

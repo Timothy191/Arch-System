@@ -484,6 +484,8 @@ describe('proxy', () => {
     expect(csp).toContain('https://api.open-meteo.com');
     expect(csp).toContain('https://us.cloud.langfuse.com');
     expect(csp).toContain('https://*.r2.cloudflarestorage.com');
+    expect(csp).toContain('https://*.grafana.net');
+    expect(csp).toContain('https://challenges.cloudflare.com');
     expect(csp).toContain("connect-src 'self'");
     expect(csp).not.toContain('connect-src *');
     expect(csp).not.toContain('scada.example.com');
@@ -531,6 +533,8 @@ describe('proxy', () => {
     expect(prodCsp).toContain("form-action 'self'");
     expect(prodCsp).toContain('https://us.cloud.langfuse.com');
     expect(prodCsp).toContain('https://*.r2.cloudflarestorage.com');
+    expect(prodCsp).toContain('https://*.grafana.net');
+    expect(prodCsp).toContain('https://challenges.cloudflare.com');
 
     const devMatch = nextConfigSource.match(
       /key:\s*'Content-Security-Policy-Report-Only',\s*value:\s*"([^"]+)"/

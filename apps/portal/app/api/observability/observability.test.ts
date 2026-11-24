@@ -99,6 +99,31 @@ describe('Native Observability & CI BFF Clients', () => {
     );
   });
 
+  it('reports Grafana Cloud fallback guidance when /api/health succeeds but /api/search returns 401', async () => {
+    process.env.GRAFANA_URL = 'https://bigaloe1811.grafana.net';
+    process.env.GRAFANA_PUBLIC_URL = 'https://bigaloe1811.grafana.net';
+
+    globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/health')) {
+        return mockJsonResponse({ database: 'ok' });
+      }
+      if (url.includes('/api/search')) {
+        return mockJsonResponse({ message: 'Unauthorized' }, 401);
+      }
+      return mockJsonResponse({}, 404);
+    }) as typeof fetch;
+
+    const summary = await fetchObservabilitySummary();
+    const grafana = summary.services.find((service) => service.id === 'grafana');
+
+    expect(grafana?.mode).toBe('fallback');
+    expect(grafana?.endpointConfigured).toBe(true);
+    expect(grafana?.latencyMs).not.toBeNull();
+    expect(grafana?.detail).toContain('GRAFANA_API_KEY');
+    expect(summary.dashboards).toHaveLength(0);
+  });
+
   it('returns schema-valid Woodpecker CI pipelines when live and GitHub fallback otherwise', async () => {
     process.env.WOODPECKER_URL = 'http://127.0.0.1:8000';
     process.env.WOODPECKER_TOKEN = 'wp-test-token';

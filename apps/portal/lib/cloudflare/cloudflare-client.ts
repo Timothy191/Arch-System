@@ -40,22 +40,20 @@ import { createFetchClient, type FetchClient } from '@repo/utils/fetch-client';
 const CLOUDFLARE_API_BASE = 'https://api.cloudflare.com/client/v4';
 const DEFAULT_TIMEOUT_MS = 8_000;
 const DEFAULT_MAX_RETRIES = 2;
-
-/**
- * Narrowest practical Cloudflare API token scopes (read-only, documentation only):
- * - AccountRead, ZoneRead, WorkersScriptsRead, QueuesRead, R2Read,
- *   TurnstileRead, AccountAccessPoliciesRead, TunnelRead, AIRead
- */
+const MAX_PROTECTED_FLOWS = 10;
 
 /** Environment variable names (never values). */
 export const CLOUDFLARE_ENV_VARS = {
   apiToken: 'CLOUDFLARE_API_TOKEN',
   accountId: 'CLOUDFLARE_ACCOUNT_ID',
   zoneId: 'CLOUDFLARE_ZONE_ID',
+  tunnelId: 'CLOUDFLARE_TUNNEL_ID',
   turnstileSiteKey: 'NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY',
   turnstileSecretKey: 'CLOUDFLARE_TURNSTILE_SECRET_KEY',
   aiGatewayEnabled: 'CLOUDFLARE_AI_GATEWAY_ENABLED',
 } as const;
+
+export type CloudflareTokenKind = 'account' | 'user' | 'unknown';
 
 export interface CloudflareClientOptions {
   apiToken?: string;
@@ -78,11 +76,198 @@ interface CloudflareApiListResponse<T> {
   };
 }
 
+interface RawZeroTrustPolicy {
+  id?: string;
+  name?: string;
+  applicationType?: string;
+  application_type?: string;
+  identityProviders?: unknown;
+  isActive?: boolean;
+  decision?: string;
+  sessionDurationMinutes?: unknown;
+  updatedAt?: unknown;
+  updated_at?: unknown;
+}
+
+interface RawZeroTrustApp {
+  id?: string;
+  name?: string;
+  domain?: string;
+  type?: string;
+}
+
+interface RawZeroTrustServiceToken {
+  id?: string;
+  name?: string;
+  clientId?: unknown;
+  client_id?: unknown;
+  expiresAt?: unknown;
+  expires_at?: unknown;
+}
+
+interface RawTunnelConnection {
+  opened_at?: unknown;
+}
+
+interface RawTunnel {
+  id: string;
+  name: string;
+  status: string;
+  connections?: RawTunnelConnection[];
+}
+
+interface RawWorkerScript {
+  id: string;
+  name?: string;
+  versions?: Array<{ tag: string }>;
+  modified_on?: string;
+  created_on?: string;
+}
+
+interface RawQueue {
+  id?: string;
+  name?: string;
+  queue_id?: string;
+  queue_name?: string;
+  consumers_total_count?: number;
+}
+
+interface RawR2Bucket {
+  name: string;
+  public_access_block?: { enabled: boolean };
+}
+
+interface RawTurnstileWidget {
+  name?: string;
+  domains?: string[];
+}
+
+interface RawAiGateway {
+  id?: string;
+  name?: string;
+}
+
+interface RawZoneRuleset {
+  id: string;
+  phase?: string;
+}
+
+interface ZoneResolutionResult {
+  mode: CloudflareConnectionMode;
+  zoneId: string | null;
+  discovered: boolean;
+}
+
+const ZERO_TRUST_APP_TYPE_MAP: Record<
+  string,
+  CloudflareZeroTrustStatus['applications'][number]['type']
+> = {
+  self_hosted: 'self_hosted',
+  saas: 'saas',
+  application: 'application',
+  api: 'api',
+};
+
+const POLICY_APP_TYPE_MAP: Record<string, CloudflareZeroTrustPolicy['applicationType']> = {
+  application: 'application',
+  self_hosted: 'self_hosted',
+  api: 'api',
+};
+
+const TUNNEL_STATUS_MAP: Record<string, CloudflareTunnel['status']> = {
+  active: 'active',
+  healthy: 'active',
+  pending: 'pending',
+  degraded: 'pending',
+  inactive: 'inactive',
+  down: 'inactive',
+};
+
+/** Classify token prefix (`cfat_` account token vs `cfut_` user token) without inspecting secret entropy. */
+export function detectCloudflareTokenKind(token: string | undefined): CloudflareTokenKind {
+  if (token?.startsWith('cfat_')) return 'account';
+  if (token?.startsWith('cfut_')) return 'user';
+  return 'unknown';
+}
+
+function toIsoOrNull(rawValue: unknown): string | null {
+  if (typeof rawValue !== 'string' || !rawValue.trim()) return null;
+  const parsedMs = Date.parse(rawValue);
+  return Number.isNaN(parsedMs) ? null : new Date(parsedMs).toISOString();
+}
+
+function isNonEmptyString(candidate: unknown): candidate is string {
+  return typeof candidate === 'string' && candidate.trim().length > 0;
+}
+
+function normalizeZeroTrustPolicy(rawPolicy: RawZeroTrustPolicy): CloudflareZeroTrustPolicy | null {
+  if (!isNonEmptyString(rawPolicy.id)) return null;
+  const rawAppType = rawPolicy.applicationType ?? rawPolicy.application_type ?? '';
+  const applicationType = POLICY_APP_TYPE_MAP[rawAppType] ?? 'application';
+  const identityProviders = Array.isArray(rawPolicy.identityProviders)
+    ? rawPolicy.identityProviders.filter(isNonEmptyString)
+    : [];
+  const duration = rawPolicy.sessionDurationMinutes;
+  const sessionDurationMinutes =
+    typeof duration === 'number' && Number.isInteger(duration) && duration > 0 ? duration : null;
+
+  return {
+    id: rawPolicy.id,
+    name: isNonEmptyString(rawPolicy.name) ? rawPolicy.name : rawPolicy.id,
+    applicationType,
+    identityProviders,
+    isActive:
+      typeof rawPolicy.isActive === 'boolean'
+        ? rawPolicy.isActive
+        : rawPolicy.decision !== 'bypass',
+    sessionDurationMinutes,
+    updatedAt: toIsoOrNull(rawPolicy.updatedAt ?? rawPolicy.updated_at),
+  };
+}
+
+function normalizeZeroTrustApp(
+  rawApp: RawZeroTrustApp
+): CloudflareZeroTrustStatus['applications'][number] | null {
+  if (!isNonEmptyString(rawApp.id)) return null;
+  const appName = isNonEmptyString(rawApp.name) ? rawApp.name : rawApp.id;
+  const appDomain = isNonEmptyString(rawApp.domain) ? rawApp.domain : appName;
+  const appType = ZERO_TRUST_APP_TYPE_MAP[rawApp.type ?? ''] ?? 'application';
+  return { id: rawApp.id, name: appName, domain: appDomain, type: appType };
+}
+
+function normalizeZeroTrustServiceToken(
+  rawToken: RawZeroTrustServiceToken
+): CloudflareZeroTrustStatus['serviceTokens'][number] | null {
+  if (!isNonEmptyString(rawToken.id)) return null;
+  return {
+    id: rawToken.id,
+    name: isNonEmptyString(rawToken.name) ? rawToken.name : rawToken.id,
+    clientIdPresent: Boolean(rawToken.clientId ?? rawToken.client_id),
+    expiresAt: toIsoOrNull(rawToken.expiresAt ?? rawToken.expires_at),
+  };
+}
+
+function extractTurnstileFlows(widgets: readonly RawTurnstileWidget[]): string[] {
+  const uniqueFlows = new Set<string>();
+  for (const widget of widgets) {
+    if (isNonEmptyString(widget.name)) {
+      uniqueFlows.add(widget.name.trim());
+    }
+    for (const domain of widget.domains ?? []) {
+      if (isNonEmptyString(domain)) {
+        uniqueFlows.add(domain.trim());
+      }
+    }
+  }
+  return Array.from(uniqueFlows).slice(0, MAX_PROTECTED_FLOWS);
+}
+
 export class CloudflareApiClient {
   private readonly http: FetchClient;
   private readonly apiToken: string | undefined;
   private readonly accountId: string | undefined;
   private readonly zoneId: string | undefined;
+  private resolvedZonePromise: Promise<ZoneResolutionResult> | null = null;
 
   constructor(options: CloudflareClientOptions = {}) {
     this.apiToken = options.apiToken ?? process.env.CLOUDFLARE_API_TOKEN;
@@ -145,8 +330,8 @@ export class CloudflareApiClient {
       };
     }
     try {
-      const data = await read();
-      return { mode: 'live', data, detail: 'Connected' };
+      const payload = await read();
+      return { mode: 'live', data: payload, detail: 'Connected' };
     } catch (err) {
       if (err instanceof ForbiddenError) {
         return { mode: 'insufficient', data: null, detail: 'Token lacks required read scopes' };
@@ -162,61 +347,145 @@ export class CloudflareApiClient {
     }
   }
 
+  private async resolveZoneId(): Promise<ZoneResolutionResult> {
+    if (isNonEmptyString(this.zoneId)) {
+      return { mode: 'live', zoneId: this.zoneId, discovered: false };
+    }
+    if (!this.isConfigured) {
+      return { mode: 'unconfigured', zoneId: null, discovered: false };
+    }
+    if (!this.resolvedZonePromise) {
+      this.resolvedZonePromise = (async () => {
+        const result = await this.safeRead(async () =>
+          this.getJson<Array<{ id: string; name?: string }>>(
+            `/zones?account.id=${this.accountId}&status=active&per_page=5`
+          )
+        );
+        return {
+          mode: result.mode,
+          zoneId: result.data?.[0]?.id ?? null,
+          discovered: true,
+        };
+      })();
+    }
+    return this.resolvedZonePromise;
+  }
+
   // ── Account / zone ────────────────────────────────────────────────────────
 
   async getAccountStatus(): Promise<CloudflareAccountStatus> {
     const startedAt = Date.now();
-    const result = await this.safeRead(async () =>
-      this.getJson<{ id: string; name: string }>(`/accounts/${this.accountId}`)
+    const accountRead = await this.safeRead(async () =>
+      this.getJson<{ id: string; name?: string }>(`/accounts/${this.accountId}`)
     );
-    const latencyMs = result.mode === 'live' ? Date.now() - startedAt : null;
+
+    if (accountRead.mode === 'live') {
+      return {
+        id: 'cloudflare-account',
+        label: 'Cloudflare Account',
+        mode: 'live',
+        endpointConfigured: this.isConfigured,
+        latencyMs: Date.now() - startedAt,
+        detail: accountRead.data?.name ? `Connected — ${accountRead.data.name}` : 'Connected',
+        lastSyncedAt: new Date().toISOString(),
+      };
+    }
+
+    if (accountRead.mode === 'insufficient') {
+      const verifyPath =
+        detectCloudflareTokenKind(this.apiToken) === 'account'
+          ? `/accounts/${this.accountId}/tokens/verify`
+          : '/user/tokens/verify';
+      const verifyRead = await this.safeRead(async () =>
+        this.getJson<{ id?: string; status?: string }>(verifyPath)
+      );
+      if (verifyRead.mode === 'live' && verifyRead.data?.status === 'active') {
+        return {
+          id: 'cloudflare-account',
+          label: 'Cloudflare Account',
+          mode: 'live',
+          endpointConfigured: this.isConfigured,
+          latencyMs: Date.now() - startedAt,
+          detail: 'Token active (scoped account access)',
+          lastSyncedAt: new Date().toISOString(),
+        };
+      }
+    }
 
     return {
       id: 'cloudflare-account',
       label: 'Cloudflare Account',
-      mode: result.mode,
+      mode: accountRead.mode,
       endpointConfigured: this.isConfigured,
-      latencyMs,
-      detail: result.detail,
-      lastSyncedAt: result.mode === 'live' ? new Date().toISOString() : null,
+      latencyMs: null,
+      detail: accountRead.detail,
+      lastSyncedAt: null,
     };
   }
 
   // ── Zero Trust ────────────────────────────────────────────────────────────
 
   async getZeroTrustStatus(): Promise<CloudflareZeroTrustStatus> {
-    const tokenConfigured = this.isConfigured;
-    const result = await this.safeRead(async () => {
-      const [policies, applications, serviceTokens] = await Promise.all([
-        this.getJson<CloudflareZeroTrustPolicy[]>(`/accounts/${this.accountId}/access/policies`),
-        this.getJson<Array<{ id: string; name: string; domain: string; type: string }>>(
-          `/accounts/${this.accountId}/access/apps`
-        ),
-        this.getJson<Array<{ id: string; name: string; clientId: string; expiresAt?: string }>>(
-          `/accounts/${this.accountId}/access/service_tokens`
-        ),
-      ]);
-      return { policies, applications, serviceTokens };
-    });
+    if (!this.isConfigured) {
+      return {
+        mode: 'unconfigured',
+        tokenConfigured: false,
+        hasAccessReadScope: false,
+        policies: [],
+        applications: [],
+        serviceTokens: [],
+        lastSyncedAt: null,
+      };
+    }
+
+    const settled = await Promise.allSettled([
+      this.getJson<RawZeroTrustPolicy[]>(`/accounts/${this.accountId}/access/policies`),
+      this.getJson<RawZeroTrustApp[]>(`/accounts/${this.accountId}/access/apps`),
+      this.getJson<RawZeroTrustServiceToken[]>(`/accounts/${this.accountId}/access/service_tokens`),
+    ]);
+
+    const [policiesResult, appsResult, tokensResult] = settled;
+    const hasFulfilled = settled.some((entry) => entry.status === 'fulfilled');
+    const allForbidden = settled.every(
+      (entry) => entry.status === 'rejected' && entry.reason instanceof ForbiddenError
+    );
+    const mode: CloudflareConnectionMode = hasFulfilled
+      ? 'live'
+      : allForbidden
+        ? 'insufficient'
+        : 'fallback';
+
+    const policies =
+      policiesResult.status === 'fulfilled'
+        ? (policiesResult.value ?? [])
+            .map(normalizeZeroTrustPolicy)
+            .filter((entry): entry is CloudflareZeroTrustPolicy => entry !== null)
+        : [];
+    const applications =
+      appsResult.status === 'fulfilled'
+        ? (appsResult.value ?? [])
+            .map(normalizeZeroTrustApp)
+            .filter(
+              (entry): entry is CloudflareZeroTrustStatus['applications'][number] => entry !== null
+            )
+        : [];
+    const serviceTokens =
+      tokensResult.status === 'fulfilled'
+        ? (tokensResult.value ?? [])
+            .map(normalizeZeroTrustServiceToken)
+            .filter(
+              (entry): entry is CloudflareZeroTrustStatus['serviceTokens'][number] => entry !== null
+            )
+        : [];
 
     return {
-      mode: result.mode,
-      tokenConfigured,
-      hasAccessReadScope: result.mode === 'live',
-      policies: result.data?.policies ?? [],
-      applications: (result.data?.applications ?? []).map((app) => ({
-        id: app.id,
-        name: app.name,
-        domain: app.domain,
-        type: app.type as CloudflareZeroTrustStatus['applications'][number]['type'],
-      })),
-      serviceTokens: (result.data?.serviceTokens ?? []).map((token) => ({
-        id: token.id,
-        name: token.name,
-        clientIdPresent: Boolean(token.clientId),
-        expiresAt: token.expiresAt ?? null,
-      })),
-      lastSyncedAt: result.mode === 'live' ? new Date().toISOString() : null,
+      mode,
+      tokenConfigured: true,
+      hasAccessReadScope: mode === 'live',
+      policies,
+      applications,
+      serviceTokens,
+      lastSyncedAt: mode === 'live' ? new Date().toISOString() : null,
     };
   }
 
@@ -225,21 +494,15 @@ export class CloudflareApiClient {
   async getTunnelStatus(): Promise<CloudflareTunnelStatus> {
     const tokenConfigured = this.isConfigured;
     const result = await this.safeRead(async () =>
-      this.getJson<Array<{ id: string; name: string; status: string; connections?: unknown[] }>>(
-        `/accounts/${this.accountId}/cfd_tunnel`
-      )
+      this.getJson<RawTunnel[]>(`/accounts/${this.accountId}/cfd_tunnel?is_deleted=false`)
     );
 
     const tunnels: CloudflareTunnel[] = (result.data ?? []).map((tunnel) => ({
       id: tunnel.id,
       name: tunnel.name,
-      status: (tunnel.status === 'active'
-        ? 'active'
-        : tunnel.status === 'pending'
-          ? 'pending'
-          : 'inactive') as CloudflareTunnel['status'],
+      status: TUNNEL_STATUS_MAP[tunnel.status] ?? 'inactive',
       routes: [],
-      lastSeenAt: null,
+      lastSeenAt: toIsoOrNull(tunnel.connections?.[0]?.opened_at),
       originHealthy: Array.isArray(tunnel.connections) && tunnel.connections.length > 0,
     }));
 
@@ -256,18 +519,16 @@ export class CloudflareApiClient {
   async getWorkersStatus(): Promise<CloudflareWorkersStatus> {
     const tokenConfigured = this.isConfigured;
     const result = await this.safeRead(async () =>
-      this.getJson<Array<{ id: string; name: string; versions?: Array<{ tag: string }> }>>(
-        `/accounts/${this.accountId}/workers/scripts`
-      )
+      this.getJson<RawWorkerScript[]>(`/accounts/${this.accountId}/workers/scripts`)
     );
 
     const workers: CloudflareWorker[] = (result.data ?? []).map((script) => ({
       id: script.id,
-      name: script.name,
+      name: script.name ?? script.id,
       version: script.versions?.[0]?.tag ?? null,
-      hasDeployments: Boolean(script.versions?.length),
-      deploymentStatus: 'unknown',
-      lastDeployedAt: null,
+      hasDeployments: Boolean(script.versions?.length || script.modified_on),
+      deploymentStatus: script.modified_on ? 'success' : 'unknown',
+      lastDeployedAt: toIsoOrNull(script.modified_on ?? script.created_on),
     }));
 
     return {
@@ -285,17 +546,26 @@ export class CloudflareApiClient {
   async getQueuesStatus(): Promise<CloudflareQueuesStatus> {
     const tokenConfigured = this.isConfigured;
     const result = await this.safeRead(async () =>
-      this.getJson<Array<{ id: string; name: string }>>(`/accounts/${this.accountId}/queues`)
+      this.getJson<RawQueue[]>(`/accounts/${this.accountId}/queues`)
     );
 
-    const queues: CloudflareQueue[] = (result.data ?? []).map((queue) => ({
-      id: queue.id,
-      name: queue.name,
-      pendingMessages: null,
-      hasDlq: false,
-      consumerHealthy: null,
-      dlqDepth: null,
-    }));
+    const queues: CloudflareQueue[] = (result.data ?? [])
+      .map((queue): CloudflareQueue | null => {
+        const queueId = queue.queue_id ?? queue.id ?? '';
+        if (!isNonEmptyString(queueId)) return null;
+        return {
+          id: queueId,
+          name: queue.queue_name ?? queue.name ?? queueId,
+          pendingMessages: null,
+          hasDlq: false,
+          consumerHealthy:
+            typeof queue.consumers_total_count === 'number'
+              ? queue.consumers_total_count > 0
+              : null,
+          dlqDepth: null,
+        };
+      })
+      .filter((entry): entry is CloudflareQueue => entry !== null);
 
     return {
       mode: result.mode,
@@ -308,11 +578,35 @@ export class CloudflareApiClient {
   // ── Turnstile ─────────────────────────────────────────────────────────────
 
   async getTurnstileStatus(): Promise<CloudflareTurnstileStatus> {
-    const siteKeyConfigured = Boolean(process.env[CLOUDFLARE_ENV_VARS.turnstileSiteKey]);
+    const envSiteKeyConfigured = Boolean(process.env[CLOUDFLARE_ENV_VARS.turnstileSiteKey]);
     const secretKeyConfigured = Boolean(process.env[CLOUDFLARE_ENV_VARS.turnstileSecretKey]);
 
-    // Turnstile has no list endpoint; report configuration presence only.
-    const mode: CloudflareConnectionMode = !this.isConfigured ? 'unconfigured' : 'live';
+    if (!this.isConfigured) {
+      return {
+        mode: 'unconfigured',
+        siteKeyConfigured: envSiteKeyConfigured,
+        secretKeyConfigured,
+        verificationHealthy: null,
+        failureRatePercent: null,
+        protectedFlows: [],
+        lastSyncedAt: null,
+      };
+    }
+
+    const widgetResult = await this.safeRead(async () =>
+      this.getJson<RawTurnstileWidget[]>(`/accounts/${this.accountId}/challenges/widgets`)
+    );
+    const widgets = widgetResult.data ?? [];
+    const siteKeyConfigured = envSiteKeyConfigured || widgets.length > 0;
+    const protectedFlows = widgetResult.mode === 'live' ? extractTurnstileFlows(widgets) : [];
+    const mode: CloudflareConnectionMode =
+      widgetResult.mode === 'live'
+        ? 'live'
+        : widgetResult.mode === 'insufficient'
+          ? envSiteKeyConfigured && secretKeyConfigured
+            ? 'live'
+            : 'insufficient'
+          : widgetResult.mode;
 
     return {
       mode,
@@ -320,7 +614,7 @@ export class CloudflareApiClient {
       secretKeyConfigured,
       verificationHealthy: null,
       failureRatePercent: null,
-      protectedFlows: [],
+      protectedFlows,
       lastSyncedAt: mode === 'live' ? new Date().toISOString() : null,
     };
   }
@@ -331,16 +625,55 @@ export class CloudflareApiClient {
     const featureEnabled = process.env[CLOUDFLARE_ENV_VARS.aiGatewayEnabled] === 'true';
     const tokenConfigured = this.isConfigured;
 
+    if (!tokenConfigured) {
+      return {
+        mode: 'unconfigured',
+        tokenConfigured: false,
+        featureEnabled,
+        providers: [],
+        requestCount24h: null,
+        avgLatencyMs: null,
+        errorRatePercent: null,
+        costReportingAvailable: false,
+        lastSyncedAt: null,
+      };
+    }
+
+    if (!featureEnabled) {
+      return {
+        mode: 'live',
+        tokenConfigured: true,
+        featureEnabled: false,
+        providers: [],
+        requestCount24h: null,
+        avgLatencyMs: null,
+        errorRatePercent: null,
+        costReportingAvailable: false,
+        lastSyncedAt: new Date().toISOString(),
+      };
+    }
+
+    const gatewayResult = await this.safeRead(async () =>
+      this.getJson<RawAiGateway[]>(`/accounts/${this.accountId}/ai-gateway/gateways`)
+    );
+    const providers = Array.from(
+      new Set(
+        (gatewayResult.data ?? [])
+          .map((gateway) => gateway.name ?? gateway.id)
+          .filter(isNonEmptyString)
+      )
+    );
+
     return {
-      mode: tokenConfigured ? 'live' : 'unconfigured',
-      tokenConfigured,
-      featureEnabled,
-      providers: [],
+      mode: gatewayResult.mode,
+      tokenConfigured: true,
+      featureEnabled: true,
+      providers,
       requestCount24h: null,
       avgLatencyMs: null,
       errorRatePercent: null,
       costReportingAvailable: false,
-      lastSyncedAt: tokenConfigured ? new Date().toISOString() : null,
+      lastSyncedAt: gatewayResult.mode === 'live' ? new Date().toISOString() : null,
     };
   }
 
@@ -349,12 +682,14 @@ export class CloudflareApiClient {
   async getR2Status(): Promise<CloudflareR2Status> {
     const tokenConfigured = this.isConfigured;
     const result = await this.safeRead(async () =>
-      this.getJson<Array<{ name: string; public_access_block?: { enabled: boolean } }>>(
+      this.getJson<RawR2Bucket[] | { buckets?: RawR2Bucket[] }>(
         `/accounts/${this.accountId}/r2/buckets`
       )
     );
 
-    const buckets: CloudflareR2Bucket[] = (result.data ?? []).map((bucket) => ({
+    const rawBuckets = Array.isArray(result.data) ? result.data : (result.data?.buckets ?? []);
+
+    const buckets: CloudflareR2Bucket[] = rawBuckets.map((bucket) => ({
       id: bucket.name,
       name: bucket.name,
       isPublic: bucket.public_access_block?.enabled === false,
@@ -375,31 +710,76 @@ export class CloudflareApiClient {
   // ── Security Centre ───────────────────────────────────────────────────────
 
   async getSecurityCentreStatus(): Promise<CloudflareSecurityCentreStatus> {
-    const tokenConfigured = this.isConfigured;
-    const result = await this.safeRead(async () => {
-      const [waf, rateLimits] = await Promise.all([
-        this.getJson<{ result?: unknown[] }>(`/zones/${this.zoneId}/firewall/waf/packages`),
-        this.getJson<{ result?: unknown[] }>(`/zones/${this.zoneId}/rate_limits`),
-      ]);
-      return { waf, rateLimits };
-    });
+    if (!this.isConfigured) {
+      return {
+        mode: 'unconfigured',
+        tokenConfigured: false,
+        wafRules: null,
+        rateLimitRules: null,
+        accessPolicies: null,
+        warnings: [],
+        lastSyncedAt: null,
+      };
+    }
 
-    const warnings: string[] = [];
-    if (!this.zoneId) {
-      warnings.push('CLOUDFLARE_ZONE_ID not set — WAF/rate-limit rules unavailable');
+    const zoneLookup = await this.resolveZoneId();
+    if (zoneLookup.mode !== 'live') {
+      return {
+        mode: zoneLookup.mode,
+        tokenConfigured: true,
+        wafRules: null,
+        rateLimitRules: null,
+        accessPolicies: null,
+        warnings: [
+          zoneLookup.mode === 'insufficient'
+            ? 'Token lacks ZoneRead scope — security rules unavailable'
+            : 'Cloudflare zone discovery unavailable',
+        ],
+        lastSyncedAt: null,
+      };
     }
-    if (result.mode === 'insufficient') {
-      warnings.push('Token lacks ZoneRead scope — security rules unavailable');
+
+    if (!zoneLookup.zoneId) {
+      return {
+        mode: 'live',
+        tokenConfigured: true,
+        wafRules: 0,
+        rateLimitRules: 0,
+        accessPolicies: null,
+        warnings: [
+          'No active Cloudflare zones found for this account — add a zone or set CLOUDFLARE_ZONE_ID to inspect WAF/rate-limit rules',
+        ],
+        lastSyncedAt: new Date().toISOString(),
+      };
     }
+
+    const rulesetsResult = await this.safeRead(async () =>
+      this.getJson<RawZoneRuleset[]>(`/zones/${zoneLookup.zoneId}/rulesets`)
+    );
+    const rulesets = rulesetsResult.data ?? [];
+    const warnings =
+      rulesetsResult.mode === 'insufficient'
+        ? ['Token lacks Zone WAF Read scope — security rules unavailable']
+        : [];
 
     return {
-      mode: result.mode,
-      tokenConfigured,
-      wafRules: null,
-      rateLimitRules: null,
+      mode: rulesetsResult.mode,
+      tokenConfigured: true,
+      wafRules:
+        rulesetsResult.mode === 'live'
+          ? rulesets.filter(
+              (ruleset) =>
+                ruleset.phase === 'http_request_firewall_custom' ||
+                ruleset.phase === 'http_request_firewall_managed'
+            ).length
+          : null,
+      rateLimitRules:
+        rulesetsResult.mode === 'live'
+          ? rulesets.filter((ruleset) => ruleset.phase === 'http_ratelimit').length
+          : null,
       accessPolicies: null,
       warnings,
-      lastSyncedAt: result.mode === 'live' ? new Date().toISOString() : null,
+      lastSyncedAt: rulesetsResult.mode === 'live' ? new Date().toISOString() : null,
     };
   }
 

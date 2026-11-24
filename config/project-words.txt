@@ -68,6 +68,8 @@ BZPOP
 Carbinol
 cascadia
 centralised
+cfat
+cfut
 chainway
 changeout
 chargingchange

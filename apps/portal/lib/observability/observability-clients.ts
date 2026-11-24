@@ -157,6 +157,23 @@ async function fetchGrafanaDashboards(options: {
     headers,
   });
 
+  if (!search.isReachable) {
+    const isAuthError = search.detail === 'HTTP 401' || search.detail === 'HTTP 403';
+    return {
+      status: {
+        id: 'grafana',
+        label: 'Grafana',
+        mode: 'fallback',
+        latencyMs: health.latencyMs,
+        endpointConfigured: true,
+        detail: isAuthError
+          ? 'Grafana reachable — configure GRAFANA_API_KEY with Viewer/Admin role for dashboards'
+          : `Grafana reachable — dashboard search failed (${search.detail})`,
+      },
+      dashboards: [],
+    };
+  }
+
   const embedBase = (options.publicUrl || baseUrl).replace(/\/$/, '');
   const dashboards: GrafanaDashboardEntry[] = (search.payload ?? [])
     .filter((entry): entry is { uid: string; title: string; folderTitle?: string; url?: string } =>
