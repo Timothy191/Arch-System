@@ -14,6 +14,7 @@ export * from './components/EveStatusBar';
 export * from './components/FormFields';
 // Composite & Industrial UI Primitives
 export * from './components/GlassCard';
+export * from './components/GlobePins';
 export * from './components/GoldenSignalPanel';
 export * from './components/HeroCardContent';
 export * from './components/HeroRotator';

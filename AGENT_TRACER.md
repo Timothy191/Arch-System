@@ -6,6 +6,16 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-24T10:00:00+02:00] - `/hub` Design Feedback: Operational Globe Pins + Hero Banner for Core Modules (`feat/hub-globe-hero-banner`)
+
+- **Operational Globe Pins ([`GlobePins.tsx`](packages/ui/src/components/GlobePins.tsx), [`HeroRotator.tsx`](apps/portal/app/hub/HeroRotator.tsx), [`index.ts`](packages/ui/src/index.ts))**: Replaced the static "Operational subsystem indicators" div with a dependency-free SVG orthographic globe (`GlobePins`) wired into the central command panel of `HeroRotator.tsx`. Five pinned site markers (Pit Viper 351, Dispatch Room, Wash Plant 01, Fleet AV 01, DB Core) rotate on a slow 120ms auto-rotation loop with backside culling, depth-sorted far-to-near rendering, hover tooltips, and a gold rim glow. Exported `GlobePins` from `@repo/ui` package index. Biome + tsc clean.
+- **Core Operational Modules Hero Banner ([`CoreOperationalModules.tsx`](apps/portal/features/hub/components/CoreOperationalModules.tsx))**: Redesigned the "Mining Department Modules" header as a 22px-radius hero banner with gold top accent line, gradient glass surface, and three animated stat chips (Active / Pinned / Alerts) with color-coded ring themes. The header now reads as a live operational surface with the module count badge, inline executive dashboard link, and search + filter pills all contained in a single cohesive card.
+- **TypeScript Fixes ([`GlobePins.tsx`](packages/ui/src/components/GlobePins.tsx))**: Corrected `project()` return type mismatches — added explicit `screenX`/`screenY`/`depth`/`visible`/`x`/`y` fields to the projected pin object so the graticule and pin rendering no longer reference nonexistent properties (`screenX`/`screenY` on the raw projection result).
+
+**Verification**: `pnpm biome check` (2 files), `pnpm tsc --noEmit` (`0` errors across `CoreOperationalModules`, `GlobePins`, `HeroRotator`).
+
+---
+
 ## [2026-11-24T09:15:00+02:00] - Administration Panel RBAC Hardening, Server Action Security & Tab Completeness (`feat/admin-hardening-and-completeness`)
 
 - **Shared Admin Contracts, Auth Guard & Audit Logging ([`admin.schema.ts`](packages/contract/src/schemas/admin.schema.ts), [`shared.ts`](apps/portal/features/admin/actions/shared.ts), [`admin-auth.ts`](apps/portal/features/admin/lib/admin-auth.ts), [`layout.tsx`](apps/portal/app/admin/layout.tsx), [`page.tsx`](apps/portal/app/admin/page.tsx))**: Added `adminAddDepartmentSchema`, `adminArchiveDepartmentSchema`, `adminCardTemplateUploadSchema`, and `adminCardTemplateIdSchema` in `@repo/contract`; updated `assertAdmin()` to return `userId` alongside `{ supabase, employee }` and added structured `logAdminAuditEvent()` via `@repo/logger/server`; introduced `React.cache()`-deduplicated `resolveAdminAccess('admin', createServerSupabaseClient)` shared between `/admin` layout and page while preserving independent `createServerSupabaseClient()` + `'admin'` checks in both files.

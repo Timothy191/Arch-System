@@ -4,7 +4,7 @@ import type { Department } from '@repo/departments/data-access';
 import { DepartmentCard } from '@repo/hub/ui';
 import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
-import { ArrowUpRight, BarChart3, Search, Star } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowUpRight, BarChart3, Search, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useClearanceNotification } from '@/hooks/useClearanceNotification';
@@ -34,6 +34,44 @@ interface ModuleSearchInputProps {
 
 const FILTER_TAB_INACTIVE_CLASS =
   'border border-black/[0.06] font-medium text-arch-text-secondary hover:border-black/[0.14] hover:bg-white/60 hover:text-arch-text-primary';
+
+interface StatChipProps {
+  label: string;
+  count: number;
+  color: 'accent-green' | 'accent-amber' | 'accent-red';
+  icon: React.ReactNode;
+}
+
+function StatChip({ label, count, color, icon }: StatChipProps) {
+  const colorMap: Record<StatChipProps['color'], { bg: string; text: string; ring: string }> = {
+    'accent-green': {
+      bg: 'bg-accent-green/10',
+      text: 'text-accent-green',
+      ring: 'ring-accent-green/30',
+    },
+    'accent-amber': {
+      bg: 'bg-accent-amber/10',
+      text: 'text-accent-amber',
+      ring: 'ring-accent-amber/30',
+    },
+    'accent-red': { bg: 'bg-accent-red/10', text: 'text-accent-red', ring: 'ring-accent-red/30' },
+  };
+  const chipTheme = colorMap[color];
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-1.5 rounded-full border px-3 py-1.5',
+        chipTheme.bg,
+        chipTheme.text,
+        `ring-1 ${chipTheme.ring}`
+      )}
+    >
+      {icon}
+      <span className="font-mono text-[13px] tabular-nums leading-[18px]">{count}</span>
+      <span className="font-medium text-[13px] leading-[18px] opacity-80">{label}</span>
+    </div>
+  );
+}
 
 function ModuleSearchInput({ searchQuery, onSearchChange }: ModuleSearchInputProps) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -139,37 +177,77 @@ export function CoreOperationalModules({
 
   return (
     <section className="group/row relative space-y-5">
-      {/* Section Header with Live Filtering & Executive Quick-Access */}
-      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-        <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-start">
-          <h2 className="gold-steel-border gold-steel-border-slim inline-flex min-h-11 items-center gap-2.5 rounded-full border border-arch-border-subtle bg-white/90 py-1 pr-3.5 pl-1.5 font-semibold text-arch-text-primary text-sm tracking-tight shadow-xs sm:text-base">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-arch-accent-blue/35 bg-white text-arch-accent-blue shadow-sm">
-              <Logo className="h-5 w-5 scale-110 text-arch-accent-blue drop-shadow-xs" />
-            </span>
-            <span className="font-anurati font-bold tracking-[0.06em]">
-              Mining Department Modules
-            </span>
-            <span
-              data-testid="core-modules-count-badge"
-              className="gold-steel-border gold-steel-border-slim ml-0.5 rounded-full border border-accent-gold/45 bg-arch-surface-secondary px-2.5 py-0.5 font-mono text-[13px] text-arch-text-secondary tabular-nums leading-[18px]"
-            >
-              {filteredDepartments.length} / {departments.length}
-            </span>
-          </h2>
+      {/* Section Hero Banner: identity + live metrics + executive access */}
+      <div
+        className={cn(
+          'gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-[22px]',
+          'border border-white/40 bg-gradient-to-br from-white/92 via-white/78 to-white/62 p-5 shadow-window sm:p-6'
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-accent-gold/70 to-transparent"
+        />
 
-          {canSeeExecutive && (
-            <Link href="/hub/executive" className={EXECUTIVE_LINK_CLASS}>
-              <span className="flex items-center justify-center rounded-full bg-arch-accent-blue/10 p-1 text-arch-accent-blue">
-                <BarChart3 className="h-3.5 w-3.5" />
-              </span>
-              <span>Executive Dashboard</span>
-              <ArrowUpRight className="h-3.5 w-3.5 text-arch-accent-blue transition-transform duration-200 group-hover/exec:translate-x-0.5 group-hover/exec:-translate-y-0.5" />
-            </Link>
-          )}
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          {/* Identity block */}
+          <div className="flex items-center gap-3.5">
+            <span className="gold-steel-border gold-steel-border-slim flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-arch-accent-blue/30 bg-white shadow-sm">
+              <Logo className="h-6 w-6 scale-110 text-arch-accent-blue drop-shadow-xs" />
+            </span>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-anurati font-bold text-[var(--text-heading)] text-base tracking-[0.06em] sm:text-lg">
+                  Mining Department Modules
+                </h2>
+                <span
+                  data-testid="core-modules-count-badge"
+                  className="gold-steel-border gold-steel-border-slim rounded-full border border-accent-gold/45 bg-arch-surface-secondary px-2.5 py-0.5 font-mono text-[13px] text-arch-text-secondary tabular-nums leading-[18px]"
+                >
+                  {filteredDepartments.length} / {departments.length}
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-[0.14em]">
+                Live operational surface
+              </p>
+            </div>
+          </div>
+
+          {/* Stat chips */}
+          <div className="flex flex-wrap items-center gap-2">
+            <StatChip
+              label="Active"
+              count={activeCount}
+              color="accent-green"
+              icon={<Activity className="h-3.5 w-3.5" />}
+            />
+            <StatChip
+              label="Pinned"
+              count={pinnedCount}
+              color="accent-amber"
+              icon={<Star className="h-3.5 w-3.5" />}
+            />
+            <StatChip
+              label="Alerts"
+              count={criticalCount}
+              color="accent-red"
+              icon={<AlertTriangle className="h-3.5 w-3.5" />}
+            />
+
+            {canSeeExecutive && (
+              <Link href="/hub/executive" className={EXECUTIVE_LINK_CLASS}>
+                <span className="flex items-center justify-center rounded-full bg-arch-accent-blue/10 p-1 text-arch-accent-blue">
+                  <BarChart3 className="h-3.5 w-3.5" />
+                </span>
+                <span>Executive Dashboard</span>
+                <ArrowUpRight className="h-3.5 w-3.5 text-arch-accent-blue transition-transform duration-200 group-hover/exec:translate-x-0.5 group-hover/exec:-translate-y-0.5" />
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Search & Category Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+        <div className="mt-4 flex flex-wrap items-center gap-2 sm:flex-nowrap">
           {/* Quick Search Input (isolated leaf to prevent 28ms typewriter state from re-rendering 13 cards) */}
           <ModuleSearchInput searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
