@@ -28,7 +28,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <>
       <ActiveDepartmentSetter department="admin" />
-      <DepartmentLayout department={ADMIN_DEPARTMENT} tabs={getDepartmentTabs('admin')}>
+      <DepartmentLayout
+        department={ADMIN_DEPARTMENT}
+        tabs={getDepartmentTabs('admin')}
+        defaultPinned
+      >
         {children}
       </DepartmentLayout>
     </>

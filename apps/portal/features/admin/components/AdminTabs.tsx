@@ -42,9 +42,6 @@ interface AdminTabsProps {
 }
 
 export function AdminTabs({ defaultValue, value, onValueChange, children }: AdminTabsProps) {
-  const activeTab = TABS.find((t) => t.value === (value ?? defaultValue ?? 'users')) ?? TABS[0];
-  const ActiveIcon = ADMIN_SUBTAB_ICONS[activeTab.value] ?? AdminSettingsIcon;
-
   return (
     <Tabs
       defaultValue={defaultValue}
@@ -52,22 +49,6 @@ export function AdminTabs({ defaultValue, value, onValueChange, children }: Admi
       onValueChange={onValueChange}
       className="w-full space-y-6"
     >
-      {/* Active section header on desktop (navigation lives in the sidebar under General) */}
-      <div className="gold-steel-border gold-steel-border-slim hidden items-center justify-between gap-4 rounded-2xl border border-[var(--border-default)] bg-white/80 px-5 py-3.5 shadow-2xs backdrop-blur-md md:flex">
-        <div className="flex items-center gap-3">
-          <div className="gold-steel-border gold-steel-border-slim flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
-            <ActiveIcon className="h-4.5 w-4.5" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-[var(--text-heading)] text-sm">{activeTab.label}</h2>
-            <p className="text-[var(--text-secondary)] text-xs">{activeTab.description}</p>
-          </div>
-        </div>
-        <span className="rounded-full border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-mono font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
-          Console · {activeTab.value}
-        </span>
-      </div>
-
       {/* Mobile fallback tab strip */}
       <TabsList className="w-full justify-start overflow-x-auto border border-[var(--border-default)] bg-[var(--bg-secondary)] md:hidden">
         {TABS.map((tab) => {

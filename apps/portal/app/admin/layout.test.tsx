@@ -22,15 +22,18 @@ jest.mock('@repo/ui/DepartmentLayout', () => ({
   DepartmentLayout: ({
     department,
     tabs,
+    defaultPinned,
     children,
   }: {
     department: unknown;
     tabs: readonly unknown[];
+    defaultPinned?: boolean;
     children: React.ReactNode;
   }) => (
     <div
       data-testid="mock-department-layout"
       data-department-name={String((department as { name?: string })?.name)}
+      data-default-pinned={String(Boolean(defaultPinned))}
     >
       <nav aria-label="Admin sidebar tabs">
         {(tabs as { name: string; label: string }[]).map((tab) => (
@@ -93,6 +96,10 @@ describe('AdminLayout', () => {
     expect(screen.getByTestId('mock-department-layout')).toHaveAttribute(
       'data-department-name',
       'admin'
+    );
+    expect(screen.getByTestId('mock-department-layout')).toHaveAttribute(
+      'data-default-pinned',
+      'true'
     );
 
     const sidebar = screen.getByRole('navigation', { name: /Admin sidebar tabs/i });

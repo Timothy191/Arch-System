@@ -97,7 +97,8 @@ describe('SystemClock', () => {
     fireEvent.click(trigger);
 
     expect(screen.getByTestId('clock-popover-content')).toBeInTheDocument();
-    expect(screen.getByText('SAST · UTC+2')).toBeInTheDocument();
+    expect(screen.queryByText(/SAST/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/· UTC\+2/)).toBeInTheDocument();
     expect(screen.getByText('SU')).toBeInTheDocument();
 
     await waitFor(() => {
@@ -107,7 +108,7 @@ describe('SystemClock', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'UTC' }));
-    expect(screen.getByText('UTC · UTC+0')).toBeInTheDocument();
+    expect(screen.getByText(/· UTC\+0/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Toggle 12 or 24 hour format' }));
     expect(screen.getByRole('button', { name: 'Toggle 12 or 24 hour format' })).toHaveTextContent(

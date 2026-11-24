@@ -277,4 +277,27 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(dashboardArrowToggle).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByTestId('dashboard-subtabs')).toBeInTheDocument();
   });
+
+  it('locks the sidebar to fixed full-screen height while scrolling, honors defaultPinned, and renders an editorial Active Command header distinct from nav cards', () => {
+    const { container } = render(
+      <DepartmentLayout department={controlRoomDept} tabs={controlRoomTabs} defaultPinned>
+        <div>Pinned Scrollable Content</div>
+      </DepartmentLayout>
+    );
+
+    const aside = container.querySelector('aside')!;
+    const main = container.querySelector('main')!;
+    const commandHeader = screen.getByTestId('sidebar-command-header');
+
+    expect(aside.className).toContain('fixed');
+    expect(aside.className).toContain('top-14');
+    expect(aside.className).toContain('bottom-12');
+    expect(aside.className).toContain('left-0');
+    expect(aside.className).toContain('translate-x-0');
+    expect(main.className).toContain('pl-64');
+    expect(commandHeader).toHaveTextContent('Active Command');
+    expect(commandHeader).toHaveTextContent('Control Room');
+    expect(commandHeader.className).not.toContain('gold-steel-border');
+    expect(commandHeader.className).toContain('border-b');
+  });
 });

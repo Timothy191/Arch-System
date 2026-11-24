@@ -1,9 +1,9 @@
 {
   "version": "1.6.2",
-  "gitCommit": "d0e45cf2",
-  "gitCommitFull": "d0e45cf25a053d6f96502811647b30d9e357accb",
-  "gitBranch": "feat/admin-fleet-and-chrome-overhaul",
-  "buildTimestamp": "2026-11-23T12:44:13.367Z",
+  "gitCommit": "d03d71a1",
+  "gitCommitFull": "d03d71a1ccf030750f43a84a84149b5afe391c5f",
+  "gitBranch": "feat/admin-departments-clock-sidebar-polish",
+  "buildTimestamp": "2026-11-24T05:35:25.917Z",
   "releaseName": "Arch OS v1.6.2 // Industrial Command",
   "systemCodename": "Industrial Telemetry Bus"
 }

@@ -1,0 +1,27 @@
+{
+  "id": "compaction-1c3a7a67",
+  "timestamp": "2026-11-24T05:05:42.256Z",
+  "taskTag": "compaction-standard-1c3a7a67",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/.zshrc\"",
+    "\"/home/tim/.zshenv\"",
+    "\"/home/tim/.zprofile\"",
+    "\"/home/tim/.config/alacritty/alacritty.toml\"",
+    "\"/home/tim/.config/omarchy/shell.json\"",
+    "\"/home/tim/.config/hypr/bindings.lua\"",
+    "\"/home/tim/.config/hypr/hyprland.lua\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (421 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 146469,
+    "cacheHitRatio": 0.8488,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

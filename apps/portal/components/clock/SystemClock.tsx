@@ -22,12 +22,12 @@ interface DayOperationalStatus {
 const TIMEZONE_META: Readonly<
   Record<
     ClockTimezoneMode,
-    { readonly label: string; readonly iana?: string; readonly badge: string }
+    { readonly label: string; readonly iana?: string; readonly offsetLabel: string }
   >
 > = {
-  sast: { label: 'SAST', iana: 'Africa/Johannesburg', badge: 'SAST · UTC+2' },
-  utc: { label: 'UTC', iana: 'UTC', badge: 'UTC · UTC+0' },
-  local: { label: 'Local', badge: 'LOCAL · DEVICE' },
+  sast: { label: 'UTC+2', iana: 'Africa/Johannesburg', offsetLabel: 'UTC+2' },
+  utc: { label: 'UTC', iana: 'UTC', offsetLabel: 'UTC+0' },
+  local: { label: 'Local', offsetLabel: 'Local Time' },
 };
 
 function getTimePartsForZone(
@@ -221,6 +221,10 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
     weekday: 'short',
     day: 'numeric',
     month: 'short',
+  });
+  const weekdayLong = time.toLocaleDateString('en-US', {
+    timeZone: TIMEZONE_META[timezoneMode].iana,
+    weekday: 'long',
   });
   const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay();
   const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -473,7 +477,7 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
                 })}
               </div>
               <div className="font-mono text-[9px] text-[var(--text-muted)] uppercase tracking-wider">
-                {TIMEZONE_META[timezoneMode].badge}
+                {weekdayLong} · {TIMEZONE_META[timezoneMode].offsetLabel}
               </div>
             </div>
 

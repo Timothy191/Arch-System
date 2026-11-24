@@ -99,6 +99,7 @@ interface DepartmentLayoutProps {
   };
   tabs: readonly Tab[];
   children: React.ReactNode;
+  readonly defaultPinned?: boolean;
 }
 
 const TAB_LINK_BASE =
@@ -130,13 +131,18 @@ const ADMIN_GENERAL_SUBTABS = [
   { key: 'external-content', label: 'External Content' },
 ] as const;
 
-export function DepartmentLayout({ department, tabs, children }: DepartmentLayoutProps) {
+export function DepartmentLayout({
+  department,
+  tabs,
+  children,
+  defaultPinned = false,
+}: DepartmentLayoutProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams?.() ?? null;
   const activeTabParam = searchParams?.get?.('tab') ?? null;
   const basePath = `/${department.name}`;
-  const [isOpen, setIsOpen] = useState(false);
-  const [isPinned, setIsPinned] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultPinned);
+  const [isPinned, setIsPinned] = useState(defaultPinned);
   const [isDashboardExpanded, setIsDashboardExpanded] = useState(true);
   const [isReportsExpanded, setIsReportsExpanded] = useState(true);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -148,6 +154,9 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       if (saved === 'true') {
         setIsPinned(true);
         setIsOpen(true);
+      } else if (saved === 'false') {
+        setIsPinned(false);
+        setIsOpen(false);
       }
     }
   }, []);
@@ -237,11 +246,14 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
   );
 
   return (
-    <div className="relative flex h-[calc(100vh-28px)]" onMouseMove={handleContainerMouseMove}>
+    <div
+      className="relative flex min-h-[calc(100vh-8rem)] w-full"
+      onMouseMove={handleContainerMouseMove}
+    >
       {/* Hover / proximity trigger zone at the far left (disabled when pinned) */}
       <div
         className={cn(
-          'absolute top-0 bottom-0 left-0 z-40 w-12',
+          'fixed top-14 bottom-12 left-0 z-40 w-12',
           isPinned ? 'pointer-events-none' : 'cursor-pointer'
         )}
         onMouseEnter={openSidebar}
@@ -270,11 +282,11 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         />
       )}
 
-      {/* macOS Sidebar — Auto-hide/reveal style with proximity reveal, delayed collapse, and manual pin */}
+      {/* Static full-viewport sidebar that stays pinned in place while scrolling */}
       <aside
         ref={sidebarRef}
         className={cn(
-          'group/sidebar liquid-glass-light gold-steel-border absolute inset-y-0 left-0 z-navigation flex w-60 flex-col overflow-hidden rounded-r-3xl border-accent-gold/40 bg-white/90 shadow-window transition-transform duration-300',
+          'group/sidebar liquid-glass-light gold-steel-border fixed top-14 bottom-12 left-0 z-navigation flex w-60 flex-col overflow-hidden rounded-r-3xl border-accent-gold/40 bg-white/90 shadow-window transition-transform duration-300',
           isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
         style={{ borderRight: '1px solid rgba(212, 175, 55, 0.42)' }}
@@ -335,26 +347,33 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
           </div>
         </div>
 
-        {/* Department icon + label */}
+        {/* Department Workspace Header (aligned flush with nav items, distinct from selectable page cards) */}
         <div
+          data-testid="sidebar-command-header"
           className={cn(
-            'gold-steel-border gold-steel-border-slim mx-3 my-1.5 flex items-center gap-2.5 rounded-xl bg-white/80 px-3 py-2 shadow-xs transition-opacity duration-200',
+            'mx-2.5 mt-2 mb-1.5 border-accent-gold/30 border-b px-2.5 pb-2.5 transition-opacity duration-200',
             isPinned || isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
           )}
         >
-          <div className="gold-steel-border gold-steel-border-slim flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-blue)]/12 text-[var(--accent-blue)] shadow-2xs">
-            {(() => {
-              const DeptIcon =
-                ICON_MAP[department.icon] || getDepartmentIcon(department.name) || BarChart3;
-              return <DeptIcon className="h-4 w-4" />;
-            })()}
-          </div>
-          <div className="min-w-0 flex-1">
-            <span className="block truncate font-bold text-[12px] text-[var(--text-heading)] uppercase tracking-wider">
-              {department.displayName}
-            </span>
-            <span className="block font-mono text-[9.5px] text-[var(--accent-blue)] uppercase tracking-widest">
+          <div className="mb-1 flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-gold" aria-hidden="true" />
+            <span className="font-mono font-semibold text-[9px] text-accent-gold uppercase tracking-[0.18em]">
               Active Command
+            </span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span
+              className="flex h-6 w-6 shrink-0 items-center justify-center text-accent-gold"
+              aria-hidden="true"
+            >
+              {(() => {
+                const DeptIcon =
+                  ICON_MAP[department.icon] || getDepartmentIcon(department.name) || BarChart3;
+                return <DeptIcon className="h-4 w-4" />;
+              })()}
+            </span>
+            <span className="block min-w-0 flex-1 truncate font-semibold text-[15px] text-[var(--text-heading)] leading-tight tracking-tight">
+              {department.displayName}
             </span>
           </div>
         </div>
@@ -688,7 +707,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <main
         aria-label={`${department.displayName} content`}
         className={cn(
-          'h-full flex-1 overflow-auto p-lg transition-all duration-300',
+          'min-h-[calc(100vh-8rem)] min-w-0 flex-1 p-lg transition-all duration-300',
           isPinned ? 'pl-64' : 'pl-12',
           'max-md:pl-4'
         )}
