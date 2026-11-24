@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../lib/utils';
 import { GlobePins } from './GlobePins';
-import { HeroCardContent, HeroOperationalKpiStrip } from './HeroCardContent';
+import { HeroCardContent } from './HeroCardContent';
 import type { Panel } from './hero-types';
 import { ARCH_LOGO_PATH, ARCH_LOGO_VIEWBOX } from './Logo';
 
@@ -395,24 +395,13 @@ export function HeroRotator({
         )}
       </div>
 
-      {/* Operational banner: globe for the central command view, KPI strip otherwise.
-          PERF: only the active banner is mounted (previously all strips rendered hidden). */}
+      {/* Operational banner: interactive 3D globe rendered under the active hero card. */}
       {panels[activeIndex] && (
         <div
           className="mx-auto mt-3.5 w-[92%] max-w-[1060px] sm:w-[88%] lg:w-[82%]"
           data-testid="hero-kpi-slim-banner"
         >
-          {panels[activeIndex].name === 'central-command' ||
-          panels[activeIndex].name === 'overview' ? (
-            <GlobePins className="gold-steel-border gold-steel-border-slim rounded-2xl border border-white/40 bg-white/60 p-4 shadow-window backdrop-blur-xl" />
-          ) : (
-            <HeroOperationalKpiStrip
-              key={panels[activeIndex].id}
-              panelName={panels[activeIndex].name}
-              panelTitle={panels[activeIndex].title}
-              stats={panels[activeIndex].stats}
-            />
-          )}
+          <GlobePins className="gold-steel-border gold-steel-border-slim rounded-2xl border border-white/40 bg-white/60 p-4 shadow-window backdrop-blur-xl" />
         </div>
       )}
 

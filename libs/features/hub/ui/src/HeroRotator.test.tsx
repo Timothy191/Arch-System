@@ -399,13 +399,12 @@ describe('HeroRotator', () => {
 
     render(<HeroRotator {...baseProps} departments={[plantInventoryDept]} />);
     expect(screen.getByText('Plant Inventory')).toBeInTheDocument();
-    // Only the active slide's KPI strip is mounted — rotate to the Plant Inventory slide.
+    // Rotate to the Plant Inventory slide and verify the 3D globe banner remains mounted.
     fireEvent.click(screen.getByRole('button', { name: 'Next highlight' }));
-    expect(screen.getByTestId('hero-kpi-strip-plant-inventory')).toBeInTheDocument();
-    expect(screen.getAllByTestId('hero-kpi-gold-separator').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText('7 Tracked')).toBeInTheDocument();
-    expect(screen.getByText('87.5%')).toBeInTheDocument();
-    expect(screen.getByText('4 Lines')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-kpi-slim-banner')).toContainElement(
+      screen.getByRole('img', { name: 'Operations globe' })
+    );
+    expect(screen.getByText('Active Site Pins')).toBeInTheDocument();
     expect(screen.getByTestId('hero-telemetry-graph-plant-inventory')).toBeInTheDocument();
     expect(screen.getByText('Stockpile & Medium Inventory')).toBeInTheDocument();
   });

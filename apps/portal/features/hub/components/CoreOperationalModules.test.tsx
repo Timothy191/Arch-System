@@ -64,7 +64,13 @@ describe('CoreOperationalModules', () => {
 
     const banner = heading.closest('.gold-steel-border');
     expect(banner).toBeInTheDocument();
-    expect(banner).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+    expect(banner).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim',
+      'bg-white/60',
+      'backdrop-blur-xl',
+      'border-white/40'
+    );
 
     const logoSvg = banner?.querySelector('span.rounded-2xl > svg');
     expect(logoSvg).toBeInTheDocument();

@@ -181,7 +181,7 @@ export function CoreOperationalModules({
       <div
         className={cn(
           'gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-[22px]',
-          'border border-white/40 bg-gradient-to-br from-white/92 via-white/78 to-white/62 p-5 shadow-window sm:p-6'
+          'border border-white/40 bg-white/60 p-5 shadow-window backdrop-blur-xl sm:p-6'
         )}
       >
         <span

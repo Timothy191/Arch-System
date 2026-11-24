@@ -6,6 +6,14 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-24T11:33:00+02:00] - `/hub` 3D Globe Across All Hero Slides & Unified White Glass Banner (`feat/hub-globe-and-white-panel`)
+
+- **Uniform 3D Globe Banner ([`HeroRotator.tsx`](packages/ui/src/components/HeroRotator.tsx), [`HeroRotator.test.tsx`](libs/features/hub/ui/src/HeroRotator.test.tsx))**: Removed the `central-command` / `overview` slide conditional and unused `HeroOperationalKpiStrip` import so the interactive 3D `<GlobePins />` panel renders beneath `hero-kpi-slim-banner` across all Hub hero slides; updated `HeroRotator.test.tsx` to assert `GlobePins` remains mounted on department slides such as `plant-inventory`.
+- **Translucent White Panel Surface ([`CoreOperationalModules.tsx`](apps/portal/features/hub/components/CoreOperationalModules.tsx), [`CoreOperationalModules.test.tsx`](apps/portal/features/hub/components/CoreOperationalModules.test.tsx))**: Updated the Mining Department Modules banner from the opaque gradient card to `bg-white/60 backdrop-blur-xl border-white/40`, matching sibling `/hub` frosted glass panels (`HeroRotator`, `GlobePins`, `ToolBanner`, and `DepartmentReviews`), and verified the classes in `CoreOperationalModules.test.tsx`.
+- **Verification**: `@repo/hub/ui` (`3/3` suites, `32/32` tests), `CoreOperationalModules.test.tsx` + `GlobePins.test.tsx` (`2/2` suites, `9/9` tests), `pnpm lint` (`1,824` files), `pnpm lint:spelling` (`2,191` files, `0` issues), `pnpm md:lint`, `pnpm type-check` (`24/24` tasks), `pnpm audit:compliance` (`0` violations), and `pnpm knip` (exit `0`).
+
+---
+
 ## [2026-11-24T10:48:00+02:00] - Upgrade Hub Active Site Pins to Interactive 3D Canvas Globe (`feat/hub-3d-globe`)
 
 - **3D Perspective Geometry & Earth Landmass Engine ([`globe-math.ts`](packages/ui/src/components/globe-math.ts))**: Added true 3D spherical projection, yaw/pitch orbit rotation, `targetOrbitForLatLon` camera focusing, shortest-angle interpolation, Fibonacci sphere sampling (`FIBONACCI_DOT_COUNT = 2400`) filtered via ray-casting continental coastline polygons (`isLandCoordinate`), and elevated 3D spherical linear interpolation geodesic arcs (`sampleGeodesicArc`).
