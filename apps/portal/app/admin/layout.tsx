@@ -1,27 +1,21 @@
 import { ADMIN_DEPARTMENT, getDepartmentTabs } from '@repo/departments/data-access';
-import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import type React from 'react';
 import { ActiveDepartmentSetter } from '@/components/nav/ActiveDepartmentSetter';
+import { resolveAdminAccess } from '~/features/admin/lib/admin-auth';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await connection();
-  const supabase = await createServerSupabaseClient();
-  const user = await getUserSafely(supabase);
+  const access = await resolveAdminAccess('admin', createServerSupabaseClient);
 
-  if (!user) {
+  if (access === 'unauthenticated') {
     redirect('/login');
   }
 
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (employee?.role !== 'admin') {
+  if (access === 'forbidden') {
     redirect('/');
   }
 

@@ -48,23 +48,34 @@ export function MineralsTab() {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, []);
 
-  const persistRegistry = async (nextWaste: string[], nextCoal: string[]) => {
+  const persistRegistry = async (options: {
+    nextWaste: string[];
+    nextCoal: string[];
+    prevWaste: string[];
+    prevCoal: string[];
+  }) => {
     setSaving(true);
     try {
       const res = await adminSaveMineralRegistry({
-        waste: nextWaste,
-        coal: nextCoal,
+        waste: options.nextWaste,
+        coal: options.nextCoal,
       });
       if (res?.error) {
+        setWasteMinerals(options.prevWaste);
+        setCoalMinerals(options.prevCoal);
         toast.error(res.error);
-      } else {
-        toast.success('Mineral registry updated.');
+        return false;
       }
+      toast.success('Mineral registry updated.');
+      return true;
     } catch {
+      setWasteMinerals(options.prevWaste);
+      setCoalMinerals(options.prevCoal);
       toast.error('Failed to save mineral registry.');
+      return false;
     } finally {
       setSaving(false);
     }
@@ -78,10 +89,17 @@ export function MineralsTab() {
       toast.error(`"${candidate}" is already registered under Waste.`);
       return;
     }
+    const prevWaste = wasteMinerals;
+    const prevCoal = coalMinerals;
     const next = [...wasteMinerals, candidate];
     setWasteMinerals(next);
-    setNewWasteMineral('');
-    await persistRegistry(next, coalMinerals);
+    const saved = await persistRegistry({
+      nextWaste: next,
+      nextCoal: coalMinerals,
+      prevWaste,
+      prevCoal,
+    });
+    if (saved) setNewWasteMineral('');
   };
 
   const handleRemoveWaste = async (mineralToRemove: string) => {
@@ -89,9 +107,16 @@ export function MineralsTab() {
       toast.error('At least one waste mineral must remain registered.');
       return;
     }
+    const prevWaste = wasteMinerals;
+    const prevCoal = coalMinerals;
     const next = wasteMinerals.filter((m) => m !== mineralToRemove);
     setWasteMinerals(next);
-    await persistRegistry(next, coalMinerals);
+    await persistRegistry({
+      nextWaste: next,
+      nextCoal: coalMinerals,
+      prevWaste,
+      prevCoal,
+    });
   };
 
   const handleAddCoal = async (e: React.FormEvent) => {
@@ -102,10 +127,17 @@ export function MineralsTab() {
       toast.error(`"${candidate}" is already registered under Coal.`);
       return;
     }
+    const prevWaste = wasteMinerals;
+    const prevCoal = coalMinerals;
     const next = [...coalMinerals, candidate];
     setCoalMinerals(next);
-    setNewCoalMineral('');
-    await persistRegistry(wasteMinerals, next);
+    const saved = await persistRegistry({
+      nextWaste: wasteMinerals,
+      nextCoal: next,
+      prevWaste,
+      prevCoal,
+    });
+    if (saved) setNewCoalMineral('');
   };
 
   const handleRemoveCoal = async (mineralToRemove: string) => {
@@ -113,9 +145,16 @@ export function MineralsTab() {
       toast.error('At least one coal mineral must remain registered.');
       return;
     }
+    const prevWaste = wasteMinerals;
+    const prevCoal = coalMinerals;
     const next = coalMinerals.filter((m) => m !== mineralToRemove);
     setCoalMinerals(next);
-    await persistRegistry(wasteMinerals, next);
+    await persistRegistry({
+      nextWaste: wasteMinerals,
+      nextCoal: next,
+      prevWaste,
+      prevCoal,
+    });
   };
 
   return (

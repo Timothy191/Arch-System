@@ -12,6 +12,14 @@ jest.mock('@/lib/errors/error-logger', () => ({
   logError: jest.fn(),
 }));
 
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+  },
+}));
+
 const mockCreateBrowserSupabase = jest.mocked(createBrowserSupabaseClient);
 
 function buildAuditQuery(rows: unknown[], count = rows.length) {
@@ -30,24 +38,30 @@ function buildAuditQuery(rows: unknown[], count = rows.length) {
 
 describe('Admin Logs Tabs (AuditLogsTab & SystemLogsTab)', () => {
   const originalFetch = global.fetch;
+  const originalCreateObjectUrl = URL.createObjectURL;
+  const originalRevokeObjectUrl = URL.revokeObjectURL;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    URL.createObjectURL = jest.fn(() => 'blob:mock-csv');
+    URL.revokeObjectURL = jest.fn();
   });
 
   afterEach(() => {
     global.fetch = originalFetch;
+    URL.createObjectURL = originalCreateObjectUrl;
+    URL.revokeObjectURL = originalRevokeObjectUrl;
   });
 
-  it('AuditLogsTab sanitizes search filters for .or() and renders en-ZA timestamps', async () => {
+  it('AuditLogsTab sanitizes search filters, expands JSON diff, and exports CSV without re-fetch loops', async () => {
     const sampleAuditRows = [
       {
         id: 'aud-1',
         table_name: 'badges',
-        action: 'INSERT',
+        action: 'UPDATE',
         user_id: 'u-1',
-        old_values: {},
-        new_values: { qr_code: 'QR-001' },
+        old_values: { active: true },
+        new_values: { active: false, qr_code: 'QR-001' },
         created_at: '2026-11-19T08:30:00Z',
         employees: { full_name: 'T. Mokoena' },
       },
@@ -63,8 +77,25 @@ describe('Admin Logs Tabs (AuditLogsTab & SystemLogsTab)', () => {
     await waitFor(() => {
       expect(screen.getByText('T. Mokoena')).toBeInTheDocument();
     });
-    expect(screen.getAllByText('INSERT').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('UPDATE').length).toBeGreaterThan(0);
     expect(screen.getAllByText('badges').length).toBeGreaterThan(0);
+    expect(mockCreateBrowserSupabase).toHaveBeenCalledTimes(1);
+
+    // Click row to expand Old Values / New Values JSON diff
+    fireEvent.click(screen.getByText('T. Mokoena'));
+    expect(screen.getByTestId('audit-diff-aud-1')).toBeInTheDocument();
+    expect(screen.getByText('Old Values')).toBeInTheDocument();
+    expect(screen.getByText('New Values')).toBeInTheDocument();
+
+    // Wire Export button -> creates CSV blob
+    const anchorClickSpy = jest
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
+    fireEvent.click(screen.getByRole('button', { name: /Export/i }));
+    expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+    expect(anchorClickSpy).toHaveBeenCalledTimes(1);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-csv');
+    anchorClickSpy.mockRestore();
 
     const searchInput = screen.getByPlaceholderText('Search logs...');
     fireEvent.change(searchInput, { target: { value: 'badges,1(2)%*' } });
@@ -76,7 +107,7 @@ describe('Admin Logs Tabs (AuditLogsTab & SystemLogsTab)', () => {
     });
   });
 
-  it('SystemLogsTab loads paginated system logs, expands trace details, and resolves entries', async () => {
+  it('SystemLogsTab loads logs, expands traces, supports bulk resolve & CSV export', async () => {
     const fetchMock = jest.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === 'PATCH') {
         return { ok: true, json: async () => ({ success: true }) } as Response;
@@ -120,12 +151,26 @@ describe('Admin Logs Tabs (AuditLogsTab & SystemLogsTab)', () => {
     expect(screen.getByText(/Trace ID: trace-123/i)).toBeInTheDocument();
     expect(screen.getByText(/Request ID: req-456/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /Resolve/i }));
+    // Select row -> bulk toolbar appears -> bulk Resolve Selected
+    fireEvent.click(screen.getByLabelText('Select log sys-1'));
+    expect(screen.getByTestId('system-logs-bulk-toolbar')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Resolve Selected \(1\)/i }));
+
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/logs',
-        expect.objectContaining({ method: 'PATCH' })
+        expect.objectContaining({
+          method: 'PATCH',
+          body: JSON.stringify({ ids: ['sys-1'], resolved: true }),
+        })
       );
     });
+
+    const anchorClickSpy = jest
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
+    fireEvent.click(screen.getByRole('button', { name: /Export CSV/i }));
+    expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+    anchorClickSpy.mockRestore();
   });
 });

@@ -59,7 +59,7 @@ export function IntegrationManager() {
   const [testResult, setTestResult] = useState<string | null>(null);
   const [catalogFilter, setCatalogFilter] = useState<CatalogFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const supabase = createBrowserSupabaseClient();
+  const supabase = useMemo(() => createBrowserSupabaseClient(), []);
 
   const fetchIntegrations = useCallback(async () => {
     try {

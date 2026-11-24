@@ -105,20 +105,25 @@ const MOCK_DAILY_LOGS = [
   { id: 'dl-1', department_id: 'dept-prod', log_date: '2026-11-23', shift: 'day' },
 ];
 
-const mockInsertSingle = jest.fn().mockResolvedValue({
-  data: {
+const mockAdminAddDepartment = jest.fn().mockResolvedValue({
+  success: true,
+  department: {
     id: 'dept-new',
     name: 'safety-compliance',
     display_name: 'Safety Compliance',
     description: null,
-    color: 'blue',
-    icon: 'ShieldCheck',
+    color: 'slate',
+    icon: 'Building2',
     created_at: '2026-11-24T06:00:00Z',
   },
-  error: null,
 });
 
-const mockUpdateEq = jest.fn().mockResolvedValue({ error: null });
+const mockAdminArchiveDepartment = jest.fn().mockResolvedValue({ success: true });
+
+jest.mock('../actions/departments', () => ({
+  adminAddDepartment: (input: unknown) => mockAdminAddDepartment(input),
+  adminArchiveDepartment: (id: string) => mockAdminArchiveDepartment(id),
+}));
 
 const mockSupabaseClient = {
   from: jest.fn((table: string) => {
@@ -128,14 +133,6 @@ const mockSupabaseClient = {
           is: jest.fn().mockReturnValue({
             order: jest.fn().mockResolvedValue({ data: MOCK_DEPARTMENTS, error: null }),
           }),
-        }),
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: mockInsertSingle,
-          }),
-        }),
-        update: jest.fn().mockReturnValue({
-          eq: mockUpdateEq,
         }),
       };
     }
@@ -280,12 +277,13 @@ describe('DepartmentsTab', () => {
     fireEvent.click(screen.getByRole('button', { name: /Add Area/i }));
 
     await waitFor(() => {
+      expect(mockAdminAddDepartment).toHaveBeenCalledWith({ display_name: 'Safety Compliance' });
       expect(screen.getByTestId('department-row-safety-compliance')).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove Safety Compliance' }));
     await waitFor(() => {
-      expect(mockUpdateEq).toHaveBeenCalledWith('id', 'dept-new');
+      expect(mockAdminArchiveDepartment).toHaveBeenCalledWith('dept-new');
       expect(screen.queryByTestId('department-row-safety-compliance')).not.toBeInTheDocument();
     });
   });

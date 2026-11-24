@@ -1,7 +1,8 @@
-import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { AdminTabsClient } from '~/features/admin/components/AdminTabsClient';
+import { resolveAdminAccess } from '~/features/admin/lib/admin-auth';
 import { AuditLogsTab } from '~/features/admin/tabs/AuditLogsTab';
 import { DepartmentsTab } from '~/features/admin/tabs/DepartmentsTab';
 import { ExternalContentTab } from '~/features/admin/tabs/ExternalContentTab';
@@ -36,20 +37,13 @@ export default async function AdminPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   await connection();
-  const supabase = await createServerSupabaseClient();
-  const user = await getUserSafely(supabase);
+  const access = await resolveAdminAccess('admin', createServerSupabaseClient);
 
-  if (!user) {
+  if (access === 'unauthenticated') {
     redirect('/login');
   }
 
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (employee?.role !== 'admin') {
+  if (access === 'forbidden') {
     redirect('/');
   }
 

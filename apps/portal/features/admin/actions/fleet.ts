@@ -8,7 +8,7 @@ import {
   resolveDefaultManufacturer,
   resolveMachineIdentity,
 } from '../tabs/fleet-utils';
-import { assertAdmin } from './shared';
+import { assertAdmin, logAdminAuditEvent } from './shared';
 
 export async function adminAddMachine(data: {
   name: string;
@@ -28,7 +28,7 @@ export async function adminAddMachine(data: {
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
   if (!data.machine_type?.trim()) return { error: 'Machine Type is required.' };
   if (!data.manufacturer?.trim()) return { error: 'Machine Manufacturer is required.' };
@@ -104,6 +104,14 @@ export async function adminAddMachine(data: {
     });
   }
 
+  logAdminAuditEvent({
+    actorId: userId,
+    action: 'create',
+    resource: 'machines',
+    resourceId: createdMachineId ?? null,
+    metadata: { name: resolvedMachineId, machine_type: data.machine_type.trim() },
+  });
+
   await updateTags(['table:fleet', 'table:equipment', 'table:machines']);
   revalidatePath('/admin');
   return { success: true };
@@ -130,7 +138,7 @@ export async function adminUpdateMachine(
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
   const name = data.name?.trim();
   const machineType = data.machine_type?.trim();
@@ -171,6 +179,13 @@ export async function adminUpdateMachine(
 
   if (error) return { error: 'Failed to update machine' };
 
+  logAdminAuditEvent({
+    actorId: userId,
+    action: 'update',
+    resource: 'machines',
+    resourceId: id,
+  });
+
   await updateTags(['table:fleet', 'table:equipment', 'table:machines']);
   revalidatePath('/admin');
   return { success: true };
@@ -188,7 +203,7 @@ export async function adminGenerateStartingSmr(): Promise<{
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
   const [{ data: machineRows, error: machineErr }, { data: deptRows }, { data: opRows }] =
     await Promise.all([
@@ -288,6 +303,13 @@ export async function adminGenerateStartingSmr(): Promise<{
       updatedCount += 1;
     }
   }
+
+  logAdminAuditEvent({
+    actorId: userId,
+    action: 'bulk_generate_smr',
+    resource: 'machines',
+    metadata: { updatedCount },
+  });
 
   await updateTags(['table:fleet', 'table:equipment', 'table:machines']);
   revalidatePath('/admin');

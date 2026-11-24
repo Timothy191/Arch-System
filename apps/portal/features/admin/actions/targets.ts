@@ -7,7 +7,7 @@ import {
 import { cacheInvalidateTags } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { assertAdmin } from './shared';
+import { assertAdmin, logAdminAuditEvent } from './shared';
 
 const DEFAULT_OPERATIONAL_TARGETS: AdminOperationalTargets = {
   shift: {
@@ -93,6 +93,12 @@ export async function adminSaveOperationalTargets(rawInput: AdminOperationalTarg
   }
 
   await cacheInvalidateTags(['config:operational_targets']);
+  logAdminAuditEvent({
+    actorId: auth.userId,
+    action: existing ? 'update' : 'create',
+    resource: 'operational_targets',
+    resourceId: existing?.id ?? null,
+  });
   revalidatePath('/admin');
   revalidatePath('/control-room');
   revalidatePath('/production');

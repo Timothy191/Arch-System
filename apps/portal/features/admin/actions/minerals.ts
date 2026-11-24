@@ -7,7 +7,7 @@ import {
 import { cacheInvalidateTags } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { assertAdmin } from './shared';
+import { assertAdmin, logAdminAuditEvent } from './shared';
 
 const DEFAULT_WASTE_MINERALS: readonly string[] = [
   'Dyke',
@@ -91,6 +91,13 @@ export async function adminSaveMineralRegistry(rawInput: { waste: string[]; coal
   }
 
   await cacheInvalidateTags(['config:mineral_registry']);
+  logAdminAuditEvent({
+    actorId: auth.userId,
+    action: existing ? 'update' : 'create',
+    resource: 'mineral_registry',
+    resourceId: existing?.id ?? null,
+    metadata: { wasteCount: config.waste.length, coalCount: config.coal.length },
+  });
   revalidatePath('/admin');
   revalidatePath('/control-room/hourly-loads');
   revalidatePath('/control-room');

@@ -2,10 +2,18 @@
 
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { Button } from '@repo/ui/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@repo/ui/components/ui/dialog';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { CheckCircle2, Layers, MapPin, Plus, Trash2, XCircle } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
   adminAddMineBlock,
@@ -31,18 +39,22 @@ interface DbMineBlockRow {
   active: boolean;
 }
 
+type PendingSiteDelete =
+  | { kind: 'site'; row: DbSiteRow }
+  | { kind: 'block'; row: DbMineBlockRow }
+  | null;
+
 export function SitesTab() {
-  const supabase = createBrowserSupabaseClient();
+  const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const [dbSites, setDbSites] = useState<DbSiteRow[]>([]);
   const [dbBlocks, setDbBlocks] = useState<DbMineBlockRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<PendingSiteDelete>(null);
 
-  // New site form state
   const [newSiteName, setNewSiteName] = useState('');
   const [newSiteCode, setNewSiteCode] = useState('');
 
-  // New mine block form state
   const [newBlockSiteId, setNewBlockSiteId] = useState<string>('');
   const [newBlockName, setNewBlockName] = useState('');
   const [newBlockCode, setNewBlockCode] = useState('');
@@ -71,7 +83,7 @@ export function SitesTab() {
   }, [supabase, newBlockSiteId]);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
   const handleAddSite = async (e: React.FormEvent) => {
@@ -112,26 +124,6 @@ export function SitesTab() {
       }
     } catch {
       toast.error('Failed to update site.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDeleteSite = async (site: DbSiteRow) => {
-    if (!window.confirm(`Are you sure you want to remove or deactivate "${site.name}"?`)) {
-      return;
-    }
-    setSaving(true);
-    try {
-      const res = await adminDeleteSite(site.id);
-      if (res?.error) {
-        toast.error(res.error);
-      } else {
-        toast.success(`Site "${site.name}" removed.`);
-        await loadData();
-      }
-    } catch {
-      toast.error('Failed to remove site.');
     } finally {
       setSaving(false);
     }
@@ -181,21 +173,34 @@ export function SitesTab() {
     }
   };
 
-  const handleDeleteBlock = async (block: DbMineBlockRow) => {
-    if (!window.confirm(`Are you sure you want to remove "${block.name}"?`)) {
-      return;
-    }
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
     setSaving(true);
     try {
-      const res = await adminDeleteMineBlock(block.id);
+      if (pendingDelete.kind === 'site') {
+        const res = await adminDeleteSite(pendingDelete.row.id);
+        if (res?.error) {
+          toast.error(res.error);
+        } else {
+          toast.success(`Site "${pendingDelete.row.name}" removed.`);
+          setPendingDelete(null);
+          await loadData();
+        }
+        return;
+      }
+
+      const res = await adminDeleteMineBlock(pendingDelete.row.id);
       if (res?.error) {
         toast.error(res.error);
       } else {
-        toast.success(`Block "${block.name}" removed.`);
+        toast.success(`Block "${pendingDelete.row.name}" removed.`);
+        setPendingDelete(null);
         await loadData();
       }
     } catch {
-      toast.error('Failed to remove mine block.');
+      toast.error(
+        pendingDelete.kind === 'site' ? 'Failed to remove site.' : 'Failed to remove mine block.'
+      );
     } finally {
       setSaving(false);
     }
@@ -306,7 +311,7 @@ export function SitesTab() {
                       disabled={saving}
                       aria-label={`Remove ${site.name}`}
                       className="text-accent-red hover:text-accent-red/80"
-                      onClick={() => handleDeleteSite(site)}
+                      onClick={() => setPendingDelete({ kind: 'site', row: site })}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -435,7 +440,7 @@ export function SitesTab() {
                         disabled={saving}
                         aria-label={`Remove ${block.name}`}
                         className="text-accent-red hover:text-accent-red/80"
-                        onClick={() => handleDeleteBlock(block)}
+                        onClick={() => setPendingDelete({ kind: 'block', row: block })}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -447,6 +452,37 @@ export function SitesTab() {
           )}
         </GlassCard>
       </div>
+
+      <Dialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {pendingDelete?.kind === 'site' ? 'Remove or Deactivate Site' : 'Remove Mine Block'}
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove{' '}
+              {pendingDelete?.kind === 'site' ? 'or deactivate ' : ''}&ldquo;
+              {pendingDelete?.row.name}&rdquo;?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setPendingDelete(null)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={saving}
+              onClick={() => void handleConfirmDelete()}
+            >
+              Confirm Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

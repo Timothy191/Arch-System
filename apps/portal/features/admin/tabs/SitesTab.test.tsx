@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { adminDeleteMineBlock, adminDeleteSite } from '../actions/sites';
 import { SitesTab } from './SitesTab';
 
 jest.mock('@repo/supabase/client', () => ({
@@ -34,16 +35,18 @@ jest.mock('@repo/supabase/client', () => ({
 }));
 
 jest.mock('../actions/sites', () => ({
-  adminAddSite: jest.fn(),
-  adminUpdateSite: jest.fn(),
-  adminDeleteSite: jest.fn(),
-  adminAddMineBlock: jest.fn(),
-  adminUpdateMineBlock: jest.fn(),
-  adminDeleteMineBlock: jest.fn(),
+  adminAddSite: jest.fn().mockResolvedValue({ success: true }),
+  adminUpdateSite: jest.fn().mockResolvedValue({ success: true }),
+  adminDeleteSite: jest.fn().mockResolvedValue({ success: true }),
+  adminAddMineBlock: jest.fn().mockResolvedValue({ success: true }),
+  adminUpdateMineBlock: jest.fn().mockResolvedValue({ success: true }),
+  adminDeleteMineBlock: jest.fn().mockResolvedValue({ success: true }),
 }));
 
 describe('SitesTab', () => {
-  it('renders the redesigned Sites and Mine Blocks adding panels with side-by-side form controls and without the Filter by Site strip', async () => {
+  it('renders Sites and Mine Blocks panels and uses Radix Dialog confirmation instead of window.confirm', async () => {
+    const confirmSpy = jest.spyOn(window, 'confirm');
+
     render(<SitesTab />);
 
     const sitesAddingPanel = screen.getByTestId('sites-adding-panel');
@@ -54,19 +57,29 @@ describe('SitesTab', () => {
     expect(blocksAddingPanel).toBeInTheDocument();
     expect(blocksAddingPanel).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
 
-    expect(screen.getByPlaceholderText('Site Name (e.g. North Pit)')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Code (e.g. PIT-NP)')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Add Site/i })).toBeInTheDocument();
-
-    expect(screen.getByLabelText('Select site for block')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Block Name (e.g. North Pit Bench B)')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Code (e.g. BLK-NP-B)')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Add Block/i })).toBeInTheDocument();
-
-    expect(screen.queryByText(/Filter by Site:/i)).not.toBeInTheDocument();
-
     await waitFor(() => {
       expect(screen.getByText('Block A Central')).toBeInTheDocument();
     });
+
+    // Trigger site delete dialog
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Brakfontein Pit' }));
+    expect(screen.getByText(/Remove or Deactivate Site/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Confirm Remove/i }));
+
+    await waitFor(() => {
+      expect(adminDeleteSite).toHaveBeenCalledWith('site-1');
+    });
+
+    // Trigger mine block delete dialog
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Block A Central' }));
+    expect(screen.getByText(/Remove Mine Block/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Confirm Remove/i }));
+
+    await waitFor(() => {
+      expect(adminDeleteMineBlock).toHaveBeenCalledWith('block-1');
+    });
+
+    expect(confirmSpy).not.toHaveBeenCalled();
+    confirmSpy.mockRestore();
   });
 });

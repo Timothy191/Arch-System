@@ -5,8 +5,10 @@ import { Button } from '@repo/ui/components/ui/button';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Pagination } from '@repo/ui/Pagination';
-import { CheckCircle2, CircleDot, Search } from 'lucide-react';
+import { CheckCircle2, CircleDot, Download, Search } from 'lucide-react';
 import { Fragment, useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { sanitizeCsvCell } from '@/lib/api/csv-utils';
 import { logError } from '@/lib/errors/error-logger';
 
 interface SystemLogRow {
@@ -59,6 +61,8 @@ export function SystemLogsTab() {
   const [sourceFilter, setSourceFilter] = useState('all');
   const [resolvedFilter, setResolvedFilter] = useState('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -88,6 +92,7 @@ export function SystemLogsTab() {
         throw new Error(body.error ?? `HTTP ${res.status}`);
       }
       setLogs(body.data ?? []);
+      setSelectedIds(new Set());
       setTotalCount(body.pagination?.totalCount ?? 0);
       setTotalPages(body.pagination?.totalPages ?? 0);
     } catch (error) {
@@ -95,6 +100,7 @@ export function SystemLogsTab() {
         context: 'SystemLogsTab.loadLogs',
       });
       setLogs([]);
+      setSelectedIds(new Set());
       setTotalCount(0);
       setTotalPages(0);
     } finally {
@@ -103,24 +109,101 @@ export function SystemLogsTab() {
   }, [currentPage, pageSize, levelFilter, sourceFilter, resolvedFilter, debouncedSearch]);
 
   useEffect(() => {
-    loadLogs();
+    void loadLogs();
   }, [loadLogs]);
 
-  const toggleResolved = async (log: SystemLogRow) => {
+  const patchLogResolution = async (ids: string[], resolved: boolean, isBulk: boolean) => {
+    if (ids.length === 0) return;
+    if (isBulk) setBulkBusy(true);
     try {
       const res = await fetch('/api/logs', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: [log.id], resolved: !log.resolved }),
+        body: JSON.stringify({ ids, resolved }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast.success(
+        resolved
+          ? `Marked ${ids.length} log entry(ies) resolved.`
+          : `Reopened ${ids.length} log entry(ies).`
+      );
       await loadLogs();
     } catch (error) {
       logError(error instanceof Error ? error : new Error(String(error)), {
-        context: 'SystemLogsTab.toggleResolved',
-        logId: log.id,
+        context: 'SystemLogsTab.patchLogResolution',
+        logIdsCount: ids.length,
       });
+      toast.error('Failed to update system log status.');
+    } finally {
+      if (isBulk) setBulkBusy(false);
     }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const allOnPageSelected = logs.length > 0 && logs.every((row) => selectedIds.has(row.id));
+
+  const toggleSelectAll = () => {
+    if (allOnPageSelected) {
+      setSelectedIds(new Set());
+      return;
+    }
+    setSelectedIds(new Set(logs.map((row) => row.id)));
+  };
+
+  const handleExportCsv = () => {
+    if (logs.length === 0) return;
+    const headerRow = [
+      'Timestamp',
+      'Level',
+      'Source',
+      'Category',
+      'Message',
+      'User',
+      'Resolved',
+      'Trace ID',
+      'Request ID',
+    ]
+      .map(sanitizeCsvCell)
+      .join(',');
+
+    const dataRows = logs.map((row) =>
+      [
+        new Date(row.created_at).toISOString(),
+        row.level,
+        row.source,
+        row.category,
+        row.message,
+        row.employees?.full_name ?? '',
+        row.resolved ? 'resolved' : 'open',
+        row.trace_id ?? '',
+        row.request_id ?? '',
+      ]
+        .map(sanitizeCsvCell)
+        .join(',')
+    );
+
+    const csvContent = [headerRow, ...dataRows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `system-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${logs.length} system log row(s) to CSV.`);
   };
 
   return (
@@ -184,14 +267,65 @@ export function SystemLogsTab() {
             <option value="false">Unresolved</option>
             <option value="true">Resolved</option>
           </select>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loading || logs.length === 0}
+            onClick={handleExportCsv}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
         </div>
       </div>
+
+      {selectedIds.size > 0 && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent-gold/40 bg-[var(--bg-secondary)] px-4 py-2.5 text-xs"
+          data-testid="system-logs-bulk-toolbar"
+        >
+          <span className="font-medium text-[var(--text-heading)]">
+            {selectedIds.size} entry(ies) selected
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={bulkBusy}
+              onClick={() => void patchLogResolution(Array.from(selectedIds), true, true)}
+            >
+              <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+              Resolve Selected ({selectedIds.size})
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={bulkBusy}
+              onClick={() => void patchLogResolution(Array.from(selectedIds), false, true)}
+            >
+              <CircleDot className="mr-1.5 h-3.5 w-3.5" />
+              Reopen Selected ({selectedIds.size})
+            </Button>
+          </div>
+        </div>
+      )}
 
       <GlassCard className="overflow-hidden p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-[var(--border-default)] border-b">
+                <th scope="col" className="w-10 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={allOnPageSelected}
+                    onChange={toggleSelectAll}
+                    aria-label="Select all logs on page"
+                    className="h-4 w-4 rounded border-[var(--border-default)]"
+                  />
+                </th>
                 <th
                   scope="col"
                   className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
@@ -239,13 +373,13 @@ export function SystemLogsTab() {
             <tbody className="divide-y divide-[var(--border-default)]">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--text-muted)]">
+                  <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading...
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--text-muted)]">
+                  <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     No system logs found.
                   </td>
                 </tr>
@@ -256,6 +390,15 @@ export function SystemLogsTab() {
                       className="cursor-pointer transition-colors hover:bg-[var(--bg-tertiary)]"
                       onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
                     >
+                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(log.id)}
+                          onChange={() => toggleSelectOne(log.id)}
+                          aria-label={`Select log ${log.id}`}
+                          className="h-4 w-4 rounded border-[var(--border-default)]"
+                        />
+                      </td>
                       <td className="whitespace-nowrap px-6 py-4 text-[var(--text-muted)] text-sm">
                         {new Date(log.created_at).toLocaleString('en-ZA')}
                       </td>
@@ -282,7 +425,7 @@ export function SystemLogsTab() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            void toggleResolved(log);
+                            void patchLogResolution([log.id], !log.resolved, false);
                           }}
                         >
                           {log.resolved ? (
@@ -301,7 +444,7 @@ export function SystemLogsTab() {
                     </tr>
                     {expandedId === log.id && (
                       <tr className="bg-[var(--bg-tertiary)]/50">
-                        <td colSpan={7} className="px-6 py-4">
+                        <td colSpan={8} className="px-6 py-4">
                           <div className="space-y-3">
                             {(log.trace_id || log.request_id) && (
                               <div className="flex flex-wrap gap-4 font-mono text-[var(--text-muted)] text-xs">

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { adminAddDepartment, adminArchiveDepartment } from '../actions/departments';
 import {
   buildDepartmentMetrics,
   computeDepartmentsOverview,
@@ -244,19 +245,14 @@ export function DepartmentsTab() {
 
     setErrorMessage(null);
     try {
-      const { data, error } = await supabase
-        .from('departments')
-        .insert({ name: slug, display_name: trimmed })
-        .select('id, name, display_name, description, color, icon, created_at')
-        .single();
-
-      if (error) {
-        setErrorMessage(error.message);
+      const result = await adminAddDepartment({ display_name: trimmed });
+      if ('error' in result && result.error) {
+        setErrorMessage(result.error);
         return;
       }
 
-      if (data) {
-        const created = data as DepartmentRecord;
+      if ('department' in result && result.department) {
+        const created = result.department as DepartmentRecord;
         setDepartments((prev) => [...prev, created]);
         setExpandedIds((prev) => new Set([...prev, created.id]));
       }
@@ -269,13 +265,9 @@ export function DepartmentsTab() {
   const handleRemoveArea = async (deptId: string) => {
     setErrorMessage(null);
     try {
-      const { error } = await supabase
-        .from('departments')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', deptId);
-
-      if (error) {
-        setErrorMessage(error.message);
+      const result = await adminArchiveDepartment(deptId);
+      if ('error' in result && result.error) {
+        setErrorMessage(result.error);
         return;
       }
 

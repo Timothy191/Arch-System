@@ -114,3 +114,25 @@ export const upsertAdminEmployeeSchema = z.object({
   department_permissions: departmentPermissionsMapSchema.optional().default({}),
 });
 export type UpsertAdminEmployeeSchemaInput = z.infer<typeof upsertAdminEmployeeSchema>;
+
+export const adminAddDepartmentSchema = z.object({
+  display_name: z.string().trim().min(1, 'Department name is required').max(120),
+  name: z.string().trim().min(1).max(120).optional(),
+});
+export type AdminAddDepartmentInput = z.infer<typeof adminAddDepartmentSchema>;
+
+export const adminArchiveDepartmentSchema = z.object({
+  id: z.string().min(1, 'Department ID is required'),
+});
+export type AdminArchiveDepartmentInput = z.infer<typeof adminArchiveDepartmentSchema>;
+
+export const adminCardTemplateUploadSchema = z.object({
+  name: z.string().trim().min(1, 'Template name is required').max(120),
+  isDefault: z.boolean().default(false),
+});
+export type AdminCardTemplateUploadInput = z.infer<typeof adminCardTemplateUploadSchema>;
+
+export const adminCardTemplateIdSchema = z.object({
+  id: z.string().min(1, 'Template ID is required'),
+});
+export type AdminCardTemplateIdInput = z.infer<typeof adminCardTemplateIdSchema>;

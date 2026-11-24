@@ -67,40 +67,7 @@ const DEFAULT_MAXMEMORY_POLICY = 'noeviction';
 const REDIS_LATENCY_THRESHOLD_MS = 250;
 const EVENT_LOOP_THRESHOLD_MS = 100;
 const MIN_HIT_RATIO_THRESHOLD_PCT = 80;
-const SAMPLE_COMMAND_NAMES = [
-  'GET',
-  'SET',
-  'HGET',
-  'HSET',
-  'LRANGE',
-  'LPUSH',
-  'EXPIRE',
-  'INCR',
-  'ZADD',
-  'PUBLISH',
-];
-const SAMPLE_COMMAND_COUNTS = [3245, 2891, 1567, 1423, 987, 654, 432, 321, 234, 156];
 const _DEFAULT_HEARTBEAT_ISO = '2026-11-19T00:00:00.000Z';
-const SAMPLE_SLOWLOG_COMMANDS = [
-  {
-    command: 'LRANGE',
-    durationMs: 142,
-    client: '10.0.0.4:45231',
-    timestamp: '2026-11-16T10:15:30Z',
-  },
-  {
-    command: 'HGETALL',
-    durationMs: 98,
-    client: '10.0.0.7:33920',
-    timestamp: '2026-11-16T10:14:22Z',
-  },
-  {
-    command: 'ZREVRANGE',
-    durationMs: 76,
-    client: '10.0.0.2:51847',
-    timestamp: '2026-11-16T10:12:10Z',
-  },
-];
 
 type HeartbeatStatus = 'UP' | 'DEGRADED' | 'DOWN';
 type AlertState = 'NORMAL' | 'PENDING' | 'FIRING' | 'RECOVERING';
@@ -390,33 +357,24 @@ function mapObservabilityToRedisStats(payload: ObservabilityApiResponse): RedisS
     };
   });
 
-  // Map commands from payload if available, otherwise use defaults
+  // Map commands from payload if available; report empty array when metrics are unavailable.
   const commands =
     redisStats?.totalKeys !== undefined
       ? [{ name: 'Total Commands', count: redisStats?.opsPerSecond ?? 0 }]
-      : SAMPLE_COMMAND_NAMES.map((name, i) => ({
-          name,
-          count: SAMPLE_COMMAND_COUNTS[i] ?? 0,
-        }));
+      : [];
 
-  // Map slowlog from payload if available
+  // Map slowlog from payload if available; never fabricate slowlog entries.
   const slowlog =
     (redisStats?.l1Evictions ?? 0) > 0
       ? [
           {
-            command: 'LRANGE',
-            durationMs: 142,
-            client: '10.0.0.4:45231',
-            timestamp: syncedTimestamp,
-          },
-          {
-            command: 'HGETALL',
-            durationMs: 98,
-            client: '10.0.0.7:33920',
+            command: 'L1_EVICTIONS',
+            durationMs: Math.max(1, Math.round(redisStats?.avgLatencyMs ?? 1)),
+            client: 'portal-l1-cache',
             timestamp: previousSlowlogTimestamp,
           },
         ]
-      : SAMPLE_SLOWLOG_COMMANDS;
+      : [];
 
   const resolvedSlaPct =
     (redisUptime && 'sla24hPct' in redisUptime ? redisUptime.sla24hPct : undefined) ??

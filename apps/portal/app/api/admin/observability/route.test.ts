@@ -24,6 +24,8 @@ const mockCollectRedisHealthDiagnostics = jest.mocked(collectRedisHealthDiagnost
 
 const HTTP_OK = 200;
 const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN = 403;
+const HTTP_TOO_MANY_REQUESTS = 429;
 const MOCK_HITS = 420;
 const MOCK_MISSES = 18;
 const MOCK_L1_HITS = 300;
@@ -119,5 +121,58 @@ describe('Given GET /api/admin/observability', () => {
         lastDurationMs: MOCK_JOB_DURATION_MS,
       },
     ]);
+  });
+
+  it('When the caller is authenticated without admin role, Then it returns 403 Forbidden', async () => {
+    mockGetAuthenticatedEmployee.mockResolvedValueOnce({
+      id: 'emp-op-01',
+      role: 'operator',
+      departmentId: null,
+      accessibleDepartments: [],
+    } as unknown as Awaited<ReturnType<typeof getAuthenticatedEmployee>>);
+
+    const response = await GET();
+    const payload = await response.json();
+
+    expect(response.status).toBe(HTTP_FORBIDDEN);
+    expect(payload).toEqual({ error: 'Forbidden' });
+  });
+
+  it('When an admin exceeds 60 req/min, Then it returns 429 Too Many Requests', async () => {
+    mockGetCacheStats.mockResolvedValue({
+      hits: MOCK_HITS,
+      misses: MOCK_MISSES,
+      l1Hits: MOCK_L1_HITS,
+      l2Hits: MOCK_L2_HITS,
+      redisErrors: 0,
+      avgLatencyMs: MOCK_AVG_LATENCY_MS,
+      p95LatencyMs: MOCK_P95_LATENCY_MS,
+      xFetchTriggers: 0,
+      l1Evictions: 0,
+      l2RoundTrips: MOCK_L2_HITS,
+      privilegeVersionChanges: 0,
+      avgWriteThroughDelayMs: 0,
+    });
+    mockCollectRedisHealthDiagnostics.mockResolvedValue(null);
+
+    for (let i = 0; i < 60; i += 1) {
+      mockGetAuthenticatedEmployee.mockResolvedValueOnce({
+        id: 'emp-admin-rate-limit',
+        role: 'admin',
+        departmentId: null,
+        accessibleDepartments: [],
+      } as unknown as Awaited<ReturnType<typeof getAuthenticatedEmployee>>);
+      const okRes = await GET();
+      expect(okRes.status).toBe(HTTP_OK);
+    }
+
+    mockGetAuthenticatedEmployee.mockResolvedValueOnce({
+      id: 'emp-admin-rate-limit',
+      role: 'admin',
+      departmentId: null,
+      accessibleDepartments: [],
+    } as unknown as Awaited<ReturnType<typeof getAuthenticatedEmployee>>);
+    const limitedRes = await GET();
+    expect(limitedRes.status).toBe(HTTP_TOO_MANY_REQUESTS);
   });
 });

@@ -37,7 +37,6 @@ export function ExternalContentTab() {
       const result = await externalContentIndexing({
         source: 'url',
         sourceId: urlInput.trim(),
-        userId: '',
       });
       if (result.success) {
         toast.success(`Indexed ${result.indexedCount ?? 0} chunks from URL`);
@@ -69,7 +68,6 @@ export function ExternalContentTab() {
         owner: githubOwner.trim(),
         repo: githubRepo.trim(),
         path: githubPath.trim(),
-        userId: '',
       });
       if (result.success) {
         toast.success(`Indexed ${result.indexedCount ?? 0} chunks from GitHub`);
@@ -99,7 +97,6 @@ export function ExternalContentTab() {
       const result = await externalContentIndexing({
         source: 'local-docs',
         dirPath: localDirPath.trim(),
-        userId: '',
       });
       if (result.success) {
         toast.success(`Indexed ${result.indexedCount ?? 0} chunks from local docs`);
@@ -229,6 +226,9 @@ export function ExternalContentTab() {
             onChange={(e) => setLocalDirPath(e.target.value)}
             className="border-[var(--border-default)] bg-[var(--bg-primary)] text-xs"
           />
+          <p className="text-[11px] text-[var(--text-muted)]">
+            Local / self-hosted runtime only (disabled on Vercel serverless).
+          </p>
           <Button
             size="sm"
             disabled={isIndexing || !localDirPath.trim()}

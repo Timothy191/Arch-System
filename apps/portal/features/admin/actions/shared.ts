@@ -1,20 +1,24 @@
+import { logger } from '@repo/logger/server';
 import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 
 const HTTP_UNAUTHORIZED = 401;
 const HTTP_FORBIDDEN = 403;
 const HTTP_TOO_MANY_REQUESTS = 429;
+const ADMIN_RATE_LIMIT_MAX = 30;
+const ADMIN_RATE_LIMIT_WINDOW_MS = 60_000;
 
 const adminMutationLimiter = new RateLimiter({
   store: new MemoryStore(),
   strategy: new FixedWindowStrategy(),
-  limit: 30,
-  windowMs: 60_000,
+  limit: ADMIN_RATE_LIMIT_MAX,
+  windowMs: ADMIN_RATE_LIMIT_WINDOW_MS,
   keyPrefix: 'ratelimit:admin-mutation:',
 });
 
 /**
- * Shared admin guard for admin server actions (fleet, minerals, sites, targets).
+ * Shared admin guard for admin server actions (fleet, minerals, sites, targets,
+ * departments, card-templates).
  * Intentionally NOT a `'use server'` module: it is an internal helper consumed by
  * sibling action files and must never be exposed as a client-callable action.
  */
@@ -40,5 +44,23 @@ export async function assertAdmin() {
     return { error: 'Rate limit exceeded', status: HTTP_TOO_MANY_REQUESTS } as const;
   }
 
-  return { supabase, employee };
+  return { supabase, employee, userId: user.id };
+}
+
+/** Emits a structured audit event for an admin server action mutation. */
+export function logAdminAuditEvent(options: {
+  actorId: string;
+  action: string;
+  resource: string;
+  resourceId?: string | null;
+  metadata?: Record<string, unknown>;
+}): void {
+  logger.info({
+    event: 'admin_mutation',
+    actorId: options.actorId,
+    action: options.action,
+    resource: options.resource,
+    resourceId: options.resourceId ?? null,
+    ...(options.metadata ? { metadata: options.metadata } : {}),
+  });
 }

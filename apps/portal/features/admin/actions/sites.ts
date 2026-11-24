@@ -8,7 +8,7 @@ import {
 } from '@repo/contract/schemas/admin.schema';
 import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
-import { assertAdmin } from './shared';
+import { assertAdmin, logAdminAuditEvent } from './shared';
 
 function buildSiteCode(name: string): string {
   const words = name
@@ -44,7 +44,7 @@ export async function adminAddSite(rawInput: {
   }
   const data = parseResult.data;
 
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
   const name = data.name.trim();
   const siteCode = data.site_code.trim().toUpperCase();
@@ -56,6 +56,13 @@ export async function adminAddSite(rawInput: {
   });
 
   if (error) return { error: 'Failed to add site' };
+
+  logAdminAuditEvent({
+    actorId: userId,
+    action: 'create',
+    resource: 'sites',
+    metadata: { name, site_code: siteCode },
+  });
 
   await cacheInvalidateTags(['table:sites']);
   revalidatePath('/admin');
@@ -72,17 +79,25 @@ export async function adminDeleteSite(id: string) {
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
+  let resolution: 'deleted' | 'deactivated' = 'deleted';
   const { error } = await supabase.from('sites').delete().eq('id', id);
   if (error) {
-    // Fallback to deactivating if foreign keys reference the site
+    resolution = 'deactivated';
     const { error: updateErr } = await supabase
       .from('sites')
       .update({ active: false })
       .eq('id', id);
     if (updateErr) return { error: 'Failed to remove site' };
   }
+
+  logAdminAuditEvent({
+    actorId: userId,
+    action: resolution === 'deleted' ? 'delete' : 'deactivate',
+    resource: 'sites',
+    resourceId: id,
+  });
 
   await cacheInvalidateTags(['table:sites']);
   revalidatePath('/admin');
@@ -108,7 +123,7 @@ export async function adminUpdateSite(
   }
   const data = parseResult.data;
 
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
   const name = data.name?.trim();
   const siteCode = data.site_code?.trim().toUpperCase();
@@ -125,6 +140,14 @@ export async function adminUpdateSite(
     .eq('id', id);
 
   if (error) return { error: 'Failed to update site' };
+
+  logAdminAuditEvent({
+    actorId: userId,
+    action: 'update',
+    resource: 'sites',
+    resourceId: id,
+    metadata: { active: data.active },
+  });
 
   await cacheInvalidateTags(['table:sites']);
   revalidatePath('/admin');
@@ -165,7 +188,7 @@ export async function adminAddMineBlock(rawInput: {
   }
   const data = parseResult.data;
 
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
   const name = data.name.trim();
   const code = data.code.trim().toUpperCase();
@@ -178,6 +201,13 @@ export async function adminAddMineBlock(rawInput: {
   });
 
   if (error) return { error: error.message || 'Failed to add mine block' };
+
+  logAdminAuditEvent({
+    actorId: userId,
+    action: 'create',
+    resource: 'mine_blocks',
+    metadata: { name, code, site_id: data.site_id ?? null },
+  });
 
   await cacheInvalidateTags(['table:mine_blocks']);
   revalidatePath('/admin');
@@ -194,17 +224,25 @@ export async function adminDeleteMineBlock(id: string) {
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
+  let resolution: 'deleted' | 'deactivated' = 'deleted';
   const { error } = await supabase.from('mine_blocks').delete().eq('id', id);
   if (error) {
-    // Fallback to deactivating if referenced
+    resolution = 'deactivated';
     const { error: updateErr } = await supabase
       .from('mine_blocks')
       .update({ active: false })
       .eq('id', id);
     if (updateErr) return { error: updateErr.message || 'Failed to remove mine block' };
   }
+
+  logAdminAuditEvent({
+    actorId: userId,
+    action: resolution === 'deleted' ? 'delete' : 'deactivate',
+    resource: 'mine_blocks',
+    resourceId: id,
+  });
 
   await cacheInvalidateTags(['table:mine_blocks']);
   revalidatePath('/admin');
@@ -231,7 +269,7 @@ export async function adminUpdateMineBlock(
   }
   const data = parseResult.data;
 
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
   const patch: Record<string, unknown> = {};
   if (data.name !== undefined) patch.name = data.name.trim();
@@ -241,6 +279,14 @@ export async function adminUpdateMineBlock(
 
   const { error } = await supabase.from('mine_blocks').update(patch).eq('id', id);
   if (error) return { error: error.message || 'Failed to update mine block' };
+
+  logAdminAuditEvent({
+    actorId: userId,
+    action: 'update',
+    resource: 'mine_blocks',
+    resourceId: id,
+    metadata: { active: data.active },
+  });
 
   await cacheInvalidateTags(['table:mine_blocks']);
   revalidatePath('/admin');

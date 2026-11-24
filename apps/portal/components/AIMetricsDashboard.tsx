@@ -63,6 +63,7 @@ function formatRand(amount: number): string {
 export default function AIMetricsDashboard() {
   const [scope, setScope] = useState<'session' | '24h' | '7d' | '30d' | 'all-time'>('all-time');
   const [refreshing, setRefreshing] = useState(false);
+  const [autoPoll, setAutoPoll] = useState(false);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['ai-metrics', scope],
@@ -73,7 +74,7 @@ export default function AIMetricsDashboard() {
       if (!json.success) throw new Error(json.error || 'Failed to fetch AI metrics');
       return json.metrics;
     },
-    refetchInterval: 30000,
+    refetchInterval: autoPoll ? 30_000 : false,
   });
 
   const handleRefresh = () => {
@@ -195,6 +196,18 @@ export default function AIMetricsDashboard() {
                 </button>
               ))}
             </div>
+
+            <button
+              type="button"
+              onClick={() => setAutoPoll((prev) => !prev)}
+              className={`rounded-lg border px-2.5 py-1.5 font-medium text-xs transition-colors ${
+                autoPoll
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                  : 'border-[var(--border-subtle)] bg-white/70 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
+              }`}
+            >
+              {autoPoll ? 'Auto-Poll 30s' : 'Manual Poll'}
+            </button>
 
             <button
               type="button"

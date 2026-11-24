@@ -80,6 +80,9 @@ export function TargetsTab() {
   const [targets, setTargets] = useState<AdminOperationalTargets>(
     DEFAULT_OPERATIONAL_TARGETS_CLIENT
   );
+  const [savedTargets, setSavedTargets] = useState<AdminOperationalTargets>(
+    DEFAULT_OPERATIONAL_TARGETS_CLIENT
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -89,6 +92,7 @@ export function TargetsTab() {
         const remote = await getOperationalTargets();
         if (remote) {
           setTargets(remote);
+          setSavedTargets(remote);
           if (typeof window !== 'undefined') {
             window.localStorage.setItem(OPERATIONAL_TARGETS_STORAGE_KEY, JSON.stringify(remote));
           }
@@ -98,7 +102,9 @@ export function TargetsTab() {
           const cached = window.localStorage.getItem(OPERATIONAL_TARGETS_STORAGE_KEY);
           if (cached) {
             try {
-              setTargets(JSON.parse(cached) as AdminOperationalTargets);
+              const parsed = JSON.parse(cached) as AdminOperationalTargets;
+              setTargets(parsed);
+              setSavedTargets(parsed);
             } catch {
               // ignore malformed local cache
             }
@@ -108,8 +114,10 @@ export function TargetsTab() {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, []);
+
+  const isDirty = JSON.stringify(targets) !== JSON.stringify(savedTargets);
 
   const handleFieldChange = (
     horizon: keyof AdminOperationalTargets,
@@ -149,18 +157,24 @@ export function TargetsTab() {
     toast.info('Daily (2× Shift) and Monthly (60× Shift) targets scaled from Shift baseline.');
   };
 
+  const handleDiscard = () => {
+    setTargets(savedTargets);
+    toast.info('Reverted unsaved target changes.');
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(OPERATIONAL_TARGETS_STORAGE_KEY, JSON.stringify(targets));
-      }
       const res = await adminSaveOperationalTargets(targets);
       if (res?.error) {
         toast.error(res.error);
-      } else {
-        toast.success('Shift, Daily, and Monthly operational targets saved.');
+        return;
       }
+      setSavedTargets(targets);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(OPERATIONAL_TARGETS_STORAGE_KEY, JSON.stringify(targets));
+      }
+      toast.success('Shift, Daily, and Monthly operational targets saved.');
     } catch {
       toast.error('Failed to save operational targets.');
     } finally {
@@ -202,16 +216,35 @@ export function TargetsTab() {
     <div className="space-y-6" data-testid="admin-targets-tab">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="flex flex-col gap-1">
-          <h2 className="font-bold text-[var(--text-heading)] text-lg">
-            Operational Targets (Shift · Daily · Monthly)
-          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-bold text-[var(--text-heading)] text-lg">
+              Operational Targets (Shift · Daily · Monthly)
+            </h2>
+            {isDirty && (
+              <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 font-medium text-[11px] text-amber-800">
+                Unsaved changes
+              </span>
+            )}
+          </div>
           <p className="text-[var(--text-secondary)] text-xs">
             Define official Shift, Daily, and Monthly targets for Control Room SCADA graphs,
             excavator dispatch, and production dashboards.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {isDirty && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleDiscard}
+              disabled={loading || saving}
+              className="border-[var(--border-default)] text-[var(--text-heading)] text-xs"
+            >
+              Discard Changes
+            </Button>
+          )}
           <Button
             type="button"
             variant="outline"

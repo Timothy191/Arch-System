@@ -4,6 +4,14 @@ import { AnimeStagger } from '@repo/ui/AnimeStagger';
 import { Checkbox } from '@repo/ui/Checkbox';
 import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@repo/ui/components/ui/dialog';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { fetchClient } from '@repo/utils/client';
@@ -84,6 +92,7 @@ export function WebhookManager() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState<WebhookEndpoint | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     url: '',
     description: '',
@@ -149,12 +158,17 @@ export function WebhookManager() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this webhook?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteTargetId(id);
+  };
 
+  const confirmDeleteWebhook = async () => {
+    if (!deleteTargetId) return;
+    const idToDelete = deleteTargetId;
     try {
-      await fetchClient.delete(`/api/webhooks/${id}`);
+      await fetchClient.delete(`/api/webhooks/${idToDelete}`);
       toast.success('Webhook deleted successfully');
+      setDeleteTargetId(null);
       fetchWebhooks();
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : 'Failed to delete webhook');
@@ -498,6 +512,29 @@ export function WebhookManager() {
           </AnimeStagger>
         )}
       </div>
+
+      <Dialog
+        open={Boolean(deleteTargetId)}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Webhook</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this webhook? Delivery retries and future event
+              triggers will stop immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDeleteTargetId(null)}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={() => void confirmDeleteWebhook()}>
+              Confirm Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

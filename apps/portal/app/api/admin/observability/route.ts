@@ -1,3 +1,4 @@
+import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
 import { type CacheStatsSnapshot, collectRedisHealthDiagnostics, getCacheStats } from '@repo/redis';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { NextResponse } from 'next/server';
@@ -20,6 +21,30 @@ import {
 
 const HTTP_OK = 200;
 const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN = 403;
+const HTTP_TOO_MANY_REQUESTS = 429;
+const RATE_LIMIT_MAX = 60;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
+const observabilityLimiter = new RateLimiter({
+  store: new MemoryStore(),
+  strategy: new FixedWindowStrategy(),
+  limit: RATE_LIMIT_MAX,
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  keyPrefix: 'ratelimit:admin_observability:',
+});
+
+function resolvePrincipalIdentity(principal: unknown): { role: string; actorId: string } {
+  const record = principal as {
+    id?: string;
+    role?: string;
+    user?: { id?: string };
+    employee?: { id?: string; role?: string } | null;
+  };
+  const role = String(record.employee?.role ?? record.role ?? '').toLowerCase();
+  const actorId = record.user?.id ?? record.employee?.id ?? record.id ?? 'unknown';
+  return { role, actorId };
+}
 const DEFAULT_ALERT_HOLD_MS = 30_000;
 const REDIS_LATENCY_THRESHOLD_MS = 250;
 const REDIS_LATENCY_RECOVERY_MS = 150;
@@ -251,6 +276,16 @@ export async function GET() {
   const principal = await getAuthenticatedEmployee().catch(() => null);
   if (!principal) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_UNAUTHORIZED });
+  }
+
+  const { role, actorId } = resolvePrincipalIdentity(principal);
+  if (role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: HTTP_FORBIDDEN });
+  }
+
+  const rateLimit = await observabilityLimiter.check(actorId);
+  if (!rateLimit.allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: HTTP_TOO_MANY_REQUESTS });
   }
 
   const [cacheStats, redisDiagnostics, observability] = await Promise.all([

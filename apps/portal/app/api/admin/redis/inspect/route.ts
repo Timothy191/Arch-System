@@ -1,10 +1,28 @@
+import { logger } from '@repo/logger/server';
+import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
 import { getRedisClient } from '@repo/redis';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const ALLOWED_ADMIN_ROLES = new Set(['admin', 'super_admin', 'executive']);
+const ALLOWED_ADMIN_ROLES = new Set(['admin']);
 const SENSITIVE_KEY_PATTERN = /(session|token|secret|password|auth|credential)/i;
 const MAX_SCAN_KEYS = 50;
+const HTTP_OK = 200;
+const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN = 403;
+const HTTP_TOO_MANY_REQUESTS = 429;
+const HTTP_INTERNAL_ERROR = 500;
+const HTTP_SERVICE_UNAVAILABLE = 503;
+const RATE_LIMIT_MAX = 60;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
+const redisInspectLimiter = new RateLimiter({
+  store: new MemoryStore(),
+  strategy: new FixedWindowStrategy(),
+  limit: RATE_LIMIT_MAX,
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  keyPrefix: 'ratelimit:admin_redis_inspect:',
+});
 
 function formatInspectedValue(key: string, rawValue: unknown): unknown {
   if (SENSITIVE_KEY_PATTERN.test(key)) {
@@ -23,12 +41,18 @@ function formatInspectedValue(key: string, rawValue: unknown): unknown {
 export async function GET(req: NextRequest) {
   const principal = await getAuthenticatedEmployee();
   if (!principal?.employee) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_UNAUTHORIZED });
   }
 
   const role = String(principal.employee.role ?? '').toLowerCase();
   if (!ALLOWED_ADMIN_ROLES.has(role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: 'Forbidden' }, { status: HTTP_FORBIDDEN });
+  }
+
+  const actorId = principal.user?.id ?? principal.employee.id;
+  const rateLimit = await redisInspectLimiter.check(actorId);
+  if (!rateLimit.allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: HTTP_TOO_MANY_REQUESTS });
   }
 
   try {
@@ -36,7 +60,7 @@ export async function GET(req: NextRequest) {
     if (!redis?.isOpen) {
       return NextResponse.json(
         { connected: false, keys: [], inspected: null, error: 'Redis client is disconnected' },
-        { status: 503 }
+        { status: HTTP_SERVICE_UNAVAILABLE }
       );
     }
 
@@ -66,13 +90,23 @@ export async function GET(req: NextRequest) {
         ttlSeconds: typeof ttlSeconds === 'number' ? ttlSeconds : -1,
         value: formatInspectedValue(selectedKey, rawValue),
       };
+
+      logger.info({
+        event: 'admin_redis_key_inspected',
+        actorId,
+        key: selectedKey,
+        keyType: inspected.type,
+      });
     }
 
-    return NextResponse.json({
-      connected: true,
-      keys,
-      inspected,
-    });
+    return NextResponse.json(
+      {
+        connected: true,
+        keys,
+        inspected,
+      },
+      { status: HTTP_OK }
+    );
   } catch (err: unknown) {
     return NextResponse.json(
       {
@@ -81,7 +115,7 @@ export async function GET(req: NextRequest) {
         inspected: null,
         error: err instanceof Error ? err.message : 'Redis inspection failed',
       },
-      { status: 500 }
+      { status: HTTP_INTERNAL_ERROR }
     );
   }
 }
