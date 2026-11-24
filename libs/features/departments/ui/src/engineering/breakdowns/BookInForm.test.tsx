@@ -1,6 +1,25 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { BookInForm } from './BookInForm';
 import type { Breakdown, Machine } from './types';
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: function MockImage({
+    src,
+    alt,
+    className,
+    width,
+    height,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+    width?: number;
+    height?: number;
+  }) {
+    return <img src={src} alt={alt} className={className} width={width} height={height} />;
+  },
+}));
 
 jest.mock('./actions', () => ({
   createBreakdown: jest.fn(),
@@ -19,13 +38,25 @@ const MOCK_MACHINES: Machine[] = [
     name: 'CAT 320D',
     machine_type: 'Excavator',
     serial_number: 'FL-001',
+    manufacturer: 'Caterpillar',
+    starting_smr: 12000,
+    current_smu: 14500,
+    image_url: '/images/fleet/hitachi-excavator.webp',
+    site_name: 'Main Pit',
+    site_code: 'MP-01',
     active: true,
   },
   {
     id: 'm-2',
-    name: 'Volvo A40G',
+    name: 'DT-04',
     machine_type: 'Haul Truck',
-    serial_number: 'FL-002',
+    serial_number: 'Volvo A40G',
+    manufacturer: 'Volvo',
+    starting_smr: null,
+    current_smu: null,
+    image_url: null,
+    site_name: null,
+    site_code: null,
     active: true,
   },
 ];
@@ -54,12 +85,14 @@ const ACTIVE_BREAKDOWN: Breakdown = {
 describe('BookInForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     createBreakdown.mockResolvedValue(undefined);
   });
 
   it('renders form fields and book in button', () => {
     render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
 
+    expect(screen.getByLabelText(/Machine ID/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Select Machine/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Date In/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Time In/i)).toBeInTheDocument();
@@ -97,6 +130,39 @@ describe('BookInForm', () => {
     expect(screen.getByText('1 machines')).toBeInTheDocument();
   });
 
+  it('populates machine photo and saved metadata card when Machine ID is selected', () => {
+    render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
+
+    expect(screen.queryByTestId('selected-machine-profile')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/Machine ID/i), {
+      target: { value: 'm-1' },
+    });
+
+    const profileCard = screen.getByTestId('selected-machine-profile');
+    expect(profileCard).toBeInTheDocument();
+
+    const img = within(profileCard).getByRole('img', { name: 'CAT 320D' });
+    expect(img).toHaveAttribute('src', '/images/fleet/hitachi-excavator.webp');
+    expect(within(profileCard).getByText('CAT 320D')).toBeInTheDocument();
+    expect(within(profileCard).getByText('FL-001')).toBeInTheDocument();
+    expect(within(profileCard).getByText('Caterpillar')).toBeInTheDocument();
+    expect(within(profileCard).getByText('Excavator')).toBeInTheDocument();
+    expect(within(profileCard).getByText('Main Pit (MP-01)')).toBeInTheDocument();
+    expect(within(profileCard).getByText('14,500 hrs')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/Machine ID/i), {
+      target: { value: 'm-2' },
+    });
+
+    const fallbackImg = within(profileCard).getByRole('img', { name: 'DT-04' });
+    expect(fallbackImg).toHaveAttribute('src', '/images/fleet/volvo-adt.webp');
+    expect(within(profileCard).getByText('Volvo A40G')).toBeInTheDocument();
+    expect(within(profileCard).getByText('Volvo')).toBeInTheDocument();
+    expect(within(profileCard).getByText('Main Pit')).toBeInTheDocument();
+    expect(within(profileCard).getByText('Not recorded')).toBeInTheDocument();
+  });
+
   it('shows error when machine is not selected on submit', async () => {
     render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
 
@@ -125,15 +191,19 @@ describe('BookInForm', () => {
     expect(createBreakdown).not.toHaveBeenCalled();
   });
 
-  it('submits successfully and shows success message', async () => {
+  it('submits Date In, Time In, and preset Breakdown Reason successfully', async () => {
     render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
 
-    fireEvent.change(screen.getByLabelText(/Select Machine/i), {
+    fireEvent.change(screen.getByLabelText(/Machine ID/i), {
       target: { value: 'm-1' },
     });
-    fireEvent.change(screen.getByPlaceholderText(/Describe the issue/i), {
-      target: { value: 'Hydraulic pump failure' },
+    fireEvent.change(screen.getByLabelText(/Date In/i), {
+      target: { value: '2026-11-24' },
     });
+    fireEvent.change(screen.getByLabelText(/Time In/i), {
+      target: { value: '09:30' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Hydraulic Hose Leak / Burst' }));
 
     fireEvent.click(screen.getByRole('button', { name: /Book In Machine/i }));
 
@@ -144,7 +214,9 @@ describe('BookInForm', () => {
           fleet_id: 'FL-001',
           machine_name: 'CAT 320D',
           machine_type: 'Excavator',
-          reason: 'Hydraulic pump failure',
+          date_in: '2026-11-24',
+          time_in: '09:30',
+          reason: 'Hydraulic Hose Leak / Burst',
         })
       );
     });

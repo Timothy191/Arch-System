@@ -230,11 +230,12 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
     fireEvent.change(screen.getByLabelText('Machine'), { target: { value: 'm1' } });
     fireEvent.change(screen.getByLabelText('Wheel Position'), { target: { value: 'Front Left' } });
     fireEvent.change(screen.getByLabelText('Installed Tyre'), { target: { value: 't1' } });
-    fireEvent.change(screen.getByLabelText('New Tyre Serial Number'), {
+    fireEvent.change(screen.getByLabelText(/Serial Number/i), {
       target: { value: 'TIRE-900' },
     });
-    fireEvent.change(screen.getByLabelText('Brand'), { target: { value: 'Bridgestone' } });
-    fireEvent.change(screen.getByLabelText('Tyre Size'), { target: { value: '59/80R63' } });
+    fireEvent.change(screen.getByLabelText(/Brand/i), { target: { value: 'Bridgestone' } });
+    fireEvent.change(screen.getByLabelText(/Tyre Size/i), { target: { value: '59/80R63' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Sidewall Cut' }));
     fireEvent.change(screen.getByLabelText('Tread Depth (mm)'), { target: { value: '12' } });
 
     expect(screen.getByLabelText('Condition Status')).toHaveValue('critical');
@@ -248,9 +249,12 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
           machineId: 'm1',
           position: 'Front Left',
           removedTireId: 't1',
+          tireSerial: 'TIRE-001',
+          tireBrand: 'Michelin',
           replacementSerial: 'TIRE-900',
           replacementBrand: 'Bridgestone',
           replacementSize: '59/80R63',
+          removedReason: 'Sidewall Cut',
           conditionStatus: 'critical',
         })
       );
@@ -258,6 +262,90 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
 
     expect(toast.success).toHaveBeenCalled();
     expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it('auto-populates SMU hours, serial, and brand and rejects missing required fields client-side', async () => {
+    render(
+      <TireActivityManagerClient
+        todayStr="2026-11-20"
+        machines={[
+          {
+            id: 'm1',
+            name: 'DT-01',
+            machine_type: 'Dump Truck',
+            serial_number: 'SN-01',
+            latest_smu: 1200,
+          },
+          {
+            id: 'm2',
+            name: 'DT-02',
+            machine_type: 'Dump Truck',
+            serial_number: 'SN-02',
+            latest_smu: 4520,
+          },
+        ]}
+        tires={[
+          {
+            id: 't1',
+            serial_number: 'TIRE-001',
+            brand: 'Michelin',
+            size: '59/80R63',
+            position: 'Front Left',
+            status: 'installed',
+            machine_id: 'm1',
+            machineName: 'DT-01',
+            installed_at: '2026-01-01',
+            installed_hours: 1200,
+          },
+          {
+            id: 't3',
+            serial_number: 'TIRE-003',
+            brand: 'Goodyear',
+            size: '59/80R63',
+            position: 'Spare',
+            status: 'inventory',
+            machine_id: null,
+            machineName: 'Unassigned',
+            installed_at: null,
+            installed_hours: 0,
+          },
+        ]}
+        recentActivities={[]}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('open-tire-activity-btn'));
+
+    // Switching machine auto-populates Machine Hours (SMU)
+    fireEvent.change(screen.getByLabelText('Machine'), { target: { value: 'm2' } });
+    expect(screen.getByLabelText(/Machine Hours \(SMU\)/i)).toHaveValue(4520);
+
+    // Rejects submission when Reason is missing
+    fireEvent.change(screen.getByLabelText(/Serial Number/i), { target: { value: 'TIRE-999' } });
+    fireEvent.change(screen.getByLabelText(/Brand/i), { target: { value: 'Michelin' } });
+    fireEvent.change(screen.getByLabelText(/Tyre Size/i), { target: { value: '59/80R63' } });
+    fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Reason is required (min 3 characters)');
+    });
+    expect(logTireActivity).not.toHaveBeenCalled();
+
+    // Switching to Install Spare auto-populates Serial Number and Brand
+    fireEvent.click(screen.getByRole('tab', { name: /Install Spare \/ New/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Use Inventory Spare/i }));
+    expect(screen.getByLabelText(/Serial Number/i)).toHaveValue('TIRE-003');
+    expect(screen.getByLabelText(/Brand/i)).toHaveValue('Goodyear');
+
+    // Rejects empty Machine Hours (SMU)
+    fireEvent.change(screen.getByLabelText(/Machine Hours \(SMU\)/i), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: 'New Mount / Book-In' }));
+    fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Machine hours (SMU) is required');
+    });
+    expect(logTireActivity).not.toHaveBeenCalled();
   });
 
   it('filters ledger entries by activity type and search text and handles error feedback', async () => {
@@ -346,6 +434,7 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
     fireEvent.click(screen.getByRole('button', { name: /Use Inventory Spare/i }));
     expect(screen.getByLabelText('Inventory Spare Tyre')).toHaveValue('t3');
 
+    fireEvent.click(screen.getByRole('button', { name: 'New Mount / Book-In' }));
     fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('Database failure');

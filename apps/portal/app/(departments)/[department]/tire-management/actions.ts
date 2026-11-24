@@ -69,6 +69,8 @@ async function performTireRemoval(options: {
 }): Promise<string> {
   const { supabase, input, machineName } = options;
   const tireId = input.removedTireId!;
+  const resolvedSerial = input.tireSerial?.trim() || input.replacementSerial?.trim();
+  const resolvedBrand = input.tireBrand?.trim() || input.replacementBrand?.trim();
 
   const { error: updateError } = await supabase
     .from('tires')
@@ -76,7 +78,7 @@ async function performTireRemoval(options: {
       status: input.removedOutcome,
       removed_at: input.actionDate,
       removed_hours: input.machineHours,
-      scrapped_reason: input.removedReason?.trim() || null,
+      scrapped_reason: input.removedReason.trim(),
       machine_id: null,
       updated_at: new Date().toISOString(),
     })
@@ -95,6 +97,8 @@ async function performTireRemoval(options: {
     machineName,
     position: input.position,
     machineHours: input.machineHours,
+    serialNumber: resolvedSerial,
+    brand: resolvedBrand,
     outcome: input.removedOutcome,
     reason: input.removedReason,
     treadDepthMm: input.treadDepthMm,
@@ -155,11 +159,14 @@ async function upsertInstalledTire(options: {
     return input.existingSpareTireId;
   }
 
+  const serialNumber = (input.replacementSerial || input.tireSerial)!.trim();
+  const brand = (input.replacementBrand || input.tireBrand)!.trim();
+
   const { data: insertedTire, error: insertError } = await supabase
     .from('tires')
     .insert({
-      serial_number: input.replacementSerial!.trim(),
-      brand: input.replacementBrand!.trim(),
+      serial_number: serialNumber,
+      brand,
       size: input.replacementSize!.trim(),
       machine_id: input.machineId,
       position: input.position,
@@ -191,12 +198,17 @@ async function performTireInstallation(options: {
   const { supabase, input, machineName } = options;
   const installedTireId = await upsertInstalledTire({ supabase, input });
   const prefix = input.mode === 'replace' ? '[REPLACEMENT]' : '[INSTALLATION]';
+  const resolvedSerial = input.replacementSerial?.trim() || input.tireSerial?.trim();
+  const resolvedBrand = input.replacementBrand?.trim() || input.tireBrand?.trim();
 
   const activityNotes = buildTireActivityNote({
     prefix,
     machineName,
     position: input.position,
     machineHours: input.machineHours,
+    serialNumber: resolvedSerial,
+    brand: resolvedBrand,
+    reason: input.removedReason,
     treadDepthMm: input.treadDepthMm,
     pressurePsi: input.pressurePsi,
     notes: input.notes,
@@ -230,12 +242,17 @@ async function performTireInspection(options: {
 }): Promise<string> {
   const { supabase, input, machineName } = options;
   const targetTireId = (input.tireId || input.removedTireId || input.existingSpareTireId)!;
+  const resolvedSerial = input.tireSerial?.trim() || input.replacementSerial?.trim();
+  const resolvedBrand = input.tireBrand?.trim() || input.replacementBrand?.trim();
 
   const inspectNotes = buildTireActivityNote({
     prefix: '[INSPECTION]',
     machineName,
     position: input.position,
     machineHours: input.machineHours,
+    serialNumber: resolvedSerial,
+    brand: resolvedBrand,
+    reason: input.removedReason,
     treadDepthMm: input.treadDepthMm,
     pressurePsi: input.pressurePsi,
     notes: input.notes,
@@ -315,6 +332,8 @@ export async function logTireActivity(
     input.mode === 'inspect' ? await performTireInspection({ supabase, input, machineName }) : null;
 
   // Step 6: Audit log
+  const auditSerial = input.replacementSerial?.trim() || input.tireSerial?.trim() || null;
+  const auditBrand = input.replacementBrand?.trim() || input.tireBrand?.trim() || null;
   await logAuditEvent({
     action: input.mode === 'install' ? 'insert' : 'update',
     tableName: 'tires',
@@ -326,6 +345,9 @@ export async function logTireActivity(
       position: input.position,
       actionDate: input.actionDate,
       machineHours: input.machineHours,
+      serialNumber: auditSerial,
+      brand: auditBrand,
+      reason: input.removedReason,
       removedTireId,
       installedTireId,
       inspectedTireId,

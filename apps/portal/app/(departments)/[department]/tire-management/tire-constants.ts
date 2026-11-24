@@ -12,6 +12,14 @@ export const TIRE_POSITIONS = [
 export const TIRE_ACTIVITY_MODES = ['replace', 'remove', 'install', 'inspect'] as const;
 export const TIRE_CONDITION_STATUSES = ['good', 'warning', 'critical'] as const;
 export const TIRE_REMOVED_OUTCOMES = ['inventory', 'scrapped'] as const;
+export const TIRE_ACTIVITY_REASON_PRESETS = [
+  'Sidewall Cut',
+  'Tread Worn',
+  'Punctured / Blowout',
+  'Scheduled Rotation',
+  'New Mount / Book-In',
+  'Routine Inspection',
+] as const;
 
 export const CRITICAL_TREAD_DEPTH_MM = 15;
 export const WARNING_TREAD_DEPTH_MM = 22;
@@ -36,6 +44,8 @@ export interface TireMachineOption {
   readonly name: string;
   readonly machine_type: string;
   readonly serial_number: string | null;
+  readonly starting_smr?: number | null;
+  readonly latest_smu?: number | null;
 }
 
 export interface TireLatestInspection {
@@ -87,10 +97,13 @@ const DATE_YYYY_MM_DD_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 function validateRemovalRequirements(
   val: {
+    mode: TireActivityMode;
     machineId: string;
     removedTireId?: string;
-    removedOutcome: TireRemovedOutcome;
-    removedReason?: string;
+    tireSerial?: string;
+    tireBrand?: string;
+    replacementSerial?: string;
+    replacementBrand?: string;
   },
   ctx: z.RefinementCtx
 ): void {
@@ -108,12 +121,23 @@ function validateRemovalRequirements(
       message: 'Select the installed tire being removed',
     });
   }
-  if (val.removedOutcome === 'scrapped' && !val.removedReason?.trim()) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['removedReason'],
-      message: 'Removal reason is required when marking a tire as scrapped',
-    });
+  if (val.mode === 'remove') {
+    const resolvedSerial = val.tireSerial?.trim() || val.replacementSerial?.trim();
+    if (!resolvedSerial) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tireSerial'],
+        message: 'Serial Number is required',
+      });
+    }
+    const resolvedBrand = val.tireBrand?.trim() || val.replacementBrand?.trim();
+    if (!resolvedBrand) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tireBrand'],
+        message: 'Brand is required',
+      });
+    }
   }
 }
 
@@ -121,6 +145,8 @@ function validateInstallationRequirements(
   val: {
     machineId: string;
     existingSpareTireId?: string;
+    tireSerial?: string;
+    tireBrand?: string;
     replacementSerial?: string;
     replacementBrand?: string;
     replacementSize?: string;
@@ -134,22 +160,24 @@ function validateInstallationRequirements(
       message: 'Machine selection is required for tire installation',
     });
   }
-  if (val.existingSpareTireId) {
-    return;
-  }
-  if (!val.replacementSerial?.trim()) {
+  const resolvedSerial = val.replacementSerial?.trim() || val.tireSerial?.trim();
+  if (!resolvedSerial) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['replacementSerial'],
-      message: 'Replacement serial number is required when not selecting an inventory spare',
+      message: 'Serial Number is required',
     });
   }
-  if (!val.replacementBrand?.trim()) {
+  const resolvedBrand = val.replacementBrand?.trim() || val.tireBrand?.trim();
+  if (!resolvedBrand) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['replacementBrand'],
-      message: 'Replacement brand is required when registering a new tire',
+      message: 'Brand is required',
     });
+  }
+  if (val.existingSpareTireId) {
+    return;
   }
   if (!val.replacementSize?.trim()) {
     ctx.addIssue({
@@ -165,6 +193,10 @@ function validateInspectionRequirements(
     tireId?: string;
     removedTireId?: string;
     existingSpareTireId?: string;
+    tireSerial?: string;
+    tireBrand?: string;
+    replacementSerial?: string;
+    replacementBrand?: string;
     treadDepthMm?: number;
     pressurePsi?: number;
   },
@@ -176,6 +208,22 @@ function validateInspectionRequirements(
       code: z.ZodIssueCode.custom,
       path: ['removedTireId'],
       message: 'Select a tire to log an inspection',
+    });
+  }
+  const resolvedSerial = val.tireSerial?.trim() || val.replacementSerial?.trim();
+  if (!resolvedSerial) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['tireSerial'],
+      message: 'Serial Number is required',
+    });
+  }
+  const resolvedBrand = val.tireBrand?.trim() || val.replacementBrand?.trim();
+  if (!resolvedBrand) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['tireBrand'],
+      message: 'Brand is required',
     });
   }
   if (val.treadDepthMm === undefined) {
@@ -202,14 +250,23 @@ export const tireActivitySchema = z
     actionDate: z
       .string()
       .regex(DATE_YYYY_MM_DD_REGEX, 'Action date must follow YYYY-MM-DD format'),
-    machineHours: z.coerce
-      .number()
-      .int('Machine hours must be a whole number')
-      .min(0, 'Machine hours must be >= 0'),
+    machineHours: z.preprocess(
+      (rawVal) => (rawVal === '' || rawVal === null || rawVal === undefined ? Number.NaN : rawVal),
+      z.coerce
+        .number({ message: 'Machine hours (SMU) is required' })
+        .int('Machine hours must be a whole number')
+        .min(0, 'Machine hours must be >= 0')
+    ),
     tireId: z.string().trim().optional(),
     removedTireId: z.string().trim().optional(),
     removedOutcome: z.enum(TIRE_REMOVED_OUTCOMES).default('inventory'),
-    removedReason: z.string().trim().max(500).optional(),
+    removedReason: z
+      .string({ message: 'Reason is required (min 3 characters)' })
+      .trim()
+      .min(3, 'Reason is required (min 3 characters)')
+      .max(500),
+    tireSerial: z.string().trim().max(120).optional(),
+    tireBrand: z.string().trim().max(120).optional(),
     replacementSerial: z.string().trim().max(120).optional(),
     replacementBrand: z.string().trim().max(120).optional(),
     replacementSize: z.string().trim().max(120).optional(),
@@ -256,6 +313,8 @@ export function buildTireActivityNote(options: {
   readonly machineName: string;
   readonly position: string;
   readonly machineHours: number;
+  readonly serialNumber?: string;
+  readonly brand?: string;
   readonly outcome?: TireRemovedOutcome;
   readonly reason?: string;
   readonly treadDepthMm?: number;
@@ -265,6 +324,8 @@ export function buildTireActivityNote(options: {
   const segments = [
     `${options.prefix} Machine: ${options.machineName}`,
     `Position: ${options.position}`,
+    `Serial: ${options.serialNumber?.trim() || 'Recorded'}`,
+    `Brand: ${options.brand?.trim() || 'Recorded'}`,
     `Hours: ${options.machineHours}h`,
   ];
 

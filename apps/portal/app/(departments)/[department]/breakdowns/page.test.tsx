@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
+import { BreakdownsDashboard } from '@/features/departments';
 import BreakdownsPage from './page';
 
 jest.mock('next/server', () => ({
@@ -70,22 +71,40 @@ const mockBreakdowns = [
 const mockMachines = [
   {
     id: 'm-1',
-    name: 'Dump Truck 01',
+    name: 'DT-01',
     machine_type: 'Haul Truck',
-    serial_number: 'SN-01',
+    serial_number: 'Volvo A45G',
+    manufacturer: 'Volvo',
+    starting_smr: 11200,
+    image_url: '/images/fleet/volvo-adt.webp',
+    site: { name: 'Main Pit', site_code: 'MP-01' },
     active: true,
   },
   {
     id: 'm-2',
-    name: 'Excavator 01',
+    name: 'EX-01',
     machine_type: 'Excavator',
     serial_number: 'SN-02',
+    manufacturer: 'Hitachi',
+    starting_smr: 12800,
+    image_url: null,
+    site: null,
     active: true,
+  },
+];
+
+const mockMachineOps = [
+  {
+    machine_id: 'm-1',
+    end_smu: 14500,
+    start_smu: 14490,
   },
 ];
 
 let breakdownsQueryData: typeof mockBreakdowns | null = mockBreakdowns;
 let machinesQueryData: typeof mockMachines | null = mockMachines;
+let machineOpsQueryData: typeof mockMachineOps | null = mockMachineOps;
+let throwMachineOpsError = false;
 
 // Mock dept-context
 jest.mock('~/lib/dept-context', () => ({
@@ -112,6 +131,19 @@ jest.mock('~/lib/dept-context', () => ({
               order: jest.fn().mockResolvedValue({ data: machinesQueryData }),
             };
           }
+          if (table === 'machine_operations') {
+            return {
+              select: jest.fn().mockReturnThis(),
+              in: jest.fn().mockReturnThis(),
+              order: jest.fn().mockReturnThis(),
+              limit: jest.fn().mockImplementation(() => {
+                if (throwMachineOpsError) {
+                  return Promise.reject(new Error('machine_operations timeout'));
+                }
+                return Promise.resolve({ data: machineOpsQueryData });
+              }),
+            };
+          }
           return {
             select: jest.fn().mockReturnThis(),
             order: jest.fn().mockResolvedValue({ data: [] }),
@@ -124,11 +156,14 @@ jest.mock('~/lib/dept-context', () => ({
 
 describe('BreakdownsPage', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     breakdownsQueryData = mockBreakdowns;
     machinesQueryData = mockMachines;
+    machineOpsQueryData = mockMachineOps;
+    throwMachineOpsError = false;
   });
 
-  it('computes breakdown metrics in a single pass accurately', async () => {
+  it('computes breakdown metrics in a single pass and enriches machines with saved metadata and latest SMU', async () => {
     const jsx = await BreakdownsPage({
       params: Promise.resolve({ department: 'engineering' }),
     });
@@ -142,11 +177,53 @@ describe('BreakdownsPage', () => {
     expect(screen.getByTestId('avg-repair-hours')).toHaveTextContent('3');
     expect(screen.getByTestId('breakdowns-count')).toHaveTextContent('3');
     expect(screen.getByTestId('machines-count')).toHaveTextContent('2');
+
+    const dashboardCall = (BreakdownsDashboard as jest.Mock).mock.calls[0]?.[0];
+    expect(dashboardCall.machines).toEqual([
+      expect.objectContaining({
+        id: 'm-1',
+        name: 'DT-01',
+        manufacturer: 'Volvo',
+        starting_smr: 11200,
+        current_smu: 14500,
+        image_url: '/images/fleet/volvo-adt.webp',
+        site_name: 'Main Pit',
+        site_code: 'MP-01',
+      }),
+      expect.objectContaining({
+        id: 'm-2',
+        name: 'EX-01',
+        manufacturer: 'Hitachi',
+        starting_smr: 12800,
+        current_smu: 12800,
+        image_url: null,
+        site_name: null,
+        site_code: null,
+      }),
+    ]);
+  });
+
+  it('falls back cleanly to starting_smr if machine_operations query fails', async () => {
+    throwMachineOpsError = true;
+
+    const jsx = await BreakdownsPage({
+      params: Promise.resolve({ department: 'engineering' }),
+    });
+    render(jsx);
+
+    const dashboardCall = (BreakdownsDashboard as jest.Mock).mock.calls[0]?.[0];
+    expect(dashboardCall.machines[0]).toEqual(
+      expect.objectContaining({
+        id: 'm-1',
+        current_smu: 11200,
+      })
+    );
   });
 
   it('handles empty breakdown datasets without division by zero', async () => {
     breakdownsQueryData = [];
     machinesQueryData = [];
+    machineOpsQueryData = [];
 
     const jsx = await BreakdownsPage({
       params: Promise.resolve({ department: 'engineering' }),
@@ -165,6 +242,7 @@ describe('BreakdownsPage', () => {
   it('handles null query responses gracefully', async () => {
     breakdownsQueryData = null;
     machinesQueryData = null;
+    machineOpsQueryData = null;
 
     const jsx = await BreakdownsPage({
       params: Promise.resolve({ department: 'engineering' }),
