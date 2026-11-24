@@ -490,7 +490,7 @@ describe('MachineOperationsList', () => {
 
       const machineOpsLink = screen.getByRole('link', { name: /Machine Operations/i });
       expect(machineOpsLink.className).toContain('gold-steel-border');
-      expect(machineOpsLink.className).toContain('border-accent-amber/55');
+      expect(machineOpsLink.className).toContain('border-accent-gold/65');
       expect(machineOpsLink.className).toContain('ring-1');
       // Verify the small straight vertical line on the left (w-1 h-5) is removed
       expect(machineOpsLink.querySelector('.h-5.w-1')).toBeNull();

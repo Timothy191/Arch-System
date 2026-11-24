@@ -102,18 +102,18 @@ interface DepartmentLayoutProps {
 }
 
 const TAB_LINK_BASE =
-  'group relative flex flex-1 items-center gap-2.5 rounded-xl border px-2.5 py-1.5 text-[13px] transition-all';
+  'group relative flex flex-1 items-center gap-2.5 rounded-xl border px-2.5 py-2 text-[13px] transition-all';
 const TAB_LINK_ACTIVE =
-  'gold-steel-border gold-steel-border-slim border-accent-amber/55 bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-xs ring-1 ring-accent-amber/30 ring-inset';
+  'gold-steel-border gold-steel-border-slim border-accent-gold/65 bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-xs ring-1 ring-accent-gold/30 ring-inset';
 const TAB_LINK_INACTIVE =
-  'border-transparent font-medium text-[var(--text-heading)] hover:border-accent-amber/30 hover:bg-white/80 hover:text-[var(--accent-blue)]';
+  'border-black/[0.08] bg-white/65 font-medium text-[var(--text-heading)] shadow-2xs hover:border-accent-gold/45 hover:bg-white/90 hover:text-[var(--accent-blue)]';
 
 const SUBTAB_LINK_BASE =
   'group relative flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-[12px] transition-all';
 const SUBTAB_LINK_ACTIVE =
-  'gold-steel-border gold-steel-border-slim border-accent-amber/50 bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs ring-1 ring-accent-amber/25 ring-inset';
+  'gold-steel-border gold-steel-border-slim border-accent-gold/60 bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs ring-1 ring-accent-gold/30 ring-inset';
 const SUBTAB_LINK_INACTIVE =
-  'border-transparent font-medium text-[var(--text-heading)] hover:border-accent-amber/30 hover:bg-white/80 hover:text-[var(--accent-blue)]';
+  'border-black/[0.07] bg-white/50 font-medium text-[var(--text-heading)] hover:border-accent-gold/40 hover:bg-white/90 hover:text-[var(--accent-blue)]';
 
 const ADMIN_GENERAL_SUBTABS = [
   { key: 'users', label: 'Users' },
@@ -274,10 +274,10 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <aside
         ref={sidebarRef}
         className={cn(
-          'group/sidebar liquid-glass-light gold-steel-border absolute inset-y-0 left-0 z-50 flex w-60 flex-col overflow-hidden rounded-r-3xl bg-white/90 shadow-window transition-transform duration-300',
+          'group/sidebar liquid-glass-light gold-steel-border absolute inset-y-0 left-0 z-navigation flex w-60 flex-col overflow-hidden rounded-r-3xl border-accent-gold/40 bg-white/90 shadow-window transition-transform duration-300',
           isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
-        style={{ borderRight: '1px solid rgba(212, 175, 55, 0.28)' }}
+        style={{ borderRight: '1px solid rgba(212, 175, 55, 0.42)' }}
         onMouseEnter={openSidebar}
         onMouseLeave={() => closeSidebarWithDelay(450)}
         onFocus={openSidebar}
@@ -298,7 +298,10 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         </div>
 
         {/* MacTitleBar with department name */}
-        <MacTitleBar title={department.displayName} className="bg-white/50" />
+        <MacTitleBar
+          title={department.displayName}
+          className="border-accent-gold/30 border-b bg-white/60"
+        />
 
         {/* Back to Hub link & Pin toggle */}
         <div
@@ -428,8 +431,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                         className={cn(
                           'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-colors',
                           isActive
-                            ? 'gold-steel-border gold-steel-border-slim border-accent-amber/50 bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] shadow-2xs'
-                            : 'border-black/[0.08] bg-white/80 text-[var(--text-heading)] group-hover:border-accent-amber/40 group-hover:text-[var(--accent-blue)]'
+                            ? 'gold-steel-border gold-steel-border-slim border-accent-gold/55 bg-[var(--accent-blue)]/15 text-accent-gold shadow-2xs'
+                            : 'border-black/[0.08] bg-white/85 text-[var(--text-heading)] group-hover:border-accent-gold/45 group-hover:text-accent-gold'
                         )}
                       >
                         <Icon className="h-3.5 w-3.5 shrink-0" />
@@ -554,7 +557,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                 {hasAdminGeneralSubtabs && isDashboardExpanded && (
                   <div
                     data-testid="admin-general-subtabs"
-                    className="mt-0.5 ml-4 space-y-0.5 border-[var(--accent-blue)]/25 border-l-2 pl-4"
+                    className="mt-1.5 ml-3.5 flex flex-col gap-1 border-accent-gold/35 border-l-2 pl-3"
                   >
                     {ADMIN_GENERAL_SUBTABS.map((subtab) => {
                       const isSubtabActive =

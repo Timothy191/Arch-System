@@ -242,12 +242,12 @@ export function FeedbackWidget({ variant = 'header', embedded = false }: Feedbac
           aria-haspopup="dialog"
           className={cn(
             embedded
-              ? 'flex items-center gap-1.5 font-medium text-[var(--text-heading)] text-xs transition-all hover:text-[var(--accent-blue)] active:scale-95'
-              : 'gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full border border-white/20 bg-[var(--material-ultra-thin)] px-2.5 font-medium text-[var(--text-heading)] text-xs shadow-diffusion-sm backdrop-blur-md transition-all hover:scale-105 hover:bg-[var(--material-thin)] active:scale-95',
+              ? 'flex items-center gap-1.5 font-medium text-[var(--text-heading)] text-xs transition-all hover:text-accent-gold active:scale-95'
+              : 'gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full border border-accent-gold/45 bg-[var(--material-ultra-thin)] px-2.5 font-medium text-[var(--text-heading)] text-xs shadow-diffusion-sm backdrop-blur-md transition-all hover:scale-105 hover:bg-[var(--material-thin)] active:scale-95',
             isOpen &&
               (embedded
-                ? 'text-[var(--accent-blue)]'
-                : 'bg-[var(--material-thin)] ring-1 ring-[var(--accent-blue)]/45')
+                ? 'text-accent-gold'
+                : 'bg-[var(--material-thin)] ring-1 ring-accent-gold/45')
           )}
           title="Feedback & Support"
         >

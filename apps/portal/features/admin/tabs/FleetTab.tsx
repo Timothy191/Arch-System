@@ -6,29 +6,26 @@ import { Button } from '@repo/ui/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Edit2, Plus, Power, Search } from 'lucide-react';
+import { Download, Edit2, Plus, Power, Search, Sparkles, X } from 'lucide-react';
+import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
-import { adminAddMachine, adminUpdateMachine } from '../actions/fleet';
+import { adminAddMachine, adminGenerateStartingSmr, adminUpdateMachine } from '../actions/fleet';
+import { FleetAnalyticsPanel } from './FleetAnalyticsPanel';
+import {
+  buildFleetCsv,
+  computeFleetAnalytics,
+  estimateBaselineStartingSmr,
+  FLEET_IMAGE_PRESETS,
+  type FleetMachineRecord,
+  isArticulatedOrRigidDumper,
+  resolveDefaultMachineImage,
+  resolveDefaultManufacturer,
+  resolveMachineIdentity,
+} from './fleet-utils';
 
-interface Machine {
-  id: string;
-  name: string;
-  machine_type: string;
-  manufacturer?: string | null;
-  serial_number: string | null;
-  starting_smr?: number | null;
-  bin_factor: number | null;
-  bin_factor_waste?: number | null;
-  bin_factor_coal?: number | null;
-  active: boolean;
-  report_exempt: boolean;
-  department_id: string;
-  site_id: string | null;
-  created_at: string;
-  department: { display_name: string } | null;
-  site: { name: string; site_code: string } | null;
-}
+type Machine = FleetMachineRecord;
 
 interface Department {
   id: string;
@@ -42,50 +39,50 @@ interface Site {
   active: boolean;
 }
 
+type StatusFilter = 'all' | 'active' | 'inactive';
+type FleetSortOption = 'id-asc' | 'name-asc' | 'smr-desc' | 'manufacturer-asc';
+
+const FILTER_SELECT_CLASS =
+  'rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm focus:border-accent-gold focus:outline-none';
+const TABLE_HEADER_CELL_CLASS =
+  'px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider';
+const FORM_LABEL_CLASS = 'mb-2 block font-medium text-[var(--text-body)] text-sm';
+
 const MACHINE_TYPE_OPTIONS = [
   'Articulated Dumper',
   'Rigid Dumper',
+  'Dump Truck',
   'Excavator',
   'Dozer',
   'Drill Rig',
   'Grader',
   'Loader',
-  'Water Bowser',
-  'Support Equipment',
+  'Crusher',
+  'Compactor',
+  'Water Truck',
+  'Other',
 ] as const;
 
-const DUMPER_TYPES = [
-  'articulated dumper',
-  'articulated dump truck',
-  'rigid dumper',
-  'rigid dump truck',
-  'adt',
-  'rdt',
-  'dump truck',
-  'dump_truck',
-  'dumper',
-  'hauler',
-];
-
-function isArticulatedOrRigidDumper(machineType: string): boolean {
-  const lower = machineType.toLowerCase();
-  return DUMPER_TYPES.some((t) => lower.includes(t));
-}
-
 export function FleetTab() {
-  const supabase = createBrowserSupabaseClient();
+  const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingMachine, setEditingMachine] = useState<Machine | null>(null);
+  const [previewMachine, setPreviewMachine] = useState<Machine | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [generatingSmr, setGeneratingSmr] = useState(false);
   const [dialogError, setDialogError] = useState('');
 
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [filterType, setFilterType] = useState('');
+  const [filterManufacturer, setFilterManufacturer] = useState('');
   const [filterDept, setFilterDept] = useState('');
   const [filterSite, setFilterSite] = useState('');
+  const [sortBy, setSortBy] = useState<FleetSortOption>('id-asc');
   const [pendingToggle, setPendingToggle] = useState<Machine | null>(null);
 
   const loadData = useCallback(async () => {
@@ -94,17 +91,20 @@ export function FleetTab() {
       supabase
         .from('machines')
         .select('*, department:departments(display_name), site:sites(name, site_code)')
+        .is('deleted_at', null)
         .order('name'),
       supabase.from('departments').select('id, display_name').order('display_name'),
       supabase.from('sites').select('id, name, site_code, active').order('name'),
     ]);
     if (machineData) {
-      const normalised = machineData.map((m) => ({
-        ...m,
-        department: Array.isArray(m.department) ? (m.department[0] ?? null) : m.department,
-        site: Array.isArray(m.site) ? (m.site[0] ?? null) : m.site,
+      const normalized = machineData.map((machine) => ({
+        ...machine,
+        department: Array.isArray(machine.department)
+          ? (machine.department[0] ?? null)
+          : machine.department,
+        site: Array.isArray(machine.site) ? (machine.site[0] ?? null) : machine.site,
       })) as Machine[];
-      setMachines(normalised);
+      setMachines(normalized);
     }
     if (deptData) setDepartments(deptData);
     if (siteData) setSites(siteData);
@@ -115,24 +115,139 @@ export function FleetTab() {
     loadData();
   }, [loadData]);
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return machines.filter((m) => {
-      const matchSearch =
-        !q ||
-        m.name.toLowerCase().includes(q) ||
-        m.machine_type.toLowerCase().includes(q) ||
-        (m.manufacturer ?? '').toLowerCase().includes(q) ||
-        (m.serial_number ?? '').toLowerCase().includes(q);
-      const matchDept = !filterDept || m.department_id === filterDept;
-      const matchSite =
-        !filterSite || (filterSite === '__none__' ? !m.site_id : m.site_id === filterSite);
-      return matchSearch && matchDept && matchSite;
-    });
-  }, [machines, search, filterDept, filterSite]);
+  const analytics = useMemo(() => computeFleetAnalytics(machines), [machines]);
 
-  const totalActive = machines.filter((m) => m.active).length;
-  const totalInactive = machines.length - totalActive;
+  const typeOptions = useMemo(
+    () => Array.from(new Set(machines.map((m) => m.machine_type).filter(Boolean))).sort(),
+    [machines]
+  );
+
+  const manufacturerOptions = useMemo(
+    () => analytics.byManufacturer.map((entry) => entry.label).sort(),
+    [analytics.byManufacturer]
+  );
+
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const list = machines.filter((machine) => {
+      const identity = resolveMachineIdentity({
+        name: machine.name,
+        serialNumber: machine.serial_number,
+      });
+      const resolvedMfg = resolveDefaultManufacturer({
+        machineId: identity.machineId,
+        machineName: identity.machineName,
+        machineType: machine.machine_type,
+        manufacturer: machine.manufacturer,
+      });
+
+      const matchSearch =
+        !query ||
+        identity.machineId.toLowerCase().includes(query) ||
+        identity.machineName.toLowerCase().includes(query) ||
+        machine.machine_type.toLowerCase().includes(query) ||
+        resolvedMfg.toLowerCase().includes(query);
+      const matchStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'active' && machine.active) ||
+        (statusFilter === 'inactive' && !machine.active);
+      const matchType = !filterType || machine.machine_type === filterType;
+      const matchMfg = !filterManufacturer || resolvedMfg === filterManufacturer;
+      const matchDept = !filterDept || machine.department_id === filterDept;
+      const matchSite =
+        !filterSite ||
+        (filterSite === '__none__' ? !machine.site_id : machine.site_id === filterSite);
+      return matchSearch && matchStatus && matchType && matchMfg && matchDept && matchSite;
+    });
+
+    return [...list].sort((a, b) => {
+      const idA = resolveMachineIdentity({ name: a.name, serialNumber: a.serial_number });
+      const idB = resolveMachineIdentity({ name: b.name, serialNumber: b.serial_number });
+      if (sortBy === 'smr-desc') {
+        return Number(b.starting_smr ?? 0) - Number(a.starting_smr ?? 0);
+      }
+      if (sortBy === 'name-asc') {
+        return idA.machineName.localeCompare(idB.machineName);
+      }
+      if (sortBy === 'manufacturer-asc') {
+        const mfgA = resolveDefaultManufacturer({
+          machineId: idA.machineId,
+          machineName: idA.machineName,
+          machineType: a.machine_type,
+          manufacturer: a.manufacturer,
+        });
+        const mfgB = resolveDefaultManufacturer({
+          machineId: idB.machineId,
+          machineName: idB.machineName,
+          machineType: b.machine_type,
+          manufacturer: b.manufacturer,
+        });
+        return mfgA.localeCompare(mfgB);
+      }
+      return idA.machineId.localeCompare(idB.machineId);
+    });
+  }, [
+    machines,
+    search,
+    statusFilter,
+    filterType,
+    filterManufacturer,
+    filterDept,
+    filterSite,
+    sortBy,
+  ]);
+
+  const productionDepartmentId = useMemo(
+    () =>
+      departments.find((dept) => dept.display_name.toLowerCase() === 'production')?.id ??
+      departments[0]?.id ??
+      '',
+    [departments]
+  );
+
+  const hasActiveFilters = Boolean(
+    search || statusFilter !== 'all' || filterType || filterManufacturer || filterDept || filterSite
+  );
+
+  const clearAllFilters = () => {
+    setSearch('');
+    setStatusFilter('all');
+    setFilterType('');
+    setFilterManufacturer('');
+    setFilterDept('');
+    setFilterSite('');
+  };
+
+  const handleGenerateStartingSmr = async () => {
+    setGeneratingSmr(true);
+    const result = await adminGenerateStartingSmr();
+    if (result.error) {
+      logError(new Error(result.error), { context: 'fleet_generate_starting_smr' });
+      toast.error(result.error);
+    } else {
+      toast.success(
+        result.updatedCount && result.updatedCount > 0
+          ? `Updated Starting SMR & fleet metadata for ${result.updatedCount} machine(s)`
+          : 'All fleet Starting SMR hours, manufacturers, and Production assignments are up to date'
+      );
+      await loadData();
+    }
+    setGeneratingSmr(false);
+  };
+
+  const handleExportCsv = () => {
+    const csv = buildFleetCsv(filtered);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `fleet-registry-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${filtered.length} machine record(s)`);
+  };
 
   const handleAdd = () => {
     setEditingMachine(null);
@@ -160,11 +275,12 @@ export function FleetTab() {
     await loadData();
   };
 
-  const handleSave = async (data: {
-    name: string;
+  const handleSave = async (formPayload: {
+    machine_id: string;
+    machine_name: string;
     machine_type: string;
     manufacturer: string;
-    machine_id: string;
+    image_url: string;
     starting_smr: string;
     bin_factor_waste: string;
     bin_factor_coal: string;
@@ -176,26 +292,26 @@ export function FleetTab() {
     setSaving(true);
     setDialogError('');
 
-    const parsedWaste = data.bin_factor_waste ? parseFloat(data.bin_factor_waste) : null;
-    const parsedCoal = data.bin_factor_coal ? parseFloat(data.bin_factor_coal) : null;
-    const parsedSmr = data.starting_smr !== '' ? parseFloat(data.starting_smr) : 0;
-    const resolvedName =
-      data.name.trim() ||
-      `${data.manufacturer.trim()} ${data.machine_type.trim()} (${data.machine_id.trim()})`;
+    const parsedWaste = formPayload.bin_factor_waste
+      ? parseFloat(formPayload.bin_factor_waste)
+      : null;
+    const parsedCoal = formPayload.bin_factor_coal ? parseFloat(formPayload.bin_factor_coal) : null;
+    const parsedSmr = formPayload.starting_smr !== '' ? parseFloat(formPayload.starting_smr) : 0;
 
     const payload = {
-      name: resolvedName,
-      machine_type: data.machine_type,
-      manufacturer: data.manufacturer,
-      serial_number: data.machine_id || undefined,
+      name: formPayload.machine_id.trim(),
+      serial_number: formPayload.machine_name.trim(),
+      machine_type: formPayload.machine_type,
+      manufacturer: formPayload.manufacturer,
+      image_url: formPayload.image_url.trim() || null,
       starting_smr: parsedSmr,
       bin_factor: parsedWaste ?? parsedCoal ?? null,
       bin_factor_waste: parsedWaste,
       bin_factor_coal: parsedCoal,
-      department_id: data.department_id,
-      site_id: data.site_id || null,
-      active: data.active,
-      report_exempt: data.report_exempt,
+      department_id: formPayload.department_id,
+      site_id: formPayload.site_id || null,
+      active: formPayload.active,
+      report_exempt: formPayload.report_exempt,
     };
 
     const result = editingMachine
@@ -206,6 +322,7 @@ export function FleetTab() {
       setDialogError(result.error);
     } else {
       setShowDialog(false);
+      toast.success(editingMachine ? 'Machine updated' : 'Machine added');
       await loadData();
     }
     setSaving(false);
@@ -213,146 +330,290 @@ export function FleetTab() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="font-medium text-[var(--text-heading)] text-lg">Fleet</h2>
-        <Button
-          onClick={handleAdd}
-          className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Machine
-        </Button>
-      </div>
-
-      {/* Stats bar */}
-      <div className="grid grid-cols-3 gap-4">
-        <GlassCard className="px-4 py-3">
-          <p className="text-[var(--text-muted)] text-xs">Total</p>
-          <p className="mt-0.5 font-medium text-2xl text-[var(--text-heading)]">
-            {machines.length}
+      {/* Header Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-semibold text-[var(--text-heading)] text-lg">Fleet Registry</h2>
+          <p className="text-[var(--text-muted)] text-xs">
+            Production machinery, separated Machine ID &amp; model names, Starting SMR baselines
+            &amp; verified equipment photos.
           </p>
-        </GlassCard>
-        <GlassCard className="px-4 py-3">
-          <p className="text-[var(--text-muted)] text-xs">Active</p>
-          <p className="mt-0.5 font-medium text-2xl text-accent-green">{totalActive}</p>
-        </GlassCard>
-        <GlassCard className="px-4 py-3">
-          <p className="text-[var(--text-muted)] text-xs">Inactive</p>
-          <p className="mt-0.5 font-medium text-2xl text-[var(--text-muted)]">{totalInactive}</p>
-        </GlassCard>
-      </div>
-
-      {/* Search + filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative min-w-48 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search machine ID, manufacturer, type…"
-            className="w-full border-[var(--border-default)] bg-[var(--bg-secondary)] pl-9"
-          />
         </div>
-        <select
-          value={filterDept}
-          onChange={(e) => setFilterDept(e.target.value)}
-          aria-label="Filter by department"
-          className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none"
-        >
-          <option value="">All Departments</option>
-          {departments.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.display_name}
-            </option>
-          ))}
-        </select>
-        <select
-          value={filterSite}
-          onChange={(e) => setFilterSite(e.target.value)}
-          aria-label="Filter by site"
-          className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none"
-        >
-          <option value="">All Sites</option>
-          <option value="__none__">No site assigned</option>
-          {sites.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.site_code} — {s.name}
-            </option>
-          ))}
-        </select>
-        {(search || filterDept || filterSite) && (
-          <button
-            onClick={() => {
-              setSearch('');
-              setFilterDept('');
-              setFilterSite('');
-            }}
-            className="px-3 py-2 text-[var(--text-muted)] text-sm transition-colors hover:text-[var(--text-heading)]"
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={generatingSmr || loading}
+            onClick={handleGenerateStartingSmr}
+            data-testid="generate-starting-smr-button"
+            className="border-accent-gold/50 text-[var(--text-heading)] hover:bg-accent-gold/10"
           >
-            Clear
-          </button>
-        )}
+            <Sparkles className="mr-1.5 h-4 w-4 text-accent-gold" aria-hidden="true" />
+            {generatingSmr ? 'Generating SMR…' : 'Generate Starting SMR'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={filtered.length === 0}
+            onClick={handleExportCsv}
+          >
+            <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            Export CSV
+          </Button>
+          <Button
+            onClick={handleAdd}
+            className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
+          >
+            <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            Add Machine
+          </Button>
+        </div>
       </div>
 
-      {/* Table */}
+      {/* Interactive Fleet KPIs & Visual Analytics */}
+      <FleetAnalyticsPanel
+        analytics={analytics}
+        statusFilter={statusFilter}
+        selectedType={filterType}
+        selectedManufacturer={filterManufacturer}
+        onStatusFilterChange={setStatusFilter}
+        onSelectType={setFilterType}
+        onSelectManufacturer={setFilterManufacturer}
+      />
+
+      {/* Search + Standard UX Filters */}
+      <GlassCard className="space-y-3 p-3.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="relative min-w-52 flex-1">
+            <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search Machine ID, Machine Name, manufacturer, or type…"
+              className="w-full border-[var(--border-default)] bg-[var(--bg-secondary)] pl-9"
+            />
+          </div>
+
+          <div
+            role="group"
+            aria-label="Filter by status"
+            className="inline-flex rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-0.5 text-xs"
+          >
+            {(['all', 'active', 'inactive'] as const).map((statusOption) => (
+              <button
+                key={statusOption}
+                type="button"
+                onClick={() => setStatusFilter(statusOption)}
+                className={`rounded-md px-2.5 py-1.5 font-medium capitalize transition-colors ${
+                  statusFilter === statusOption
+                    ? 'bg-[var(--bg-primary)] text-[var(--text-heading)] shadow-2xs'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+                }`}
+              >
+                {statusOption}
+              </button>
+            ))}
+          </div>
+
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            aria-label="Filter by machine type"
+            className={FILTER_SELECT_CLASS}
+          >
+            <option value="">All Types</option>
+            {typeOptions.map((typeName) => (
+              <option key={typeName} value={typeName}>
+                {typeName}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filterManufacturer}
+            onChange={(e) => setFilterManufacturer(e.target.value)}
+            aria-label="Filter by manufacturer"
+            className={FILTER_SELECT_CLASS}
+          >
+            <option value="">All Manufacturers</option>
+            {manufacturerOptions.map((mfgName) => (
+              <option key={mfgName} value={mfgName}>
+                {mfgName}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filterDept}
+            onChange={(e) => setFilterDept(e.target.value)}
+            aria-label="Filter by department"
+            className={FILTER_SELECT_CLASS}
+          >
+            <option value="">All Departments</option>
+            {departments.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.display_name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filterSite}
+            onChange={(e) => setFilterSite(e.target.value)}
+            aria-label="Filter by site"
+            className={FILTER_SELECT_CLASS}
+          >
+            <option value="">All Sites</option>
+            <option value="__none__">No site assigned</option>
+            {sites.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.site_code} — {s.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as FleetSortOption)}
+            aria-label="Sort fleet machines"
+            className={FILTER_SELECT_CLASS}
+          >
+            <option value="id-asc">Sort: Machine ID (A–Z)</option>
+            <option value="name-asc">Sort: Machine Name (A–Z)</option>
+            <option value="smr-desc">Sort: Starting SMR (High–Low)</option>
+            <option value="manufacturer-asc">Sort: Manufacturer (A–Z)</option>
+          </select>
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={clearAllFilters}
+              className="inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] px-2.5 py-2 text-[var(--text-muted)] text-xs transition-colors hover:text-[var(--text-heading)]"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+              Clear
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
+          <span>
+            Showing <strong className="text-[var(--text-heading)]">{filtered.length}</strong> of{' '}
+            {machines.length} machines
+          </span>
+          <span>Click any machine thumbnail to inspect its reference photo &amp; specs</span>
+        </div>
+      </GlassCard>
+
+      {/* Fleet Table with Separated Machine ID, Machine Name & Machine Picture */}
       <GlassCard className="overflow-hidden p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-[var(--border-default)] border-b">
-                {[
-                  'Machine Id / Name',
-                  'Type / Bin Factor (Waste & Coal)',
-                  'Manufacture',
-                  'Starting SMR',
-                  'Department',
-                  'Site',
-                  'Status',
-                  'Actions',
-                ].map((h) => (
-                  <th
-                    key={h}
-                    scope="col"
-                    className={`px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider${h === 'Actions' ? 'text-right' : ''}`}
-                  >
-                    {h}
-                  </th>
-                ))}
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
+                  Machine ID
+                </th>
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
+                  Machine Name
+                </th>
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
+                  Manufacturer
+                </th>
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
+                  Type / Bin Factor
+                </th>
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
+                  Starting SMR
+                </th>
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
+                  Department
+                </th>
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
+                  Site
+                </th>
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
+                  Status
+                </th>
+                <th scope="col" className={`${TABLE_HEADER_CELL_CLASS} text-right`}>
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-default)]">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
+                  <td colSpan={9} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading…
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
+                  <td colSpan={9} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     {machines.length === 0
                       ? 'No machines registered. Add one to get started.'
                       : 'No machines match the current filters.'}
                   </td>
                 </tr>
               ) : (
-                filtered.map((m) => {
-                  const isDumper = isArticulatedOrRigidDumper(m.machine_type);
-                  const wasteFactor = m.bin_factor_waste ?? m.bin_factor;
-                  const coalFactor = m.bin_factor_coal;
+                filtered.map((machine) => {
+                  const identity = resolveMachineIdentity({
+                    name: machine.name,
+                    serialNumber: machine.serial_number,
+                  });
+                  const resolvedManufacturer = resolveDefaultManufacturer({
+                    machineId: identity.machineId,
+                    machineName: identity.machineName,
+                    machineType: machine.machine_type,
+                    manufacturer: machine.manufacturer,
+                  });
+                  const resolvedImage = resolveDefaultMachineImage({
+                    machineType: machine.machine_type,
+                    manufacturer: resolvedManufacturer,
+                    machineId: identity.machineId,
+                    imageUrl: machine.image_url,
+                  });
+                  const isDumper = isArticulatedOrRigidDumper(machine.machine_type);
+                  const wasteFactor = machine.bin_factor_waste ?? machine.bin_factor;
+                  const coalFactor = machine.bin_factor_coal;
+                  const smrValue = Number(machine.starting_smr ?? 0);
+
                   return (
-                    <tr key={m.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
-                      <td className="px-6 py-4 font-medium text-[var(--text-heading)] text-sm">
-                        <div>{m.serial_number || m.name}</div>
-                        {m.serial_number && m.name !== m.serial_number && (
-                          <div className="font-normal text-[var(--text-muted)] text-xs">
-                            {m.name}
-                          </div>
-                        )}
+                    <tr
+                      key={machine.id}
+                      className="transition-colors hover:bg-[var(--bg-tertiary)]"
+                    >
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewMachine(machine)}
+                            aria-label={`Preview picture for ${identity.machineId}`}
+                            className="group relative h-10 w-16 shrink-0 overflow-hidden rounded-lg border border-accent-gold/40 bg-[var(--bg-secondary)] transition-transform hover:scale-105"
+                          >
+                            <Image
+                              src={resolvedImage}
+                              alt={`${identity.machineId} ${identity.machineName}`}
+                              width={64}
+                              height={40}
+                              className="h-full w-full object-cover"
+                            />
+                          </button>
+                          <span className="font-mono font-semibold text-[var(--text-heading)] text-sm">
+                            {identity.machineId}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span className="font-mono text-[var(--text-muted)]">{m.machine_type}</span>
+                      <td className="px-4 py-3.5 font-medium text-[var(--text-heading)] text-sm">
+                        {identity.machineName}
+                      </td>
+                      <td className="px-4 py-3.5 text-[var(--text-body)] text-sm">
+                        {resolvedManufacturer}
+                      </td>
+                      <td className="px-4 py-3.5 text-sm">
+                        <span className="font-mono text-[var(--text-muted)]">
+                          {machine.machine_type}
+                        </span>
                         {isDumper && (wasteFactor != null || coalFactor != null) && (
                           <div className="mt-1 flex flex-wrap gap-1.5">
                             {wasteFactor != null && (
@@ -373,62 +634,74 @@ export function FleetTab() {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                        {m.manufacturer || '—'}
+                      <td className="px-4 py-3.5 font-mono text-[var(--text-heading)] text-sm tabular-nums">
+                        {smrValue > 0
+                          ? `${smrValue.toLocaleString('en-US', {
+                              minimumFractionDigits: 1,
+                              maximumFractionDigits: 1,
+                            })} hrs`
+                          : '—'}
                       </td>
-                      <td className="px-6 py-4 font-mono text-[var(--text-muted)] text-sm">
-                        {m.starting_smr != null ? `${m.starting_smr} hrs` : '—'}
+                      <td className="px-4 py-3.5 text-sm">
+                        <Badge
+                          variant="outline"
+                          className="border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]"
+                        >
+                          {machine.department?.display_name || 'Production'}
+                        </Badge>
                       </td>
-                      <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                        {m.department?.display_name || '—'}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {m.site ? (
+                      <td className="px-4 py-3.5 text-sm">
+                        {machine.site ? (
                           <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
-                            {m.site.site_code}
-                            <span className="text-[var(--text-muted)]">{m.site.name}</span>
+                            {machine.site.site_code}
+                            <span className="text-[var(--text-muted)]">{machine.site.name}</span>
                           </span>
                         ) : (
                           <span className="text-[var(--text-muted)] text-xs">—</span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5">
                         <div className="flex flex-col items-start gap-1">
                           <Badge
                             variant="outline"
                             className={
-                              m.active
+                              machine.active
                                 ? 'border-accent-green/20 bg-accent-green/10 text-accent-green'
                                 : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)]'
                             }
                           >
-                            {m.active ? 'Active' : 'Inactive'}
+                            {machine.active ? 'Active' : 'Inactive'}
                           </Badge>
-                          {m.report_exempt && (
+                          {machine.report_exempt && (
                             <span className="inline-flex items-center gap-1 rounded-full border border-accent-amber/20 bg-accent-amber/10 px-1.5 py-0.5 text-[10px] text-accent-amber">
                               Exempt
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-4 py-3.5 text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEdit(m)}>
-                            <Edit2 className="h-4 w-4" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            aria-label={`Edit ${identity.machineId}`}
+                            onClick={() => handleEdit(machine)}
+                          >
+                            <Edit2 className="h-4 w-4" aria-hidden="true" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             disabled={saving}
                             className={
-                              m.active
+                              machine.active
                                 ? 'text-accent-red hover:text-accent-red/80'
                                 : 'text-accent-green hover:text-accent-green'
                             }
-                            onClick={() => setPendingToggle(m)}
-                            title={m.active ? 'Deactivate' : 'Activate'}
+                            onClick={() => setPendingToggle(machine)}
+                            title={machine.active ? 'Deactivate' : 'Activate'}
                           >
-                            <Power className="h-4 w-4" />
+                            <Power className="h-4 w-4" aria-hidden="true" />
                           </Button>
                         </div>
                       </td>
@@ -439,22 +712,21 @@ export function FleetTab() {
             </tbody>
           </table>
         </div>
-        {!loading && filtered.length > 0 && filtered.length < machines.length && (
-          <p className="border-[var(--border-default)] border-t px-6 py-2 text-[var(--text-muted)] text-xs">
-            Showing {filtered.length} of {machines.length} machines
-          </p>
-        )}
       </GlassCard>
 
       {/* Add / Edit dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto border-[var(--border-default)] bg-[var(--bg-primary)]">
+        <DialogContent
+          aria-describedby={undefined}
+          className="max-h-[90vh] max-w-lg overflow-y-auto border-[var(--border-default)] bg-[var(--bg-primary)]"
+        >
           <DialogHeader>
             <DialogTitle>{editingMachine ? 'Edit Machine' : 'Add Machine'}</DialogTitle>
           </DialogHeader>
           <MachineForm
             machine={editingMachine}
             departments={departments}
+            defaultDepartmentId={productionDepartmentId}
             sites={sites}
             error={dialogError}
             saving={saving}
@@ -464,9 +736,34 @@ export function FleetTab() {
         </DialogContent>
       </Dialog>
 
+      {/* Machine Picture & Spec Preview Modal */}
+      <Dialog
+        open={Boolean(previewMachine)}
+        onOpenChange={(open) => !open && setPreviewMachine(null)}
+      >
+        <DialogContent
+          aria-describedby={undefined}
+          className="max-w-lg border-[var(--border-default)] bg-[var(--bg-primary)]"
+        >
+          {previewMachine && (
+            <MachinePreviewDialogContent
+              machine={previewMachine}
+              onEdit={() => {
+                const target = previewMachine;
+                setPreviewMachine(null);
+                handleEdit(target);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Confirm deactivate / activate dialog */}
       <Dialog open={!!pendingToggle} onOpenChange={(open) => !open && setPendingToggle(null)}>
-        <DialogContent className="max-w-sm border-[var(--border-default)] bg-[var(--bg-primary)]">
+        <DialogContent
+          aria-describedby={undefined}
+          className="max-w-sm border-[var(--border-default)] bg-[var(--bg-primary)]"
+        >
           <DialogHeader>
             <DialogTitle>
               {pendingToggle?.active ? 'Deactivate Machine?' : 'Activate Machine?'}
@@ -499,9 +796,78 @@ export function FleetTab() {
   );
 }
 
+function MachinePreviewDialogContent({
+  machine,
+  onEdit,
+}: {
+  readonly machine: Machine;
+  readonly onEdit: () => void;
+}) {
+  const identity = resolveMachineIdentity({
+    name: machine.name,
+    serialNumber: machine.serial_number,
+  });
+  const mfg = resolveDefaultManufacturer({
+    machineId: identity.machineId,
+    machineName: identity.machineName,
+    machineType: machine.machine_type,
+    manufacturer: machine.manufacturer,
+  });
+  const imgUrl = resolveDefaultMachineImage({
+    machineType: machine.machine_type,
+    manufacturer: mfg,
+    machineId: identity.machineId,
+    imageUrl: machine.image_url,
+  });
+
+  return (
+    <div className="space-y-4">
+      <DialogHeader>
+        <DialogTitle>
+          {identity.machineId} — {identity.machineName}
+        </DialogTitle>
+      </DialogHeader>
+      <div className="overflow-hidden rounded-xl border border-accent-gold/40 bg-[var(--bg-secondary)]">
+        <Image
+          src={imgUrl}
+          alt={`${identity.machineId} ${identity.machineName}`}
+          width={640}
+          height={400}
+          className="h-60 w-full object-cover"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-2.5">
+          <div className="text-[11px] text-[var(--text-muted)]">Manufacturer &amp; Type</div>
+          <div className="font-medium text-[var(--text-heading)]">
+            {mfg} · {machine.machine_type}
+          </div>
+        </div>
+        <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-2.5">
+          <div className="text-[11px] text-[var(--text-muted)]">Starting SMR</div>
+          <div className="font-mono font-semibold text-[var(--text-heading)]">
+            {Number(machine.starting_smr ?? 0).toLocaleString('en-US', {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })}{' '}
+            hrs
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <Button type="button" onClick={onEdit} variant="outline">
+          <Edit2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          Edit Machine
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function MachineForm({
   machine,
   departments,
+  defaultDepartmentId,
   sites,
   error,
   saving,
@@ -510,14 +876,16 @@ function MachineForm({
 }: {
   machine: Machine | null;
   departments: Department[];
+  defaultDepartmentId: string;
   sites: Site[];
   error: string;
   saving: boolean;
   onSubmit: (_data: {
-    name: string;
+    machine_id: string;
+    machine_name: string;
     machine_type: string;
     manufacturer: string;
-    machine_id: string;
+    image_url: string;
     starting_smr: string;
     bin_factor_waste: string;
     bin_factor_coal: string;
@@ -528,35 +896,64 @@ function MachineForm({
   }) => void;
   onCancel: () => void;
 }) {
+  const initialIdentity = machine
+    ? resolveMachineIdentity({ name: machine.name, serialNumber: machine.serial_number })
+    : { machineId: '', machineName: '' };
+
+  const [machineId, setMachineId] = useState(initialIdentity.machineId);
+  const [machineName, setMachineName] = useState(initialIdentity.machineName);
   const [machineType, setMachineType] = useState(machine?.machine_type || '');
-  const [manufacturer, setManufacturer] = useState(machine?.manufacturer || '');
-  const [machineId, setMachineId] = useState(machine?.serial_number || machine?.name || '');
+  const [manufacturer, setManufacturer] = useState(
+    machine
+      ? resolveDefaultManufacturer({
+          machineId: initialIdentity.machineId,
+          machineName: initialIdentity.machineName,
+          machineType: machine.machine_type,
+          manufacturer: machine.manufacturer,
+        })
+      : ''
+  );
+  const [imageUrl, setImageUrl] = useState(
+    machine
+      ? resolveDefaultMachineImage({
+          machineType: machine.machine_type,
+          manufacturer: machine.manufacturer,
+          machineId: initialIdentity.machineId,
+          imageUrl: machine.image_url,
+        })
+      : ''
+  );
   const [startingSmr, setStartingSmr] = useState(
     machine?.starting_smr != null ? machine.starting_smr.toString() : ''
   );
-  const [name, setName] = useState(machine?.name || '');
   const [binFactorWaste, setBinFactorWaste] = useState(
     (machine?.bin_factor_waste ?? machine?.bin_factor)?.toString() || ''
   );
   const [binFactorCoal, setBinFactorCoal] = useState(machine?.bin_factor_coal?.toString() || '');
   const [departmentId, setDepartmentId] = useState(
-    machine?.department_id || departments[0]?.id || ''
+    machine?.department_id || defaultDepartmentId || departments[0]?.id || ''
   );
   const [siteId, setSiteId] = useState(machine?.site_id || '');
   const [active, setActive] = useState(machine?.active ?? true);
   const [reportExempt, setReportExempt] = useState(machine?.report_exempt ?? false);
 
   const isDumperType = isArticulatedOrRigidDumper(machineType);
-
   const activeSites = sites.filter((s) => s.active || s.id === siteId);
+  const resolvedPreviewUrl = resolveDefaultMachineImage({
+    machineType: machineType || 'Dump Truck',
+    manufacturer,
+    machineId: machineId || 'DT-01',
+    imageUrl,
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
-      name: name || machineId,
+      machine_id: machineId,
+      machine_name: machineName,
       machine_type: machineType,
       manufacturer,
-      machine_id: machineId,
+      image_url: resolvedPreviewUrl,
       starting_smr: startingSmr,
       bin_factor_waste: isDumperType ? binFactorWaste : '',
       bin_factor_coal: isDumperType ? binFactorCoal : '',
@@ -571,10 +968,37 @@ function MachineForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label
-            htmlFor="machineType"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
+          <label htmlFor="machineId" className={FORM_LABEL_CLASS}>
+            Machine ID <span className="text-accent-red">*</span>
+          </label>
+          <Input
+            id="machineId"
+            value={machineId}
+            onChange={(e) => setMachineId(e.target.value)}
+            placeholder="e.g. BD-22, DT-102, EX-22"
+            className="border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="machineName" className={FORM_LABEL_CLASS}>
+            Machine Name / Model <span className="text-accent-red">*</span>
+          </label>
+          <Input
+            id="machineName"
+            value={machineName}
+            onChange={(e) => setMachineName(e.target.value)}
+            placeholder="e.g. Caterpillar D9R, Volvo A45G"
+            className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="machineType" className={FORM_LABEL_CLASS}>
             Machine Type <span className="text-accent-red">*</span>
           </label>
           <select
@@ -598,51 +1022,25 @@ function MachineForm({
         </div>
 
         <div>
-          <label
-            htmlFor="manufacturer"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
-            Machine Manufacture <span className="text-accent-red">*</span>
+          <label htmlFor="manufacturer" className={FORM_LABEL_CLASS}>
+            Manufacturer <span className="text-accent-red">*</span>
           </label>
           <Input
             id="manufacturer"
             value={manufacturer}
             onChange={(e) => setManufacturer(e.target.value)}
-            placeholder="e.g. Caterpillar, Bell, Komatsu, Volvo"
+            placeholder="e.g. Volvo, Caterpillar, Komatsu"
             className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
             required
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label
-            htmlFor="machineId"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
-            Machine Id <span className="text-accent-red">*</span>
-          </label>
-          <Input
-            id="machineId"
-            value={machineId}
-            onChange={(e) => {
-              setMachineId(e.target.value);
-              if (!machine) setName(e.target.value);
-            }}
-            placeholder="e.g. ADT-001, RDT-104, EX-02"
-            className="border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono"
-            required
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="startingSmr"
-            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
-          >
-            Starting SMR on Site <span className="text-accent-red">*</span>
-          </label>
+      <div>
+        <label htmlFor="startingSmr" className={FORM_LABEL_CLASS}>
+          Starting SMR on Site <span className="text-accent-red">*</span>
+        </label>
+        <div className="flex gap-2">
           <Input
             id="startingSmr"
             type="number"
@@ -650,10 +1048,64 @@ function MachineForm({
             min="0"
             value={startingSmr}
             onChange={(e) => setStartingSmr(e.target.value)}
-            placeholder="e.g. 1250.0"
+            placeholder="e.g. 12500.0"
             className="border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono"
             required
           />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              setStartingSmr(
+                String(
+                  estimateBaselineStartingSmr({
+                    machineType: machineType || 'Dump Truck',
+                    machineId: machineId || 'UNIT-01',
+                  })
+                )
+              )
+            }
+          >
+            Generate
+          </Button>
+        </div>
+      </div>
+
+      {/* Machine Picture Selector + Preview */}
+      <div className="space-y-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
+        <span className="block font-medium text-[var(--text-body)] text-sm">Machine Picture</span>
+        <div className="flex items-center gap-3">
+          <div className="h-14 w-24 shrink-0 overflow-hidden rounded-lg border border-accent-gold/40 bg-[var(--bg-primary)]">
+            <Image
+              src={resolvedPreviewUrl}
+              alt={`${machineId || 'Machine'} preview`}
+              width={96}
+              height={56}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <select
+              aria-label="Machine picture preset"
+              value={FLEET_IMAGE_PRESETS.some((p) => p.url === imageUrl) ? imageUrl : ''}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs"
+            >
+              <option value="">Auto-match by Manufacturer &amp; Type</option>
+              {FLEET_IMAGE_PRESETS.map((preset) => (
+                <option key={preset.url} value={preset.url}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
+            <Input
+              aria-label="Machine picture URL"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="/images/fleet/volvo-adt.webp"
+              className="h-8 border-[var(--border-default)] bg-[var(--bg-primary)] font-mono text-xs"
+            />
+          </div>
         </div>
       </div>
 
@@ -717,7 +1169,7 @@ function MachineForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-2 block font-medium text-[var(--text-body)] text-sm">
+          <label className={FORM_LABEL_CLASS}>
             Department <span className="text-accent-red">*</span>
           </label>
           <select
@@ -737,7 +1189,7 @@ function MachineForm({
         </div>
 
         <div>
-          <label className="mb-2 block font-medium text-[var(--text-body)] text-sm">Site</label>
+          <label className={FORM_LABEL_CLASS}>Site</label>
           <select
             value={siteId}
             onChange={(e) => setSiteId(e.target.value)}
@@ -804,7 +1256,7 @@ function MachineForm({
           disabled={saving}
           className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
         >
-          {saving ? 'Saving…' : machine ? 'Update' : 'Add Machine'}
+          {saving ? 'Saving…' : machine ? 'Save Changes' : 'Add Machine'}
         </Button>
       </div>
     </form>

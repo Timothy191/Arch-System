@@ -84,7 +84,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
   const VolumeIcon =
     volume.muted || volume.volume === 0 ? VolumeX : volume.volume < 50 ? Volume1 : Volume2;
   const volumeColor =
-    volume.muted || volume.volume === 0 ? 'text-[var(--text-muted)]' : 'text-accent-gold';
+    volume.muted || volume.volume === 0 ? 'text-accent-gold/55' : 'text-accent-gold';
 
   const BatteryIcon = battery.charging
     ? BatteryCharging
@@ -96,15 +96,10 @@ const SystemTrayPillInner = function SystemTrayPillInner({
           ? BatteryFull
           : BatteryMedium;
 
-  const batteryColor = battery.charging
-    ? 'text-[var(--accent-green)]'
-    : battery.level === null
-      ? 'text-[var(--text-secondary)]'
-      : battery.level < 0.5
-        ? 'text-[var(--accent-red)]'
-        : battery.level < 0.7
-          ? 'text-[var(--accent-amber)]'
-          : 'text-[var(--accent-green)]';
+  const batteryColor =
+    !battery.charging && battery.level !== null && battery.level < 0.2
+      ? 'text-[var(--accent-red)]'
+      : 'text-accent-gold';
 
   const pathname = usePathname();
   const isAuthRoute =
@@ -211,7 +206,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
                   |
                 </span>
                 <div
-                  className="flex animate-pulse items-center gap-1 rounded-full border border-accent-amber/20 bg-accent-amber/10 px-1.5 py-0.5 text-accent-amber"
+                  className="flex animate-pulse items-center gap-1 rounded-full border border-accent-gold/35 bg-accent-gold/10 px-1.5 py-0.5 text-accent-gold"
                   title={`${offlineQueue.pendingCount} offline actions pending sync`}
                 >
                   <CloudOff className="h-3 w-3" />

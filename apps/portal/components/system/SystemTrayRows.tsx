@@ -684,7 +684,7 @@ export function TaskbarNotificationBell({ embedded = false }: { embedded?: boole
                   className={cn(
                     'rounded-lg border p-2.5 text-left transition-colors',
                     item.unread
-                      ? 'border-accent-amber/25 bg-accent-amber/5'
+                      ? 'border-accent-gold/35 bg-accent-gold/5'
                       : 'border-black/[0.05] bg-black/[0.02]'
                   )}
                 >
@@ -740,7 +740,7 @@ export function WifiNetworkPopover({
   }, []);
 
   const ConnIcon = !network.online ? WifiOff : Wifi;
-  const connColor = network.online ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]';
+  const connColor = network.online ? 'text-accent-gold' : 'text-[var(--accent-red)]';
 
   const detectedProfiles: readonly DetectedWifiProfile[] = [
     {

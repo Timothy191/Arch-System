@@ -3,7 +3,7 @@
 import * as Popover from '@radix-ui/react-popover';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { cn } from '@repo/ui/lib/utils';
-import { Hammer, Wrench } from 'lucide-react';
+import { Clock, Hammer, Wrench } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const ACTIVE_POPOVER_TICK_MS = 1000;
@@ -253,10 +253,11 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
           title="Clock & Calendar"
           className={cn(
             embedded
-              ? 'flex cursor-default select-none items-center gap-1 rounded-full px-1 outline-none transition-colors hover:text-[var(--accent-blue)] active:scale-95'
-              : 'gold-steel-border gold-steel-border-slim flex h-7 cursor-default select-none items-center gap-1.5 rounded-full border border-white/20 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm outline-none backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] active:scale-95'
+              ? 'flex cursor-default select-none items-center gap-1 rounded-full px-1 outline-none transition-colors hover:text-accent-gold active:scale-95'
+              : 'gold-steel-border gold-steel-border-slim flex h-7 cursor-default select-none items-center gap-1.5 rounded-full border border-accent-gold/45 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm outline-none backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] active:scale-95'
           )}
         >
+          <Clock className="h-3 w-3 shrink-0 text-accent-gold" aria-hidden="true" />
           <span className="font-mono font-semibold text-[12px] text-[var(--text-heading)] tabular-nums leading-none">
             {timeStr}
           </span>

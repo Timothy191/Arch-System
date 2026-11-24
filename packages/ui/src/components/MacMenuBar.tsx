@@ -123,10 +123,11 @@ export function MacMenuBar({
         y: 0,
       }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      data-sidebar-expanded={isSidebarExpanded ? 'true' : 'false'}
+      data-hub-route={isHubRoute ? 'true' : 'false'}
       className={cn(
-        'fixed top-2 right-3 z-navigation flex h-11 items-center justify-between px-3.5 transition-[left] duration-300 ease-out',
-        isSidebarExpanded && !isHubRoute ? 'left-3 md:left-[252px]' : 'left-3',
-        'liquid-glass-light gold-steel-border rounded-full border border-white/20 shadow-window',
+        'fixed inset-x-3 top-2 z-50 flex h-11 items-center justify-between gap-2 px-3.5 transition-all duration-300 ease-out',
+        'liquid-glass-light gold-steel-border gold-steel-border-slim rounded-full border border-accent-gold/45 shadow-window',
         className
       )}
     >
@@ -153,7 +154,7 @@ export function MacMenuBar({
           onClick={() => setSystemMenuOpen((open) => !open)}
           className={cn(
             'group/ctx gold-steel-border gold-steel-border-slim ml-1 hidden h-7 cursor-pointer select-none items-center gap-1.5 rounded-full',
-            'border border-black/[0.08] bg-white/60 px-2.5 font-medium text-[11px] text-[var(--text-heading)] shadow-2xs backdrop-blur-md transition-all hover:bg-white/85 md:inline-flex'
+            'border border-accent-gold/40 bg-white/70 px-2.5 font-medium text-[11px] text-[var(--text-heading)] shadow-2xs backdrop-blur-md transition-all hover:border-accent-gold hover:bg-white/90 md:inline-flex'
           )}
           title="Open System Menu"
         >
@@ -471,7 +472,7 @@ export function MacMenuBar({
       </nav>
 
       {/* Center: Pill-shaped search or custom slot */}
-      <div className="mx-4 hidden flex-1 items-center justify-center sm:flex">
+      <div className="mx-2 hidden min-w-0 flex-1 items-center justify-center sm:flex md:mx-4">
         {centerSlot !== undefined ? (
           centerSlot
         ) : (

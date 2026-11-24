@@ -189,10 +189,10 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
           aria-expanded={open}
           title="System Tray (Alt+S)"
           className={cn(
-            'relative flex cursor-default select-none items-center justify-center rounded-full text-[var(--text-secondary)] transition-all duration-150 ease-in-out focus-visible:outline-none',
+            'relative flex cursor-default select-none items-center justify-center rounded-full text-accent-gold transition-all duration-150 ease-in-out focus-visible:outline-none',
             embedded
-              ? 'h-5 w-5 hover:text-[var(--text-heading)] active:scale-[0.95]'
-              : 'gold-steel-border gold-steel-border-slim h-7 w-7 border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.97]',
+              ? 'h-5 w-5 hover:text-accent-gold-hover active:scale-[0.95]'
+              : 'gold-steel-border gold-steel-border-slim h-7 w-7 border border-accent-gold/45 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)] focus-visible:ring-2 focus-visible:ring-accent-gold/50 active:scale-[0.97]',
             open && !embedded && 'bg-[var(--material-thin)]'
           )}
         >
@@ -200,7 +200,7 @@ export function ServicesDropdown({ embedded = false }: { readonly embedded?: boo
             variant="gold"
             className={cn(
               embedded ? 'h-3.5 w-3.5' : 'h-4 w-4',
-              'transition-transform duration-200 ease-out',
+              'text-accent-gold transition-transform duration-200 ease-out',
               open ? 'rotate-0' : 'rotate-180'
             )}
           />

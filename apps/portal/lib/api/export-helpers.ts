@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
 import type { z } from 'zod';
 import { applyCors } from '@/lib/api/cors';
+import { sanitizeCsvCell } from '@/lib/api/csv-utils';
 
 type ServerSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 export type ExportQuery = z.infer<typeof exportQuerySchema>;
@@ -12,18 +13,12 @@ const HTTP_UNAUTHORIZED = 401;
 const HTTP_INTERNAL_ERROR = 500;
 const DEFAULT_HISTORY_DAYS = 30;
 const MS_PER_DAY = 86_400_000;
-/** Leading characters that spreadsheet apps interpret as formulas (CSV injection). */
-const CSV_FORMULA_PREFIX = /^[=+\-@\t\r]/;
+
+export { sanitizeCsvCell };
 
 export type ExportRequestContext =
   | { kind: 'ok'; supabase: ServerSupabaseClient; query: ExportQuery }
   | { kind: 'rejected'; response: NextResponse };
-
-/** Neutralizes CSV/formula injection and RFC-4180 quotes a single cell. */
-export function sanitizeCsvCell(cellText: string): string {
-  const sanitized = CSV_FORMULA_PREFIX.test(cellText) ? `'${cellText}` : cellText;
-  return `"${sanitized.replace(/"/g, '""')}"`;
-}
 
 /** Authenticates the caller and validates export query params (shared by all export routes). */
 export async function prepareExportRequest(req: NextRequest): Promise<ExportRequestContext> {

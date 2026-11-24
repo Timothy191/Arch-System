@@ -27,11 +27,11 @@ const HeaderWidgets = dynamic(
   {
     loading: () => (
       <div className="flex items-center gap-1.5" aria-hidden="true">
-        <span className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none">
+        <span className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none">
           |
         </span>
         <span className="inline-block h-4 w-[58px] rounded-full bg-black/5" />
-        <span className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none">
+        <span className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none">
           |
         </span>
         <span className="inline-block h-4 w-5 rounded-full bg-black/5" />
@@ -222,7 +222,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                     <nav id="navigation" aria-label="Main menu">
                       <div
                         data-testid="taskbar-unified-pill"
-                        className="gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full border border-white/20 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm backdrop-blur-md transition-colors"
+                        className="gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full border border-accent-gold/45 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm backdrop-blur-md transition-colors"
                       >
                         <SystemTrayPill embedded />
                         <HeaderWidgets />

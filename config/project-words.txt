@@ -50,6 +50,7 @@ blobby
 blockingly
 blockquotes
 bnetcat
+bomag
 bookin
 bookout
 bowser
@@ -221,6 +222,7 @@ hillshaded
 hilux
 hincrby
 HINCRBYFLOAT
+hino
 hitl
 hmac
 HMGET
@@ -333,6 +335,7 @@ meilisearch
 menlo
 metabase
 meteo
+metso
 mgmt
 mgrs
 mhsac
@@ -522,6 +525,7 @@ Safelisting
 SAMEORIGIN
 sandboxed
 sandboxing
+sany
 scaffolder
 scania
 scanline

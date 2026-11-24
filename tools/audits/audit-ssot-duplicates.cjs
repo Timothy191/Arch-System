@@ -38,7 +38,7 @@ const CANONICAL_SSOT_SYMBOLS = [
   },
   {
     symbol: 'sanitizeCsvCell',
-    canonicalPath: 'apps/portal/lib/api/export-helpers.ts',
+    canonicalPath: 'apps/portal/lib/api/csv-utils.ts',
   },
   {
     symbol: 'prepareExportRequest',

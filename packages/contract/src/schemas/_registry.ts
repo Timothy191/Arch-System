@@ -489,6 +489,7 @@ export const machineTelemetryArchiveSchema = z
 export const machinesSchema = z
   .object({
     id: z.string().optional(),
+    image_url: z.string().nullable().optional(),
     tenant_id: z.string().optional(),
     created_at: z.string().optional(),
     updated_at: z.string().optional(),
