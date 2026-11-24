@@ -468,7 +468,7 @@ export function DepartmentReviews() {
           role="dialog"
           aria-label="Runtime Environment Preview"
           data-testid="footer-environment-preview-dialog"
-          className="liquid-glass-light gold-steel-border gold-steel-border-slim fixed right-3 bottom-13 z-popover w-[min(92vw,440px)] overflow-hidden rounded-2xl border border-accent-gold/45 bg-white/95 p-3.5 text-[11px] shadow-window backdrop-blur-2xl"
+          className="liquid-glass-light gold-steel-border gold-steel-border-slim fixed right-3 bottom-13 z-popover w-[min(92vw,440px)] overflow-hidden rounded-2xl border border-accent-gold/45 bg-white/60 p-3.5 text-[11px] shadow-window backdrop-blur-2xl"
         >
           <div className="mb-2.5 flex items-center justify-between gap-2 border-accent-gold/25 border-b pb-2">
             <div className="flex items-center gap-2">
