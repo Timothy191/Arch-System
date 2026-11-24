@@ -62,14 +62,17 @@ describe('CoreOperationalModules', () => {
     const heading = screen.getByRole('heading', { name: /Mining Department Modules/i });
     expect(heading).toBeInTheDocument();
 
-    const logoSvg = heading.querySelector('span.rounded-full > svg');
+    const banner = heading.closest('.gold-steel-border');
+    expect(banner).toBeInTheDocument();
+    expect(banner).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+
+    const logoSvg = banner?.querySelector('span.rounded-2xl > svg');
     expect(logoSvg).toBeInTheDocument();
     expect(logoSvg).toHaveAttribute('viewBox', '22.75 16.625 166.16 166.19');
 
     expect(screen.getByLabelText('Pin Administration')).toBeInTheDocument();
     expect(screen.getByLabelText('Pin Stock Control Department')).toBeInTheDocument();
     expect(screen.getAllByTestId('arch-bookmark-icon')).toHaveLength(2);
-    expect(heading).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
     expect(screen.getByTestId('core-modules-count-badge')).toHaveClass(
       'gold-steel-border',
       'gold-steel-border-slim'

@@ -198,11 +198,11 @@ describe('HeroRotator', () => {
       '22.75 16.625 166.16 166.19'
     );
 
-    // Slim KPI banner under the hero card with gold | separators
+    // Globe pins banner under the hero card on the default central-command slide
     const slimBanner = screen.getByTestId('hero-kpi-slim-banner');
     expect(slimBanner).toBeInTheDocument();
-    expect(slimBanner).toContainElement(screen.getByTestId('hero-kpi-strip-central-command'));
-    expect(screen.getAllByTestId('hero-kpi-gold-separator').length).toBeGreaterThanOrEqual(2);
+    expect(slimBanner).toContainElement(screen.getByRole('img', { name: 'Operations globe' }));
+    expect(slimBanner).toContainElement(screen.getByText('Active Site Pins'));
 
     // Primary and secondary hero CTAs have gold bordering
     const secondaryCtas = container.querySelectorAll('[data-cta="secondary-hero"]');
@@ -402,6 +402,7 @@ describe('HeroRotator', () => {
     // Only the active slide's KPI strip is mounted — rotate to the Plant Inventory slide.
     fireEvent.click(screen.getByRole('button', { name: 'Next highlight' }));
     expect(screen.getByTestId('hero-kpi-strip-plant-inventory')).toBeInTheDocument();
+    expect(screen.getAllByTestId('hero-kpi-gold-separator').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText('7 Tracked')).toBeInTheDocument();
     expect(screen.getByText('87.5%')).toBeInTheDocument();
     expect(screen.getByText('4 Lines')).toBeInTheDocument();
