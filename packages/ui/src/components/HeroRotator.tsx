@@ -189,7 +189,7 @@ function HeroSlide({
         <div
           className={cn(
             'relative h-full w-full select-none overflow-hidden rounded-2xl',
-            'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/40 shadow-window',
+            'gold-steel-border gold-steel-border-slim border border-white/40 bg-white/60 shadow-window backdrop-blur-xl',
             'transition-[box-shadow,transform] duration-500 ease-out',
             isCenter ? 'hover:-translate-y-0.5' : 'pointer-events-none'
           )}

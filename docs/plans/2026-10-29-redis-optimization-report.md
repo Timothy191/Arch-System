@@ -67,15 +67,15 @@ Also add a `CATCH_ALL` fallback category for keys without explicit categorizatio
 
 ```typescript
 export const CacheCategory = {
-  AUTH: 'auth',
-  METRICS: 'metrics',
-  SHIFT: 'shift',
-  AI_MEMORY: 'ai_memory',
-  DEPARTMENT: 'dept',
-  EQUIPMENT: 'equipment',
-  TELEMETRY: 'telemetry', // NEW
-  REPORTS: 'reports', // NEW
-  SESSIONS: 'sessions', // NEW
+  AUTH: "auth",
+  METRICS: "metrics",
+  SHIFT: "shift",
+  AI_MEMORY: "ai_memory",
+  DEPARTMENT: "dept",
+  EQUIPMENT: "equipment",
+  TELEMETRY: "telemetry", // NEW
+  REPORTS: "reports", // NEW
+  SESSIONS: "sessions", // NEW
 } as const;
 ```
 
@@ -123,17 +123,19 @@ The `cacheInvalidateTags()` broadcast payload is limited to `BROADCAST_KEY_LIMIT
 
 ```typescript
 // Add new export:
-export async function cacheInvalidateTagsBatch(tags: string[]): Promise<number> {
+export async function cacheInvalidateTagsBatch(
+  tags: string[]
+): Promise<number> {
   // Send single broadcast with all tags; each instance processes independently
-  const payload = { type: 'tags', tags };
+  const payload = { type: "tags", tags };
   try {
     const redis = await getRedisClient();
-    await redis.publish('cache:invalidate:broadcast', JSON.stringify(payload));
+    await redis.publish("cache:invalidate:broadcast", JSON.stringify(payload));
     // Each instance independently invalidates its own L1 + L2
     const totalDeleted = await cacheInvalidateTags(tags);
     return totalDeleted;
   } catch {
-    await incrementCounter('cache.invalidate.batch_failed');
+    await incrementCounter("cache.invalidate.batch_failed");
     return 0;
   }
 }
@@ -224,7 +226,7 @@ export function startL1Sweep(intervalMs = 60_000): void {
   sweepInterval = setInterval(() => {
     const removed = memorySweep();
     if (removed > 0) {
-      recordCacheHit('l1_sweep', removed); // metric: entries reclaimed
+      recordCacheHit("l1_sweep", removed); // metric: entries reclaimed
     }
   }, intervalMs);
 }
@@ -321,6 +323,6 @@ await recordL1EvictionCount(removed); // after memorySweep
 
 ### Long-term (P3 — quarterly)
 
-- [ ] Evaluate Redis Cluster vs. Single-instance for write throughput
+- [x] Evaluate Redis Cluster vs. Single-instance for write throughput
 - [x] Migrate vector search to pgvector if RediSearch license costs increase
 - [x] Design cold-start mitigation for serverless Redis (pre-warm caches on deployment)

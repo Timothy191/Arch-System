@@ -75,7 +75,7 @@ export function ToolBanner({ tools }: ToolBannerProps) {
               <GlassCard
                 variant="spotlight"
                 spotlightColor={config.glow}
-                className="h-full rounded-card border border-black/[0.08] bg-white/75 shadow-card backdrop-blur-xl transition-all duration-300 will-change-[backdrop-filter] hover:border-arch-accent-blue/30 hover:shadow-card-hover"
+                className="h-full rounded-card border border-black/[0.08] bg-white/60 shadow-card backdrop-blur-xl transition-all duration-300 will-change-[backdrop-filter] hover:border-arch-accent-blue/30 hover:shadow-card-hover"
               >
                 <div className="flex select-none flex-col items-center p-5 text-center sm:p-6">
                   <div

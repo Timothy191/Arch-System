@@ -107,7 +107,7 @@ export default async function ExecutiveDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <GlassCard variant="window">
+      <GlassCard variant="window" backgroundOpacity={0.6}>
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <p className="font-semibold text-[var(--accent-blue)] text-xs uppercase tracking-wider">
