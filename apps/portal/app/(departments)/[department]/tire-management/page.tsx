@@ -53,7 +53,7 @@ export default async function TireManagementPage({
         .limit(50),
       supabase
         .from('machines')
-        .select('id, name, machine_type, serial_number, active')
+        .select('id, name, machine_type, serial_number, starting_smr, active')
         .order('name'),
     ]);
 
@@ -96,14 +96,67 @@ export default async function TireManagementPage({
     };
   });
 
-  const machines: TireMachineOption[] = (machinesData || [])
-    .filter((m) => (m as { active?: boolean | null }).active !== false)
-    .map((m) => ({
+  const activeMachines = (machinesData || []).filter(
+    (m) => (m as { active?: boolean | null }).active !== false
+  );
+
+  const latestSmuByMachine = new Map<string, number>();
+  for (const tire of tires) {
+    if (!tire.machine_id) continue;
+    const candidate = tire.latestInspection?.current_smu ?? tire.installed_hours;
+    if (candidate != null && Number.isFinite(Number(candidate))) {
+      const prev = latestSmuByMachine.get(tire.machine_id);
+      if (prev === undefined || Number(candidate) > prev) {
+        latestSmuByMachine.set(tire.machine_id, Number(candidate));
+      }
+    }
+  }
+
+  if (activeMachines.length > 0) {
+    try {
+      const machineIds = activeMachines.map((m) => m.id);
+      const { data: recentOps } = await supabase
+        .from('machine_operations')
+        .select('machine_id, end_smu, start_smu')
+        .in('machine_id', machineIds)
+        .order('shift_date', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      for (const op of recentOps || []) {
+        if (!op.machine_id) continue;
+        const smu =
+          op.end_smu != null
+            ? Number(op.end_smu)
+            : op.start_smu != null
+              ? Number(op.start_smu)
+              : null;
+        if (smu != null && Number.isFinite(smu) && smu > 0) {
+          const prev = latestSmuByMachine.get(op.machine_id);
+          if (prev === undefined || smu > prev) {
+            latestSmuByMachine.set(op.machine_id, smu);
+          }
+        }
+      }
+    } catch {
+      // Non-fatal fallback: machine.starting_smr and installed tire hours remain available
+    }
+  }
+
+  const machines: TireMachineOption[] = activeMachines.map((m) => {
+    const rawStarting = (m as { starting_smr?: number | null }).starting_smr;
+    const startingSmr =
+      rawStarting != null && Number.isFinite(Number(rawStarting)) ? Number(rawStarting) : null;
+    const latestSmu = latestSmuByMachine.get(m.id) ?? startingSmr;
+    return {
       id: m.id,
       name: m.name,
       machine_type: m.machine_type,
       serial_number: m.serial_number ?? null,
-    }));
+      starting_smr: startingSmr,
+      latest_smu: latestSmu,
+    };
+  });
 
   const resolvedToday = today || new Date().toISOString().slice(0, 10);
 

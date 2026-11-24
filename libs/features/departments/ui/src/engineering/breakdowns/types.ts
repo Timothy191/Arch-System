@@ -71,6 +71,12 @@ export interface Machine {
   name: string;
   machine_type: string;
   serial_number: string | null;
+  manufacturer?: string | null;
+  starting_smr?: number | null;
+  current_smu?: number | null;
+  image_url?: string | null;
+  site_name?: string | null;
+  site_code?: string | null;
   active: boolean;
 }
 

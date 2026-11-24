@@ -36,7 +36,7 @@ const mockReportData: ProductionMonthReportData = {
     stripRatio: 2.94,
     expectedTonnesFromBcm: 195000,
     reconciliationDriftPct: 71.79,
-    daysLogged: 10,
+    daysLogged: 1,
     totalDaysInMonth: 31,
     coalTargetProgressPct: 85.0,
     wasteTargetProgressPct: 83.3,
@@ -49,6 +49,7 @@ const mockReportData: ProductionMonthReportData = {
   dailyRows: [
     {
       date: '2026-03-10',
+      hasData: true,
       dayShiftCoalTonnes: 4500,
       nightShiftCoalTonnes: 4000,
       totalCoalTonnes: 8500,
@@ -64,6 +65,24 @@ const mockReportData: ProductionMonthReportData = {
       activeMachinesCount: 12,
       stripRatio: 2.94,
     },
+    {
+      date: '2026-03-09',
+      hasData: false,
+      dayShiftCoalTonnes: 0,
+      nightShiftCoalTonnes: 0,
+      totalCoalTonnes: 0,
+      dayShiftWasteTonnes: 0,
+      nightShiftWasteTonnes: 0,
+      totalWasteTonnes: 0,
+      haulTruckLoads: 0,
+      haulTruckBcm: 0,
+      excavatorBcm: 0,
+      dozerPushBcm: 0,
+      totalBcm: 0,
+      fleetOperatingHours: 0,
+      activeMachinesCount: 0,
+      stripRatio: 0,
+    },
   ],
 };
 
@@ -72,14 +91,39 @@ describe('ProductionCommandCenterClient', () => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly with monthly targets and single-pass aggregated table totals', () => {
+  it('renders full-month calendar ledger, Pit BCM upstream tiles, and zero weighbridge references', () => {
     render(<ProductionCommandCenterClient initialData={mockReportData} deptId="dept-prod-01" />);
 
-    expect(screen.getByText('Production Command & Monthly Reconciliation')).toBeInTheDocument();
+    expect(screen.getByText('Production Command & Pit BCM Ledger')).toBeInTheDocument();
     expect(
       screen.getByText('March 2026 — Automated Daily Production & Stripping Ledger')
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Showing full month \(all 31 days\) for March 2026 — 1 active production day\(s\) captured/i
+      )
+    ).toBeInTheDocument();
 
+    expect(screen.getByText('1. Haul Truck Pit BCM')).toBeInTheDocument();
+    expect(screen.getByText('2. Excavator Pit BCM')).toBeInTheDocument();
+    expect(screen.getByText('3. Dozer Rollover Pit BCM')).toBeInTheDocument();
+    expect(screen.getByText('4. Fleet SMR Ops')).toBeInTheDocument();
+
+    expect(screen.getByRole('link', { name: 'Production Targets' })).toHaveAttribute(
+      'href',
+      '/production/daily-log'
+    );
+    expect(screen.getByRole('link', { name: 'Hourly Loads Matrix' })).toHaveAttribute(
+      'href',
+      '/production/hourly-loads'
+    );
+    expect(screen.getByRole('link', { name: 'Detailed Shift Logs' })).toHaveAttribute(
+      'href',
+      '/production/reports'
+    );
+
+    expect(screen.queryByText(/weighbridge/i)).not.toBeInTheDocument();
+    expect(screen.getByText('No data captured')).toBeInTheDocument();
     expect(screen.getByText('MONTHLY TOTAL')).toBeInTheDocument();
     expect(screen.getAllByText('4,500').length).toBeGreaterThan(0);
     expect(screen.getAllByText('4,000').length).toBeGreaterThan(0);

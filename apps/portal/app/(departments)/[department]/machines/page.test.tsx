@@ -43,6 +43,30 @@ jest.mock(
   })
 );
 
+jest.mock('~/features/departments/components/production/actions', () => ({
+  getProductionMachinesTargetReport: jest.fn(async (asOfDate: string) => ({
+    asOfDate,
+    activeShiftLabel: 'Day Shift',
+    targets: {},
+    summaryByHorizon: {},
+    machines: [],
+  })),
+}));
+
+jest.mock('~/features/departments/components/production/ProductionMachinesTargetPanel', () => ({
+  ProductionMachinesTargetPanel: ({
+    report,
+  }: {
+    report: { asOfDate: string; activeShiftLabel: string };
+  }) => (
+    <div
+      data-testid="production-machines-target-panel"
+      data-date={report.asOfDate}
+      data-shift={report.activeShiftLabel}
+    />
+  ),
+}));
+
 jest.mock('~/lib/dept-context', () => ({
   getDepartmentContext: jest.fn(async () => ({
     deptId: 'dept-engineering-001',
@@ -82,6 +106,15 @@ describe('/[department]/machines Page & Telemetry Panels', () => {
     expect(screen.getByTestId('plant-inventory-workspace')).toHaveAttribute(
       'data-mode',
       'item-list'
+    );
+
+    const productionJsx = await MachinesPage({
+      params: Promise.resolve({ department: 'production' }),
+    });
+    render(productionJsx);
+    expect(screen.getByTestId('production-machines-target-panel')).toHaveAttribute(
+      'data-date',
+      '2026-11-20'
     );
   });
 

@@ -9,6 +9,7 @@ import {
   Sparkles,
   Trash2,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { createBreakdown } from './actions';
 import type { Breakdown, Machine } from './types';
@@ -30,6 +31,74 @@ const COMMON_REASONS = [
 ];
 
 const DRAFT_KEY = 'arch_breakdown_bookin_draft';
+const DEFAULT_FLEET_IMAGE = '/images/fleet/volvo-adt.webp';
+
+function resolveMachineImageUrl(machine: Machine): string {
+  const explicit = (machine.image_url ?? '').trim();
+  if (explicit) return explicit;
+
+  const idUpper = machine.name.toUpperCase();
+  const mfgLower = (machine.manufacturer ?? '').toLowerCase();
+  const typeLower = machine.machine_type.toLowerCase();
+
+  if (idUpper.startsWith('DT-') || idUpper === 'FB-18' || typeLower.includes('articulated')) {
+    return '/images/fleet/volvo-adt.webp';
+  }
+  if (idUpper.startsWith('WB-') || typeLower.includes('water')) {
+    return '/images/fleet/water-bowser.webp';
+  }
+  if (idUpper === 'FB-16' || mfgLower.includes('toyota')) {
+    return '/images/fleet/service-bowser.webp';
+  }
+  if (idUpper.startsWith('CR-') || typeLower.includes('crusher')) {
+    return '/images/fleet/mobile-crusher.webp';
+  }
+  if (idUpper.startsWith('CKN-') || typeLower.includes('compactor')) {
+    return '/images/fleet/roller-compactor.webp';
+  }
+  if (typeLower.includes('drill')) {
+    return '/images/fleet/atlas-copco-drill.webp';
+  }
+  if (typeLower.includes('dozer')) {
+    return mfgLower.includes('komatsu')
+      ? '/images/fleet/komatsu-dozer.webp'
+      : '/images/fleet/caterpillar-dozer.webp';
+  }
+  if (typeLower.includes('excavator')) {
+    return mfgLower.includes('komatsu')
+      ? '/images/fleet/komatsu-excavator.webp'
+      : '/images/fleet/hitachi-excavator.webp';
+  }
+  if (typeLower.includes('grader')) {
+    return mfgLower.includes('sany')
+      ? '/images/fleet/sany-grader.webp'
+      : '/images/fleet/caterpillar-grader.webp';
+  }
+  if (typeLower.includes('loader')) {
+    return mfgLower.includes('caterpillar')
+      ? '/images/fleet/caterpillar-loader.webp'
+      : '/images/fleet/volvo-loader.webp';
+  }
+  if (typeLower.includes('dump') || typeLower.includes('rigid') || typeLower.includes('haul')) {
+    if (mfgLower.includes('komatsu')) return '/images/fleet/komatsu-rdt.webp';
+    if (mfgLower.includes('caterpillar')) return '/images/fleet/caterpillar-rdt.webp';
+    return DEFAULT_FLEET_IMAGE;
+  }
+  return DEFAULT_FLEET_IMAGE;
+}
+
+function formatSavedSmr(machine: Machine): string {
+  const smrValue = machine.current_smu ?? machine.starting_smr;
+  if (smrValue == null || Number.isNaN(Number(smrValue))) {
+    return 'Not recorded';
+  }
+  return `${Number(smrValue).toLocaleString('en-US')} hrs`;
+}
+
+function formatMachineSite(machine: Machine): string {
+  if (!machine.site_name) return 'Main Pit';
+  return machine.site_code ? `${machine.site_name} (${machine.site_code})` : machine.site_name;
+}
 
 export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInFormProps) {
   const [isPending, startTransition] = useTransition();
@@ -185,13 +254,13 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Machine Selector */}
+          {/* Step 1: Machine ID Selector */}
           <div>
             <label
               htmlFor="machine-select"
-              className="mb-1.5 block text-[var(--text-secondary)] text-sm"
+              className="mb-1.5 block font-medium text-[var(--text-secondary)] text-sm"
             >
-              Select Machine
+              Step 1 · Machine ID (Select Machine)
             </label>
             <select
               id="machine-select"
@@ -200,7 +269,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
               onChange={(e) => setSelectedMachineId(e.target.value)}
               className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
             >
-              <option value="">— Choose a machine —</option>
+              <option value="">— Choose a Machine ID —</option>
               {machines.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name} ({m.machine_type})
@@ -209,34 +278,78 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             </select>
           </div>
 
-          {/* Auto-filled Machine Details */}
+          {/* Saved Machine Profile Card */}
           {selectedMachine && (
-            <div className="grid grid-cols-2 gap-3 rounded-lg border border-violet-500/10 bg-violet-500/5 p-3">
-              <div>
-                <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                  Fleet / Serial
-                </p>
-                <p className="font-medium text-[var(--text-heading)] text-sm">
-                  {selectedMachine.serial_number || selectedMachine.id.slice(0, 8)}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                  Machine Type
-                </p>
-                <p className="font-medium text-[var(--text-heading)] text-sm">
-                  {selectedMachine.machine_type}
-                </p>
+            <div
+              data-testid="selected-machine-profile"
+              className="flex flex-col gap-4 rounded-xl border border-violet-500/20 bg-violet-500/5 p-3.5 sm:flex-row sm:items-center"
+            >
+              <Image
+                src={resolveMachineImageUrl(selectedMachine)}
+                alt={selectedMachine.name}
+                width={160}
+                height={96}
+                className="h-24 w-40 shrink-0 rounded-lg border border-[var(--border-default)] object-cover"
+              />
+              <div className="grid flex-1 grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+                <div>
+                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Machine ID
+                  </p>
+                  <p className="font-semibold text-[var(--text-heading)] text-sm">
+                    {selectedMachine.name}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Fleet / Serial
+                  </p>
+                  <p className="font-medium text-[var(--text-heading)] text-sm">
+                    {selectedMachine.serial_number || selectedMachine.id.slice(0, 8)}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Manufacturer
+                  </p>
+                  <p className="font-medium text-[var(--text-heading)] text-sm">
+                    {selectedMachine.manufacturer || 'Heavy Fleet'}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Machine Type
+                  </p>
+                  <p className="font-medium text-[var(--text-heading)] text-sm">
+                    {selectedMachine.machine_type}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Site
+                  </p>
+                  <p className="font-medium text-[var(--text-heading)] text-sm">
+                    {formatMachineSite(selectedMachine)}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Saved SMR Hours
+                  </p>
+                  <p className="font-semibold text-[var(--text-heading)] text-sm">
+                    {formatSavedSmr(selectedMachine)}
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Date & Time */}
+          {/* Step 2: Date & Time */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-[var(--text-secondary)] text-sm">
+              <label className="mb-1.5 flex items-center gap-1.5 font-medium text-[var(--text-secondary)] text-sm">
                 <CalendarDays className="h-3.5 w-3.5" />
-                Date In
+                Step 2 · Date In
               </label>
               <input
                 type="date"
@@ -248,7 +361,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
               />
             </div>
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-[var(--text-secondary)] text-sm">
+              <label className="mb-1.5 flex items-center gap-1.5 font-medium text-[var(--text-secondary)] text-sm">
                 <Clock className="h-3.5 w-3.5" />
                 Time In
               </label>
@@ -263,10 +376,15 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             </div>
           </div>
 
-          {/* Quick Preset Fault Reasons */}
+          {/* Step 3: Breakdown Reason & Quick Presets */}
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className="block text-[var(--text-secondary)] text-sm">Breakdown Reason</label>
+              <label
+                htmlFor="breakdown-reason-input"
+                className="block font-medium text-[var(--text-secondary)] text-sm"
+              >
+                Step 3 · Breakdown Reason
+              </label>
               <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
                 <Sparkles className="h-3 w-3 text-violet-400" />
                 Quick presets
@@ -287,12 +405,13 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             </div>
 
             <textarea
+              id="breakdown-reason-input"
               required
               rows={3}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Describe the issue or select a preset..."
-              className="w-full resize-none rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[#555] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
+              className="w-full resize-none rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
             />
           </div>
 

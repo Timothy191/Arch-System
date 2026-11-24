@@ -2,6 +2,9 @@ import { connection } from 'next/server';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantHistoryDatabaseClient } from '~/features/departments/components/plant-processing/PlantHistoryDatabaseClient';
+import { getProductionPerformanceData } from '~/features/departments/components/production/actions';
+import { ProductionReportsWorkspace } from '~/features/departments/components/production/ProductionReportsWorkspace';
+import type { ProductionReportTab } from '~/features/departments/components/production/production-types';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { mapOperationsToMachineDailyRecords } from './machine-activity-helpers';
 import { ReportsDashboardClient } from './ReportsDashboardClient';
@@ -41,6 +44,24 @@ export default async function ReportsPage({
         mode="reports"
         today={today}
         initialReportTab={initialReportTab}
+      />
+    );
+  }
+  if (deptSlug === 'production') {
+    const { deptId } = await getDepartmentContext({ department: deptSlug });
+    const initialProdTab: ProductionReportTab =
+      tabParam === 'pdf-report' ||
+      tabParam === 'daily' ||
+      tabParam === 'monthly' ||
+      tabParam === 'foreman'
+        ? tabParam
+        : 'foreman';
+    const performanceData = await getProductionPerformanceData(undefined, deptId);
+    return (
+      <ProductionReportsWorkspace
+        initialData={performanceData}
+        initialTab={initialProdTab}
+        deptId={deptId}
       />
     );
   }

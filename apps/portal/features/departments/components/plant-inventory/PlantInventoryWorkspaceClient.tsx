@@ -7,6 +7,7 @@ import {
   BarChart2,
   CheckCircle2,
   ClipboardList,
+  Minus,
   Search,
   TrendingUp,
 } from 'lucide-react';
@@ -64,10 +65,8 @@ export function PlantInventoryWorkspaceClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
-  // Inline Required / Have Amount Editing State
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [editRequiredValue, setEditRequiredValue] = useState<string>('');
-  const [editPresentValue, setEditPresentValue] = useState<string>('');
+  // -1 Remove Confirmation State
+  const [pendingRemoveItem, setPendingRemoveItem] = useState<PlantInventoryStockItem | null>(null);
   const [inlineFeedback, setInlineFeedback] = useState<string | null>(null);
 
   // Add Item Form State (used in `item-list` view)
@@ -155,33 +154,60 @@ export function PlantInventoryWorkspaceClient({
     }
   };
 
-  const startInlineEditAmounts = (item: PlantInventoryStockItem) => {
-    setEditingItemId(item.id);
-    setEditRequiredValue(String(item.amountRequired));
-    setEditPresentValue(String(item.amountPresent));
-    setInlineFeedback(null);
-  };
-
-  const handleSaveInlineAmounts = (item: PlantInventoryStockItem) => {
-    const reqNum = Number(editRequiredValue);
-    const presNum = Number(editPresentValue);
-    if (Number.isNaN(reqNum) || reqNum < 0 || Number.isNaN(presNum) || presNum < 0) {
+  const handleConfirmRemoveOne = (item: PlantInventoryStockItem) => {
+    if (item.amountPresent <= 0) {
+      setPendingRemoveItem(null);
       return;
     }
-    const flags = computeStockAutomatedFlags(reqNum, presNum);
+
+    const nextPresent = Math.max(0, Number((item.amountPresent - 1).toFixed(2)));
+    const removedAmount = Math.max(0, Number((item.amountPresent - nextPresent).toFixed(2)));
+    const flags = computeStockAutomatedFlags(item.amountRequired, nextPresent);
+
     const updated = stockItems.map((row) =>
-      row.id === item.id ? { ...row, amountRequired: reqNum, amountPresent: presNum } : row
+      row.id === item.id ? { ...row, amountPresent: nextPresent } : row
     );
     persistStockItems(updated);
-    setEditingItemId(null);
+
+    const usageEntry: PlantInventoryUsageEntry = {
+      id: `use-${Date.now()}`,
+      date: today,
+      shift: usageShift,
+      stockId: item.id,
+      stock: item.stock,
+      description: `Quick -1 unit removal from Inventory List (${item.code})`,
+      amountUsed: removedAmount > 0 ? removedAmount : 1,
+      unit: item.unit,
+      circuitArea: 'Inventory List Quick Drawdown',
+      plantEquipment: item.plantEquipment,
+      loggedBy: usageOperator.trim() || 'Plant Shift Supervisor',
+    };
+    persistUsageHistory([usageEntry, ...usageHistory]);
+
+    setPendingRemoveItem(null);
     setInlineFeedback(
-      `Updated "${item.stock}" — Required: ${formatQty(reqNum)} ${item.unit}, Have: ${formatQty(presNum)} ${item.unit} (${flags.statusLabel}, ${flags.coveragePct}% coverage).`
+      `Removed 1 ${item.unit} from "${item.stock}" — Have: ${formatQty(nextPresent)} ${item.unit} (${flags.statusLabel}, ${flags.coveragePct}% coverage).`
     );
+
     void updatePlantInventoryAmountsAction({
       id: item.id,
       code: item.code,
-      amountRequired: reqNum,
-      amountPresent: presNum,
+      amountRequired: item.amountRequired,
+      amountPresent: nextPresent,
+    }).catch(() => undefined);
+
+    void recordPlantInventoryUsageAction({
+      stockId: item.id,
+      stockCode: item.code,
+      stockName: item.stock,
+      date: usageEntry.date,
+      shift: usageEntry.shift,
+      amountUsed: usageEntry.amountUsed,
+      unit: usageEntry.unit,
+      circuitArea: usageEntry.circuitArea,
+      plantEquipment: usageEntry.plantEquipment,
+      description: usageEntry.description,
+      loggedBy: usageEntry.loggedBy,
     }).catch(() => undefined);
   };
 
@@ -716,7 +742,6 @@ export function PlantInventoryWorkspaceClient({
                 {filteredStockItems.map((item) => {
                   const flags = computeStockAutomatedFlags(item.amountRequired, item.amountPresent);
                   const isShortfall = flags.needsReplenishment;
-                  const isEditing = editingItemId === item.id;
                   return (
                     <tr
                       key={item.id}
@@ -742,96 +767,53 @@ export function PlantInventoryWorkspaceClient({
                         {item.description}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right align-top font-medium font-mono text-[var(--text-heading)] text-sm">
-                        {isEditing ? (
-                          <div className="inline-flex items-center justify-end gap-1.5">
-                            <input
-                              type="number"
-                              min="0"
-                              step="any"
-                              aria-label={`Edit Amount Required for ${item.stock}`}
-                              value={editRequiredValue}
-                              onChange={(e) => setEditRequiredValue(e.target.value)}
-                              className="w-24 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs"
-                            />
-                            <span className="text-[var(--text-muted)] text-xs">{item.unit}</span>
-                          </div>
-                        ) : (
-                          <span>
-                            {formatQty(item.amountRequired)} {item.unit}
-                          </span>
-                        )}
+                        <span>
+                          {formatQty(item.amountRequired)} {item.unit}
+                        </span>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right align-top">
-                        {isEditing ? (
-                          <div className="flex flex-col items-end gap-2">
-                            <div className="inline-flex items-center justify-end gap-1.5">
-                              <input
-                                type="number"
-                                min="0"
-                                step="any"
-                                aria-label={`Edit Have Amount for ${item.stock}`}
-                                value={editPresentValue}
-                                onChange={(e) => setEditPresentValue(e.target.value)}
-                                className="w-24 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs"
-                              />
-                              <span className="text-[var(--text-muted)] text-xs">{item.unit}</span>
-                            </div>
-                            <div className="inline-flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => handleSaveInlineAmounts(item)}
-                                className="rounded-md bg-[var(--accent-blue)] px-2.5 py-1 font-semibold text-[11px] text-white"
-                              >
-                                Save Amounts
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingItemId(null)}
-                                className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-1 font-medium text-[11px] text-[var(--text-secondary)]"
-                              >
-                                Cancel
-                              </button>
-                            </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="inline-flex items-center justify-end gap-2">
+                            <span
+                              className={`font-bold font-mono text-sm ${
+                                isShortfall
+                                  ? 'text-[var(--accent-alert)]'
+                                  : 'text-[var(--accent-green)]'
+                              }`}
+                            >
+                              {formatQty(item.amountPresent)} {item.unit}
+                            </span>
+                            <span className={getStockStatusBadgeClass(flags.stockStatus)}>
+                              {flags.statusLabel}
+                            </span>
                           </div>
-                        ) : (
-                          <div className="flex flex-col items-end gap-1">
-                            <div className="inline-flex items-center justify-end gap-2">
-                              <span
-                                className={`font-bold font-mono text-sm ${
-                                  isShortfall
-                                    ? 'text-[var(--accent-alert)]'
-                                    : 'text-[var(--accent-green)]'
-                                }`}
-                              >
-                                {formatQty(item.amountPresent)} {item.unit}
+                          <div className="inline-flex items-center justify-end gap-2 font-mono text-[11px] text-[var(--text-muted)]">
+                            <span>{flags.coveragePct}% coverage</span>
+                            {flags.needsReplenishment && (
+                              <span className="font-semibold text-[var(--accent-alert)]">
+                                Auto-Reorder (-{formatQty(flags.shortfallAmount)} {item.unit})
                               </span>
-                              <span className={getStockStatusBadgeClass(flags.stockStatus)}>
-                                {flags.statusLabel}
+                            )}
+                            {!flags.needsReplenishment && flags.surplusAmount > 0 && (
+                              <span className="text-[var(--accent-green)]">
+                                +{formatQty(flags.surplusAmount)} {item.unit} surplus
                               </span>
-                            </div>
-                            <div className="inline-flex items-center justify-end gap-2 font-mono text-[11px] text-[var(--text-muted)]">
-                              <span>{flags.coveragePct}% coverage</span>
-                              {flags.needsReplenishment && (
-                                <span className="font-semibold text-[var(--accent-alert)]">
-                                  Auto-Reorder (-{formatQty(flags.shortfallAmount)} {item.unit})
-                                </span>
-                              )}
-                              {!flags.needsReplenishment && flags.surplusAmount > 0 && (
-                                <span className="text-[var(--accent-green)]">
-                                  +{formatQty(flags.surplusAmount)} {item.unit} surplus
-                                </span>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => startInlineEditAmounts(item)}
-                                aria-label={`Update Required and Have Amounts for ${item.stock}`}
-                                className="rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-1.5 py-0.5 font-sans text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
-                              >
-                                Edit Amounts
-                              </button>
-                            </div>
+                            )}
+                            <button
+                              type="button"
+                              disabled={item.amountPresent <= 0}
+                              onClick={() => {
+                                setInlineFeedback(null);
+                                setPendingRemoveItem(item);
+                              }}
+                              aria-label={`Remove 1 unit from ${item.stock}`}
+                              className="inline-flex items-center gap-1 rounded border border-[var(--accent-alert)]/35 bg-[var(--accent-alert)]/10 px-2 py-0.5 font-sans font-semibold text-[11px] text-[var(--accent-alert)] transition-colors hover:bg-[var(--accent-alert)]/20 disabled:cursor-not-allowed disabled:opacity-45"
+                            >
+                              <Minus className="h-3 w-3" aria-hidden="true" />
+                              -1 Remove
+                            </button>
                           </div>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -850,6 +832,59 @@ export function PlantInventoryWorkspaceClient({
             </table>
           </div>
         </GlassCard>
+
+        {pendingRemoveItem && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4 backdrop-blur-sm">
+            <div
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="confirm-remove-stock-title"
+              aria-describedby="confirm-remove-stock-desc"
+              className="gold-steel-border gold-steel-border-slim w-full max-w-md rounded-2xl border border-white/60 bg-white/95 p-5 shadow-window backdrop-blur-xl"
+            >
+              <h3
+                id="confirm-remove-stock-title"
+                className="font-bold text-[var(--text-heading)] text-lg"
+              >
+                Confirm Remove 1 Unit
+              </h3>
+              <p
+                id="confirm-remove-stock-desc"
+                className="mt-2 text-[var(--text-secondary)] text-sm"
+              >
+                Remove 1 {pendingRemoveItem.unit} from{' '}
+                <strong className="text-[var(--text-heading)]">{pendingRemoveItem.stock}</strong>?
+              </p>
+              <div className="mt-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-mono text-xs">
+                <span className="text-[var(--text-muted)]">Amount Present: </span>
+                <span className="font-semibold text-[var(--text-heading)]">
+                  {formatQty(pendingRemoveItem.amountPresent)} {pendingRemoveItem.unit}
+                </span>
+                <span className="mx-2 text-[var(--text-muted)]">-&gt;</span>
+                <span className="font-bold text-[var(--accent-alert)]">
+                  {formatQty(Math.max(0, Number((pendingRemoveItem.amountPresent - 1).toFixed(2))))}{' '}
+                  {pendingRemoveItem.unit}
+                </span>
+              </div>
+              <div className="mt-5 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPendingRemoveItem(null)}
+                  className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3.5 py-2 font-medium text-[var(--text-secondary)] text-xs hover:text-[var(--text-heading)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleConfirmRemoveOne(pendingRemoveItem)}
+                  className="rounded-lg bg-[var(--accent-alert)] px-3.5 py-2 font-semibold text-white text-xs transition-opacity hover:opacity-90"
+                >
+                  Confirm Remove 1
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

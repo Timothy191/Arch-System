@@ -4,6 +4,7 @@ import {
   INITIAL_PLANT_STOCK_ITEMS,
   PlantInventoryWorkspaceClient,
 } from './PlantInventoryWorkspaceClient';
+import { STOCK_STORAGE_KEY, USAGE_STORAGE_KEY } from './plant-inventory-seeds';
 
 jest.mock('sonner', () => ({
   toast: {
@@ -68,34 +69,90 @@ describe('PlantInventoryWorkspaceClient', () => {
       expect(screen.queryByText('Primary Jaw Crusher Toggle Plates')).not.toBeInTheDocument();
     });
 
-    it('When updating Amount Required and Have Amount inline, Then it recalculates automated flags and coverage', () => {
+    it('When clicking -1 Remove, Then it prompts for confirmation, cancels cleanly, and decrements Have by 1 only when confirmed', () => {
       render(<PlantInventoryWorkspaceClient mode="inventory-list" today="2026-10-22" />);
 
-      const editBtn = screen.getByRole('button', {
-        name: 'Update Required and Have Amounts for Magnetite Superfine Medium (96% Fe3O4)',
+      expect(screen.queryByRole('button', { name: /Edit Amounts/i })).not.toBeInTheDocument();
+
+      const removeBtn = screen.getByRole('button', {
+        name: 'Remove 1 unit from Magnetite Superfine Medium (96% Fe3O4)',
       });
-      fireEvent.click(editBtn);
+      expect(removeBtn).toHaveTextContent('-1 Remove');
+      expect(removeBtn).toBeEnabled();
 
-      const reqInput = screen.getByLabelText(
-        'Edit Amount Required for Magnetite Superfine Medium (96% Fe3O4)'
-      );
-      const haveInput = screen.getByLabelText(
-        'Edit Have Amount for Magnetite Superfine Medium (96% Fe3O4)'
-      );
+      fireEvent.click(removeBtn);
 
-      fireEvent.change(reqInput, { target: { value: '200' } });
-      fireEvent.change(haveInput, { target: { value: '80' } });
+      const table = screen.getByRole('table', { name: 'Plant Inventory List' });
+      const dialog = screen.getByRole('alertdialog');
+      expect(dialog).toHaveTextContent('Confirm Remove 1 Unit');
+      expect(dialog).toHaveTextContent('Magnetite Superfine Medium (96% Fe3O4)');
+      expect(dialog).toHaveTextContent('148.5 t');
+      expect(dialog).toHaveTextContent('147.5 t');
+      expect(within(table).getByText('148.5 t')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole('button', { name: 'Save Amounts' }));
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+      expect(screen.getByText('148.5 t')).toBeInTheDocument();
 
+      fireEvent.click(removeBtn);
+      const confirmDialog = screen.getByRole('alertdialog');
+      fireEvent.click(within(confirmDialog).getByRole('button', { name: 'Confirm Remove 1' }));
+
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+      expect(screen.getByText('147.5 t')).toBeInTheDocument();
+      expect(screen.getByText('81.9% coverage')).toBeInTheDocument();
       expect(screen.getByRole('status')).toHaveTextContent(
-        'Updated "Magnetite Superfine Medium (96% Fe3O4)" — Required: 200 t, Have: 80 t (Critical (<50%), 40% coverage).'
+        'Removed 1 t from "Magnetite Superfine Medium (96% Fe3O4)" — Have: 147.5 t (Replenish, 81.9% coverage).'
       );
-      expect(screen.getByText('Critical (<50%)')).toBeInTheDocument();
+
+      const storedStock = JSON.parse(window.localStorage.getItem(STOCK_STORAGE_KEY) ?? '[]');
+      expect(storedStock[0]?.amountPresent).toBe(147.5);
+      const storedUsage = JSON.parse(window.localStorage.getItem(USAGE_STORAGE_KEY) ?? '[]');
+      expect(storedUsage[0]?.stock).toBe('Magnetite Superfine Medium (96% Fe3O4)');
+      expect(storedUsage[0]?.amountUsed).toBe(1);
+    });
+
+    it('When Amount Present is 0, Then the -1 Remove button is disabled', () => {
+      const zeroedItems = INITIAL_PLANT_STOCK_ITEMS.map((item, idx) =>
+        idx === 0 ? { ...item, amountPresent: 0 } : item
+      );
+      window.localStorage.setItem(STOCK_STORAGE_KEY, JSON.stringify(zeroedItems));
+
+      render(<PlantInventoryWorkspaceClient mode="inventory-list" today="2026-10-22" />);
+
+      const removeBtn = screen.getByRole('button', {
+        name: 'Remove 1 unit from Magnetite Superfine Medium (96% Fe3O4)',
+      });
+      expect(removeBtn).toBeDisabled();
     });
   });
 
   describe('Given mode="item-list" (/plant-inventory/machines)', () => {
+    it('When rendered, Then it displays the white Item List header panel and golden borders on Add New Item inputs', () => {
+      render(<PlantInventoryWorkspaceClient mode="item-list" today="2026-10-22" />);
+
+      const heading = screen.getByRole('heading', { name: 'Item List' });
+      const headerPanel = heading.closest('.gold-steel-border');
+      expect(headerPanel).not.toBeNull();
+      expect(headerPanel?.className).toContain('bg-white/90');
+      expect(headerPanel).toHaveTextContent(`Catalog Items: ${INITIAL_PLANT_STOCK_ITEMS.length}`);
+
+      const inputsToCheck = [
+        screen.getByLabelText('Stock Name'),
+        screen.getByLabelText('Part / Stock Code'),
+        screen.getByLabelText('Category'),
+        screen.getByLabelText('Description'),
+        screen.getByLabelText('Amount Required'),
+        screen.getByLabelText('Amount Present'),
+        screen.getByLabelText('Unit'),
+        screen.getByLabelText(/Plant Equipment/i),
+      ];
+
+      for (const control of inputsToCheck) {
+        expect(control.className).toContain('border-accent-gold/65');
+      }
+    });
+
     it('When the user adds a new item to the stock list, Then it is added to the catalog and persisted to localStorage', () => {
       render(<PlantInventoryWorkspaceClient mode="item-list" today="2026-10-22" />);
 

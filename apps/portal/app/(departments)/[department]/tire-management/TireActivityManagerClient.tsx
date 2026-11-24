@@ -25,6 +25,7 @@ import { logTireActivity } from './actions';
 import {
   CRITICAL_TREAD_DEPTH_MM,
   classifyTireActivityType,
+  TIRE_ACTIVITY_REASON_PRESETS,
   TIRE_CONDITION_STATUSES,
   TIRE_POSITIONS,
   type TireActivityMode,
@@ -34,6 +35,7 @@ import {
   type TireMachineOption,
   type TireRecord,
   type TireRemovedOutcome,
+  tireActivitySchema,
   WARNING_TREAD_DEPTH_MM,
 } from './tire-constants';
 
@@ -101,6 +103,28 @@ function formatTireOptionLabel(tire: TireRecord): string {
   return `${tire.serial_number} — ${tire.brand} (${tire.size})${posLabel}`;
 }
 
+function resolveMachineHoursDefault(
+  targetMachineId: string,
+  machines: readonly TireMachineOption[],
+  installedTires: readonly TireRecord[]
+): string {
+  const machine = machines.find((m) => m.id === targetMachineId);
+  if (machine?.latest_smu != null && Number.isFinite(machine.latest_smu)) {
+    return String(Math.round(machine.latest_smu));
+  }
+  const onMachine = installedTires.find((t) => t.machine_id === targetMachineId);
+  if (onMachine?.latestInspection?.current_smu != null) {
+    return String(Math.round(onMachine.latestInspection.current_smu));
+  }
+  if (onMachine?.installed_hours != null) {
+    return String(Math.round(onMachine.installed_hours));
+  }
+  if (machine?.starting_smr != null && Number.isFinite(machine.starting_smr)) {
+    return String(Math.round(machine.starting_smr));
+  }
+  return '0';
+}
+
 export function TireActivityManagerClient({
   machines,
   tires,
@@ -111,13 +135,29 @@ export function TireActivityManagerClient({
   const [isPending, startTransition] = useTransition();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+  const installedTires = useMemo(() => tires.filter((t) => t.status === 'installed'), [tires]);
+  const spareTires = useMemo(() => tires.filter((t) => t.status === 'inventory'), [tires]);
+
   const [mode, setMode] = useState<TireActivityMode>('replace');
   const [machineId, setMachineId] = useState<string>(() => machines[0]?.id ?? '');
   const [position, setPosition] = useState<string>(TIRE_POSITIONS[0]);
   const [actionDate, setActionDate] = useState<string>(todayStr);
-  const [machineHours, setMachineHours] = useState<string>('0');
+  const [machineHours, setMachineHours] = useState<string>(() =>
+    resolveMachineHoursDefault(
+      machines[0]?.id ?? '',
+      machines,
+      tires.filter((t) => t.status === 'installed')
+    )
+  );
 
-  const [removedTireId, setRemovedTireId] = useState<string>('');
+  const [removedTireId, setRemovedTireId] = useState<string>(() => {
+    const firstId = machines[0]?.id ?? '';
+    return (
+      tires.find((t) => t.status === 'installed' && t.machine_id === firstId)?.id ??
+      tires.find((t) => t.status === 'installed')?.id ??
+      ''
+    );
+  });
   const [removedOutcome, setRemovedOutcome] = useState<TireRemovedOutcome>('inventory');
   const [removedReason, setRemovedReason] = useState<string>('');
 
@@ -136,9 +176,6 @@ export function TireActivityManagerClient({
   const [ledgerFilter, setLedgerFilter] = useState<'all' | TireActivityType>('all');
   const [ledgerSearch, setLedgerSearch] = useState<string>('');
 
-  const installedTires = useMemo(() => tires.filter((t) => t.status === 'installed'), [tires]);
-  const spareTires = useMemo(() => tires.filter((t) => t.status === 'inventory'), [tires]);
-
   const machineInstalledTires = useMemo(() => {
     if (!machineId) return installedTires;
     const onMachine = installedTires.filter((t) => t.machine_id === machineId);
@@ -151,6 +188,37 @@ export function TireActivityManagerClient({
     [installedTires, machineId]
   );
 
+  const selectedSpare = useMemo(
+    () => spareTires.find((s) => s.id === existingSpareTireId),
+    [spareTires, existingSpareTireId]
+  );
+  const selectedRemovedTire = useMemo(
+    () => installedTires.find((t) => t.id === removedTireId),
+    [installedTires, removedTireId]
+  );
+
+  const showsRemovalSection = mode === 'remove' || mode === 'replace';
+  const showsInstallSection = mode === 'replace' || mode === 'install';
+
+  const isSpareWithRecord =
+    showsInstallSection && installSource === 'spare' && Boolean(selectedSpare);
+  const isTargetWithRecord = !showsInstallSection && Boolean(selectedRemovedTire);
+  const isIdentityReadOnly = isSpareWithRecord || isTargetWithRecord;
+
+  const displayedSerial = isSpareWithRecord
+    ? (selectedSpare?.serial_number ?? '')
+    : isTargetWithRecord
+      ? (selectedRemovedTire?.serial_number ?? '')
+      : replacementSerial;
+
+  const displayedBrand = isSpareWithRecord
+    ? (selectedSpare?.brand ?? '')
+    : isTargetWithRecord
+      ? (selectedRemovedTire?.brand ?? '')
+      : replacementBrand;
+
+  const displayedSize = isSpareWithRecord ? (selectedSpare?.size ?? '') : replacementSize;
+
   const handleMachineChange = (nextMachineId: string) => {
     setMachineId(nextMachineId);
     const matchingTire = installedTires.find(
@@ -161,10 +229,8 @@ export function TireActivityManagerClient({
     if (firstOnMachine) {
       setRemovedTireId(firstOnMachine.id);
       if (firstOnMachine.position) setPosition(firstOnMachine.position);
-      if (firstOnMachine.installed_hours != null) {
-        setMachineHours(String(firstOnMachine.installed_hours));
-      }
     }
+    setMachineHours(resolveMachineHoursDefault(nextMachineId, machines, installedTires));
   };
 
   const handleSelectRemovedTire = (nextTireId: string) => {
@@ -173,7 +239,11 @@ export function TireActivityManagerClient({
     if (!matched) return;
     if (matched.machine_id) setMachineId(matched.machine_id);
     if (matched.position) setPosition(matched.position);
-    if (matched.installed_hours != null) setMachineHours(String(matched.installed_hours));
+    if (matched.latestInspection?.current_smu != null) {
+      setMachineHours(String(Math.round(matched.latestInspection.current_smu)));
+    } else if (matched.installed_hours != null) {
+      setMachineHours(String(Math.round(matched.installed_hours)));
+    }
   };
 
   const handleTreadChange = (rawVal: string) => {
@@ -189,8 +259,13 @@ export function TireActivityManagerClient({
     setFormError(null);
     if (!machineId && machines[0]?.id) {
       handleMachineChange(machines[0].id);
-    } else if (!removedTireId && machineInstalledTires[0]?.id) {
-      setRemovedTireId(machineInstalledTires[0].id);
+    } else {
+      if (!removedTireId && machineInstalledTires[0]?.id) {
+        setRemovedTireId(machineInstalledTires[0].id);
+      }
+      if (machineId) {
+        setMachineHours(resolveMachineHoursDefault(machineId, machines, installedTires));
+      }
     }
     if (!existingSpareTireId && spareTires[0]?.id) {
       setExistingSpareTireId(spareTires[0].id);
@@ -202,28 +277,50 @@ export function TireActivityManagerClient({
     event.preventDefault();
     setFormError(null);
 
-    const isSpareInstall = (mode === 'replace' || mode === 'install') && installSource === 'spare';
-    const isNewInstall = (mode === 'replace' || mode === 'install') && installSource === 'new';
+    const isSpareInstall = showsInstallSection && installSource === 'spare';
+    const resolvedSerial = displayedSerial.trim();
+    const resolvedBrand = displayedBrand.trim();
 
     const payload = {
       mode,
       machineId,
       position,
       actionDate,
-      machineHours: Number(machineHours || 0),
+      machineHours: machineHours.trim() === '' ? Number.NaN : Number(machineHours),
       removedTireId:
         mode === 'remove' || mode === 'replace' || mode === 'inspect' ? removedTireId : undefined,
       removedOutcome,
-      removedReason: removedReason.trim() || undefined,
-      existingSpareTireId: isSpareInstall ? existingSpareTireId : undefined,
-      replacementSerial: isNewInstall ? replacementSerial.trim() : undefined,
-      replacementBrand: isNewInstall ? replacementBrand.trim() : undefined,
-      replacementSize: isNewInstall ? replacementSize.trim() : undefined,
+      removedReason: removedReason.trim(),
+      tireSerial:
+        mode === 'remove' || mode === 'inspect'
+          ? resolvedSerial || undefined
+          : mode === 'replace'
+            ? (selectedRemovedTire?.serial_number ?? '').trim() || resolvedSerial || undefined
+            : undefined,
+      tireBrand:
+        mode === 'remove' || mode === 'inspect'
+          ? resolvedBrand || undefined
+          : mode === 'replace'
+            ? (selectedRemovedTire?.brand ?? '').trim() || resolvedBrand || undefined
+            : undefined,
+      existingSpareTireId: isSpareInstall ? existingSpareTireId || undefined : undefined,
+      replacementSerial: showsInstallSection ? resolvedSerial || undefined : undefined,
+      replacementBrand: showsInstallSection ? resolvedBrand || undefined : undefined,
+      replacementSize: showsInstallSection ? displayedSize.trim() || undefined : undefined,
       treadDepthMm: treadDepthMm.trim() === '' ? undefined : Number(treadDepthMm),
       pressurePsi: pressurePsi.trim() === '' ? undefined : Number(pressurePsi),
       conditionStatus,
       notes: notes.trim() || undefined,
     };
+
+    const validation = tireActivitySchema.safeParse(payload);
+    if (!validation.success) {
+      const issueMessage =
+        validation.error.issues[0]?.message ?? 'Please fill in all required tyre activity fields.';
+      setFormError(issueMessage);
+      toast.error(issueMessage);
+      return;
+    }
 
     startTransition(async () => {
       try {
@@ -260,9 +357,6 @@ export function TireActivityManagerClient({
       return hay.includes(query);
     });
   }, [recentActivities, ledgerFilter, ledgerSearch]);
-
-  const showsRemovalSection = mode === 'remove' || mode === 'replace';
-  const showsInstallSection = mode === 'replace' || mode === 'install';
 
   return (
     <div className="space-y-6">
@@ -320,7 +414,7 @@ export function TireActivityManagerClient({
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {/* Mode Switcher */}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="tablist">
               {(
@@ -362,11 +456,11 @@ export function TireActivityManagerClient({
               </div>
             )}
 
-            {/* Machine, Position, Date, Hours */}
+            {/* Machine, Wheel Position, Date, Hours */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label htmlFor="tire-machine-select" className={LABEL_CLASS}>
-                  Machine
+                  Machine *
                 </label>
                 <select
                   id="tire-machine-select"
@@ -387,7 +481,7 @@ export function TireActivityManagerClient({
 
               <div>
                 <label htmlFor="tire-position-select" className={LABEL_CLASS}>
-                  Wheel Position
+                  Wheel Position *
                 </label>
                 <select
                   id="tire-position-select"
@@ -407,7 +501,7 @@ export function TireActivityManagerClient({
 
               <div>
                 <label htmlFor="tire-action-date" className={LABEL_CLASS}>
-                  Activity Date
+                  Activity Date *
                 </label>
                 <input
                   id="tire-action-date"
@@ -421,7 +515,7 @@ export function TireActivityManagerClient({
 
               <div>
                 <label htmlFor="tire-machine-hours" className={LABEL_CLASS}>
-                  Machine Hours (SMU)
+                  Machine Hours (SMU) *
                 </label>
                 <input
                   id="tire-machine-hours"
@@ -442,8 +536,8 @@ export function TireActivityManagerClient({
                 <h5 className="mb-3 font-semibold text-[var(--text-heading)] text-xs uppercase tracking-wider">
                   {mode === 'inspect' ? 'Select Tyre to Inspect' : 'Tyre Being Removed'}
                 </h5>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <div className={showsRemovalSection ? 'md:col-span-1' : 'md:col-span-3'}>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
                     <label htmlFor="removed-tire-select" className={LABEL_CLASS}>
                       {mode === 'inspect' ? 'Target Tyre' : 'Installed Tyre'}
                     </label>
@@ -466,42 +560,21 @@ export function TireActivityManagerClient({
                   </div>
 
                   {showsRemovalSection && (
-                    <>
-                      <div>
-                        <label htmlFor="removed-outcome-select" className={LABEL_CLASS}>
-                          Removed Disposition
-                        </label>
-                        <select
-                          id="removed-outcome-select"
-                          aria-label="Removed Disposition"
-                          value={removedOutcome}
-                          onChange={(e) => setRemovedOutcome(e.target.value as TireRemovedOutcome)}
-                          className={INPUT_CLASS}
-                        >
-                          <option value="inventory">Move to Inventory (Spare)</option>
-                          <option value="scrapped">Mark as Scrapped</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label htmlFor="removed-reason-input" className={LABEL_CLASS}>
-                          Removal / Scrap Reason
-                        </label>
-                        <input
-                          id="removed-reason-input"
-                          type="text"
-                          placeholder={
-                            removedOutcome === 'scrapped'
-                              ? 'Required: sidewall cut, blowout, tread worn out'
-                              : 'Optional: rotation, repair, tread check'
-                          }
-                          value={removedReason}
-                          onChange={(e) => setRemovedReason(e.target.value)}
-                          className={INPUT_CLASS}
-                          required={removedOutcome === 'scrapped'}
-                        />
-                      </div>
-                    </>
+                    <div>
+                      <label htmlFor="removed-outcome-select" className={LABEL_CLASS}>
+                        Removed Disposition
+                      </label>
+                      <select
+                        id="removed-outcome-select"
+                        aria-label="Removed Disposition"
+                        value={removedOutcome}
+                        onChange={(e) => setRemovedOutcome(e.target.value as TireRemovedOutcome)}
+                        className={INPUT_CLASS}
+                      >
+                        <option value="inventory">Move to Inventory (Spare)</option>
+                        <option value="scrapped">Mark as Scrapped</option>
+                      </select>
+                    </div>
                   )}
                 </div>
               </div>
@@ -512,7 +585,7 @@ export function TireActivityManagerClient({
               <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/60 p-4">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <h5 className="font-semibold text-[var(--text-heading)] text-xs uppercase tracking-wider">
-                    Replacement / Mounted Tyre Details
+                    Replacement / Mounted Tyre Source
                   </h5>
                   <div className="inline-flex rounded-lg border border-[var(--border-default)] bg-white p-0.5 text-xs">
                     <button
@@ -542,7 +615,7 @@ export function TireActivityManagerClient({
                   </div>
                 </div>
 
-                {installSource === 'spare' ? (
+                {installSource === 'spare' && (
                   <div>
                     <label htmlFor="existing-spare-select" className={LABEL_CLASS}>
                       Inventory Spare Tyre
@@ -563,54 +636,120 @@ export function TireActivityManagerClient({
                       ))}
                     </select>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div>
-                      <label htmlFor="replacement-serial-input" className={LABEL_CLASS}>
-                        New Tyre Serial Number
-                      </label>
-                      <input
-                        id="replacement-serial-input"
-                        type="text"
-                        placeholder="e.g. TIRE-2026-041"
-                        value={replacementSerial}
-                        onChange={(e) => setReplacementSerial(e.target.value)}
-                        className={INPUT_CLASS}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="replacement-brand-input" className={LABEL_CLASS}>
-                        Brand
-                      </label>
-                      <input
-                        id="replacement-brand-input"
-                        type="text"
-                        placeholder="e.g. Michelin"
-                        value={replacementBrand}
-                        onChange={(e) => setReplacementBrand(e.target.value)}
-                        className={INPUT_CLASS}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="replacement-size-input" className={LABEL_CLASS}>
-                        Tyre Size
-                      </label>
-                      <input
-                        id="replacement-size-input"
-                        type="text"
-                        placeholder="e.g. 59/80R63"
-                        value={replacementSize}
-                        onChange={(e) => setReplacementSize(e.target.value)}
-                        className={INPUT_CLASS}
-                        required
-                      />
-                    </div>
-                  </div>
                 )}
               </div>
             )}
+
+            {/* Mandatory Tyre Identity & Activity Reason */}
+            <div className="rounded-xl border border-[var(--accent-blue)]/25 bg-blue-50/40 p-4">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h5 className="font-semibold text-[var(--text-heading)] text-xs uppercase tracking-wider">
+                  Required Tyre Identity &amp; Activity Reason
+                </h5>
+                <span className="text-[11px] text-[var(--text-muted)]">
+                  Fields marked * are required for audit ledger logging
+                </span>
+              </div>
+
+              <div
+                className={cn(
+                  'grid grid-cols-1 gap-4',
+                  showsInstallSection ? 'sm:grid-cols-3' : 'sm:grid-cols-2'
+                )}
+              >
+                <div>
+                  <label htmlFor="tire-serial-input" className={LABEL_CLASS}>
+                    Serial Number *
+                  </label>
+                  <input
+                    id="tire-serial-input"
+                    type="text"
+                    placeholder="e.g. TIRE-2026-041"
+                    value={displayedSerial}
+                    readOnly={isIdentityReadOnly}
+                    onChange={(e) => setReplacementSerial(e.target.value)}
+                    className={cn(
+                      INPUT_CLASS,
+                      isIdentityReadOnly && 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                    )}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="tire-brand-input" className={LABEL_CLASS}>
+                    Brand *
+                  </label>
+                  <input
+                    id="tire-brand-input"
+                    type="text"
+                    placeholder="e.g. Michelin"
+                    value={displayedBrand}
+                    readOnly={isIdentityReadOnly}
+                    onChange={(e) => setReplacementBrand(e.target.value)}
+                    className={cn(
+                      INPUT_CLASS,
+                      isIdentityReadOnly && 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                    )}
+                    required
+                  />
+                </div>
+
+                {showsInstallSection && (
+                  <div>
+                    <label htmlFor="tire-size-input" className={LABEL_CLASS}>
+                      Tyre Size *
+                    </label>
+                    <input
+                      id="tire-size-input"
+                      type="text"
+                      placeholder="e.g. 59/80R63"
+                      value={displayedSize}
+                      readOnly={isSpareWithRecord}
+                      onChange={(e) => setReplacementSize(e.target.value)}
+                      className={cn(
+                        INPUT_CLASS,
+                        isSpareWithRecord && 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                      )}
+                      required
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4">
+                <label htmlFor="tire-reason-input" className={LABEL_CLASS}>
+                  Reason *
+                </label>
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {TIRE_ACTIVITY_REASON_PRESETS.map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setRemovedReason(preset)}
+                      className={cn(
+                        'rounded-md border px-2.5 py-1 font-medium text-[11px] transition-colors',
+                        removedReason === preset
+                          ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)] text-white'
+                          : 'border-[var(--border-default)] bg-white text-[var(--text-secondary)] hover:border-[var(--accent-blue)]/40 hover:text-[var(--text-heading)]'
+                      )}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  id="tire-reason-input"
+                  type="text"
+                  placeholder="Select a preset or describe reason (min 3 characters)..."
+                  value={removedReason}
+                  onChange={(e) => setRemovedReason(e.target.value)}
+                  className={INPUT_CLASS}
+                  aria-required="true"
+                  required
+                />
+              </div>
+            </div>
 
             {/* Telemetry & Notes */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

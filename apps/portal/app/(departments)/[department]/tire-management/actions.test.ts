@@ -199,6 +199,9 @@ describe('logTireActivity server action & helpers', () => {
       actionDate: '2026-11-20',
       machineHours: 1420,
       removedTireId: 't1',
+      tireSerial: 'TIRE-001',
+      tireBrand: 'Michelin',
+      removedReason: 'Routine Inspection',
       treadDepthMm: 34,
       pressurePsi: 108,
       conditionStatus: 'good',
@@ -208,10 +211,11 @@ describe('logTireActivity server action & helpers', () => {
     expect(result.inspectedTireId).toBe('t1');
   });
 
-  it('validates schema constraints including rejecting normal conditionStatus and missing scrap reason', async () => {
+  it('validates schema constraints including rejecting normal conditionStatus and missing reason, hours, serial, or brand', async () => {
     const { client } = buildSupabaseMock();
     mockCreateServerSupabaseClient.mockResolvedValue(client);
 
+    // Missing reason across modes
     await expect(
       logTireActivity({
         mode: 'remove',
@@ -220,7 +224,10 @@ describe('logTireActivity server action & helpers', () => {
         actionDate: '2026-11-20',
         machineHours: 1400,
         removedTireId: 't1',
+        tireSerial: 'TIRE-001',
+        tireBrand: 'Michelin',
         removedOutcome: 'scrapped',
+        removedReason: '',
         conditionStatus: 'good',
       })
     ).rejects.toThrow(ValidationError);
@@ -233,6 +240,77 @@ describe('logTireActivity server action & helpers', () => {
         actionDate: '2026-11-20',
         machineHours: 1400,
         removedTireId: 't1',
+        tireSerial: 'TIRE-001',
+        tireBrand: 'Michelin',
+        removedReason: 'ok', // < 3 chars
+        treadDepthMm: 28,
+        pressurePsi: 105,
+        conditionStatus: 'good',
+      })
+    ).rejects.toThrow(ValidationError);
+
+    // Missing serial or brand
+    await expect(
+      logTireActivity({
+        mode: 'install',
+        machineId: 'm1',
+        position: 'Front Left',
+        actionDate: '2026-11-20',
+        machineHours: 1400,
+        removedReason: 'New Mount / Book-In',
+        replacementSerial: '',
+        replacementBrand: 'Michelin',
+        replacementSize: '59/80R63',
+        conditionStatus: 'good',
+      })
+    ).rejects.toThrow(ValidationError);
+
+    await expect(
+      logTireActivity({
+        mode: 'remove',
+        machineId: 'm1',
+        position: 'Front Left',
+        actionDate: '2026-11-20',
+        machineHours: 1400,
+        removedTireId: 't1',
+        tireSerial: 'TIRE-001',
+        tireBrand: '',
+        removedOutcome: 'inventory',
+        removedReason: 'Scheduled Rotation',
+        conditionStatus: 'good',
+      })
+    ).rejects.toThrow(ValidationError);
+
+    // Negative machineHours
+    await expect(
+      logTireActivity({
+        mode: 'inspect',
+        machineId: 'm1',
+        position: 'Front Left',
+        actionDate: '2026-11-20',
+        machineHours: -5,
+        removedTireId: 't1',
+        tireSerial: 'TIRE-001',
+        tireBrand: 'Michelin',
+        removedReason: 'Routine Inspection',
+        treadDepthMm: 28,
+        pressurePsi: 105,
+        conditionStatus: 'good',
+      })
+    ).rejects.toThrow(ValidationError);
+
+    // Invalid conditionStatus
+    await expect(
+      logTireActivity({
+        mode: 'inspect',
+        machineId: 'm1',
+        position: 'Front Left',
+        actionDate: '2026-11-20',
+        machineHours: 1400,
+        removedTireId: 't1',
+        tireSerial: 'TIRE-001',
+        tireBrand: 'Michelin',
+        removedReason: 'Routine Inspection',
         treadDepthMm: 28,
         pressurePsi: 105,
         conditionStatus: 'normal' as unknown as 'good',
@@ -254,6 +332,8 @@ describe('logTireActivity server action & helpers', () => {
       actionDate: '2026-11-20',
       machineHours: 4820,
       removedTireId: 't1',
+      tireSerial: 'TIRE-001',
+      tireBrand: 'Bridgestone',
       removedOutcome: 'scrapped',
       removedReason: 'Sidewall rock cut',
       replacementSerial: 'TIRE-2026-888',
@@ -295,8 +375,15 @@ describe('logTireActivity server action & helpers', () => {
 
     expect(inspectionInserts).toHaveLength(2);
     expect(String(inspectionInserts[0]?.notes)).toContain('[REMOVAL]');
-    expect(String(inspectionInserts[0]?.notes)).toContain('DT-04 Komatsu 730E');
+    expect(String(inspectionInserts[0]?.notes)).toContain('Serial: TIRE-001');
+    expect(String(inspectionInserts[0]?.notes)).toContain('Brand: Bridgestone');
+    expect(String(inspectionInserts[0]?.notes)).toContain('Hours: 4820h');
+    expect(String(inspectionInserts[0]?.notes)).toContain('Reason: Sidewall rock cut');
     expect(String(inspectionInserts[1]?.notes)).toContain('[REPLACEMENT]');
+    expect(String(inspectionInserts[1]?.notes)).toContain('Serial: TIRE-2026-888');
+    expect(String(inspectionInserts[1]?.notes)).toContain('Brand: Michelin');
+    expect(String(inspectionInserts[1]?.notes)).toContain('Hours: 4820h');
+    expect(String(inspectionInserts[1]?.notes)).toContain('Reason: Sidewall rock cut');
     expect(inspectionInserts[1]?.condition_status).toBe('good');
 
     expect(mockLogAuditEvent).toHaveBeenCalledTimes(1);
@@ -317,6 +404,9 @@ describe('logTireActivity server action & helpers', () => {
       actionDate: '2026-11-20',
       machineHours: 2300,
       existingSpareTireId: 't-spare-1',
+      replacementSerial: 'TIRE-SPARE-09',
+      replacementBrand: 'Goodyear',
+      removedReason: 'New Mount / Book-In',
       treadDepthMm: 38,
       pressurePsi: 110,
       conditionStatus: 'warning',
@@ -333,6 +423,10 @@ describe('logTireActivity server action & helpers', () => {
       installed_hours: 2300,
     });
     expect(String(inspectionInserts[0]?.notes)).toContain('[INSTALLATION]');
+    expect(String(inspectionInserts[0]?.notes)).toContain('Serial: TIRE-SPARE-09');
+    expect(String(inspectionInserts[0]?.notes)).toContain('Brand: Goodyear');
+    expect(String(inspectionInserts[0]?.notes)).toContain('Hours: 2300h');
+    expect(String(inspectionInserts[0]?.notes)).toContain('Reason: New Mount / Book-In');
   });
 
   it('throws DatabaseError when Supabase update or insert fails', async () => {
@@ -349,7 +443,10 @@ describe('logTireActivity server action & helpers', () => {
         actionDate: '2026-11-20',
         machineHours: 1400,
         removedTireId: 't1',
+        tireSerial: 'TIRE-001',
+        tireBrand: 'Michelin',
         removedOutcome: 'inventory',
+        removedReason: 'Scheduled Rotation',
         conditionStatus: 'good',
       })
     ).rejects.toThrow(DatabaseError);
@@ -367,6 +464,9 @@ describe('logTireActivity server action & helpers', () => {
         actionDate: '2026-11-20',
         machineHours: 1400,
         removedTireId: 't1',
+        tireSerial: 'TIRE-001',
+        tireBrand: 'Michelin',
+        removedReason: 'Routine Inspection',
         treadDepthMm: 10,
         pressurePsi: 95,
         conditionStatus: 'critical',
@@ -395,6 +495,9 @@ describe('logTireActivity server action & helpers', () => {
         actionDate: '2026-11-20',
         machineHours: 1500 + i,
         removedTireId: 't1',
+        tireSerial: 'TIRE-001',
+        tireBrand: 'Michelin',
+        removedReason: 'Routine Inspection',
         treadDepthMm: 30,
         pressurePsi: 108,
         conditionStatus: 'good',
@@ -409,6 +512,9 @@ describe('logTireActivity server action & helpers', () => {
         actionDate: '2026-11-20',
         machineHours: 1600,
         removedTireId: 't1',
+        tireSerial: 'TIRE-001',
+        tireBrand: 'Michelin',
+        removedReason: 'Routine Inspection',
         treadDepthMm: 30,
         pressurePsi: 108,
         conditionStatus: 'good',
@@ -416,16 +522,22 @@ describe('logTireActivity server action & helpers', () => {
     ).rejects.toThrow(RateLimitError);
   });
 
-  it('formats and classifies activity notes accurately', () => {
+  it('formats and classifies activity notes accurately with Serial, Brand, Hours, and Reason', () => {
     const removalNote = buildTireActivityNote({
       prefix: '[REMOVAL]',
       machineName: 'DT-01',
       position: 'Front Left',
       machineHours: 1200,
+      serialNumber: 'TIRE-001',
+      brand: 'Michelin',
       outcome: 'inventory',
       reason: 'Scheduled rotation',
     });
     expect(removalNote).toContain('[REMOVAL] Machine: DT-01');
+    expect(removalNote).toContain('Serial: TIRE-001');
+    expect(removalNote).toContain('Brand: Michelin');
+    expect(removalNote).toContain('Hours: 1200h');
+    expect(removalNote).toContain('Reason: Scheduled rotation');
     expect(classifyTireActivityType(removalNote)).toBe('removal');
     expect(classifyTireActivityType('[REPLACEMENT] Machine: DT-01')).toBe('replacement');
     expect(classifyTireActivityType('[INSTALLATION] Machine: DT-01')).toBe('installation');
