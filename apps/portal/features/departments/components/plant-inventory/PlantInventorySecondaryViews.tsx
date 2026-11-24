@@ -12,6 +12,12 @@ import {
 } from './plant-inventory-seeds';
 import { computeStockAutomatedFlags } from './stock-flags';
 
+const GOLD_INPUT_CLASS =
+  'border border-accent-gold/65 bg-white focus:border-accent-gold focus:ring-2 focus:ring-accent-gold/25';
+
+const GOLD_SELECT_CLASS =
+  'w-full rounded-lg border border-accent-gold/65 bg-white px-3 py-2 text-[var(--text-heading)] text-sm focus:border-accent-gold focus:outline-none focus:ring-2 focus:ring-accent-gold/25';
+
 export function PlantInventoryItemListView({
   stockItems,
   newStockName,
@@ -55,24 +61,33 @@ export function PlantInventoryItemListView({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <PackagePlus className="h-6 w-6 text-[var(--accent-blue)]" aria-hidden="true" />
-            <h2 className="font-bold text-2xl text-[var(--text-heading)]">Item List</h2>
+      <div className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-[22px] border border-white/60 bg-white/90 p-5 shadow-window backdrop-blur-xl sm:p-6">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-accent-gold/75 to-transparent"
+        />
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-start gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-accent-gold/45 bg-white shadow-xs">
+              <PackagePlus className="h-5 w-5 text-accent-gold" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">Item List</h2>
+              <p className="mt-1 text-[var(--text-secondary)] text-sm">
+                Register new stock items, spare parts, or reagents into the Plant Inventory master
+                stock list, assigned to specific plant equipment.
+              </p>
+            </div>
           </div>
-          <p className="mt-1 text-[var(--text-secondary)] text-sm">
-            Register new stock items, spare parts, or reagents into the Plant Inventory master stock
-            list, assigned to specific plant equipment.
-          </p>
+          <span className="self-start rounded-xl border border-accent-gold/40 bg-white/85 px-3.5 py-1.5 font-mono text-[var(--text-muted)] text-xs shadow-2xs sm:self-auto">
+            Catalog Items:{' '}
+            <strong className="text-[var(--text-heading)]">{stockItems.length}</strong>
+          </span>
         </div>
-        <span className="self-start rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-mono text-[var(--text-muted)] text-xs sm:self-auto">
-          Catalog Items: <strong className="text-[var(--text-heading)]">{stockItems.length}</strong>
-        </span>
       </div>
 
       <GlassCard>
-        <div className="mb-4">
+        <div className="mb-4 border-accent-gold/30 border-b pb-3">
           <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
             <Plus className="h-4 w-4 text-[var(--accent-blue)]" aria-hidden="true" />
             Add New Item to Stock List
@@ -99,6 +114,7 @@ export function PlantInventoryItemListView({
                 value={newStockName}
                 onChange={(e) => setNewStockName(e.target.value)}
                 placeholder="e.g. Secondary Cyclone Apex Insert"
+                className={GOLD_INPUT_CLASS}
               />
             </div>
             <div>
@@ -114,6 +130,7 @@ export function PlantInventoryItemListView({
                 value={newStockCode}
                 onChange={(e) => setNewStockCode(e.target.value)}
                 placeholder="e.g. DMC-650-APX"
+                className={GOLD_INPUT_CLASS}
               />
             </div>
             <div>
@@ -129,7 +146,7 @@ export function PlantInventoryItemListView({
                 onChange={(e) =>
                   setNewCategory(e.target.value as PlantInventoryStockItem['category'])
                 }
-                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
+                className={GOLD_SELECT_CLASS}
               >
                 <option value="Wear Spares">Wear Spares</option>
                 <option value="Dense Medium">Dense Medium</option>
@@ -155,6 +172,7 @@ export function PlantInventoryItemListView({
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
                 placeholder="Circuit location, specification, and operational purpose"
+                className={GOLD_INPUT_CLASS}
               />
             </div>
             <div>
@@ -173,6 +191,7 @@ export function PlantInventoryItemListView({
                 value={newAmountRequired}
                 onChange={(e) => setNewAmountRequired(e.target.value)}
                 placeholder="e.g. 12"
+                className={GOLD_INPUT_CLASS}
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -192,6 +211,7 @@ export function PlantInventoryItemListView({
                   value={newAmountPresent}
                   onChange={(e) => setNewAmountPresent(e.target.value)}
                   placeholder="e.g. 8"
+                  className={GOLD_INPUT_CLASS}
                 />
               </div>
               <div>
@@ -207,6 +227,7 @@ export function PlantInventoryItemListView({
                   value={newUnit}
                   onChange={(e) => setNewUnit(e.target.value)}
                   placeholder="units / t / L"
+                  className={GOLD_INPUT_CLASS}
                 />
               </div>
             </div>
@@ -226,6 +247,7 @@ export function PlantInventoryItemListView({
               value={newPlantEquipment}
               onChange={(e) => setNewPlantEquipment(e.target.value)}
               placeholder="e.g. Primary Jaw Crusher CR-101"
+              className={GOLD_INPUT_CLASS}
             />
           </div>
 
