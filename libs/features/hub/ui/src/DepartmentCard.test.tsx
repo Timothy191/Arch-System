@@ -133,8 +133,15 @@ describe('DepartmentCard', () => {
       'gold-steel-border',
       'gold-steel-border-slim'
     );
-    const heading = screen.getByRole('heading', { name: 'Drilling Operations' });
-    expect(heading).toHaveClass('uiverse-card-title', 'font-anurati');
+    expect(screen.getByTestId('dept-telemetry-graph-drilling')).toBeInTheDocument();
+    expect(screen.getByText('24H Trend')).toBeInTheDocument();
+    expect(screen.getByText('10–30')).toBeInTheDocument();
+    expect(screen.getByText('+150.0%')).toBeInTheDocument();
+
+    expect(screen.getByRole('heading', { name: 'Drilling Operations' })).toHaveClass(
+      'uiverse-card-title',
+      'font-anurati'
+    );
     expect(screen.getByTestId('dept-header-separator-drilling')).toBeInTheDocument();
   });
 

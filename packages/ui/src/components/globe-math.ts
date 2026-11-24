@@ -49,8 +49,9 @@ export const INITIAL_ORBIT_YAW_RAD = 28 * DEG_TO_RAD;
 export const INITIAL_ORBIT_PITCH_RAD = -18 * DEG_TO_RAD;
 export const FIBONACCI_DOT_COUNT = 2400;
 
+export const GLOBE_SPHERE_FILL_RATIO = 0.36;
+
 const GOLDEN_ANGLE_RAD = Math.PI * (3 - Math.sqrt(5));
-const HALF_PI_RAD = Math.PI / 2;
 const POLE_THRESHOLD_LAT = 88;
 
 export const DEFAULT_GLOBE_PINS: readonly GlobePin[] = [
@@ -560,5 +561,3 @@ export function formatCoordinates(latDeg: number, lonDeg: number): string {
   const lonHemisphere = lonDeg >= 0 ? 'E' : 'W';
   return `${Math.abs(latDeg).toFixed(1)}°${latHemisphere}, ${Math.abs(lonDeg).toFixed(1)}°${lonHemisphere}`;
 }
-
-export const POLE_LIMIT_COS = Math.cos(HALF_PI_RAD - 0.02);

@@ -37,7 +37,7 @@ export function SystemGoldenSeparator({
   );
 }
 
-interface HeroTelemetrySeries {
+export interface HeroTelemetrySeries {
   title: string;
   unit: string;
   currentValue: string;
@@ -49,7 +49,7 @@ interface HeroTelemetrySeries {
   points: number[];
 }
 
-function getHeroTelemetrySeries(
+export function getHeroTelemetrySeries(
   panelName: string,
   stats?: { label: string; value: string }
 ): HeroTelemetrySeries {

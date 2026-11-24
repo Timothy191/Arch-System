@@ -1,8 +1,9 @@
 'use client';
 
-import { Pause, Play, RotateCcw } from 'lucide-react';
+import { Pause, Play, RotateCcw, Satellite } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../lib/utils';
+import { GlobeDepartmentMetrics } from './GlobeDepartmentMetrics';
 import {
   buildEarthSurfaceDots,
   clampPitchRad,
@@ -21,6 +22,8 @@ import {
   targetOrbitForLatLon,
 } from './globe-math';
 import { type ProjectedPinHit, renderGlobe3DFrame } from './globe-renderer';
+import { createWebGLGlobeRenderer, type WebGLGlobeRenderer } from './globe-webgl';
+import type { Panel } from './hero-types';
 
 export {
   buildEarthSurfaceDots,
@@ -33,8 +36,12 @@ export {
   targetOrbitForLatLon,
 };
 
+type SatelliteImageryLayer = 'viirs' | 'blue-marble';
+type SatelliteFeedStatus = 'blue-marble' | 'nasa-viirs' | 'wireframe';
+
 export interface GlobePinsProps {
   readonly pins?: readonly GlobePin[];
+  readonly activePanel?: Panel;
   readonly className?: string;
 }
 
@@ -47,9 +54,26 @@ const TARGET_LERP_FACTOR = 0.14;
 const DRAG_CLICK_THRESHOLD_PX = 5;
 const MAX_FRAME_DELTA_SEC = 0.05;
 const MAX_DPR = 2;
+const BUNDLED_BLUE_MARBLE_SRC = '/images/earth-blue-marble.jpg';
+
+const FALLBACK_OVERVIEW_PANEL: Panel = {
+  id: 'overview',
+  name: 'overview',
+  title: 'System Overview',
+  description: 'Global operations command surface',
+  category: 'Command',
+  image: '/images/departments/overview.webp',
+  stats: { label: 'System Health', value: '100% Optimal' },
+  trend: [62, 68, 72, 76, 81, 86, 90, 94, 96, 99],
+  status: 'active',
+  icon: <span aria-hidden="true" />,
+  iconBgColor: 'bg-accent-gold/10',
+  primary: { href: '/overview', label: 'Overview', icon: <span aria-hidden="true" /> },
+  assetOverline: 'CENTRAL COMMAND // SYS-MAIN',
+};
 
 const CONTROL_BUTTON_CLASS =
-  'inline-flex items-center gap-1 rounded-full border border-white/60 bg-white/75 px-2.5 py-1 text-[11px] font-medium text-[var(--text-secondary)] shadow-xs transition-colors hover:bg-white hover:text-[var(--text-heading)]';
+  'inline-flex items-center gap-1 rounded-full border border-white/60 bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-slate-800 shadow-xs transition-colors hover:bg-white hover:text-slate-950';
 
 function findHitPin(
   hits: readonly ProjectedPinHit[],
@@ -75,10 +99,24 @@ function getSafeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D | n
   }
 }
 
-/** Interactive 3D Canvas globe displaying live operational mining sites and telemetry arcs. */
-export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsProps) {
+function syncCanvasResolution(
+  canvas: HTMLCanvasElement,
+  width: number,
+  height: number,
+  dpr: number
+): void {
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+}
+
+/** Interactive 3D satellite Earth globe paired with live synchronized department telemetry. */
+export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }: GlobePinsProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const webglCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const webglRendererRef = useRef<WebGLGlobeRenderer | null>(null);
   const orbitRef = useRef<OrbitAngles>({
     yawRad: INITIAL_ORBIT_YAW_RAD,
     pitchRad: INITIAL_ORBIT_PITCH_RAD,
@@ -101,9 +139,10 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
     movedPx: 0,
   });
   const pinHitsRef = useRef<readonly ProjectedPinHit[]>([]);
-  const stageSizeRef = useRef<{ width: number; height: number }>({
+  const stageSizeRef = useRef<{ width: number; height: number; dpr: number }>({
     width: CANVAS_STAGE_FALLBACK_PX,
     height: CANVAS_STAGE_FALLBACK_PX,
+    dpr: 1,
   });
 
   const [selectedPinId, setSelectedPinId] = useState<string | null>(
@@ -112,6 +151,8 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
   const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [isDraggingUI, setIsDraggingUI] = useState(false);
+  const [imageryLayer, setImageryLayer] = useState<SatelliteImageryLayer>('viirs');
+  const [feedStatus, setFeedStatus] = useState<SatelliteFeedStatus>('wireframe');
 
   const selectedIdRef = useRef<string | null>(selectedPinId);
   const hoveredIdRef = useRef<string | null>(hoveredPinId);
@@ -122,6 +163,7 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
   autoRotateRef.current = isAutoRotating;
 
   const surfaceDots = useMemo(() => buildEarthSurfaceDots(), []);
+  const resolvedPanel = activePanel ?? FALLBACK_OVERVIEW_PANEL;
 
   const focusPin = useCallback((pin: GlobePin) => {
     setSelectedPinId(pin.id);
@@ -141,11 +183,79 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
   }, [pins]);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof Image === 'undefined') return;
+    let isCancelled = false;
+    let activeObjectUrl: string | null = null;
+    const abortController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+
+    const uploadImageryUrl = (
+      srcUrl: string,
+      nextStatus: SatelliteFeedStatus,
+      revokeUrlAfterLoad: boolean
+    ) => {
+      const img = new Image();
+      img.onload = () => {
+        if (isCancelled) {
+          if (revokeUrlAfterLoad && typeof URL?.revokeObjectURL === 'function') {
+            URL.revokeObjectURL(srcUrl);
+          }
+          return;
+        }
+        webglRendererRef.current?.setTextureImage(img);
+        setFeedStatus(nextStatus);
+        if (revokeUrlAfterLoad && typeof URL?.revokeObjectURL === 'function') {
+          URL.revokeObjectURL(srcUrl);
+          if (activeObjectUrl === srcUrl) {
+            activeObjectUrl = null;
+          }
+        }
+      };
+      img.src = srcUrl;
+    };
+
+    uploadImageryUrl(BUNDLED_BLUE_MARBLE_SRC, 'blue-marble', false);
+
+    if (imageryLayer === 'viirs' && typeof fetch === 'function') {
+      void fetch('/api/hub/earth-imagery?layer=viirs', { signal: abortController?.signal })
+        .then(async (response) => {
+          if (!response.ok || isCancelled) return;
+          const contentType = response.headers.get('content-type') ?? '';
+          if (!contentType.toLowerCase().startsWith('image/')) return;
+          const headerSource = response.headers.get('x-earth-imagery-source');
+          const blob = await response.blob();
+          if (isCancelled || typeof URL?.createObjectURL !== 'function') return;
+          const objectUrl = URL.createObjectURL(blob);
+          activeObjectUrl = objectUrl;
+          uploadImageryUrl(
+            objectUrl,
+            headerSource === 'nasa-gibs' ? 'nasa-viirs' : 'blue-marble',
+            true
+          );
+        })
+        .catch(() => {
+          // Keep bundled Blue Marble imagery active if live proxy is unavailable
+        });
+    }
+
+    return () => {
+      isCancelled = true;
+      abortController?.abort();
+      if (activeObjectUrl && typeof URL?.revokeObjectURL === 'function') {
+        URL.revokeObjectURL(activeObjectUrl);
+      }
+    };
+  }, [imageryLayer]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
+    const webglCanvas = webglCanvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
     const ctx = getSafeContext(canvas);
+    const webglRenderer = webglCanvas ? createWebGLGlobeRenderer(webglCanvas) : null;
+    webglRendererRef.current = webglRenderer;
+
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       typeof window.matchMedia === 'function' &&
@@ -158,11 +268,11 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
       const dpr =
         typeof window !== 'undefined' ? Math.min(MAX_DPR, window.devicePixelRatio || 1) : 1;
 
-      stageSizeRef.current = { width, height };
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
+      stageSizeRef.current = { width, height, dpr };
+      syncCanvasResolution(canvas, width, height, dpr);
+      if (webglCanvas) {
+        syncCanvasResolution(webglCanvas, width, height, dpr);
+      }
       if (ctx) {
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
@@ -224,6 +334,14 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
         }
       }
 
+      const hasWebGLTexture =
+        webglRenderer?.render({
+          widthPx: stageSizeRef.current.width,
+          heightPx: stageSizeRef.current.height,
+          dpr: stageSizeRef.current.dpr,
+          orbit: orbitRef.current,
+        }) ?? false;
+
       if (ctx) {
         pinHitsRef.current = renderGlobe3DFrame({
           ctx,
@@ -235,6 +353,7 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
           surfaceDots,
           selectedPinId: selectedIdRef.current,
           hoveredPinId: hoveredIdRef.current,
+          hasWebGLSphere: hasWebGLTexture,
         });
       }
 
@@ -243,7 +362,6 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
       }
     };
 
-    // Render frame 0 synchronously to prevent a blank flash before the first animation tick.
     stepFrame(0);
 
     return () => {
@@ -251,6 +369,8 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
         cancelAnimationFrame(animationFrameId);
       }
       resizeObserver?.disconnect();
+      webglRenderer?.dispose();
+      webglRendererRef.current = null;
     };
   }, [pins, surfaceDots]);
 
@@ -328,15 +448,28 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
     <div className={cn('space-y-4', className)}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5">
-          <span className="font-anurati font-bold text-[var(--text-heading)] text-sm tracking-[0.05em]">
+          <span className="font-anurati font-bold text-slate-950 text-sm tracking-[0.05em]">
             Active Site Pins
           </span>
-          <span className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider">
+          <span className="font-semibold text-[11px] text-slate-700 uppercase tracking-wider">
             {pins.length} operational sites
           </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setImageryLayer((prev) => (prev === 'viirs' ? 'blue-marble' : 'viirs'))}
+            className={CONTROL_BUTTON_CLASS}
+            aria-label={
+              imageryLayer === 'viirs'
+                ? 'Switch to NASA Blue Marble layer'
+                : 'Switch to NASA Live VIIRS satellite imagery'
+            }
+          >
+            <Satellite className="h-3 w-3 text-accent-gold" aria-hidden="true" />
+            <span>{imageryLayer === 'viirs' ? 'Live NASA' : 'Blue Marble'}</span>
+          </button>
           <button
             type="button"
             onClick={() => setIsAutoRotating((prev) => !prev)}
@@ -359,19 +492,23 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
             <RotateCcw className="h-3 w-3" aria-hidden="true" />
             <span>Reset</span>
           </button>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/70 px-2.5 py-1 shadow-xs">
-            <span className="h-2 w-2 rounded-full bg-accent-green" aria-hidden="true" />
-            <span className="text-[11px] text-[var(--text-secondary)]">All sites online</span>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-700/30 bg-emerald-950 px-2.5 py-1 shadow-xs">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
+            <span className="font-bold text-[11px] text-white">All sites online</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[minmax(0,300px)_1fr]">
+      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,310px)_1fr]">
         <div className="flex flex-col items-center">
           <div
             ref={containerRef}
-            className="relative flex h-[290px] w-full max-w-[300px] items-center justify-center overflow-hidden rounded-2xl border border-white/55 bg-white/45 shadow-sm"
+            className="relative flex h-[290px] w-full max-w-[310px] items-center justify-center overflow-hidden rounded-2xl border border-white/65 bg-white/45 shadow-sm"
           >
+            <canvas
+              ref={webglCanvasRef}
+              className="pointer-events-none absolute inset-0 block h-full w-full"
+            />
             <canvas
               ref={canvasRef}
               role="img"
@@ -386,69 +523,64 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, className }: GlobePinsPro
                 setHoveredPinId(null);
               }}
               className={cn(
-                'block h-full w-full touch-none select-none',
+                'relative z-10 block h-full w-full touch-none select-none',
                 isDraggingUI ? 'cursor-grabbing' : hoveredPinId ? 'cursor-pointer' : 'cursor-grab'
               )}
             />
+            <span className="pointer-events-none absolute top-2.5 left-3 z-20 rounded-full border border-white/75 bg-white/85 px-2 py-0.5 font-bold font-mono text-[9.5px] text-slate-800 shadow-xs">
+              {feedStatus === 'nasa-viirs'
+                ? 'NASA VIIRS LIVE'
+                : feedStatus === 'blue-marble'
+                  ? 'NASA BLUE MARBLE'
+                  : '3D TELEMETRY'}
+            </span>
             {activePin && (
-              <div className="pointer-events-none absolute inset-x-3 bottom-2.5 flex items-center justify-between rounded-full border border-white/70 bg-white/85 px-2.5 py-1 text-[10px] shadow-xs">
-                <span className="font-semibold text-[var(--text-heading)]">{activePin.label}</span>
-                <span className="font-mono text-[var(--text-secondary)] tabular-nums">
+              <div className="pointer-events-none absolute inset-x-3 bottom-2.5 z-20 flex items-center justify-between rounded-full border border-white/75 bg-white/90 px-2.5 py-1 text-[10px] shadow-xs">
+                <span className="font-bold text-slate-950">{activePin.label}</span>
+                <span className="font-mono font-semibold text-slate-700 tabular-nums">
                   {formatCoordinates(activePin.lat, activePin.lon)}
                 </span>
               </div>
             )}
           </div>
-          <span className="mt-1.5 text-[10px] text-[var(--text-tertiary)] tracking-wide">
+          <span className="mt-1.5 font-medium text-[10px] text-slate-700 tracking-wide">
             Drag to orbit 3D globe · Click pin to focus
           </span>
-        </div>
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
-          {pins.map((pin) => {
-            const isSelected = selectedPinId === pin.id;
-            const isHovered = hoveredPinId === pin.id;
-            return (
-              <button
-                key={pin.id}
-                type="button"
-                aria-pressed={isSelected}
-                onMouseEnter={() => setHoveredPinId(pin.id)}
-                onMouseLeave={() => setHoveredPinId(null)}
-                onClick={() => focusPin(pin)}
-                className={cn(
-                  'flex items-center justify-between gap-2.5 rounded-xl border px-3 py-2 text-left transition-all duration-150',
-                  isSelected
-                    ? 'border-accent-gold/65 bg-white/95 shadow-sm'
-                    : isHovered
-                      ? 'border-white/80 bg-white/85 shadow-xs'
-                      : 'border-white/50 bg-white/60 hover:bg-white/80'
-                )}
-              >
-                <div className="flex min-w-0 items-center gap-2.5">
+          <div
+            className="mt-2 flex w-full max-w-[310px] flex-wrap items-center justify-center gap-1.5"
+            aria-label="Quick site pin focus controls"
+          >
+            {pins.map((pin) => {
+              const isSelected = selectedPinId === pin.id;
+              return (
+                <button
+                  key={pin.id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onMouseEnter={() => setHoveredPinId(pin.id)}
+                  onMouseLeave={() => setHoveredPinId(null)}
+                  onClick={() => focusPin(pin)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-[10px] transition-all',
+                    isSelected
+                      ? 'border-accent-gold/70 bg-white text-slate-950 shadow-xs'
+                      : 'border-white/60 bg-white/65 text-slate-700 hover:bg-white hover:text-slate-950'
+                  )}
+                >
                   <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    className="h-2 w-2 shrink-0 rounded-full"
                     style={{ backgroundColor: pin.color ?? 'var(--accent-gold)' }}
                     aria-hidden="true"
                   />
-                  <div className="min-w-0">
-                    <div className="truncate font-semibold text-[var(--text-heading)] text-xs">
-                      {pin.label}
-                    </div>
-                    {pin.region && (
-                      <div className="truncate text-[10px] text-[var(--text-secondary)]">
-                        {pin.region}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <span className="shrink-0 font-mono text-[10px] text-[var(--text-secondary)] tabular-nums">
-                  {formatCoordinates(pin.lat, pin.lon)}
-                </span>
-              </button>
-            );
-          })}
+                  <span>{pin.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        <GlobeDepartmentMetrics activePanel={resolvedPanel} />
       </div>
     </div>
   );

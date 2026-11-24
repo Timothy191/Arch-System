@@ -42,6 +42,70 @@ export function toTitleCase(value: string): string {
   return value.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+interface TrendSummary {
+  readonly deltaLabel: string;
+  readonly rangeLabel: string;
+  readonly isUp: boolean;
+  readonly strokeColor: string;
+}
+
+function buildTrendSummary(points: readonly number[]): TrendSummary {
+  const firstPoint = points[0] ?? 0;
+  const lastPoint = points[points.length - 1] ?? 0;
+  const deltaPct = firstPoint !== 0 ? ((lastPoint - firstPoint) / Math.abs(firstPoint)) * 100 : 0;
+  const isUp = deltaPct >= 0;
+  return {
+    deltaLabel: `${isUp ? '+' : ''}${deltaPct.toFixed(1)}%`,
+    rangeLabel: `${Math.min(...points)}–${Math.max(...points)}`,
+    isUp,
+    strokeColor: isUp ? '#d4af37' : '#e11d48',
+  };
+}
+
+function DepartmentTelemetryPanel({
+  departmentName,
+  trend,
+}: {
+  readonly departmentName: string;
+  readonly trend: number[];
+}) {
+  const summary = buildTrendSummary(trend);
+  return (
+    <div
+      data-testid={`dept-telemetry-graph-${departmentName}`}
+      className="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 shadow-2xs"
+    >
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" aria-hidden="true" />
+          <span className="font-bold font-mono text-[9.5px] text-slate-700 uppercase tracking-wider">
+            24H Trend
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 font-mono text-[9.5px] tabular-nums">
+          <span className="text-slate-500">{summary.rangeLabel}</span>
+          <span
+            className={cn(
+              'rounded-full px-1.5 py-0.5 font-bold',
+              summary.isUp ? 'bg-emerald-500/12 text-emerald-800' : 'bg-rose-500/12 text-rose-800'
+            )}
+          >
+            {summary.deltaLabel}
+          </span>
+        </div>
+      </div>
+      <Sparkline
+        data={trend}
+        width={220}
+        height={42}
+        strokeWidth={2}
+        color={summary.strokeColor}
+        isFluidWidth
+      />
+    </div>
+  );
+}
+
 const DEPARTMENT_ICON_MAP: Record<string, LucideIcon> = {
   Wrench,
   ShieldCheck,
@@ -362,6 +426,11 @@ function DepartmentCard({
             <p className="uiverse-card-subtitle">{department.description}</p>
           </div>
 
+          {/* Dedicated 24H Telemetry Graph Panel */}
+          {department.trend && department.trend.length >= 2 && (
+            <DepartmentTelemetryPanel departmentName={department.name} trend={department.trend} />
+          )}
+
           {/* Tag / Stats row */}
           {department.stats && (
             <div className="uiverse-card-tag-row group-hover:border-arch-accent-blue/25 group-hover:bg-white/95">
@@ -371,11 +440,6 @@ function DepartmentCard({
                   aria-hidden="true"
                 />
                 <span className="uiverse-card-tag-row-text">{department.stats.label}</span>
-                {department.trend && (
-                  <div className="opacity-90">
-                    <Sparkline data={department.trend} width={52} height={14} color="#d4af37" />
-                  </div>
-                )}
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="uiverse-card-tag-row-value tabular-nums">

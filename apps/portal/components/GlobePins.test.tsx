@@ -136,5 +136,39 @@ describe('GlobePins interactive 3D Canvas component', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Reset 3D globe view' }));
     expect(screen.getByRole('button', { name: 'Pause globe rotation' })).toBeInTheDocument();
+
+    expect(screen.getByTestId('globe-dept-metrics-overview')).toBeInTheDocument();
+    const layerToggle = screen.getByRole('button', { name: /Switch to NASA Blue Marble layer/i });
+    fireEvent.click(layerToggle);
+    expect(
+      screen.getByRole('button', { name: /Switch to NASA Live VIIRS satellite imagery/i })
+    ).toBeInTheDocument();
+  });
+
+  it('synchronizes the telemetry metrics graph panel with the active HeroRotator department', () => {
+    render(
+      <GlobePins
+        activePanel={{
+          id: 'drilling',
+          name: 'drilling',
+          title: 'Drilling Operations',
+          description: 'Drill rig bit depth telemetry',
+          category: 'Field Operations',
+          image: '/images/departments/drilling.webp',
+          stats: { label: 'Depth', value: '1,240m' },
+          trend: [42, 48, 55, 62, 70],
+          status: 'active',
+          icon: <span aria-hidden="true" />,
+          iconBgColor: 'bg-accent-gold/10',
+          primary: { href: '/drilling', label: 'Drilling', icon: <span aria-hidden="true" /> },
+          assetOverline: 'FIELD OPERATIONS // UNIT-PV351',
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('globe-dept-metrics-drilling')).toBeInTheDocument();
+    expect(screen.getByText('Drilling Operations Telemetry')).toBeInTheDocument();
+    expect(screen.getByText('FIELD OPERATIONS // UNIT-PV351')).toBeInTheDocument();
+    expect(screen.getByText('DELTA +66.7%')).toBeInTheDocument();
   });
 });

@@ -1,4 +1,5 @@
 import {
+  GLOBE_SPHERE_FILL_RATIO,
   type GlobePin,
   type GlobeViewport,
   getSurfaceTangents,
@@ -31,6 +32,7 @@ export interface RenderGlobeFrameOptions {
   readonly surfaceDots: readonly SurfaceDot[];
   readonly selectedPinId: string | null;
   readonly hoveredPinId: string | null;
+  readonly hasWebGLSphere?: boolean;
 }
 
 interface GlobeRenderContext {
@@ -43,7 +45,7 @@ interface GlobeRenderContext {
   readonly hoveredPinId: string | null;
 }
 
-const SPHERE_FILL_RATIO = 0.36;
+const SPHERE_FILL_RATIO = GLOBE_SPHERE_FILL_RATIO;
 const ORBITAL_RING_RADIUS_MULT = 1.24;
 const ORBITAL_RING_TILT_X_RAD = -0.44;
 const ORBITAL_RING_TILT_Z_RAD = 0.24;
@@ -232,11 +234,16 @@ function drawGraticuleCurve(
     readonly frame: GlobeRenderContext;
     readonly points: readonly Vec3[];
     readonly isEquator: boolean;
+    readonly isSubtleOverlay: boolean;
   }
 ): void {
-  const { frame, points, isEquator } = options;
-  ctx.lineWidth = isEquator ? 1.15 : 0.75;
-  ctx.strokeStyle = isEquator ? 'rgba(212, 175, 55, 0.34)' : 'rgba(100, 116, 139, 0.19)';
+  const { frame, points, isEquator, isSubtleOverlay } = options;
+  ctx.lineWidth = isEquator ? 1.15 : 0.7;
+  if (isSubtleOverlay) {
+    ctx.strokeStyle = isEquator ? 'rgba(212, 175, 55, 0.36)' : 'rgba(255, 255, 255, 0.14)';
+  } else {
+    ctx.strokeStyle = isEquator ? 'rgba(212, 175, 55, 0.34)' : 'rgba(100, 116, 139, 0.19)';
+  }
 
   let hasOpenSegment = false;
   ctx.beginPath();
@@ -257,7 +264,11 @@ function drawGraticuleCurve(
   ctx.stroke();
 }
 
-function drawGraticule3D(ctx: CanvasRenderingContext2D, frame: GlobeRenderContext): void {
+function drawGraticule3D(
+  ctx: CanvasRenderingContext2D,
+  options: { readonly frame: GlobeRenderContext; readonly isSubtleOverlay: boolean }
+): void {
+  const { frame, isSubtleOverlay } = options;
   ctx.save();
   ctx.beginPath();
   ctx.arc(frame.viewport.centerX, frame.viewport.centerY, frame.viewport.radiusPx, 0, Math.PI * 2);
@@ -268,7 +279,12 @@ function drawGraticule3D(ctx: CanvasRenderingContext2D, frame: GlobeRenderContex
     for (let lonDeg = -180; lonDeg <= 180; lonDeg += GRATICULE_STEP_DEG) {
       ringPoints.push(latLonToUnitVec3(latDeg, lonDeg));
     }
-    drawGraticuleCurve(ctx, { frame, points: ringPoints, isEquator: latDeg === 0 });
+    drawGraticuleCurve(ctx, {
+      frame,
+      points: ringPoints,
+      isEquator: latDeg === 0,
+      isSubtleOverlay,
+    });
   }
 
   for (const lonDeg of GRATICULE_LONGITUDES_DEG) {
@@ -276,7 +292,12 @@ function drawGraticule3D(ctx: CanvasRenderingContext2D, frame: GlobeRenderContex
     for (let latDeg = -85; latDeg <= 85; latDeg += GRATICULE_STEP_DEG) {
       meridianPoints.push(latLonToUnitVec3(latDeg, lonDeg));
     }
-    drawGraticuleCurve(ctx, { frame, points: meridianPoints, isEquator: false });
+    drawGraticuleCurve(ctx, {
+      frame,
+      points: meridianPoints,
+      isEquator: false,
+      isSubtleOverlay,
+    });
   }
 
   ctx.restore();
@@ -580,9 +601,13 @@ export function renderGlobe3DFrame(options: RenderGlobeFrameOptions): readonly P
   drawAmbientContactShadow(ctx, frame);
   drawAtmosphericHalo(ctx, frame);
   drawOrbitalRingPass(ctx, { frame, layer: 'back' });
-  drawSphereBody(ctx, frame);
-  drawGraticule3D(ctx, frame);
-  drawContinentDots3D(ctx, frame);
+  if (options.hasWebGLSphere) {
+    drawGraticule3D(ctx, { frame, isSubtleOverlay: true });
+  } else {
+    drawSphereBody(ctx, frame);
+    drawGraticule3D(ctx, { frame, isSubtleOverlay: false });
+    drawContinentDots3D(ctx, frame);
+  }
   drawGeodesicArcs3D(ctx, frame);
   const pinHits = drawElevatedPins3D(ctx, frame);
   drawOrbitalRingPass(ctx, { frame, layer: 'front' });

@@ -401,7 +401,10 @@ export function HeroRotator({
           className="mx-auto mt-3.5 w-[92%] max-w-[1060px] sm:w-[88%] lg:w-[82%]"
           data-testid="hero-kpi-slim-banner"
         >
-          <GlobePins className="gold-steel-border gold-steel-border-slim rounded-2xl border border-white/40 bg-white/60 p-4 shadow-window backdrop-blur-xl" />
+          <GlobePins
+            activePanel={panels[activeIndex]}
+            className="gold-steel-border gold-steel-border-slim rounded-2xl border border-white/40 bg-white/60 p-4 shadow-window backdrop-blur-xl"
+          />
         </div>
       )}
 

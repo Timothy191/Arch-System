@@ -518,5 +518,6 @@ describe('HeroRotator', () => {
     fireEvent.click(screen.getByLabelText('Next highlight'));
     expect(screen.getByTestId('hero-dept-icon-presentation')).toBeInTheDocument();
     expect(screen.getByText('CEO and investor presentation deck')).toBeInTheDocument();
+    expect(screen.getByTestId('globe-dept-metrics-presentation')).toBeInTheDocument();
   });
 });

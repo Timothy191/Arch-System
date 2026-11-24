@@ -16,9 +16,9 @@ import type { EmployeeClearance } from '@/lib/hub-departments';
 
 const EXECUTIVE_LINK_CLASS = cn(
   'gold-steel-border gold-steel-border-slim group/exec inline-flex min-h-11 items-center gap-2',
-  'rounded-full border border-arch-border-subtle bg-white/90 px-3.5 py-1.5',
-  'font-semibold text-[13px] text-arch-text-primary leading-[18px] shadow-xs transition-all duration-150',
-  'hover:-translate-y-px hover:border-arch-accent-blue/40 hover:bg-white hover:text-arch-accent-blue active:scale-[0.985]'
+  'rounded-full border border-slate-300 bg-white px-3.5 py-1.5',
+  'font-bold text-[13px] text-slate-950 leading-[18px] shadow-sm transition-all duration-150',
+  'hover:-translate-y-px hover:border-arch-accent-blue hover:bg-white hover:text-arch-accent-blue active:scale-[0.985]'
 );
 
 interface CoreOperationalModulesProps {
@@ -45,30 +45,34 @@ interface StatChipProps {
 function StatChip({ label, count, color, icon }: StatChipProps) {
   const colorMap: Record<StatChipProps['color'], { bg: string; text: string; ring: string }> = {
     'accent-green': {
-      bg: 'bg-accent-green/10',
-      text: 'text-accent-green',
-      ring: 'ring-accent-green/30',
+      bg: 'bg-emerald-950 border-emerald-700',
+      text: 'text-white',
+      ring: 'ring-emerald-600/45',
     },
     'accent-amber': {
-      bg: 'bg-accent-amber/10',
-      text: 'text-accent-amber',
-      ring: 'ring-accent-amber/30',
+      bg: 'bg-amber-950 border-amber-600',
+      text: 'text-amber-50',
+      ring: 'ring-amber-500/45',
     },
-    'accent-red': { bg: 'bg-accent-red/10', text: 'text-accent-red', ring: 'ring-accent-red/30' },
+    'accent-red': {
+      bg: 'bg-rose-950 border-rose-700',
+      text: 'text-white',
+      ring: 'ring-rose-600/45',
+    },
   };
   const chipTheme = colorMap[color];
   return (
     <div
       className={cn(
-        'flex items-center gap-1.5 rounded-full border px-3 py-1.5',
+        'flex items-center gap-1.5 rounded-full border px-3 py-1.5 shadow-sm',
         chipTheme.bg,
         chipTheme.text,
         `ring-1 ${chipTheme.ring}`
       )}
     >
       {icon}
-      <span className="font-mono text-[13px] tabular-nums leading-[18px]">{count}</span>
-      <span className="font-medium text-[13px] leading-[18px] opacity-80">{label}</span>
+      <span className="font-bold font-mono text-[13px] tabular-nums leading-[18px]">{count}</span>
+      <span className="font-bold text-[13px] leading-[18px]">{label}</span>
     </div>
   );
 }
@@ -82,7 +86,7 @@ function ModuleSearchInput({ searchQuery, onSearchChange }: ModuleSearchInputPro
 
   return (
     <div className="gold-steel-border gold-steel-border-slim relative min-w-[200px] flex-1 rounded-full sm:w-64 sm:min-w-[240px]">
-      <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-accent-gold" />
+      <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-accent-gold brightness-110" />
       <input
         id="hub-module-search"
         type="text"
@@ -93,7 +97,7 @@ function ModuleSearchInput({ searchQuery, onSearchChange }: ModuleSearchInputPro
         onChange={(e) => onSearchChange(e.target.value)}
         onFocus={() => setIsSearchFocused(true)}
         onBlur={() => setIsSearchFocused(false)}
-        className="gold-steel-border gold-steel-border-slim h-11 w-full rounded-full border border-arch-border-subtle bg-white/90 pr-10 pl-10 text-[13px] text-arch-text-primary shadow-xs transition-all placeholder:text-arch-text-tertiary focus:border-accent-gold focus:outline-none"
+        className="gold-steel-border gold-steel-border-slim h-11 w-full rounded-full border border-accent-gold/45 bg-white/95 px-10 font-bold text-[13px] text-accent-gold caret-accent-gold brightness-110 placeholder:font-bold placeholder:text-accent-gold focus:border-accent-gold focus:outline-none"
       />
       <span id="hub-module-search-hint" className="sr-only">
         Press slash or Command K to focus the module search
@@ -103,12 +107,12 @@ function ModuleSearchInput({ searchQuery, onSearchChange }: ModuleSearchInputPro
           type="button"
           aria-label="Clear search"
           onClick={() => onSearchChange('')}
-          className="absolute top-1/2 right-2.5 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[13px] text-arch-text-tertiary hover:text-arch-text-primary"
+          className="absolute top-1/2 right-2.5 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full font-bold text-[13px] text-accent-gold hover:bg-arch-surface-tertiary"
         >
           ✕
         </button>
       ) : (
-        <kbd className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 rounded-full border border-arch-border-subtle bg-arch-surface-tertiary px-2 py-0.5 font-mono text-[13px] text-arch-text-tertiary leading-[18px]">
+        <kbd className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 rounded-full border border-accent-gold/45 bg-white px-2 py-0.5 font-bold font-mono text-[13px] text-accent-gold leading-[18px]">
           /
         </kbd>
       )}
@@ -219,19 +223,19 @@ export function CoreOperationalModules({
               label="Active"
               count={activeCount}
               color="accent-green"
-              icon={<Activity className="h-3.5 w-3.5" />}
+              icon={<Activity className="h-3.5 w-3.5 text-emerald-300" />}
             />
             <StatChip
               label="Pinned"
               count={pinnedCount}
               color="accent-amber"
-              icon={<Star className="h-3.5 w-3.5" />}
+              icon={<Star className="h-3.5 w-3.5 text-amber-300" />}
             />
             <StatChip
               label="Alerts"
               count={criticalCount}
               color="accent-red"
-              icon={<AlertTriangle className="h-3.5 w-3.5" />}
+              icon={<AlertTriangle className="h-3.5 w-3.5 text-rose-300" />}
             />
 
             {canSeeExecutive && (

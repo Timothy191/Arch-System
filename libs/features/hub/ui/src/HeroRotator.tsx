@@ -45,6 +45,7 @@ export function HeroRotator({
       image: '/images/departments/overview.webp',
       video: '/images/departments/overview.mp4',
       stats: { label: 'System Health', value: '100% Optimal' },
+      trend: [62, 68, 72, 76, 81, 86, 90, 94, 96, 99],
       status: 'active',
       icon: <Logo variant="gold" className="h-4 w-4 text-accent-gold" />,
       iconBgColor: 'bg-accent-gold/10',
@@ -110,6 +111,7 @@ export function HeroRotator({
               ? '/images/departments/overview.mp4'
               : `/images/departments/${dept.name}.mp4`,
         stats: dept.stats || { label: 'Telemetry', value: 'Online' },
+        trend: dept.trend,
         status: dept.status || 'active',
         icon: <Logo variant="gold" className="h-4 w-4 text-accent-gold" />,
         iconBgColor: 'bg-accent-gold/10',

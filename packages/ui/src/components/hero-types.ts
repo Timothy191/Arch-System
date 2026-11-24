@@ -9,6 +9,7 @@ export interface Panel {
   image: string;
   video?: string;
   stats?: { label: string; value: string };
+  trend?: readonly number[];
   status: string;
   icon: ReactNode;
   iconBgColor: string;

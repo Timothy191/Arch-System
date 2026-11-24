@@ -89,7 +89,18 @@ describe('CoreOperationalModules', () => {
     );
     expect(screen.getByLabelText('Search operational modules')).toHaveClass(
       'gold-steel-border',
-      'gold-steel-border-slim'
+      'gold-steel-border-slim',
+      'font-bold',
+      'text-accent-gold'
+    );
+    expect(screen.getAllByText('Active')[0]?.parentElement).toHaveClass(
+      'bg-emerald-950',
+      'text-white'
+    );
+    expect(screen.getByText('Pinned').parentElement).toHaveClass('bg-amber-950', 'text-amber-50');
+    expect(screen.getAllByText('Alerts')[0]?.parentElement).toHaveClass(
+      'bg-rose-950',
+      'text-white'
     );
     expect(screen.getByRole('group', { name: 'Filter modules by category' })).toHaveClass(
       'gold-steel-border',

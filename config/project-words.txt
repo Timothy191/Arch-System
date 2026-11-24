@@ -749,3 +749,8 @@ multigraph
 ipcountry
 scancode
 scanode
+viirs
+snpp
+epsg
+highp
+webgl
