@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { quickAddMineBlock, updateExcavatorAssignmentConfig } from '../hourly-loads/actions';
+import { saveExcavatorShiftTelemetry } from './actions';
 import { ExcavatorActivityForm } from './ExcavatorActivityForm';
 import { ExcavatorActivityTelemetryOverview } from './ExcavatorActivityTelemetryOverview';
 
@@ -28,6 +29,18 @@ jest.mock('../hourly-loads/actions', () => ({
       code: 'BLK-MAIN-BRAK-D',
       site_id: 'site-1',
     },
+  }),
+}));
+
+jest.mock('./actions', () => ({
+  saveExcavatorShiftTelemetry: jest.fn().mockResolvedValue({
+    success: true,
+    startSmr: 14500,
+    stopSmr: 14510,
+    hoursWorked: 10,
+    operatorId: 'op-1',
+    operatorName: 'Thabo Mokoena',
+    comment: 'Clean cut on Bench B',
   }),
 }));
 
@@ -342,5 +355,70 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     expect(screen.getByTestId('excavator-golden-graph-total-bcm')).toBeInTheDocument();
     expect(screen.getByTestId('excavator-golden-graph-total-loads')).toBeInTheDocument();
     expect(screen.getByTestId('excavator-golden-graph-active-excavators')).toBeInTheDocument();
+  });
+
+  it('pre-populates Start SMR, validates Stop SMR against Start SMR, and saves Operator, SMR, and Comment', async () => {
+    render(
+      <ExcavatorActivityForm
+        {...mockProps}
+        operators={[
+          { id: 'op-1', full_name: 'Thabo Mokoena', employee_code: 'EMP-101' },
+          { id: 'op-2', full_name: 'Sipho Dlamini', employee_code: 'EMP-102' },
+        ]}
+        initialShiftTelemetry={{
+          'ex-10|day': {
+            startSmr: 14500,
+            stopSmr: null,
+            startSmrSource: 'previous_shift',
+            operatorId: null,
+            comment: '',
+          },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('excavator-activity-card-EX-10')).toHaveClass(
+      'bg-white',
+      'gold-steel-border'
+    );
+    expect(screen.getByText('Start: Prev Shift')).toBeInTheDocument();
+
+    const startInput = screen.getByLabelText('Start SMR for EX-10') as HTMLInputElement;
+    const stopInput = screen.getByLabelText('Stop SMR for EX-10') as HTMLInputElement;
+    const operatorSelect = screen.getByLabelText('Select Operator for EX-10') as HTMLSelectElement;
+    const commentInput = screen.getByLabelText('Shift comment for EX-10') as HTMLTextAreaElement;
+    const saveBtn = screen.getByLabelText('Save shift telemetry for EX-10');
+
+    expect(startInput.value).toBe('14500');
+
+    // Entering Stop SMR below Start SMR shows inline alert and disables saving
+    fireEvent.change(stopInput, { target: { value: '14490' } });
+    expect(screen.getByRole('alert')).toHaveTextContent('Stop SMR cannot be lower than Start SMR.');
+    expect(saveBtn).toBeDisabled();
+
+    // Enter valid Stop SMR, Operator, and Comment
+    fireEvent.change(stopInput, { target: { value: '14510' } });
+    expect(screen.getByTestId('shift-hours-badge-EX-10')).toHaveTextContent('10.0 hrs');
+    expect(saveBtn).toBeEnabled();
+
+    fireEvent.change(operatorSelect, { target: { value: 'op-1' } });
+    fireEvent.change(commentInput, { target: { value: 'Clean cut on Bench B' } });
+    fireEvent.click(saveBtn);
+
+    await waitFor(() => {
+      expect(saveExcavatorShiftTelemetry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          departmentId: 'dept-1',
+          excavatorId: 'ex-10',
+          loadDate: '2026-10-23',
+          shiftType: 'day',
+          startSmr: 14500,
+          stopSmr: 14510,
+          operatorId: 'op-1',
+          operatorName: 'Thabo Mokoena',
+          comment: 'Clean cut on Bench B',
+        })
+      );
+    });
   });
 });

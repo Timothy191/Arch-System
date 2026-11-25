@@ -1,10 +1,12 @@
 import {
+  ACCESS_CONTROL_TABS,
   DEPARTMENTS,
   getDepartmentTabs,
   OFFICE_TABS,
   PLANT_INVENTORY_TABS,
   PLANT_PROCESSING_TABS,
   PRESENTATION_TABS,
+  PRODUCTION_TABS,
   PRODUCTIVITY_TOOLS,
 } from './departments';
 
@@ -145,24 +147,49 @@ describe('DEPARTMENTS registry', () => {
     ]);
   });
 
-  it('gives Drilling the shared operational tabs alongside its rig-specific pages', () => {
-    const tabs = getDepartmentTabs('drilling');
-    expect(tabs.map((t) => t.name)).toEqual([
+  it('gives Drilling core operational tabs without Tools and updates Production and Access Control labels', () => {
+    const drillingTabs = getDepartmentTabs('drilling');
+    expect(drillingTabs.map((t) => t.name)).toEqual([
       'dashboard',
       'drilling-operations',
       'daily-log',
       'machines',
       'history',
       'reports',
-      'tools',
+    ]);
+    expect(drillingTabs.map((t) => t.name)).not.toContain('tools');
+
+    const engineeringTabs = getDepartmentTabs('engineering');
+    expect(engineeringTabs.map((t) => t.name)).toEqual([
+      'dashboard',
+      'breakdowns',
+      'tire-management',
+      'daily-log',
+      'machines',
+      'history',
+      'reports',
+    ]);
+    expect(engineeringTabs.map((t) => t.name)).not.toContain('tools');
+
+    const productionTabs = getDepartmentTabs('production');
+    expect(productionTabs).toBe(PRODUCTION_TABS);
+    expect(productionTabs.map((t) => ({ name: t.name, label: t.label }))).toEqual([
+      { name: 'dashboard', label: 'Dashboard' },
+      { name: 'daily-log', label: 'Targets' },
+      { name: 'machines', label: 'Machines' },
+      { name: 'history', label: 'Performance' },
+      { name: 'reports', label: 'Reports' },
     ]);
 
-    // Parity with the generic department tab set: every shared operational page
-    // that `app/(departments)/[department]/*` serves must be reachable.
-    const genericTabNames = getDepartmentTabs('production').map((t) => t.name);
-    expect(genericTabNames).not.toContain('tools');
-    for (const sharedTab of genericTabNames) {
-      expect(tabs.map((t) => t.name)).toContain(sharedTab);
-    }
+    const accessControlTabs = getDepartmentTabs('access-control');
+    expect(accessControlTabs).toBe(ACCESS_CONTROL_TABS);
+    expect(accessControlTabs.map((t) => ({ name: t.name, label: t.label }))).toContainEqual({
+      name: 'muster',
+      label: 'On-Site',
+    });
+    expect(accessControlTabs.map((t) => ({ name: t.name, label: t.label }))).toContainEqual({
+      name: 'expired',
+      label: 'Expired',
+    });
   });
 });

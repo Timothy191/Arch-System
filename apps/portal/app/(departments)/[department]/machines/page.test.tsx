@@ -304,6 +304,22 @@ describe('/[department]/machines Page & Telemetry Panels', () => {
     expect(screen.getByText('HT-12')).toBeInTheDocument();
     expect(screen.getByText('Bin: 45 BCM')).toBeInTheDocument();
 
+    expect(screen.getByTestId('machine-database-header-panel')).toHaveClass(
+      'bg-white',
+      'gold-steel-border',
+      'border-accent-gold/60'
+    );
+    expect(screen.getByTestId('machine-database-admin-banner')).toHaveClass(
+      'bg-white',
+      'gold-steel-border',
+      'border-accent-gold/55'
+    );
+    expect(screen.getByTestId('site-group-pill-PIT-1')).toHaveClass(
+      'bg-white',
+      'gold-steel-border',
+      'border-accent-gold/60'
+    );
+
     // Upward & downward % indicators and totals
     expect(screen.getByText('50 h')).toBeInTheDocument();
     expect(screen.getByText('+50.0%')).toBeInTheDocument();

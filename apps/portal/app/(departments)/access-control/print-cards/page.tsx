@@ -2,18 +2,22 @@ import { connection } from 'next/server';
 import {
   getDepartmentsForCardStudio,
   getEmployeeCardProfiles,
+  getFleetAndVehicleBadgeProfiles,
   getNeo300PrinterStatus,
   getRecentNeo300Jobs,
 } from './actions';
 import { Neo300PrintStudio } from './neo300-print-studio';
 
+const RECENT_PRINT_JOB_LIMIT = 15;
+
 export default async function PrintCardsPage() {
   await connection();
-  const [printer, employees, jobs, departments] = await Promise.all([
+  const [printer, employees, jobs, departments, fleetBadges] = await Promise.all([
     getNeo300PrinterStatus(),
     getEmployeeCardProfiles(),
-    getRecentNeo300Jobs(15),
+    getRecentNeo300Jobs(RECENT_PRINT_JOB_LIMIT),
     getDepartmentsForCardStudio(),
+    getFleetAndVehicleBadgeProfiles(),
   ]);
 
   return (
@@ -22,6 +26,7 @@ export default async function PrintCardsPage() {
       initialEmployees={employees}
       initialJobs={jobs}
       departments={departments}
+      initialFleetBadges={fleetBadges}
     />
   );
 }

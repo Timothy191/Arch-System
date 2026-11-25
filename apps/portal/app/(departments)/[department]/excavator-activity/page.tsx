@@ -7,6 +7,12 @@ import { HAUL_TRUCK_MACHINE_TYPES, parseExcavatorMaterial } from '../hourly-load
 import { ExcavatorActivityForm } from './ExcavatorActivityForm';
 import { ExcavatorActivityList } from './ExcavatorActivityList';
 import { ExcavatorActivityTelemetryOverview } from './ExcavatorActivityTelemetryOverview';
+import {
+  buildInitialShiftTelemetryMap,
+  type RawMachineOperationSmrRow,
+} from './excavator-shift-helpers';
+
+const RECENT_SMR_OPS_LIMIT = 200;
 
 export default async function ExcavatorActivityPage({
   params,
@@ -34,7 +40,7 @@ export default async function ExcavatorActivityPage({
   ] = await Promise.all([
     supabase
       .from('machines')
-      .select('id, name, machine_type, serial_number, active, site_id')
+      .select('id, name, machine_type, serial_number, active, site_id, starting_smr')
       .eq('machine_type', 'Excavator')
       .eq('active', true)
       .order('name'),
@@ -67,25 +73,10 @@ export default async function ExcavatorActivityPage({
     getOperationalTargets(),
   ]);
 
-  // Fetch today's dumper assignments via excavator_activity IDs
+  const excavatorIds = (excavators ?? []).map((e) => e.id);
   const activityIds = todayActivity?.map((a) => a.id) || [];
-  let todayAssignments: Array<{
-    id: string;
-    excavator_activity_id: string;
-    dumper_machine_id: string;
-    material_type: string;
-    total_loads: number;
-    total_bcm: number | null;
-    notes: string | null;
-    dumper: {
-      name: string;
-      bin_factor: number | null;
-      machine_type: string;
-    } | null;
-  }> = [];
 
-  // Fetch assignments and hourly loads in parallel (loads don't depend on assignments)
-  const [{ data: assignments }, { data: todayLoads }] = await Promise.all([
+  const [{ data: assignments }, { data: todayLoads }, machineOpsResult] = await Promise.all([
     activityIds.length > 0
       ? supabase
           .from('excavator_dumper_assignments')
@@ -99,8 +90,28 @@ export default async function ExcavatorActivityPage({
       )
       .eq('department_id', deptId)
       .eq('load_date', today),
+    excavatorIds.length > 0
+      ? supabase
+          .from('machine_operations')
+          .select(
+            'id, machine_id, shift_date, shift_type, start_smu, end_smu, hours_worked, operator_id, operator_name'
+          )
+          .in('machine_id', excavatorIds)
+          .lte('shift_date', today)
+          .order('shift_date', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(RECENT_SMR_OPS_LIMIT)
+      : Promise.resolve({ data: [] as RawMachineOperationSmrRow[] }),
   ]);
-  todayAssignments = assignments || [];
+
+  const todayAssignments = assignments || [];
+  const machineOperations = (machineOpsResult.data ?? []) as RawMachineOperationSmrRow[];
+  const initialShiftTelemetry = buildInitialShiftTelemetryMap({
+    excavators: excavators || [],
+    machineOperations,
+    todayActivities: todayActivity || [],
+    today,
+  });
 
   // Compute KPIs and Global Combined Tally
   const totalLoads = todayAssignments?.reduce((sum, a) => sum + (a.total_loads || 0), 0) || 0;
@@ -155,6 +166,7 @@ export default async function ExcavatorActivityPage({
         todayDumperLoads={todayLoads || []}
         todayActivities={todayActivity || []}
         todayAssignments={todayAssignments || []}
+        initialShiftTelemetry={initialShiftTelemetry}
         mineralRegistry={mineralRegistry}
         today={today}
         initialShift={getCurrentShift()}

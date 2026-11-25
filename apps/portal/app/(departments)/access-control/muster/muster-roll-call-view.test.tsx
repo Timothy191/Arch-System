@@ -82,7 +82,7 @@ describe('MusterRollCallView', () => {
   it('renders summary header and calculates live counts via memoized aggregation', () => {
     render(<MusterRollCallView initialSummary={mockSummary} />);
 
-    expect(screen.getByText('Emergency Evacuation & Blast Clearance Station')).toBeInTheDocument();
+    expect(screen.getByText('On-Site Command HUD')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument(); // Total souls
     expect(screen.getByText('1 Verified')).toBeInTheDocument(); // Station count for Alpha
   });

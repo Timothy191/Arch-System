@@ -88,13 +88,13 @@ export function QuickActionHub() {
             <span>RFID Inventory</span>
           </Link>
 
-          {/* Action 4: Muster Station */}
+          {/* Action 4: On-Site (Muster) */}
           <Link
             href="/access-control/muster"
             className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-white px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs shadow-2xs transition-all hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] active:scale-95"
           >
             <LifeBuoy className="h-3.5 w-3.5 text-red-600" />
-            <span>Muster Roll</span>
+            <span>On-Site Roll Call</span>
           </Link>
 
           {/* Action 5: Regulatory Reports */}

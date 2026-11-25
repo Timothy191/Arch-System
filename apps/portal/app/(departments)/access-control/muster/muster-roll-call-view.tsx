@@ -239,7 +239,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded bg-black/[0.04] px-2 py-0.5 font-bold font-mono text-[var(--text-heading)] text-xs uppercase tracking-wider">
-                  DMRE SECTION 54/55 MUSTER PROTOCOL
+                  DMRE SECTION 54/55
                 </span>
                 <span
                   className={`rounded-full px-2 py-0.5 font-bold text-xs ${
@@ -250,11 +250,11 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
                 >
                   {unaccounted > 0
                     ? `ACTIVE RECONCILIATION • ${unaccounted} UNACCOUNTED`
-                    : 'ALL SOULS ACCOUNTED • PIT SECURED'}
+                    : 'ALL SOULS ACCOUNTED'}
                 </span>
               </div>
               <h2 className="mt-1 font-black text-2xl text-[var(--text-heading)] tracking-tight">
-                Emergency Evacuation & Blast Clearance Station
+                On-Site Command HUD
               </h2>
               <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Brakfontein Pit Alpha • Automated head-count sync via gate turnstiles and safety
@@ -440,7 +440,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
                   Compliance
                 </th>
                 <th scope="col" className="px-4 py-3">
-                  Muster Station
+                  On-Site Station
                 </th>
                 <th scope="col" className="px-4 py-3 text-right">
                   Reconciliation Action

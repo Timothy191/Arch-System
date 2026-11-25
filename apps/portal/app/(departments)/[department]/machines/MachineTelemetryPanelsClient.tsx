@@ -39,13 +39,16 @@ export function MachineTelemetryPanelsClient({ siteGroups }: MachineTelemetryPan
       {siteGroups.map(({ siteKey, siteCode, siteName, machines: siteMachines }) => (
         <div key={siteKey} className="space-y-3">
           {/* Site heading */}
-          <div className="inline-flex items-center gap-2.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 px-3.5 py-1.5 shadow-card">
+          <div
+            data-testid={`site-group-pill-${siteKey}`}
+            className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2.5 rounded-full border border-accent-gold/60 bg-white px-4 py-2 shadow-card"
+          >
             {siteCode ? (
-              <span className="inline-flex rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-mono text-[var(--accent-blue)] text-xs">
+              <span className="inline-flex rounded-full border border-accent-gold/40 bg-amber-50 px-2.5 py-0.5 font-mono font-semibold text-amber-900 text-xs">
                 {siteCode}
               </span>
             ) : null}
-            <h3 className="font-medium text-[var(--text-heading)] text-sm">{siteName}</h3>
+            <h3 className="font-semibold text-[var(--text-heading)] text-sm">{siteName}</h3>
             <span className="text-[var(--text-muted)] text-xs">
               {siteMachines.length} machine{siteMachines.length !== 1 ? 's' : ''}
             </span>

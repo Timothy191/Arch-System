@@ -278,8 +278,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                       onClick={() => setInspectBadge(b)}
                       className="group flex cursor-pointer items-center gap-2"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white p-1 shadow-sm transition-transform group-hover:scale-105">
-                        <QRCodeSection data={b.qr_code} size={30} />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center p-1">
+                        <QRCodeSection data={b.qr_code} size={40} />
                       </div>
                       <span className="font-bold font-mono text-[var(--text-primary)] group-hover:text-blue-400">
                         {b.qr_code}
@@ -669,8 +669,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
               </button>
             </div>
 
-            <div className="mx-auto flex h-48 w-48 items-center justify-center rounded-2xl border border-[var(--border-default)] bg-white p-3 shadow-md">
-              <QRCodeSection data={inspectBadge.qr_code} size={160} />
+            <div className="mx-auto flex h-48 w-48 items-center justify-center">
+              <QRCodeSection data={inspectBadge.qr_code} size={180} />
             </div>
 
             <div className="space-y-1">

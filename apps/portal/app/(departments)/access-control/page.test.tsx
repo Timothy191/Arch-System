@@ -178,6 +178,6 @@ describe('AccessControlDashboardPage', () => {
     render(element);
 
     expect(screen.getByText('142')).toBeInTheDocument();
-    expect(screen.getByText('Muster Roll Call')).toBeInTheDocument();
+    expect(screen.getAllByText('On-Site Roll Call')).toHaveLength(2);
   });
 });

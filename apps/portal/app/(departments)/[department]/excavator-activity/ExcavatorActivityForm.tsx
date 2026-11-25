@@ -23,6 +23,17 @@ import {
   normalizeQuickBlockFormat,
   parseExcavatorMaterial,
 } from '../hourly-loads/loads-utils';
+import { saveExcavatorShiftTelemetry } from './actions';
+import {
+  type ExcavatorOperatorOption,
+  ExcavatorShiftTelemetryControls,
+  type ExcavatorShiftTelemetryDraft,
+} from './ExcavatorShiftTelemetryControls';
+import {
+  buildExcavatorShiftTelemetryKey,
+  buildInitialShiftTelemetryMap,
+  type ExcavatorShiftSmrDefaults,
+} from './excavator-shift-helpers';
 
 interface ExcavatorMachine {
   id: string;
@@ -30,6 +41,7 @@ interface ExcavatorMachine {
   machine_type: string;
   serial_number: string | null;
   site_id?: string | null;
+  starting_smr?: number | null;
 }
 
 interface DumperMachine {
@@ -38,12 +50,6 @@ interface DumperMachine {
   machine_type: string;
   bin_factor: number | null;
   site_id: string | null;
-}
-
-interface Operator {
-  id: string;
-  full_name: string;
-  employee_code: string;
 }
 
 interface Site {
@@ -66,6 +72,8 @@ interface ExcavatorActivityConfig {
   site_id?: string | null;
   block_mined_id?: string | null;
   material_type?: string | null;
+  operator_id?: string | null;
+  notes?: string | null;
   activity_date?: string;
 }
 
@@ -82,12 +90,13 @@ interface ExcavatorActivityFormProps {
   departmentId: string;
   excavators: ExcavatorMachine[];
   dumpers: DumperMachine[];
-  operators?: Operator[];
+  operators?: ExcavatorOperatorOption[];
   sites?: Site[];
   mineBlocks: MineBlock[];
   todayDumperLoads: HourlyLoadSegmentSummary[];
   todayActivities?: ExcavatorActivityConfig[];
   todayAssignments?: SavedDumperAssignment[];
+  initialShiftTelemetry?: Record<string, ExcavatorShiftSmrDefaults>;
   mineralRegistry?: {
     waste: string[];
     coal: string[];
@@ -381,11 +390,13 @@ export function ExcavatorActivityForm({
   departmentId,
   excavators,
   dumpers,
+  operators = [],
   sites = [],
   mineBlocks,
   todayDumperLoads,
   todayActivities = [],
   todayAssignments = [],
+  initialShiftTelemetry = {},
   mineralRegistry,
   today,
   initialShift,
@@ -679,6 +690,151 @@ export function ExcavatorActivityForm({
   const effectiveToday = useMemo(
     () => today || new Date().toISOString().split('T')[0] || '',
     [today]
+  );
+
+  const fallbackTelemetryMap = useMemo(
+    () =>
+      buildInitialShiftTelemetryMap({
+        excavators,
+        machineOperations: [],
+        todayActivities,
+        today: effectiveToday,
+      }),
+    [excavators, todayActivities, effectiveToday]
+  );
+
+  const buildDraftFromTelemetry = useCallback(
+    (excavatorId: string, shiftType: HourlyShift): ExcavatorShiftTelemetryDraft => {
+      const key = buildExcavatorShiftTelemetryKey(excavatorId, shiftType);
+      const source = initialShiftTelemetry[key] ?? fallbackTelemetryMap[key];
+      return {
+        startSmrInput: source?.startSmr != null ? String(source.startSmr) : '',
+        stopSmrInput: source?.stopSmr != null ? String(source.stopSmr) : '',
+        startSmrSource: source?.startSmrSource ?? 'none',
+        operatorId: source?.operatorId ?? '',
+        comment: source?.comment ?? '',
+        isDirty: false,
+        isSaving: false,
+        lastSavedAt: null,
+      };
+    },
+    [initialShiftTelemetry, fallbackTelemetryMap]
+  );
+
+  const [shiftDrafts, setShiftDrafts] = useState<Record<string, ExcavatorShiftTelemetryDraft>>(
+    () => {
+      const seeded: Record<string, ExcavatorShiftTelemetryDraft> = {};
+      for (const exc of excavators) {
+        for (const sh of ['day', 'night'] as const) {
+          const key = buildExcavatorShiftTelemetryKey(exc.id, sh);
+          seeded[key] = buildDraftFromTelemetry(exc.id, sh);
+        }
+      }
+      return seeded;
+    }
+  );
+
+  const handleUpdateTelemetryDraft = useCallback(
+    (
+      excavatorId: string,
+      patch: Partial<
+        Pick<
+          ExcavatorShiftTelemetryDraft,
+          'startSmrInput' | 'stopSmrInput' | 'operatorId' | 'comment'
+        >
+      >
+    ) => {
+      const key = buildExcavatorShiftTelemetryKey(excavatorId, selectedShift);
+      setShiftDrafts((prev) => {
+        const current = prev[key] ?? buildDraftFromTelemetry(excavatorId, selectedShift);
+        return {
+          ...prev,
+          [key]: { ...current, ...patch, isDirty: true },
+        };
+      });
+    },
+    [selectedShift, buildDraftFromTelemetry]
+  );
+
+  const handleSaveShiftTelemetry = useCallback(
+    async (excavator: ExcavatorMachine) => {
+      const key = buildExcavatorShiftTelemetryKey(excavator.id, selectedShift);
+      const draft = shiftDrafts[key] ?? buildDraftFromTelemetry(excavator.id, selectedShift);
+      const parsedStart = draft.startSmrInput.trim() ? Number(draft.startSmrInput) : null;
+      const parsedStop = draft.stopSmrInput.trim() ? Number(draft.stopSmrInput) : null;
+
+      if (parsedStart !== null && parsedStop !== null && parsedStop < parsedStart) {
+        toast.error('Stop SMR must be greater than or equal to Start SMR.');
+        return;
+      }
+
+      const selectedOp = operators.find((op) => op.id === draft.operatorId) ?? null;
+      const currentSiteId = excavatorSites[excavator.id] || null;
+      const currentBlockId = excavatorBlocks[excavator.id] || null;
+      const currentMat = excavatorMaterials[excavator.id] ?? 'Waste';
+      const currentSub = excavatorMaterialSubCategories[excavator.id] ?? null;
+
+      setShiftDrafts((prev) => ({
+        ...prev,
+        [key]: { ...draft, isSaving: true },
+      }));
+
+      try {
+        const res = await saveExcavatorShiftTelemetry({
+          departmentId,
+          excavatorId: excavator.id,
+          loadDate: effectiveToday,
+          shiftType: selectedShift,
+          startSmr: parsedStart,
+          stopSmr: parsedStop,
+          operatorId: draft.operatorId || null,
+          operatorName: selectedOp?.full_name ?? null,
+          comment: draft.comment.trim() || null,
+          siteId: currentSiteId,
+          blockMinedId: currentBlockId,
+          materialType: formatExcavatorMaterial(currentMat, currentSub),
+        });
+
+        setShiftDrafts((prev) => ({
+          ...prev,
+          [key]: {
+            ...draft,
+            startSmrInput: res.startSmr != null ? String(res.startSmr) : '',
+            stopSmrInput: res.stopSmr != null ? String(res.stopSmr) : '',
+            startSmrSource: res.startSmr != null ? 'current_shift' : draft.startSmrSource,
+            operatorId: res.operatorId ?? '',
+            comment: res.comment ?? '',
+            isDirty: false,
+            isSaving: false,
+            lastSavedAt: new Date().toISOString(),
+          },
+        }));
+        toast.success(`Saved shift SMR, operator, and comment for ${excavator.name}.`);
+        startTransition(() => {
+          router.refresh();
+        });
+      } catch (err) {
+        logError(err, { context: 'save_excavator_shift_telemetry' });
+        setShiftDrafts((prev) => ({
+          ...prev,
+          [key]: { ...draft, isSaving: false },
+        }));
+        toast.error(err instanceof Error ? err.message : 'Failed to save shift telemetry.');
+      }
+    },
+    [
+      selectedShift,
+      shiftDrafts,
+      buildDraftFromTelemetry,
+      operators,
+      excavatorSites,
+      excavatorBlocks,
+      excavatorMaterials,
+      excavatorMaterialSubCategories,
+      departmentId,
+      effectiveToday,
+      router,
+    ]
   );
 
   // Handle excavator site assignment change
@@ -1123,7 +1279,8 @@ export function ExcavatorActivityForm({
             return (
               <div
                 key={excavator.id}
-                className="flex flex-col gap-3 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs"
+                data-testid={`excavator-activity-card-${excavator.name}`}
+                className="gold-steel-border gold-steel-border-slim flex flex-col gap-3 rounded-xl border border-accent-gold/45 bg-white p-4 shadow-card"
               >
                 {/* Header: Excavator Name (with Gold Arch Logo + Golden Separator) + Active Machines Subtitle + Material Toggle */}
                 <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-default)]/60 border-b pb-2.5">
@@ -1181,110 +1338,115 @@ export function ExcavatorActivityForm({
                   </div>
                 </div>
 
-                {/* Site, Block Mined / Area (+ Quick Add) & Material Sub-Category Selectors */}
-                <div
-                  className={`grid grid-cols-1 gap-2.5 ${isRegularMachine ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}
-                >
-                  <div className="space-y-1">
-                    <label className="block font-medium text-[11px] text-[var(--text-muted)]">
-                      Site / Location
-                    </label>
-                    <select
-                      value={currentSiteId}
-                      onChange={(e) =>
-                        handleExcavatorSiteChange(excavator.id, e.target.value || null)
-                      }
-                      aria-label={`Select Site / Location for ${excavator.name}`}
-                      className={SELECT_FIELD_CLASS}
-                    >
-                      <option value="">No Site</option>
-                      {sites.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {!isRegularMachine && (
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between gap-1">
-                        <label className="block font-medium text-[11px] text-[var(--text-muted)]">
-                          Block Mined / Area
-                        </label>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <select
-                          value={currentBlockId}
-                          onChange={(e) =>
-                            handleExcavatorBlockChange(excavator.id, e.target.value || null)
-                          }
-                          aria-label={`Select Block Mined / Area for ${excavator.name}`}
-                          className={SELECT_FIELD_CLASS}
-                        >
-                          <option value="">Select block / area...</option>
-                          {availableBlocks.map((mb) => (
-                            <option key={mb.id} value={mb.id}>
-                              {mb.name} ({mb.code})
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (isQuickAddOpen) {
-                              setQuickAddExcavatorId(null);
-                            } else {
-                              setQuickAddExcavatorId(excavator.id);
-                              setQuickBlockName('');
-                              setQuickBlockCode('');
-                            }
-                          }}
-                          aria-label={`Quick add Block Mined / Area for ${excavator.name}`}
-                          title="Quick add Block (auto-configures format & BLK code)"
-                          data-testid={`quick-add-block-btn-${excavator.name}`}
-                          className="gold-steel-border gold-steel-border-slim inline-flex h-[31px] w-[31px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-accent-amber/40 bg-[var(--bg-primary)] text-[var(--text-heading)] shadow-2xs transition-colors hover:bg-accent-amber/15"
-                        >
-                          {isQuickAddOpen ? (
-                            <X className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-                          ) : (
-                            <Plus className="h-3.5 w-3.5 text-accent-amber" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {!isRegularMachine && (
+                {/* Step 1: Site, Block Mined / Area (+ Quick Add) & Material Sub-Category */}
+                <div className="space-y-2 rounded-xl border border-accent-gold/35 bg-[var(--bg-secondary)]/55 p-3">
+                  <span className="block font-semibold text-[11px] text-[var(--text-heading)] uppercase tracking-wide">
+                    1. Location &amp; Material
+                  </span>
+                  <div
+                    className={`grid grid-cols-1 gap-2.5 ${isRegularMachine ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}
+                  >
                     <div className="space-y-1">
                       <label className="block font-medium text-[11px] text-[var(--text-muted)]">
-                        {isRegularMachine
-                          ? `Activity (${currentMaterial})`
-                          : `Material (${currentMaterial})`}
+                        Site / Location
                       </label>
                       <select
-                        value={currentSubCategory}
+                        value={currentSiteId}
                         onChange={(e) =>
-                          handleExcavatorMaterialSubCategoryChange(
-                            excavator.id,
-                            e.target.value || null
-                          )
+                          handleExcavatorSiteChange(excavator.id, e.target.value || null)
                         }
-                        aria-label={`Select ${currentMaterial} material sub-category for ${excavator.name}`}
+                        aria-label={`Select Site / Location for ${excavator.name}`}
                         className={SELECT_FIELD_CLASS}
                       >
-                        <option value="">
-                          Select {currentMaterial.toLowerCase()}{' '}
-                          {isRegularMachine ? 'activity...' : 'material...'}
-                        </option>
-                        {materialSubCategories.map((subCat) => (
-                          <option key={subCat} value={subCat}>
-                            {subCat}
+                        <option value="">No Site</option>
+                        {sites.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
                           </option>
                         ))}
                       </select>
                     </div>
-                  )}
+
+                    {!isRegularMachine && (
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <label className="block font-medium text-[11px] text-[var(--text-muted)]">
+                            Block Mined / Area
+                          </label>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={currentBlockId}
+                            onChange={(e) =>
+                              handleExcavatorBlockChange(excavator.id, e.target.value || null)
+                            }
+                            aria-label={`Select Block Mined / Area for ${excavator.name}`}
+                            className={SELECT_FIELD_CLASS}
+                          >
+                            <option value="">Select block / area...</option>
+                            {availableBlocks.map((mb) => (
+                              <option key={mb.id} value={mb.id}>
+                                {mb.name} ({mb.code})
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isQuickAddOpen) {
+                                setQuickAddExcavatorId(null);
+                              } else {
+                                setQuickAddExcavatorId(excavator.id);
+                                setQuickBlockName('');
+                                setQuickBlockCode('');
+                              }
+                            }}
+                            aria-label={`Quick add Block Mined / Area for ${excavator.name}`}
+                            title="Quick add Block (auto-configures format & BLK code)"
+                            data-testid={`quick-add-block-btn-${excavator.name}`}
+                            className="gold-steel-border gold-steel-border-slim inline-flex h-[31px] w-[31px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-accent-amber/40 bg-[var(--bg-primary)] text-[var(--text-heading)] shadow-2xs transition-colors hover:bg-accent-amber/15"
+                          >
+                            {isQuickAddOpen ? (
+                              <X className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                            ) : (
+                              <Plus className="h-3.5 w-3.5 text-accent-amber" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {!isRegularMachine && (
+                      <div className="space-y-1">
+                        <label className="block font-medium text-[11px] text-[var(--text-muted)]">
+                          {isRegularMachine
+                            ? `Activity (${currentMaterial})`
+                            : `Material (${currentMaterial})`}
+                        </label>
+                        <select
+                          value={currentSubCategory}
+                          onChange={(e) =>
+                            handleExcavatorMaterialSubCategoryChange(
+                              excavator.id,
+                              e.target.value || null
+                            )
+                          }
+                          aria-label={`Select ${currentMaterial} material sub-category for ${excavator.name}`}
+                          className={SELECT_FIELD_CLASS}
+                        >
+                          <option value="">
+                            Select {currentMaterial.toLowerCase()}{' '}
+                            {isRegularMachine ? 'activity...' : 'material...'}
+                          </option>
+                          {materialSubCategories.map((subCat) => (
+                            <option key={subCat} value={subCat}>
+                              {subCat}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Inline Quick Add Block Drawer with Auto-Formatter */}
@@ -1334,6 +1496,18 @@ export function ExcavatorActivityForm({
                     </div>
                   </div>
                 )}
+
+                {/* Steps 2 & 3: Operator, Start/Stop SMR & Shift Comment */}
+                <ExcavatorShiftTelemetryControls
+                  excavatorName={excavator.name}
+                  operators={operators}
+                  draft={
+                    shiftDrafts[buildExcavatorShiftTelemetryKey(excavator.id, selectedShift)] ??
+                    buildDraftFromTelemetry(excavator.id, selectedShift)
+                  }
+                  onUpdateDraft={(patch) => handleUpdateTelemetryDraft(excavator.id, patch)}
+                  onSave={() => handleSaveShiftTelemetry(excavator)}
+                />
               </div>
             );
           })}

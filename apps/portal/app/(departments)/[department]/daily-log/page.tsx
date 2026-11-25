@@ -1,6 +1,12 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import { connection } from 'next/server';
+import {
+  DrillingDailyLogClient,
+  loadDrillingDailyLogData,
+} from '~/features/departments/components/drilling';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
+import { getProductionPlatformTargets } from '~/features/departments/components/production/actions';
+import { ProductionTargetsPanel } from '~/features/departments/components/production/ProductionTargetsPanel';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { DailyLogForm } from './DailyLogForm';
 
@@ -17,6 +23,18 @@ export default async function DailyLogPage({
 
   if (department === 'plant-inventory') {
     return <PlantInventoryWorkspaceClient mode="inventory-list" today={today} />;
+  }
+
+  if (department === 'production') {
+    const initialTargets = await getProductionPlatformTargets();
+    return <ProductionTargetsPanel initialTargets={initialTargets} deptId={deptId} />;
+  }
+
+  if (department === 'drilling') {
+    const drillingData = await loadDrillingDailyLogData({ deptId, logDate: today });
+    return (
+      <DrillingDailyLogClient departmentId={deptId} today={today} initialData={drillingData} />
+    );
   }
   const [{ data: machines }, { data: todayLogs }] = await Promise.all([
     supabase.from('machines').select('id, name, machine_type').eq('active', true).order('name'),

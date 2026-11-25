@@ -50,7 +50,8 @@ export default async function ToolsPage({
   if (
     department === 'plant-processing' ||
     department === 'production' ||
-    department === 'drilling'
+    department === 'drilling' ||
+    department === 'engineering'
   ) {
     redirect(`/${department}`);
   }

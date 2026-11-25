@@ -20,6 +20,7 @@ import {
   cancelNeo300Job,
   getDepartmentsForCardStudio,
   getEmployeeCardProfiles,
+  getFleetAndVehicleBadgeProfiles,
   getNeo300PrinterStatus,
   getRecentNeo300Jobs,
   sendNeo300PrintJob,
@@ -259,5 +260,54 @@ describe('print-cards actions', () => {
     expect(printRes.success).toBe(true);
 
     await cancelNeo300Job('job-12345678');
+  });
+
+  it('classifies fleet and coal haul trucks with active QR/RFID badges cleanly', async () => {
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'fleet') {
+        return makeChain({
+          data: [
+            {
+              id: 'flt-coal',
+              fleet_code: 'DT-77',
+              vehicle_type: 'Coal Haul Truck',
+              make: 'CAT',
+              model: '777G',
+              registration_number: 'NA-777',
+              status: 'active',
+            },
+            {
+              id: 'flt-company',
+              fleet_code: 'SVC-02',
+              vehicle_type: 'Service Bowser',
+              make: 'Hino',
+              model: '500',
+              registration_number: 'NA-500',
+              status: 'active',
+            },
+          ],
+          error: null,
+        });
+      }
+      if (table === 'badges') {
+        return makeChain({
+          data: [{ fleet_id: 'flt-coal', qr_code: 'FLT-DT-77', rfid_code: 'RFID-77' }],
+          error: null,
+        });
+      }
+      return makeChain({ data: [], error: null });
+    });
+
+    const fleetProfiles = await getFleetAndVehicleBadgeProfiles();
+    expect(fleetProfiles).toHaveLength(2);
+    expect(fleetProfiles.find((f) => f.id === 'flt-coal')).toMatchObject({
+      category: 'coal-trucks',
+      qr_code: 'FLT-DT-77',
+      has_card: true,
+    });
+    expect(fleetProfiles.find((f) => f.id === 'flt-company')).toMatchObject({
+      category: 'company-fleet',
+      has_card: false,
+    });
   });
 });

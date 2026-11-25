@@ -123,7 +123,7 @@ export function HeadcountMusterBanner({
             className="flex shrink-0 items-center gap-2 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-bold text-white text-xs shadow-sm transition-all hover:bg-[var(--accent-blue)]/90 active:scale-95"
           >
             <LifeBuoy className="h-4 w-4" />
-            <span>Muster Roll Call</span>
+            <span>On-Site Roll Call</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>

@@ -130,8 +130,8 @@ export const DEPARTMENTS = [
       },
       {
         path: '/production/daily-log',
-        name: 'Daily Log',
-        description: 'Submit shift logs',
+        name: 'Targets',
+        description: 'Shift, daily, weekly, and monthly production & rollover targets',
       },
       {
         path: '/production/machines',
@@ -165,8 +165,8 @@ export const DEPARTMENTS = [
       },
       {
         path: '/production/history',
-        name: 'History',
-        description: 'Past daily logs',
+        name: 'Performance',
+        description: 'Shift, daily, weekly, monthly & foreman performance reports',
       },
       {
         path: '/production/reports',
@@ -195,7 +195,7 @@ export const DEPARTMENTS = [
       },
       {
         path: '/access-control/muster',
-        name: 'Muster Station',
+        name: 'On-Site',
         description: 'Emergency roll call & zone occupancy',
       },
       {
@@ -222,6 +222,11 @@ export const DEPARTMENTS = [
         path: '/access-control/badges',
         name: 'Badges',
         description: 'Active RFID/QR credential management',
+      },
+      {
+        path: '/access-control/expired',
+        name: 'Expired',
+        description: 'Expired & expiring credentials (30/60/90-day windows)',
       },
       {
         path: '/access-control/reports',
@@ -282,11 +287,6 @@ export const DEPARTMENTS = [
         path: '/engineering/reports',
         name: 'Reports',
         description: 'Aggregate data + CSV',
-      },
-      {
-        path: '/engineering/tools',
-        name: 'Tools',
-        description: 'Flowise / tool embeds',
       },
     ],
     roles: ['engineer', 'supervisor', 'admin'],

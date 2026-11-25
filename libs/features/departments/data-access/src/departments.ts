@@ -80,7 +80,7 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: 'Yield', value: '85%' },
     trend: [78, 80, 79, 82, 83, 84, 85, 86],
     actions: [
-      { label: 'Daily Log', href: '/production/daily-log' },
+      { label: 'Targets', href: '/production/daily-log' },
       { label: 'Reports', href: '/production/reports' },
     ],
   },
@@ -323,9 +323,9 @@ export const PRODUCTIVITY_TOOLS = [
 
 export const PRODUCTION_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
-  { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
+  { name: 'daily-log', label: 'Targets', icon: 'Target' },
   { name: 'machines', label: 'Machines', icon: 'Cpu' },
-  { name: 'history', label: 'History', icon: 'History' },
+  { name: 'history', label: 'Performance', icon: 'TrendingUp' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const;
 
@@ -362,16 +362,11 @@ export const ENGINEERING_TABS = [
   { name: 'machines', label: 'Machines', icon: 'Cpu' },
   { name: 'history', label: 'History', icon: 'History' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
-  { name: 'tools', label: 'Tools', icon: 'Wrench' },
 ] as const;
 
 /**
- * Drilling specific tabs — rig operations lead, followed by the same
- * operational set every other department exposes (Daily Log, Machines,
- * History, Reports, Tools). Drilling used to expose only four entries, which
- * left it as the only department without the shared operational pages even
- * though `app/(departments)/[department]/{daily-log,machines,history,tools}`
- * already handle `department === 'drilling'`.
+ * Drilling specific tabs — rig operations lead, followed by core operational pages
+ * (Daily Log, Machines, History, Reports). Tools are excluded from Drilling.
  */
 export const DRILLING_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
@@ -380,7 +375,6 @@ export const DRILLING_TABS = [
   { name: 'machines', label: 'Machines', icon: 'Cpu' },
   { name: 'history', label: 'History', icon: 'History' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
-  { name: 'tools', label: 'Tools', icon: 'Wrench' },
 ] as const;
 
 /**
@@ -388,12 +382,13 @@ export const DRILLING_TABS = [
  */
 export const ACCESS_CONTROL_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
-  { name: 'muster', label: 'Muster Station', icon: 'LifeBuoy' },
+  { name: 'muster', label: 'On-Site', icon: 'LifeBuoy' },
   { name: 'print-cards', label: 'Print Cards', icon: 'Printer' },
   { name: 'qr-codes', label: 'QR & RFID Codes', icon: 'QrCode' },
   { name: 'access-logs', label: 'Access Logs', icon: 'ShieldCheck' },
   { name: 'visitors', label: 'Visitors', icon: 'Users' },
   { name: 'badges', label: 'Badges', icon: 'CreditCard' },
+  { name: 'expired', label: 'Expired', icon: 'ShieldOff' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const;
 

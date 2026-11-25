@@ -181,28 +181,28 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
     }
   }
 
-  // Default muster stations
+  // Default muster stations mapped to operational departments
   const stations = [
     {
-      id: 'STA-A',
-      name: 'Muster Point Alpha',
-      location: 'Main Pit Incline Ramp Head',
+      id: 'STA-ENG',
+      name: 'Engineering Department',
+      location: 'Engineering Office & Workshop Plaza',
       count: 0,
-      targetZone: 'Pit Extraction Zone',
+      targetZone: 'Engineering & Maintenance Yard',
     },
     {
-      id: 'STA-B',
-      name: 'Muster Point Bravo',
-      location: 'Coal Processing Plant Assembly',
+      id: 'STA-OFF',
+      name: 'Office Department',
+      location: 'Administration Complex',
       count: 0,
-      targetZone: 'Wash Plant & Stockpiles',
+      targetZone: 'Administration Offices',
     },
     {
-      id: 'STA-C',
-      name: 'Muster Point Charlie',
-      location: 'Administration & Workshop Plaza',
+      id: 'STA-PROD',
+      name: 'Production & Logistics Department',
+      location: 'Main Gate & Pit Surface',
       count: 0,
-      targetZone: 'Maintenance Yard & Admin',
+      targetZone: 'Production & Logistics Assembly',
     },
   ];
 

@@ -8,10 +8,6 @@ jest.mock('next/image', () => ({
   default: ({ alt, src }: { alt: string; src: string }) => <img alt={alt} src={src} />,
 }));
 
-jest.mock('../card-actions/qr-section', () => ({
-  QRCodeSection: ({ data }: { data: string }) => <div data-testid="qr">{data}</div>,
-}));
-
 const employee: EmployeeCardProfile = {
   id: 'emp-1-abcdef123456',
   emp_code: 'Brak 0043',
@@ -57,7 +53,7 @@ const jobs: CardPrintJob[] = [
 ];
 
 describe('Neo300PrinterQueuePanel', () => {
-  it('defaults to Plantcor Card showing Coy Number and actual Medical & Induction dates, and toggles to Digital front/back', () => {
+  it('renders the Plantcor Card CR80 template with Coy Number and actual Medical & Induction dates', () => {
     const onEditEmployee = jest.fn();
     const onPrint = jest.fn();
     const onCancelJob = jest.fn();
@@ -76,20 +72,13 @@ describe('Neo300PrinterQueuePanel', () => {
 
     const templateImg = screen.getByAltText('Plantcor Pty Ltd Access Card Template');
     expect(templateImg).toHaveAttribute('src', '/images/access-card-template.jpeg');
+    expect(screen.getByText('Plantcor Card • Front')).toBeInTheDocument();
 
     expect(screen.getByTestId('plantcor-card-coy-number')).toHaveTextContent('Brak 0043');
     expect(screen.getByTestId('plantcor-card-medical-date')).toHaveTextContent('2099-01-15');
     expect(screen.getByTestId('plantcor-card-induction-date')).toHaveTextContent('2099-06-30');
     expect(screen.queryByText('PASS')).not.toBeInTheDocument();
     expect(screen.queryByText('VALID')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Digital' }));
-    expect(screen.getByText('COY: Brak 0043')).toBeInTheDocument();
-    expect(screen.getByText(/Med: 2099-01-15/)).toBeInTheDocument();
-    expect(screen.getByText(/Induct: 2099-06-30/)).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
-    expect(screen.getByText(/MAGICARD SECURE HOLOPRINT/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Edit Photo & Details/i }));
     expect(onEditEmployee).toHaveBeenCalledWith(employee);

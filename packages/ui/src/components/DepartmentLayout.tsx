@@ -34,6 +34,9 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  ShieldOff,
+  Target,
+  TrendingUp,
   Undo2,
   Users,
   Workflow,
@@ -82,6 +85,9 @@ const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>
   Presentation,
   Workflow,
   Cloud,
+  Target,
+  TrendingUp,
+  ShieldOff,
 };
 
 interface Tab {

@@ -368,7 +368,7 @@ describe('proxy', () => {
       deptData: { id: 'dept-uuid-1' },
     });
     (cacheGet as jest.Mock).mockResolvedValue(null);
-    const req = makeRequest('/engineering/tools');
+    const req = makeRequest('/plant-inventory/tools');
     const res = await proxy(req);
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toContain('unauthorized_department');

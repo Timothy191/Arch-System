@@ -233,4 +233,52 @@ describe('Neo300PrintStudio full interactive flows', () => {
       });
     }
   });
+
+  it('toggles USB Connection Setup panel and switches between Vehicle, Company Fleet, and Coal Trucks directory tabs', () => {
+    render(
+      <Neo300PrintStudio
+        initialPrinter={basePrinter}
+        initialEmployees={baseEmployees}
+        initialJobs={baseJobs}
+        departments={baseDepartments}
+        initialFleetBadges={[
+          {
+            id: 'f-1',
+            code: 'DT-77',
+            vehicle_type: 'Coal Haul Truck',
+            make_model: 'CAT 777G',
+            registration_number: 'NA-777',
+            status: 'active',
+            category: 'coal-trucks',
+            qr_code: 'FLT-DT-77',
+            rfid_code: null,
+            has_card: true,
+          },
+          {
+            id: 'f-2',
+            code: 'LV-12',
+            vehicle_type: 'Site Sedan',
+            make_model: 'Hilux',
+            registration_number: 'NA-012',
+            status: 'active',
+            category: 'vehicle',
+            qr_code: null,
+            rfid_code: null,
+            has_card: false,
+          },
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Setup USB Connection/i }));
+    expect(screen.getByText(/USB & CUPS Printer Setup/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Verify USB Link/i }));
+    expect(toast.success).toHaveBeenCalledWith('USB handshake verified on queue Magicard_Neo300');
+
+    const coalTab = screen.getByRole('tab', { name: 'Coal Trucks' });
+    fireEvent.mouseDown(coalTab);
+    fireEvent.click(coalTab);
+    expect(screen.getByText(/DT-77 • Coal Haul Truck/i)).toBeInTheDocument();
+  });
 });

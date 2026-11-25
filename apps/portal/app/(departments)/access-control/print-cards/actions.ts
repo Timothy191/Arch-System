@@ -72,6 +72,21 @@ export interface CardPrintJob {
   printer_id: string | null;
 }
 
+export type FleetCardBadgeCategory = 'vehicle' | 'company-fleet' | 'coal-trucks';
+
+export interface FleetCardBadgeProfile {
+  id: string;
+  code: string;
+  vehicle_type: string;
+  make_model: string | null;
+  registration_number: string | null;
+  status: string;
+  category: FleetCardBadgeCategory;
+  qr_code: string | null;
+  rfid_code: string | null;
+  has_card: boolean;
+}
+
 async function assertAccessControlRole() {
   return assertAccessControlRoleFor({
     allowedRoles: ACCESS_CONTROL_WRITE_ROLES,
@@ -580,4 +595,75 @@ export async function cancelNeo300Job(jobId: string) {
 
   revalidatePath('/access-control/print-cards');
   return { success: true };
+}
+
+const FLEET_PROFILE_LIMIT = 100;
+
+function classifyFleetBadgeCategory(
+  vehicleType: string,
+  fleetCode: string
+): FleetCardBadgeCategory {
+  const normalized = `${vehicleType} ${fleetCode}`.toLowerCase();
+  if (/(coal|haul|adt|dump|tipper|truck)/.test(normalized)) {
+    return 'coal-trucks';
+  }
+  if (/(company|service|utility|bowser|support|bus|van|pickup)/.test(normalized)) {
+    return 'company-fleet';
+  }
+  return 'vehicle';
+}
+
+/**
+ * Retrieve active fleet and vehicle units paired with their active QR/RFID badges
+ * for category tabs (Vehicle, Company Fleet, Coal Trucks) in Neo 300 Print Studio.
+ */
+export async function getFleetAndVehicleBadgeProfiles(): Promise<FleetCardBadgeProfile[]> {
+  try {
+    const { supabase } = await assertAccessControlRole();
+    const { data: fleetRows, error } = await supabase
+      .from('fleet')
+      .select('id, fleet_code, vehicle_type, make, model, registration_number, status')
+      .order('fleet_code', { ascending: true })
+      .limit(FLEET_PROFILE_LIMIT);
+
+    if (error || !fleetRows || fleetRows.length === 0) {
+      return [];
+    }
+
+    const fleetIds = fleetRows.map((row) => row.id);
+    const { data: badges } = await supabase
+      .from('badges')
+      .select('fleet_id, qr_code, rfid_code, is_active')
+      .in('fleet_id', fleetIds)
+      .eq('is_active', true);
+
+    const badgeByFleetId = new Map<string, { qr_code: string; rfid_code: string | null }>();
+    for (const badge of badges ?? []) {
+      if (badge.fleet_id) {
+        badgeByFleetId.set(badge.fleet_id, {
+          qr_code: badge.qr_code,
+          rfid_code: badge.rfid_code,
+        });
+      }
+    }
+
+    return fleetRows.map((row) => {
+      const badge = badgeByFleetId.get(row.id);
+      const makeModel = [row.make, row.model].filter(Boolean).join(' ') || null;
+      return {
+        id: row.id,
+        code: row.fleet_code,
+        vehicle_type: row.vehicle_type,
+        make_model: makeModel,
+        registration_number: row.registration_number,
+        status: row.status,
+        category: classifyFleetBadgeCategory(row.vehicle_type, row.fleet_code),
+        qr_code: badge?.qr_code ?? null,
+        rfid_code: badge?.rfid_code ?? null,
+        has_card: Boolean(badge),
+      };
+    });
+  } catch {
+    return [];
+  }
 }

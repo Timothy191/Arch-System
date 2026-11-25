@@ -198,19 +198,25 @@ export default async function MachinesPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 px-5 py-2.5 shadow-card backdrop-blur-md">
+      <div
+        data-testid="machine-database-header-panel"
+        className="gold-steel-border gold-steel-border-slim flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-accent-gold/60 bg-white px-5 py-3.5 shadow-card"
+      >
         <h2 className="font-bold text-2xl text-[var(--text-heading)]">Machine Database</h2>
         <Link
           href="/admin"
-          className="rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] px-4 py-2 text-[var(--text-muted)] text-sm transition-colors hover:border-[var(--border-emphasis)] hover:text-[var(--text-heading)]"
+          className="rounded-full border border-accent-gold/50 bg-white px-4 py-2 font-medium text-[var(--text-heading)] text-sm transition-colors hover:border-accent-gold hover:text-[var(--accent-blue)]"
         >
           Manage in Admin →
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/5 px-5 py-2.5 text-[var(--accent-blue)] text-sm">
+      <div
+        data-testid="machine-database-admin-banner"
+        className="gold-steel-border gold-steel-border-slim flex items-center gap-2.5 rounded-2xl border border-accent-gold/55 bg-white px-5 py-3 text-[var(--text-heading)] text-sm shadow-2xs"
+      >
         <svg
-          className="h-4 w-4 shrink-0"
+          className="h-4 w-4 shrink-0 text-accent-amber"
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
