@@ -518,10 +518,31 @@ function formatPersonFullName(
   return fallbackName?.trim() || 'Employee';
 }
 
+const UNREGISTERED_SCANNER_IDS = new Set([
+  'LEGACY',
+  'PORTAL-EASY-SCANNER',
+  'EASY-SCANNER-CONSOLE',
+  'SIMULATED',
+]);
+
+function isRegisteredScannerDeviceId(deviceId: string | null | undefined): boolean {
+  const normalized = (deviceId ?? '').trim().toUpperCase();
+  return normalized.length > 0 && !UNREGISTERED_SCANNER_IDS.has(normalized);
+}
+
+function isRegisteredScannerRow(logRow: AccessLogFilterQueryRow): boolean {
+  if (!('device_id' in logRow) || logRow.device_id === undefined) {
+    return true;
+  }
+  return isRegisteredScannerDeviceId(logRow.device_id);
+}
+
 interface FilterableAccessLogQuery<TSelf> {
   eq(column: string, criterion: unknown): TSelf;
   in(column: string, criteria: readonly string[]): TSelf;
   gte(column: string, threshold: string): TSelf;
+  not?: (column: string, operator: string, value: unknown) => TSelf;
+  neq?: (column: string, value: unknown) => TSelf;
 }
 
 function applyAccessLogQueryFilters<TQuery extends FilterableAccessLogQuery<TQuery>>(
@@ -532,6 +553,7 @@ function applyAccessLogQueryFilters<TQuery extends FilterableAccessLogQuery<TQue
     readonly direction?: 'IN' | 'OUT' | 'ALL' | null;
     readonly statusFilter?: 'GRANTED' | 'DENIED' | 'ALL' | null;
     readonly startIso?: string | null;
+    readonly requireRegisteredScanner?: boolean;
   }
 ): TQuery {
   let activeQuery = initialQuery;
@@ -549,6 +571,16 @@ function applyAccessLogQueryFilters<TQuery extends FilterableAccessLogQuery<TQue
   }
   if (filterState.startIso) {
     activeQuery = activeQuery.gte('scanned_at', filterState.startIso);
+  }
+  if (filterState.requireRegisteredScanner) {
+    if (typeof activeQuery.not === 'function') {
+      activeQuery = activeQuery.not!('device_id', 'is', null);
+    }
+    if (typeof activeQuery.neq === 'function') {
+      for (const excludedId of UNREGISTERED_SCANNER_IDS) {
+        activeQuery = activeQuery.neq!('device_id', excludedId);
+      }
+    }
   }
   return activeQuery;
 }
@@ -691,6 +723,7 @@ async function runAccessLogsSelectTier(options: {
     readonly direction?: 'IN' | 'OUT' | 'ALL' | null;
     readonly statusFilter?: 'GRANTED' | 'DENIED' | 'ALL' | null;
     readonly startIso?: string | null;
+    readonly requireRegisteredScanner?: boolean;
   };
   readonly rangeFrom: number;
   readonly rangeTo: number;
@@ -788,7 +821,10 @@ export async function getAccessLogsWithFilters(
       const tierResult = await runAccessLogsSelectTier({
         supabase,
         selectColumns: tier.selectColumns,
-        filterState,
+        filterState: {
+          ...filterState,
+          requireRegisteredScanner: tier.name === 'primary',
+        },
         rangeFrom: queryRangeFrom,
         rangeTo: queryRangeTo,
       });
@@ -821,10 +857,11 @@ export async function getAccessLogsWithFilters(
       supabase,
       resolvedRows.map(normalizeAccessLogRow)
     );
+    const scannerVerifiedRows = enrichedRows.filter(isRegisteredScannerRow);
 
     if (requiresFullScan) {
       const lowerTerm = trimmedSearch.toLowerCase();
-      const matchedLogs = enrichedRows.filter((logRow) => {
+      const matchedLogs = scannerVerifiedRows.filter((logRow) => {
         if (activeCategory && classifyAccessLogCategory(logRow) !== activeCategory) {
           return false;
         }
@@ -838,8 +875,11 @@ export async function getAccessLogsWithFilters(
     }
 
     return {
-      logs: enrichedRows,
-      totalCount: resolvedCount ?? enrichedRows.length,
+      logs: scannerVerifiedRows,
+      totalCount:
+        scannerVerifiedRows.length !== enrichedRows.length
+          ? scannerVerifiedRows.length
+          : (resolvedCount ?? scannerVerifiedRows.length),
       queryWarning: warnings.length > 0 ? warnings.join(' ') : null,
     };
   } catch (unexpectedError: unknown) {

@@ -74,7 +74,6 @@ describe('UsersTab modal redesign & permissions', () => {
     });
     expect(screen.getByText('User')).toBeInTheDocument();
     expect(screen.getByText(/Male · Born 1990-04-12/)).toBeInTheDocument();
-    expect(screen.getByText('2 depts (1 R/W, 1 R)')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Add Employee/i }));
 

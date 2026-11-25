@@ -1,14 +1,13 @@
 'use client';
 
 import type { DepartmentPermission, EmployeeGender, EmployeeRecordType } from '@repo/contract';
-import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Camera, Edit2, QrCode, RefreshCw, Search, Trash2, Upload, UserPlus } from 'lucide-react';
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
 import {
@@ -177,7 +176,7 @@ export function UsersTab() {
         </Button>
       </div>
 
-      <GlassCard className="overflow-hidden p-0">
+      <GlassCard className="gold-steel-border overflow-hidden p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -189,16 +188,19 @@ export function UsersTab() {
                   Coy / ID Number
                 </th>
                 <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
-                  Job Title & Area
+                  Job Title
+                </th>
+                <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
+                  Area
                 </th>
                 <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
                   Department & Access
                 </th>
                 <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
-                  Medical / Induction
+                  Medical
                 </th>
                 <th scope="col" className={TABLE_HEADER_CELL_CLASS}>
-                  QR Code & Role
+                  Induction
                 </th>
                 <th scope="col" className={`${TABLE_HEADER_CELL_CLASS} text-right`}>
                   Actions
@@ -208,13 +210,13 @@ export function UsersTab() {
             <tbody className="divide-y divide-[var(--border-default)]">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--text-muted)]">
+                  <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading...
                   </td>
                 </tr>
               ) : filteredEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--text-muted)]">
+                  <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     No employees found.
                   </td>
                 </tr>
@@ -231,18 +233,12 @@ export function UsersTab() {
                     ? formatDateShort(emp.date_of_birth)
                     : null;
                   const recordTypeLabel = emp.record_type === 'user' ? 'User' : 'Employee';
-                  const permissionsMap = emp.department_permissions ?? {};
-                  const accessibleCount = emp.accessible_departments?.length || 0;
-                  const writeCount = Object.values(permissionsMap).filter(
-                    (perm) => perm.write
-                  ).length;
-                  const readOnlyCount = Math.max(0, accessibleCount - writeCount);
 
                   return (
                     <tr key={emp.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] font-semibold text-[var(--text-muted)] text-xs">
+                          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-accent-gold/40 bg-[var(--bg-secondary)]">
                             {emp.photo_url ? (
                               <Image
                                 src={emp.photo_url}
@@ -253,10 +249,7 @@ export function UsersTab() {
                                 unoptimized
                               />
                             ) : (
-                              <span>
-                                {(emp.first_name?.[0] ?? emp.full_name[0] ?? 'E').toUpperCase()}
-                                {(emp.last_name?.[0] ?? '').toUpperCase()}
-                              </span>
+                              <EmployeeQrAvatar qrCode={emp.qr_code_data || ''} />
                             )}
                           </div>
                           <div>
@@ -290,41 +283,21 @@ export function UsersTab() {
                         <div className="text-[var(--text-heading)] text-sm">
                           {emp.job_title || '—'}
                         </div>
-                        <div className="text-[var(--text-muted)] text-xs">Area: {primaryArea}</div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="text-[var(--text-heading)] text-sm">{primaryArea}</div>
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="text-[var(--text-heading)] text-sm">{primaryDept}</div>
-                        <div className="text-[var(--text-muted)] text-xs">
-                          {accessibleCount === 0
-                            ? '0 accessible depts'
-                            : `${accessibleCount} depts (${writeCount} R/W, ${readOnlyCount} R)`}
-                        </div>
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="text-[var(--text-heading)] text-xs">
-                          Med: {formatDateShort(emp.medical_expiry_date)}
-                        </div>
-                        <div className="text-[var(--text-muted)] text-xs">
-                          Ind: {formatDateShort(emp.induction_expiry_date)}
+                          {formatDateShort(emp.medical_expiry_date)}
                         </div>
                       </td>
                       <td className="px-4 py-3.5">
-                        <div className="flex flex-col items-start gap-1">
-                          <Badge
-                            variant="outline"
-                            className={
-                              emp.role === 'admin'
-                                ? 'border-violet-500/20 bg-violet-500/10 text-violet-400'
-                                : emp.role === 'supervisor'
-                                  ? 'border-accent-blue/20 bg-accent-blue/10 text-accent-blue'
-                                  : ''
-                            }
-                          >
-                            {emp.role}
-                          </Badge>
-                          <span className="font-mono text-[var(--text-muted)] text-xs">
-                            {emp.qr_code_data || 'No QR'}
-                          </span>
+                        <div className="text-[var(--text-muted)] text-xs">
+                          {formatDateShort(emp.induction_expiry_date)}
                         </div>
                       </td>
                       <td className="px-4 py-3.5 text-right">
@@ -375,6 +348,50 @@ export function UsersTab() {
           />
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function EmployeeQrAvatar({ qrCode }: { qrCode: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [hasRendered, setHasRendered] = useState(false);
+
+  useEffect(() => {
+    if (!qrCode || !containerRef.current || typeof window === 'undefined') return;
+    let cancelled = false;
+    async function mount() {
+      try {
+        const mod = await import('qr-code-styling');
+        if (cancelled || !containerRef.current) return;
+        const Ctor = mod.default;
+        const instance = new Ctor({
+          type: 'svg',
+          width: 28,
+          height: 28,
+          margin: 2,
+          data: qrCode,
+          dotsOptions: { color: 'oklch(0.21 0.006 285.88)', type: 'rounded' },
+          cornersSquareOptions: { color: 'oklch(0.55 0.14 66)', type: 'extra-rounded' },
+          cornersDotOptions: { color: 'oklch(0.55 0.14 66)', type: 'dot' },
+          backgroundOptions: { color: 'oklch(1 0 0)' },
+        });
+        containerRef.current.replaceChildren();
+        instance.append(containerRef.current);
+        if (!cancelled) setHasRendered(true);
+      } catch {
+        if (!cancelled) setHasRendered(false);
+      }
+    }
+    void mount();
+    return () => {
+      cancelled = true;
+    };
+  }, [qrCode]);
+
+  return (
+    <div className="flex h-7 w-7 items-center justify-center">
+      <div ref={containerRef} className={hasRendered ? 'block' : 'hidden'} />
+      {!hasRendered && <QrCode className="h-4 w-4 text-[var(--text-muted)]" aria-hidden="true" />}
     </div>
   );
 }

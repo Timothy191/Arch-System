@@ -423,13 +423,7 @@ export function DepartmentsTab() {
             />
           </div>
 
-          <div className="flex items-center justify-between gap-3 sm:justify-end">
-            <span className="text-[var(--text-muted)] text-xs">
-              Showing{' '}
-              <strong className="text-[var(--text-heading)]">{filteredDepartments.length}</strong>{' '}
-              of {departments.length} departments — click any department for site details &amp;
-              metrics
-            </span>
+          <div className="flex items-center justify-end">
             <Button
               type="button"
               variant="outline"
@@ -713,6 +707,13 @@ export function DepartmentsTab() {
             })}
           </ul>
         )}
+        <div className="border-[var(--border-default)] border-t px-6 py-3">
+          <span className="text-[var(--text-muted)] text-xs">
+            Showing{' '}
+            <strong className="text-[var(--text-heading)]">{filteredDepartments.length}</strong> of{' '}
+            {departments.length} departments — click any department for site details &amp; metrics
+          </span>
+        </div>
       </GlassCard>
     </div>
   );
