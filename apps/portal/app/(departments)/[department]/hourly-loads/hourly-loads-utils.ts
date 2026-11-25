@@ -52,6 +52,21 @@ export interface ExcavatorActivitySummary {
   shift_type: string;
 }
 
+export interface HourlyLoadsOperatorOption {
+  id: string;
+  full_name: string;
+  employee_code: string;
+}
+
+export interface HourlyLoadsMachineOperationSummary {
+  id: string;
+  machine_id: string;
+  operator_id: string | null;
+  start_smu: number | null;
+  end_smu: number | null;
+  shift_type: string;
+}
+
 export interface HourlyLoadsGridProps {
   departmentId: string;
   machines: Machine[];
@@ -61,6 +76,9 @@ export interface HourlyLoadsGridProps {
   mineBlocks?: MineBlockOption[];
   excavatorActivities?: ExcavatorActivitySummary[];
   activeBreakdowns?: ActiveBreakdownRecord[];
+  operators?: HourlyLoadsOperatorOption[];
+  todayOperations?: HourlyLoadsMachineOperationSummary[];
+  latestSmrByMachine?: Record<string, number>;
   mineralRegistry?: {
     waste: string[];
     coal: string[];

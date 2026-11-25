@@ -6,6 +6,13 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T12:35:00+02:00] - Hub Telemetry Removal, Hourly Loads Operator/Stop SMR Sync, Machine Ops Auto-Fill & Glass/Gold Branding Tokens
+
+- **Hub (`CoreOperationalModules.tsx`)**: Removed `HubLiveTelemetryPulse` (`LIVE SYSTEM FEED`) banner and updated `CoreOperationalModules.test.tsx`.
+- **Hourly Loads (`HourlyLoadsGrid.tsx`, `hourly-loads/page.tsx`, `hourly-loads/actions.ts`, `hourly-loads-utils.ts`)**: Added `Operator` and `Stop SMR` columns right after `Machine`, backed by `saveHourlyLoadMachineOperation` persisting directly to `machine_operations` in Supabase.
+- **Machine Operations (`MachineOperationsForm.tsx`)**: Auto-populated `operatorId`, `startSmu`, `endSmu`, and `siteId` from `todayOperations` when selecting a machine, added `> 14h` shift guard/label on `Hours Worked` (`Shift Stop SMR − Start SMR`), and applied taskbar liquid-glass + `gold-steel-border` styling to the form.
+- **Theme & Rules (`packages/theme/src/tokens/glass.ts`, `AGENTS.md`)**: Codified `glassSurfaceBranding` (`taskbarTemplate` + `goldSteelTrim`) tokens and documented mandatory golden steel border + liquid-glass transparency rules for agents.
+
 ## [2026-11-25T12:09:00+02:00] - Control Room Telemetry Badges, Hourly Timeline Spacing & Separator Updates
 
 - **Control Room SCADA Panel ([`ScadaPanel.tsx`](apps/portal/features/departments/components/control-room/ScadaPanel.tsx))**:

@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type React from 'react';
-import { saveHourlyLoad, splitMachineHourlyLoad } from './actions';
+import { saveHourlyLoad, saveHourlyLoadMachineOperation, splitMachineHourlyLoad } from './actions';
 import { HourlyLoadsGrid } from './HourlyLoadsGrid';
 import {
   buildActiveBreakdownByMachineMap,
@@ -88,6 +88,7 @@ jest.mock('./actions', () => ({
     },
   }),
   splitMachineHourlyLoad: jest.fn().mockResolvedValue({ success: true, newLoad: null }),
+  saveHourlyLoadMachineOperation: jest.fn().mockResolvedValue({ success: true, operation: null }),
 }));
 
 describe('HourlyLoadsGrid Engineering Breakdown Blocking', () => {
@@ -446,5 +447,48 @@ describe('HourlyLoadsGrid Engineering Breakdown Blocking', () => {
     expect(
       screen.getByText(/No machines available. Add machines in the Machine DB tab first./i)
     ).toBeInTheDocument();
+  });
+
+  it('captures Operator and Stop SMR in HourlyLoadsGrid and persists via saveHourlyLoadMachineOperation', async () => {
+    render(
+      <HourlyLoadsGrid
+        departmentId="dept-cr"
+        machines={machines}
+        excavators={excavators}
+        hourlyLoads={[]}
+        sites={sites}
+        operators={[{ id: 'op-1', full_name: 'Thabo Mokoena', employee_code: 'OP-DT-01' }]}
+        latestSmrByMachine={{ 'dt-02': 1420 }}
+        today="2026-11-20"
+        initialShift="day"
+      />
+    );
+
+    const operatorSelect = screen.getByLabelText('Select operator for DT-02');
+    fireEvent.change(operatorSelect, { target: { value: 'op-1' } });
+    await waitFor(() => {
+      expect(saveHourlyLoadMachineOperation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          departmentId: 'dept-cr',
+          machineId: 'dt-02',
+          operatorId: 'op-1',
+          startSmr: 1420,
+        })
+      );
+    });
+
+    const stopSmrInput = screen.getByLabelText('Stop SMR for DT-02');
+    fireEvent.change(stopSmrInput, { target: { value: '1429.5' } });
+    fireEvent.blur(stopSmrInput);
+    await waitFor(() => {
+      expect(saveHourlyLoadMachineOperation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          departmentId: 'dept-cr',
+          machineId: 'dt-02',
+          stopSmr: 1429.5,
+          startSmr: 1420,
+        })
+      );
+    });
   });
 });

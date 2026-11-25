@@ -35,3 +35,26 @@ export const glassVariants = {
 } as const;
 
 export type GlassVariant = keyof typeof glassVariants;
+
+/**
+ * Canonical taskbar-derived liquid-glass + golden steel branding tokens.
+ * Mirrors the bottom taskbar surface (`liquid-glass-light gold-steel-border gold-steel-border-slim`)
+ * so forms, panels, and floating bars inherit uniform transparency, blur, and gold trim.
+ */
+export const glassSurfaceBranding = {
+  taskbarTemplate: {
+    classes:
+      'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/25 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md',
+    background: 'var(--material-ultra-thin)',
+    border: 'rgba(255, 255, 255, 0.25)',
+    blur: '12px',
+    shadow: 'var(--shadow-diffusion-sm)',
+    goldBorderClass: 'gold-steel-border gold-steel-border-slim',
+  },
+  goldSteelTrim: {
+    className: 'gold-steel-border gold-steel-border-slim',
+    widthSlim: '1.75px',
+    widthDefault: '2.25px',
+    animation: 'gold-trim-shine 4.2s ease-in-out infinite',
+  },
+} as const;

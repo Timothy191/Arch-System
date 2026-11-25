@@ -31,6 +31,9 @@ export default async function HourlyLoadsPage({
     { data: mineBlocks },
     { data: excavatorActivities },
     { data: activeBreakdowns },
+    { data: operators },
+    { data: todayOperations },
+    { data: previousSMRs },
     mineralRegistry,
   ] = await withAsyncSpan(
     'hourly_loads_load',
@@ -74,6 +77,24 @@ export default async function HourlyLoadsPage({
           .select('id, fleet_id, machine_id, machine_name, reason, status, date_in, time_in')
           .eq('status', 'active')
           .is('deleted_at', null),
+        supabase
+          .from('operators')
+          .select('id, full_name, employee_code')
+          .eq('active', true)
+          .order('full_name'),
+        supabase
+          .from('machine_operations')
+          .select('id, machine_id, operator_id, start_smu, end_smu, shift_type')
+          .eq('department_id', deptId)
+          .eq('shift_date', today)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('machine_operations')
+          .select('machine_id, end_smu')
+          .not('end_smu', 'is', null)
+          .order('shift_date', { ascending: false })
+          .order('end_smu', { ascending: false })
+          .limit(500),
         getMineralRegistry(),
       ]);
       span?.setAttributes?.({
@@ -87,6 +108,19 @@ export default async function HourlyLoadsPage({
       return results;
     }
   );
+
+  const latestSmrByMachine: Record<string, number> = {};
+  for (const row of (previousSMRs as Array<{
+    machine_id: string;
+    end_smu: number | null;
+  }> | null) || []) {
+    if (row.machine_id && row.end_smu != null) {
+      const candidate = Number(row.end_smu);
+      if (candidate > (latestSmrByMachine[row.machine_id] ?? 0)) {
+        latestSmrByMachine[row.machine_id] = candidate;
+      }
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -115,6 +149,9 @@ export default async function HourlyLoadsPage({
         mineBlocks={mineBlocks || []}
         excavatorActivities={excavatorActivities || []}
         activeBreakdowns={activeBreakdowns || []}
+        operators={operators || []}
+        todayOperations={todayOperations || []}
+        latestSmrByMachine={latestSmrByMachine}
         mineralRegistry={mineralRegistry}
         today={today}
         initialShift={getCurrentShift()}

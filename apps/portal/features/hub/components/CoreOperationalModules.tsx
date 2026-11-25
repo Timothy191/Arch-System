@@ -13,7 +13,6 @@ import { usePinnedDepartments } from '@/hooks/usePinnedDepartments';
 import { useTypewriterPlaceholder } from '@/hooks/useTypewriterPlaceholder';
 import { dispatchActiveModuleChange } from '@/lib/event-manager';
 import type { EmployeeClearance } from '@/lib/hub-departments';
-import { HubLiveTelemetryPulse } from './HubLiveTelemetryPulse';
 
 const EXECUTIVE_LINK_CLASS = cn(
   'gold-steel-border gold-steel-border-slim group/exec inline-flex min-h-11 items-center gap-2',
@@ -333,9 +332,6 @@ export function CoreOperationalModules({
           </div>
         </div>
       </div>
-
-      {/* Live animated telemetry graph + system update messages banner */}
-      <HubLiveTelemetryPulse departments={departments} />
 
       {/* System Default Golden Separator — divides header bar from module panels below */}
       <div

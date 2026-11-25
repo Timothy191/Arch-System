@@ -3,6 +3,7 @@ import { createServiceRoleClient } from '@repo/supabase/service-role';
 import {
   quickAddMineBlock,
   saveHourlyLoad,
+  saveHourlyLoadMachineOperation,
   splitMachineHourlyLoad,
   syncExcavatorActivityFromHourlyLoads,
   updateExcavatorAssignmentConfig,
@@ -10,6 +11,10 @@ import {
   updateMachineSite,
 } from './actions';
 import { computeDumperLoadsAndBcm, deriveExcavatorDumperAssignments } from './loads-utils';
+
+jest.mock('next/cache', () => ({
+  revalidatePath: jest.fn(),
+}));
 
 jest.mock('@repo/redis', () => ({
   cacheInvalidateTags: jest.fn().mockResolvedValue(undefined),
@@ -38,6 +43,7 @@ function makeQuery(data: unknown = null) {
     eq: jest.fn(() => query),
     in: jest.fn(() => query),
     order: jest.fn(() => query),
+    limit: jest.fn(() => query),
     maybeSingle: jest.fn().mockResolvedValue({ data, error: null }),
     single: jest.fn().mockResolvedValue({ data, error: null }),
     then: (resolve: (value: unknown) => unknown, reject: (reason: unknown) => unknown) =>
@@ -744,6 +750,90 @@ describe('Control Room Hourly Loads actions', () => {
           name: 'west bench e',
         })
       ).rejects.toThrow('Failed to quick-add mine block');
+    });
+  });
+
+  describe('saveHourlyLoadMachineOperation', () => {
+    it('updates existing machine_operations row with operatorId and stopSmr', async () => {
+      setPrincipal({ role: 'operator' });
+      const existingOp = {
+        id: 'd290f1ee-6c54-4b01-90e6-d701748f0899',
+        operator_id: null,
+        start_smu: 1000,
+        end_smu: null,
+      };
+      const updatedOp = {
+        id: existingOp.id,
+        machine_id: machineId,
+        operator_id: 'd290f1ee-6c54-4b01-90e6-d701748f0888',
+        start_smu: 1000,
+        end_smu: 1008.5,
+        shift_type: 'day',
+      };
+      const opsQuery = makeQuery([existingOp]);
+      opsQuery.single.mockResolvedValue({ data: updatedOp, error: null });
+
+      jest.mocked(createServiceRoleClient).mockReturnValue({
+        from: jest.fn(() => opsQuery),
+      } as never);
+
+      const res = await saveHourlyLoadMachineOperation({
+        departmentId,
+        machineId,
+        shiftDate: '2026-11-25',
+        shiftType: 'day',
+        operatorId: 'd290f1ee-6c54-4b01-90e6-d701748f0888',
+        stopSmr: 1008.5,
+        startSmr: 1000,
+      });
+
+      expect(res).toEqual({ success: true, operation: updatedOp });
+      expect(opsQuery.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operator_id: 'd290f1ee-6c54-4b01-90e6-d701748f0888',
+          end_smu: 1008.5,
+        })
+      );
+    });
+
+    it('inserts a new machine_operations row when none exists for the shift', async () => {
+      setPrincipal({ role: 'supervisor' });
+      const insertedOp = {
+        id: 'd290f1ee-6c54-4b01-90e6-d701748f0877',
+        machine_id: machineId,
+        operator_id: 'd290f1ee-6c54-4b01-90e6-d701748f0888',
+        start_smu: 1200,
+        end_smu: 1210,
+        shift_type: 'night',
+      };
+      const opsQuery = makeQuery([]);
+      opsQuery.single.mockResolvedValue({ data: insertedOp, error: null });
+
+      jest.mocked(createServiceRoleClient).mockReturnValue({
+        from: jest.fn(() => opsQuery),
+      } as never);
+
+      const res = await saveHourlyLoadMachineOperation({
+        departmentId,
+        machineId,
+        shiftDate: '2026-11-25',
+        shiftType: 'night',
+        operatorId: 'd290f1ee-6c54-4b01-90e6-d701748f0888',
+        stopSmr: 1210,
+        startSmr: 1200,
+      });
+
+      expect(res).toEqual({ success: true, operation: insertedOp });
+      expect(opsQuery.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          department_id: departmentId,
+          machine_id: machineId,
+          shift_type: 'night',
+          start_time: '18:00',
+          start_smu: 1200,
+          end_smu: 1210,
+        })
+      );
     });
   });
 });

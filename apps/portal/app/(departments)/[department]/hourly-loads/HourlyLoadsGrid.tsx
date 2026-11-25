@@ -8,7 +8,7 @@ import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useSta
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
 import { trackClientMetric } from '@/lib/observability/client-telemetry';
-import { saveHourlyLoad, splitMachineHourlyLoad } from './actions';
+import { saveHourlyLoad, saveHourlyLoadMachineOperation, splitMachineHourlyLoad } from './actions';
 import {
   HourCell,
   HourlyLoadsSplitSection,
@@ -41,15 +41,25 @@ import {
   sumHourlyTotal,
 } from './loads-utils';
 
+const EMPTY_MINE_BLOCKS: NonNullable<HourlyLoadsGridProps['mineBlocks']> = [];
+const EMPTY_EXCAVATOR_ACTIVITIES: NonNullable<HourlyLoadsGridProps['excavatorActivities']> = [];
+const EMPTY_ACTIVE_BREAKDOWNS: NonNullable<HourlyLoadsGridProps['activeBreakdowns']> = [];
+const EMPTY_OPERATORS: NonNullable<HourlyLoadsGridProps['operators']> = [];
+const EMPTY_TODAY_OPERATIONS: NonNullable<HourlyLoadsGridProps['todayOperations']> = [];
+const EMPTY_LATEST_SMR: Record<string, number> = {};
+
 function HourlyLoadsGrid({
   departmentId,
   machines,
   excavators,
   hourlyLoads,
   sites,
-  mineBlocks: _mineBlocks = [],
-  excavatorActivities = [],
-  activeBreakdowns = [],
+  mineBlocks: _mineBlocks = EMPTY_MINE_BLOCKS,
+  excavatorActivities = EMPTY_EXCAVATOR_ACTIVITIES,
+  activeBreakdowns = EMPTY_ACTIVE_BREAKDOWNS,
+  operators = EMPTY_OPERATORS,
+  todayOperations = EMPTY_TODAY_OPERATIONS,
+  latestSmrByMachine = EMPTY_LATEST_SMR,
   mineralRegistry,
   today,
   initialShift,
@@ -63,6 +73,22 @@ function HourlyLoadsGrid({
   }, []);
 
   // AGENT-TRACE: The grid owns its load/site state so edits apply optimistically.
+  const [machineOpsState, setMachineOpsState] = useState<
+    Record<string, { operatorId: string; stopSmr: string }>
+  >(() => {
+    const initial: Record<string, { operatorId: string; stopSmr: string }> = {};
+    for (const op of todayOperations) {
+      const opKey = `${op.machine_id}:${op.shift_type}`;
+      if (!initial[opKey]) {
+        initial[opKey] = {
+          operatorId: op.operator_id ?? '',
+          stopSmr: op.end_smu != null ? String(op.end_smu) : '',
+        };
+      }
+    }
+    return initial;
+  });
+
   // No router.refresh() anywhere — each change updates local state instantly and
   // persists in the background, so the page never reloads between values.
   const [loadsState, setLoadsState] = useState<HourlyLoad[]>(hourlyLoads);
@@ -185,6 +211,69 @@ function HourlyLoadsGrid({
 
   const [selectedShift, setSelectedShift] = useState<HourlyShift>(
     initialShift ?? (new Date().getHours() >= 6 && new Date().getHours() < 18 ? 'day' : 'night')
+  );
+
+  const handleMachineOperatorChange = useCallback(
+    async (machineId: string, operatorId: string) => {
+      const opKey = `${machineId}:${selectedShift}`;
+      const previous = machineOpsState[opKey];
+      setMachineOpsState((prev) => ({
+        ...prev,
+        [opKey]: {
+          operatorId,
+          stopSmr: prev[opKey]?.stopSmr ?? '',
+        },
+      }));
+      try {
+        await saveHourlyLoadMachineOperation({
+          departmentId,
+          machineId,
+          shiftDate: today,
+          shiftType: selectedShift,
+          operatorId: operatorId || null,
+          startSmr: latestSmrByMachine[machineId] ?? null,
+        });
+      } catch (err) {
+        setMachineOpsState((prev) => ({
+          ...prev,
+          [opKey]: previous ?? { operatorId: '', stopSmr: '' },
+        }));
+        toast.error(err instanceof Error ? err.message : 'Failed to save operator');
+      }
+    },
+    [departmentId, latestSmrByMachine, machineOpsState, selectedShift, today]
+  );
+
+  const handleMachineStopSmrCommit = useCallback(
+    async (machineId: string, rawValue: string) => {
+      const trimmed = rawValue.trim();
+      const parsedStopSmr = trimmed === '' ? null : Number.parseFloat(trimmed);
+      if (
+        trimmed !== '' &&
+        (parsedStopSmr === null || Number.isNaN(parsedStopSmr) || parsedStopSmr < 0)
+      ) {
+        toast.error('Stop SMR must be a valid non-negative number');
+        return;
+      }
+      const startSmr = latestSmrByMachine[machineId] ?? null;
+      if (parsedStopSmr !== null && startSmr !== null && parsedStopSmr < startSmr) {
+        toast.error(`Stop SMR (${parsedStopSmr}) cannot be less than Start SMR (${startSmr})`);
+        return;
+      }
+      try {
+        await saveHourlyLoadMachineOperation({
+          departmentId,
+          machineId,
+          shiftDate: today,
+          shiftType: selectedShift,
+          stopSmr: parsedStopSmr,
+          startSmr,
+        });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Failed to save Stop SMR');
+      }
+    },
+    [departmentId, latestSmrByMachine, selectedShift, today]
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -810,6 +899,16 @@ function HourlyLoadsGrid({
                       </div>
                     </div>
                   </th>
+                  <th scope="col" className="min-w-[160px] px-3 py-2.5 text-left align-top">
+                    <span className="block font-bold text-[var(--text-heading)] text-xs">
+                      Operator
+                    </span>
+                  </th>
+                  <th scope="col" className="min-w-[110px] px-3 py-2.5 text-left align-top">
+                    <span className="block font-bold text-[var(--text-heading)] text-xs">
+                      Stop SMR
+                    </span>
+                  </th>
                   <th scope="col" className="min-w-[165px] px-3 py-2.5 text-left align-top">
                     <div className="space-y-1.5">
                       <span className="block font-bold text-[var(--text-heading)] text-xs">
@@ -946,6 +1045,92 @@ function HourlyLoadsGrid({
                               </div>
                             )}
                           </div>
+                        </td>
+
+                        {/* Operator Column */}
+                        <td
+                          className={`min-w-[160px] px-3 py-2.5 ${isBreakdownBlocked ? 'bg-red-50' : ''}`}
+                        >
+                          <select
+                            data-row={String(originalRowIndex)}
+                            data-action="select-operator"
+                            aria-label={`Select operator for ${row.machineName}`}
+                            value={
+                              machineOpsState[`${row.machineId}:${selectedShift}`]?.operatorId ?? ''
+                            }
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              if (isBreakdownBlocked) return;
+                              void handleMachineOperatorChange(row.machineId, e.target.value);
+                            }}
+                            disabled={isRowDisabled}
+                            aria-disabled={isBreakdownBlocked ? 'true' : undefined}
+                            className={`w-full rounded-md border px-2 py-1 font-medium text-xs transition-colors ${
+                              isBreakdownBlocked
+                                ? 'cursor-not-allowed border-red-300 bg-red-100/80 text-red-900 opacity-85'
+                                : isLocked
+                                  ? 'cursor-not-allowed border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)] opacity-60'
+                                  : 'cursor-pointer border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]'
+                            }`}
+                          >
+                            <option value="">Select Operator</option>
+                            {operators.map((op) => (
+                              <option key={op.id} value={op.id}>
+                                {op.full_name} ({op.employee_code})
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+
+                        {/* Stop SMR Column */}
+                        <td
+                          className={`min-w-[110px] px-3 py-2.5 ${isBreakdownBlocked ? 'bg-red-50' : ''}`}
+                        >
+                          <input
+                            type="number"
+                            step="0.1"
+                            min={latestSmrByMachine[row.machineId] ?? 0}
+                            data-row={String(originalRowIndex)}
+                            data-action="input-stop-smr"
+                            aria-label={`Stop SMR for ${row.machineName}`}
+                            placeholder={
+                              latestSmrByMachine[row.machineId] != null
+                                ? `${latestSmrByMachine[row.machineId]}`
+                                : 'Stop SMR'
+                            }
+                            value={
+                              machineOpsState[`${row.machineId}:${selectedShift}`]?.stopSmr ?? ''
+                            }
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const opKey = `${row.machineId}:${selectedShift}`;
+                              setMachineOpsState((prev) => ({
+                                ...prev,
+                                [opKey]: {
+                                  operatorId: prev[opKey]?.operatorId ?? '',
+                                  stopSmr: val,
+                                },
+                              }));
+                            }}
+                            onBlur={(e) => {
+                              if (isBreakdownBlocked) return;
+                              void handleMachineStopSmrCommit(row.machineId, e.target.value);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                            disabled={isRowDisabled}
+                            aria-disabled={isBreakdownBlocked ? 'true' : undefined}
+                            className={`w-full rounded-md border px-2 py-1 font-mono text-xs transition-colors ${
+                              isBreakdownBlocked
+                                ? 'cursor-not-allowed border-red-300 bg-red-100/80 text-red-900 opacity-85'
+                                : isLocked
+                                  ? 'cursor-not-allowed border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)] opacity-60'
+                                  : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]'
+                            }`}
+                          />
                         </td>
 
                         {/* Excavator Assigned Column */}

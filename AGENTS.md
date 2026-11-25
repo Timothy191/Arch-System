@@ -165,66 +165,52 @@ Extend or throw `AppError` subclasses from `@repo/errors` (`ValidationError` 400
 Protected Server Actions (`'use server'`) and Route Handlers follow this exact order: **1. Authenticate → 2. Authorize → 3. Validate (`@repo/contract`) → 4. Rate-limit → 5. Execute → 6. Audit log → 7. Invalidate caches → 8. Return typed result** (always invalidate before `redirect()`, which throws a control-flow exception):
 
 ```typescript
-"use server";
+'use server';
 
 import {
   shiftCloseoutSchema,
   type ShiftCloseoutInput,
-} from "@repo/contract/schemas/control-room.schema";
-import {
-  AuthError,
-  ForbiddenError,
-  RateLimitError,
-  ValidationError,
-} from "@repo/errors";
-import { logger } from "@repo/logger/server";
-import {
-  FixedWindowStrategy,
-  MemoryStore,
-  RateLimiter,
-} from "@repo/rate-limiter";
-import { getAuthenticatedEmployee } from "@repo/supabase";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { tagDepartment } from "@/lib/cache-tags";
-import { updateTag } from "@/lib/server-cache";
+} from '@repo/contract/schemas/control-room.schema';
+import { AuthError, ForbiddenError, RateLimitError, ValidationError } from '@repo/errors';
+import { logger } from '@repo/logger/server';
+import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
+import { getAuthenticatedEmployee } from '@repo/supabase';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { tagDepartment } from '@/lib/cache-tags';
+import { updateTag } from '@/lib/server-cache';
 
 const closeoutLimiter = new RateLimiter({
   store: new MemoryStore(),
   strategy: new FixedWindowStrategy(),
   limit: 5,
   windowMs: 60_000,
-  keyPrefix: "ratelimit:shift_closeout:",
+  keyPrefix: 'ratelimit:shift_closeout:',
 });
 
 export async function submitShiftCloseout(rawInput: ShiftCloseoutInput) {
   const supabase = await createServerSupabaseClient();
   const principal = await getAuthenticatedEmployee(supabase);
-  if (!principal?.employee) throw new AuthError("Unauthorized");
-  if (!principal.employee.accessible_departments.includes("control-room")) {
-    throw new ForbiddenError("Insufficient department access");
+  if (!principal?.employee) throw new AuthError('Unauthorized');
+  if (!principal.employee.accessible_departments.includes('control-room')) {
+    throw new ForbiddenError('Insufficient department access');
   }
 
   const parsed = shiftCloseoutSchema.safeParse(rawInput);
   if (!parsed.success) {
-    throw new ValidationError(
-      parsed.error.issues[0]?.message ?? "Invalid input"
-    );
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid input');
   }
 
   const { allowed } = await closeoutLimiter.check(principal.user.id);
-  if (!allowed) throw new RateLimitError("Rate limit exceeded");
+  if (!allowed) throw new RateLimitError('Rate limit exceeded');
 
-  const { data: closeoutRecord, error } = await supabase.rpc(
-    "close_shift",
-    parsed.data
-  );
+  const { data: closeoutRecord, error } = await supabase.rpc('close_shift', parsed.data);
   if (error) throw error;
   logger.info({
-    event: "shift_closeout_submitted",
+    event: 'shift_closeout_submitted',
     actorId: principal.user.id,
   });
 
-  await updateTag(tagDepartment("control-room", "shift-closeout"));
+  await updateTag(tagDepartment('control-room', 'shift-closeout'));
   return { success: true as const, closeoutRecord };
 }
 ```
@@ -253,7 +239,7 @@ Always acquire external clients through factory functions to preserve pooling an
 ### Hard UI, database, & workspace invariants
 
 - **Light mode only**: Canvas `#f3f4f6` (`data-theme="light"`), semantic OKLCH variables from `@repo/theme`. Zero `dark:` utilities or raw hex/RGB values (`pnpm audit:tokens`).
-- **Glass surfaces & imports**: Use `@repo/ui/GlassCard` (`variant="default" | "window" | "spotlight" | "glowborder" | "liquid"`). Import via canonical package subpaths (`@repo/ui/GlassCard`), never deep `/src/` paths.
+- **Glass surfaces & golden branding**: Use `@repo/ui/GlassCard` (`variant="default" | "window" | "spotlight" | "glowborder" | "liquid"`). All panels, forms, headers, and floating bars MUST inherit the taskbar-derived liquid-glass transparency and golden steel branding (`liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/25 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md`, codified in `@repo/theme/src/tokens/glass.ts` `glassSurfaceBranding`). Import via canonical package subpaths (`@repo/ui/GlassCard`), never deep `/src/` paths.
 - **Tailwind & CSS budgets**: <= 20 utilities per element (target <= 12); extract chains of >= 10 utilities repeated >= 3 times into a component, CVA variant, or module `cn()` constant (`pnpm audit:tailwind`; total CSS <= 115 KB via `pnpm lint:css-perf`). Use `next/image` with explicit dimensions and `alt`.
 - **PostgreSQL RLS**: Every `public` table must enable RLS consulting `(SELECT auth.uid())` and `public.employees` (`pnpm audit:rls-matrix`).
 - **Consolidated tracing**: Record workspace changes in root `AGENT_TRACER.md` only (ISO-8601 heading at top). Never create per-package `*/AGENT_TRACER.md` or variant filenames (`pnpm audit:agents:check`).

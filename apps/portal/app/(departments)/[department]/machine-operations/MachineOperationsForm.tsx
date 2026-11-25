@@ -612,7 +612,10 @@ export function MachineOperationsForm({
 
   return (
     <GlassCard>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="gold-steel-border gold-steel-border-slim space-y-6 rounded-card border border-white/25 bg-[var(--material-ultra-thin)] p-5 shadow-diffusion-sm backdrop-blur-md"
+      >
         <div className="flex items-center justify-between">
           <h3 className="font-medium text-[var(--text-heading)] text-lg">Log Machine Operation</h3>
           {lastSaved && (
@@ -649,12 +652,26 @@ export function MachineOperationsForm({
                       : null)
                   : null;
                 const hasActiveBreakdown = engDelay?.status === 'active';
+                const existingOp =
+                  todayOperations.find(
+                    (op) => op.machine_id === nextMachineId && op.shift_type === formData.shiftType
+                  ) ?? todayOperations.find((op) => op.machine_id === nextMachineId);
+                const resolvedStartSmr =
+                  existingOp?.start_smu != null
+                    ? String(existingOp.start_smu)
+                    : machineObj?.latest_smu != null
+                      ? String(machineObj.latest_smu)
+                      : '';
+                const resolvedEndSmr =
+                  existingOp?.end_smu != null ? String(existingOp.end_smu) : '';
 
                 setFormData((prev) => ({
                   ...prev,
                   machineId: nextMachineId,
-                  siteId: prev.siteId || machineObj?.site_id || '',
-                  startSmu: machineObj?.latest_smu != null ? String(machineObj.latest_smu) : '',
+                  operatorId: existingOp?.operator_id || prev.operatorId,
+                  siteId: existingOp?.site_id || prev.siteId || machineObj?.site_id || '',
+                  startSmu: resolvedStartSmr,
+                  endSmu: resolvedEndSmr,
                   endsOnBreakdown: hasActiveBreakdown || prev.endsOnBreakdown,
                   breakdownReason:
                     hasActiveBreakdown && engDelay?.reasons?.length
@@ -1124,13 +1141,19 @@ export function MachineOperationsForm({
         {(hoursWorked !== null || isDozer) && (
           <div className="space-y-3">
             {hoursWorked !== null && (
-              <div className="flex items-center gap-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
+              <div className="flex flex-wrap items-center gap-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
                 <span className="text-[var(--text-muted)] text-sm">Hours Worked:</span>
-                <span className="font-medium text-2xl text-[var(--accent-blue)]">
+                <span
+                  className={`font-medium text-2xl ${
+                    hoursWorked > 14 ? 'text-accent-red' : 'text-[var(--accent-blue)]'
+                  }`}
+                >
                   {hoursWorked.toFixed(2)}h
                 </span>
                 <span className="text-[var(--text-muted)] text-xs">
-                  (SMR calculated: Stop - Start)
+                  {hoursWorked > 14
+                    ? '(Shift Stop SMR − Start SMR exceeds 14h — verify Start SMR)'
+                    : '(Shift Stop SMR − Start SMR)'}
                 </span>
               </div>
             )}

@@ -17,6 +17,8 @@ import type {
 import { cacheInvalidateTags } from '@repo/redis/cache';
 import { type EmployeeSummary, getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 import { withAsyncSpan } from '@/lib/observability/tracing';
 import {
   deriveExcavatorDumperAssignments,
@@ -909,4 +911,104 @@ export async function saveHourlyLoad(input: SaveHourlyLoadInput) {
       return { success: true, load: inserted };
     }
   );
+}
+
+const saveHourlyLoadMachineOpSchema = z.object({
+  departmentId: z.uuid(),
+  machineId: z.uuid(),
+  shiftDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  shiftType: z.enum(['day', 'night']),
+  operatorId: z.uuid().nullable().optional(),
+  stopSmr: z.number().min(0).nullable().optional(),
+  startSmr: z.number().min(0).nullable().optional(),
+});
+
+export async function saveHourlyLoadMachineOperation(
+  input: z.infer<typeof saveHourlyLoadMachineOpSchema>
+) {
+  const principal = await getAuthenticatedEmployee();
+  if (!principal?.employee) {
+    throw new Error('Unauthorized');
+  }
+  const role = principal.employee.role ?? '';
+  if (!(_CONTROL_ROOM_OPERATOR_ROLES as readonly string[]).includes(role)) {
+    throw new Error('Insufficient permissions to update machine operation');
+  }
+
+  const parsed = saveHourlyLoadMachineOpSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? 'Invalid machine operation input');
+  }
+
+  const { departmentId, machineId, shiftDate, shiftType, operatorId, stopSmr, startSmr } =
+    parsed.data;
+  const serviceClient = createServiceRoleClient();
+
+  const { data: existingRows, error: fetchError } = await serviceClient
+    .from('machine_operations')
+    .select('id, operator_id, start_smu, end_smu')
+    .eq('department_id', departmentId)
+    .eq('machine_id', machineId)
+    .eq('shift_date', shiftDate)
+    .eq('shift_type', shiftType)
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (fetchError) throw fetchError;
+
+  const existing = existingRows?.[0] ?? null;
+
+  if (existing) {
+    const updatePatch: Record<string, unknown> = {};
+    if (operatorId !== undefined) updatePatch.operator_id = operatorId;
+    if (stopSmr !== undefined) updatePatch.end_smu = stopSmr;
+    if (existing.start_smu == null && startSmr != null) {
+      updatePatch.start_smu = startSmr;
+    }
+
+    const { data: updated, error: updateError } = await serviceClient
+      .from('machine_operations')
+      .update(updatePatch)
+      .eq('id', existing.id)
+      .select('id, machine_id, operator_id, start_smu, end_smu, shift_type')
+      .single();
+
+    if (updateError) throw updateError;
+
+    await invalidateHourlyLoadsCache(departmentId, [
+      'table:machine_operations',
+      'table:hourly_loads',
+      `dept:${departmentId}`,
+    ]);
+    revalidatePath('/control-room/machine-operations');
+    revalidatePath('/control-room/hourly-loads');
+    return { success: true as const, operation: updated };
+  }
+
+  const effectiveStartSmr = startSmr ?? stopSmr ?? null;
+  const { data: inserted, error: insertError } = await serviceClient
+    .from('machine_operations')
+    .insert({
+      department_id: departmentId,
+      machine_id: machineId,
+      operator_id: operatorId ?? null,
+      shift_date: shiftDate,
+      shift_type: shiftType,
+      start_time: shiftType === 'day' ? '06:00' : '18:00',
+      start_smu: effectiveStartSmr,
+      end_smu: stopSmr ?? null,
+    } as never)
+    .select('id, machine_id, operator_id, start_smu, end_smu, shift_type')
+    .single();
+
+  if (insertError) throw insertError;
+
+  await invalidateHourlyLoadsCache(departmentId, [
+    'table:machine_operations',
+    'table:hourly_loads',
+    `dept:${departmentId}`,
+  ]);
+  revalidatePath('/control-room/machine-operations');
+  revalidatePath('/control-room/hourly-loads');
+  return { success: true as const, operation: inserted };
 }

@@ -123,6 +123,7 @@ describe('CoreOperationalModules', () => {
     expect(screen.getByTestId('core-modules-header-separator').querySelector('svg')).toHaveClass(
       'text-accent-gold'
     );
+    expect(screen.queryByText('LIVE SYSTEM FEED')).not.toBeInTheDocument();
   });
 
   describe('CookieConsent persistence & zero-flash behavior', () => {
