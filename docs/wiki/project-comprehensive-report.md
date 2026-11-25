@@ -150,7 +150,7 @@ Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining ope
 │       │  └─────────┘ └─────────┘ └─────────┘       │                     │
 │       │  ┌─────────┐ ┌─────────┐ ┌─────────┐       │                     │
 │       │  │Grafana  │ │Prometheus│ │  Redis  │       │                     │
-│       │  │ :9091   │ │ :9090   │ │ :6379   │       │                     │
+│       │  │ :3005   │ │ :9090   │ │ :6379   │       │                     │
 │       │  └─────────┘ └─────────┘ └─────────┘       │                     │
 │       │                                             │                     │
 │       │  One command: ./scripts/deploy.sh local    │                     │

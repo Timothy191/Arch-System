@@ -11,6 +11,7 @@ import {
 } from '@/lib/observability/alert-evaluator';
 import { collectRealLayerRuntimeSnapshot } from '@/lib/observability/metrics';
 import { getObservabilityMetrics } from '@/lib/observability/simple-metrics';
+import { persistSloSnapshots } from '@/lib/observability/slo-store';
 import {
   getAllUptimeSummaries,
   getOverallSla24hPct,
@@ -301,6 +302,7 @@ export async function GET() {
   const uptimeSummaries = getAllUptimeSummaries();
   const uptimeByTarget = getUptimeSummariesByTarget();
   const overallSla24hPct = getOverallSla24hPct();
+  const sloPersistence = await persistSloSnapshots({ summaries: uptimeSummaries });
   const activeAlerts = getActiveAlertEvaluations();
   const goldenSignals = buildGoldenSignalPanels({
     cacheStats,
@@ -339,6 +341,7 @@ export async function GET() {
       },
       runtime: runtimeSnapshot,
       workflows,
+      sloPersistence,
     },
     {
       status: HTTP_OK,

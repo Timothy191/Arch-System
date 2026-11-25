@@ -41,14 +41,3 @@ scrape_configs:
         labels:
           environment: 'production'
           cluster: 'arch-supabase-pg17'
-
-  - job_name: 'cloudflare'
-    static_configs:
-      - targets: ['api.cloudflare.com:443']
-    scrape_interval: 60s
-    metrics_path: '/metrics'
-    scheme: 'https'
-    tls_config:
-      enable_http2: false
-    authorization:
-      token: '${CLOUDFLARE_API_TOKEN}'

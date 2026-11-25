@@ -1,38 +1,37 @@
 groups:
-  - name: AMCA.Rules
+  # Cache metrics exposed by /api/metrics (portal_cache_*). The previous
+  # amca_* metric names were never emitted, so every rule here was inert.
+  - name: cache_alerts
     rules:
       - alert: CacheMissRateTooHigh
-        expr: rate(amca_cache_misses_total[5m]) / (rate(amca_cache_hits_total[5m]) + rate(amca_cache_misses_total[5m])) > 0.4
+        expr: >-
+          sum(rate(portal_cache_misses_total[5m]))
+          /
+          (sum(rate(portal_cache_hits_total[5m])) + sum(rate(portal_cache_misses_total[5m]))) > 0.4
         for: 2m
         labels:
           severity: warning
+          team: platform
         annotations:
           summary: 'Cache Miss Rate exceeds 40%'
-          description: 'Cache miss rate for Tier L1 is too high. Policy engine may not be keeping up.'
-
-      - alert: RedisShardDown
-        expr: up{job="redis-cluster"} == 0
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          summary: 'Redis Shard Down'
-          description: 'A node in the L2 cache cluster has failed.'
+          description: 'Cache miss rate is {{ $value | humanizePercentage }}. Policy engine may not be keeping up.'
 
       - alert: L2CacheLatencyHigh
         expr: portal_cache_latency_ms{metric="p95"} > 100
         for: 2m
         labels:
           severity: warning
+          team: platform
         annotations:
           summary: L2 Cache P95 Latency Above 100ms
           description: 'L2 Redis cache p95 latency has exceeded 100ms. Consider cache optimization or Redis scaling.'
 
-      - alert: CacheWriteThroughDelayHigh
-        expr: portal_cache_write_through_delay_ms > 500
-        for: 2m
+      - alert: CacheErrorsElevated
+        expr: rate(portal_cache_errors_total[5m]) > 0.1
+        for: 5m
         labels:
-          severity: warning
+          severity: critical
+          team: platform
         annotations:
-          summary: Cache Write-Through Delay High
-          description: 'Cache write-through delay to Supabase exceeds 500ms. Review write pattern or Supabase performance.'
+          summary: 'Redis cache errors elevated'
+          description: 'Cache errors are occurring at {{ $value }}/s. Check Redis connectivity and the /api/health probe.'

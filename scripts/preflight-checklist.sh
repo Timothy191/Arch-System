@@ -154,7 +154,7 @@ check_port() {
 check_port "$PORT" "Portal"
 check_port 6379  "Redis"
 check_port 6333  "Qdrant"
-check_port 9091  "Grafana"
+check_port 3005  "Grafana"
 check_port 9092  "Prometheus"
 check_port 1881  "Fuxa"
 

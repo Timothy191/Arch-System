@@ -1094,7 +1094,7 @@ if docker ps --format '{{.Names}}' 2>/dev/null | grep -q plantcor-flowise; then
 fi
 
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q plantcor-grafana; then
-  echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_GREEN}[ ✔ ONLINE ]\${CLR_RESET}  \${CLR_BOLD}Grafana:\${CLR_RESET}      http://localhost:9091"
+  echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_GREEN}[ ✔ ONLINE ]\${CLR_RESET}  \${CLR_BOLD}Grafana:\${CLR_RESET}      http://localhost:3005"
 fi
 
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q plantcor-prometheus; then
@@ -1242,7 +1242,7 @@ main() {
     log "Supabase:   $SUPABASE_URL (Cloud Mode)"
   fi
 
-  [ "$DEPLOY_MODE" = "local" ] && log "Grafana:    http://localhost:9091"
+  [ "$DEPLOY_MODE" = "local" ] && log "Grafana:    http://localhost:3005"
   echo
   log "Logs: tail -f $DEPLOY_LOG"
   log "Stop: $0 $DEPLOY_MODE --clean"

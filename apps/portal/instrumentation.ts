@@ -13,6 +13,21 @@ function nowMs(): number {
 /** High-resolution start marker captured when the instrumentation module loads. */
 const processStartTimeMs = nowMs();
 
+function resolveSentryDsn(): string | undefined {
+  return process.env.SENTRY_DSN ?? process.env.NEXT_PUBLIC_SENTRY_DSN;
+}
+
+async function initializeSentry(): Promise<void> {
+  if (!resolveSentryDsn()) {
+    return;
+  }
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./sentry.server.config');
+  } else if (process.env.NEXT_RUNTIME === 'edge') {
+    await import('./sentry.edge.config');
+  }
+}
+
 async function loadBaselinesFromConfig(): Promise<void> {
   if (process.env.NEXT_RUNTIME !== 'nodejs') {
     return;
@@ -38,6 +53,9 @@ async function loadBaselinesFromConfig(): Promise<void> {
 }
 
 export async function register(): Promise<void> {
+  // Attach Sentry before anything else so startup failures are reported.
+  await initializeSentry();
+
   // Record server startup time as the first performance measurement.
   performanceMonitor.recordStartupTime(nowMs() - processStartTimeMs, {
     layer: 'application',
@@ -105,6 +123,23 @@ export const onRequestError = async (
     error: err instanceof Error ? err : new Error(String(err)),
     context: { source: 'server', category: 'request' },
   });
+
+  if (resolveSentryDsn()) {
+    const SentryModule = await import('@sentry/nextjs');
+    SentryModule.captureRequestError(
+      err,
+      {
+        path: request?.path ?? request?.url ?? 'unknown',
+        method: request?.method ?? 'GET',
+        headers: request?.headers ?? {},
+      },
+      {
+        routerKind: String(context?.routerKind ?? 'unknown'),
+        routePath: String(context?.routePath ?? 'unknown'),
+        routeType: String(context?.routeType ?? 'unknown'),
+      }
+    );
+  }
 
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     const { serverLogger } = await import('@repo/logger');

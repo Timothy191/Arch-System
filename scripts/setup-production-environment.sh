@@ -85,7 +85,7 @@ REQUIRED_PORTS=(
   "6333/tcp  (Qdrant)"
   "8123/tcp  (ClickHouse)"
   "9093/tcp  (Prometheus)"
-  "9091/tcp  (Grafana)"
+  "3005/tcp  (Grafana)"
   "8082/tcp  (cAdvisor)"
 )
 
@@ -521,7 +521,7 @@ setup_monitoring() {
 
   success "Monitoring stack started"
   info "Services include: Prometheus, Grafana, cAdvisor"
-  info "Grafana will be available at http://localhost:9091 (default)"
+  info "Grafana will be available at http://localhost:3005 (default)"
   info "To view logs: docker-compose -f $monitoring_file logs -f"
   info "To stop: docker-compose -f $monitoring_file down"
 }
@@ -610,7 +610,7 @@ print_summary() {
   if [ "$SKIP_MONITORING" = false ]; then
     echo -e "${BOLD}Monitoring Stack:${NC}"
     echo -e "  • Prometheus: ${GREEN}Running${NC} (http://localhost:9093)"
-    echo -e "  • Grafana: ${GREEN}Running${NC} (http://localhost:9091)"
+    echo -e "  • Grafana: ${GREEN}Running${NC} (http://localhost:3005)"
     echo -e "  • cAdvisor: ${GREEN}Running${NC} (http://localhost:8082)"
     echo
   fi
@@ -623,7 +623,7 @@ print_summary() {
 
   echo -e "\033[1mLocal services recommendations:\033[0m"
   echo "  • Flowise, Supabase, Qdrant are expected to be hosted locally on this server or LAN. Ensure .env.tools and .env are configured to point to localhost or LAN IPs."
-  echo "  • Open required ports (3000, 3001, 5678, 6333, 8123, 9091, 9093, 8082) in your firewall for internal access."
+  echo "  • Open required ports (3000, 3001, 5678, 6333, 8123, 3005, 9093, 8082) in your firewall for internal access."
   echo "  • Confirm .env.tools has correct credentials for services (FLOWISE, REDIS_PASSWORD)."
   echo "  • For production, consider placing these services behind internal network controls (VLANs, firewalls) and not exposing them publicly."
   echo

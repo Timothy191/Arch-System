@@ -7,35 +7,43 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
+  # Bound collector memory before the batch processor buffers spans.
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 400
+    spike_limit_mib: 100
   batch:
-
-  # Cloudflare trace processor — extracts Cloudflare-specific attributes
-  cloudflare:
-    operations_to_ignore: []
-    metrics_interval: 60
-    ignore_status_codes: [400, 404, 500, 502, 503, 504]
-    # These attributes will be added to each span
-    # - cloudflare_trace_id
-    # - cloudflare_request_id
-    # - cloudflare_status_code
-    # - cloudflare_error_code
+    timeout: 5s
+    send_batch_size: 1024
 
 exporters:
-  # Pull-based exporter: exposes collected metrics at /metrics on :8889 for Prometheus to scrape.
+  # Pull-based metrics exporter exposed on :8889 for Prometheus to scrape.
   prometheus:
-    endpoint: '0.0.0.0:8889'
-  # Tempo trace exporter — forwards traces to Grafana Tempo for long-term storage and visualization.
-  tempo:
-    endpoint: 'tempo:4317'
-    insecure: true
+    endpoint: 0.0.0.0:8889
+  # Forward traces to Grafana Tempo over OTLP/gRPC.
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  debug:
+    verbosity: normal
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
 
 service:
+  extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [tempo, prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/tempo]
     metrics:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, batch]
       exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug]

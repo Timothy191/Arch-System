@@ -72,10 +72,10 @@ services:
     color: '#14b8a6'
 
   - name: Grafana (Monitoring)
-    url: http://host.docker.internal:9091
+    url: http://host.docker.internal:3005
     healthcheck:
       type: http
-      url: http://host.docker.internal:9091/api/health
+      url: http://host.docker.internal:3005/api/health
     icon: mdi:pressure-fire
     color: '#8b5cf6'
 
@@ -142,7 +142,7 @@ navigation:
     icon: mdi:dashboard
 
   - title: Monitoring
-    url: http://host.docker.internal:9091
+    url: http://host.docker.internal:3005
     icon: mdi:pressure-fire
 # Docker-friendly: use host.docker.internal to reach host services.
 # On Linux, ensure --add-host=host.docker.internal:host-gateway is set

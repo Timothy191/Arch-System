@@ -38,6 +38,11 @@ export const REGISTERED_VERCEL_CRONS: readonly CronScheduleDescriptor[] = [
     schedule: '0 8 * * *',
     description: 'Daily processing of queued webhook deliveries from database triggers',
   },
+  {
+    path: '/api/cron/observability-slo',
+    schedule: '*/15 * * * *',
+    description: 'Quarter-hourly uptime probe, SLO budget evaluation, and slo_metrics snapshot',
+  },
 ] as const;
 
 export async function GET(req: Request): Promise<NextResponse> {

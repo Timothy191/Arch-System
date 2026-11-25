@@ -1,0 +1,29 @@
+[Unit]
+Description=Arch-System Health Check (portal /api/health)
+Documentation=https://github.com/plantcor/arch-systems
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Override via /etc/arch-system/health.env (PORTAL_HEALTH_URL=...) if the
+# portal is not on the default local port.
+Environment=PORTAL_HEALTH_URL=http://127.0.0.1:3000/api/health
+EnvironmentFile=-/etc/arch-system/health.env
+ExecStart=/usr/bin/curl --fail --silent --show-error --max-time 10 ${PORTAL_HEALTH_URL}
+
+# Security hardening — curl only needs outbound loopback traffic.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LockPersonality=true
+
+# Logging — readable via: journalctl -u arch-health -n 50
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=arch-health

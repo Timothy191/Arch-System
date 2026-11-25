@@ -10,7 +10,7 @@ Arch-System (the Plantcor mining operations portal) is an industrial operations 
 
 - **Node.js** `>=24.0.0` (`.nvmrc` and `.node-version` pin `24`)
 - **pnpm** `9.15.9` (pinned via the `packageManager` field in root `package.json`)
-- **Docker** — required for local Redis (`pnpm redis:up`) and optional local observability stack (`infra/docker/compose.observability.yml`)
+- **Docker** — required for local Redis (`pnpm redis:up`) and optional local observability stack (`infra/monitoring/docker-compose.yml`, started with `pnpm monitor:grafana`)
 - **Cloud Supabase** — all development and production environments connect to cloud-hosted Supabase PostgreSQL 17
 - **Git** with hooks enabled (Husky installs automatically on `pnpm install`)
 

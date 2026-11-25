@@ -211,7 +211,7 @@ CATEGORY SCORE   █████████████████████
 | Preflight checklist   | **10 audits + --fix**                                       | 🟢 Auto-repair            |
 | Health endpoints      | `/api/health`, `/api/health/live`                           | 🟢 Ready                  |
 | Cache health endpoint | `/api/health/cache`                                         | 🟢 Redis stats            |
-| Grafana dashboards    | Port 9091                                                   | 🟢 Live                   |
+| Grafana dashboards    | Port 3005                                                   | 🟢 Live                   |
 | Prometheus scrape     | Port 9093                                                   | 🟢 Active                 |
 | Sentry error tracking | ✅                                                          | 🟢 Source maps            |
 | Standalone build      | ✅                                                          | 🟢 `server.js` entry      |

@@ -10,10 +10,10 @@ The `infra/` directory organizes all local, on-premises, and cloud infrastructur
 
 - **`docker/`**: Centralized Docker Compose profiles and reverse-proxy configurations (`Caddyfile`, `compose.portal.yml`, `compose.production.yml`, `compose.staging.yml`, `compose.full-stack.yml`, `compose.redis.yml`, `compose.redis-stack.yml`, `compose.tools.yml`, `compose.ai-tools.yml`, `compose.security.yml`, `compose.dashboards.yml`, `compose.n8n-production.yml`).
 - **`k8s/`**: Kubernetes production manifests, HorizontalPodAutoscaler (`hpa.yaml`), Argo Rollouts (`rollout.yaml`, `analysis-template.yaml`), NetworkPolicy (`network-policy.yaml`), Ingress (`ingress.yaml`), Cert-Manager (`cert-manager-issuer.yaml`), External Secrets, Helm charts, Kustomize overlays, and Velero backup schedules (`velero-schedule.yaml`).
-- **`monitoring/`**: Core observability runtime definitions (`docker-compose.yml`, `otel-collector-config.yaml`, `grafana-provisioning/`) for Prometheus, Grafana, and the OpenTelemetry Collector.
-- **`observability/`**: Prometheus scrape configurations (`prometheus.yml`), Alertmanager routing (`alertmanager.yml`), custom alert rules (`prometheus-rules/`), and Grafana dashboard JSON models (`grafana-dashboards/`).
+- **`monitoring/`**: The single local observability stack (`docker-compose.yml`, `otel-collector-config.yaml`, `tempo.yaml`, `grafana-provisioning/`) for OpenTelemetry, Prometheus, Grafana, Alertmanager, cAdvisor, Loki, Tempo, and the optional Woodpecker CI pair. Copy `.env.example` to `.env` for admin/alert settings.
+- **`observability/`**: Cluster Prometheus scrape configuration (`prometheus.yml`), Alertmanager routing (`alertmanager.yml`, `null` receiver by default), alert rules (`prometheus-rules/`), and the canonical Grafana dashboard JSON models (`grafana-dashboards/`).
 - **`redis/`**: Redis L2 cache and cluster configurations (`redis.conf`, `acl/`, `config/shard-map.json`, `docker-compose/redis-cluster.yml`, and `terraform/`).
-- **`systemd/`**: Linux service units and timers (`arch-systems.service`, `arch-systems-local.service`, `arch-agents.service`, `arch-backup.timer`, `arch-health.timer`) for bare-metal mining site servers.
+- **`systemd/`**: Linux service units and timers (`arch-systems.service`, `arch-systems-local.service`, `arch-agents.service`, `arch-health.service`, `arch-backup.timer`, `arch-health.timer`) for bare-metal mining site servers.
 - **`terraform/`**: Cloud infrastructure-as-code modules (`main.tf`, `vpc.tf`, `eks.tf`, `storage.tf`, `cdn.tf`, `dns.tf`, `backend.tf`, `variables.tf`, `outputs.tf`).
 - **`vault/`**: HashiCorp Vault server configuration (`vault-config.hcl`) and access control policies (`policies/`).
 - **`argocd/`**: GitOps continuous delivery application manifest (`application.yaml`).
@@ -54,18 +54,20 @@ docker compose -f infra/docker/compose.tools.yml up -d
 
 ## 3. Observability Stack (Prometheus, Grafana, Alertmanager, OpenTelemetry)
 
-The observability pipeline collects application, cache, database, and SCADA telemetry metrics across `infra/monitoring/` and `infra/observability/`.
+There is a single local observability stack: `infra/monitoring/docker-compose.yml` (project `plantcor-observability`). Cluster scraping configuration lives in `infra/observability/`.
 
 ### Architecture & Data Flow
 
-- **Application Metrics (`/api/metrics`)**:
-  Prometheus scrapes the portal's `/api/metrics` endpoint (`infra/observability/prometheus.yml`) for HTTP request latency histograms, L1/L2 cache hit ratios, TinyLFU eviction counters (`l1_eviction`), L2 round-trips (`l2_round_trip`), privilege version changes, and write-through delay (`write_through_delay_ms`).
+- **Application Metrics (`/api/metrics` & `/api/metrics/prometheus`)**:
+  Prometheus scrapes the portal through `monitoring/prometheus.yml` (local stack) or `infra/observability/prometheus.yml` (Kubernetes) for HTTP request latency histograms, L1/L2 cache hit ratios, TinyLFU eviction counters (`l1_eviction`), L2 round-trips (`l2_round_trip`), privilege version changes, and write-through delay (`write_through_delay_ms`).
 - **OpenTelemetry Collector (`infra/monitoring/otel-collector-config.yaml`)**:
-  Receives OTLP traces and metrics from the Next.js server runtime and forwards spans and metrics to Prometheus and tracing backends.
+  Receives OTLP traces, metrics, and logs from the Next.js server runtime; traces are exported to Tempo, metrics are exposed on `:8889` for Prometheus.
 - **Grafana Dashboards (`infra/observability/grafana-dashboards/`)**:
-  Pre-provisioned via `infra/monitoring/grafana-provisioning/` to visualize portal throughput, Redis memory utilization, Postgres connection pools, and department shift KPIs.
+  Pre-provisioned via `infra/monitoring/grafana-provisioning/` to visualize portal throughput, Redis memory utilization, Postgres connection pools, and department shift KPIs. Served on `http://localhost:3005`.
 - **Alertmanager (`infra/observability/alertmanager.yml` & `prometheus-rules/`)**:
-  Evaluates threshold and anomaly rules (including SCADA stream z-score anomalies, Redis connectivity drops, and elevated 5xx error rates) and dispatches notifications to control room operators.
+  Evaluates rules that reference emitted portal metrics (SCADA connectivity, shift closeout latency, cache miss rate, 5xx error rate, API p95). The tracked config uses a `null` receiver; copy it to a gitignored `alertmanager.local.yml`, add credentials, and set `ALERTMANAGER_CONFIG_PATH` to enable Slack/PagerDuty delivery.
+- **SLO Persistence (`/api/cron/observability-slo`)**:
+  A Vercel cron (`*/15 * * * *`) probes Supabase, Redis, FUXA, and the Node runtime, then writes uptime snapshots to the `slo_metrics` table for long-term SLO/error-budget history.
 
 ### Starting & Stopping the Monitoring Stack
 

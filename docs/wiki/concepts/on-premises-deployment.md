@@ -32,7 +32,7 @@ Local Dev (✅ Fully Operational)
 ─────────────────────────────────
 Portal        → localhost:3000
 AI Chat       → via portal
-Grafana       → localhost:9091
+Grafana       → localhost:3005
 Prometheus    → localhost:9090
 Redis         → localhost:6379
 Supabase      → localhost:54321
@@ -76,7 +76,7 @@ Server management via Cockpit → :9090
 - [ ] Create `arch` user: `sudo useradd -m -s /bin/bash arch && sudo usermod -aG docker arch`
 - [ ] Configure SSH key-based auth (disable password auth)
 - [ ] Configure firewall (UFW / firewalld):
-  - Allow: 22 (SSH), 3000 (portal), 9090 (Cockpit), 9091 (Grafana)
+  - Allow: 22 (SSH), 3000 (portal), 9090 (Cockpit), 3005 (Grafana)
   - Block: all other external ports
 - [ ] Create data directories: `sudo mkdir -p /opt/arch-systems/data/{flowise,redis}`
 
@@ -117,7 +117,7 @@ cp apps/portal/.env.production.example apps/portal/.env
 
 - [ ] Verify all containers start: `docker compose ps`
 - [ ] Confirm portal accessible on port 3000
-- [ ] Confirm Grafana on port 9091
+- [ ] Confirm Grafana on port 3005
 
 ### Phase D — Offline Capability
 
@@ -134,7 +134,7 @@ cp apps/portal/.env.production.example apps/portal/.env
 ### Phase E — Validation
 
 - [ ] Run: `curl -fs http://localhost:3000` — portal responds
-- [ ] Run: `curl -fs http://localhost:9091` — Grafana responds
+- [ ] Run: `curl -fs http://localhost:3005` — Grafana responds
 - [ ] Verify all 8 departments load in browser
 - [ ] Confirm AI chat connects to providers (or falls back correctly offline)
 - [ ] Verify Prometheus scraping all targets

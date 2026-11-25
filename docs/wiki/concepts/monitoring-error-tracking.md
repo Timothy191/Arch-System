@@ -1,13 +1,14 @@
 ---
 title: Monitoring and Error Tracking
 created: 2026-05-15
-updated: 2026-11-17
+updated: 2026-11-25
 type: concept
 tags: [infrastructure, system, application, concept, observability]
 sources:
   [
     apps/portal/components/observability/ObservabilityConsole.tsx,
-    infra/docker/compose.observability.yml,
+    infra/monitoring/docker-compose.yml,
+    apps/portal/instrumentation.ts,
   ]
 confidence: high
 ---
@@ -21,7 +22,7 @@ The portal pairs a **Native Observability & CI Console** (`/admin/observability`
 Built on `@repo/contract/schemas/observability-layer.schema`, the portal exposes authenticated dual-mode BFF routes (`/api/observability/summary` and `/api/observability/ci`) backing `ObservabilityConsole.tsx`:
 
 - **Golden Signals**: Latency (p50/p95/p99), traffic (req/s), error ratio, and saturation across portal routes, Supabase, and Redis.
-- **Container & Collector Health**: Live health checks for `plantcor-otel-collector` (`:4318` / `:13133`), `plantcor-prometheus` (`:9090`), and `plantcor-grafana` (`:3001`, configured with `GF_DEFAULT_THEME=light`).
+- **Container & Collector Health**: Live health checks for `plantcor-otel-collector` (`:4318` / `:13133`), `plantcor-prometheus` (`:9090`), and `plantcor-grafana` (`:3005`, configured with `GF_DEFAULT_THEME=light`).
 - **CI Pipeline & 6-Check Gatekeeper Telemetry**: Displays Woodpecker CI pipeline status alongside the local 28-gate `pnpm agent:verify` + `pnpm ci:gatekeeper` status checks (`Quality Gates`, `Policy Check`, `Dead Code Detection`, `Dependency Lint`, `Security Audit`, `Tier 2 Review Policy Check`).
 - **VibeMon Multi-Agent Pulse (`/api/health/vibemon`)**: Tracks active coding agent sessions, task budgets, and Work State v1 handoffs in `AgenticMonitor.tsx`.
 
@@ -51,24 +52,28 @@ Filters: password, token strings from error reports.
 
 ### Server (Node.js)
 
-`instrumentation.ts` — Server-side Sentry initialization:
+`sentry.server.config.ts` — Server-side Sentry initialization (DSN resolved from `SENTRY_DSN`, falling back to `NEXT_PUBLIC_SENTRY_DSN`), including header scrubbing for `authorization`, `cookie`, and `x-internal-secret`.
+
+`instrumentation.ts` loads that file during `register()` and forwards request errors:
 
 ```typescript
-import * as Sentry from '@sentry/nextjs';
-
-if (process.env.NEXT_RUNTIME === 'nodejs') {
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    tracesSampleRate: 1.0,
-  });
+async function initializeSentry(): Promise<void> {
+  if (!resolveSentryDsn()) return;
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./sentry.server.config');
+  } else if (process.env.NEXT_RUNTIME === 'edge') {
+    await import('./sentry.edge.config');
+  }
 }
-
-export const onRequestError = Sentry.captureRequestError;
 ```
 
 ### Edge Runtime
 
-Same `instrumentation.ts` file handles edge runtime via `process.env.NEXT_RUNTIME === "edge"` check.
+`sentry.edge.config.ts` mirrors the Node config (same DSN fallback, sample rate, and header scrubbing) and is loaded from the same `register()` branch.
+
+### Request error forwarding
+
+`onRequestError` calls `Sentry.captureRequestError(err, { path, method, headers }, { routerKind, routePath, routeType })` whenever a DSN is configured, before the structured Pino log and `system_logs` persistence.
 
 ### next.config.mjs
 
@@ -80,11 +85,13 @@ export default withSentryConfig(nextConfig, {
   project: process.env.SENTRY_PROJECT,
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  tunnelRoute: '/monitoring',
+  tunnelRoute: '/api/sentry-proxy',
   hideSourceMaps: true,
   disableLogger: true,
 });
 ```
+
+The tunnel rewrite is injected by `withSentryConfig` itself; there is no hand-written route handler for `/api/sentry-proxy`.
 
 Environment variables:
 
@@ -186,74 +193,76 @@ Copernicus STAC endpoint: `https://catalogue.dataspace.copernicus.eu/stac`
 
 No API key required. Responses cached via Next.js `revalidate: 3600`.
 
-## Prometheus & Grafana (Phase 3)
+## Prometheus & Grafana (Local Observability Stack)
 
-The Docker Compose stack includes a full metrics collection and visualization layer added in Phase 3.
+There is exactly **one** local observability stack: `infra/monitoring/docker-compose.yml` (Compose project `plantcor-observability`). The former `infra/docker/compose.observability.yml` stack was removed to eliminate duplicate Grafana/Prometheus containers and port collisions.
 
 ### Services
 
-| Service    | Port   | Purpose                       |
-| ---------- | ------ | ----------------------------- |
-| Prometheus | `9090` | Metrics scraping and alerting |
-| Grafana    | `9091` | Dashboard visualization       |
+| Service                 | Host port(s)                                  | Purpose                                          |
+| ----------------------- | --------------------------------------------- | ------------------------------------------------ |
+| OpenTelemetry Collector | `4317` (gRPC), `4318` (HTTP), `8889`, `13133` | OTLP intake → Tempo traces / Prometheus metrics  |
+| Prometheus              | `9090`                                        | Metrics scraping, recording and alert rules      |
+| Grafana                 | `3005`                                        | Light-mode dashboards (`GF_DEFAULT_THEME=light`) |
+| Alertmanager            | `9093`                                        | Alert routing (default `null` receiver)          |
+| cAdvisor                | `8082`                                        | Container CPU/memory/IO metrics                  |
+| Loki                    | `3100`                                        | Log aggregation                                  |
+| Tempo                   | `3200`                                        | Distributed traces (24h local retention)         |
 
-Both are started automatically via `./scripts/deploy.sh local`.
+Start or stop the core stack with `pnpm monitor:grafana` / `pnpm monitor:grafana-stop` (also wired into `./scripts/deploy.sh local` and `make up-monitoring`). The Woodpecker CI pair is available under the optional `ci` profile (`docker compose -f infra/monitoring/docker-compose.yml --profile ci up -d`).
 
 ### Prometheus Configuration
 
-`monitoring/prometheus.yml` defines scrape targets:
+`monitoring/prometheus.yml` is the canonical local scrape config. It loads alert rules from `infra/observability/prometheus-rules/*.yaml` and scrapes:
 
-```yaml
-scrape_configs:
-  - job_name: portal
-    static_configs:
-      - targets: ['portal:3000']
-    metrics_path: /api/metrics
+- `prometheus` (`localhost:9090`), `cadvisor` (`:8080`), `otel-collector` (`:8889`), `loki` (`:3100`), `tempo` (`:3200`)
+- `plantcor-portal` (`host.docker.internal:3000/api/metrics`)
+- `plantcor-portal-control-room` (`host.docker.internal:3000/api/metrics/prometheus`)
+- `kiro-agent` and `langfuse` (optional local AI tooling)
 
-  - job_name: redis
-    static_configs:
-      - targets: ['redis-exporter:9121']
-
-  - job_name: postgres
-    static_configs:
-      - targets: ['postgres-exporter:9187']
-```
+Supabase Cloud privileged metrics are intentionally disabled locally: the job needs a mounted service-role password file. The cluster/Kubernetes variant lives in `infra/observability/prometheus.yml` (pod service discovery + Supabase privileged scraping).
 
 ### Key Metrics Tracked
 
-| Metric                          | Type      | Description                           |
-| ------------------------------- | --------- | ------------------------------------- |
-| `http_request_duration_seconds` | Histogram | API route latency                     |
-| `ai_provider_requests_total`    | Counter   | Requests per AI provider              |
-| `ai_provider_errors_total`      | Counter   | Failover events                       |
-| `ai_cache_hit_ratio`            | Gauge     | Redis cache hit rate for AI responses |
-| `db_query_duration_seconds`     | Histogram | PostgreSQL query latency              |
-| `active_websocket_connections`  | Gauge     | Live real-time subscribers            |
+| Metric                                                    | Type      | Description                            |
+| --------------------------------------------------------- | --------- | -------------------------------------- |
+| `control_room_api_requests_total`                         | Counter   | Portal API requests by endpoint/status |
+| `control_room_api_response_time_seconds_bucket`           | Histogram | API latency                            |
+| `control_room_shift_closeout_duration_seconds_bucket`     | Histogram | Shift closeout latency                 |
+| `control_room_scada_connection_status`                    | Gauge     | SCADA/FUXA connectivity (1/0)          |
+| `control_room_data_integrity_score`                       | Gauge     | Data integrity score (0–100)           |
+| `portal_cache_hits_total{source="l1"\|"l2"}`              | Counter   | Cache hits by tier                     |
+| `portal_cache_misses_total` / `portal_cache_errors_total` | Counter   | Cache misses and Redis errors          |
+| `portal_cache_latency_ms{metric="avg"\|"p95"}`            | Gauge     | Cache latency                          |
+| `node_event_loop_delay_ms{quantile=…}`                    | Gauge     | Node.js 24 event-loop delay            |
+| `node_v8_heap_used_bytes`                                 | Gauge     | V8 heap usage                          |
 
 ### Grafana Dashboards
 
-Access at `http://localhost:9091` (admin / admin on first run).
+Access at `http://localhost:3005` (admin / admin on first run; override with `GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` in `infra/monitoring/.env`). Dashboards are provisioned from `infra/observability/grafana-dashboards/`:
 
-Pre-configured dashboards:
-
-- **Portal Overview** — request rates, error rates, response time p50/p95/p99
-- **AI Service** — provider usage, failover frequency, cache hit rate
-- **Database** — query latency, connection pool usage, slow queries
-- **Redis** — hit rate, memory usage, evictions
+- **Overview** — stack health and request rates
+- **Control Room** — shift closeout p50/p95, SCADA p95, data integrity, active alerts, orphaned records, API request rate
+- **Arch Portal** — golden-signal and Inngest job panels
+- **Cache** — L1/L2 hit ratios and Redis latency
+- **Supabase Cluster** — database health
 
 ### Alerting Rules
 
-Prometheus alert thresholds defined in `monitoring/prometheus.yml`:
+Rules live in `infra/observability/prometheus-rules/alerts.yaml` and `cache-alerts.yaml`, and reference only metrics the portal actually emits (e.g. `HighAPIErrorRate`, `ShiftCloseoutSlow`, `SCADAConnectionDown`, `CacheMissRateTooHigh`, `HighAPILatency`).
 
-| Alert                | Condition                      | Severity |
-| -------------------- | ------------------------------ | -------- |
-| `HighErrorRate`      | HTTP 5xx rate > 5% for 5min    | critical |
-| `SlowAPIResponse`    | p95 latency > 2s for 5min      | warning  |
-| `AIProviderFailover` | Failover events > 3 in 1min    | warning  |
-| `DBSlowQuery`        | p99 query > 200ms for 10min    | warning  |
-| `RedisCacheMiss`     | Cache hit rate < 60% for 15min | info     |
+`infra/observability/alertmanager.yml` ships with a `null` default receiver so the stack starts without credentials. To deliver notifications, copy it to `infra/observability/alertmanager.local.yml` (gitignored), uncomment the Slack/PagerDuty receivers with real credentials, and set `ALERTMANAGER_CONFIG_PATH` before starting the stack. Alertmanager does not expand environment variables.
 
-See [[on-premises-deployment]] for production monitoring setup and alert routing.
+Alert-response steps are documented in `docs/operations/alert-response-procedures.md`.
+
+### SLO Snapshot Persistence
+
+In-memory uptime/alert state is periodically persisted to the `slo_metrics` table (migration `092_slo_monitoring.sql`):
+
+- `GET /api/cron/observability-slo` (`*/15 * * * *` in `vercel.json`) probes Supabase, Redis, FUXA, and the Node runtime, appends heartbeat ticks, and writes one row per target (`slo_name = uptime:<targetId>`, target `99.9%`, 24h period, `success`/`warning`/`breached` status, remaining error budget).
+- Writes use the service-role client and are best-effort: failures are returned in the response payload but never break observability reads.
+- `/api/admin/observability` also snapshots the passive samples it already collects (deduplicated to one write per target per 10 minutes).
+- Authenticated users can read history directly; the `current_slo_status` view returns the latest value/status per SLO.
 
 ## Related
 

@@ -51,8 +51,8 @@
 
 #### Control-Room & Operations
 
-- **Dashboard not updating**: Verify the `infra/docker/compose.observability.yml` stack
-  status (OpenTelemetry Collector, Prometheus, Grafana) and check FUXA configurations/alerts.
+- **Dashboard not updating**: Verify the `infra/monitoring/docker-compose.yml` stack
+  status (`pnpm monitor:grafana`) — OpenTelemetry Collector, Prometheus, Grafana — and check FUXA configurations/alerts.
 - **Pin reset procedure**: See [Pin Reset Runbook](operations/pin-reset-procedure.md).
 - **Shift closeout**: Refer to [Shift Closeout Runbook](operations/shift-closeout-runbook.md).
 - **SCADA/FUXA Troubleshooting**: Refer to [FUXA Troubleshooting Guide](operations/fuxa-troubleshooting.md).

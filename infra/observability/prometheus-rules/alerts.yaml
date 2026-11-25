@@ -1,56 +1,205 @@
 groups:
-  - name: application_alerts
+  # Metrics emitted by apps/portal/lib/observability/metrics.ts (Prometheus registry
+  # exposed on /api/metrics and /api/metrics/prometheus).
+  - name: control_room_alerts
+    interval: 30s
     rules:
-      - alert: HighErrorRate
-        expr: job:request_error_rate{job="portal"} > 0.05
+      - alert: SCADAConnectionDown
+        expr: control_room_scada_connection_status == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: operations
+        annotations:
+          summary: 'SCADA system disconnected'
+          description: 'FUXA SCADA system has been disconnected for 5 minutes. Machine status updates may be delayed.'
+
+      - alert: ShiftCloseoutSlow
+        expr: histogram_quantile(0.95, rate(control_room_shift_closeout_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: 'Shift closeout operations are slow'
+          description: '95th percentile shift closeout duration is {{ $value }}s (threshold: 30s)'
+
+      - alert: ShiftCloseoutVerySlow
+        expr: histogram_quantile(0.95, rate(control_room_shift_closeout_duration_seconds_bucket[5m])) > 60
         for: 2m
         labels:
           severity: critical
+          team: operations
+        annotations:
+          summary: 'Shift closeout operations are very slow'
+          description: '95th percentile shift closeout duration is {{ $value }}s (threshold: 60s)'
+
+      - alert: DataIntegrityScoreLow
+        expr: control_room_data_integrity_score < 70
+        for: 10m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: 'Data integrity score is low'
+          description: 'Data integrity score is {{ $value }}% (threshold: 70%). Review data integrity issues.'
+
+      - alert: ShiftCompletenessRateLow
+        expr: control_room_shift_completeness_rate < 80
+        for: 30m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: 'Shift completeness rate is low'
+          description: 'Shift completeness rate is {{ $value }}% (threshold: 80%). Machines may be missing entries.'
+
+      - alert: OrphanedRecordsDetected
+        expr: control_room_orphaned_records_count > 0
+        for: 10m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: 'Orphaned records detected'
+          description: '{{ $value }} orphaned records found in {{ $labels.table_name }}. Review data integrity.'
+
+      - alert: HighOrphanedRecordCount
+        expr: sum(control_room_orphaned_records_count) > 50
+        for: 5m
+        labels:
+          severity: critical
+          team: operations
+        annotations:
+          summary: 'High number of orphaned records'
+          description: '{{ $value }} orphaned records detected. Immediate data quality review required.'
+
+      - alert: HighAlertCount
+        expr: sum(control_room_active_alerts) > 10
+        for: 15m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: 'High number of active alerts'
+          description: '{{ $value }} active alerts in Control Room. Review and acknowledge as needed.'
+
+      - alert: HighAPIErrorRate
+        expr: rate(control_room_api_requests_total{status_code=~"5.."}[5m]) / rate(control_room_api_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: 'High API error rate'
+          description: 'API error rate is {{ $value | humanizePercentage }} (threshold: 5%). Check application logs.'
+
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(control_room_api_response_time_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: 'High API P95 latency'
+          description: 'P95 API latency is {{ $value }}s (threshold: 1s).'
+
+      - alert: LowHourlyLoadsUpdateRate
+        expr: rate(control_room_hourly_loads_update_total[1h]) < 0.1
+        for: 2h
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: 'Low hourly loads update rate'
+          description: 'Hourly loads are not being updated regularly. Check operator activity.'
+
+  - name: control_room_info
+    interval: 5m
+    rules:
+      - alert: ShiftCloseoutSuccess
+        expr: increase(control_room_shift_closeout_total{success="true"}[1h]) > 0
+        labels:
+          severity: info
+          team: operations
+        annotations:
+          summary: 'Shift closeout successful'
+          description: '{{ $value }} shifts closed successfully in the last hour.'
+
+  # Infrastructure alerts. Metric names must match what the portal actually
+  # emits (see /api/metrics); dead metric references fail silently otherwise.
+  - name: infrastructure_alerts
+    rules:
+      - alert: SupabaseMetricsScrapeDown
+        expr: up{job="supabase-cloud-metrics"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: 'Supabase metrics unreachable'
+          description: 'Prometheus cannot scrape the Supabase privileged metrics endpoint.'
+
+      - alert: PortalScrapeDown
+        expr: up{job=~"plantcor-portal.*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: 'Portal metrics unreachable'
+          description: 'Prometheus cannot scrape {{ $labels.job }} ({{ $labels.instance }}).'
+
+  - name: application_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(control_room_api_requests_total{status_code=~"5.."}[5m]) / rate(control_room_api_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
         annotations:
           summary: High HTTP Error Rate on Portal
           description: '{{ $value | humanizePercentage }} of requests are failing.'
 
       - alert: HighLatency
-        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        expr: histogram_quantile(0.95, rate(control_room_api_response_time_seconds_bucket[5m])) > 1.0
         for: 5m
         labels:
           severity: warning
+          team: platform
         annotations:
           summary: High P95 Latency
           description: 'P95 latency is over 1 second (current: {{ $value }}s).'
 
-      - alert: DatabaseConnectionIssues
-        expr: up{job="database"} == 0
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          summary: Database Down
-          description: 'Prometheus cannot scrape database metrics.'
-
       - alert: SCADAStreamAnomaly
-        expr: zscore(scada_machine_telemetry_latency_seconds[5m]) > 3
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: SCADA Stream Latency Anomaly
-          description: 'Machine telemetry latency exceeded 3 standard deviations (current: {{ $value }}s).'
-
-      - alert: RedisConnectivityDrop
-        expr: redis_up == 0
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          summary: Redis L2 Cache Cluster Down
-          description: 'Redis L2 cache cluster is unreachable; cache functionality impaired.'
-
-      - alert: CacheEffectivenessDegraded
-        expr: (portal_cache_hits_total{source="l2"} / max by (source) (portal_cache_hits_total)) < 0.7
+        expr: >-
+          histogram_quantile(
+            0.95,
+            rate(control_room_scada_fetch_machines_duration_seconds_bucket[5m])
+          ) > 3 * avg_over_time(
+            (histogram_quantile(
+              0.95,
+              rate(control_room_scada_fetch_machines_duration_seconds_bucket[5m])
+            ))[1h:5m]
+          )
         for: 5m
         labels:
           severity: warning
+          team: operations
+        annotations:
+          summary: SCADA Stream Latency Anomaly
+          description: 'Machine telemetry fetch p95 exceeded 3x its 1h average (current: {{ $value }}s).'
+
+      - alert: CacheEffectivenessDegraded
+        expr: >-
+          sum(rate(portal_cache_hits_total{source="l2"}[5m]))
+          /
+          sum(rate(portal_cache_hits_total[5m])) < 0.7
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
         annotations:
           summary: L2 Cache Hit Rate Below 70%
           description: 'L2 Redis cache hit rate has dropped below 70% threshold. Consider reviewing cache TTL or data volume.'

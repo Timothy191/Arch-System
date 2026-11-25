@@ -105,7 +105,7 @@ A preconfigured `.devcontainer/devcontainer.json` (Node 24, Rust 1.85.0, Python 
 
 - **[docs/DESIGN.md](docs/DESIGN.md)**: Light-mode OKLCH design system, Metallic Gold (`#d4af37`) brand tokens, liquid-glass surfaces, and typography scale.
 - **[docs/PRODUCT.md](docs/PRODUCT.md)**: Product strategy, industrial operator personas, and departmental workflows.
-- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Vercel production (`arch-system`), Docker observability stack (`compose.observability.yml`), and Rocky Linux/RHEL deployment guide.
+- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Vercel production (`arch-system`), Docker observability stack (`infra/monitoring/docker-compose.yml`), and Rocky Linux/RHEL deployment guide.
 - **[docs/ONBOARDING.md](docs/ONBOARDING.md)**: Developer onboarding checklist.
 - **[.github/SECURITY.md](.github/SECURITY.md)** & **[docs/SECURITY.md](docs/SECURITY.md)**: Security policy, Private Vulnerability Reporting, and enforced controls.
 - **[CHANGELOG.md](CHANGELOG.md)**: Release history and production milestones.

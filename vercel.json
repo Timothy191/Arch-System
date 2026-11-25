@@ -26,6 +26,10 @@
     {
       "path": "/api/cron/webhook-deliveries",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/observability-slo",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
