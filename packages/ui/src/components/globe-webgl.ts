@@ -9,6 +9,8 @@ export interface WebGLGlobeRenderOptions {
 
 export interface WebGLGlobeRenderer {
   readonly setTextureImage: (image: HTMLImageElement) => void;
+  readonly setOverlayTextureImage: (image: HTMLImageElement) => void;
+  readonly clearOverlayTexture: () => void;
   readonly render: (options: WebGLGlobeRenderOptions) => boolean;
   readonly dispose: () => void;
 }
@@ -23,7 +25,7 @@ void main() {
 }
 `;
 
-const FRAGMENT_SHADER_SOURCE = `
+export const GLOBE_FRAGMENT_SHADER_SOURCE = `
 precision highp float;
 
 uniform vec2 u_center;
@@ -31,7 +33,9 @@ uniform float u_radiusPx;
 uniform float u_cameraDist;
 uniform vec2 u_orbit;
 uniform sampler2D u_texture;
+uniform sampler2D u_overlayTexture;
 uniform float u_hasTexture;
+uniform float u_hasOverlay;
 
 const float PI = 3.14159265359;
 const float TWO_PI = 6.28318530718;
@@ -70,21 +74,31 @@ void main() {
   float lat = asin(clamp(pWorld.y, -1.0, 1.0));
   vec2 uv = vec2(clamp(0.5 + lon / TWO_PI, 0.001, 0.999), clamp(0.5 + lat / PI, 0.001, 0.999));
 
-  vec3 lightDir = normalize(vec3(-0.46, 0.56, 0.69));
-  float lambert = max(dot(nCam, lightDir), 0.0);
+  vec3 lightDir = normalize(vec3(-0.42, 0.54, 0.73));
+  vec3 fillDir = normalize(vec3(0.58, -0.22, 0.78));
+  float wrapDiffuse = dot(nCam, lightDir) * 0.5 + 0.5;
+  float fillDiffuse = max(dot(nCam, fillDir), 0.0);
   vec3 halfVec = normalize(lightDir + vec3(0.0, 0.0, 1.0));
   float spec = pow(max(dot(nCam, halfVec), 0.0), 28.0);
   float fresnel = pow(1.0 - max(nCam.z, 0.0), 2.8);
 
   vec3 oceanBase = vec3(0.11, 0.25, 0.43);
   vec3 reliefHint = oceanBase + vec3(0.08, 0.14, 0.2) * smoothstep(-0.2, 0.6, sin(lon * 4.0) * cos(lat * 3.0));
-  vec3 texColor = u_hasTexture > 0.5 ? texture2D(u_texture, uv).rgb : reliefHint;
+  vec3 baseColor = u_hasTexture > 0.5 ? texture2D(u_texture, uv).rgb : reliefHint;
+  vec3 texColor = baseColor;
+  if (u_hasOverlay > 0.5) {
+    vec3 overlayColor = texture2D(u_overlayTexture, uv).rgb;
+    float overlayPeak = max(overlayColor.r, max(overlayColor.g, overlayColor.b));
+    float overlayMask = smoothstep(0.035, 0.095, overlayPeak);
+    texColor = mix(baseColor, overlayColor, overlayMask);
+  }
 
-  // Lift contrast slightly for daylight glass clarity
-  vec3 vibrantColor = clamp((texColor - 0.5) * 1.12 + 0.54, 0.0, 1.0);
-  vec3 litColor = vibrantColor * (0.58 + 0.54 * lambert);
-  litColor += vec3(0.96, 0.98, 1.0) * spec * 0.16;
-  litColor = mix(litColor, vec3(0.68, 0.85, 0.98), fresnel * 0.45);
+  // Wrap-around daylight lighting & lifted deep-ocean floor so neither hemisphere goes black
+  vec3 liftedTex = max(texColor, vec3(0.06, 0.16, 0.32));
+  vec3 vibrantColor = clamp((liftedTex - 0.48) * 1.08 + 0.52, 0.0, 1.0);
+  vec3 litColor = vibrantColor * (0.76 + 0.24 * wrapDiffuse + 0.14 * fillDiffuse);
+  litColor += vec3(0.96, 0.98, 1.0) * spec * 0.14;
+  litColor = mix(litColor, vec3(0.72, 0.88, 0.99), fresnel * 0.42);
   litColor += vec3(0.83, 0.69, 0.22) * fresnel * 0.12;
 
   gl_FragColor = vec4(clamp(litColor, 0.0, 1.0), edgeAlpha);
@@ -129,7 +143,7 @@ export function createWebGLGlobeRenderer(canvas: HTMLCanvasElement): WebGLGlobeR
   if (!gl || typeof gl.createProgram !== 'function') return null;
 
   const vertexShader = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER_SOURCE);
-  const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE);
+  const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, GLOBE_FRAGMENT_SHADER_SOURCE);
   if (!vertexShader || !fragmentShader) {
     if (vertexShader) gl.deleteShader(vertexShader);
     if (fragmentShader) gl.deleteShader(fragmentShader);
@@ -156,9 +170,11 @@ export function createWebGLGlobeRenderer(canvas: HTMLCanvasElement): WebGLGlobeR
 
   const quadBuffer = gl.createBuffer();
   const texture = gl.createTexture();
-  if (!quadBuffer || !texture) {
+  const overlayTexture = gl.createTexture();
+  if (!quadBuffer || !texture || !overlayTexture) {
     if (quadBuffer) gl.deleteBuffer(quadBuffer);
     if (texture) gl.deleteTexture(texture);
+    if (overlayTexture) gl.deleteTexture(overlayTexture);
     gl.deleteProgram(program);
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
@@ -174,36 +190,55 @@ export function createWebGLGlobeRenderer(canvas: HTMLCanvasElement): WebGLGlobeR
   const cameraDistLoc = gl.getUniformLocation(program, 'u_cameraDist');
   const orbitLoc = gl.getUniformLocation(program, 'u_orbit');
   const textureLoc = gl.getUniformLocation(program, 'u_texture');
+  const overlayTextureLoc = gl.getUniformLocation(program, 'u_overlayTexture');
   const hasTextureLoc = gl.getUniformLocation(program, 'u_hasTexture');
+  const hasOverlayLoc = gl.getUniformLocation(program, 'u_hasOverlay');
 
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  for (const tex of [texture, overlayTexture]) {
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  }
 
   const glContext = gl;
   const activateProgram = glContext.useProgram.bind(glContext);
   let hasTextureUploaded = false;
+  let hasOverlayUploaded = false;
+
+  const uploadImageToTexture = (targetTexture: WebGLTexture, image: HTMLImageElement): boolean => {
+    if (image.naturalWidth === 0 || image.naturalHeight === 0) return false;
+    try {
+      glContext.bindTexture(glContext.TEXTURE_2D, targetTexture);
+      glContext.pixelStorei(glContext.UNPACK_FLIP_Y_WEBGL, 1);
+      glContext.texImage2D(
+        glContext.TEXTURE_2D,
+        0,
+        glContext.RGBA,
+        glContext.RGBA,
+        glContext.UNSIGNED_BYTE,
+        image
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   return {
     setTextureImage: (image: HTMLImageElement) => {
-      if (image.naturalWidth === 0 || image.naturalHeight === 0) return;
-      try {
-        glContext.bindTexture(glContext.TEXTURE_2D, texture);
-        glContext.pixelStorei(glContext.UNPACK_FLIP_Y_WEBGL, 1);
-        glContext.texImage2D(
-          glContext.TEXTURE_2D,
-          0,
-          glContext.RGBA,
-          glContext.RGBA,
-          glContext.UNSIGNED_BYTE,
-          image
-        );
+      if (uploadImageToTexture(texture, image)) {
         hasTextureUploaded = true;
-      } catch {
-        // Ignore cross-origin or decode upload failure; keeps fallback appearance
       }
+    },
+    setOverlayTextureImage: (image: HTMLImageElement) => {
+      if (uploadImageToTexture(overlayTexture, image)) {
+        hasOverlayUploaded = true;
+      }
+    },
+    clearOverlayTexture: () => {
+      hasOverlayUploaded = false;
     },
     render: ({ widthPx, heightPx, dpr, orbit }: WebGLGlobeRenderOptions) => {
       const physWidth = Math.max(1, Math.round(widthPx * dpr));
@@ -229,7 +264,11 @@ export function createWebGLGlobeRenderer(canvas: HTMLCanvasElement): WebGLGlobeR
       glContext.activeTexture(glContext.TEXTURE0);
       glContext.bindTexture(glContext.TEXTURE_2D, texture);
       glContext.uniform1i(textureLoc, 0);
+      glContext.activeTexture(glContext.TEXTURE1);
+      glContext.bindTexture(glContext.TEXTURE_2D, overlayTexture);
+      glContext.uniform1i(overlayTextureLoc, 1);
       glContext.uniform1f(hasTextureLoc, hasTextureUploaded ? 1 : 0);
+      glContext.uniform1f(hasOverlayLoc, hasOverlayUploaded ? 1 : 0);
 
       glContext.drawArrays(glContext.TRIANGLE_STRIP, 0, 4);
       return hasTextureUploaded;
@@ -237,6 +276,7 @@ export function createWebGLGlobeRenderer(canvas: HTMLCanvasElement): WebGLGlobeR
     dispose: () => {
       try {
         glContext.deleteTexture(texture);
+        glContext.deleteTexture(overlayTexture);
         glContext.deleteBuffer(quadBuffer);
         glContext.deleteProgram(program);
         glContext.deleteShader(vertexShader);

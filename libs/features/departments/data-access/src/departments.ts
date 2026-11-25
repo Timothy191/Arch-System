@@ -213,7 +213,8 @@ export const DEPARTMENTS: Department[] = [
     displayName: 'Database',
     route: '/database',
     icon: 'Database',
-    description: 'PostgreSQL schema definitions, migrations, and live telemetry panels',
+    description:
+      'Cross-department PostgreSQL 17 registry, visual ER schemas, master data panels & readiness reports',
     color: 'emerald',
     type: 'standard',
     status: 'active',
@@ -223,6 +224,7 @@ export const DEPARTMENTS: Department[] = [
     actions: [
       { label: 'Schemas', href: '/database/schemas' },
       { label: 'Panels', href: '/database/panels' },
+      { label: 'Reports', href: '/database/reports' },
     ],
   },
   {

@@ -69,7 +69,7 @@ describe('OverviewPage & SystemArchitecture (/overview)', () => {
       'Next.js 16',
       'React 19',
       'TypeScript 5.8',
-      'Supabase RLS (168 Migrations)',
+      'Supabase RLS (179 Migrations)',
       'PostgreSQL 17',
       'Redis Cluster',
       'Tailwind + OKLCH',

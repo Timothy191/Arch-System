@@ -749,7 +749,9 @@ export default function DatabaseSchema() {
         <Card className="p-4">
           <div className="mb-2 flex items-center gap-2">
             <Key className="h-5 w-5 text-accent-blue" />
-            <span className="font-medium text-sm text-text-heading">213 Versioned Migrations</span>
+            <span className="font-medium text-sm text-text-heading">
+              179 Migrations (Head #229)
+            </span>
           </div>
           <p className="text-text-secondary text-xs">
             Supabase PostgreSQL 17 schema managed via zero-padded declarative migrations & atomic

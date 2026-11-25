@@ -14,6 +14,7 @@ describe('DatabaseSchemasPage (/database/schemas) & Visual ER Diagram', () => {
     render(jsx);
 
     expect(screen.getByText('100% RLS Enabled')).toBeInTheDocument();
+    expect(screen.getByText(/Migration #229/i)).toBeInTheDocument();
     expect(screen.getByText('Database Schema')).toBeInTheDocument();
     expect(screen.getByText('Table Relationships')).toBeInTheDocument();
     expect(
@@ -67,14 +68,23 @@ describe('DatabaseSchemasPage (/database/schemas) & Visual ER Diagram', () => {
 
     const searchInput = screen.getByLabelText('Search database tables');
     fireEvent.change(searchInput, { target: { value: 'tire' } });
-    expect(screen.getByText(/Table Definitions \(2 of 20\)/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`Table Definitions \\(2 of ${ER_TABLES.length}\\)`, 'i'))
+    ).toBeInTheDocument();
 
     fireEvent.change(searchInput, { target: { value: '' } });
     fireEvent.click(screen.getByRole('button', { name: 'Access Control & Gate' }));
-    expect(screen.getByText(/Table Definitions \(4 of 20\)/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`Table Definitions \\(5 of ${ER_TABLES.length}\\)`, 'i'))
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /All Domains/i }));
-    expect(screen.getByText(/Table Definitions \(20 of 20\)/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        new RegExp(`Table Definitions \\(${ER_TABLES.length} of ${ER_TABLES.length}\\)`, 'i')
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText(/179 Migrations \(Head #229\)/i)).toBeInTheDocument();
 
     const focusBtn = screen.getByRole('button', { name: /All Links/i });
     fireEvent.click(focusBtn);

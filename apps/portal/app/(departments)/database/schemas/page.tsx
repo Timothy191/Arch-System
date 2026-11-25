@@ -29,7 +29,7 @@ export default async function DatabaseSchemasPage() {
           </Badge>
           <Badge variant="blue" size="sm">
             <ShieldCheck className="mr-1 inline h-3 w-3" />
-            213 Migrations
+            Migration #229 · 179 SQL Files
           </Badge>
         </div>
       </div>

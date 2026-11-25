@@ -65,9 +65,10 @@ describe('Database Admin Department Route Module', () => {
       expect(screen.getByText('Supabase PostgreSQL 17 Operations Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Supabase Live Connected')).toBeInTheDocument();
       expect(screen.getByText('SUPABASE CLUSTER METRICS')).toBeInTheDocument();
-      expect(screen.getByText('122')).toBeInTheDocument();
-      expect(screen.getByText('Migration #209')).toBeInTheDocument();
-      expect(screen.getByText('Migration #186')).toBeInTheDocument();
+      expect(screen.getByText('522')).toBeInTheDocument();
+      expect(screen.getByTestId('department-readiness-matrix')).toBeInTheDocument();
+      expect(screen.getByText('Migration #229')).toBeInTheDocument();
+      expect(screen.getByText('Migration #220')).toBeInTheDocument();
       expect(screen.getByTestId('redis-insight-workbench-card')).toBeInTheDocument();
       expect(screen.getByText('Open RedisInsight (:5540)')).toBeInTheDocument();
       expect(screen.getByText('drilling:telemetry:stream')).toBeInTheDocument();
@@ -99,7 +100,7 @@ describe('Database Admin Department Route Module', () => {
       render(jsx);
 
       expect(screen.getByText('Supabase Standby')).toBeInTheDocument();
-      expect(screen.getByText('Standby')).toBeInTheDocument();
+      expect(screen.getAllByText('Standby').length).toBeGreaterThanOrEqual(2);
     });
   });
 

@@ -22,12 +22,17 @@ import {
   targetOrbitForLatLon,
 } from './globe-math';
 import { type ProjectedPinHit, renderGlobe3DFrame } from './globe-renderer';
-import { createWebGLGlobeRenderer, type WebGLGlobeRenderer } from './globe-webgl';
+import {
+  createWebGLGlobeRenderer,
+  GLOBE_FRAGMENT_SHADER_SOURCE,
+  type WebGLGlobeRenderer,
+} from './globe-webgl';
 import type { Panel } from './hero-types';
 
 export {
   buildEarthSurfaceDots,
   formatCoordinates,
+  GLOBE_FRAGMENT_SHADER_SOURCE,
   type GlobePin,
   isLandCoordinate,
   latLonToUnitVec3,
@@ -151,7 +156,7 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
   const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [isDraggingUI, setIsDraggingUI] = useState(false);
-  const [imageryLayer, setImageryLayer] = useState<SatelliteImageryLayer>('viirs');
+  const [imageryLayer, setImageryLayer] = useState<SatelliteImageryLayer>('blue-marble');
   const [feedStatus, setFeedStatus] = useState<SatelliteFeedStatus>('wireframe');
 
   const selectedIdRef = useRef<string | null>(selectedPinId);
@@ -191,19 +196,23 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
     const uploadImageryUrl = (
       srcUrl: string,
       nextStatus: SatelliteFeedStatus,
-      revokeUrlAfterLoad: boolean
+      options: { readonly isOverlay: boolean; readonly revokeUrlAfterLoad: boolean }
     ) => {
       const img = new Image();
       img.onload = () => {
         if (isCancelled) {
-          if (revokeUrlAfterLoad && typeof URL?.revokeObjectURL === 'function') {
+          if (options.revokeUrlAfterLoad && typeof URL?.revokeObjectURL === 'function') {
             URL.revokeObjectURL(srcUrl);
           }
           return;
         }
-        webglRendererRef.current?.setTextureImage(img);
+        if (options.isOverlay) {
+          webglRendererRef.current?.setOverlayTextureImage(img);
+        } else {
+          webglRendererRef.current?.setTextureImage(img);
+        }
         setFeedStatus(nextStatus);
-        if (revokeUrlAfterLoad && typeof URL?.revokeObjectURL === 'function') {
+        if (options.revokeUrlAfterLoad && typeof URL?.revokeObjectURL === 'function') {
           URL.revokeObjectURL(srcUrl);
           if (activeObjectUrl === srcUrl) {
             activeObjectUrl = null;
@@ -213,9 +222,14 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
       img.src = srcUrl;
     };
 
-    uploadImageryUrl(BUNDLED_BLUE_MARBLE_SRC, 'blue-marble', false);
+    uploadImageryUrl(BUNDLED_BLUE_MARBLE_SRC, 'blue-marble', {
+      isOverlay: false,
+      revokeUrlAfterLoad: false,
+    });
 
-    if (imageryLayer === 'viirs' && typeof fetch === 'function') {
+    if (imageryLayer === 'blue-marble') {
+      webglRendererRef.current?.clearOverlayTexture();
+    } else if (imageryLayer === 'viirs' && typeof fetch === 'function') {
       void fetch('/api/hub/earth-imagery?layer=viirs', { signal: abortController?.signal })
         .then(async (response) => {
           if (!response.ok || isCancelled) return;
@@ -226,11 +240,10 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
           if (isCancelled || typeof URL?.createObjectURL !== 'function') return;
           const objectUrl = URL.createObjectURL(blob);
           activeObjectUrl = objectUrl;
-          uploadImageryUrl(
-            objectUrl,
-            headerSource === 'nasa-gibs' ? 'nasa-viirs' : 'blue-marble',
-            true
-          );
+          uploadImageryUrl(objectUrl, headerSource === 'nasa-gibs' ? 'nasa-viirs' : 'blue-marble', {
+            isOverlay: headerSource === 'nasa-gibs',
+            revokeUrlAfterLoad: true,
+          });
         })
         .catch(() => {
           // Keep bundled Blue Marble imagery active if live proxy is unavailable

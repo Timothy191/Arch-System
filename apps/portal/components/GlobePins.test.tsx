@@ -2,6 +2,7 @@ import '@testing-library/jest-dom';
 import {
   buildEarthSurfaceDots,
   formatCoordinates,
+  GLOBE_FRAGMENT_SHADER_SOURCE,
   GlobePins,
   isLandCoordinate,
   latLonToUnitVec3,
@@ -138,11 +139,19 @@ describe('GlobePins interactive 3D Canvas component', () => {
     expect(screen.getByRole('button', { name: 'Pause globe rotation' })).toBeInTheDocument();
 
     expect(screen.getByTestId('globe-dept-metrics-overview')).toBeInTheDocument();
-    const layerToggle = screen.getByRole('button', { name: /Switch to NASA Blue Marble layer/i });
+    const layerToggle = screen.getByRole('button', {
+      name: /Switch to NASA Live VIIRS satellite imagery/i,
+    });
     fireEvent.click(layerToggle);
     expect(
-      screen.getByRole('button', { name: /Switch to NASA Live VIIRS satellite imagery/i })
+      screen.getByRole('button', { name: /Switch to NASA Blue Marble layer/i })
     ).toBeInTheDocument();
+  });
+
+  it('includes dual-texture VIIRS black-swath fallback and studio fill lighting in the WebGL fragment shader', () => {
+    expect(GLOBE_FRAGMENT_SHADER_SOURCE).toContain('uniform sampler2D u_overlayTexture;');
+    expect(GLOBE_FRAGMENT_SHADER_SOURCE).toContain('overlayMask');
+    expect(GLOBE_FRAGMENT_SHADER_SOURCE).toContain('fillDir');
   });
 
   it('synchronizes the telemetry metrics graph panel with the active HeroRotator department', () => {

@@ -6,6 +6,15 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T06:32:00+02:00] - Fix `/hub` Operations Globe Black Side & Upgrade `/database` Cross-Department Readiness (`fix/hub-globe-and-database-audit`)
+
+- **Hub Operations Globe ([`globe-webgl.ts`](packages/ui/src/components/globe-webgl.ts), [`GlobePins.tsx`](packages/ui/src/components/GlobePins.tsx), [`GlobePins.test.tsx`](apps/portal/components/GlobePins.test.tsx))**:
+  - Eliminated the dark/missing-swath hemisphere artifact caused by defaulting to NASA GIBS daily incomplete VIIRS swaths and hard single-key Lambert cutoff.
+  - Defaulted the globe layer to seamless NASA Blue Marble with a dual-texture WebGL shader (`u_texture` + `u_overlayTexture`) that blends non-black live VIIRS swaths smoothly over Blue Marble and applies 360° studio wrap + fill lighting.
+- **Database Department Cross-Department Audit & Readiness ([`department-database-catalog.ts`](<apps/portal/app/(departments)/database/department-database-catalog.ts>), [`database/page.tsx`](<apps/portal/app/(departments)/database/page.tsx>), [`database/panels/page.tsx`](<apps/portal/app/(departments)/database/panels/page.tsx>), [`database/reports/page.tsx`](<apps/portal/app/(departments)/database/reports/page.tsx>), [`departments.ts`](libs/features/departments/data-access/src/departments.ts), [`department-live-metrics.ts`](libs/features/departments/data-access/src/department-live-metrics.ts), [`data.ts`](apps/portal/app/overview/lib/data.ts), [`database-er-diagram-data.ts`](apps/portal/app/overview/sections/database-er-diagram-data.ts))**:
+  - Added cross-department master/operational table readiness verification across all 10 operational departments (52 tracked `public.*` tables), live table row counts, expanded 36-table ER schema graph, Master Reference Data Console panels on `/database/panels`, and a dedicated `/database/reports` audit page.
+  - Updated migration provenance metadata across Database/Overview views to match head `#229` (`179` SQL migration files).
+
 ## [2026-11-24T14:42:00+02:00] - 14 Design Feedback Items & Access Control Completion (`feat/design-feedback-14-items`, Orca `run_8f6448c6d68e`)
 
 - **Production Department — Items 1–7 ([`actions.ts`](apps/portal/features/departments/components/production/actions.ts), [`ProductionCommandCenterClient.tsx`](apps/portal/features/departments/components/production/ProductionCommandCenterClient.tsx), [`ProductionTargetsPanel.tsx`](apps/portal/features/departments/components/production/ProductionTargetsPanel.tsx), [`ProductionMachinesTargetPanel.tsx`](apps/portal/features/departments/components/production/ProductionMachinesTargetPanel.tsx), [`ProductionPerformanceClient.tsx`](apps/portal/features/departments/components/production/ProductionPerformanceClient.tsx), [`ProductionReportsWorkspace.tsx`](apps/portal/features/departments/components/production/ProductionReportsWorkspace.tsx), [`ProductionForemanPdfDocument.tsx`](apps/portal/features/departments/components/production/ProductionForemanPdfDocument.tsx))**:

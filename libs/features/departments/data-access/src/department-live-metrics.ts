@@ -225,6 +225,16 @@ export async function fetchLiveDepartmentMetrics(
         status: 'active',
       };
     }
+
+    // --- Database Overlay ---
+    result.database = {
+      stats: {
+        label: 'Schema',
+        value: '52 Tables',
+      },
+      trend: [activeMachines, totalMachines, badgesRes?.count ?? 0, activeBreakdowns],
+      status: 'active',
+    };
   } catch (err) {
     console.warn('fetchLiveDepartmentMetrics warning (using default overlays):', err);
   }

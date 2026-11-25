@@ -1,5 +1,4 @@
 import { getCacheStats, getRedisClient, isServerlessRedis } from '@repo/redis';
-import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { Badge } from '@repo/ui';
 import { BorderBox } from '@repo/ui/BorderBox';
 import { Divider } from '@repo/ui/Divider';
@@ -16,7 +15,6 @@ import {
   HardDrive,
   Layers,
   Lock,
-  Server,
   ShieldCheck,
   Table2,
   Zap,
@@ -24,6 +22,12 @@ import {
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { DATABASE_SCHEMA } from '@/app/overview/lib/data';
+import {
+  DATABASE_MIGRATION_SUMMARY,
+  evaluateDepartmentReadiness,
+  fetchDatabaseTableCounts,
+  getTableConsumerDepartments,
+} from './department-database-catalog';
 import { fetchSupabaseClusterTelemetry } from './supabase-telemetry';
 
 const REDIS_KEY_NAMESPACES = [
@@ -53,94 +57,20 @@ const REDIS_KEY_NAMESPACES = [
   },
 ] as const;
 
-const LIVE_COUNT_TABLES = [
-  'departments',
-  'employees',
-  'personnel',
-  'badges',
-  'machines',
-  'daily_logs',
-  'breakdowns',
-  'delay_entries',
-  'hourly_loads',
-  'card_print_jobs',
-  'access_logs',
-  'audit_logs',
-] as const;
+const HEADER_LINK_CLASS =
+  'gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded-md border border-[var(--accent-blue)]/20 bg-white px-2.5 py-1 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--bg-secondary)]';
 
-const RECENT_MIGRATIONS = [
-  {
-    id: '209',
-    file: '209_fix_pg_stat_statements_and_cron_health_rpc.sql',
-    scope: 'Supabase Add-ons & RPCs',
-    summary:
-      'Schema-qualified extensions.pg_stat_statements, MV refresh logs, and pg_cron health RPC',
-  },
-  {
-    id: '186',
-    file: '186_database_optimization_remediation.sql',
-    scope: 'Performance & Indexing',
-    summary: 'Composite FK indexes, statement timeout guards, and vacuum autoscale tuning',
-  },
-  {
-    id: '185',
-    file: '185_consolidate_permissive_policies_wave3.sql',
-    scope: 'RLS Consolidation',
-    summary: 'Unified overlapping permissive SELECT/UPDATE policies across operational tables',
-  },
-  {
-    id: '184',
-    file: '184_drop_duplicate_indexes.sql',
-    scope: 'Storage Optimization',
-    summary: 'Eliminated redundant btree indexes identified by pg_stat_user_indexes audit',
-  },
-  {
-    id: '183',
-    file: '183_rls_initplan_Wrapping.sql',
-    scope: 'RLS InitPlan (100%)',
-    summary: 'Wrapped auth.uid() and auth.jwt() in scalar subqueries for per-statement caching',
-  },
-  {
-    id: '182',
-    file: '182_employee_provisioning_9_fields.sql',
-    scope: 'Personnel & Badging',
-    summary: 'Added 9-field personnel provisioning RPC and medical/induction compliance columns',
-  },
-] as const;
+const TELEMETRY_TILE_CLASS = 'rounded-lg border border-[var(--border-subtle)] bg-white p-3';
 
 export default async function DatabaseDashboardPage() {
   await connection();
-  const clusterTelemetry = await fetchSupabaseClusterTelemetry();
+  const [clusterTelemetry, tableCountsResult] = await Promise.all([
+    fetchSupabaseClusterTelemetry(),
+    fetchDatabaseTableCounts(),
+  ]);
 
-  const rowCounts: Record<string, number | null> = {};
-  let isLiveConnected = false;
-
-  try {
-    const supabase = await createReadReplicaClient();
-    const results = await Promise.allSettled(
-      LIVE_COUNT_TABLES.map(async (tableName) => {
-        const { count, error } = await supabase
-          .from(tableName)
-          .select('*', { count: 'exact', head: true });
-        if (error) return { tableName, count: null };
-        return { tableName, count: count ?? 0 };
-      })
-    );
-
-    for (const res of results) {
-      if (res.status === 'fulfilled' && res.value.count !== null) {
-        rowCounts[res.value.tableName] = res.value.count;
-        isLiveConnected = true;
-      }
-    }
-  } catch {
-    isLiveConnected = false;
-  }
-
-  const totalLiveRows = Object.values(rowCounts).reduce<number>(
-    (acc, val) => acc + (typeof val === 'number' ? val : 0),
-    0
-  );
+  const { rowCounts, isLiveConnected, totalLiveRows } = tableCountsResult;
+  const readinessSummary = evaluateDepartmentReadiness({ rowCounts, isLiveConnected });
 
   let isRedisHealthy = false;
   let redisHitRatePct = 100;
@@ -178,15 +108,16 @@ export default async function DatabaseDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="gold-steel-border gold-steel-border-slim flex flex-col justify-between gap-3 rounded-xl bg-white/75 p-4 shadow-2xs backdrop-blur-md sm:flex-row sm:items-center">
+      <div className="gold-steel-border gold-steel-border-slim flex flex-col justify-between gap-3 rounded-xl bg-white p-4 shadow-2xs sm:flex-row sm:items-center">
         <div>
           <h2 className="flex items-center gap-2.5 font-semibold text-2xl text-[var(--text-heading)]">
             <Database className="h-6 w-6 text-accent-green" />
             Supabase PostgreSQL 17 Operations Dashboard
           </h2>
           <p className="mt-1 text-[var(--text-secondary)] text-xs">
-            Live schema introspection, Row Level Security (RLS) InitPlan status, and table row
-            telemetry via <code className="font-mono">@repo/supabase</code>
+            Cross-department schema verification, master reference readiness, Row Level Security
+            (RLS) InitPlan status, and live row telemetry via{' '}
+            <code className="font-mono">@repo/supabase</code>
           </p>
         </div>
 
@@ -195,13 +126,15 @@ export default async function DatabaseDashboardPage() {
             {isLiveConnected ? 'Supabase Live Connected' : 'Supabase Standby'}
           </Badge>
           <Badge variant="blue" size="sm">
-            PostgreSQL 17 · 186 Migrations
+            PostgreSQL 17 · Head #{DATABASE_MIGRATION_SUMMARY.latestMigrationNumber} (
+            {DATABASE_MIGRATION_SUMMARY.totalMigrationFiles} SQL)
           </Badge>
-          <Link
-            href="/database/panels"
-            className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded-md border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-1 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--accent-blue)]/15"
-          >
+          <Link href="/database/panels" className={HEADER_LINK_CLASS}>
             Provisioning Panels
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+          <Link href="/database/reports" className={HEADER_LINK_CLASS}>
+            Readiness Reports
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -226,7 +159,9 @@ export default async function DatabaseDashboardPage() {
           <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">
             {DATABASE_SCHEMA.length}
           </p>
-          <p className="mt-1 text-accent-green text-xs">100% strict Zod contract alignment</p>
+          <p className="mt-1 text-accent-green text-xs">
+            {readinessSummary.totalTrackedTables} tracked cross-dept tables
+          </p>
         </GlassCard>
 
         <GlassCard>
@@ -254,13 +189,20 @@ export default async function DatabaseDashboardPage() {
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-accent-green" />
               <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
-                RLS InitPlan Coverage
+                Dept Data Readiness
               </p>
             </div>
             <Lock className="h-3.5 w-3.5 text-accent-green" />
           </div>
-          <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">100%</p>
-          <p className="mt-1 text-accent-green text-xs">(select auth.uid()) cached per statement</p>
+          <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">
+            {isLiveConnected
+              ? `${readinessSummary.readyDepartmentsCount} / ${readinessSummary.reports.length} Ready`
+              : 'Standby'}
+          </p>
+          <p className="mt-1 text-accent-green text-xs">
+            {readinessSummary.populatedTablesCount}/{readinessSummary.totalTrackedTables} tables
+            populated · 100% RLS
+          </p>
         </GlassCard>
 
         <BorderBox variant="patterned" padding="none" className="overflow-hidden">
@@ -272,12 +214,129 @@ export default async function DatabaseDashboardPage() {
                   Migrations Applied
                 </p>
               </div>
-              <Server className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+              <Badge variant="blue" size="sm">
+                Head #{DATABASE_MIGRATION_SUMMARY.latestMigrationNumber}
+              </Badge>
             </div>
-            <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">186</p>
-            <p className="mt-1 text-[var(--text-muted)] text-xs">001_initial → 186_optimization</p>
+            <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">
+              {DATABASE_MIGRATION_SUMMARY.totalMigrationFiles} SQL
+            </p>
+            <p className="mt-1 text-[var(--text-muted)] text-xs">
+              001_initial → {DATABASE_MIGRATION_SUMMARY.latestMigrationNumber}_enrich_fleet
+            </p>
           </div>
         </BorderBox>
+      </div>
+
+      <Divider variant="fading" label="CROSS-DEPARTMENT DATABASE READINESS MATRIX" />
+
+      {/* Cross-Department Database Readiness Matrix */}
+      <div
+        className="grid grid-cols-1 gap-4 md:grid-cols-2"
+        data-testid="department-readiness-matrix"
+      >
+        {readinessSummary.reports.map((report) => {
+          const {
+            requirement,
+            status,
+            emptyMasterTables,
+            populatedTableCount,
+            totalRequiredTables,
+          } = report;
+          const badgeVariant =
+            status === 'ready' ? 'green' : status === 'attention' ? 'amber' : 'blue';
+          const badgeLabel =
+            status === 'ready' ? 'Ready' : status === 'attention' ? 'Needs Setup' : 'Standby';
+
+          return (
+            <GlassCard
+              key={requirement.departmentSlug}
+              className="flex flex-col justify-between gap-3 p-4"
+            >
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 className="font-semibold text-[var(--text-heading)] text-sm">
+                      {requirement.departmentName}
+                    </h3>
+                    <p className="text-[var(--text-secondary)] text-xs">{requirement.summary}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant={badgeVariant} size="sm">
+                      {badgeLabel}
+                    </Badge>
+                    <Badge variant="blue" size="sm">
+                      {populatedTableCount}/{totalRequiredTables} tables
+                    </Badge>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Master Reference Tables
+                  </span>
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {requirement.masterTables.map((tableName) => {
+                      const count = rowCounts[tableName];
+                      const isMissing = isLiveConnected && (count === null || count === 0);
+                      return (
+                        <span
+                          key={tableName}
+                          className={
+                            isMissing
+                              ? 'rounded border border-amber-500/40 bg-amber-50 px-2 py-0.5 font-mono text-[11px] text-amber-800'
+                              : 'rounded border border-[var(--border-default)] bg-white px-2 py-0.5 font-mono text-[11px] text-[var(--text-heading)]'
+                          }
+                        >
+                          {tableName}: {typeof count === 'number' ? count : '—'}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Operational & Log Tables
+                  </span>
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {requirement.operationalTables.map((tableName) => {
+                      const count = rowCounts[tableName];
+                      return (
+                        <span
+                          key={tableName}
+                          className="rounded border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-0.5 font-mono text-[10px] text-[var(--text-secondary)]"
+                        >
+                          {tableName}: {typeof count === 'number' ? count : '—'}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-subtle)] border-t pt-2.5 text-xs">
+                {emptyMasterTables.length > 0 ? (
+                  <span className="font-medium text-amber-800">
+                    Empty master table(s): {emptyMasterTables.join(', ')}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 font-medium text-accent-green">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    All master tables verified
+                  </span>
+                )}
+                <Link
+                  href={requirement.manageHref}
+                  className="inline-flex items-center gap-1 font-medium text-[var(--accent-blue)] hover:underline"
+                >
+                  {requirement.manageLabel}
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </GlassCard>
+          );
+        })}
       </div>
 
       <Divider variant="fading" label="LIVE SUPABASE TABLE CATALOG & ROW COUNTS" />
@@ -306,6 +365,7 @@ export default async function DatabaseDashboardPage() {
               <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/30 font-mono text-[11px] text-[var(--text-muted)]">
                 <th className="px-4 py-3">Table Name</th>
                 <th className="px-4 py-3">Description</th>
+                <th className="px-4 py-3">Consuming Departments</th>
                 <th className="px-4 py-3">Key Columns</th>
                 <th className="px-4 py-3 text-center">RLS Policy</th>
                 <th className="px-4 py-3 text-right">Live Row Count</th>
@@ -314,6 +374,7 @@ export default async function DatabaseDashboardPage() {
             <tbody className="divide-y divide-[var(--border-subtle)]">
               {DATABASE_SCHEMA.map((table) => {
                 const count = rowCounts[table.name];
+                const consumers = getTableConsumerDepartments(table.name);
                 return (
                   <tr
                     key={table.name}
@@ -325,6 +386,9 @@ export default async function DatabaseDashboardPage() {
                     <td className="max-w-md px-4 py-2.5 text-[var(--text-secondary)]">
                       {table.description}
                     </td>
+                    <td className="px-4 py-2.5 text-[11px] text-[var(--text-heading)]">
+                      {consumers.length > 0 ? consumers.join(', ') : 'Core Infrastructure'}
+                    </td>
                     <td className="px-4 py-2.5 font-mono text-[11px] text-[var(--text-muted)]">
                       {table.columns.slice(0, 4).join(', ')}
                       {table.columns.length > 4 ? ` +${table.columns.length - 4}` : ''}
@@ -335,7 +399,7 @@ export default async function DatabaseDashboardPage() {
                       </Badge>
                     </td>
                     <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono font-semibold text-[var(--text-heading)]">
-                      {typeof count === 'number' ? count.toLocaleString('en-ZA') : 'Active'}
+                      {typeof count === 'number' ? count.toLocaleString('en-ZA') : 'Standby'}
                     </td>
                   </tr>
                 );
@@ -345,11 +409,11 @@ export default async function DatabaseDashboardPage() {
         </div>
       </GlassCard>
 
-      <Divider variant="fading" label="RECENT SUPABASE MIGRATION LEDGER (181 → 186)" />
+      <Divider variant="fading" label="RECENT SUPABASE MIGRATION LEDGER (220 → 229)" />
 
       {/* Recent Migrations */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {RECENT_MIGRATIONS.map((mig) => (
+        {DATABASE_MIGRATION_SUMMARY.recentMigrations.map((mig) => (
           <GlassCard key={mig.id} className="flex flex-col justify-between gap-2 p-4">
             <div>
               <div className="flex items-center justify-between gap-2">
@@ -409,7 +473,7 @@ export default async function DatabaseDashboardPage() {
               href="http://localhost:5540"
               target="_blank"
               rel="noopener noreferrer"
-              className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-3 py-1.5 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--accent-blue)]/20"
+              className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded-md border border-[var(--accent-blue)]/30 bg-white px-3 py-1.5 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--bg-secondary)]"
             >
               Open RedisInsight (:5540)
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -418,7 +482,7 @@ export default async function DatabaseDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 border-[var(--border-subtle)] border-b p-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">Cache Hit Ratio</span>
               <Zap className="h-3.5 w-3.5 text-accent-green" />
@@ -431,7 +495,7 @@ export default async function DatabaseDashboardPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">X-Fetch Stampede Guard</span>
               <Layers className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
@@ -444,7 +508,7 @@ export default async function DatabaseDashboardPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">P95 Read Latency</span>
               <Activity className="h-3.5 w-3.5 text-accent-green" />
@@ -457,7 +521,7 @@ export default async function DatabaseDashboardPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">Active Namespaces</span>
               <Database className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
@@ -538,7 +602,7 @@ export default async function DatabaseDashboardPage() {
               href="http://localhost:9091"
               target="_blank"
               rel="noopener noreferrer"
-              className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-3 py-1.5 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--accent-blue)]/20"
+              className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded-md border border-[var(--accent-blue)]/30 bg-white px-3 py-1.5 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--bg-secondary)]"
             >
               Open Grafana (:9091)
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -547,7 +611,7 @@ export default async function DatabaseDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">Node Memory & CPU Load</span>
               <Cpu className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
@@ -562,7 +626,7 @@ export default async function DatabaseDashboardPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">Shared Buffer Cache Hit</span>
               <Zap className="h-3.5 w-3.5 text-accent-green" />
@@ -576,7 +640,7 @@ export default async function DatabaseDashboardPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">
                 PostgreSQL & Pooler Connections
@@ -593,7 +657,7 @@ export default async function DatabaseDashboardPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">PostgREST JWT Cache Hit</span>
               <ShieldCheck className="h-3.5 w-3.5 text-accent-green" />
@@ -607,7 +671,7 @@ export default async function DatabaseDashboardPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">NVMe Filesystem Headroom</span>
               <HardDrive className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
@@ -620,7 +684,7 @@ export default async function DatabaseDashboardPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+          <div className={TELEMETRY_TILE_CLASS}>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
               <span className="font-medium uppercase tracking-wider">
                 GoTrue Identity & Storage
@@ -670,7 +734,7 @@ export default async function DatabaseDashboardPage() {
           {clusterTelemetry.addons.map((addon) => (
             <div
               key={addon.id}
-              className="flex flex-col justify-between gap-2 rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3"
+              className="flex flex-col justify-between gap-2 rounded-lg border border-[var(--border-subtle)] bg-white p-3"
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
