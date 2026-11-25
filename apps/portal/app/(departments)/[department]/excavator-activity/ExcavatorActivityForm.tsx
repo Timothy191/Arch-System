@@ -1197,7 +1197,7 @@ export function ExcavatorActivityForm({
 
   return (
     <div className="space-y-4">
-      <GlassCard className="border border-black/[0.06] bg-[var(--vibrancy-surface)] p-4">
+      <GlassCard className="p-4">
         <div className="mb-3 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-[var(--text-heading)] text-sm">

@@ -229,13 +229,47 @@ function MacTrafficLights() {
   );
 }
 
+const NEUTRAL_SURFACE_OVERRIDES = new Set([
+  'bg-[var(--bg-primary)]',
+  'bg-[var(--vibrancy-surface)]',
+  'bg-[var(--bg-secondary)]',
+  'bg-[var(--bg-secondary)]/40',
+  'bg-white',
+  'bg-white/95',
+  'bg-white/90',
+  'bg-white/85',
+  'bg-white/80',
+  'bg-white/75',
+  'bg-white/70',
+  'bg-white/60',
+  'bg-arch-surface-base/95',
+  'border-[var(--border-default)]',
+  'border-[var(--border-subtle)]',
+  'border-black/[0.06]',
+  'border-black/[0.08]',
+  'border-black/10',
+  'border-arch-border-subtle',
+  'border-slate-200/90',
+]);
+
+function normalizeGlassPanelClassName(rawClassName?: string): string | undefined {
+  if (!rawClassName) return rawClassName;
+  if (rawClassName.includes('!bg-none') || rawClassName.includes('!bg-white')) {
+    return rawClassName;
+  }
+  const filteredTokens = rawClassName
+    .split(/\s+/)
+    .filter((token) => token.length > 0 && !NEUTRAL_SURFACE_OVERRIDES.has(token));
+  return filteredTokens.join(' ');
+}
+
 export function GlassCard({
   ref,
   children,
   className,
-  hover,
+  hover = true,
   onClick,
-  accent = 'none',
+  accent = 'blue',
   variant = 'default',
   glassIntensity,
   title,
@@ -482,7 +516,7 @@ export function GlassCard({
           onClick &&
           'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]',
         padding && 'p-6',
-        className
+        normalizeGlassPanelClassName(className)
       )}
       style={
         {

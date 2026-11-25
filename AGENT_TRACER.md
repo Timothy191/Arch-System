@@ -6,6 +6,12 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T12:03:00+02:00] - Global Liquid-Glass Panel Transparency & Interactive Hover
+
+- **Global Panel Normalization ([`GlassCard.tsx`](packages/ui/src/components/GlassCard.tsx), [`GlassCard.test.tsx`](apps/portal/components/ui/GlassCard.test.tsx))**:
+  - Standardized `GlassCard` defaults to `hover = true` and `accent = 'blue'` and added `normalizeGlassPanelClassName` to strip neutral opaque surface/border overrides (`bg-[var(--vibrancy-surface)]`, `bg-[var(--bg-primary)]`, `bg-white`, `border-black/[0.06]`, `border-[var(--border-default)]`) while preserving explicit `!bg-none`/`!bg-white` white+gold header panels and semantic status tints.
+  - Cleaned up explicit `<GlassCard>` surface overrides in [`ExcavatorActivityForm.tsx`](<apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorActivityForm.tsx>), [`HourlyLoadsGrid.tsx`](<apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx>), [`HourlyLoadsSummaryPanels.tsx`](<apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsSummaryPanels.tsx>), and [`PlantHourlyMatrixSection.tsx`](apps/portal/features/departments/components/plant-processing/PlantHourlyMatrixSection.tsx).
+
 ## [2026-11-25T11:52:00+02:00] - `/hub` Active Site Pins Globe Removal
 
 - **Hub Hero ([`HeroRotator.tsx`](packages/ui/src/components/HeroRotator.tsx), [`HeroRotator.tsx`](libs/features/hub/ui/src/HeroRotator.tsx), [`hub/page.tsx`](apps/portal/app/hub/page.tsx), [`HeroRotator.test.tsx`](libs/features/hub/ui/src/HeroRotator.test.tsx), [`hub/page.test.tsx`](apps/portal/app/hub/page.test.tsx))**:

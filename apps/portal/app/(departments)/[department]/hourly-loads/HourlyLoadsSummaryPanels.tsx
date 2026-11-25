@@ -204,7 +204,7 @@ export function HourlyLoadsTelemetryHeader({
   maxHourLoads,
 }: HourlyLoadsTelemetryHeaderProps) {
   return (
-    <GlassCard className="space-y-4 border border-black/[0.06] bg-[var(--vibrancy-surface)] p-4 sm:p-5">
+    <GlassCard className="space-y-4 p-4 sm:p-5">
       {/* Redesigned Live KPI Strip */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {/* KPI 1: Total Loads Captured */}
@@ -467,7 +467,7 @@ export function HourlyLoadsSplitSection({
   return (
     <>
       {/* Bottom Action Area: Split Shift / Machine Lineup Change */}
-      <GlassCard className="flex flex-col items-start justify-between gap-4 border border-black/[0.06] bg-[var(--vibrancy-surface)] p-4 sm:flex-row sm:items-center">
+      <GlassCard className="flex flex-col items-start justify-between gap-4 p-4 sm:flex-row sm:items-center">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[var(--text-heading)] text-sm">

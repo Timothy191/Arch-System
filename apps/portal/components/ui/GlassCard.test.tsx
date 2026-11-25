@@ -2,10 +2,37 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 describe('GlassCard', () => {
-  it('renders with default variant and children', () => {
+  it('renders with default variant, liquid-glass-light transparency, and children', () => {
     const { container } = render(<GlassCard>Default Content</GlassCard>);
     expect(screen.getByText('Default Content')).toBeInTheDocument();
-    expect(container.firstChild).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+    expect(container.firstChild).toHaveClass(
+      'liquid-glass-light',
+      'border-white/20',
+      'shadow-window',
+      'gold-steel-border',
+      'gold-steel-border-slim',
+      'liquid-glass-interactive'
+    );
+  });
+
+  it('strips neutral opaque surface overrides while preserving explicit !bg-white panels', () => {
+    const { container, rerender } = render(
+      <GlassCard className="border border-black/[0.06] bg-[var(--vibrancy-surface)] p-4">
+        Transparent Panel
+      </GlassCard>
+    );
+    expect(container.firstChild).toHaveClass('liquid-glass-light', 'border-white/20', 'p-4');
+    expect(container.firstChild).not.toHaveClass(
+      'bg-[var(--vibrancy-surface)]',
+      'border-black/[0.06]'
+    );
+
+    rerender(
+      <GlassCard className="!bg-none !bg-white border border-accent-gold/70 p-6">
+        Explicit White Panel
+      </GlassCard>
+    );
+    expect(container.firstChild).toHaveClass('!bg-white', '!bg-none');
   });
 
   it('renders with window variant and title', () => {

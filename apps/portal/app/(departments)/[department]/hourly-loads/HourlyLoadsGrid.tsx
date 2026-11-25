@@ -774,7 +774,7 @@ function HourlyLoadsGrid({
         onKeyDown={handleGridKeyDown}
         className="revo-grid-visible"
       >
-        <GlassCard className="overflow-hidden border border-[var(--border-default)] bg-[var(--bg-primary)] p-0 shadow-sm">
+        <GlassCard className="overflow-hidden p-0">
           <div className="w-full overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
