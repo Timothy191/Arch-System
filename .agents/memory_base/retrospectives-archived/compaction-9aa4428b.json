@@ -1,0 +1,35 @@
+{
+  "id": "compaction-9aa4428b",
+  "timestamp": "2026-11-25T09:17:53.428Z",
+  "taskTag": "compaction-standard-9aa4428b",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/infra/remote-support-bridge/token.test.mjs\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/lib/tier2-token.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/lib/cobrowse-guard.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/lib/diagnostics.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/actions.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/support/ice-servers/route.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/support/tier2/launch/route.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/components/RemoteSupportSessionOverlay.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/components/RemoteSupportDesk.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/e2e/remote-support.spec.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/support/page.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/hooks/useRemoteSupportSignaling.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/hooks/useWebRtcPeer.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/components/SupportAuditLogPanel.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/remote-support/components/ManagedDevicesPanel.test.tsx\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (424 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 317141,
+    "cacheHitRatio": 0.8532,
+    "checkpointCount": 2,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

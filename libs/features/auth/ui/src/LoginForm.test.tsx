@@ -85,8 +85,8 @@ describe('LoginForm (@repo/auth/ui)', () => {
 
     const signInButton = screen.getByRole('button', { name: /Sign In/i });
     expect(signInButton).toBeInTheDocument();
-    expect(signInButton.className).toContain('bg-amber-500');
-    expect(signInButton.className).toContain('text-zinc-950');
+    expect(signInButton.className).toContain('bg-[var(--color-action-primary)]');
+    expect(signInButton.className).toContain('text-[var(--text-on-glass)]');
 
     expect(screen.getByTestId('enterprise-auth-addons')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Visitor QR Code/i })).toBeInTheDocument();
