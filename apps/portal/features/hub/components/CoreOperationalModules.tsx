@@ -34,29 +34,30 @@ interface ModuleSearchInputProps {
 }
 
 const FILTER_TAB_INACTIVE_CLASS =
-  'border border-black/[0.06] font-medium text-arch-text-secondary hover:border-black/[0.14] hover:bg-white/60 hover:text-arch-text-primary';
+  'border border-slate-500/80 font-medium text-arch-text-secondary hover:border-slate-800 hover:bg-white/80 hover:text-arch-text-primary';
 
 interface StatChipProps {
   label: string;
   count: number;
   color: 'accent-green' | 'accent-amber' | 'accent-red';
   icon: React.ReactNode;
+  shineDelayClass?: string;
 }
 
-function StatChip({ label, count, color, icon }: StatChipProps) {
+function StatChip({ label, count, color, icon, shineDelayClass }: StatChipProps) {
   const colorMap: Record<StatChipProps['color'], { bg: string; text: string; ring: string }> = {
     'accent-green': {
-      bg: 'bg-emerald-950 border-emerald-700',
+      bg: 'bg-emerald-950 border-emerald-500/80',
       text: 'text-white',
       ring: 'ring-emerald-600/45',
     },
     'accent-amber': {
-      bg: 'bg-amber-950 border-amber-600',
+      bg: 'bg-amber-950 border-amber-400/85',
       text: 'text-amber-50',
       ring: 'ring-amber-500/45',
     },
     'accent-red': {
-      bg: 'bg-rose-950 border-rose-700',
+      bg: 'bg-rose-950 border-rose-500/80',
       text: 'text-white',
       ring: 'ring-rose-600/45',
     },
@@ -65,10 +66,11 @@ function StatChip({ label, count, color, icon }: StatChipProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-1.5 rounded-full border px-3 py-1.5 shadow-sm',
+        'stat-chip-shine shining flex items-center gap-1.5 rounded-full border px-3 py-1.5 shadow-sm',
         chipTheme.bg,
         chipTheme.text,
-        `ring-1 ${chipTheme.ring}`
+        `ring-1 ${chipTheme.ring}`,
+        shineDelayClass
       )}
     >
       {icon}
@@ -231,12 +233,14 @@ export function CoreOperationalModules({
               count={pinnedCount}
               color="accent-amber"
               icon={<Star className="h-3.5 w-3.5 text-amber-300" />}
+              shineDelayClass="stat-chip-shine-delay-1"
             />
             <StatChip
               label="Alerts"
               count={criticalCount}
               color="accent-red"
               icon={<AlertTriangle className="h-3.5 w-3.5 text-rose-300" />}
+              shineDelayClass="stat-chip-shine-delay-2"
             />
 
             {canSeeExecutive && (
@@ -269,7 +273,7 @@ export function CoreOperationalModules({
               className={cn(
                 'min-h-9 rounded-full px-3 py-1.5 text-[13px] tabular-nums leading-[18px] transition-all',
                 activeFilter === 'all'
-                  ? 'border border-black/[0.14] bg-white font-semibold text-arch-text-primary shadow-card'
+                  ? 'border border-slate-700/85 bg-white font-semibold text-arch-text-primary shadow-card'
                   : FILTER_TAB_INACTIVE_CLASS
               )}
             >
@@ -283,7 +287,7 @@ export function CoreOperationalModules({
                 className={cn(
                   'flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] tabular-nums leading-[18px] transition-all',
                   activeFilter === 'pinned'
-                    ? 'border border-arch-accent-blue/35 bg-white font-semibold text-arch-accent-blue shadow-card'
+                    ? 'border border-arch-accent-blue/75 bg-white font-semibold text-arch-accent-blue shadow-card'
                     : FILTER_TAB_INACTIVE_CLASS
                 )}
               >
@@ -298,7 +302,7 @@ export function CoreOperationalModules({
               className={cn(
                 'inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] tabular-nums leading-[18px] transition-all',
                 activeFilter === 'active'
-                  ? 'border border-accent-green/35 bg-white font-semibold text-accent-green shadow-card'
+                  ? 'border border-emerald-800/85 bg-white font-semibold text-accent-green shadow-card ring-1 ring-emerald-900/20'
                   : FILTER_TAB_INACTIVE_CLASS
               )}
             >
@@ -312,7 +316,7 @@ export function CoreOperationalModules({
               className={cn(
                 'inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] tabular-nums leading-[18px] transition-all',
                 activeFilter === 'critical'
-                  ? 'border border-accent-amber/40 bg-white font-semibold text-accent-amber shadow-card'
+                  ? 'border border-amber-800/85 bg-white font-semibold text-accent-amber shadow-card ring-1 ring-amber-900/20'
                   : FILTER_TAB_INACTIVE_CLASS
               )}
             >

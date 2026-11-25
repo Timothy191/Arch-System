@@ -1,11 +1,13 @@
 import '@testing-library/jest-dom';
 import {
   buildEarthSurfaceDots,
+  DEFAULT_GLOBE_PINS,
   formatCoordinates,
   GLOBE_FRAGMENT_SHADER_SOURCE,
   GlobePins,
   isLandCoordinate,
   latLonToUnitVec3,
+  resolveMpumalangaSitePin,
   rotateVec3,
   sampleGeodesicArc,
   targetOrbitForLatLon,
@@ -55,17 +57,28 @@ describe('globe-math 3D geometry', () => {
     expect(rotated.z).toBeCloseTo(1, 5);
   });
 
-  it('distinguishes real landmass coordinates from open ocean and builds Earth dot-matrix', () => {
+  it('distinguishes real landmass coordinates from open ocean and resolves Mpumalanga site pins', () => {
+    expect(isLandCoordinate(-26.15, 28.68)).toBe(true); // Delmas / Brakfontein, Mpumalanga
     expect(isLandCoordinate(-33.9, 18.4)).toBe(true); // Cape Town
-    expect(isLandCoordinate(-22.9, 14.2)).toBe(true); // Namibia / Pit Viper 351
-    expect(isLandCoordinate(-31.9, 115.8)).toBe(true); // Perth
-    expect(isLandCoordinate(-37.8, 175.2)).toBe(true); // New Zealand North Island
     expect(isLandCoordinate(40.7, -74.0)).toBe(true); // US East
     expect(isLandCoordinate(0, -150)).toBe(false); // Mid-Pacific Ocean
     expect(isLandCoordinate(15, -40)).toBe(false); // Mid-Atlantic Ocean
 
     const dots = buildEarthSurfaceDots();
     expect(dots.length).toBeGreaterThan(300);
+
+    const brakPin = resolveMpumalangaSitePin({
+      id: 'site-1',
+      name: 'Brakfontein Pit',
+      siteCode: 'BRAK-PIT',
+      active: true,
+      activeBreakdowns: 1,
+      todayLoads: 42,
+    });
+    expect(brakPin.lat).toBe(-26.15);
+    expect(brakPin.lon).toBe(28.68);
+    expect(brakPin.status).toBe('alert');
+    expect(brakPin.telemetrySummary).toBe('42 loads · 1 alert');
   });
 
   it('elevates 3D geodesic arc midpoints above unit sphere and formats coordinates', () => {
@@ -108,35 +121,45 @@ describe('GlobePins interactive 3D Canvas component', () => {
     window.cancelAnimationFrame = originalCancelRaf;
   });
 
-  it('renders 3D globe canvas, header metadata, and interactive site controls', () => {
+  it('renders 3D globe canvas focused on Mpumalanga, South Africa with real site controls and zero mock pins', () => {
     const mockCtx = createMockCanvasContext();
     HTMLCanvasElement.prototype.getContext = jest.fn(
       () => mockCtx as unknown as CanvasRenderingContext2D
     ) as unknown as typeof HTMLCanvasElement.prototype.getContext;
 
-    render(<GlobePins />);
+    render(<GlobePins pins={DEFAULT_GLOBE_PINS} />);
 
-    expect(screen.getByText('Active Site Pins')).toBeInTheDocument();
-    expect(screen.getByText('5 operational sites')).toBeInTheDocument();
-    expect(screen.getByText('All sites online')).toBeInTheDocument();
+    expect(screen.getByText(/Active Site Pins · Mpumalanga, South Africa/i)).toBeInTheDocument();
+    expect(screen.getByText('4 operational sites')).toBeInTheDocument();
+    expect(screen.getByText('4 sites online')).toBeInTheDocument();
+    expect(screen.getByText('MPUMALANGA · ZA')).toBeInTheDocument();
+    expect(screen.getByText('26.1°S, 28.7°E')).toBeInTheDocument();
+
+    expect(screen.queryByText('Pit Viper 351')).not.toBeInTheDocument();
+    expect(screen.queryByText('Fleet AV 01')).not.toBeInTheDocument();
+    expect(screen.queryByText('DB Core')).not.toBeInTheDocument();
 
     const globeCanvas = screen.getByTestId('operations-3d-globe');
     expect(globeCanvas).toHaveAttribute('role', 'img');
     expect(globeCanvas).toHaveAttribute('aria-label', 'Operations globe');
     expect(mockCtx.createRadialGradient).toHaveBeenCalled();
 
-    const dbCoreButton = screen.getByRole('button', { name: /DB Core/i });
-    expect(dbCoreButton).toHaveAttribute('aria-pressed', 'false');
-    fireEvent.click(dbCoreButton);
-    expect(dbCoreButton).toHaveAttribute('aria-pressed', 'true');
+    const headOfficeButton = screen.getByRole('button', { name: /Head Office/i });
+    expect(headOfficeButton).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(headOfficeButton);
+    expect(headOfficeButton).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Resume globe rotation' })).toBeInTheDocument();
+
+    // Toggle orbit rotation on, then verify Reset re-centers cleanly
+    fireEvent.click(screen.getByRole('button', { name: 'Resume globe rotation' }));
+    expect(screen.getByRole('button', { name: 'Pause globe rotation' })).toBeInTheDocument();
 
     fireEvent.pointerDown(globeCanvas, { clientX: 120, clientY: 120, pointerId: 1 });
     fireEvent.pointerMove(globeCanvas, { clientX: 155, clientY: 132, pointerId: 1 });
     fireEvent.pointerUp(globeCanvas, { clientX: 155, clientY: 132, pointerId: 1 });
 
     fireEvent.click(screen.getByRole('button', { name: 'Reset 3D globe view' }));
-    expect(screen.getByRole('button', { name: 'Pause globe rotation' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Resume globe rotation' })).toBeInTheDocument();
 
     expect(screen.getByTestId('globe-dept-metrics-overview')).toBeInTheDocument();
     const layerToggle = screen.getByRole('button', {
@@ -146,6 +169,13 @@ describe('GlobePins interactive 3D Canvas component', () => {
     expect(
       screen.getByRole('button', { name: /Switch to NASA Blue Marble layer/i })
     ).toBeInTheDocument();
+  });
+
+  it('renders real empty state when zero Supabase sites are provided', () => {
+    render(<GlobePins pins={[]} />);
+    expect(screen.getByText('0 operational sites')).toBeInTheDocument();
+    expect(screen.getByText('No active sites')).toBeInTheDocument();
+    expect(screen.getByText('No active sites registered in Supabase')).toBeInTheDocument();
   });
 
   it('includes dual-texture VIIRS black-swath fallback and studio fill lighting in the WebGL fragment shader', () => {

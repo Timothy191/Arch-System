@@ -15,7 +15,9 @@ import {
   isLandCoordinate,
   latLonToUnitVec3,
   normalizeYawRad,
+  type OperationalSiteInput,
   type OrbitAngles,
+  resolveMpumalangaSitePin,
   rotateVec3,
   sampleGeodesicArc,
   shortestAngleDelta,
@@ -31,11 +33,14 @@ import type { Panel } from './hero-types';
 
 export {
   buildEarthSurfaceDots,
+  DEFAULT_GLOBE_PINS,
   formatCoordinates,
   GLOBE_FRAGMENT_SHADER_SOURCE,
   type GlobePin,
   isLandCoordinate,
   latLonToUnitVec3,
+  type OperationalSiteInput,
+  resolveMpumalangaSitePin,
   rotateVec3,
   sampleGeodesicArc,
   targetOrbitForLatLon,
@@ -150,11 +155,9 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
     dpr: 1,
   });
 
-  const [selectedPinId, setSelectedPinId] = useState<string | null>(
-    pins.find((pin) => pin.id === 'dispatch-room')?.id ?? pins[0]?.id ?? null
-  );
+  const [selectedPinId, setSelectedPinId] = useState<string | null>(pins[0]?.id ?? null);
   const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
-  const [isAutoRotating, setIsAutoRotating] = useState(true);
+  const [isAutoRotating, setIsAutoRotating] = useState(false);
   const [isDraggingUI, setIsDraggingUI] = useState(false);
   const [imageryLayer, setImageryLayer] = useState<SatelliteImageryLayer>('blue-marble');
   const [feedStatus, setFeedStatus] = useState<SatelliteFeedStatus>('wireframe');
@@ -184,7 +187,7 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
       pitchRad: INITIAL_ORBIT_PITCH_RAD,
     };
     velocityRef.current = { yaw: 0, pitch: 0 };
-    setIsAutoRotating(true);
+    setIsAutoRotating(false);
   }, [pins]);
 
   useEffect(() => {
@@ -456,16 +459,23 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
 
   const activePin =
     pins.find((pin) => pin.id === (hoveredPinId ?? selectedPinId)) ?? pins[0] ?? null;
+  const alertPinsCount = pins.filter((pin) => pin.status === 'alert').length;
+  const statusBadgeText =
+    pins.length === 0
+      ? 'No active sites'
+      : alertPinsCount > 0
+        ? `${alertPinsCount} ${alertPinsCount === 1 ? 'site alert' : 'site alerts'}`
+        : `${pins.length} sites online`;
 
   return (
-    <div className={cn('space-y-4', className)}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className={cn('space-y-3', className)}>
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex flex-col gap-0.5">
           <span className="font-anurati font-bold text-slate-950 text-sm tracking-[0.05em]">
-            Active Site Pins
+            Active Site Pins · Mpumalanga, South Africa
           </span>
           <span className="font-semibold text-[11px] text-slate-700 uppercase tracking-wider">
-            {pins.length} operational sites
+            {pins.length} operational {pins.length === 1 ? 'site' : 'sites'}
           </span>
         </div>
 
@@ -505,9 +515,22 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
             <RotateCcw className="h-3 w-3" aria-hidden="true" />
             <span>Reset</span>
           </button>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-700/30 bg-emerald-950 px-2.5 py-1 shadow-xs">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
-            <span className="font-bold text-[11px] text-white">All sites online</span>
+          <div
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 shadow-xs',
+              alertPinsCount > 0
+                ? 'border-amber-700/40 bg-amber-950'
+                : 'border-emerald-700/30 bg-emerald-950'
+            )}
+          >
+            <span
+              className={cn(
+                'h-2 w-2 rounded-full',
+                alertPinsCount > 0 ? 'bg-amber-400' : 'bg-emerald-400'
+              )}
+              aria-hidden="true"
+            />
+            <span className="font-bold text-[11px] text-white">{statusBadgeText}</span>
           </div>
         </div>
       </div>
@@ -516,7 +539,7 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
         <div className="flex flex-col items-center">
           <div
             ref={containerRef}
-            className="relative flex h-[290px] w-full max-w-[310px] items-center justify-center overflow-hidden rounded-2xl border border-white/65 bg-white/45 shadow-sm"
+            className="relative flex h-[290px] w-full max-w-[310px] items-center justify-center overflow-hidden rounded-2xl border border-accent-gold/45 bg-white/55 shadow-sm"
           >
             <canvas
               ref={webglCanvasRef}
@@ -540,56 +563,73 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
                 isDraggingUI ? 'cursor-grabbing' : hoveredPinId ? 'cursor-pointer' : 'cursor-grab'
               )}
             />
-            <span className="pointer-events-none absolute top-2.5 left-3 z-20 rounded-full border border-white/75 bg-white/85 px-2 py-0.5 font-bold font-mono text-[9.5px] text-slate-800 shadow-xs">
+            <span className="pointer-events-none absolute top-2.5 left-3 z-20 rounded-full border border-white/75 bg-white/90 px-2 py-0.5 font-bold font-mono text-[9.5px] text-slate-800 shadow-xs">
               {feedStatus === 'nasa-viirs'
                 ? 'NASA VIIRS LIVE'
                 : feedStatus === 'blue-marble'
                   ? 'NASA BLUE MARBLE'
                   : '3D TELEMETRY'}
             </span>
+            <span className="pointer-events-none absolute top-2.5 right-3 z-20 rounded-full border border-accent-gold/55 bg-white/90 px-2 py-0.5 font-bold font-mono text-[9.5px] text-slate-900 shadow-xs">
+              MPUMALANGA · ZA
+            </span>
             {activePin && (
-              <div className="pointer-events-none absolute inset-x-3 bottom-2.5 z-20 flex items-center justify-between rounded-full border border-white/75 bg-white/90 px-2.5 py-1 text-[10px] shadow-xs">
-                <span className="font-bold text-slate-950">{activePin.label}</span>
-                <span className="font-mono font-semibold text-slate-700 tabular-nums">
+              <div className="pointer-events-none absolute inset-x-3 bottom-2.5 z-20 flex items-center justify-between gap-2 rounded-full border border-accent-gold/45 bg-white/95 px-2.5 py-1 text-[10px] shadow-xs">
+                <span className="truncate font-bold text-slate-950">
+                  {activePin.label}
+                  {activePin.siteCode ? ` (${activePin.siteCode})` : ''}
+                </span>
+                <span className="shrink-0 font-mono font-semibold text-slate-700 tabular-nums">
                   {formatCoordinates(activePin.lat, activePin.lon)}
                 </span>
               </div>
             )}
           </div>
           <span className="mt-1.5 font-medium text-[10px] text-slate-700 tracking-wide">
-            Drag to orbit 3D globe · Click pin to focus
+            Focused on Mpumalanga, South Africa · Drag to orbit
           </span>
 
           <div
             className="mt-2 flex w-full max-w-[310px] flex-wrap items-center justify-center gap-1.5"
             aria-label="Quick site pin focus controls"
           >
-            {pins.map((pin) => {
-              const isSelected = selectedPinId === pin.id;
-              return (
-                <button
-                  key={pin.id}
-                  type="button"
-                  aria-pressed={isSelected}
-                  onMouseEnter={() => setHoveredPinId(pin.id)}
-                  onMouseLeave={() => setHoveredPinId(null)}
-                  onClick={() => focusPin(pin)}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-[10px] transition-all',
-                    isSelected
-                      ? 'border-accent-gold/70 bg-white text-slate-950 shadow-xs'
-                      : 'border-white/60 bg-white/65 text-slate-700 hover:bg-white hover:text-slate-950'
-                  )}
-                >
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: pin.color ?? 'var(--accent-gold)' }}
-                    aria-hidden="true"
-                  />
-                  <span>{pin.label}</span>
-                </button>
-              );
-            })}
+            {pins.length === 0 ? (
+              <span className="rounded-full border border-accent-gold/45 bg-white/80 px-2.5 py-1 font-medium text-[10px] text-slate-600">
+                No active sites registered in Supabase
+              </span>
+            ) : (
+              pins.map((pin) => {
+                const isSelected = selectedPinId === pin.id;
+                return (
+                  <button
+                    key={pin.id}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onMouseEnter={() => setHoveredPinId(pin.id)}
+                    onMouseLeave={() => setHoveredPinId(null)}
+                    onClick={() => focusPin(pin)}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-[10px] transition-all',
+                      isSelected
+                        ? 'border-accent-gold/80 bg-white text-slate-950 shadow-xs'
+                        : 'border-white/70 bg-white/75 text-slate-700 hover:bg-white hover:text-slate-950'
+                    )}
+                  >
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: pin.color ?? 'var(--accent-gold)' }}
+                      aria-hidden="true"
+                    />
+                    <span>{pin.label}</span>
+                    {pin.telemetrySummary && (
+                      <span className="font-mono text-[9px] text-slate-600 tabular-nums">
+                        · {pin.telemetrySummary}
+                      </span>
+                    )}
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
 

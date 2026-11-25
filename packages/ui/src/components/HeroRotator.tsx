@@ -4,6 +4,7 @@ import { m } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../lib/utils';
+import { type GlobePin, GlobePins } from './GlobePins';
 import { HeroCardContent } from './HeroCardContent';
 import type { Panel } from './hero-types';
 import { ARCH_LOGO_PATH, ARCH_LOGO_VIEWBOX } from './Logo';
@@ -25,6 +26,7 @@ function ArchEmblemIcon({ className }: { className?: string }) {
 
 export interface HeroRotatorProps {
   panels: Panel[];
+  sitePins?: readonly GlobePin[];
   incidentCount?: number;
   breakdownCount?: number;
   offlineMachineCount?: number;
@@ -168,7 +170,7 @@ function HeroSlide({
       aria-hidden={!isCenter}
       onClick={handleClick}
       className={cn(
-        'absolute inset-x-0 mx-auto h-full w-[92%] max-w-[1060px] transform-gpu will-change-[transform,opacity] sm:w-[88%] lg:w-[82%]',
+        'absolute inset-x-0 mx-auto h-full w-full max-w-[1260px] transform-gpu will-change-[transform,opacity]',
         cursorClass
       )}
       style={{
@@ -213,6 +215,7 @@ function HeroSlide({
 
 export function HeroRotator({
   panels,
+  sitePins,
   incidentCount = 0,
   breakdownCount = 0,
   offlineMachineCount = 0,
@@ -315,7 +318,7 @@ export function HeroRotator({
 
   return (
     <div
-      className="relative w-full select-none rounded-2xl py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40"
+      className="relative w-full select-none rounded-2xl py-2 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onKeyDown={handleKeyDown}
@@ -424,11 +427,18 @@ export function HeroRotator({
         </div>
       )}
 
+      {/* Active Mpumalanga Operational Sites 3D Globe Banner */}
+      <div data-testid="hero-kpi-slim-banner" className="mt-4 w-full">
+        <div className="gold-steel-border gold-steel-border-slim rounded-2xl border border-accent-gold/55 bg-white/85 p-4 shadow-window backdrop-blur-xl sm:p-5">
+          <GlobePins pins={sitePins} activePanel={panels[activeIndex]} />
+        </div>
+      </div>
+
       {/* Golden Separator between Hero Card selection and Bottom Core Operational Modules panel */}
       <div
         data-testid="hero-bottom-golden-separator"
         aria-hidden="true"
-        className="mx-auto mt-4 flex w-[92%] max-w-[1060px] items-center justify-center gap-3 sm:w-[88%] lg:w-[82%]"
+        className="mt-4 flex w-full items-center justify-center gap-3"
       >
         <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-gold/55 to-accent-gold motion-safe:animate-pulse" />
         <span className="h-2 w-2 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />

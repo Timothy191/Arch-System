@@ -9,16 +9,15 @@
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1.5px solid rgba(15, 23, 42, 0.14);
   border-radius: 20px;
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.95),
-    0 1px 2px rgba(15, 23, 42, 0.08), 0 8px 20px -4px rgba(15, 23, 42, 0.09);
-  transition: box-shadow var(--theme-transition-duration, 200ms)
-      cubic-bezier(0.16, 1, 0.3, 1),
-    transform var(--theme-transition-duration, 200ms)
-      cubic-bezier(0.16, 1, 0.3, 1),
-    border-color var(--theme-transition-duration, 200ms)
-      cubic-bezier(0.16, 1, 0.3, 1),
-    background var(--theme-transition-duration, 200ms)
-      cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(15, 23, 42, 0.08),
+    0 8px 20px -4px rgba(15, 23, 42, 0.09);
+  transition:
+    box-shadow var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1),
+    transform var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1),
+    border-color var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1),
+    background var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
@@ -27,8 +26,10 @@
   background: rgba(255, 255, 255, 0.96);
   border-color: rgba(15, 23, 42, 0.26);
   transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 1),
-    0 4px 12px rgba(15, 23, 42, 0.1), 0 16px 32px -6px rgba(15, 23, 42, 0.14);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 1),
+    0 4px 12px rgba(15, 23, 42, 0.1),
+    0 16px 32px -6px rgba(15, 23, 42, 0.14);
 }
 
 .uiverse-card-banner {
@@ -44,107 +45,55 @@
   opacity: 0.95;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  background: linear-gradient(
-    135deg,
-    var(--accent-blue),
-    var(--accent-electric-blue)
-  );
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-electric-blue));
 }
 
 .uiverse-card-banner-drilling {
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.85),
-    rgba(217, 119, 6, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(217, 119, 6, 0.85));
 }
 
 .uiverse-card-banner-production {
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.85),
-    rgba(5, 150, 105, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(5, 150, 105, 0.85));
 }
 
 .uiverse-card-banner-plant-processing {
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.85),
-    rgba(16, 185, 129, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(16, 185, 129, 0.85));
 }
 
 .uiverse-card-banner-plant-inventory {
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.85),
-    rgba(14, 116, 144, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(14, 116, 144, 0.85));
 }
 
 .uiverse-card-banner-access-control {
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.85),
-    rgba(29, 78, 216, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(29, 78, 216, 0.85));
 }
 
 .uiverse-card-banner-engineering {
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.85),
-    rgba(109, 40, 217, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.85), rgba(109, 40, 217, 0.85));
 }
 
 .uiverse-card-banner-control-room {
-  background: linear-gradient(
-    135deg,
-    rgba(239, 68, 68, 0.85),
-    rgba(185, 28, 28, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.85), rgba(185, 28, 28, 0.85));
 }
 
 .uiverse-card-banner-admin {
-  background: linear-gradient(
-    135deg,
-    rgba(168, 85, 247, 0.85),
-    rgba(126, 34, 206, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.85), rgba(126, 34, 206, 0.85));
 }
 
 .uiverse-card-banner-availability-utilization {
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.85),
-    rgba(37, 99, 235, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(37, 99, 235, 0.85));
 }
 
 .uiverse-card-banner-overview {
-  background: linear-gradient(
-    135deg,
-    rgba(14, 165, 233, 0.85),
-    rgba(37, 99, 235, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.85), rgba(37, 99, 235, 0.85));
 }
 
 .uiverse-card-banner-database {
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.85),
-    rgba(6, 95, 70, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(6, 95, 70, 0.85));
 }
 
 .uiverse-card-banner-presentation {
-  background: linear-gradient(
-    135deg,
-    rgba(212, 175, 55, 0.88),
-    rgba(180, 83, 9, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.88), rgba(180, 83, 9, 0.85));
 }
 
 .uiverse-card-icon-bubble {
@@ -162,8 +111,7 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.16);
-  transition: transform var(--theme-transition-duration, 200ms)
-    cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 20;
 }
 
@@ -176,14 +124,11 @@
   top: 10px;
   right: 10px;
   margin: 0;
-  transition: transform var(--theme-transition-duration, 200ms)
-      cubic-bezier(0.16, 1, 0.3, 1),
-    background-color var(--theme-transition-duration, 200ms)
-      cubic-bezier(0.16, 1, 0.3, 1),
-    border-color var(--theme-transition-duration, 200ms)
-      cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow var(--theme-transition-duration, 200ms)
-      cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    transform var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1),
+    background-color var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1),
+    border-color var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1);
   border-radius: 8px;
   width: 28px;
   height: 28px;
@@ -226,8 +171,7 @@
   text-transform: uppercase;
   letter-spacing: 0.055em;
   color: var(--color-ink);
-  transition: color var(--theme-transition-duration, 200ms)
-    cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .uiverse-card:hover .uiverse-card-title {
@@ -259,8 +203,7 @@
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
-  transition: background-color var(--theme-transition-duration, 200ms)
-    cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .uiverse-card-tag-row-text {
@@ -280,34 +223,37 @@
 }
 
 .gold-steel-border-slim {
-  --gold-border-width: 1.5px;
+  --gold-border-width: 1.75px;
 }
 
 .gold-steel-border::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: var(--gold-border-width, 2px);
+  padding: var(--gold-border-width, 2.25px);
   background: linear-gradient(
-    135deg,
-    var(--arch15, #d4af37) 0%,
-    #f4d03f 22%,
-    #fff6cc 45%,
-    var(--arch15, #d4af37) 65%,
-    #c5a017 82%,
-    var(--arch15, #d4af37) 100%
+    115deg,
+    #5c4004 0%,
+    #7a5406 20%,
+    #a8760b 36%,
+    #e5bc4b 47%,
+    #fff4c2 50%,
+    #e5bc4b 53%,
+    #a8760b 64%,
+    #7a5406 82%,
+    #5c4004 100%
   );
-  background-size: 300% 300%;
-  background-position: 50% 50%;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  background-size: 280% 280%;
+  background-position: 0% 50%;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  /* PERF: static at rest. `background-position` animations are non-composited
-     (CPU paint + mask raster every frame); with 250-330 bordered elements per
-     page this dropped frame rates to 10-24 FPS. Shimmer only runs on hover. */
   opacity: 1;
   pointer-events: none;
   z-index: 25;
+  animation: gold-trim-shine 4.2s ease-in-out infinite;
 }
 
 @keyframes gold-shimmer {
@@ -324,44 +270,109 @@
   }
 }
 
+@keyframes gold-trim-shine {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0.94;
+  }
+
+  50% {
+    background-position: 100% 50%;
+    opacity: 1;
+  }
+
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.94;
+  }
+}
+
+/* Shining metal effect for stat chips (Active / Pinned / Alerts) */
+.stat-chip-shine {
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.38),
+    0 2px 6px rgba(15, 23, 42, 0.16);
+}
+
+.stat-chip-shine::before {
+  content: '';
+  position: absolute;
+  top: -15%;
+  bottom: -15%;
+  left: 0;
+  width: 48%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 246, 204, 0.25) 28%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(255, 246, 204, 0.22) 72%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: translateX(-140%) skewX(-22deg);
+  pointer-events: none;
+}
+
+.stat-chip-shine.shining::before {
+  opacity: 1;
+  animation: stat-shine 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.stat-chip-shine-delay-1.shining::before {
+  animation-delay: 0.45s;
+}
+
+.stat-chip-shine-delay-2.shining::before {
+  animation-delay: 0.9s;
+}
+
+@keyframes stat-shine {
+  0% {
+    transform: translateX(-140%) skewX(-22deg);
+  }
+
+  55%,
+  100% {
+    transform: translateX(260%) skewX(-22deg);
+  }
+}
+
 /* Preserve shimmer on hover/focus with enhanced visibility */
 .gold-steel-border:hover::before,
 .gold-steel-border:focus-visible::before {
-  animation: gold-shimmer 1.5s ease-in-out infinite;
+  animation: gold-shimmer 1.8s ease-in-out infinite;
   opacity: 1;
 }
 
 input.gold-steel-border {
-  border: var(--gold-border-width, 1.5px) solid rgba(212, 175, 55, 0.65);
-  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.35),
-    inset 0 1px 0 rgba(255, 246, 204, 0.65);
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.85),
-      rgba(255, 255, 255, 0.85)
-    ),
-    linear-gradient(
-      135deg,
-      var(--arch15, #d4af37) 0%,
-      #f4d03f 22%,
-      #fff6cc 45%,
-      var(--arch15, #d4af37) 65%,
-      #c5a017 82%,
-      var(--arch15, #d4af37) 100%
-    );
+  border: var(--gold-border-width, 1.75px) solid rgba(122, 84, 6, 0.92);
+  box-shadow:
+    0 0 0 1px rgba(146, 102, 12, 0.65),
+    inset 0 1px 0 rgba(255, 246, 204, 0.75);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+    linear-gradient(135deg, #5c4004 0%, #8c630c 25%, #f6dc7a 50%, #8c630c 75%, #5c4004 100%);
   background-origin: border-box;
   background-clip: padding-box, border-box;
-  background-size: 100% 100%, 300% 300%;
-  background-position: 50% 50%;
+  background-size:
+    100% 100%,
+    280% 280%;
+  background-position: 0% 50%;
 }
 
 input.gold-steel-border:hover,
 input.gold-steel-border:focus {
-  animation: gold-shimmer 1.5s ease-in-out infinite;
+  animation: gold-shimmer 1.8s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .gold-steel-border::before,
   .gold-steel-border:hover::before,
+  .stat-chip-shine.shining::before,
   input.gold-steel-border:hover,
   input.gold-steel-border:focus {
     animation: none;
@@ -439,11 +450,7 @@ input.gold-steel-border:focus {
 
 .state-error {
   border-color: var(--status-critical, var(--color-danger));
-  background: color-mix(
-    in oklab,
-    var(--status-critical, var(--color-danger)) 8%,
-    transparent
-  );
+  background: color-mix(in oklab, var(--status-critical, var(--color-danger)) 8%, transparent);
 }
 .state-empty {
   text-align: center;

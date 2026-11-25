@@ -6,6 +6,17 @@ export interface GlobePin {
   readonly color?: string;
   readonly region?: string;
   readonly status?: 'online' | 'standby' | 'alert';
+  readonly siteCode?: string;
+  readonly telemetrySummary?: string;
+}
+
+export interface OperationalSiteInput {
+  readonly id: string;
+  readonly name: string;
+  readonly siteCode: string;
+  readonly active: boolean;
+  readonly activeBreakdowns?: number;
+  readonly todayLoads?: number;
 }
 
 export interface Vec3 {
@@ -45,62 +56,146 @@ export const LIMB_SCALE_NORM =
   CAMERA_DISTANCE_MULT / Math.sqrt(CAMERA_DISTANCE_MULT * CAMERA_DISTANCE_MULT - 1);
 export const MIN_PITCH_RAD = -1.15;
 export const MAX_PITCH_RAD = 1.15;
-export const INITIAL_ORBIT_YAW_RAD = 28 * DEG_TO_RAD;
-export const INITIAL_ORBIT_PITCH_RAD = -18 * DEG_TO_RAD;
+export const INITIAL_ORBIT_YAW_RAD = 28.68 * DEG_TO_RAD;
+export const INITIAL_ORBIT_PITCH_RAD = -26.15 * DEG_TO_RAD;
 export const FIBONACCI_DOT_COUNT = 2400;
 
 export const GLOBE_SPHERE_FILL_RATIO = 0.36;
 
 const GOLDEN_ANGLE_RAD = Math.PI * (3 - Math.sqrt(5));
 const POLE_THRESHOLD_LAT = 88;
+const MPUMALANGA_BASE_LAT = -26.15;
+const MPUMALANGA_BASE_LON = 28.68;
+
+interface MpumalangaCoordinatePreset {
+  readonly lat: number;
+  readonly lon: number;
+  readonly region: string;
+  readonly color: string;
+}
+
+const MPUMALANGA_SITE_COORDINATES: Readonly<Record<string, MpumalangaCoordinatePreset>> = {
+  'BRAK-PIT': {
+    lat: -26.15,
+    lon: 28.68,
+    region: 'Delmas, Mpumalanga · Open-Cast Pit',
+    color: 'rgb(184, 134, 11)',
+  },
+  'BRAK-PLANT': {
+    lat: -26.16,
+    lon: 28.69,
+    region: 'Delmas, Mpumalanga · Beneficiation Plant',
+    color: 'rgb(16, 185, 129)',
+  },
+  'EXT-PIT': {
+    lat: -26.18,
+    lon: 28.72,
+    region: 'Delmas, Mpumalanga · Extension Pit',
+    color: 'rgb(2, 132, 199)',
+  },
+  'HEAD-OFFICE': {
+    lat: -26.09,
+    lon: 28.31,
+    region: 'Bredell / Delmas, Mpumalanga Corridor',
+    color: 'rgb(59, 130, 246)',
+  },
+};
 
 export const DEFAULT_GLOBE_PINS: readonly GlobePin[] = [
   {
-    id: 'pit-viper-351',
-    label: 'Pit Viper 351',
-    region: 'Namibia · Pattern B-14',
-    lat: -22.9,
-    lon: 14.2,
-    color: 'rgb(212, 175, 55)',
+    id: 'brak-pit',
+    siteCode: 'BRAK-PIT',
+    label: 'Brakfontein Pit',
+    region: 'Delmas, Mpumalanga · Open-Cast Pit',
+    lat: -26.15,
+    lon: 28.68,
+    color: 'rgb(184, 134, 11)',
     status: 'online',
   },
   {
-    id: 'dispatch-room',
-    label: 'Dispatch Room',
-    region: 'Cape Town · SCADA Core',
-    lat: -33.9,
-    lon: 18.4,
-    color: 'rgb(0, 122, 255)',
-    status: 'online',
-  },
-  {
-    id: 'wash-plant-01',
-    label: 'Wash Plant 01',
-    region: 'Perth · Beneficiation',
-    lat: -31.9,
-    lon: 115.8,
+    id: 'brak-plant',
+    siteCode: 'BRAK-PLANT',
+    label: 'Brakfontein Plant',
+    region: 'Delmas, Mpumalanga · Beneficiation Plant',
+    lat: -26.16,
+    lon: 28.69,
     color: 'rgb(16, 185, 129)',
     status: 'online',
   },
   {
-    id: 'fleet-av-01',
-    label: 'Fleet AV 01',
-    region: 'Hamilton NZ · Haulage Telemetry',
-    lat: -37.8,
-    lon: 175.2,
-    color: 'rgb(5, 150, 105)',
+    id: 'ext-pit',
+    siteCode: 'EXT-PIT',
+    label: 'Extension Pit',
+    region: 'Delmas, Mpumalanga · Extension Pit',
+    lat: -26.18,
+    lon: 28.72,
+    color: 'rgb(2, 132, 199)',
     status: 'online',
   },
   {
-    id: 'db-core',
-    label: 'DB Core',
-    region: 'US East · Postgres Cluster',
-    lat: 40.7,
-    lon: -74.0,
+    id: 'head-office',
+    siteCode: 'HEAD-OFFICE',
+    label: 'Head Office',
+    region: 'Bredell / Delmas, Mpumalanga Corridor',
+    lat: -26.09,
+    lon: 28.31,
     color: 'rgb(59, 130, 246)',
     status: 'online',
   },
 ];
+
+function normalizeSiteCodeLookup(siteCode: string, siteName: string): string {
+  const cleanCode = siteCode.trim().toUpperCase();
+  if (cleanCode in MPUMALANGA_SITE_COORDINATES) {
+    return cleanCode;
+  }
+  const normalizedName = siteName.trim().toLowerCase();
+  if (normalizedName.includes('plant')) return 'BRAK-PLANT';
+  if (normalizedName.includes('extension') || normalizedName.includes('ext')) return 'EXT-PIT';
+  if (
+    normalizedName.includes('head') ||
+    normalizedName.includes('office') ||
+    normalizedName.includes('bredell')
+  ) {
+    return 'HEAD-OFFICE';
+  }
+  if (normalizedName.includes('brakfontein') || normalizedName.includes('pit')) {
+    return 'BRAK-PIT';
+  }
+  return cleanCode;
+}
+
+/** Resolve a real Supabase `public.sites` record into a Mpumalanga, South Africa 3D globe pin. */
+export function resolveMpumalangaSitePin(site: OperationalSiteInput): GlobePin {
+  const lookupKey = normalizeSiteCodeLookup(site.siteCode, site.name);
+  const preset = MPUMALANGA_SITE_COORDINATES[lookupKey];
+  const hash = Array.from(lookupKey || site.name).reduce(
+    (acc, ch) => (acc * 31 + ch.charCodeAt(0)) % 97,
+    0
+  );
+  const fallbackLat = MPUMALANGA_BASE_LAT - ((hash % 11) - 5) * 0.04;
+  const fallbackLon = MPUMALANGA_BASE_LON + (((hash * 7) % 13) - 6) * 0.05;
+
+  const activeBreakdowns = Math.max(0, site.activeBreakdowns ?? 0);
+  const todayLoads = Math.max(0, site.todayLoads ?? 0);
+  const status: GlobePin['status'] =
+    activeBreakdowns > 0 ? 'alert' : site.active ? 'online' : 'standby';
+
+  const alertsLabel = activeBreakdowns === 1 ? '1 alert' : `${activeBreakdowns} alerts`;
+  const loadsLabel = todayLoads === 1 ? '1 load' : `${todayLoads} loads`;
+
+  return {
+    id: site.id,
+    siteCode: site.siteCode,
+    label: site.name,
+    region: preset?.region ?? 'Mpumalanga Coalfields, South Africa',
+    lat: preset?.lat ?? Number(fallbackLat.toFixed(2)),
+    lon: preset?.lon ?? Number(fallbackLon.toFixed(2)),
+    color: activeBreakdowns > 0 ? 'rgb(220, 38, 38)' : (preset?.color ?? 'rgb(184, 134, 11)'),
+    status,
+    telemetrySummary: `${loadsLabel} · ${alertsLabel}`,
+  };
+}
 
 type PolygonRing = readonly (readonly [lonDeg: number, latDeg: number])[];
 

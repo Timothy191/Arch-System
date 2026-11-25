@@ -198,9 +198,12 @@ describe('HeroRotator', () => {
       '22.75 16.625 166.16 166.19'
     );
 
-    // Active Site Pins globe banner has been removed from HeroRotator
-    expect(screen.queryByTestId('hero-kpi-slim-banner')).not.toBeInTheDocument();
-    expect(screen.queryByText('Active Site Pins')).not.toBeInTheDocument();
+    // Active Mpumalanga operational sites 3D globe banner is rendered inside HeroRotator
+    const globeBanner = screen.getByTestId('hero-kpi-slim-banner');
+    expect(globeBanner).toBeInTheDocument();
+    expect(screen.getByText(/Active Site Pins · Mpumalanga, South Africa/i)).toBeInTheDocument();
+    expect(screen.getAllByText('Brakfontein Pit').length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText('Pit Viper 351')).not.toBeInTheDocument();
 
     // Primary and secondary hero CTAs have gold bordering
     const secondaryCtas = container.querySelectorAll('[data-cta="secondary-hero"]');
@@ -397,11 +400,11 @@ describe('HeroRotator', () => {
 
     render(<HeroRotator {...baseProps} departments={[plantInventoryDept]} />);
     expect(screen.getByText('Plant Inventory')).toBeInTheDocument();
-    // Rotate to the Plant Inventory slide and verify its telemetry graph mounts.
+    // Rotate to the Plant Inventory slide and verify its synchronized telemetry updates.
     fireEvent.click(screen.getByRole('button', { name: 'Next highlight' }));
-    expect(screen.queryByTestId('hero-kpi-slim-banner')).not.toBeInTheDocument();
+    expect(screen.getByTestId('hero-kpi-slim-banner')).toBeInTheDocument();
     expect(screen.getByTestId('hero-telemetry-graph-plant-inventory')).toBeInTheDocument();
-    expect(screen.getByText('Stockpile & Medium Inventory')).toBeInTheDocument();
+    expect(screen.getAllByText('Stockpile & Medium Inventory').length).toBeGreaterThanOrEqual(1);
   });
 
   it('applies the display face (font-anurati) to all hero-card panel headers and Gold branding to Previous/Next highlight buttons', () => {

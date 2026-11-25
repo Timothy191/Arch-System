@@ -94,14 +94,27 @@ describe('CoreOperationalModules', () => {
       'text-accent-gold'
     );
     expect(screen.getAllByText('Active')[0]?.parentElement).toHaveClass(
+      'stat-chip-shine',
+      'shining',
       'bg-emerald-950',
       'text-white'
     );
-    expect(screen.getByText('Pinned').parentElement).toHaveClass('bg-amber-950', 'text-amber-50');
+    expect(screen.getByText('Pinned').parentElement).toHaveClass(
+      'stat-chip-shine',
+      'stat-chip-shine-delay-1',
+      'shining',
+      'bg-amber-950',
+      'text-amber-50'
+    );
     expect(screen.getAllByText('Alerts')[0]?.parentElement).toHaveClass(
+      'stat-chip-shine',
+      'stat-chip-shine-delay-2',
+      'shining',
       'bg-rose-950',
       'text-white'
     );
+    expect(screen.getByRole('button', { name: /Active/i })).toHaveClass('border-slate-500/80');
+    expect(screen.getByRole('button', { name: /Alerts/i })).toHaveClass('border-slate-500/80');
     expect(screen.getByRole('group', { name: 'Filter modules by category' })).toHaveClass(
       'gold-steel-border',
       'gold-steel-border-slim'

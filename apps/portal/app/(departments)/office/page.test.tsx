@@ -122,14 +122,26 @@ describe('Office Department & AI Productivity Suite Route Module', () => {
   });
 
   describe('OfficePage (page.tsx) & Sub-routes', () => {
-    it('renders Office Department & AI Productivity Suite, GenOffice Online Suite, Inshellisense Terminal IDE, and Trail-Code Intelligence panels', async () => {
+    it('renders Office Department & AI Productivity Suite with golden studio header and without Inshellisense or Trail-Code panels', async () => {
       const jsx = await OfficePage();
       render(jsx);
 
       expect(screen.getByText('Office Department & AI Productivity Suite')).toBeInTheDocument();
-      expect(screen.getByText('GenOffice Online')).toBeInTheDocument();
-      expect(screen.getByText('inshellisense v0.0.4')).toBeInTheDocument();
-      expect(screen.getByText('trail-code v0.28.1')).toBeInTheDocument();
+      expect(screen.queryByText('GenOffice Online')).not.toBeInTheDocument();
+      expect(screen.queryByText('inshellisense v0.0.4')).not.toBeInTheDocument();
+      expect(screen.queryByText('trail-code v0.28.1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('inshellisense-terminal-panel')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('trail-code-intelligence-panel')).not.toBeInTheDocument();
+
+      // Studio Header Panel with white background + golden border
+      const studioHeader = screen.getByTestId('genoffice-studio-header-panel');
+      expect(studioHeader).toBeInTheDocument();
+      expect(studioHeader).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim',
+        '!bg-white',
+        'border-accent-gold/70'
+      );
 
       // 1. GenOffice Online Suite Panel
       expect(screen.getByTestId('genoffice-suite-panel')).toBeInTheDocument();
@@ -142,32 +154,13 @@ describe('Office Department & AI Productivity Suite Route Module', () => {
         screen.getByRole('tab', { name: /Executive Shift Presentation Deck/i })
       ).toBeInTheDocument();
 
-      // SOP Auto-Download card indicator
+      // Artifact preview card trigger
       expect(
         screen.getByTestId('office-doc-card-office-doc-shift-handover-sop')
       ).toBeInTheDocument();
-      expect(screen.getByText('Auto-Download Live PDF Template')).toBeInTheDocument();
-
-      // 2. Inshellisense Terminal IDE Panel
-      expect(screen.getByTestId('inshellisense-terminal-panel')).toBeInTheDocument();
-      expect(screen.getByText('Inshellisense Terminal IDE')).toBeInTheDocument();
-      expect(screen.getByText('0.0.4')).toBeInTheDocument();
-      expect(screen.getByText('healthy')).toBeInTheDocument();
-      expect(screen.getByText('bash')).toBeInTheDocument();
-      expect(screen.getByText('zsh')).toBeInTheDocument();
-      expect(screen.getByText('fish')).toBeInTheDocument();
-      expect(screen.getByText('pwsh')).toBeInTheDocument();
-
-      // 3. Trail-Code Intelligence Panel
-      expect(screen.getByTestId('trail-code-intelligence-panel')).toBeInTheDocument();
-      expect(screen.getByText('Trail-Code Intelligence')).toBeInTheDocument();
-      expect(screen.getByText('0.28.1')).toBeInTheDocument();
-      expect(screen.getByText('Request Proxy')).toBeInTheDocument();
-      expect(screen.getByText('Dual-Tier Redis Cache')).toBeInTheDocument();
-      expect(screen.getByText('Department Workspace')).toBeInTheDocument();
     });
 
-    it('auto-downloads the live populated SOP PDF template when clicking the Executive Shift Handover SOP card', async () => {
+    it('opens interactive Selected Document Review panel when clicking an artifact card and downloads PDF, CSV, Markdown, and JSON files', async () => {
       const jsx = await OfficePage();
       render(jsx);
 
@@ -188,24 +181,62 @@ describe('Office Department & AI Productivity Suite Route Module', () => {
       fireEvent.click(sopCard);
 
       await waitFor(() => {
-        expect(screen.getByRole('status')).toHaveTextContent(
-          'Auto-downloaded live PDF report for "Executive Shift Handover & Safety Escalation SOP"'
-        );
+        expect(screen.getByTestId('selected-office-document-preview')).toBeInTheDocument();
+      });
+      expect(screen.getByText('Selected Document Review')).toBeInTheDocument();
+
+      // Download PDF
+      fireEvent.click(screen.getByRole('button', { name: /Download PDF \(\.pdf\)/i }));
+      await waitFor(() => {
+        expect(mockToBlob).toHaveBeenCalledTimes(1);
       });
 
-      const downloadAnchor = createdAnchors.find((anchor) => anchor.download.length > 0);
-      expect(mockToBlob).toHaveBeenCalledTimes(1);
-      expect(downloadAnchor?.download).toMatch(
-        /^Executive-Shift-Handover-Safety-SOP-\d{4}-\d{2}-\d{2}\.pdf$/
-      );
+      // Download CSV
+      fireEvent.click(screen.getByRole('button', { name: /Download CSV \(\.csv\)/i }));
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent(/\.csv/i);
+      });
+
+      // Download Markdown
+      fireEvent.click(screen.getByRole('button', { name: /Download Markdown \(\.md\)/i }));
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent(/\.md/i);
+      });
+
+      // Download JSON
+      fireEvent.click(screen.getByRole('button', { name: /Download JSON \(\.json\)/i }));
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent(/\.json/i);
+      });
+
+      const downloadNames = createdAnchors
+        .map((anchor) => anchor.download)
+        .filter((name) => name.length > 0);
+      expect(downloadNames.some((name) => name.endsWith('.pdf'))).toBe(true);
+      expect(downloadNames.some((name) => name.endsWith('.csv'))).toBe(true);
+      expect(downloadNames.some((name) => name.endsWith('.md'))).toBe(true);
+      expect(downloadNames.some((name) => name.endsWith('.json'))).toBe(true);
       expect(toast.success).toHaveBeenCalled();
 
       createElementSpy.mockRestore();
     });
 
-    it('switches GenOffice tabs and saves a new Office artifact via saveOfficeDocumentAction', async () => {
+    it('switches GenOffice tabs, saves a new Office artifact via saveOfficeDocumentAction, and downloads the generated file to device', async () => {
       const jsx = await OfficePage();
       render(jsx);
+
+      const createdAnchors: HTMLAnchorElement[] = [];
+      const originalCreateElement = document.createElement.bind(document);
+      const createElementSpy = jest
+        .spyOn(document, 'createElement')
+        .mockImplementation((tagName: string) => {
+          const element = originalCreateElement(tagName);
+          if (tagName === 'a') {
+            jest.spyOn(element as HTMLAnchorElement, 'click').mockImplementation(() => {});
+            createdAnchors.push(element as HTMLAnchorElement);
+          }
+          return element;
+        });
 
       fireEvent.click(
         screen.getByRole('tab', { name: /Mining Yield & Cost Spreadsheet Modeler/i })
@@ -219,11 +250,21 @@ describe('Office Department & AI Productivity Suite Route Module', () => {
         target: { value: 'Q4 Wash Plant Yield & Cost Sheet' },
       });
 
-      fireEvent.click(screen.getByRole('button', { name: /Save Office Artifact/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Save Artifact & Download to Device/i }));
 
       await waitFor(() => {
         expect(screen.getByRole('status')).toHaveTextContent('Q4 Wash Plant Yield & Cost Sheet');
+        expect(screen.getByRole('status')).toHaveTextContent(/saved.*to device/i);
       });
+
+      const downloadedFiles = createdAnchors
+        .map((anchor) => anchor.download)
+        .filter((name) => name.length > 0);
+      expect(
+        downloadedFiles.some((name) => name.startsWith('Q4-Wash-Plant-Yield-Cost-Sheet-'))
+      ).toBe(true);
+
+      createElementSpy.mockRestore();
     });
 
     it('renders OfficePanelsPage and OfficeDocumentsPage in their respective modes', async () => {
@@ -333,11 +374,7 @@ describe('Office Department & AI Productivity Suite Route Module', () => {
       expect(snapshot.departmentSlug).toBe('office');
       expect(snapshot.isAuthenticated).toBe(true);
       expect(snapshot.documents.length).toBeGreaterThanOrEqual(3);
-      expect(snapshot.labTools.map((toolEntry) => toolEntry.id)).toEqual([
-        'genoffice',
-        'inshellisense',
-        'trail-code',
-      ]);
+      expect(snapshot.labTools.map((toolEntry) => toolEntry.id)).toEqual(['genoffice']);
     });
 
     it('validates input and persists audit + cache revalidation in saveOfficeDocumentAction', async () => {

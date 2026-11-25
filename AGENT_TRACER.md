@@ -6,6 +6,19 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T11:03:00+02:00] - `/hub` & `/office` Design Feedback Updates (`feat/hub-office-design-feedback`)
+
+- **Hub 3D Globe & Live Mpumalanga Sites ([`globe-math.ts`](packages/ui/src/components/globe-math.ts), [`GlobePins.tsx`](packages/ui/src/components/GlobePins.tsx), [`HeroRotator.tsx`](packages/ui/src/components/HeroRotator.tsx), [`HeroRotator.tsx`](libs/features/hub/ui/src/HeroRotator.tsx), [`hub/page.tsx`](apps/portal/app/hub/page.tsx), [`hub/layout.tsx`](apps/portal/app/hub/layout.tsx))**:
+  - Restored the interactive 3D satellite globe inside `HeroRotator` centered on Delmas / Brakfontein Colliery corridor, Mpumalanga, South Africa (`26.15°S, 28.68°E`) with `MPUMALANGA · ZA` framing and default stationary lock on the region until `Orbit` or drag is triggered.
+  - Replaced mock global pins (`Pit Viper 351`, `Dispatch Room`, `Wash Plant 01`, `Fleet AV 01`, `DB Core`) with live Supabase `public.sites` resolution (`resolveMpumalangaSitePin`) joined with active `breakdowns`, `machines`, and today's `hourly_loads` counts.
+  - Tightened `/hub` layout, edge-to-panel horizontal padding, vertical section spacing (`space-y-6`), and hero card/globe container widths for crisp flush grid alignment.
+- **Hub Metallic Stat Chips, Filter Borders & Global Animated Gold Trim ([`cards.css`](packages/theme/src/css/cards.css), [`CoreOperationalModules.tsx`](apps/portal/features/hub/components/CoreOperationalModules.tsx))**:
+  - Upgraded `.stat-chip-shine` with staggered metallic specular sweep animations (`Active`, `Pinned`, `Alerts`) and beveled pill depth, darkened `Active`/`Alerts` filter button borders (`border-slate-500/80`, `border-emerald-800/85`, `border-amber-800/85`), and darkened `.gold-steel-border` globally with continuous pulse-of-shine trim sweep (`gold-trim-shine`).
+- **Office Suite Overhaul & Removed Lab Integrations ([`OfficeWorkspaceClient.tsx`](apps/portal/features/departments/components/office/OfficeWorkspaceClient.tsx), [`office-file-export.ts`](apps/portal/features/departments/components/office/office-file-export.ts), [`actions.ts`](apps/portal/features/departments/components/office/actions.ts), [`departments.ts`](libs/features/departments/data-access/src/departments.ts))**:
+  - Removed the header tool-version badge strip and decommissioned unused `Inshellisense Terminal IDE` and `Trail-Code Intelligence` panels, constants, and metadata.
+  - Replaced the flat `GENOFFICE ONLINE AI SUITE & ARTIFACT STUDIO` divider with a white + golden-bordered studio banner (`genoffice-studio-header-panel`).
+  - Made Executive Artifact cards open an interactive `Selected Document Review` panel with live Supabase KPIs and multi-format device export (`.pdf`, `.csv`, `.md`, `.json`), and wired the `Create & Sync Office Artifact` form to persist artifacts and automatically save the selected format to device.
+
 ## [2026-11-25T10:25:00+02:00] - `/hub` & `/access-control` Design Feedback Updates (`feat/design-feedback-hub-access-control`)
 
 - **Hub UI & Telemetry ([`HeroRotator.tsx`](packages/ui/src/components/HeroRotator.tsx), [`HubLiveTelemetryPulse.tsx`](apps/portal/features/hub/components/HubLiveTelemetryPulse.tsx), [`CoreOperationalModules.tsx`](apps/portal/features/hub/components/CoreOperationalModules.tsx))**:

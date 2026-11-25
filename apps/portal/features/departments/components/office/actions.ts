@@ -33,7 +33,7 @@ export interface OfficeDocumentRecord {
 }
 
 interface OfficeLabToolStatus {
-  readonly id: 'genoffice' | 'inshellisense' | 'trail-code';
+  readonly id: 'genoffice';
   readonly name: string;
   readonly version: string;
   readonly repositoryUrl: string;
@@ -155,24 +155,6 @@ const INITIAL_OFFICE_LAB_TOOLS: readonly OfficeLabToolStatus[] = [
     status: 'online',
     capabilitySummary:
       'AI-native online document writer, mining yield & cost spreadsheet modeler, and executive shift presentation deck studio.',
-  },
-  {
-    id: 'inshellisense',
-    name: 'Inshellisense Terminal IDE',
-    version: '0.0.4',
-    repositoryUrl: 'https://github.com/microsoft/inshellisense',
-    status: 'healthy',
-    capabilitySummary:
-      'IDE-style command-line autocomplete runtime supporting bash, zsh, fish, and pwsh for Arch-System operational CLI workflows.',
-  },
-  {
-    id: 'trail-code',
-    name: 'Trail-Code Intelligence',
-    version: '0.28.1',
-    repositoryUrl: 'https://github.com/trailhq/Trail-Code',
-    status: 'healthy',
-    capabilitySummary:
-      'Interactive codebase trail intelligence mapping Edge Proxy RBAC, Dual-Tier Redis L1/L2 caching, and Department Workspace routes.',
   },
 ];
 

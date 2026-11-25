@@ -23,9 +23,7 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-[calc(100vh-28px)] text-[var(--text-heading)]">
       <div className="relative z-10">
         {/* Full-width responsive Hub Content Container */}
-        <div className="w-full px-md pt-sm pb-20 sm:px-lg md:pb-3xl lg:px-xl xl:px-3xl 2xl:px-4xl">
-          {children}
-        </div>
+        <div className="w-full px-3 pt-3 pb-20 sm:px-5 md:pb-10 lg:px-6">{children}</div>
 
         {/* Mobile bottom navigation (hidden on md+) */}
         <Suspense fallback={null}>

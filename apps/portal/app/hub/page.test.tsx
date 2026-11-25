@@ -366,4 +366,81 @@ describe('HubPage — graceful degradation', () => {
       'presentation',
     ]);
   });
+
+  it('passes real Mpumalanga sitePins resolved from Supabase sites, breakdowns, machines, and hourly_loads to HeroRotator', async () => {
+    const { createReadReplicaClient } = await import('@repo/supabase/read-replica');
+    const makeResultChain = (tableName: string) => {
+      const rows =
+        tableName === 'sites'
+          ? [
+              { id: 'site-brak-pit', name: 'Brakfontein Pit', site_code: 'BRAK-PIT', active: true },
+              {
+                id: 'site-brak-plant',
+                name: 'Brakfontein Plant',
+                site_code: 'BRAK-PLANT',
+                active: true,
+              },
+            ]
+          : tableName === 'breakdowns'
+            ? [{ id: 'bd-1', site_code: 'BRAK-PIT' }]
+            : tableName === 'machines'
+              ? [{ id: 'mach-1', site_id: 'site-brak-pit' }]
+              : tableName === 'hourly_loads'
+                ? [{ id: 'hl-1', machine_id: 'mach-1', total_loads: 18 }]
+                : [];
+      const chain: Record<string, unknown> = {
+        select: jest.fn(() => chain),
+        eq: jest.fn(() => chain),
+        is: jest.fn(() => chain),
+        order: jest.fn(() => chain),
+        limit: jest.fn(() => chain),
+        in: jest.fn(() => chain),
+        single: jest.fn(async () => ({ data: null, error: null })),
+        maybeSingle: jest.fn(async () => ({ data: null, error: null })),
+        rpc: jest.fn(async () => ({ data: [], error: null })),
+        data: rows,
+        count: rows.length,
+        error: null,
+      };
+      return chain;
+    };
+    (createReadReplicaClient as jest.Mock).mockImplementationOnce(async () => ({
+      from: jest.fn((tableName: string) => makeResultChain(tableName)),
+    }));
+    // Ensure subsequent calls in Promise.allSettled also resolve if mockResolvedValueOnce is consumed by first fetcher
+    (createReadReplicaClient as jest.Mock).mockImplementation(async () => ({
+      from: jest.fn((tableName: string) => makeResultChain(tableName)),
+    }));
+
+    const jsx = await HubPage();
+    render(jsx);
+
+    expect(mockHeroRotator).toHaveBeenCalledTimes(1);
+    const heroProps = mockHeroRotator.mock.calls[0]?.[0] as {
+      sitePins?: Array<{
+        id: string;
+        label: string;
+        lat: number;
+        lon: number;
+        status?: string;
+        telemetrySummary?: string;
+      }>;
+    };
+    expect(heroProps.sitePins).toBeDefined();
+    expect(heroProps.sitePins).toHaveLength(2);
+    expect(heroProps.sitePins?.[0]).toMatchObject({
+      label: 'Brakfontein Pit',
+      lat: -26.15,
+      lon: 28.68,
+      status: 'alert',
+      telemetrySummary: '18 loads · 1 alert',
+    });
+    expect(heroProps.sitePins?.[1]).toMatchObject({
+      label: 'Brakfontein Plant',
+      lat: -26.16,
+      lon: 28.69,
+      status: 'online',
+      telemetrySummary: '0 loads · 0 alerts',
+    });
+  });
 });

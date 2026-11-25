@@ -6,6 +6,7 @@ import {
 import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
+import { type GlobePin, resolveMpumalangaSitePin } from '@repo/ui/components/GlobePins';
 import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
@@ -92,6 +93,109 @@ async function getLiveDepartmentMetrics(today: string): Promise<DepartmentLiveMe
   );
 }
 
+interface HubSiteRow {
+  readonly id: string;
+  readonly name: string;
+  readonly site_code: string;
+  readonly active: boolean;
+}
+
+interface HubBreakdownSiteRow {
+  readonly id: string;
+  readonly site_code: string | null;
+}
+
+interface HubMachineSiteRow {
+  readonly id: string;
+  readonly site_id: string | null;
+}
+
+interface HubHourlyLoadSiteRow {
+  readonly id: string;
+  readonly machine_id: string;
+  readonly total_loads: number | null;
+}
+
+async function getHubOperationalSites(today: string): Promise<readonly GlobePin[]> {
+  'use cache';
+
+  cacheLife('minutes');
+  cacheTag('table:sites');
+  cacheTag('table:breakdowns');
+  cacheTag('table:hourly_loads');
+  cacheTag('table:machines');
+
+  return withCache(
+    async () => {
+      const db = await createReadReplicaClient([]);
+      const [sitesRes, breakdownsRes, machinesRes, loadsRes] = await Promise.all([
+        db
+          .from('sites')
+          .select('id, name, site_code, active')
+          .eq('active', true)
+          .is('deleted_at', null)
+          .order('name'),
+        db.from('breakdowns').select('id, site_code').eq('status', 'active').is('deleted_at', null),
+        db.from('machines').select('id, site_id').eq('active', true).is('deleted_at', null),
+        db.from('hourly_loads').select('id, machine_id, total_loads').eq('load_date', today),
+      ]);
+
+      const rawSites = Array.isArray(sitesRes?.data) ? (sitesRes.data as HubSiteRow[]) : [];
+      if (rawSites.length === 0) {
+        return [];
+      }
+
+      const rawBreakdowns = Array.isArray(breakdownsRes?.data)
+        ? (breakdownsRes.data as HubBreakdownSiteRow[])
+        : [];
+      const rawMachines = Array.isArray(machinesRes?.data)
+        ? (machinesRes.data as HubMachineSiteRow[])
+        : [];
+      const rawLoads = Array.isArray(loadsRes?.data)
+        ? (loadsRes.data as HubHourlyLoadSiteRow[])
+        : [];
+
+      const machineToSiteMap = new Map<string, string>();
+      for (const machine of rawMachines) {
+        if (machine.site_id) {
+          machineToSiteMap.set(machine.id, machine.site_id);
+        }
+      }
+
+      const loadsBySiteId = new Map<string, number>();
+      for (const loadEntry of rawLoads) {
+        const siteId = machineToSiteMap.get(loadEntry.machine_id);
+        if (!siteId) continue;
+        const delta = typeof loadEntry.total_loads === 'number' ? loadEntry.total_loads : 1;
+        loadsBySiteId.set(siteId, (loadsBySiteId.get(siteId) ?? 0) + delta);
+      }
+
+      const breakdownsByCode = new Map<string, number>();
+      for (const breakdown of rawBreakdowns) {
+        const cleanCode = breakdown.site_code?.trim().toUpperCase();
+        if (!cleanCode) continue;
+        breakdownsByCode.set(cleanCode, (breakdownsByCode.get(cleanCode) ?? 0) + 1);
+      }
+
+      return rawSites.map((site) =>
+        resolveMpumalangaSitePin({
+          id: site.id,
+          name: site.name,
+          siteCode: site.site_code,
+          active: site.active,
+          activeBreakdowns: breakdownsByCode.get(site.site_code.trim().toUpperCase()) ?? 0,
+          todayLoads: loadsBySiteId.get(site.id) ?? 0,
+        })
+      );
+    },
+    {
+      category: CacheCategory.METRICS,
+      keyParts: ['hub', 'operational-sites-mpumalanga-v1', today],
+      tags: ['table:sites', 'table:breakdowns', 'table:hourly_loads', 'table:machines'],
+    }
+  );
+}
+
 export default async function HubPage() {
   await connection();
   const supabase = await createServerSupabaseClient();
@@ -117,12 +221,14 @@ export default async function HubPage() {
     liveMetricsResult,
     userRoleResult,
     clearanceResult,
+    sitePinsResult,
   ] = await Promise.allSettled([
     getDashboardCounts(today),
     getAccessibleDepartmentNames(userId),
     getLiveDepartmentMetrics(today),
     getEmployeeRole(userId),
     getEmployeeClearance(userId),
+    getHubOperationalSites(today),
   ]);
 
   const { incidentCount, breakdownCount, offlineMachineCount } =
@@ -141,6 +247,8 @@ export default async function HubPage() {
     clearanceResult.status === 'fulfilled'
       ? clearanceResult.value
       : { state: 'clear' as const, details: [] as string[] };
+
+  const sitePins = sitePinsResult.status === 'fulfilled' ? sitePinsResult.value : [];
 
   // Plugin widgets come from the failure-isolated consumers wrapper — a broken
   // plugin orchestrator degrades to an empty grid, never a broken hub page.
@@ -229,10 +337,10 @@ export default async function HubPage() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-[1360px] space-y-12 px-6 py-6 sm:px-10">
+    <div className="mx-auto w-full max-w-[1440px] space-y-6 py-2">
       <h1 className="sr-only">Arch Systems Operations Hub</h1>
       {/* Light-theme glass hero section */}
-      <section className="relative w-full pt-2 pb-2">
+      <section className="relative w-full pt-1 pb-1">
         <HeroBackground />
 
         {/* Heading, 3D Hero Carousel with separate cards, and CTAs */}
@@ -252,6 +360,7 @@ export default async function HubPage() {
           secondaryHref={accessibleDeptIds.length > 0 ? `/${accessibleDeptIds[0]}` : '/'}
           secondaryLabel="System Guidelines"
           departments={departments}
+          sitePins={sitePins}
           incidentCount={incidentCount}
           breakdownCount={breakdownCount}
           offlineMachineCount={offlineMachineCount}
