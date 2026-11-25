@@ -198,11 +198,9 @@ describe('HeroRotator', () => {
       '22.75 16.625 166.16 166.19'
     );
 
-    // Globe pins banner under the hero card on the default central-command slide
-    const slimBanner = screen.getByTestId('hero-kpi-slim-banner');
-    expect(slimBanner).toBeInTheDocument();
-    expect(slimBanner).toContainElement(screen.getByRole('img', { name: 'Operations globe' }));
-    expect(slimBanner).toContainElement(screen.getByText('Active Site Pins'));
+    // Active Site Pins globe banner has been removed from HeroRotator
+    expect(screen.queryByTestId('hero-kpi-slim-banner')).not.toBeInTheDocument();
+    expect(screen.queryByText('Active Site Pins')).not.toBeInTheDocument();
 
     // Primary and secondary hero CTAs have gold bordering
     const secondaryCtas = container.querySelectorAll('[data-cta="secondary-hero"]');
@@ -399,12 +397,9 @@ describe('HeroRotator', () => {
 
     render(<HeroRotator {...baseProps} departments={[plantInventoryDept]} />);
     expect(screen.getByText('Plant Inventory')).toBeInTheDocument();
-    // Rotate to the Plant Inventory slide and verify the 3D globe banner remains mounted.
+    // Rotate to the Plant Inventory slide and verify its telemetry graph mounts.
     fireEvent.click(screen.getByRole('button', { name: 'Next highlight' }));
-    expect(screen.getByTestId('hero-kpi-slim-banner')).toContainElement(
-      screen.getByRole('img', { name: 'Operations globe' })
-    );
-    expect(screen.getByText('Active Site Pins')).toBeInTheDocument();
+    expect(screen.queryByTestId('hero-kpi-slim-banner')).not.toBeInTheDocument();
     expect(screen.getByTestId('hero-telemetry-graph-plant-inventory')).toBeInTheDocument();
     expect(screen.getByText('Stockpile & Medium Inventory')).toBeInTheDocument();
   });
@@ -518,6 +513,5 @@ describe('HeroRotator', () => {
     fireEvent.click(screen.getByLabelText('Next highlight'));
     expect(screen.getByTestId('hero-dept-icon-presentation')).toBeInTheDocument();
     expect(screen.getByText('CEO and investor presentation deck')).toBeInTheDocument();
-    expect(screen.getByTestId('globe-dept-metrics-presentation')).toBeInTheDocument();
   });
 });

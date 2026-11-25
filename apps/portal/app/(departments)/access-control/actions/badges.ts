@@ -8,7 +8,10 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { DatabaseError, ValidationError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
+import { type AccessLogCategory, classifyAccessLogCategory } from './badges-category';
 import { assertAccessControlRole } from './shared';
+
+export type { AccessLogCategory } from './badges-category';
 
 const VISITOR_BADGE_TTL_MS = 8 * 60 * 60 * 1000;
 const DENIAL_BLACKLIST_THRESHOLD = 3;
@@ -254,6 +257,7 @@ export interface AccessLogFilterOptions {
   readonly direction?: 'IN' | 'OUT' | 'ALL' | null;
   readonly statusFilter?: 'GRANTED' | 'DENIED' | 'ALL' | null;
   readonly dateRange?: AccessLogDateRange | null;
+  readonly category?: AccessLogCategory | null;
   readonly page?: number;
   readonly pageSize?: number;
 }
@@ -295,6 +299,7 @@ export interface AccessLogFilterQueryRow {
     readonly fleet?: {
       readonly fleet_code: string;
       readonly registration_number: string | null;
+      readonly vehicle_type?: string | null;
     } | null;
   } | null;
 }
@@ -552,6 +557,7 @@ interface FleetRecordLite {
   readonly id: string;
   readonly fleet_code: string;
   readonly registration_number: string | null;
+  readonly vehicle_type?: string | null;
 }
 
 async function enrichAccessLogRowsWithFleet(
@@ -573,7 +579,7 @@ async function enrichAccessLogRowsWithFleet(
   try {
     const { data: fleetRows, error: fleetError } = await supabase
       .from('fleet')
-      .select('id, fleet_code, registration_number')
+      .select('id, fleet_code, registration_number, vehicle_type')
       .in('id', fleetIds);
 
     if (fleetError || !fleetRows) {
@@ -596,6 +602,7 @@ async function enrichAccessLogRowsWithFleet(
           fleet: {
             fleet_code: matchedFleet.fleet_code,
             registration_number: matchedFleet.registration_number,
+            vehicle_type: matchedFleet.vehicle_type ?? null,
           },
         },
       };
@@ -713,8 +720,10 @@ export async function getAccessLogsWithFilters(
   const to = from + pageSize - 1;
   const trimmedSearch = options.searchQuery?.trim() ?? '';
   const hasSearchFilter = trimmedSearch.length > 0;
-  const queryRangeFrom = hasSearchFilter ? 0 : from;
-  const queryRangeTo = hasSearchFilter ? MAX_SEARCH_FETCH_ROWS - 1 : to;
+  const activeCategory = options.category && options.category !== 'ALL' ? options.category : null;
+  const requiresFullScan = hasSearchFilter || Boolean(activeCategory);
+  const queryRangeFrom = requiresFullScan ? 0 : from;
+  const queryRangeTo = requiresFullScan ? MAX_SEARCH_FETCH_ROWS - 1 : to;
   const warnings: string[] = [];
 
   try {
@@ -813,9 +822,14 @@ export async function getAccessLogsWithFilters(
       resolvedRows.map(normalizeAccessLogRow)
     );
 
-    if (hasSearchFilter) {
+    if (requiresFullScan) {
       const lowerTerm = trimmedSearch.toLowerCase();
-      const matchedLogs = enrichedRows.filter((logRow) => matchesSearchKeyword(logRow, lowerTerm));
+      const matchedLogs = enrichedRows.filter((logRow) => {
+        if (activeCategory && classifyAccessLogCategory(logRow) !== activeCategory) {
+          return false;
+        }
+        return !hasSearchFilter || matchesSearchKeyword(logRow, lowerTerm);
+      });
       return {
         logs: matchedLogs.slice(from, to + 1),
         totalCount: matchedLogs.length,

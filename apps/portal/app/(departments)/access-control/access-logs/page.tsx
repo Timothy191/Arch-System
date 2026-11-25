@@ -1,6 +1,7 @@
 import { Breadcrumb, BreadcrumbItem } from '@repo/ui/components/ui/breadcrumb';
 import { connection } from 'next/server';
 import {
+  type AccessLogCategory,
   type AccessLogDateRange,
   type AccessLogFilterQueryRow,
   type AllEmployeesAttendanceRegisterResult,
@@ -26,6 +27,15 @@ const VALID_DATE_RANGES = new Set<AccessLogDateRange>([
   'QUARTER',
   'YEAR',
   'ALL',
+]);
+const VALID_CATEGORIES = new Set<AccessLogCategory>([
+  'ALL',
+  'employees',
+  'contractors',
+  'fleet-machines',
+  'fleet-ldv',
+  'fleet-personal',
+  'fleet-coal-trucks',
 ]);
 
 function parsePositiveInt(rawValue: string | undefined, fallback: number, max?: number): number {
@@ -95,7 +105,7 @@ function resolveEntityDetails(logRow: AccessLogFilterQueryRow): {
       personnelId: null,
       idNumber: null,
       empCode: badge.fleet.registration_number ?? null,
-      jobTitle: 'Fleet Asset',
+      jobTitle: badge.fleet.vehicle_type ?? 'Fleet Asset',
       company: null,
     };
   }
@@ -155,6 +165,7 @@ export default async function AccessLogsPage({
     direction?: string;
     status?: string;
     dateRange?: string;
+    category?: string;
   }>;
 }) {
   await connection();
@@ -174,6 +185,10 @@ export default async function AccessLogsPage({
   const dateRange: AccessLogDateRange =
     rawDateRange && VALID_DATE_RANGES.has(rawDateRange) ? rawDateRange : 'ALL';
 
+  const rawCategory = params.category?.trim().toLowerCase() as AccessLogCategory | undefined;
+  const category: AccessLogCategory =
+    rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : 'ALL';
+
   const warningMessages: string[] = [];
 
   const [personnelSettled, logsSettled, summarySettled, registerSettled] = await Promise.allSettled(
@@ -187,6 +202,7 @@ export default async function AccessLogsPage({
         direction,
         statusFilter,
         dateRange,
+        ...(category !== 'ALL' ? { category } : {}),
       }),
       employeeId ? getEmployeeAttendanceSummary(employeeId, dateRange) : Promise.resolve(null),
       getAllEmployeesAttendanceRegister({
@@ -245,6 +261,7 @@ export default async function AccessLogsPage({
         initialAttendanceSummary={attendanceSummary}
         initialAttendanceRegister={initialAttendanceRegister}
         initialDateRange={dateRange}
+        initialCategory={category}
         initialQueryWarning={initialQueryWarning}
       />
     </div>

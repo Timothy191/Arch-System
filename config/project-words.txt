@@ -37,6 +37,7 @@ autonumber
 autorun
 AVEVA
 backgrounded
+bakkie
 basemap
 bbox
 beforeinstallprompt

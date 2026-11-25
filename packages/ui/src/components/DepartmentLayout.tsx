@@ -7,6 +7,7 @@ import {
   BarChart3,
   BookOpen,
   Briefcase,
+  Car,
   CheckSquare,
   ChevronRight,
   Circle,
@@ -37,6 +38,7 @@ import {
   ShieldOff,
   Target,
   TrendingUp,
+  Truck,
   Undo2,
   Users,
   Workflow,
@@ -137,6 +139,27 @@ const ADMIN_GENERAL_SUBTABS = [
   { key: 'external-content', label: 'External Content' },
 ] as const;
 
+const ACCESS_LOGS_SUBTABS = [
+  { key: 'employees', label: 'Employees' },
+  { key: 'contractors', label: 'Contractors' },
+  { key: 'fleet-machines', label: 'Fleet (Machines on site)' },
+  { key: 'fleet-ldv', label: 'Fleet (Company LDV)' },
+  { key: 'fleet-personal', label: 'Fleet (Personal Vehicles of employees)' },
+  { key: 'fleet-coal-trucks', label: 'Fleet (Coal trucks)' },
+] as const;
+
+const ACCESS_LOGS_SUBTAB_ICONS: Record<
+  (typeof ACCESS_LOGS_SUBTABS)[number]['key'],
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
+> = {
+  employees: Users,
+  contractors: Briefcase,
+  'fleet-machines': Pickaxe,
+  'fleet-ldv': Truck,
+  'fleet-personal': Car,
+  'fleet-coal-trucks': Factory,
+};
+
 export function DepartmentLayout({
   department,
   tabs,
@@ -146,11 +169,13 @@ export function DepartmentLayout({
   const pathname = usePathname();
   const searchParams = useSearchParams?.() ?? null;
   const activeTabParam = searchParams?.get?.('tab') ?? null;
+  const activeCategoryParam = searchParams?.get?.('category') ?? null;
   const basePath = `/${department.name}`;
   const [isOpen, setIsOpen] = useState(defaultPinned);
   const [isPinned, setIsPinned] = useState(defaultPinned);
   const [isDashboardExpanded, setIsDashboardExpanded] = useState(true);
   const [isReportsExpanded, setIsReportsExpanded] = useState(true);
+  const [isAccessLogsExpanded, setIsAccessLogsExpanded] = useState(true);
   const sidebarRef = useRef<HTMLElement>(null);
   const collapseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -396,6 +421,8 @@ export function DepartmentLayout({
             const hasDashboardSubtabs =
               tab.name === 'dashboard' && department.name === 'control-room';
             const hasAdminGeneralSubtabs = tab.name === 'dashboard' && department.name === 'admin';
+            const hasAccessLogsSubtabs =
+              tab.name === 'access-logs' && department.name === 'access-control';
             const hasAnyDashboardSubtabs = hasDashboardSubtabs || hasAdminGeneralSubtabs;
             const isShiftCloseoutSubtabActive =
               hasDashboardSubtabs && pathname === `${basePath}/shift-closeout`;
@@ -429,12 +456,15 @@ export function DepartmentLayout({
               isRouteMatch &&
               !isPdfReportActive &&
               !isWhatsappReportActive;
+            const isAccessLogsSubtabSelected =
+              hasAccessLogsSubtabs && isRouteMatch && Boolean(activeCategoryParam);
             const isActive =
               isRouteMatch &&
               !isPdfReportActive &&
               !isWhatsappReportActive &&
               !isShiftOperationsSubtabActive &&
-              !isShiftCloseoutSubtabActive;
+              !isShiftCloseoutSubtabActive &&
+              !isAccessLogsSubtabSelected;
             const Icon = ICON_MAP[tab.icon];
             return (
               <div key={tab.name} className="space-y-0.5">
@@ -447,6 +477,9 @@ export function DepartmentLayout({
                       }
                       if (tab.name === 'reports') {
                         setIsReportsExpanded(true);
+                      }
+                      if (hasAccessLogsSubtabs) {
+                        setIsAccessLogsExpanded(true);
                       }
                     }}
                     className={cn(TAB_LINK_BASE, isActive ? TAB_LINK_ACTIVE : TAB_LINK_INACTIVE)}
@@ -513,6 +546,33 @@ export function DepartmentLayout({
                         className={cn(
                           'h-3.5 w-3.5 transition-transform duration-200',
                           isReportsExpanded && 'rotate-90'
+                        )}
+                      />
+                    </button>
+                  )}
+                  {hasAccessLogsSubtabs && (
+                    <button
+                      type="button"
+                      data-testid="access-logs-subtabs-toggle"
+                      aria-label={
+                        isAccessLogsExpanded
+                          ? 'Collapse Access Logs sub-tabs'
+                          : 'Expand Access Logs sub-tabs'
+                      }
+                      aria-expanded={isAccessLogsExpanded}
+                      onClick={() => setIsAccessLogsExpanded((prev) => !prev)}
+                      className={cn(
+                        'shrink-0 cursor-pointer rounded-md p-1.5 transition-colors',
+                        isRouteMatch
+                          ? 'text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10'
+                          : 'text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
+                      )}
+                    >
+                      <Logo
+                        variant="gold"
+                        className={cn(
+                          'h-3.5 w-3.5 transition-transform duration-200',
+                          isAccessLogsExpanded && 'rotate-90'
                         )}
                       />
                     </button>
@@ -675,6 +735,41 @@ export function DepartmentLayout({
                       />
                       <span>WhatsApp Report</span>
                     </Link>
+                  </div>
+                )}
+                {hasAccessLogsSubtabs && isAccessLogsExpanded && (
+                  <div
+                    data-testid="access-logs-subtabs"
+                    className="mt-1 ml-3.5 flex flex-col gap-1 border-accent-gold/35 border-l-2 pl-3"
+                  >
+                    {ACCESS_LOGS_SUBTABS.map((subtab) => {
+                      const isSubtabActive =
+                        pathname === `${basePath}/access-logs` &&
+                        activeCategoryParam === subtab.key;
+                      const SubIcon = ACCESS_LOGS_SUBTAB_ICONS[subtab.key];
+                      return (
+                        <Link
+                          key={subtab.key}
+                          href={`${basePath}/access-logs?category=${subtab.key}`}
+                          data-testid={`access-logs-subtab-${subtab.key}`}
+                          title={subtab.label}
+                          className={cn(
+                            SUBTAB_LINK_BASE,
+                            isSubtabActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
+                          )}
+                        >
+                          <SubIcon
+                            className={cn(
+                              'h-3 w-3 shrink-0 transition-colors',
+                              isSubtabActive
+                                ? 'text-[var(--accent-blue)]'
+                                : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
+                            )}
+                          />
+                          <span className="truncate">{subtab.label}</span>
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>

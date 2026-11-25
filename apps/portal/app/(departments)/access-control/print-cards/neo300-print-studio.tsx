@@ -17,6 +17,7 @@ import {
 import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { QRCodeSection } from '../card-actions/qr-section';
 import type {
   CardPrintJob,
   CardStudioDepartment,
@@ -521,20 +522,11 @@ export function Neo300PrintStudio({
                         }`}
                       >
                         <div className="flex min-w-0 items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-slate-800 to-slate-700 font-bold text-sm text-white">
-                            {emp.photo_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={emp.photo_url}
-                                alt={`${emp.first_name} ${emp.surname}`}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <>
-                                {emp.first_name[0]}
-                                {emp.surname[0]}
-                              </>
-                            )}
+                          <div
+                            data-testid={`employee-row-qr-${emp.id}`}
+                            className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-accent-gold/55 bg-white p-0.5 shadow-2xs"
+                          >
+                            <QRCodeSection data={emp.qr_code || `EMP-${emp.emp_code}`} size={38} />
                           </div>
                           <div className="min-w-0">
                             <p className="truncate font-medium text-[var(--text-heading)] text-sm">

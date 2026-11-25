@@ -48,6 +48,7 @@ import {
   getVisitorsForDepartment,
   registerVisitor,
 } from './badges';
+import { classifyAccessLogCategory } from './badges-category';
 import { assertAccessControlRole } from './shared';
 
 const mockAssertRole = jest.mocked(assertAccessControlRole);
@@ -695,6 +696,138 @@ describe('access-control badges & attendance server actions', () => {
       });
       expect(scanRes.accessGranted).toBe(true);
       expect(scanRes.name).toBe('Alice ADT');
+    });
+
+    it('classifies and filters access logs across employees, contractors, and all 4 fleet categories', async () => {
+      const makeLog = (id: string, badge: Record<string, unknown>) => ({
+        id,
+        scanned_at: '2026-10-27T08:00:00Z',
+        gate_location: 'Main Gate',
+        access_granted: true,
+        denial_reason: null,
+        access_type: 'QR',
+        direction: 'IN',
+        badge_id: id,
+        badge,
+      });
+
+      const logsByCategory = [
+        makeLog('emp', {
+          id: 'b-emp',
+          qr_code: 'EMP-1',
+          entity_type: 'personnel',
+          personnel: {
+            id: 'p-1',
+            first_name: 'John',
+            surname: 'Doe',
+            emp_code: 'E1',
+            job_title: 'Operator',
+          },
+        }),
+        makeLog('con', {
+          id: 'b-con',
+          qr_code: 'CON-1',
+          entity_type: 'visitor',
+          visitor: { id: 'v-1', name: 'Contractor Sam', company: 'BuildCo' },
+        }),
+        makeLog('mach', {
+          id: 'b-mach',
+          qr_code: 'FL-EX',
+          entity_type: 'fleet',
+          fleet_id: 'fl-ex',
+        }),
+        makeLog('ldv', {
+          id: 'b-ldv',
+          qr_code: 'FL-LDV',
+          entity_type: 'fleet',
+          fleet_id: 'fl-ldv',
+        }),
+        makeLog('pers', {
+          id: 'b-pers',
+          qr_code: 'FL-PERS',
+          entity_type: 'fleet',
+          fleet_id: 'fl-pers',
+        }),
+        makeLog('coal', {
+          id: 'b-coal',
+          qr_code: 'FL-COAL',
+          entity_type: 'fleet',
+          fleet_id: 'fl-coal',
+        }),
+      ];
+
+      expect(
+        classifyAccessLogCategory({
+          ...(logsByCategory[0] as never),
+        })
+      ).toBe('employees');
+      expect(
+        classifyAccessLogCategory({
+          ...(logsByCategory[1] as never),
+        })
+      ).toBe('contractors');
+
+      mockAssertRole.mockResolvedValue({
+        supabase: {
+          from: jest.fn((table: string) => {
+            if (table === 'access_logs') {
+              return buildSupabaseChain(() => ({
+                data: logsByCategory,
+                count: logsByCategory.length,
+                error: null,
+              }));
+            }
+            if (table === 'fleet') {
+              return buildSupabaseChain(() => ({
+                data: [
+                  {
+                    id: 'fl-ex',
+                    fleet_code: 'EX-01',
+                    registration_number: 'NA',
+                    vehicle_type: 'Excavator',
+                  },
+                  {
+                    id: 'fl-ldv',
+                    fleet_code: 'LDV-04',
+                    registration_number: 'ND-111',
+                    vehicle_type: 'Company LDV',
+                  },
+                  {
+                    id: 'fl-pers',
+                    fleet_code: 'PV-09',
+                    registration_number: 'ND-222',
+                    vehicle_type: 'Personal Sedan',
+                  },
+                  {
+                    id: 'fl-coal',
+                    fleet_code: 'CT-14',
+                    registration_number: 'ND-333',
+                    vehicle_type: 'Coal Haul Truck',
+                  },
+                ],
+                error: null,
+              }));
+            }
+            return buildSupabaseChain(() => ({ data: [], error: null }));
+          }),
+        },
+      } as never);
+
+      const coalResult = await getAccessLogsWithFilters({ category: 'fleet-coal-trucks' });
+      expect(coalResult.totalCount).toBe(1);
+      expect(coalResult.logs[0]?.id).toBe('coal');
+
+      const machinesResult = await getAccessLogsWithFilters({ category: 'fleet-machines' });
+      expect(machinesResult.totalCount).toBe(1);
+      expect(machinesResult.logs[0]?.id).toBe('mach');
+
+      const ldvResult = await getAccessLogsWithFilters({ category: 'fleet-ldv' });
+      expect(ldvResult.totalCount).toBe(1);
+      expect(ldvResult.logs[0]?.id).toBe('ldv');
+
+      const personalResult = await getAccessLogsWithFilters({ category: 'fleet-personal' });
+      expect(personalResult.totalCount).toBe(1);
+      expect(personalResult.logs[0]?.id).toBe('pers');
     });
   });
 });

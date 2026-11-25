@@ -300,4 +300,36 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(commandHeader.className).not.toContain('gold-steel-border');
     expect(commandHeader.className).toContain('border-b');
   });
+
+  it('renders all 6 Access Logs sub-tabs under Access Control sidebar and highlights active category', () => {
+    const accessControlDept = DEPARTMENTS.find((d) => d.name === 'access-control')!;
+    const accessControlTabs = getDepartmentTabs('access-control');
+    mockUsePathname.mockReturnValue('/access-control/access-logs');
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('category=fleet-coal-trucks'));
+
+    render(
+      <DepartmentLayout department={accessControlDept} tabs={accessControlTabs}>
+        <div>Access Logs Content</div>
+      </DepartmentLayout>
+    );
+
+    const expectedSubtabs = [
+      { key: 'employees', label: 'Employees' },
+      { key: 'contractors', label: 'Contractors' },
+      { key: 'fleet-machines', label: 'Fleet (Machines on site)' },
+      { key: 'fleet-ldv', label: 'Fleet (Company LDV)' },
+      { key: 'fleet-personal', label: 'Fleet (Personal Vehicles of employees)' },
+      { key: 'fleet-coal-trucks', label: 'Fleet (Coal trucks)' },
+    ];
+
+    expect(screen.getByTestId('access-logs-subtabs')).toBeInTheDocument();
+    for (const subtab of expectedSubtabs) {
+      const link = screen.getByTestId(`access-logs-subtab-${subtab.key}`);
+      expect(link).toHaveTextContent(subtab.label);
+      expect(link).toHaveAttribute('href', `/access-control/access-logs?category=${subtab.key}`);
+    }
+
+    const activeCoalLink = screen.getByTestId('access-logs-subtab-fleet-coal-trucks');
+    expect(activeCoalLink.className).toContain('bg-[var(--accent-blue)]/10');
+  });
 });

@@ -92,6 +92,8 @@ describe('Neo300PrintStudio Coy Number & Expiry Dates workflow', () => {
       />
     );
 
+    expect(screen.getByTestId('employee-row-qr-emp-1')).toHaveTextContent('EMP-OP-DT-77');
+    expect(screen.queryByText('AA')).not.toBeInTheDocument();
     expect(screen.getByTestId('plantcor-card-medical-date')).toHaveTextContent('2027-06-15');
     expect(screen.getByTestId('plantcor-card-induction-date')).toHaveTextContent('2027-08-20');
 

@@ -57,6 +57,9 @@ describe('Access Control Dashboard Widgets', () => {
     expect(screen.getByText('None expiring')).toBeInTheDocument();
     expect(screen.getByText('Zero denied')).toBeInTheDocument();
     expect(screen.getByText('All cleared')).toBeInTheDocument();
+
+    const activeQrCard = screen.getByText('Active QR Codes').closest('div.rounded-xl');
+    expect(activeQrCard).toHaveClass('!bg-white', 'gold-steel-border', 'border-accent-gold/65');
   });
 
   it('renders DashboardChartsRow and QRStatusDistributionChart with en-US numbers', () => {

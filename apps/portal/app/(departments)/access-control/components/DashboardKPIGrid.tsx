@@ -23,26 +23,27 @@ interface KPICardProps {
   hero?: boolean;
 }
 
-const KPI_CARD_MOTION_CLASS = 'bg-white shadow-lg transition-all hover:shadow-xl active:scale-95';
+const KPI_CARD_MOTION_CLASS =
+  'gold-steel-border gold-steel-border-slim !bg-none !bg-white border-accent-gold/65 shadow-sm transition-all hover:shadow-xl active:scale-95';
 
 const variantStyles = {
   default: {
-    card: `${KPI_CARD_MOTION_CLASS} border-blue-500/20 shadow-blue-500/20 hover:shadow-blue-500/30`,
+    card: `${KPI_CARD_MOTION_CLASS} hover:shadow-blue-500/20`,
     icon: 'bg-blue-500/10 text-blue-600',
     value: 'text-blue-800',
   },
   warning: {
-    card: `${KPI_CARD_MOTION_CLASS} border-amber-500/30 shadow-amber-500/20 hover:shadow-amber-500/30`,
+    card: `${KPI_CARD_MOTION_CLASS} hover:shadow-amber-500/20`,
     icon: 'bg-amber-500/10 text-amber-600',
     value: 'text-amber-800',
   },
   danger: {
-    card: `${KPI_CARD_MOTION_CLASS} border-red-500/30 shadow-red-500/20 hover:shadow-red-500/30`,
+    card: `${KPI_CARD_MOTION_CLASS} hover:shadow-red-500/20`,
     icon: 'bg-red-500/10 text-red-600',
     value: 'text-red-700',
   },
   success: {
-    card: `${KPI_CARD_MOTION_CLASS} border-emerald-500/30 shadow-emerald-500/20 hover:shadow-emerald-500/30`,
+    card: `${KPI_CARD_MOTION_CLASS} hover:shadow-emerald-500/20`,
     icon: 'bg-emerald-500/10 text-emerald-600',
     value: 'text-emerald-700',
   },

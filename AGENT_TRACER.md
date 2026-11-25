@@ -6,6 +6,16 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T10:25:00+02:00] - `/hub` & `/access-control` Design Feedback Updates (`feat/design-feedback-hub-access-control`)
+
+- **Hub UI & Telemetry ([`HeroRotator.tsx`](packages/ui/src/components/HeroRotator.tsx), [`HubLiveTelemetryPulse.tsx`](apps/portal/features/hub/components/HubLiveTelemetryPulse.tsx), [`CoreOperationalModules.tsx`](apps/portal/features/hub/components/CoreOperationalModules.tsx))**:
+  - Removed the `Active Site Pins` (`GlobePins`) banner block from `HeroRotator`.
+  - Added an animated system-updates ticker banner and interactive auto-rebuilding telemetry graph underneath `Mining Department Modules`.
+- **Access Control HUD, KPIs, Muster, Print Studio & Access Logs Sub-Tabs ([`PerimeterGateHUD.tsx`](<apps/portal/app/(departments)/access-control/components/PerimeterGateHUD.tsx>), [`DashboardKPIGrid.tsx`](<apps/portal/app/(departments)/access-control/components/DashboardKPIGrid.tsx>), [`muster-roll-call-view.tsx`](<apps/portal/app/(departments)/access-control/muster/muster-roll-call-view.tsx>), [`neo300-print-studio.tsx`](<apps/portal/app/(departments)/access-control/print-cards/neo300-print-studio.tsx>), [`DepartmentLayout.tsx`](packages/ui/src/components/DepartmentLayout.tsx), [`badges-category.ts`](<apps/portal/app/(departments)/access-control/actions/badges-category.ts>), [`badges.ts`](<apps/portal/app/(departments)/access-control/actions/badges.ts>), [`access-logs/page.tsx`](<apps/portal/app/(departments)/access-control/access-logs/page.tsx>), [`AccessLogsClient.tsx`](<apps/portal/app/(departments)/access-control/access-logs/AccessLogsClient.tsx>))**:
+  - Redesigned `PerimeterGateHUD` with gate cycle throughput and barrier/BAC readiness graphs; restyled Access Control KPI cards with crisp white backgrounds and golden borders.
+  - Updated `/access-control/muster` by removing window header chrome and the `ALL SOULS ACCOUNTED` pill, styling counter cards with bright 3D elevation + golden borders, styling station cards and roll-call table with white backgrounds + golden borders, and adding typewriter placeholder animation to the white/gold search input.
+  - Replaced employee initials avatars in `/access-control/print-cards` with per-employee QR code thumbnails and added 6 category sub-tabs under `Access Logs` (`Employees`, `Contractors`, `Fleet (Machines on site)`, `Fleet (Company LDV)`, `Fleet (Personal Vehicles of employees)`, `Fleet (Coal trucks)`).
+
 ## [2026-11-25T09:20:00+02:00] - Hybrid Two-Tier Remote Support & Desktop Assistance (`feat/remote-support-system`)
 
 - **Database, Contracts & RBAC ([`230_remote_support_system.sql`](packages/database/migrations/230_remote_support_system.sql), [`manual-types.ts`](packages/supabase/src/manual-types.ts), [`remote-support.schema.ts`](packages/contract/src/schemas/remote-support.schema.ts), [`env.ts`](libs/shared/utils/src/env.ts), [`server/proxy.ts`](apps/portal/server/proxy.ts), [`admin/layout.tsx`](apps/portal/app/admin/layout.tsx), [`departments.ts`](libs/features/departments/data-access/src/departments.ts))**:

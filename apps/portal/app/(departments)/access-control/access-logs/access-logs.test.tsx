@@ -628,4 +628,28 @@ describe('AccessLogsClient, AccessLogsPage & Attendance Register', () => {
     expect(dailyCsv).toContain('2026-10-27');
     expect(dailyCsv).toContain('Failed Breathalyzer Alcohol Test');
   });
+
+  it('filters access logs by category sub-tabs and forwards category from RSC searchParams', async () => {
+    mockGetAccessLogsWithFilters.mockResolvedValue({ logs: [], totalCount: 0 });
+    const coalPage = await AccessLogsPage({
+      searchParams: Promise.resolve({ category: 'fleet-coal-trucks' }),
+    });
+    const { unmount } = render(coalPage);
+    expect(mockGetAccessLogsWithFilters).toHaveBeenCalledWith(
+      expect.objectContaining({ category: 'fleet-coal-trucks' })
+    );
+    expect(screen.getByTestId('access-logs-category-tabs')).toBeInTheDocument();
+    expect(screen.getByTestId('access-logs-category-tab-fleet-coal-trucks')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+
+    fireEvent.click(screen.getByTestId('access-logs-category-tab-fleet-ldv'));
+    await waitFor(() => {
+      expect(mockGetAccessLogsWithFilters).toHaveBeenCalledWith(
+        expect.objectContaining({ category: 'fleet-ldv' })
+      );
+    });
+    unmount();
+  });
 });

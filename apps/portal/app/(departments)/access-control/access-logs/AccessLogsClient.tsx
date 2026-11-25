@@ -52,6 +52,7 @@ import {
   getEmployeeAttendanceSummary,
 } from '../actions';
 import type {
+  AccessLogCategory,
   AccessLogDateRange,
   AccessLogFilterQueryRow,
   AllEmployeesAttendanceRegisterResult,
@@ -59,6 +60,19 @@ import type {
   EmployeeAttendanceSummary,
   EmployeeDailyAttendanceRecord,
 } from '../actions/badges';
+
+const ACCESS_LOG_CATEGORY_TABS: ReadonlyArray<{
+  readonly id: AccessLogCategory;
+  readonly label: string;
+}> = [
+  { id: 'ALL', label: 'All Logs' },
+  { id: 'employees', label: 'Employees' },
+  { id: 'contractors', label: 'Contractors' },
+  { id: 'fleet-machines', label: 'Fleet (Machines on site)' },
+  { id: 'fleet-ldv', label: 'Fleet (Company LDV)' },
+  { id: 'fleet-personal', label: 'Fleet (Personal Vehicles of employees)' },
+  { id: 'fleet-coal-trucks', label: 'Fleet (Coal trucks)' },
+];
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 50;
@@ -182,6 +196,7 @@ interface AccessLogsClientProps {
   readonly initialAttendanceSummary?: EmployeeAttendanceSummary | null;
   readonly initialAttendanceRegister?: AllEmployeesAttendanceRegisterResult | null;
   readonly initialDateRange?: AccessLogDateRange;
+  readonly initialCategory?: AccessLogCategory;
   readonly initialQueryWarning?: string | null;
 }
 
@@ -192,6 +207,7 @@ interface AccessLogQueryOverrides {
   readonly direction?: 'ALL' | 'IN' | 'OUT';
   readonly status?: 'ALL' | 'GRANTED' | 'DENIED';
   readonly dateRange?: AccessLogDateRange;
+  readonly category?: AccessLogCategory;
 }
 
 export function escapeAccessLogCsvCell(cellText: string): string {
@@ -650,6 +666,7 @@ export function AccessLogsClient({
   initialAttendanceSummary = null,
   initialAttendanceRegister = null,
   initialDateRange = 'ALL',
+  initialCategory = 'ALL',
   initialQueryWarning = null,
 }: AccessLogsClientProps) {
   const [activeTab, setActiveTab] = useState<'logs' | 'register'>('logs');
@@ -667,6 +684,18 @@ export function AccessLogsClient({
   const [directionFilter, setDirectionFilter] = useState<'ALL' | 'IN' | 'OUT'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'GRANTED' | 'DENIED'>('ALL');
   const [dateRangeFilter, setDateRangeFilter] = useState<AccessLogDateRange>(initialDateRange);
+  const [categoryFilter, setCategoryFilter] = useState<AccessLogCategory>(initialCategory);
+
+  const prevInitialCategoryRef = useRef<AccessLogCategory>(initialCategory);
+  useEffect(() => {
+    if (prevInitialCategoryRef.current !== initialCategory) {
+      prevInitialCategoryRef.current = initialCategory;
+      setCategoryFilter(initialCategory);
+      setLogs(initialLogs);
+      setTotalCount(initialTotalCount);
+      setCurrentPage(DEFAULT_PAGE);
+    }
+  }, [initialCategory, initialLogs, initialTotalCount]);
 
   // Attendance register state
   const [registerData, setRegisterData] = useState<AllEmployeesAttendanceRegisterResult | null>(
@@ -716,6 +745,7 @@ export function AccessLogsClient({
       const targetDirection = overrides.direction ?? directionFilter;
       const targetStatus = overrides.status ?? statusFilter;
       const targetDateRange = overrides.dateRange ?? dateRangeFilter;
+      const targetCategory = overrides.category ?? categoryFilter;
 
       startTransition(async () => {
         try {
@@ -727,6 +757,7 @@ export function AccessLogsClient({
             direction: targetDirection,
             statusFilter: targetStatus,
             dateRange: targetDateRange,
+            ...(targetCategory !== 'ALL' ? { category: targetCategory } : {}),
           });
 
           const rawRows = (fetchResult.logs ?? []) as unknown as Array<
@@ -752,7 +783,15 @@ export function AccessLogsClient({
         }
       });
     },
-    [selectedEmployeeId, currentPage, searchKeyword, directionFilter, statusFilter, dateRangeFilter]
+    [
+      selectedEmployeeId,
+      currentPage,
+      searchKeyword,
+      directionFilter,
+      statusFilter,
+      dateRangeFilter,
+      categoryFilter,
+    ]
   );
 
   const fetchAttendanceRegister = useCallback(
@@ -812,6 +851,7 @@ export function AccessLogsClient({
     setDirectionFilter('ALL');
     setStatusFilter('ALL');
     setDateRangeFilter('ALL');
+    setCategoryFilter('ALL');
     setCurrentPage(DEFAULT_PAGE);
     fetchUpdatedLogs({
       employeeId: null,
@@ -820,6 +860,7 @@ export function AccessLogsClient({
       direction: 'ALL',
       status: 'ALL',
       dateRange: 'ALL',
+      category: 'ALL',
     });
   };
 
@@ -1023,6 +1064,39 @@ export function AccessLogsClient({
       {/* TAB 1: ACCESS LOGS STREAM */}
       {activeTab === 'logs' && (
         <>
+          {/* Access Log Category Sub-Tabs (Employees, Contractors, Fleet Types) */}
+          <div
+            role="tablist"
+            aria-label="Access Logs Category Sub-tabs"
+            data-testid="access-logs-category-tabs"
+            className="flex flex-wrap items-center gap-2 rounded-xl border border-accent-gold/55 bg-white p-2 shadow-2xs"
+          >
+            {ACCESS_LOG_CATEGORY_TABS.map((catTab) => {
+              const isSelected = categoryFilter === catTab.id;
+              return (
+                <button
+                  key={catTab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  data-testid={`access-logs-category-tab-${catTab.id}`}
+                  onClick={() => {
+                    setCategoryFilter(catTab.id);
+                    setCurrentPage(DEFAULT_PAGE);
+                    fetchUpdatedLogs({ page: DEFAULT_PAGE, category: catTab.id });
+                  }}
+                  className={`rounded-lg border px-3 py-1.5 font-semibold text-xs transition-all ${
+                    isSelected
+                      ? 'gold-steel-border gold-steel-border-slim border-accent-gold bg-amber-50 text-slate-900 shadow-2xs'
+                      : 'border-black/[0.07] bg-slate-50 text-slate-600 hover:border-accent-gold/45 hover:bg-white hover:text-slate-900'
+                  }`}
+                >
+                  {catTab.label}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Employee Attendance Register Dossier Card */}
           {attendanceSummary && (
             <GlassCard variant="window" className="border-blue-500/30 bg-blue-500/5 p-5 shadow-sm">

@@ -85,6 +85,32 @@ describe('MusterRollCallView', () => {
     expect(screen.getByText('On-Site Command HUD')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument(); // Total souls
     expect(screen.getByText('1 Verified')).toBeInTheDocument(); // Station count for Alpha
+    expect(screen.queryByText('ALL SOULS ACCOUNTED')).not.toBeInTheDocument();
+
+    expect(screen.getByTestId('muster-counter-total')).toHaveClass(
+      'gold-steel-border',
+      'shadow-xl'
+    );
+    expect(screen.getByTestId('muster-roll-call-table-container')).toHaveClass(
+      'gold-steel-border',
+      'bg-white'
+    );
+    expect(screen.getByTestId('muster-stations-grid').firstElementChild).toHaveClass(
+      'gold-steel-border',
+      'bg-white'
+    );
+  });
+
+  it('omits ALL SOULS ACCOUNTED badge even when zero personnel are unaccounted and uses borderless default GlassCards', () => {
+    const allAccountedSummary: MusterSummary = {
+      ...mockSummary,
+      unaccountedCount: 0,
+      records: mockSummary.records.map((r) => ({ ...r, status: 'accounted' })),
+    };
+
+    const { container } = render(<MusterRollCallView initialSummary={allAccountedSummary} />);
+    expect(screen.queryByText('ALL SOULS ACCOUNTED')).not.toBeInTheDocument();
+    expect(container.querySelectorAll('span[class*="--mac-close"]')).toHaveLength(0);
   });
 
   it('filters personnel table when search input is typed', () => {

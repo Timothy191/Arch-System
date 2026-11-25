@@ -4,7 +4,6 @@ import { m } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../lib/utils';
-import { GlobePins } from './GlobePins';
 import { HeroCardContent } from './HeroCardContent';
 import type { Panel } from './hero-types';
 import { ARCH_LOGO_PATH, ARCH_LOGO_VIEWBOX } from './Logo';
@@ -394,19 +393,6 @@ export function HeroRotator({
           </div>
         )}
       </div>
-
-      {/* Operational banner: interactive 3D globe rendered under the active hero card. */}
-      {panels[activeIndex] && (
-        <div
-          className="mx-auto mt-3.5 w-[92%] max-w-[1060px] sm:w-[88%] lg:w-[82%]"
-          data-testid="hero-kpi-slim-banner"
-        >
-          <GlobePins
-            activePanel={panels[activeIndex]}
-            className="gold-steel-border gold-steel-border-slim rounded-2xl border border-white/40 bg-white/60 p-4 shadow-window backdrop-blur-xl"
-          />
-        </div>
-      )}
 
       {total > 1 && (
         <div className="mt-4 flex items-center justify-center px-1 sm:mt-5">
