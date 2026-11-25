@@ -13,6 +13,7 @@ DECLARE
   event_type TEXT;
   payload JSONB;
   dept_id UUID;
+  webhook RECORD;
 BEGIN
   IF TG_TABLE_NAME = 'daily_logs' THEN
     IF TG_OP = 'INSERT' THEN
@@ -162,9 +163,20 @@ $$ LANGUAGE plpgsql;
 
 ALTER FUNCTION public.queue_webhook_delivery() SET search_path = public, pg_temp;
 
--- Remove the deprecated operational_delays webhook triggers.
-DROP TRIGGER IF EXISTS operational_delays_webhook_insert ON public.operational_delays;
-DROP TRIGGER IF EXISTS operational_delays_webhook_update ON public.operational_delays;
+-- Remove the deprecated operational_delays webhook triggers when those relations exist.
+DO $$
+BEGIN
+  IF to_regclass('public.operational_delays') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS operational_delays_webhook_insert ON public.operational_delays;
+    DROP TRIGGER IF EXISTS operational_delays_webhook_update ON public.operational_delays;
+  END IF;
+
+  IF to_regclass('public.operational_delays_deprecated_20250115') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS operational_delays_webhook_insert ON public.operational_delays_deprecated_20250115;
+    DROP TRIGGER IF EXISTS operational_delays_webhook_update ON public.operational_delays_deprecated_20250115;
+  END IF;
+END;
+$$;
 
 -- Recreate triggers on the current operational tables.
 DROP TRIGGER IF EXISTS daily_logs_webhook_insert ON public.daily_logs;
@@ -197,15 +209,21 @@ CREATE TRIGGER production_logs_webhook_update
   AFTER UPDATE ON public.production_logs
   FOR EACH ROW EXECUTE FUNCTION public.queue_webhook_delivery();
 
-DROP TRIGGER IF EXISTS safety_incidents_webhook_insert ON public.safety_incidents;
-CREATE TRIGGER safety_incidents_webhook_insert
-  AFTER INSERT ON public.safety_incidents
-  FOR EACH ROW EXECUTE FUNCTION public.queue_webhook_delivery();
+DO $$
+BEGIN
+  IF to_regclass('public.safety_incidents') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS safety_incidents_webhook_insert ON public.safety_incidents;
+    CREATE TRIGGER safety_incidents_webhook_insert
+      AFTER INSERT ON public.safety_incidents
+      FOR EACH ROW EXECUTE FUNCTION public.queue_webhook_delivery();
 
-DROP TRIGGER IF EXISTS safety_incidents_webhook_update ON public.safety_incidents;
-CREATE TRIGGER safety_incidents_webhook_update
-  AFTER UPDATE ON public.safety_incidents
-  FOR EACH ROW EXECUTE FUNCTION public.queue_webhook_delivery();
+    DROP TRIGGER IF EXISTS safety_incidents_webhook_update ON public.safety_incidents;
+    CREATE TRIGGER safety_incidents_webhook_update
+      AFTER UPDATE ON public.safety_incidents
+      FOR EACH ROW EXECUTE FUNCTION public.queue_webhook_delivery();
+  END IF;
+END;
+$$;
 
 DROP TRIGGER IF EXISTS delay_entries_webhook_insert ON public.delay_entries;
 CREATE TRIGGER delay_entries_webhook_insert

@@ -1,13 +1,14 @@
+<!-- cspell:ignore mrwhtxbhrzyttlsyuofc Squawk InitPlan -->
+
 # Migrations Overview
 
-This directory is the canonical source of truth for database schema migrations.
-All migrations are pushed to Cloud Supabase (mrwhtxbhrzyttlsyuofc).
+This directory (`packages/database/migrations/`) is the canonical source of truth for **Arch-System** PostgreSQL 17 schema migrations, synced to Cloud Supabase (`mrwhtxbhrzyttlsyuofc`).
 
-## Disabled Migrations
+Deploy-time paths (`packages/supabase/migrations` and `packages/database/supabase/migrations`) resolve here via symlinks.
 
-You may notice a few migrations suffixed with `.disabled`:
+## Authoring Standards
 
-- `158_fix_function_search_paths.sql.disabled`: Disabled because it targets legacy schemas and functions that no longer exist or match the current architecture. Execution in a fresh reset throws fatal errors.
-- `161_db_hardening.sql.disabled`: Disabled because it contains out-of-date security schemas and attempts to alter roles that clash with the actual control room hardening applied in `160_control_room_hardening.sql`.
-
-If these legacy concepts are still needed, they should be re-implemented in a new, correctly sequenced migration file.
+1. **Sequential Naming**: Use 3-digit zero-padded immutable filenames (`NNN_snake_case.sql`). Never rename, renumber, or delete applied `.sql` migrations.
+2. **Rollback & Idempotency Safety**: Always guard DDL with `IF NOT EXISTS` / `IF EXISTS` (`pnpm --filter @repo/database check-migrations`).
+3. **PG17 Squawk Linting**: All migrations must pass Squawk (`pnpm --filter @repo/database lint:migrations`). Annotate transactional index drops on legacy duplicate indexes with `-- squawk-ignore require-concurrent-index-deletion`.
+4. **RLS & InitPlan Performance**: Every `public` table must enable Row-Level Security, consult `(SELECT auth.uid())` (InitPlan-wrapped) and `public.employees` / `public.has_department_access()`, and pass `pnpm --filter @repo/database test` and `pnpm audit:rls-matrix`.
