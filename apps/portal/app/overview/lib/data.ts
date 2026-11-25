@@ -94,11 +94,6 @@ export const DEPARTMENTS = [
         description: 'Submit shift logs',
       },
       {
-        path: '/drilling/machines',
-        name: 'Machines',
-        description: 'Department equipment & drill rigs',
-      },
-      {
         path: '/drilling/equipment-overview',
         name: 'Equipment Overview',
         description: 'Drill fleet availability & utilization matrix',
@@ -391,7 +386,7 @@ export const DEPARTMENTS = [
     name: 'Database',
     slug: 'database',
     description:
-      'PostgreSQL 17 schema definitions, 213 migrations, and live Supabase telemetry panels',
+      'PostgreSQL 17 schema definitions, 179 versioned SQL migrations (head #229), and live Supabase telemetry panels',
     color: '#10b981',
     routes: [
       {
@@ -1327,7 +1322,7 @@ export const BACKEND_SERVICES: BackendService[] = [
     category: 'database',
     role: 'Primary ACID Data Store + Read Replica',
     description:
-      'PostgreSQL 17 cluster with 213 versioned migrations, partition pruning, read-replica routing, and 100% Row Level Security InitPlan policies.',
+      'PostgreSQL 17 cluster with 179 versioned SQL migrations (head #229), partition pruning, read-replica routing, and 100% Row Level Security InitPlan policies.',
     tech: 'PostgreSQL 17 + PostgREST + pgvector',
     color: '#3ecf8e',
     protocols: ['PostgreSQL Wire (5432)', 'HTTPS / PostgREST'],
@@ -1697,7 +1692,7 @@ export const BACKEND_CONNECTIONS: BackendConnection[] = [
     protocol: 'Postgres Wire / SSL',
     flowType: 'data',
     description:
-      'Real-time schema graph rendering from 213 migration definitions and RLS policy catalog.',
+      'Real-time schema graph rendering from 179 versioned SQL migrations (head #229) and RLS policy catalog.',
     color: '#3ecf8e',
   },
 

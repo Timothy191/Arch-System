@@ -94,6 +94,9 @@ export function PerimeterGateHUD({ initialGates }: PerimeterGateHUDProps) {
             <>
               <Activity className="h-3.5 w-3.5 animate-pulse text-emerald-500" />
               <span>Realtime CDC • Supabase</span>
+              <span className="text-[var(--text-muted)]">
+                (Perimeter Barriers &amp; Gate telemetry)
+              </span>
             </>
           ) : (
             <>

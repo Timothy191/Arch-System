@@ -153,10 +153,10 @@ describe('DEPARTMENTS registry', () => {
       'dashboard',
       'drilling-operations',
       'daily-log',
-      'machines',
       'history',
       'reports',
     ]);
+    expect(drillingTabs.map((t) => t.name)).not.toContain('machines');
     expect(drillingTabs.map((t) => t.name)).not.toContain('tools');
 
     const engineeringTabs = getDepartmentTabs('engineering');

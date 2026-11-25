@@ -121,7 +121,7 @@ export default function TechStack() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <div className="rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-4 py-3 font-medium text-accent-blue text-sm">
-                  PostgreSQL 17 (168 Migrations)
+                  PostgreSQL 17 (179 Migrations)
                 </div>
                 <div className="rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-4 py-3 font-medium text-accent-blue text-sm">
                   100% RLS InitPlan
@@ -194,8 +194,8 @@ export default function TechStack() {
             contracts
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">database/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 213 Supabase PostgreSQL 17 migrations &
-            generated types
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 179 Supabase PostgreSQL 17 migrations (head
+            #229) &amp; generated types
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">supabase/</span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# SSR auth, Primary & Read-Replica client

@@ -2,6 +2,7 @@
 
 import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
+import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { CheckCircle2, RefreshCw, Sparkles, Target } from 'lucide-react';
 import { useEffect, useState, useTransition } from 'react';
@@ -155,6 +156,7 @@ export function ProductionTargetsPanel({ initialTargets }: ProductionTargetsPane
                 <Target className="h-5 w-5 text-[var(--accent-blue)]" />
                 Production Targets Workspace
               </h2>
+              <Divider className="my-4 h-px bg-[var(--accent-blue)]/50" />
               <Badge
                 variant="outline"
                 className="border-emerald-500/25 bg-emerald-500/10 font-mono text-emerald-700 text-xs"

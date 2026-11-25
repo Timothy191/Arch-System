@@ -206,8 +206,9 @@ export const DEPARTMENT_DATA_REQUIREMENTS: readonly DepartmentDataRequirement[] 
     manageHref: '/engineering/machines',
     manageLabel: 'Inspect Fleet',
     summary: 'Fleet machinery database, breakdown dispatches, tyre lifecycle, and shift fuel/hours',
-    masterTables: ['machines', 'machine_types', 'tires'],
+    masterTables: ['machines', 'machine_types'],
     operationalTables: [
+      'tires',
       'breakdowns',
       'tire_inspections',
       'engineering_notes',
@@ -239,8 +240,9 @@ export const DEPARTMENT_DATA_REQUIREMENTS: readonly DepartmentDataRequirement[] 
     manageHref: '/database/panels',
     manageLabel: 'Provision Personnel',
     summary: 'Personnel records, medical/induction compliance, QR/RFID badges, and CR80 printers',
-    masterTables: ['personnel', 'badges', 'card_printers', 'card_templates'],
+    masterTables: ['personnel', 'badges', 'card_printers'],
     operationalTables: [
+      'card_templates',
       'access_logs',
       'visitors',
       'muster_events',

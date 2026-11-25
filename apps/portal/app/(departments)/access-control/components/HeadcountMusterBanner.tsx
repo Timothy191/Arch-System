@@ -23,6 +23,9 @@ interface HeadcountMusterBannerProps {
   blastStatus?: 'ALL_CLEAR' | 'STANDBY_BLAST_SCHEDULED' | 'MUSTER_EVACUATION_ACTIVE';
 }
 
+const MUSTER_PILL_BASE_CLASS =
+  'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium text-[var(--text-heading)] shadow-lg transition-all hover:shadow-xl active:scale-95';
+
 export function HeadcountMusterBanner({
   totalSouls = 142,
   employeesCount = 88,
@@ -68,22 +71,37 @@ export function HeadcountMusterBanner({
 
         {/* Center: Breakdown Pills */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-black/[0.03] px-3 py-1.5 font-medium text-[var(--text-secondary)]">
+          {/* Personnel - bright bold with 3D effect */}
+          <div
+            className={`${MUSTER_PILL_BASE_CLASS} border-blue-500/40 bg-blue-500/10 shadow-blue-500/20 hover:shadow-blue-500/30`}
+          >
             <HardHat className="h-3.5 w-3.5 text-blue-600" />
             <span>Personnel:</span>
             <strong className="font-mono text-[var(--text-heading)]">{employeesCount}</strong>
           </div>
-          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-black/[0.03] px-3 py-1.5 font-medium text-[var(--text-secondary)]">
+
+          {/* Contractors - bright bold with 3D effect */}
+          <div
+            className={`${MUSTER_PILL_BASE_CLASS} border-amber-500/40 bg-amber-500/10 shadow-amber-500/20 hover:shadow-amber-500/30`}
+          >
             <Shield className="h-3.5 w-3.5 text-amber-600" />
             <span>Contractors:</span>
             <strong className="font-mono text-[var(--text-heading)]">{contractorsCount}</strong>
           </div>
-          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-black/[0.03] px-3 py-1.5 font-medium text-[var(--text-secondary)]">
+
+          {/* Visitors - bright bold with 3D effect */}
+          <div
+            className={`${MUSTER_PILL_BASE_CLASS} border-teal-500/40 bg-teal-500/10 shadow-teal-500/20 hover:shadow-teal-500/30`}
+          >
             <Users className="h-3.5 w-3.5 text-teal-600" />
             <span>Visitors:</span>
             <strong className="font-mono text-[var(--text-heading)]">{visitorsCount}</strong>
           </div>
-          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-black/[0.03] px-3 py-1.5 font-medium text-[var(--text-secondary)]">
+
+          {/* Fleet / Trucks - bright bold with 3D effect */}
+          <div
+            className={`${MUSTER_PILL_BASE_CLASS} border-indigo-500/40 bg-indigo-500/10 shadow-indigo-500/20 hover:shadow-indigo-500/30`}
+          >
             <Truck className="h-3.5 w-3.5 text-indigo-600" />
             <span>Fleet / Trucks:</span>
             <strong className="font-mono text-[var(--text-heading)]">{vehiclesCount}</strong>

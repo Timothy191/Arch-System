@@ -64,7 +64,7 @@ const OVERVIEW_NAV_ITEMS = [
   {
     value: 'database',
     label: 'Database Schema',
-    badge: '168 SQL',
+    badge: '179 SQL',
     icon: Database,
   },
   {
@@ -238,7 +238,7 @@ export default function OverviewPage() {
               Architecture & Ops
             </div>
             <div className="truncate font-mono text-[13px] text-[var(--text-muted)] leading-[18px]">
-              13 Modules · 168 Migrations
+              13 Modules · 179 Migrations
             </div>
           </div>
         </div>

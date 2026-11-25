@@ -23,26 +23,28 @@ interface KPICardProps {
   hero?: boolean;
 }
 
+const KPI_CARD_MOTION_CLASS = 'bg-white shadow-lg transition-all hover:shadow-xl active:scale-95';
+
 const variantStyles = {
   default: {
-    card: 'bg-card border-border',
-    icon: 'bg-primary/10 text-primary',
-    value: 'text-foreground',
+    card: `${KPI_CARD_MOTION_CLASS} border-blue-500/20 shadow-blue-500/20 hover:shadow-blue-500/30`,
+    icon: 'bg-blue-500/10 text-blue-600',
+    value: 'text-blue-800',
   },
   warning: {
-    card: 'bg-warning/5 border-warning/30',
-    icon: 'bg-warning/10 text-warning',
-    value: 'text-warning',
+    card: `${KPI_CARD_MOTION_CLASS} border-amber-500/30 shadow-amber-500/20 hover:shadow-amber-500/30`,
+    icon: 'bg-amber-500/10 text-amber-600',
+    value: 'text-amber-800',
   },
   danger: {
-    card: 'bg-danger/5 border-danger/30',
-    icon: 'bg-danger/10 text-danger',
-    value: 'text-danger',
+    card: `${KPI_CARD_MOTION_CLASS} border-red-500/30 shadow-red-500/20 hover:shadow-red-500/30`,
+    icon: 'bg-red-500/10 text-red-600',
+    value: 'text-red-700',
   },
   success: {
-    card: 'bg-success/5 border-success/30',
-    icon: 'bg-success/10 text-success',
-    value: 'text-success',
+    card: `${KPI_CARD_MOTION_CLASS} border-emerald-500/30 shadow-emerald-500/20 hover:shadow-emerald-500/30`,
+    icon: 'bg-emerald-500/10 text-emerald-600',
+    value: 'text-emerald-700',
   },
 };
 
@@ -69,7 +71,7 @@ function KPICard({
   return (
     <div
       key={id}
-      className={`flex flex-col justify-between rounded-xl border p-5 shadow-card transition-all duration-200 hover:shadow-card-hover ${styles.card} ${hero ? 'min-h-[140px]' : 'min-h-[120px]'}`}
+      className={`flex flex-col justify-between rounded-xl border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${styles.card} ${hero ? 'min-h-[140px]' : 'min-h-[120px]'}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>

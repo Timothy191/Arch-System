@@ -40,6 +40,9 @@ import {
 } from './plant-inventory-seeds';
 import { computeStockAutomatedFlags } from './stock-flags';
 
+const REMOVE_ONE_BUTTON_CLASS =
+  'inline-flex items-center gap-1 rounded-lg border border-white bg-white px-2 py-1 font-semibold text-[11px] text-emerald-700 shadow-emerald-500/20 shadow-lg transition-all hover:bg-emerald-500 hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-45';
+
 export {
   INITIAL_PLANT_STOCK_ITEMS,
   type PlantInventoryStockItem,
@@ -418,12 +421,14 @@ export function PlantInventoryWorkspaceClient({
     return (
       <div className="space-y-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
+          <div className="flex-1 rounded-lg border border-[var(--border-default)] bg-white p-4">
             <div className="flex items-center gap-2.5">
               <BarChart2 className="h-6 w-6 text-[var(--accent-blue)]" aria-hidden="true" />
               <h2 className="font-bold text-2xl text-[var(--text-heading)]">Stock Dashboard</h2>
             </div>
-            <p className="mt-1 text-[var(--text-secondary)] text-sm">
+            {/* Separator */}
+            <div className="mt-2 h-0.5 w-full rounded bg-[var(--accent-blue)]/50" />
+            <p className="mt-2 text-[var(--text-secondary)] text-sm">
               Plant equipment stock overview for consumables, reagents, and wear spares tracked per
               piece of plant equipment (crushers, screens, pumps, cyclones, thickeners — not mobile
               mining machines).
@@ -807,7 +812,7 @@ export function PlantInventoryWorkspaceClient({
                                 setPendingRemoveItem(item);
                               }}
                               aria-label={`Remove 1 unit from ${item.stock}`}
-                              className="inline-flex items-center gap-1 rounded border border-[var(--accent-alert)]/35 bg-[var(--accent-alert)]/10 px-2 py-0.5 font-sans font-semibold text-[11px] text-[var(--accent-alert)] transition-colors hover:bg-[var(--accent-alert)]/20 disabled:cursor-not-allowed disabled:opacity-45"
+                              className={REMOVE_ONE_BUTTON_CLASS}
                             >
                               <Minus className="h-3 w-3" aria-hidden="true" />
                               -1 Remove

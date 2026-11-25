@@ -44,9 +44,9 @@ const METRICS_GRID_CLASS = 'grid grid-cols-1 gap-3 sm:grid-cols-2';
 const METRIC_BOX_CLASS =
   'rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5';
 const WHERE_BOX_CLASS =
-  'flex items-center gap-2.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3.5 py-2.5';
+  'mb-4 flex items-center gap-2.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3.5 py-2.5';
 const TOGGLE_BUTTON_CLASS =
-  'flex w-full items-center justify-between rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] px-3.5 py-2.5 font-medium text-[var(--text-heading)] text-sm transition-colors hover:bg-[var(--bg-secondary)]';
+  'mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-white px-3.5 py-2.5 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-[var(--bg-secondary)]';
 const FORM_PANEL_CLASS =
   'space-y-3.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4';
 const INPUT_CLASS =
@@ -279,6 +279,7 @@ export function DrillRigDailyCard({ departmentId, logDate, rig, onSaved }: Drill
         </div>
       </div>
 
+      {/* Move the button slightly down with improved spacing and white background */}
       <button
         type="button"
         onClick={handleToggleForm}

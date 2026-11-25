@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { connection } from 'next/server';
 import { getDepartmentContext } from '~/lib/dept-context';
 import {
@@ -178,6 +178,15 @@ describe('AccessControlDashboardPage', () => {
     render(element);
 
     expect(screen.getByText('142')).toBeInTheDocument();
-    expect(screen.getAllByText('On-Site Roll Call')).toHaveLength(2);
+    expect(screen.getByText('On-Site Roll Call')).toBeInTheDocument();
+    const quickActionsBtn = screen.getByRole('button', { name: /Quick Actions/i });
+    expect(quickActionsBtn).toBeInTheDocument();
+    fireEvent.click(quickActionsBtn);
+    const menu = screen.getByRole('menu');
+    expect(menu).toBeInTheDocument();
+    expect(screen.getByText('Print Badge (Neo300)')).toBeInTheDocument();
+    expect(screen.getByText('Easy Scanner & Register')).toBeInTheDocument();
+    fireEvent.keyDown(menu, { key: 'Escape' });
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 });

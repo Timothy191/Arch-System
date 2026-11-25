@@ -1,18 +1,8 @@
 import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
-import { BorderBox } from '@repo/ui/BorderBox';
 import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
-import {
-  AlertTriangle,
-  ArrowRight,
-  ClipboardList,
-  Clock,
-  Drill,
-  FileText,
-  MessageSquare,
-  Radio,
-} from 'lucide-react';
+import { AlertTriangle, ArrowRight, Clock, Drill, FileText, MessageSquare } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { withCache } from '@/lib/cache-utils';
@@ -196,202 +186,187 @@ export default async function DrillingDashboardPage() {
   } = await getDrillingDashboardData(deptId, today);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h2 className="font-semibold text-2xl text-[var(--text-heading)]">
-              Drilling Dashboard
-            </h2>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-green/20 bg-accent-green/10 px-2.5 py-0.5 font-medium text-accent-green text-xs">
-              <Radio className="h-3 w-3" />
-              Auto-Built from Control Room
-            </span>
-          </div>
-          <p className="mt-1 text-[var(--text-muted)] text-sm">
-            {new Date().toLocaleDateString('en-ZA', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-        </div>
+    <div className="space-y-8 lg:space-y-12">
+      <header className="mb-8">
+        <h1 className="mb-2 font-bold font-display text-4xl text-[var(--text-heading)] lg:text-5xl">
+          Drilling Dashboard
+        </h1>
+        <p className="text-[var(--text-muted)] text-base">Auto-Built from Control Room</p>
+      </header>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/drilling/drilling-operations"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3.5 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-[var(--bg-tertiary)]"
-          >
-            <Drill className="h-3.5 w-3.5 text-accent-green" />
-            Today&apos;s Shift Report ({loggedShifts})
-          </Link>
-          <Link
-            href="/drilling/reports"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-3.5 py-1.5 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--accent-blue)]/20"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            Production Reports
-          </Link>
-        </div>
+      <div className="border-[var(--border-default)]/20 border-t pb-8">
+        <Divider variant="fading" label="CONTROL ROOM AUTO-SYNCED PRODUCTION" />
       </div>
 
-      <Divider variant="fading" label="CONTROL ROOM AUTO-SYNCED PRODUCTION" />
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <Drill className="h-4 w-4 text-accent-green" />
-            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
-              Meters Today
-            </p>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
+        {/* Meters Today Card */}
+        <GlassCard variant="window" accent="green" className="h-full p-6 md:p-8">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h2 className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                Meters Today
+              </h2>
+              <p className="mt-2 font-bold text-3xl text-[var(--text-heading)] lg:text-4xl">
+                {totalMeters.toFixed(1)}m
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-green/10">
+              <Drill className="h-6 w-6 text-accent-green" />
+            </div>
           </div>
-          <p className="mt-2 font-bold text-2xl text-accent-green">{totalMeters.toFixed(1)}m</p>
-          <p className="mt-1 text-[var(--text-muted)] text-xs">Captured via Control Room</p>
+          <p className="mt-3 text-[var(--text-muted)] text-sm">
+            Captured via Control Room auto-sync
+          </p>
         </GlassCard>
 
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <ClipboardList className="h-4 w-4 text-[var(--accent-blue)]" />
-            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
-              Holes Today
-            </p>
+        {/* Holes Today Card */}
+        <GlassCard variant="window" accent="blue" className="h-full p-6 md:p-8">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h2 className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                Holes Today
+              </h2>
+              <p className="mt-2 font-bold text-3xl text-[var(--accent-blue)] lg:text-4xl">
+                {totalHoles}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-blue/10">
+              <FileText className="h-6 w-6 text-[var(--accent-blue)]" />
+            </div>
           </div>
-          <p className="mt-2 font-bold text-2xl text-[var(--accent-blue)]">{totalHoles}</p>
-          <p className="mt-1 text-[var(--text-muted)] text-xs">
+          <p className="mt-3 text-[var(--text-muted)] text-sm">
             {loggedShifts} shift{loggedShifts === 1 ? '' : 's'} compiled
           </p>
         </GlassCard>
 
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <Drill className="h-4 w-4 text-accent-green" />
-            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
-              Active Drills
-            </p>
+        {/* Active Drills Card */}
+        <GlassCard variant="window" accent="green" className="h-full p-6 md:p-8">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h2 className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                Active Drills
+              </h2>
+              <p className="mt-2 font-bold text-3xl text-[var(--text-heading)] lg:text-4xl">
+                {machineCount}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-green/10">
+              <Drill className="h-6 w-6 text-accent-green" />
+            </div>
           </div>
-          <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">{machineCount}</p>
           {activeOps > 0 && (
-            <p className="mt-1 text-accent-green text-xs">
+            <p className="mt-3 text-accent-green text-sm">
               {activeOps} operation{activeOps > 1 ? 's' : ''} active
             </p>
           )}
         </GlassCard>
 
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-[var(--accent-blue)]" />
-            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
-              Hours Today
-            </p>
-          </div>
-          <p className="mt-2 font-bold text-2xl text-[var(--accent-blue)]">
-            {totalHours.toFixed(1)}h
-          </p>
-        </GlassCard>
-
-        <BorderBox variant="patterned-caution" padding="none" className="overflow-hidden">
-          <div className="p-4 sm:p-5">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-accent-blue" />
-              <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
-                Delays
+        {/* Hours Today Card */}
+        <GlassCard variant="window" accent="blue" className="h-full p-6 md:p-8">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h2 className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                Hours Today
+              </h2>
+              <p className="mt-2 font-bold text-3xl text-[var(--accent-blue)] lg:text-4xl">
+                {totalHours.toFixed(1)}h
               </p>
             </div>
-            <p className="mt-2 font-bold text-2xl text-accent-blue">{delayCount}</p>
-            {delayMinutes > 0 && (
-              <p className="mt-1 text-[var(--text-muted)] text-xs">{delayMinutes} min lost</p>
-            )}
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-blue/10">
+              <Clock className="h-6 w-6 text-[var(--accent-blue)]" />
+            </div>
           </div>
-        </BorderBox>
+          <p className="mt-3 text-[var(--text-muted)] text-sm">{loggedShifts} shifts logged</p>
+        </GlassCard>
+
+        {/* Delays Card */}
+        <GlassCard variant="window" className="h-full p-6 md:p-8">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-accent-blue" />
+            <div>
+              <h2 className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                Delays
+              </h2>
+              <p className="mt-1 font-bold text-accent-blue text-xl">{delayCount}</p>
+              {delayMinutes > 0 && (
+                <p className="mt-1 text-[var(--text-muted)] text-sm">{delayMinutes} min lost</p>
+              )}
+            </div>
+          </div>
+        </GlassCard>
       </div>
 
       <Divider variant="dotted" label="OPERATIONAL MODULES & RIG COMMAND" />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Link href="/drilling/drilling-operations" className="group h-full">
-          <BorderBox variant="thick-transparent" className="h-full border-0 p-0">
-            <GlassCard className="h-full cursor-pointer transition-colors hover:bg-[var(--bg-secondary)]">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-green/10 text-accent-green">
-                    <Drill className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[var(--text-heading)] text-base">
-                      Drilling Operations
-                    </h3>
-                    <p className="text-[var(--text-muted)] text-xs">
-                      Shift hole counts, meters drilled, and operator sign-offs
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-[var(--text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--text-heading)]" />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Drilling Operations Card */}
+        <Link href="/drilling/drilling-operations">
+          <GlassCard
+            variant="window"
+            accent="green"
+            className="h-full cursor-pointer p-6 transition-colors hover:shadow-card-hover md:p-8"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h2 className="font-semibold text-[var(--text-heading)] text-base">
+                  Drilling Operations
+                </h2>
+                <p className="text-[var(--text-muted)] text-xs">
+                  Shift hole counts, meters drilled, and operator sign-offs
+                </p>
               </div>
-              <div className="mt-4 flex items-center justify-between border-[var(--border-default)] border-t pt-3 text-xs">
-                <span className="text-[var(--text-muted)]">Today&apos;s Compiled Shifts</span>
-                <span className="font-mono font-semibold text-accent-green">
-                  {loggedShifts} Active Records
-                </span>
-              </div>
-            </GlassCard>
-          </BorderBox>
+              <ArrowRight className="h-5 w-5 text-[var(--text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--text-heading)]" />
+            </div>
+            <p className="mt-4 text-[var(--text-muted)] text-xs">
+              Today's Compiled Shifts: {loggedShifts} Active Records
+            </p>
+          </GlassCard>
         </Link>
 
-        <Link href="/drilling/reports?tab=pdf-report" className="group h-full">
-          <BorderBox variant="thick-transparent" className="h-full border-0 p-0">
-            <GlassCard className="h-full cursor-pointer transition-colors hover:bg-[var(--bg-secondary)]">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
-                    <FileText className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[var(--text-heading)] text-base">
-                      Shift PDF Report
-                    </h3>
-                    <p className="text-[var(--text-muted)] text-xs">
-                      Printable executive shift report with rig-by-rig breakdown
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-[var(--text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--text-heading)]" />
+        {/* Shift PDF Report Card */}
+        <Link href="/drilling/reports?tab=pdf-report">
+          <GlassCard
+            variant="window"
+            accent="blue"
+            className="h-full cursor-pointer p-6 transition-colors hover:shadow-card-hover md:p-8"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h2 className="font-semibold text-[var(--text-heading)] text-base">
+                  Shift PDF Report
+                </h2>
+                <p className="text-[var(--text-muted)] text-xs">
+                  Printable executive shift report with rig-by-rig breakdown
+                </p>
               </div>
-              <div className="mt-4 flex items-center justify-between border-[var(--border-default)] border-t pt-3 text-xs">
-                <span className="text-[var(--text-muted)]">Total Meters Logged</span>
-                <span className="font-mono font-semibold text-[var(--text-heading)]">
-                  {totalMeters.toFixed(1)}m ({totalHoles} holes)
-                </span>
-              </div>
-            </GlassCard>
-          </BorderBox>
+              <FileText className="h-5 w-5 text-[var(--accent-blue)]" />
+            </div>
+            <p className="mt-4 text-[var(--text-muted)] text-xs">
+              Total Meters: {totalMeters.toFixed(1)}m ({totalHoles} holes)
+            </p>
+          </GlassCard>
         </Link>
 
-        <Link href="/drilling/reports?tab=whatsapp-report" className="group h-full">
-          <BorderBox variant="thick-transparent" className="h-full border-0 p-0">
-            <GlassCard className="h-full cursor-pointer transition-colors hover:bg-[var(--bg-secondary)]">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-green/10 text-accent-green">
-                    <MessageSquare className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[var(--text-heading)] text-base">
-                      WhatsApp Shift Dispatch
-                    </h3>
-                    <p className="text-[var(--text-muted)] text-xs">
-                      Formatted shift summary ready for 1-click WhatsApp group sharing
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-[var(--text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--text-heading)]" />
+        {/* WhatsApp Shift Dispatch Card */}
+        <Link href="/drilling/reports?tab=whatsapp-report">
+          <GlassCard
+            variant="window"
+            accent="green"
+            className="h-full cursor-pointer p-6 transition-colors hover:shadow-card-hover md:p-8"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h2 className="font-semibold text-[var(--text-heading)] text-base">
+                  WhatsApp Shift Dispatch
+                </h2>
+                <p className="text-[var(--text-muted)] text-xs">
+                  Formatted shift summary ready for 1-click WhatsApp group sharing
+                </p>
               </div>
-              <div className="mt-4 flex items-center justify-between border-[var(--border-default)] border-t pt-3 text-xs">
-                <span className="text-[var(--text-muted)]">Dispatch Mode</span>
-                <span className="font-mono font-semibold text-accent-green">Ready to Share</span>
-              </div>
-            </GlassCard>
-          </BorderBox>
+              <MessageSquare className="h-5 w-5 text-accent-green" />
+            </div>
+            <p className="mt-4 text-[var(--text-muted)] text-xs">Dispatch Mode: Ready to Share</p>
+          </GlassCard>
         </Link>
       </div>
     </div>

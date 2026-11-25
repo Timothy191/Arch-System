@@ -377,7 +377,7 @@ export function OverviewStackIconsStrip() {
 }
 
 const COMMIT_VELOCITY_SERIES = [14, 19, 24, 21, 29, 34, 28, 38, 26, 30];
-const MIGRATION_GROWTH_SERIES = [18, 39, 64, 88, 112, 134, 151, 168, 189, 213];
+const MIGRATION_GROWTH_SERIES = [18, 39, 64, 88, 112, 134, 151, 179, 209, 229];
 
 export function GitHubProvenanceVisualGraphs() {
   const timeWorked = GIT_PROVENANCE_METRICS.calculateTimeWorked();
@@ -554,7 +554,9 @@ export function GitHubProvenanceVisualGraphs() {
 
           <div className="mt-1 flex items-center justify-between font-mono text-[9px] text-slate-500">
             <span>001_initial_schema.sql</span>
-            <span className="font-semibold text-teal-700">213_monthly_machine_snapshots.sql</span>
+            <span className="font-semibold text-teal-700">
+              229_enrich_fleet_machines_metadata.sql
+            </span>
           </div>
         </div>
 
@@ -606,7 +608,7 @@ export function GitHubProvenanceVisualGraphs() {
               </span>
               <span className="flex items-center gap-1 truncate">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                DB 213
+                DB 229
               </span>
               <span className="flex items-center gap-1 truncate">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />

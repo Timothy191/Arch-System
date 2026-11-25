@@ -48,7 +48,7 @@ const ARCHITECTURAL_PILLARS = [
   },
   {
     title: 'Zero-Trust Supabase PostgreSQL 17',
-    subtitle: '213 Versioned Migrations',
+    subtitle: '179 Versioned Migrations (Head #229)',
     badge: '100% RLS InitPlan',
     description:
       'Every table enforces Row Level Security with cached (select auth.uid()) InitPlan policies, atomic PL/pgSQL RPCs, and read-replica routing.',

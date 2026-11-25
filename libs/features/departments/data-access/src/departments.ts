@@ -368,13 +368,13 @@ export const ENGINEERING_TABS = [
 
 /**
  * Drilling specific tabs — rig operations lead, followed by core operational pages
- * (Daily Log, Machines, History, Reports). Tools are excluded from Drilling.
+ * (Daily Log, History, Reports). Tools are excluded from Drilling.
+ * AGENT-TRACE: 'machines' tab removed per design feedback iteration.
  */
 export const DRILLING_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'drilling-operations', label: 'Drilling Operations', icon: 'Drill' },
   { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
-  { name: 'machines', label: 'Machines', icon: 'Cpu' },
   { name: 'history', label: 'History', icon: 'History' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const;
