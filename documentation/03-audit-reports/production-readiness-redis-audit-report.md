@@ -1,5 +1,7 @@
 # Arch-System — Real-World Production Readiness & Redis Professional Audit
 
+<!-- cspell:ignore Vitter xriwt JAGJ -->
+
 **Date:** 2026-09-28  
 **Author:** Senior Systems & Resilience Engineering  
 **Scope:** Repository `Timothy191/Arch-System`, Next.js Portal (`apps/portal`), Shared Packages (`packages/*`), Cloud Supabase, Cloud Redis, Vercel Production Deployment (`arch-system`).
@@ -62,18 +64,19 @@ The core Next.js application, TypeScript contracts, PostgreSQL/Supabase schema w
 ### Key Namespaces and TTL Registry
 
 Managed via `packages/redis/src/registry.ts`:
-| Namespace / Category | Pattern | L1 TTL | L2 TTL | Data Type | Source of Truth | Ownership |
-|---|---|---|---|---|---|---|
-| `AUTH` | `arch:auth:<id>` | 60s | 3,600s | String (JSON) | PostgreSQL | `CACHE` |
-| `METRICS` | `arch:metrics:<dept>:<type>` | 15s | 300s | String (JSON) | PostgreSQL | `CACHE` |
-| `SHIFT` | `arch:shift:<dept>:<date>` | 30s | 120s | String (JSON) | PostgreSQL | `CACHE` |
-| `AI_MEMORY` | `arch:ai_memory:<session>` | 10s | 60s | String (JSON) | PostgreSQL | `CACHE` |
-| `DEPARTMENT` | `arch:dept:<slug>` | 60s | 43,200s (12h) | String (UUID) | PostgreSQL | `CACHE` |
-| `EQUIPMENT` | `arch:equipment:<id>` | 30s | 300s | String (JSON) | PostgreSQL | `CACHE` |
-| `RATE_LIMIT` | `ratelimit:<identifier>` | N/A | Dynamic window | String / Int | Redis | `TEMPORARY` |
-| `TAG_INDEX` | `arch:__tags__:<tag>` | N/A | Key lifetime | Set | Redis | `DERIVED` |
-| `SCADA_STATE`| `control-room:scada:state` | Memory | 60s | String | Control Probe | `TEMPORARY` |
-| `TELEMETRY` | `telemetry:last:<tag>` | Local Map | 86,400s (24h) | String (Num) | **Redis Only (Risk)** | `MUST PERSIST` |
+
+| Namespace / Category | Pattern                      | L1 TTL    | L2 TTL         | Data Type     | Source of Truth       | Ownership      |
+| -------------------- | ---------------------------- | --------- | -------------- | ------------- | --------------------- | -------------- |
+| `AUTH`               | `arch:auth:<id>`             | 60s       | 3,600s         | String (JSON) | PostgreSQL            | `CACHE`        |
+| `METRICS`            | `arch:metrics:<dept>:<type>` | 15s       | 300s           | String (JSON) | PostgreSQL            | `CACHE`        |
+| `SHIFT`              | `arch:shift:<dept>:<date>`   | 30s       | 120s           | String (JSON) | PostgreSQL            | `CACHE`        |
+| `AI_MEMORY`          | `arch:ai_memory:<session>`   | 10s       | 60s            | String (JSON) | PostgreSQL            | `CACHE`        |
+| `DEPARTMENT`         | `arch:dept:<slug>`           | 60s       | 43,200s (12h)  | String (UUID) | PostgreSQL            | `CACHE`        |
+| `EQUIPMENT`          | `arch:equipment:<id>`        | 30s       | 300s           | String (JSON) | PostgreSQL            | `CACHE`        |
+| `RATE_LIMIT`         | `ratelimit:<identifier>`     | N/A       | Dynamic window | String / Int  | Redis                 | `TEMPORARY`    |
+| `TAG_INDEX`          | `arch:__tags__:<tag>`        | N/A       | Key lifetime   | Set           | Redis                 | `DERIVED`      |
+| `SCADA_STATE`        | `control-room:scada:state`   | Memory    | 60s            | String        | Control Probe         | `TEMPORARY`    |
+| `TELEMETRY`          | `telemetry:last:<tag>`       | Local Map | 86,400s (24h)  | String (Num)  | **Redis Only (Risk)** | `MUST PERSIST` |
 
 ---
 

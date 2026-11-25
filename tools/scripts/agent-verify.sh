@@ -112,7 +112,7 @@ run_gate 5  "📊" "Contract Drift Audit" \
 
 run_gate 6  "🛡️ " "Agent Skill Security (SkillSpector)" \
   "bash tools/audits/skill-spector.sh" \
-  "Security vulnerability in .agents/skills."
+  "Security vulnerability in .agents/skills or .qoder/skills."
 
 run_gate 7  "🤖" "MCP Server Registration & Toolchain" \
   "pnpm mcp:verify" \

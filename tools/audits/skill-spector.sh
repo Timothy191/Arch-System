@@ -2,8 +2,9 @@
 # Autonomous SkillSpector-inspired security scanner for AI agent skills
 
 echo "🛡️  Running SkillSpector Security Scan on Agent Toolchain..."
-SKILLS_DIR=".agents/skills"
+SKILLS_DIRS=(".agents/skills" ".qoder/skills")
 RULES_FILE="GEMINI.md"
+SCAN_PATHS=("${SKILLS_DIRS[@]}" "$RULES_FILE")
 
 # Define forbidden patterns (Prompt Injection / Destructive / Exfiltration)
 # Regex matches common malicious payloads that could be hidden in skills
@@ -23,9 +24,9 @@ FORBIDDEN=(
 EXIT_CODE=0
 
 for PATTERN in "${FORBIDDEN[@]}"; do
-  if rg -i -q "$PATTERN" "$SKILLS_DIR" "$RULES_FILE" 2>/dev/null; then
+  if rg -i -q "$PATTERN" "${SCAN_PATHS[@]}" 2>/dev/null; then
     echo "🚨 SECURITY ALERT: Malicious pattern '$PATTERN' detected in skills or rules!"
-    rg -i -n "$PATTERN" "$SKILLS_DIR" "$RULES_FILE"
+    rg -i -n "$PATTERN" "${SCAN_PATHS[@]}"
     EXIT_CODE=1
   fi
 done

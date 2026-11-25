@@ -8,7 +8,8 @@
  *
  * Checks:
  *   1. .agents/rules/ integrity (non-empty markdown, structured guidelines)
- *   2. .agents/skills/ integrity (SKILL.md presence, YAML frontmatter name & description)
+ *   2. Agent skill integrity in .agents/skills/ and .qoder/skills/ (SKILL.md presence,
+ *      YAML frontmatter name & description)
  *   3. .agents/mcp_config.json (JSON syntax & server configurations)
  *   4. AGENT_TRACER.md coverage across all workspace packages, apps, and libraries
  *   5. Root agent directives (AGENTS.md, GEMINI.md, CLAUDE.md)
@@ -69,41 +70,46 @@ if (fs.existsSync(rulesDir)) {
   });
 }
 
-// ── 2. Audit .agents/skills/ ──────────────────────────────────────────────────
-console.log('2️⃣  Auditing .agents/skills/ packages and frontmatter schemas...');
-const skillsDir = path.join(AGENTS_DIR, 'skills');
+// ── 2. Audit agent skills (.agents/skills + .qoder/skills) ────────────────────
+console.log('2️⃣  Auditing agent skill packages (.agents/skills/, .qoder/skills)...');
+const SKILL_ROOTS = ['.agents/skills', '.qoder/skills'];
+const skillCounts = new Map();
 let skillsCount = 0;
-if (fs.existsSync(skillsDir)) {
+for (const skillRoot of SKILL_ROOTS) {
+  const skillRootPath = path.join(ROOT, skillRoot);
+  if (!fs.existsSync(skillRootPath)) {
+    warnings.push({
+      file: skillRoot,
+      type: 'MISSING_SKILLS_DIR',
+      description: `No ${skillRoot} directory found.`,
+    });
+    continue;
+  }
   const skillEntries = getActiveSkillDirectories(
-    fs.readdirSync(skillsDir, { withFileTypes: true }),
-    skillsDir
+    fs.readdirSync(skillRootPath, { withFileTypes: true }),
+    skillRootPath
   );
   skillEntries.forEach((entry) => {
     skillsCount++;
-    const skillDir = path.join(skillsDir, entry.name);
+    const skillDir = path.join(skillRootPath, entry.name);
     const { errors, warnings: skillWarnings } = validateSkillDirectory(skillDir);
     for (const err of errors) {
       violations.push({
-        file: `.agents/skills/${entry.name}/SKILL.md`,
+        file: `${skillRoot}/${entry.name}/SKILL.md`,
         type: err.type,
         description: err.description,
       });
     }
     for (const warn of skillWarnings) {
       warnings.push({
-        file: `.agents/skills/${entry.name}/SKILL.md`,
+        file: `${skillRoot}/${entry.name}/SKILL.md`,
         type: warn.type,
         description: warn.description,
       });
     }
   });
-  console.log(`   ✓ Audited ${skillsCount} agent skills.`);
-} else {
-  warnings.push({
-    file: '.agents/skills',
-    type: 'MISSING_SKILLS_DIR',
-    description: 'No .agents/skills directory found.',
-  });
+  skillCounts.set(skillRoot, skillEntries.length);
+  console.log(`   ✓ Audited ${skillEntries.length} skills in ${skillRoot}/.`);
 }
 
 // ── 3. Audit .agents/mcp_config.json ──────────────────────────────────────────
@@ -280,6 +286,11 @@ if (warnings.length > 0) {
   });
 }
 
+const skillRootSummary =
+  SKILL_ROOTS.filter((root) => skillCounts.has(root))
+    .map((root) => `${skillCounts.get(root)} in \`${root}/\``)
+    .join(', ') || 'none';
+
 /**
  * Deterministic report body. Deliberately carries no wall-clock field: the
  * report must be a pure function of the audited inputs, or every invocation
@@ -291,7 +302,7 @@ const reportMd = `# AI & Agentic Content Audit Report
 ## Summary Metrics
 
 - **Agent Rules**: ${rulesCount} verified in \`.agents/rules/\`
-- **Agent Skills**: ${skillsCount} verified in \`.agents/skills/\`
+- **Agent Skills**: ${skillsCount} verified (${skillRootSummary})
 - **Workspace Tracers**: ${tracerCount} consolidated \`AGENT_TRACER.md\` ledger active
 - **Root Directives**: ${ROOT_DOCS.join(', ')} validated
 

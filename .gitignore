@@ -342,3 +342,6 @@ graphify-out/
 !.commandcode/taste/taste.md
 clihub.yaml
 .env*.local
+
+# Private agent overrides (personal, never committed)
+AGENTS.local.md

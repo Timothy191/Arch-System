@@ -15,6 +15,8 @@ const ALLOWED_FRONTMATTER_KEYS = new Set([
   'compatibility',
   'metadata',
   'allowed-tools',
+  // Qoder/Claude convention: user-only invocation for side-effect workflows.
+  'disable-model-invocation',
 ]);
 
 /**

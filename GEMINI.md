@@ -28,14 +28,12 @@ Always run scoped inside `Arch-System/`:
 export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH:/home/tim/.cargo/bin"
 pnpm env:check               # Validate local/target environment configuration
 pnpm agent:start             # Branch off main + initialize [ ] checklist
-pnpm agent:finish            # Verify + safe commit + optional --ff-only --merge
 pnpm agent:verify            # Mandatory 28-gate verification suite (fails fast)
+pnpm agent:finish            # Verify + safe commit + optional --ff-only --merge
 pnpm test:coverage:changed   # Enforce >= 70% coverage on changed portal runtime files
-pnpm type-check              # turbo type-check --concurrency=2
-pnpm lint                    # turbo run lint (Biome per package)
-pnpm test                    # turbo run test
-pnpm audit:compliance        # static invariant sweep
 ```
+
+Full catalogue (`type-check`, `lint`, `test`, audits, db, redis, e2e, deploys): [`AGENTS.md`](AGENTS.md) → Development Commands.
 
 ---
 

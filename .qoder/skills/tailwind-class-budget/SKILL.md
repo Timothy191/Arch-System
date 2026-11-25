@@ -1,6 +1,6 @@
 ---
 name: tailwind-class-budget
-description: Keep Arch-System Tailwind class chains inside the repo's utility budget and design-token rules. Use when writing or editing UI markup in apps/portal, packages/ui, or libs/**/ui, when pnpm audit:tailwind or audit:tokens fails, or before adding a long className/cn() chain. Covers the 16-utility cap, duplicate detection, banned raw values, and the extraction ladder.
+description: Keep Arch-System Tailwind class chains inside the repo's utility budget and design-token rules. Use when writing or editing UI markup in apps/portal, packages/ui, or libs/**/ui, when pnpm audit:tailwind or audit:tokens fails, or before adding a long className/cn() chain. Covers the 20-utility cap, duplicate detection, banned raw values, and the extraction ladder.
 ---
 
 # Tailwind Class Budget
@@ -11,7 +11,7 @@ description: Keep Arch-System Tailwind class chains inside the repo's utility bu
 
 `tools/audits/audit-tailwind-usage.cjs`:
 
-- Cap: **16 utilities per element**, counted per `className` attribute from the _longest single string_ after resolving literals, template spans, ternaries, `+`/`&&`/`||`/`??`, arrays, and calls named `cn`, `clsx`, `twMerge`, `classNames`, `cx`.
+- Cap: **20 utilities per element** (target ≤ 12; `CONFIG.maxUtilitiesPerElement`), counted per `className` attribute from the _longest single string_ after resolving literals, template spans, ternaries, `+`/`&&`/`||`/`??`, arrays, and calls named `cn`, `clsx`, `twMerge`, `classNames`, `cx`.
 - Duplicate rule: a **deduped, sorted** fingerprint appearing ≥10 tokens and ≥3 uses is reported.
 - Scope is hardcoded: `apps/portal/**/*.tsx`, `packages/ui/src/**/*.tsx`, `libs/**/ui/**/*.tsx`; tests, specs, `node_modules`, `.next`, `dist` are ignored.
 - Also gated: `@apply` / `@layer components` outside the theme package, and purge-config regressions in `packages/theme/src/tailwind/preset.ts` (positive globs must end in `.tsx`, required exclusions present, `future.hoverOnlyWhenSupported: true`).

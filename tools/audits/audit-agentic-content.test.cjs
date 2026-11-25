@@ -36,4 +36,17 @@ for (const entry of activeSkills) {
   assert.deepEqual(warnings, [], `Unexpected warnings in skill ${entry.name}`);
 }
 
+const qoderSkillsDir = path.resolve(__dirname, '../../.qoder/skills');
+const qoderSkills = getActiveSkillDirectories(
+  realFs.readdirSync(qoderSkillsDir, { withFileTypes: true }),
+  qoderSkillsDir
+);
+assert.ok(qoderSkills.some((e) => e.name === 'repo-verify'));
+
+for (const entry of qoderSkills) {
+  const { errors, warnings } = validateSkillDirectory(path.join(qoderSkillsDir, entry.name));
+  assert.deepEqual(errors, [], `Unexpected errors in .qoder skill ${entry.name}`);
+  assert.deepEqual(warnings, [], `Unexpected warnings in .qoder skill ${entry.name}`);
+}
+
 console.log('Active skill directory regression checks passed.');

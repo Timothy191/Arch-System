@@ -415,7 +415,14 @@ function analyzeSkills() {
 }
 
 function analyzeRootInstructions() {
-  const rootFiles = ['AGENTS.md', 'CLAUDE.md', '.claude.local.md', 'GEMINI.md', '.cursorrules'];
+  const rootFiles = [
+    'AGENTS.md',
+    'CLAUDE.md',
+    'AGENTS.local.md',
+    '.claude.local.md',
+    'GEMINI.md',
+    '.cursorrules',
+  ];
   const breakdown = [];
   const seenInodes = new Set();
   let totalSize = 0;
