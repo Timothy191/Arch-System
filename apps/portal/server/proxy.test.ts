@@ -911,4 +911,52 @@ describe('proxy', () => {
       expect(readSession).toHaveBeenCalledTimes(PREFETCH_CACHE_MAX_ENTRIES + 2);
     });
   });
+
+  describe('Remote Support longest-prefix /admin/support RBAC', () => {
+    it('allows supervisor on /admin/support while blocking /admin and /admin/cloudflare', async () => {
+      const supervisorEmployee = {
+        id: 'sup-1',
+        role: 'supervisor',
+        department_id: 'dept-uuid-1',
+        accessible_departments: [],
+      };
+      buildProxyMock({ employee: supervisorEmployee });
+
+      const supportRes = await proxy(makeRequest('/admin/support'));
+      expect(supportRes.status).not.toBe(307);
+
+      const adminRootRes = await proxy(makeRequest('/admin'));
+      expect(adminRootRes.status).toBe(307);
+      expect(adminRootRes.headers.get('location')).toContain('unauthorized_department');
+
+      const cloudflareRes = await proxy(makeRequest('/admin/cloudflare'));
+      expect(cloudflareRes.status).toBe(307);
+      expect(cloudflareRes.headers.get('location')).toContain('unauthorized_department');
+    });
+
+    it('blocks operator from /admin/support and allows admin', async () => {
+      buildProxyMock({
+        employee: {
+          id: 'op-1',
+          role: 'operator',
+          department_id: 'dept-uuid-1',
+          accessible_departments: [],
+        },
+      });
+      const operatorRes = await proxy(makeRequest('/admin/support'));
+      expect(operatorRes.status).toBe(307);
+      expect(operatorRes.headers.get('location')).toContain('unauthorized_department');
+
+      buildProxyMock({
+        employee: {
+          id: 'adm-1',
+          role: 'admin',
+          department_id: 'dept-uuid-1',
+          accessible_departments: [],
+        },
+      });
+      const adminRes = await proxy(makeRequest('/admin/support'));
+      expect(adminRes.status).not.toBe(307);
+    });
+  });
 });

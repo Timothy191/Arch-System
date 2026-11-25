@@ -14,6 +14,7 @@ export const CACHE_TAGS = {
   HUB_EXECUTIVE: 'hub:executive',
   HUB_COUNTS: 'hub:counts',
   HUB_LIVE_METRICS: 'hub:live-department-metrics',
+  REMOTE_SUPPORT: 'remote-support',
 
   // Canonical Database Table tags
   TABLE_MACHINES: 'table:machines',
@@ -28,6 +29,8 @@ export const CACHE_TAGS = {
   TABLE_PRODUCTION_LOGS: 'table:production_logs',
   TABLE_DRILL_OPERATIONS: 'table:drill_operations',
   TABLE_DELAY_ENTRIES: 'table:delay_entries',
+  TABLE_REMOTE_SUPPORT_SESSIONS: 'table:remote_support_sessions',
+  TABLE_REMOTE_SUPPORT_DEVICES: 'table:remote_support_devices',
 } as const;
 
 export type CanonicalCacheTag = (typeof CACHE_TAGS)[keyof typeof CACHE_TAGS];

@@ -32,6 +32,12 @@ const RATE_LIMIT_CONFIGS = {
     maxRequests: 100,
   } as RateLimitConfig,
 
+  // Remote support endpoints - moderate restriction
+  support: {
+    windowMs: 60_000, // 1 minute
+    maxRequests: 60,
+  } as RateLimitConfig,
+
   // Webhook endpoints - higher limit for external services
   webhooks: {
     windowMs: 60_000, // 1 minute
@@ -62,6 +68,7 @@ function getRateLimitType(path: string): RateLimitType {
     return 'auth';
   if (path.startsWith('/api/export/')) return 'export';
   if (path.startsWith('/api/admin/')) return 'admin';
+  if (path.startsWith('/api/support/')) return 'support';
   if (path.startsWith('/api/webhooks/')) return 'webhooks';
   if (path.startsWith('/api/c66')) return 'hardware';
   return 'general';

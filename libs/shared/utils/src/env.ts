@@ -31,6 +31,7 @@ const clientEnvShape = {
   NEXT_PUBLIC_FUXA_URL: z.string().url().optional(),
   NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: z.string().optional(),
   NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY: z.string().min(1).optional(),
+  NEXT_PUBLIC_REMOTE_DESKTOP_GATEWAY_URL: z.string().url().optional(),
 };
 
 const serverEnvShape = {
@@ -130,6 +131,16 @@ const serverEnvShape = {
     .transform((v) => v === 'true'),
   SLOW_QUERY_THRESHOLD_MS: z.coerce.number().int().positive().default(500),
 
+  // ── Remote Support & Tier 2 Desktop Gateway (optional) ─────────────
+  CLOUDFLARE_CALLS_TURN_TOKEN_ID: z.string().min(1).optional(),
+  CLOUDFLARE_CALLS_TURN_API_TOKEN: z.string().min(1).optional(),
+  TURN_URLS: z.string().min(1).optional(),
+  TURN_SHARED_SECRET: z.string().min(8).optional(),
+  REMOTE_DESKTOP_GATEWAY_URL: z.string().url().optional(),
+  REMOTE_DESKTOP_TOKEN_SECRET: z.string().min(32).optional(),
+  MESHCENTRAL_URL: z.string().url().optional(),
+  MESHCENTRAL_LOGIN_TOKEN_KEY: z.string().min(16).optional(),
+
   // ── Version ────────────────────────────────────────────────────────
   PORTAL_VERSION: z.string().default('1.0.0'),
   VERCEL_ENV: z.string().optional(),
@@ -199,6 +210,7 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
       NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,
       NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY:
         process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY,
+      NEXT_PUBLIC_REMOTE_DESKTOP_GATEWAY_URL: process.env.NEXT_PUBLIC_REMOTE_DESKTOP_GATEWAY_URL,
       SUPABASE_URL: process.env.SUPABASE_URL,
       SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
       SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
@@ -254,6 +266,14 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
       GITHUB_TOKEN: process.env.GITHUB_TOKEN,
       ENABLE_DB_TRACING: process.env.ENABLE_DB_TRACING,
       SLOW_QUERY_THRESHOLD_MS: process.env.SLOW_QUERY_THRESHOLD_MS,
+      CLOUDFLARE_CALLS_TURN_TOKEN_ID: process.env.CLOUDFLARE_CALLS_TURN_TOKEN_ID,
+      CLOUDFLARE_CALLS_TURN_API_TOKEN: process.env.CLOUDFLARE_CALLS_TURN_API_TOKEN,
+      TURN_URLS: process.env.TURN_URLS,
+      TURN_SHARED_SECRET: process.env.TURN_SHARED_SECRET,
+      REMOTE_DESKTOP_GATEWAY_URL: process.env.REMOTE_DESKTOP_GATEWAY_URL,
+      REMOTE_DESKTOP_TOKEN_SECRET: process.env.REMOTE_DESKTOP_TOKEN_SECRET,
+      MESHCENTRAL_URL: process.env.MESHCENTRAL_URL,
+      MESHCENTRAL_LOGIN_TOKEN_KEY: process.env.MESHCENTRAL_LOGIN_TOKEN_KEY,
       PORTAL_VERSION: process.env.PORTAL_VERSION,
       VERCEL_ENV: process.env.VERCEL_ENV,
       CI: process.env.CI,
@@ -300,6 +320,7 @@ function parseEnv(): EnvVars {
     NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,
     NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY:
       process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY,
+    NEXT_PUBLIC_REMOTE_DESKTOP_GATEWAY_URL: process.env.NEXT_PUBLIC_REMOTE_DESKTOP_GATEWAY_URL,
     ENABLE_LOAD_ADAPTIVE_TEST: process.env.ENABLE_LOAD_ADAPTIVE_TEST,
     DISABLE_RATE_LIMIT: process.env.DISABLE_RATE_LIMIT,
     RATE_LIMIT_IP_WHITELIST: process.env.RATE_LIMIT_IP_WHITELIST,
@@ -334,6 +355,14 @@ function parseEnv(): EnvVars {
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
     ENABLE_DB_TRACING: process.env.ENABLE_DB_TRACING,
     SLOW_QUERY_THRESHOLD_MS: process.env.SLOW_QUERY_THRESHOLD_MS,
+    CLOUDFLARE_CALLS_TURN_TOKEN_ID: process.env.CLOUDFLARE_CALLS_TURN_TOKEN_ID,
+    CLOUDFLARE_CALLS_TURN_API_TOKEN: process.env.CLOUDFLARE_CALLS_TURN_API_TOKEN,
+    TURN_URLS: process.env.TURN_URLS,
+    TURN_SHARED_SECRET: process.env.TURN_SHARED_SECRET,
+    REMOTE_DESKTOP_GATEWAY_URL: process.env.REMOTE_DESKTOP_GATEWAY_URL,
+    REMOTE_DESKTOP_TOKEN_SECRET: process.env.REMOTE_DESKTOP_TOKEN_SECRET,
+    MESHCENTRAL_URL: process.env.MESHCENTRAL_URL,
+    MESHCENTRAL_LOGIN_TOKEN_KEY: process.env.MESHCENTRAL_LOGIN_TOKEN_KEY,
     PORTAL_VERSION: process.env.PORTAL_VERSION,
     VERCEL_ENV: process.env.VERCEL_ENV,
     CI: process.env.CI,

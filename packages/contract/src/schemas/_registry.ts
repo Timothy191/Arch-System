@@ -793,6 +793,55 @@ export const webhookEndpointsSchema = z
   })
   .passthrough();
 
+export const remoteSupportDevicesSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    hostname: z.string().optional(),
+    display_name: z.string().optional(),
+    site_id: z.string().uuid().nullable().optional(),
+    department_id: z.string().uuid().nullable().optional(),
+    assigned_employee_id: z.string().uuid().nullable().optional(),
+    device_class: z.string().optional(),
+    protocol: z.string().optional(),
+    network_host: z.string().optional(),
+    network_port: z.number().optional(),
+    require_user_consent: z.boolean().optional(),
+    is_active: z.boolean().optional(),
+    created_at: z.string().optional(),
+    updated_at: z.string().optional(),
+  })
+  .passthrough();
+
+export const remoteSupportSessionsSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    session_code: z.string().optional(),
+    tier: z.string().optional(),
+    status: z.string().optional(),
+    requester_employee_id: z.string().uuid().optional(),
+    agent_employee_id: z.string().uuid().nullable().optional(),
+    device_id: z.string().uuid().nullable().optional(),
+    department_slug: z.string().nullable().optional(),
+    issue_summary: z.string().optional(),
+    cobrowse_enabled: z.boolean().optional(),
+    expires_at: z.string().optional(),
+    created_at: z.string().optional(),
+    updated_at: z.string().optional(),
+  })
+  .passthrough();
+
+export const remoteSupportAuditEventsSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    session_id: z.string().uuid().optional(),
+    actor_employee_id: z.string().uuid().nullable().optional(),
+    event_type: z.string().optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+    ip_address: z.string().nullable().optional(),
+    created_at: z.string().optional(),
+  })
+  .passthrough();
+
 export const mutationLogSchema = z
   .object({
     tenant_id: z.string().uuid().optional(),
@@ -913,5 +962,8 @@ export const tableSchemas = {
   visitors: visitorsSchema,
   webhook_delivery_logs: webhookDeliveryLogsSchema,
   webhook_endpoints: webhookEndpointsSchema,
+  remote_support_devices: remoteSupportDevicesSchema,
+  remote_support_sessions: remoteSupportSessionsSchema,
+  remote_support_audit_events: remoteSupportAuditEventsSchema,
 } as const;
 export * from './queue.schema';

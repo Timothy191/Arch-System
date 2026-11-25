@@ -37,5 +37,12 @@ ingress:
       connectTimeout: 15s
       keepAliveConnections: 100
 
+  # 4. Tier 2 Remote Support HTML5 Desktop Bridge (WebSocket -> guacd)
+  - hostname: remote-gw.yourdomain.com
+    service: http://127.0.0.1:8085
+    originRequest:
+      connectTimeout: 30s
+      noHappyEyeballs: true
+
   # 5. Catch-all fallback rule (required by cloudflared)
   - service: http_status:404

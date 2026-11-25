@@ -1,0 +1,64 @@
+services:
+  guacd:
+    image: guacamole/guacd:1.5.5
+    container_name: arch-guacd
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    networks:
+      - arch_remote_support_net
+    healthcheck:
+      test: ['CMD-SHELL', 'nc -z 127.0.0.1 4822 || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  arch-guac-bridge:
+    build:
+      context: ../remote-support-bridge
+      dockerfile: Dockerfile
+    container_name: arch-guac-bridge
+    restart: unless-stopped
+    depends_on:
+      guacd:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:8085:8085'
+    environment:
+      PORT: '8085'
+      GUACD_HOST: guacd
+      GUACD_PORT: '4822'
+      REMOTE_DESKTOP_TOKEN_SECRET: ${REMOTE_DESKTOP_TOKEN_SECRET:?Set REMOTE_DESKTOP_TOKEN_SECRET (>= 32 chars)}
+      REDIS_URL: ${REDIS_URL:-}
+    networks:
+      - arch_remote_support_net
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8085/health || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  coturn:
+    image: coturn/coturn:4.6
+    container_name: arch-coturn
+    profiles:
+      - turn
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - --use-auth-secret
+      - --static-auth-secret=${TURN_SHARED_SECRET:-replace-with-turn-secret}
+      - --realm=${TURN_REALM:-turn.plantcormining.local}
+      - --listening-port=3478
+      - --tls-listening-port=5349
+      - --no-cli
+      - --no-multicast-peers
+      - --no-loopback-peers
+      - --denied-peer-ip=10.0.0.0-10.255.255.255
+      - --denied-peer-ip=172.16.0.0-172.31.255.255
+      - --denied-peer-ip=192.168.0.0-192.168.255.255
+
+networks:
+  arch_remote_support_net:
+    driver: bridge

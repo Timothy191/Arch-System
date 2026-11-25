@@ -234,6 +234,7 @@ const RESTRICTED_ROUTES: Record<string, string[]> = {
   database: ['admin', 'manager'],
   'hub/executive': ['admin', 'manager'],
   tools: ['admin', 'supervisor'],
+  'admin/support': ['admin', 'supervisor'],
   admin: ['admin'],
 };
 
@@ -466,14 +467,14 @@ async function enforceRouteAccess(
   const topSegment = pathSegments[0];
   const secondSegment = pathSegments[1];
 
-  // Check restricted top-level routes
-  for (const [route, allowedRoles] of Object.entries(RESTRICTED_ROUTES)) {
-    if (
-      (pathname === `/${route}` || pathname.startsWith(`/${route}/`)) &&
-      !allowedRoles.includes(userRole)
-    ) {
-      return redirectWithError(request, 'unauthorized_department', client.response);
-    }
+  // Check restricted top-level routes using longest-prefix matching so
+  // nested routes like `/admin/support` can grant narrower/broader overrides.
+  const matchedRestrictedRoute = Object.entries(RESTRICTED_ROUTES)
+    .filter(([route]) => pathname === `/${route}` || pathname.startsWith(`/${route}/`))
+    .sort(([routeA], [routeB]) => routeB.length - routeA.length)[0];
+
+  if (matchedRestrictedRoute && !matchedRestrictedRoute[1].includes(userRole)) {
+    return redirectWithError(request, 'unauthorized_department', client.response);
   }
 
   // Also check /{dept}/tools restriction

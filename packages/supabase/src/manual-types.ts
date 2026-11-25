@@ -495,3 +495,203 @@ export interface IssuedCardsUpdate {
   lost_at?: string | null;
   replaced_by?: string | null;
 }
+
+// === remote_support_devices (migration 230) ===
+
+export type RemoteSupportDeviceClass =
+  | 'workstation'
+  | 'laptop'
+  | 'scada_hmi'
+  | 'unattended_kiosk'
+  | 'server';
+
+export type RemoteSupportProtocol = 'rdp' | 'vnc' | 'ssh' | 'meshcentral';
+
+export type RemoteSupportTier = 'tier1_browser' | 'tier2_os_desktop';
+
+export type RemoteSupportSessionStatus =
+  | 'pending'
+  | 'claimed'
+  | 'consent_requested'
+  | 'active'
+  | 'ended'
+  | 'rejected'
+  | 'expired'
+  | 'revoked';
+
+export type RemoteSupportAuditEventType =
+  | 'session_created'
+  | 'session_claimed'
+  | 'consent_requested'
+  | 'consent_granted'
+  | 'consent_rejected'
+  | 'webrtc_connected'
+  | 'cobrowse_requested'
+  | 'cobrowse_granted'
+  | 'cobrowse_revoked'
+  | 'tier2_token_issued'
+  | 'tier2_connected'
+  | 'diagnostics_captured'
+  | 'session_ended'
+  | 'session_revoked'
+  | 'session_expired';
+
+export interface RemoteSupportDevicesRow {
+  id: string;
+  hostname: string;
+  display_name: string;
+  site_id: string | null;
+  department_id: string | null;
+  assigned_employee_id: string | null;
+  device_class: RemoteSupportDeviceClass;
+  protocol: RemoteSupportProtocol;
+  network_host: string;
+  network_port: number;
+  protocol_options: Json;
+  require_user_consent: boolean;
+  is_active: boolean;
+  last_connected_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RemoteSupportDevicesInsert {
+  id?: string;
+  hostname: string;
+  display_name: string;
+  site_id?: string | null;
+  department_id?: string | null;
+  assigned_employee_id?: string | null;
+  device_class: RemoteSupportDeviceClass;
+  protocol: RemoteSupportProtocol;
+  network_host: string;
+  network_port: number;
+  protocol_options?: Json;
+  require_user_consent?: boolean;
+  is_active?: boolean;
+  last_connected_at?: string | null;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface RemoteSupportDevicesUpdate {
+  id?: string;
+  hostname?: string;
+  display_name?: string;
+  site_id?: string | null;
+  department_id?: string | null;
+  assigned_employee_id?: string | null;
+  device_class?: RemoteSupportDeviceClass;
+  protocol?: RemoteSupportProtocol;
+  network_host?: string;
+  network_port?: number;
+  protocol_options?: Json;
+  require_user_consent?: boolean;
+  is_active?: boolean;
+  last_connected_at?: string | null;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// === remote_support_sessions (migration 230) ===
+
+export interface RemoteSupportSessionsRow {
+  id: string;
+  session_code: string;
+  tier: RemoteSupportTier;
+  status: RemoteSupportSessionStatus;
+  requester_employee_id: string;
+  agent_employee_id: string | null;
+  device_id: string | null;
+  department_slug: string | null;
+  issue_summary: string;
+  cobrowse_enabled: boolean;
+  consent_granted_at: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  end_reason: string | null;
+  resolution_notes: string | null;
+  client_diagnostics: Json;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RemoteSupportSessionsInsert {
+  id?: string;
+  session_code: string;
+  tier: RemoteSupportTier;
+  status: RemoteSupportSessionStatus;
+  requester_employee_id: string;
+  agent_employee_id?: string | null;
+  device_id?: string | null;
+  department_slug?: string | null;
+  issue_summary: string;
+  cobrowse_enabled?: boolean;
+  consent_granted_at?: string | null;
+  started_at?: string | null;
+  ended_at?: string | null;
+  end_reason?: string | null;
+  resolution_notes?: string | null;
+  client_diagnostics?: Json;
+  expires_at: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface RemoteSupportSessionsUpdate {
+  id?: string;
+  session_code?: string;
+  tier?: RemoteSupportTier;
+  status?: RemoteSupportSessionStatus;
+  requester_employee_id?: string;
+  agent_employee_id?: string | null;
+  device_id?: string | null;
+  department_slug?: string | null;
+  issue_summary?: string;
+  cobrowse_enabled?: boolean;
+  consent_granted_at?: string | null;
+  started_at?: string | null;
+  ended_at?: string | null;
+  end_reason?: string | null;
+  resolution_notes?: string | null;
+  client_diagnostics?: Json;
+  expires_at?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// === remote_support_audit_events (migration 230) ===
+
+export interface RemoteSupportAuditEventsRow {
+  id: string;
+  session_id: string;
+  actor_employee_id: string | null;
+  event_type: RemoteSupportAuditEventType;
+  metadata: Json;
+  ip_address: string | null;
+  created_at: string;
+}
+
+export interface RemoteSupportAuditEventsInsert {
+  id?: string;
+  session_id: string;
+  actor_employee_id?: string | null;
+  event_type: RemoteSupportAuditEventType;
+  metadata?: Json;
+  ip_address?: string | null;
+  created_at?: string;
+}
+
+export interface RemoteSupportAuditEventsUpdate {
+  id?: string;
+  session_id?: string;
+  actor_employee_id?: string | null;
+  event_type?: RemoteSupportAuditEventType;
+  metadata?: Json;
+  ip_address?: string | null;
+  created_at?: string;
+}

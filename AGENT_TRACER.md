@@ -6,6 +6,16 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T09:20:00+02:00] - Hybrid Two-Tier Remote Support & Desktop Assistance (`feat/remote-support-system`)
+
+- **Database, Contracts & RBAC ([`230_remote_support_system.sql`](packages/database/migrations/230_remote_support_system.sql), [`manual-types.ts`](packages/supabase/src/manual-types.ts), [`remote-support.schema.ts`](packages/contract/src/schemas/remote-support.schema.ts), [`env.ts`](libs/shared/utils/src/env.ts), [`server/proxy.ts`](apps/portal/server/proxy.ts), [`admin/layout.tsx`](apps/portal/app/admin/layout.tsx), [`departments.ts`](libs/features/departments/data-access/src/departments.ts))**:
+  - Added RLS-protected `remote_support_devices`, `remote_support_sessions` (Realtime-enabled), and append-only `remote_support_audit_events` tables with `(SELECT auth.uid())` policies and immutable audit trigger.
+  - Added longest-prefix RBAC in `server/proxy.ts` and `AdminLayout` allowing both `admin` and `supervisor` roles into `/admin/support` while scoping supervisors exclusively to the `Remote Support` tab, and updated `Permissions-Policy` (`display-capture=(self)`) and CSP `connect-src`.
+- **Tier 1 WebRTC Assist, Co-Browse & Portal UI ([`actions.ts`](apps/portal/features/remote-support/actions.ts), [`ice-servers/route.ts`](apps/portal/app/api/support/ice-servers/route.ts), [`useWebRtcPeer.ts`](apps/portal/features/remote-support/hooks/useWebRtcPeer.ts), [`cobrowse-guard.ts`](apps/portal/features/remote-support/lib/cobrowse-guard.ts), [`FeedbackWidget.tsx`](apps/portal/components/FeedbackWidget.tsx), [`RemoteSupportSessionOverlay.tsx`](apps/portal/features/remote-support/components/RemoteSupportSessionOverlay.tsx), [`RemoteSupportDesk.tsx`](apps/portal/features/remote-support/components/RemoteSupportDesk.tsx))**:
+  - Implemented zero-download browser screen sharing (`getDisplayMedia`) over WebRTC with Supabase Realtime Broadcast signaling, Cloudflare Calls TURN / `coturn` HMAC ephemeral credentials, laser/canvas annotations, sanitized diagnostics, consent-gated portal co-browsing with password-field masking, and a `Shift+Esc` kill switch.
+- **Tier 2 Self-Hosted HTML5 OS Desktop Gateway ([`tier2/launch/route.ts`](apps/portal/app/api/support/tier2/launch/route.ts), [`Tier2DesktopViewer.tsx`](apps/portal/features/remote-support/components/Tier2DesktopViewer.tsx), [`infra/remote-support-bridge/`](infra/remote-support-bridge/server.mjs), [`compose.remote-support.yml`](infra/docker/compose.remote-support.yml), [`remote-support-deployment.md`](docs/runbooks/remote-support-deployment.md))**:
+  - Built 60-second single-use AES-256-GCM launch tokens with Redis `jti` replay protection, a standalone `guacamole-lite` + `guacd` Docker stack exposed via Cloudflare Tunnel, and a lazy-loaded `guacamole-common-js` viewer inside `/admin/support`.
+
 ## [2026-11-25T07:12:00+02:00] - Access Control & Department UI Polish, Drilling & Database Calibration, and `/overview` Migration Sync (`chore/polish-ui-and-sync-overview-metrics`)
 
 - **Access Control & Department UI Polish ([`HeadcountMusterBanner.tsx`](<apps/portal/app/(departments)/access-control/components/HeadcountMusterBanner.tsx>), [`DashboardKPIGrid.tsx`](<apps/portal/app/(departments)/access-control/components/DashboardKPIGrid.tsx>), [`QuickActionHub.tsx`](<apps/portal/app/(departments)/access-control/components/QuickActionHub.tsx>), [`PerimeterGateHUD.tsx`](<apps/portal/app/(departments)/access-control/components/PerimeterGateHUD.tsx>), [`access-control/page.test.tsx`](<apps/portal/app/(departments)/access-control/page.test.tsx>), [`DrillRigDailyCard.tsx`](apps/portal/features/departments/components/drilling/DrillRigDailyCard.tsx), [`PlantInventoryWorkspaceClient.tsx`](apps/portal/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient.tsx), [`ProductionTargetsPanel.tsx`](apps/portal/features/departments/components/production/ProductionTargetsPanel.tsx))**:
@@ -585,7 +595,6 @@
 ## [2026-11-14T01:00:00+02:00] - Remove All Token Budget & Agent Restraint Enforcement (Tracking + Warning Retained)
 
 - **Phase 1 (Token Budget Removal)**:
-
   - `packages/agents/src/token-budget.ts`: `enforceHardCap` default `true` → `false`; removed `breached` from `RoleBudget.status` and `recordUsage` return type; removed hard-cap circuit-breaker and reserve-margin absorption logic; overruns set `status = 'warning'` + `warningTriggered = true` and never block; `DEFAULT_BUDGET_TIERS` kept as reference data.
   - `tools/scripts/token-tracker.cjs`: removed `MAX_AUTONOMOUS_TOKEN_BUDGET` constant (was 200000); auto-scaling uncapped/effectively unlimited; `checkBudget()` converts blocking `issues` to `console.warn` informational warnings, always returns `true`; `--budget-check` unconditionally `process.exit(0)`; `determineEffectiveTaskBudget()` strips `maxLeasedSkills`, `maxSubagents`, `maxPreTaskTokens` from `effectiveBudget` output.
   - `.agents/hooks/pre-task-budget-check.cjs`: rewrote from blocking check to tracking-only; wraps both `task-budget` and `budget-check` in try/catch; always `process.exit(0)`.
@@ -594,7 +603,6 @@
   - `packages/agents/src/token-budget.test.ts`: rewrote overrun tests to assert warning-only behavior; removed all `breached === true` / circuit-breaker assertions.
 
 - **Phase 2 (Agent Restraint Removal)**:
-
   - `.agents/rules/context-lifecycle-and-compaction.md`: removed `pnpm token:budget-check` and `get_active_leases` from Phase 1 preflight; removed tiered token limits (3.5k–104k, ≤1–4 skills, 0–6 subagents).
   - `.agents/skills/agent-accuracy-enforcement/SKILL.md`: replaced Section 7 "Token Budget Discipline" with "Token Budget Tracking (Non-Blocking)"; removed tiered limits and self-healing gate.
   - `.agents/rules/mandatory-ai-engineering-governance.md`: removed human approval requirement from Tier 4/5; agents may independently merge and deploy; removed "An agent must never grant itself additional permissions" restriction.

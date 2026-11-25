@@ -3,10 +3,14 @@
 import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import { analytics, fetchClient } from '@repo/utils/client';
-import { Bug, LifeBuoy, MessageSquare, Send, Sparkles, X } from 'lucide-react';
+import { Bug, LifeBuoy, MessageSquare, MonitorUp, Send, Sparkles, X } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import type React from 'react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { createRemoteSupportSession } from '@/features/remote-support/actions';
+import { useRemoteSupportStore } from '@/features/remote-support/hooks/useRemoteSupportStore';
+import { captureClientDiagnostics } from '@/features/remote-support/lib/diagnostics';
 
 interface FeedbackWidgetProps {
   variant?: 'header' | 'floating';
@@ -54,11 +58,14 @@ const FEEDBACK_CATEGORIES: readonly FeedbackCategoryItem[] = [
 // AGENT-TRACE: Redesigned FeedbackWidget to match Arch OS light-mode liquid-glass design system
 // (Logo emblem, Space Grotesk display typography, tactile category pills, monospace telemetry badges, Sonner toast).
 export function FeedbackWidget({ variant = 'header', embedded = false }: FeedbackWidgetProps) {
+  const pathname = usePathname();
+  const setActiveSession = useRemoteSupportStore((s) => s.setActiveSession);
   const [isVisible, setIsVisible] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<FeedbackCategory>('bug');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [requestingAssist, setRequestingAssist] = useState(false);
 
   const selectedCategory: FeedbackCategoryItem =
     FEEDBACK_CATEGORIES.find((cat) => cat.value === type) ?? DEFAULT_FEEDBACK_CATEGORY;
@@ -88,6 +95,47 @@ export function FeedbackWidget({ variant = 'header', embedded = false }: Feedbac
     setMessage('');
     setIsOpen(false);
     toast.success('Feedback transmitted to Arch Support Desk');
+  };
+
+  const handleRequestRemoteAssist = async () => {
+    setRequestingAssist(true);
+    try {
+      const issueText =
+        message.trim().length >= 5
+          ? message.trim()
+          : `Live remote assistance requested on ${pathname || '/'}`;
+      const departmentSlug = pathname?.split('/').filter(Boolean)[0] ?? undefined;
+      const result = await createRemoteSupportSession({
+        issueSummary: issueText,
+        departmentSlug,
+        clientDiagnostics: captureClientDiagnostics(0),
+      });
+
+      setActiveSession({
+        sessionId: result.session.id,
+        sessionCode: result.session.session_code,
+        tier: result.session.tier,
+        status: result.session.status,
+        issueSummary: result.session.issue_summary,
+        agentName: null,
+        agentRole: null,
+        deviceName: null,
+        cobrowseEnabled: false,
+        cobrowsePendingRequest: false,
+        expiresAt: result.session.expires_at,
+      });
+
+      analytics.track({
+        eventName: 'Remote Support Requested',
+        properties: { departmentSlug: departmentSlug ?? 'unknown' },
+      });
+      setIsOpen(false);
+      toast.success(`Support code ${result.session.session_code} ready`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Unable to start remote support session');
+    } finally {
+      setRequestingAssist(false);
+    }
   };
 
   const renderModalCard = (positionClass: string) => (
@@ -227,6 +275,27 @@ export function FeedbackWidget({ variant = 'header', embedded = false }: Feedbac
               <span>{submitting ? 'Sending…' : 'Submit'}</span>
             </button>
           </div>
+        </div>
+
+        {/* Live Remote Support (Zero-Download) */}
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-black/[0.07] bg-black/[0.025] px-3 py-2">
+          <div className="min-w-0">
+            <p className="font-semibold text-[11px] text-[var(--text-heading)]">
+              Need live screen help?
+            </p>
+            <p className="truncate text-[10px] text-[var(--text-muted)]">
+              Zero downloads · 6-digit consent code
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={requestingAssist}
+            onClick={handleRequestRemoteAssist}
+            className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-lg border border-accent-gold/40 bg-accent-gold/15 px-2.5 font-semibold text-[11px] text-[var(--text-heading)] hover:bg-accent-gold/25 disabled:opacity-50"
+          >
+            <MonitorUp className="h-3 w-3 text-accent-gold" />
+            <span>{requestingAssist ? 'Generating…' : 'Remote Assist'}</span>
+          </button>
         </div>
       </form>
     </div>

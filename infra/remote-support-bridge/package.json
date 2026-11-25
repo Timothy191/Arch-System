@@ -1,0 +1,15 @@
+{
+  "name": "arch-remote-support-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test token.test.mjs"
+  },
+  "dependencies": {
+    "guacamole-lite": "^1.0.4",
+    "ioredis": "^5.4.1",
+    "ws": "^8.18.0"
+  }
+}

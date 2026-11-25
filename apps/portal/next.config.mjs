@@ -327,7 +327,7 @@ const nextConfig = {
           {
             key: 'Permissions-Policy',
             value:
-              'camera=(), microphone=(), geolocation=(), clipboard-write=(self), clipboard-read=(self)',
+              'camera=(), microphone=(), geolocation=(), display-capture=(self), clipboard-write=(self), clipboard-read=(self)',
           },
           ...(isProduction
             ? [

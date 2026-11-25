@@ -1,7 +1,18 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { toast } from 'sonner';
+import { useRemoteSupportStore } from '@/features/remote-support/hooks/useRemoteSupportStore';
 import { FeedbackWidget } from './FeedbackWidget';
+
+const mockCreateRemoteSupportSession = jest.fn();
+
+jest.mock('next/navigation', () => ({
+  usePathname: () => '/control-room',
+}));
+
+jest.mock('@/features/remote-support/actions', () => ({
+  createRemoteSupportSession: (...args: unknown[]) => mockCreateRemoteSupportSession(...args),
+}));
 
 jest.mock('@repo/utils/client', () => ({
   analytics: { track: jest.fn() },
@@ -11,12 +22,14 @@ jest.mock('@repo/utils/client', () => ({
 jest.mock('sonner', () => ({
   toast: {
     success: jest.fn(),
+    error: jest.fn(),
   },
 }));
 
 describe('FeedbackWidget', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useRemoteSupportStore.getState().clearActiveSession();
   });
 
   it('renders header support button with Arch System Logo and opens the liquid-glass feedback dialog', () => {
@@ -64,6 +77,32 @@ describe('FeedbackWidget', () => {
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith('Feedback transmitted to Arch Support Desk');
+    });
+  });
+
+  it('starts a zero-download remote support session when clicking Remote Assist', async () => {
+    mockCreateRemoteSupportSession.mockResolvedValue({
+      success: true,
+      session: {
+        id: '00000000-0000-0000-0000-000000000099',
+        session_code: '482917',
+        tier: 'tier1_browser',
+        status: 'pending',
+        issue_summary: 'Live remote assistance requested on /control-room',
+        expires_at: new Date(Date.now() + 600_000).toISOString(),
+      },
+    });
+
+    render(<FeedbackWidget variant="header" />);
+    fireEvent.click(screen.getByTitle('Feedback & Support'));
+
+    const assistBtn = screen.getByRole('button', { name: /Remote Assist/i });
+    fireEvent.click(assistBtn);
+
+    await waitFor(() => {
+      expect(mockCreateRemoteSupportSession).toHaveBeenCalledTimes(1);
+      expect(useRemoteSupportStore.getState().activeSession?.sessionCode).toBe('482917');
+      expect(toast.success).toHaveBeenCalledWith('Support code 482917 ready');
     });
   });
 });

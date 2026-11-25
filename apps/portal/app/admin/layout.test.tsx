@@ -3,6 +3,14 @@ import { render, screen } from '@testing-library/react';
 import { redirect } from 'next/navigation';
 import AdminLayout from './layout';
 
+const mockHeadersGet = jest.fn(() => '');
+
+jest.mock('next/headers', () => ({
+  headers: jest.fn(async () => ({
+    get: mockHeadersGet,
+  })),
+}));
+
 jest.mock('next/navigation', () => ({
   redirect: jest.fn((url: string) => {
     throw new Error(`NEXT_REDIRECT:${url}`);
@@ -64,6 +72,7 @@ const mockSupabaseForRole = (role: string) => {
 describe('AdminLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockHeadersGet.mockReturnValue('');
   });
 
   it('redirects unauthenticated visitors to /login', async () => {
@@ -107,6 +116,7 @@ describe('AdminLayout', () => {
 
     const linkPairs = [
       [/Cloudflare Edge/i, '/admin/cloudflare'],
+      [/Remote Support/i, '/admin/support'],
       [/n8n Workflows/i, '/admin/workflows'],
       [/RedisInsight/i, '/admin/redis'],
       [/Observability & CI/i, '/admin/observability'],
@@ -116,5 +126,21 @@ describe('AdminLayout', () => {
     for (const [name, href] of linkPairs) {
       expect(screen.getByRole('link', { name })).toHaveAttribute('href', href);
     }
+  });
+
+  it('allows supervisors on /admin/support with sidebar filtered exclusively to Remote Support', async () => {
+    mockHeadersGet.mockReturnValue('/admin/support');
+    getUserSafely.mockResolvedValue({ id: 'sup-1', email: 'sup@plantcor.com' });
+    mockSupabaseForRole('supervisor');
+
+    const jsx = await AdminLayout({ children: <div data-testid="support-child">Support</div> });
+    render(jsx);
+
+    expect(screen.getByTestId('support-child')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Remote Support/i })).toHaveAttribute(
+      'href',
+      '/admin/support'
+    );
+    expect(screen.queryByRole('link', { name: /Cloudflare Edge/i })).not.toBeInTheDocument();
   });
 });

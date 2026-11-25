@@ -33,6 +33,14 @@ const ArchCursorWaitIndicator = dynamic(
   { ssr: false }
 );
 
+const RemoteSupportSessionOverlay = dynamic(
+  () =>
+    import('@/features/remote-support/components/RemoteSupportSessionOverlay').then((m) => ({
+      default: m.RemoteSupportSessionOverlay,
+    })),
+  { ssr: false }
+);
+
 export function ClientOverlays() {
   return (
     <>
@@ -41,6 +49,7 @@ export function ClientOverlays() {
       <CookieConsent />
       <OfflineBanner />
       <WebVitalsReporter />
+      <RemoteSupportSessionOverlay />
     </>
   );
 }

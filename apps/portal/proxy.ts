@@ -25,8 +25,19 @@ export async function proxy(request: NextRequest) {
   request.headers?.set?.('x-nonce', nonce);
   request.headers?.set?.('x-trace-id', traceId);
   request.headers?.set?.('x-request-id', requestId);
+  request.headers?.set?.('x-arch-pathname', request.nextUrl.pathname);
 
   const response = await handleProxy(request);
+
+  let gatewayConnectOrigin = '';
+  const rawGatewayUrl = process.env.NEXT_PUBLIC_REMOTE_DESKTOP_GATEWAY_URL;
+  if (rawGatewayUrl) {
+    try {
+      gatewayConnectOrigin = ` ${new URL(rawGatewayUrl).origin}`;
+    } catch {
+      gatewayConnectOrigin = '';
+    }
+  }
 
   const isProduction = process.env.NODE_ENV === 'production';
   const scriptSrc = isProduction
@@ -36,8 +47,8 @@ export async function proxy(request: NextRequest) {
     ? "frame-src 'self' https://challenges.cloudflare.com https://*.grafana.net https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app https://web.whatsapp.com https://*.whatsapp.com https://calendar.google.com https://docs.google.com https://drive.google.com;"
     : "frame-src 'self' http://localhost:* http://127.0.0.1:* https://*.ngrok-free.app https://challenges.cloudflare.com https://*.grafana.net https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app https://web.whatsapp.com https://*.whatsapp.com https://calendar.google.com https://docs.google.com https://drive.google.com;";
   const connectSrc = isProduction
-    ? "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://*.grafana.net https://api.open-meteo.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com https://web.whatsapp.com https://*.whatsapp.com wss://*.whatsapp.com wss://*.web.whatsapp.com;"
-    : "connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://*.grafana.net https://api.open-meteo.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com https://web.whatsapp.com https://*.whatsapp.com wss://*.whatsapp.com wss://*.web.whatsapp.com;";
+    ? `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://*.grafana.net https://api.open-meteo.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com https://web.whatsapp.com https://*.whatsapp.com wss://*.whatsapp.com wss://*.web.whatsapp.com${gatewayConnectOrigin};`
+    : `connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://*.grafana.net https://api.open-meteo.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com https://web.whatsapp.com https://*.whatsapp.com wss://*.whatsapp.com wss://*.web.whatsapp.com${gatewayConnectOrigin};`;
 
   const cspHeader = `
     default-src 'self';

@@ -461,6 +461,7 @@ export const ADMIN_DEPARTMENT = DEPARTMENTS.find((department) => department.name
 
 export const ADMIN_TABS = [
   { name: 'dashboard', label: 'General', icon: 'Settings' },
+  { name: 'support', label: 'Remote Support', icon: 'LifeBuoy' },
   { name: 'workflows', label: 'n8n Workflows', icon: 'Workflow' },
   { name: 'redis', label: 'RedisInsight', icon: 'Database' },
   { name: 'ai-metrics', label: 'AI Metrics', icon: 'Activity' },
