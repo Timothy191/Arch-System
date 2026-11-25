@@ -8,12 +8,12 @@
     ]
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@biomejs/biome": "^2.5.14",
     "@changesets/cli": "^2.31.0",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.2",
     "@playwright/test": "^1.65.1",
-    "@axe-core/playwright": "^4.14.0",
     "@repo/typescript-config": "*",
     "@storybook/addon-a11y": "8.6.19",
     "@storybook/addon-essentials": "8.6.19",
@@ -37,6 +37,8 @@
     "markdownlint-cli": "^0.41.0",
     "next": "^16.4.6",
     "pnpm-patch-i": "^0.6.0",
+    "prettier": "^3.10.1",
+    "sharp": "^0.35.5",
     "storybook": "8.6.19",
     "stylelint": "^17.15.0",
     "stylelint-config-standard": "^40.0.0",
@@ -49,8 +51,7 @@
     "typescript": "~5.9.2",
     "vite": "^8.1.6",
     "vite-tsconfig-paths": "*",
-    "web-vitals": "^6.2.3",
-    "sharp": "^0.35.5"
+    "web-vitals": "^6.2.3"
   },
   "engines": {
     "node": ">=24.0.0",
@@ -231,6 +232,8 @@
     "ensure-reachability": "python3 scripts/ensure_reachability.py",
     "format": "biome format --write .",
     "format:check": "biome format .",
+    "format:prettier": "prettier --write \"**/*.{md,css,scss,yaml,yml}\"",
+    "format:prettier:check": "prettier --check \"**/*.{md,css,scss,yaml,yml}\"",
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "lint:ci": "biome ci .",
@@ -266,7 +269,7 @@
     "verify:gates": "bash tools/scripts/enforce-quality-gates.sh",
     "ci:local": "node tools/scripts/local-ci.mjs",
     "ci:local:full": "node tools/scripts/local-ci.mjs --suite=full",
-    "quality": "turbo run //#lint:ci type-check test lint:tokens lint:css && pnpm lint:styles && pnpm lint:css-perf && pnpm lint:spelling && pnpm md:lint && pnpm deps:lint && pnpm knip && pnpm policy:check && pnpm audit:compliance && pnpm html:check && pnpm verify:gates",
+    "quality": "turbo run //#lint:ci type-check test lint:tokens lint:css && pnpm lint:styles && pnpm lint:css-perf && pnpm lint:spelling && pnpm md:lint && pnpm format:prettier:check && pnpm deps:lint && pnpm knip && pnpm policy:check && pnpm audit:compliance && pnpm html:check && pnpm verify:gates",
     "quality:run": "node tools/scripts/quality-orchestrator.mjs run",
     "quality:changed": "node tools/scripts/quality-orchestrator.mjs changed",
     "quality:full": "node tools/scripts/quality-orchestrator.mjs full",

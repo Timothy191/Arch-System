@@ -16,13 +16,17 @@
  *
  * Report generation is opt-in. The default run only prints to stdout and exits
  * with a status code, so running the audit (directly or via `pnpm agent:verify`)
- * never dirties the working tree with timestamp churn.
+ * never dirties the working tree. Report timestamps derive from the latest Git
+ * commit touching migrations or contract schemas, making `--write` byte-idempotent
+ * at a given revision.
  *
  * Exit code: 0 (HEALTHY) or 1 (DRIFT_DETECTED / error)
  */
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
+const prettier = require('prettier');
 
 const WRITE_FLAGS = new Set(['--write', '--record']);
 const shouldWrite = process.argv.slice(2).some((a) => WRITE_FLAGS.has(a));
@@ -38,6 +42,38 @@ const MIGRATIONS_DIR = fs.existsSync(ARCH_BASE_MIGRATIONS)
   : path.join(ROOT, 'packages', 'database', 'migrations');
 const CONTRACT_DIR = path.join(ROOT, 'packages', 'contract', 'src', 'schemas');
 const REPORT_DIR = path.join(ROOT, 'documentation', '03-audit-reports');
+const REPORT_MD_PATH = path.join(REPORT_DIR, 'contract-drift-report.md');
+const REPORT_JSON_PATH = path.join(REPORT_DIR, 'contract-drift-summary.json');
+
+const GIT_TIMESTAMP_FALLBACK = 'unknown';
+const MILLISECONDS_PER_SECOND = 1000;
+
+/**
+ * Latest commit epoch (seconds) touching a directory. Git is optional for report
+ * generation — shallow clones and source archives fall back to the label.
+ */
+function latestSourceCommitEpoch(dirPath) {
+  try {
+    const raw = execFileSync('git', ['-C', dirPath, 'log', '-1', '--format=%ct', '--', '.'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    const epoch = Number.parseInt(raw, 10);
+    return Number.isFinite(epoch) ? epoch : null;
+  } catch {
+    return null;
+  }
+}
+
+function resolveGeneratedOn() {
+  const epochs = [MIGRATIONS_DIR, CONTRACT_DIR]
+    .map(latestSourceCommitEpoch)
+    .filter((epoch) => epoch !== null);
+  if (epochs.length === 0) return GIT_TIMESTAMP_FALLBACK;
+  return new Date(Math.max(...epochs) * MILLISECONDS_PER_SECOND).toISOString();
+}
+
+const generatedOn = resolveGeneratedOn();
 
 console.log(
   '\n🔍 Initiating Schema & Contract Drift Audit (@repo/database <-> @repo/contract)...\n'
@@ -186,7 +222,7 @@ console.log(`📈 Drift Health Index (DHI): ${driftHealthIndex}%`);
 // file is written, so repeated audit runs leave no timestamp churn in the tree.
 const reportMd = `# Schema & Contract Drift Audit Report
 
-Generated on ${new Date().toISOString()}
+Generated on ${generatedOn}
 
 ## Fitness Function Telemetry
 
@@ -208,7 +244,7 @@ ${unmappedTables.length > 0 ? unmappedTables.map((u) => `- \`${u.table}\` (${u.i
 
 // Structured JSON Telemetry (also printed in read-only mode)
 const telemetryPayload = {
-  timestamp: new Date().toISOString(),
+  timestamp: generatedOn,
   databaseTablesCount: dbTables.size,
   contractSchemasCount: contractSchemas.size,
   synchronizedTablesCount: coveredTables.length,
@@ -224,32 +260,48 @@ const telemetryPayload = {
 const telemetryJson = JSON.stringify(telemetryPayload, null, 2);
 const isHealthy = driftHealthIndex >= DRIFT_HEALTHY_THRESHOLD;
 
-if (shouldWrite) {
-  if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });
-  fs.writeFileSync(path.join(REPORT_DIR, 'contract-drift-report.md'), reportMd, 'utf8');
-  fs.writeFileSync(path.join(REPORT_DIR, 'contract-drift-summary.json'), telemetryJson, 'utf8');
-  console.log(
-    '📄 Markdown Report written to: documentation/03-audit-reports/contract-drift-report.md'
-  );
-  console.log(
-    '📊 JSON Telemetry written to: documentation/03-audit-reports/contract-drift-summary.json'
-  );
-} else {
-  console.log('📖 Read-only run — no files written. Pass --write to persist reports.');
-  console.log('─── Contract Drift Report ───────────────────────────────────────────');
-  console.log(reportMd.trimEnd());
-  console.log('─── Telemetry (JSON) ───────────────────────────────────────────────');
-  console.log(telemetryJson);
-  console.log('─────────────────────────────────────────────────────────────────────');
+/**
+ * Emit Prettier-canonical artifacts using the repository config so the committed
+ * reports satisfy `pnpm format:prettier:check` (markdown) and `biome ci` (JSON)
+ * without a separate format pass. Prettier's JSON output is byte-identical to
+ * Biome's for this payload shape.
+ */
+async function formatReport(source, filePath, parser) {
+  const config = (await prettier.resolveConfig(filePath)) ?? {};
+  return prettier.format(source, { ...config, parser });
 }
 
-if (!isHealthy) {
-  console.error(
-    `❌ Contract Drift Audit: DRIFT DETECTED — DHI ${driftHealthIndex}% is below the ` +
-      `${DRIFT_HEALTHY_THRESHOLD}% threshold.`
-  );
+async function main() {
+  const canonicalReport = await formatReport(reportMd, REPORT_MD_PATH, 'markdown');
+  const canonicalTelemetryJson = await formatReport(telemetryJson, REPORT_JSON_PATH, 'json');
+
+  if (shouldWrite) {
+    if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });
+    fs.writeFileSync(REPORT_MD_PATH, canonicalReport, 'utf8');
+    fs.writeFileSync(REPORT_JSON_PATH, canonicalTelemetryJson, 'utf8');
+    console.log(`📄 Markdown Report written to: ${path.relative(ROOT, REPORT_MD_PATH)}`);
+    console.log(`📊 JSON Telemetry written to: ${path.relative(ROOT, REPORT_JSON_PATH)}`);
+  } else {
+    console.log('📖 Read-only run — no files written. Pass --write to persist reports.');
+    console.log('─── Contract Drift Report ───────────────────────────────────────────');
+    console.log(canonicalReport.trimEnd());
+    console.log('─── Telemetry (JSON) ───────────────────────────────────────────────');
+    console.log(canonicalTelemetryJson.trimEnd());
+    console.log('─────────────────────────────────────────────────────────────────────');
+  }
+
+  if (!isHealthy) {
+    console.error(
+      `❌ Contract Drift Audit: DRIFT DETECTED — DHI ${driftHealthIndex}% is below the ` +
+        `${DRIFT_HEALTHY_THRESHOLD}% threshold.`
+    );
+    process.exit(1);
+  }
+
+  console.log('🎯 Contract Drift Audit: 100% COMPLETE & PASS\n');
+}
+
+main().catch((error) => {
+  console.error('❌ Contract Drift Audit failed while formatting or writing reports.', error);
   process.exit(1);
-}
-
-console.log('🎯 Contract Drift Audit: 100% COMPLETE & PASS\n');
-process.exit(0);
+});

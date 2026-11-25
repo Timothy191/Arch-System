@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-10-19T11:22:48.721Z",
-  "databaseTablesCount": 96,
-  "contractSchemasCount": 199,
-  "synchronizedTablesCount": 91,
-  "unmappedTablesCount": 5,
-  "driftHealthIndex": 94.8,
+  "timestamp": "2026-11-25T07:39:53.000Z",
+  "databaseTablesCount": 110,
+  "contractSchemasCount": 386,
+  "synchronizedTablesCount": 110,
+  "unmappedTablesCount": 0,
+  "driftHealthIndex": 100,
   "status": "HEALTHY",
   "tables": [
     {
@@ -141,21 +141,6 @@
       "table": "memory_embeddings",
       "schemas": ["aiHandoffSchema", "riskAssessmentSchema"],
       "migration": "009_ai_memory.sql"
-    },
-    {
-      "table": "shift_status",
-      "schemas": ["lockAndSignShiftSchema"],
-      "migration": "0145_shift_closeout.sql"
-    },
-    {
-      "table": "tires",
-      "schemas": ["tireSchema", "createTireSchema", "replaceTireSchema"],
-      "migration": "0146_tire_management.sql"
-    },
-    {
-      "table": "tire_inspections",
-      "schemas": ["tireInspectionSchema", "logTireInspectionSchema"],
-      "migration": "0146_tire_management.sql"
     },
     {
       "table": "user_feedback",
@@ -413,6 +398,21 @@
       "migration": "102_ai_token_usage_tracking.sql"
     },
     {
+      "table": "shift_status",
+      "schemas": ["lockAndSignShiftSchema"],
+      "migration": "145_shift_closeout.sql"
+    },
+    {
+      "table": "tires",
+      "schemas": ["tireSchema", "createTireSchema", "replaceTireSchema"],
+      "migration": "146_tire_management.sql"
+    },
+    {
+      "table": "tire_inspections",
+      "schemas": ["tireInspectionSchema", "logTireInspectionSchema"],
+      "migration": "146_tire_management.sql"
+    },
+    {
       "table": "excavator_haul_logs",
       "schemas": ["excavatorHaulSchema"],
       "migration": "150_multi_site_production_report.sql"
@@ -448,6 +448,30 @@
       "migration": "162_idempotency_and_outbox.sql"
     },
     {
+      "table": "integration_catalog",
+      "schemas": ["integrationCatalogSchema", "createCatalogEntrySchema"],
+      "migration": "168_integration_platform.sql"
+    },
+    {
+      "table": "integration_installations",
+      "schemas": [
+        "integrationInstallationsSchema",
+        "installIntegrationSchema",
+        "updateInstallationSchema"
+      ],
+      "migration": "168_integration_platform.sql"
+    },
+    {
+      "table": "integration_credentials",
+      "schemas": ["integrationCredentialsSchema", "installIntegrationSchema"],
+      "migration": "168_integration_platform.sql"
+    },
+    {
+      "table": "integration_audit_logs",
+      "schemas": ["integrationAuditLogsSchema", "integrationToolCallSchema"],
+      "migration": "168_integration_platform.sql"
+    },
+    {
       "table": "mutation_log",
       "schemas": ["mutationLogSchema"],
       "migration": "171_offline_crdt_mutation_log_and_smr.sql"
@@ -458,9 +482,84 @@
       "migration": "171_offline_crdt_mutation_log_and_smr.sql"
     },
     {
+      "table": "machine_types",
+      "schemas": ["machineTypesSchema", "machineTypeSchema"],
+      "migration": "180_machine_types_and_capabilities.sql"
+    },
+    {
       "table": "employee_department_access",
       "schemas": ["employeeDepartmentAccessSchema"],
       "migration": "181_employee_department_access.sql"
+    },
+    {
+      "table": "production_monthly_targets",
+      "schemas": ["productionMonthlyTargetsSchema"],
+      "migration": "189_cross_department_targets_delays_personnel.sql"
+    },
+    {
+      "table": "plant_inventory_items",
+      "schemas": ["plantInventoryItemsSchema"],
+      "migration": "205_plant_inventory_and_remote_reconciliation.sql"
+    },
+    {
+      "table": "plant_inventory_usage",
+      "schemas": ["plantInventoryUsageSchema"],
+      "migration": "205_plant_inventory_and_remote_reconciliation.sql"
+    },
+    {
+      "table": "plant_hourly_logs",
+      "schemas": ["plantHourlyLogsSchema"],
+      "migration": "205_plant_inventory_and_remote_reconciliation.sql"
+    },
+    {
+      "table": "plant_delays",
+      "schemas": ["plantDelaysSchema"],
+      "migration": "205_plant_inventory_and_remote_reconciliation.sql"
+    },
+    {
+      "table": "muster_events",
+      "schemas": ["musterEventsSchema"],
+      "migration": "205_plant_inventory_and_remote_reconciliation.sql"
+    },
+    {
+      "table": "monthly_machine_snapshots",
+      "schemas": ["monthlyMachineSnapshotSchema", "saveMonthlyMachineSnapshotInputSchema"],
+      "migration": "213_monthly_machine_snapshots.sql"
+    },
+    {
+      "table": "system_logs",
+      "schemas": ["systemLogEntrySchema", "createSystemLogEntrySchema"],
+      "migration": "216_system_logs.sql"
+    },
+    {
+      "table": "quality_verification_runs",
+      "schemas": ["qualityVerificationRunRowSchema", "qualityRunEvidenceSchema"],
+      "migration": "226_quality_intelligence_engine.sql"
+    },
+    {
+      "table": "agent_work_reports",
+      "schemas": ["agentWorkReportRowSchema", "agentVerificationReportSchema"],
+      "migration": "226_quality_intelligence_engine.sql"
+    },
+    {
+      "table": "quality_release_certifications",
+      "schemas": ["qualityReleaseCertificationRowSchema", "releaseCertificationSchema"],
+      "migration": "226_quality_intelligence_engine.sql"
+    },
+    {
+      "table": "remote_support_devices",
+      "schemas": ["remoteSupportDevicesSchema"],
+      "migration": "230_remote_support_system.sql"
+    },
+    {
+      "table": "remote_support_sessions",
+      "schemas": ["remoteSupportSessionsSchema"],
+      "migration": "230_remote_support_system.sql"
+    },
+    {
+      "table": "remote_support_audit_events",
+      "schemas": ["remoteSupportAuditEventsSchema"],
+      "migration": "230_remote_support_system.sql"
     }
   ]
 }

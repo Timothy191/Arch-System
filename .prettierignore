@@ -1,0 +1,26 @@
+# Dependencies & build output
+node_modules
+.next
+.turbo
+dist
+build
+coverage
+.vercel
+playwright-report
+test-results
+*.tsbuildinfo
+
+# Python virtualenv & caches
+.venv
+__pycache__
+
+# Generated artifacts (source of truth is codegen/audits)
+codebase-maps
+graphify-out
+packages/theme/src/css/variables-generated.css
+
+# Agent runtime state (written by other processes; not source docs)
+.agents/memory_base
+.agentsroom
+.vibemon
+.agents/a2a/whiteboard

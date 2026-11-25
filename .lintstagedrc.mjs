@@ -8,7 +8,7 @@
  * 4. Run specialized tools (stylelint, theme lint, project tags) where appropriate.
  */
 
-const PRETTIER_BIN = './node_modules/.pnpm/node_modules/.bin/prettier';
+const PRETTIER_BIN = './node_modules/.bin/prettier';
 
 const PRETTIER_GLOBS = ['*.css', '*.yaml', '*.yml'];
 
@@ -29,7 +29,7 @@ function chunk(arr, size) {
 }
 
 export default {
-  // package.json → syncpack fix then prettier
+  // package.json → syncpack fix then biome
   [PACKAGE_JSON_GLOB]: (files) => {
     const filtered = files.filter((f) => f.endsWith(PACKAGE_JSON_GLOB));
     if (filtered.length === 0) return [];
@@ -55,7 +55,7 @@ export default {
     return commands;
   },
 
-  // JS/TS/JSX/CJS/MJS → eslint then prettier
+  // JS/TS/JSX/CJS/MJS → governed checks then biome then cspell
   '*.{js,jsx,ts,tsx,cjs,mjs}': (files) => {
     const filtered = files.filter((f) => {
       const relativePath = f.replace(`${process.cwd()}/`, '');
