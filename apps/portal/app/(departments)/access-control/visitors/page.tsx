@@ -29,7 +29,7 @@ export default async function VisitorsPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="gold-steel-border gold-steel-border-slim !bg-none !bg-white flex items-center justify-between rounded-2xl border border-accent-gold/70 p-5 shadow-sm">
         <div>
           <h2 className="font-bold text-2xl text-[var(--text-heading)]">Visitor Management</h2>
           <p className="mt-1 text-[var(--text-muted)] text-sm">

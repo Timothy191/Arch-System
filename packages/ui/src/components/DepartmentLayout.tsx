@@ -23,7 +23,6 @@ import {
   GitCommit,
   Layers,
   LifeBuoy,
-  Menu,
   MessageSquare,
   Monitor,
   Pickaxe,
@@ -293,16 +292,6 @@ export function DepartmentLayout({
         aria-hidden="true"
         data-testid="edge-trigger"
       />
-
-      {/* Mobile sidebar toggle button for touchscreen / pit tablet usability */}
-      <button
-        type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-label="Toggle department navigation"
-        className="fixed bottom-4 left-4 z-50 rounded-full border border-[var(--border-default)] bg-[var(--bg-primary)] p-2.5 text-[var(--text-heading)] shadow-lg hover:bg-[var(--bg-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] md:hidden"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
 
       {/* Mobile backdrop overlay */}
       {isOpen && !isPinned && (

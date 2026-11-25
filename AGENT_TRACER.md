@@ -6,6 +6,16 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T11:30:00+02:00] - `/office` Sidebar Cleanup & `/access-control` Design Feedback Updates
+
+- **Office Sidebar & Navigation ([`departments.ts`](libs/features/departments/data-access/src/departments.ts), [`OfficeWorkspaceClient.tsx`](apps/portal/features/departments/components/office/OfficeWorkspaceClient.tsx), [`departments.test.ts`](libs/features/departments/data-access/src/departments.test.ts), [`DepartmentLayout.test.tsx`](apps/portal/components/DepartmentLayout.test.tsx))**:
+  - Removed `Daily Log`, `Reports`, and `History` from `OFFICE_TABS`, `office` department quick actions, and `OFFICE_QUICK_LINKS`.
+- **Department Mobile Navigation Toggle ([`DepartmentLayout.tsx`](packages/ui/src/components/DepartmentLayout.tsx))**:
+  - Removed the floating `Toggle department navigation` button (`button.fixed.bottom-4`) across department layouts including `/access-control/badges`.
+- **Access Control Header Panels, Access Logs Dropdowns & Registered Scanner Enforcement ([`AccessLogsClient.tsx`](<apps/portal/app/(departments)/access-control/access-logs/AccessLogsClient.tsx>), [`badges.ts`](<apps/portal/app/(departments)/access-control/actions/badges.ts>), [`badges/page.tsx`](<apps/portal/app/(departments)/access-control/badges/page.tsx>), [`expired/page.tsx`](<apps/portal/app/(departments)/access-control/expired/page.tsx>), [`visitors/page.tsx`](<apps/portal/app/(departments)/access-control/visitors/page.tsx>), [`access-reports-studio.tsx`](<apps/portal/app/(departments)/access-control/reports/access-reports-studio.tsx>), [`access-logs.test.tsx`](<apps/portal/app/(departments)/access-control/access-logs/access-logs.test.tsx>))**:
+  - Removed the `⚡ Easy Scanner Console` button and modal, converted `Direction`, `Status`, and `Range` filters into three accessible dropdowns, added golden bordering to `Access Logs Stream` and `Employee Attendance Register` tabs, and enforced registered hardware scanner `device_id` filtering in `getAccessLogsWithFilters` (`Registered Scanners Verified`).
+  - Applied consistent white background + golden-bordered header panels across `/access-control/access-logs`, `/access-control/badges`, `/access-control/expired`, `/access-control/visitors`, and `/access-control/reports`.
+
 ## [2026-11-25T11:03:00+02:00] - `/hub` & `/office` Design Feedback Updates (`feat/hub-office-design-feedback`)
 
 - **Hub 3D Globe & Live Mpumalanga Sites ([`globe-math.ts`](packages/ui/src/components/globe-math.ts), [`GlobePins.tsx`](packages/ui/src/components/GlobePins.tsx), [`HeroRotator.tsx`](packages/ui/src/components/HeroRotator.tsx), [`HeroRotator.tsx`](libs/features/hub/ui/src/HeroRotator.tsx), [`hub/page.tsx`](apps/portal/app/hub/page.tsx), [`hub/layout.tsx`](apps/portal/app/hub/layout.tsx))**:

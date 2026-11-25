@@ -243,7 +243,7 @@ export const DEPARTMENTS: Department[] = [
     actions: [
       { label: 'Office Workspace', href: '/office' },
       { label: 'Artifact Studio', href: '/office/panels' },
-      { label: 'Daily Log', href: '/office/daily-log' },
+      { label: 'Documents', href: '/office/documents' },
     ],
   },
   {
@@ -441,9 +441,6 @@ export const OFFICE_TABS = [
   { name: 'dashboard', label: 'Office Workspace', icon: 'Briefcase' },
   { name: 'panels', label: 'Office Panels', icon: 'Layers' },
   { name: 'documents', label: 'Documents', icon: 'FileText' },
-  { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
-  { name: 'reports', label: 'Reports', icon: 'FileText' },
-  { name: 'history', label: 'History', icon: 'History' },
 ] as const;
 
 export const PRESENTATION_TABS = [

@@ -331,5 +331,24 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
 
     const activeCoalLink = screen.getByTestId('access-logs-subtab-fleet-coal-trucks');
     expect(activeCoalLink.className).toContain('bg-[var(--accent-blue)]/10');
+    expect(screen.queryByLabelText('Toggle department navigation')).not.toBeInTheDocument();
+  });
+
+  it('omits Daily Log, Reports, and History from Office sidebar tabs', () => {
+    const officeDept = DEPARTMENTS.find((d) => d.name === 'office')!;
+    const officeTabs = getDepartmentTabs('office');
+    mockUsePathname.mockReturnValue('/office');
+    mockUseSearchParams.mockReturnValue(new URLSearchParams(''));
+
+    render(
+      <DepartmentLayout department={officeDept} tabs={officeTabs}>
+        <div>Office Content</div>
+      </DepartmentLayout>
+    );
+
+    expect(screen.getByText('Office Workspace')).toBeInTheDocument();
+    expect(screen.queryByText('Daily Log')).not.toBeInTheDocument();
+    expect(screen.queryByText('Reports')).not.toBeInTheDocument();
+    expect(screen.queryByText('History')).not.toBeInTheDocument();
   });
 });

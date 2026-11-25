@@ -268,7 +268,7 @@ function StudioHeader(props: {
   readonly onDownloadPdf: () => void;
 }) {
   return (
-    <GlassCard variant="window" className="p-6 print:hidden">
+    <GlassCard className="gold-steel-border gold-steel-border-slim !bg-none !bg-white border border-accent-gold/70 p-6 shadow-sm print:hidden">
       <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
         <div className="flex items-start gap-3.5">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-green)]">

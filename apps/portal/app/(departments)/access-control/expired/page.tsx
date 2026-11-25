@@ -133,7 +133,7 @@ export default async function ExpiredCredentialsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="gold-steel-border gold-steel-border-slim !bg-none !bg-white flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent-gold/70 p-5 shadow-sm">
         <div>
           <h2 className="font-bold text-2xl text-[var(--text-heading)]">Expired Credentials</h2>
           <p className="mt-1 text-[var(--text-muted)] text-sm">

@@ -75,8 +75,6 @@ const OFFICE_QUICK_LINKS: readonly QuickNavRoute[] = [
   { href: '/office', label: 'Office Suite Overview' },
   { href: '/office/panels', label: 'Artifact Studio' },
   { href: '/office/documents', label: 'Executive Documents' },
-  { href: '/office/daily-log', label: 'Daily Log' },
-  { href: '/office/reports', label: 'Reports' },
 ];
 
 interface GenOfficeTabDescriptor {

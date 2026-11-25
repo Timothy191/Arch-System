@@ -25,7 +25,6 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Calendar,
-  CheckCircle2,
   Clock,
   Download,
   Eye,
@@ -41,12 +40,10 @@ import {
   Users,
   Wine,
   X,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import {
-  executeEasyScan,
   getAccessLogsWithFilters,
   getAllEmployeesAttendanceRegister,
   getEmployeeAttendanceSummary,
@@ -77,34 +74,8 @@ const ACCESS_LOG_CATEGORY_TABS: ReadonlyArray<{
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 50;
 const DEFAULT_REGISTER_RANGE: AccessLogDateRange = 'QUARTER';
-const AUDIO_FREQUENCY_GRANTED = 880;
-const AUDIO_FREQUENCY_DENIED = 220;
-const AUDIO_TONE_DURATION_SECONDS = 0.15;
-const SCANNER_FOCUS_DELAY_MS = 100;
 const OPERATIONAL_TIMEZONE = 'Africa/Johannesburg';
 const CSV_FORMULA_PREFIX_REGEX = /^[=+\-@\t\r]/;
-
-const GATE_OPTIONS: readonly string[] = [
-  'Main Gate North Turnstile',
-  'East Pit Boom Gate',
-  'South Haul Road Turnstile',
-  'Weighbridge Inbound',
-  'Processing Plant Turnstile',
-];
-
-interface QuickPreset {
-  readonly label: string;
-  readonly code: string;
-  readonly role: string;
-}
-
-const QUICK_PRESETS: readonly QuickPreset[] = [
-  { label: 'John Doe', code: 'BADGE-EMP-001', role: 'Engineering' },
-  { label: 'Jane Smith', code: 'BADGE-EMP-002', role: 'Mining Op' },
-  { label: 'John Operator', code: 'BADGE-OP-001', role: 'Pit Crew' },
-  { label: 'Bob Dozer', code: 'BADGE-EMP-BOB', role: 'Heavy Fleet' },
-  { label: 'Unknown Tag', code: 'INVALID-CODE-999', role: 'Denial Test' },
-];
 
 const DATE_RANGE_OPTIONS: ReadonlyArray<{
   readonly id: AccessLogDateRange;
@@ -172,20 +143,6 @@ export interface PersonnelFilterOption {
   readonly empCode: string;
   readonly idNumber?: string;
   readonly jobTitle: string;
-}
-
-export interface EasyScanFeedback {
-  readonly success: boolean;
-  readonly accessGranted: boolean;
-  readonly name: string;
-  readonly empCode?: string;
-  readonly jobTitle?: string;
-  readonly entityType: string;
-  readonly message: string;
-  readonly denialReason?: string | null;
-  readonly scannedAt: string;
-  readonly gateLocation: string;
-  readonly direction: string;
 }
 
 interface AccessLogsClientProps {
@@ -401,37 +358,6 @@ function triggerCsvDownload(options: {
   anchorElement.click();
   document.body.removeChild(anchorElement);
   URL.revokeObjectURL(blobUrl);
-}
-
-function playScanAudioFeedback(isGranted: boolean): void {
-  try {
-    if (typeof window === 'undefined') return;
-    const AudioContextClass =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-
-    const audioCtx = new AudioContextClass();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    oscillator.type = isGranted ? 'sine' : 'sawtooth';
-    oscillator.frequency.value = isGranted ? AUDIO_FREQUENCY_GRANTED : AUDIO_FREQUENCY_DENIED;
-
-    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.001,
-      audioCtx.currentTime + AUDIO_TONE_DURATION_SECONDS
-    );
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + AUDIO_TONE_DURATION_SECONDS);
-  } catch {
-    // Ignore audio permission or playback errors
-  }
 }
 
 function isAlreadyResolvedLog(
@@ -709,32 +635,17 @@ export function AccessLogsClient({
     initialEmployeeId
   );
 
-  // Detail modal & scanner modal state
+  // Detail modal state
   const [inspectedLog, setInspectedLog] = useState<ResolvedAccessLog | null>(null);
-  const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
-  const [barcodeInput, setBarcodeInput] = useState<string>('');
-  const [scanDirection, setScanDirection] = useState<'IN' | 'OUT'>('IN');
-  const [selectedGate, setSelectedGate] = useState<string>(
-    GATE_OPTIONS[0] ?? 'Main Gate North Turnstile'
-  );
-  const [lastScanResult, setLastScanResult] = useState<EasyScanFeedback | null>(null);
 
   const [isPending, startTransition] = useTransition();
-  const barcodeInputRef = useRef<HTMLInputElement>(null);
   const searchInputId = useId();
   const employeeSelectId = useId();
+  const directionSelectId = useId();
+  const statusSelectId = useId();
+  const dateRangeSelectId = useId();
   const registerSearchInputId = useId();
   const registerEmployeeSelectId = useId();
-  const barcodeInputId = useId();
-  const gateSelectId = useId();
-
-  useEffect(() => {
-    if (!isScannerOpen) return;
-    const timer = setTimeout(() => {
-      barcodeInputRef.current?.focus();
-    }, SCANNER_FOCUS_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [isScannerOpen]);
 
   const fetchUpdatedLogs = useCallback(
     async (overrides: AccessLogQueryOverrides = {}) => {
@@ -898,53 +809,6 @@ export function AccessLogsClient({
     );
   };
 
-  const handleProcessScan = async (codeToScan: string) => {
-    const cleanCode = codeToScan.trim();
-    if (!cleanCode) {
-      toast.error('Scan code cannot be empty');
-      return;
-    }
-
-    try {
-      const outcome = await executeEasyScan({
-        code: cleanCode,
-        direction: scanDirection,
-        gateLocation: selectedGate,
-        scannerId: 'EASY-SCANNER-CONSOLE',
-      });
-
-      playScanAudioFeedback(outcome.accessGranted);
-
-      setLastScanResult({
-        success: outcome.success,
-        accessGranted: outcome.accessGranted,
-        name: outcome.name,
-        empCode: outcome.empCode,
-        jobTitle: outcome.jobTitle,
-        entityType: outcome.entityType,
-        message: outcome.message,
-        denialReason: outcome.denialReason,
-        scannedAt: outcome.scannedAt,
-        gateLocation: outcome.gateLocation,
-        direction: outcome.direction,
-      });
-
-      if (outcome.accessGranted) {
-        toast.success(`Access Granted: ${outcome.name}`);
-      } else {
-        toast.error(`Access Denied: ${outcome.denialReason || outcome.name}`);
-      }
-
-      setBarcodeInput('');
-      barcodeInputRef.current?.focus();
-
-      await fetchUpdatedLogs();
-    } catch (scanError: unknown) {
-      const errorMessage = scanError instanceof Error ? scanError.message : 'Scan failed';
-      toast.error(errorMessage);
-    }
-  };
-
   const totalPages = Math.max(1, Math.ceil(totalCount / DEFAULT_PAGE_SIZE));
   const registerRecords = registerData?.records ?? [];
   const selectedRegisterEmployee =
@@ -963,8 +827,8 @@ export function AccessLogsClient({
 
   return (
     <div className="space-y-6">
-      {/* Top Banner, View Tabs, and Primary Actions */}
-      <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
+      {/* Top Banner Panel, View Tabs, and Primary Actions */}
+      <div className="gold-steel-border gold-steel-border-slim !bg-none !bg-white flex flex-col items-start justify-between gap-4 rounded-2xl border border-accent-gold/70 p-5 shadow-sm lg:flex-row lg:items-center">
         <div>
           <h2 className="font-bold text-2xl text-[var(--text-heading)]">
             Access Logs & Attendance Register
@@ -979,17 +843,17 @@ export function AccessLogsClient({
           <div
             role="tablist"
             aria-label="Access Logs Views"
-            className="inline-flex rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-1"
+            className="gold-steel-border gold-steel-border-slim inline-flex gap-1 rounded-lg border border-accent-gold/65 bg-slate-50/90 p-1"
           >
             <button
               type="button"
               role="tab"
               aria-selected={activeTab === 'logs'}
               onClick={() => handleOpenTab('logs')}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-semibold text-xs transition-colors ${
+              className={`gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md border px-3 py-1.5 font-semibold text-xs transition-colors ${
                 activeTab === 'logs'
-                  ? 'bg-white text-[var(--text-heading)] shadow-2xs'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                  ? 'border-accent-gold bg-white text-[var(--text-heading)] shadow-2xs'
+                  : 'border-accent-gold/40 bg-white/60 text-[var(--text-secondary)] hover:border-accent-gold/75 hover:text-[var(--text-heading)]'
               }`}
             >
               <Clock className="h-3.5 w-3.5" />
@@ -1000,10 +864,10 @@ export function AccessLogsClient({
               role="tab"
               aria-selected={activeTab === 'register'}
               onClick={() => handleOpenTab('register')}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-semibold text-xs transition-colors ${
+              className={`gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md border px-3 py-1.5 font-semibold text-xs transition-colors ${
                 activeTab === 'register'
-                  ? 'bg-white text-[var(--text-heading)] shadow-2xs'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                  ? 'border-accent-gold bg-white text-[var(--text-heading)] shadow-2xs'
+                  : 'border-accent-gold/40 bg-white/60 text-[var(--text-secondary)] hover:border-accent-gold/75 hover:text-[var(--text-heading)]'
               }`}
             >
               <Users className="h-3.5 w-3.5" />
@@ -1020,19 +884,10 @@ export function AccessLogsClient({
                 ? handleExportRegisterCsv(selectedRegisterEmployee)
                 : handleExportLogsCsv()
             }
-            className="flex items-center gap-1.5 text-xs"
+            className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 border-accent-gold/65 bg-white text-xs"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Export CSV</span>
-          </Button>
-
-          <Button
-            type="button"
-            onClick={() => setIsScannerOpen(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 font-semibold text-white shadow-md transition-all hover:brightness-110 active:scale-95"
-          >
-            <Zap className="h-4 w-4 fill-amber-300 text-amber-300" />
-            <span>⚡ Easy Scanner Console</span>
           </Button>
         </div>
       </div>
@@ -1276,92 +1131,88 @@ export function AccessLogsClient({
                 </div>
               </div>
 
-              {/* Secondary Filter Pills: Direction, Status, Date Range */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-default)]/50 border-t pt-3">
-                <div className="flex flex-wrap items-center gap-4 text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-semibold text-[var(--text-muted)]">Direction:</span>
-                    {(['ALL', 'IN', 'OUT'] as const).map((directionOption) => (
-                      <button
-                        key={directionOption}
-                        type="button"
-                        onClick={() => {
-                          setDirectionFilter(directionOption);
-                          setCurrentPage(DEFAULT_PAGE);
-                          fetchUpdatedLogs({
-                            page: DEFAULT_PAGE,
-                            direction: directionOption,
-                          });
-                        }}
-                        className={`rounded-md px-2.5 py-1 font-medium transition-all ${
-                          directionFilter === directionOption
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-                        }`}
-                      >
-                        {directionOption === 'ALL'
-                          ? 'All Movements'
-                          : directionOption === 'IN'
-                            ? 'Entry (IN)'
-                            : 'Exit (OUT)'}
-                      </button>
-                    ))}
+              {/* Secondary Filter Dropdowns: Direction, Status, Date Range */}
+              <div className="flex flex-col gap-3 border-[var(--border-default)]/50 border-t pt-3 md:flex-row md:items-end md:justify-between">
+                <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div>
+                    <label htmlFor={directionSelectId} className={FIELD_LABEL_CLASS}>
+                      Direction
+                    </label>
+                    <select
+                      id={directionSelectId}
+                      aria-label="Filter by direction"
+                      value={directionFilter}
+                      onChange={(changeEvent) => {
+                        const nextDirection = changeEvent.target.value as 'ALL' | 'IN' | 'OUT';
+                        setDirectionFilter(nextDirection);
+                        setCurrentPage(DEFAULT_PAGE);
+                        fetchUpdatedLogs({
+                          page: DEFAULT_PAGE,
+                          direction: nextDirection,
+                        });
+                      }}
+                      className={SELECT_CONTROL_CLASS}
+                    >
+                      <option value="ALL">All Movements</option>
+                      <option value="IN">Entry (IN)</option>
+                      <option value="OUT">Exit (OUT)</option>
+                    </select>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-semibold text-[var(--text-muted)]">Status:</span>
-                    {(['ALL', 'GRANTED', 'DENIED'] as const).map((statusOption) => (
-                      <button
-                        key={statusOption}
-                        type="button"
-                        onClick={() => {
-                          setStatusFilter(statusOption);
-                          setCurrentPage(DEFAULT_PAGE);
-                          fetchUpdatedLogs({
-                            page: DEFAULT_PAGE,
-                            status: statusOption,
-                          });
-                        }}
-                        className={`rounded-md px-2.5 py-1 font-medium transition-all ${
-                          statusFilter === statusOption
-                            ? statusOption === 'DENIED'
-                              ? 'bg-rose-600 text-white'
-                              : 'bg-emerald-600 text-white'
-                            : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-                        }`}
-                      >
-                        {statusOption}
-                      </button>
-                    ))}
+                  <div>
+                    <label htmlFor={statusSelectId} className={FIELD_LABEL_CLASS}>
+                      Status
+                    </label>
+                    <select
+                      id={statusSelectId}
+                      aria-label="Filter by status"
+                      value={statusFilter}
+                      onChange={(changeEvent) => {
+                        const nextStatus = changeEvent.target.value as 'ALL' | 'GRANTED' | 'DENIED';
+                        setStatusFilter(nextStatus);
+                        setCurrentPage(DEFAULT_PAGE);
+                        fetchUpdatedLogs({
+                          page: DEFAULT_PAGE,
+                          status: nextStatus,
+                        });
+                      }}
+                      className={SELECT_CONTROL_CLASS}
+                    >
+                      <option value="ALL">ALL</option>
+                      <option value="GRANTED">GRANTED</option>
+                      <option value="DENIED">DENIED</option>
+                    </select>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-semibold text-[var(--text-muted)]">Range:</span>
-                    {DATE_RANGE_OPTIONS.map((dateOption) => (
-                      <button
-                        key={dateOption.id}
-                        type="button"
-                        onClick={() => {
-                          setDateRangeFilter(dateOption.id);
-                          setCurrentPage(DEFAULT_PAGE);
-                          fetchUpdatedLogs({
-                            page: DEFAULT_PAGE,
-                            dateRange: dateOption.id,
-                          });
-                        }}
-                        className={`rounded-md px-2.5 py-1 font-medium transition-all ${
-                          dateRangeFilter === dateOption.id
-                            ? 'bg-slate-700 text-white'
-                            : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-                        }`}
-                      >
-                        {dateOption.label}
-                      </button>
-                    ))}
+                  <div>
+                    <label htmlFor={dateRangeSelectId} className={FIELD_LABEL_CLASS}>
+                      Range
+                    </label>
+                    <select
+                      id={dateRangeSelectId}
+                      aria-label="Filter by date range"
+                      value={dateRangeFilter}
+                      onChange={(changeEvent) => {
+                        const nextRange = changeEvent.target.value as AccessLogDateRange;
+                        setDateRangeFilter(nextRange);
+                        setCurrentPage(DEFAULT_PAGE);
+                        fetchUpdatedLogs({
+                          page: DEFAULT_PAGE,
+                          dateRange: nextRange,
+                        });
+                      }}
+                      className={SELECT_CONTROL_CLASS}
+                    >
+                      {DATE_RANGE_OPTIONS.map((dateOption) => (
+                        <option key={dateOption.id} value={dateOption.id}>
+                          {dateOption.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                <div className="text-[var(--text-muted)] text-xs">
+                <div className="shrink-0 text-[var(--text-muted)] text-xs">
                   Showing{' '}
                   <span className="font-bold text-[var(--text-heading)]">
                     {logs.length.toLocaleString('en-US')}
@@ -1378,11 +1229,17 @@ export function AccessLogsClient({
 
           {/* Access Logs Table */}
           <GlassCard className="overflow-hidden p-0">
-            <div className="flex items-center justify-between border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
-              <h3 className="flex items-center font-semibold text-[var(--text-heading)]">
-                <Clock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
-                {selectedEmployeeId ? 'Attendance Scan History' : 'Recent Access Events'}
-              </h3>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="flex items-center font-semibold text-[var(--text-heading)]">
+                  <Clock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
+                  {selectedEmployeeId ? 'Attendance Scan History' : 'Recent Access Events'}
+                </h3>
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/35 bg-emerald-500/10 px-2 py-0.5 font-semibold text-[11px] text-emerald-800">
+                  <ShieldCheck className="h-3 w-3" />
+                  Registered Scanners Verified
+                </span>
+              </div>
               <span className="text-[var(--text-muted)] text-xs">
                 {totalCount.toLocaleString('en-US')} total entries
               </span>
@@ -2017,203 +1874,6 @@ export function AccessLogsClient({
               )}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Easy Scanner Console Dialog */}
-      <Dialog open={isScannerOpen} onOpenChange={setIsScannerOpen}>
-        <DialogContent className="max-w-xl p-6 sm:rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-xl">
-              <Zap className="h-5 w-5 fill-amber-500 text-amber-500" />
-              Easy Scanner Terminal
-            </DialogTitle>
-            <DialogDescription className="text-[var(--text-muted)] text-xs">
-              Hardware barcode/RFID reader console. Scans auto-submit on Enter and immediately
-              verify credentials.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 pt-2">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor={gateSelectId} className={FIELD_LABEL_CLASS}>
-                  Gate Terminal
-                </label>
-                <select
-                  id={gateSelectId}
-                  value={selectedGate}
-                  onChange={(changeEvent) => setSelectedGate(changeEvent.target.value)}
-                  className={SELECT_CONTROL_CLASS}
-                >
-                  {GATE_OPTIONS.map((gateName) => (
-                    <option key={gateName} value={gateName}>
-                      {gateName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <span className={FIELD_LABEL_CLASS}>Direction</span>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setScanDirection('IN')}
-                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 font-bold text-xs transition-all ${
-                      scanDirection === 'IN'
-                        ? 'border border-emerald-600 bg-emerald-600 text-white shadow-sm'
-                        : 'border border-[var(--border-default)] bg-white text-[var(--text-secondary)] hover:bg-emerald-50'
-                    }`}
-                  >
-                    <LogIn className="h-3.5 w-3.5" />
-                    <span>IN (Entry)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setScanDirection('OUT')}
-                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 font-bold text-xs transition-all ${
-                      scanDirection === 'OUT'
-                        ? 'border border-amber-600 bg-amber-600 text-white shadow-sm'
-                        : 'border border-[var(--border-default)] bg-white text-[var(--text-secondary)] hover:bg-amber-50'
-                    }`}
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    <span>OUT (Exit)</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor={barcodeInputId} className={FIELD_LABEL_CLASS}>
-                Scanner Input (Barcode / RFID Wedge)
-              </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <QrCode className="absolute top-2.5 left-3 h-4 w-4 text-[var(--text-muted)]" />
-                  <input
-                    id={barcodeInputId}
-                    ref={barcodeInputRef}
-                    type="text"
-                    placeholder="Scan QR or RFID (e.g. BADGE-EMP-001)..."
-                    value={barcodeInput}
-                    onChange={(changeEvent) => setBarcodeInput(changeEvent.target.value)}
-                    onKeyDown={(keyEvent) => {
-                      if (keyEvent.key === 'Enter') {
-                        keyEvent.preventDefault();
-                        handleProcessScan(barcodeInput);
-                      }
-                    }}
-                    className="w-full rounded-lg border-2 border-blue-500/50 bg-white py-2 pr-3 pl-9 font-mono text-[var(--text-heading)] text-sm shadow-inner focus:border-blue-600 focus:outline-none"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  onClick={() => handleProcessScan(barcodeInput)}
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  Verify & Log
-                </Button>
-              </div>
-              <p className="mt-1 text-[11px] text-[var(--text-muted)]">
-                Keyboard-wedge 2D scanners (Chainway C66, Honeywell, Zebra) submit automatically on
-                scan.
-              </p>
-            </div>
-
-            <div>
-              <span className={FIELD_LABEL_CLASS}>
-                1-Click Quick Simulators (Pre-configured Tags)
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {QUICK_PRESETS.map((preset) => (
-                  <button
-                    key={preset.code}
-                    type="button"
-                    onClick={() => {
-                      setBarcodeInput(preset.code);
-                      handleProcessScan(preset.code);
-                    }}
-                    className="flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-white px-2.5 py-1 text-left text-xs transition-colors hover:border-blue-500 hover:bg-blue-50/50"
-                  >
-                    <span className="font-semibold text-[var(--text-heading)]">{preset.label}</span>
-                    <span className="font-mono text-[10px] text-[var(--text-muted)]">
-                      [{preset.code}]
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {lastScanResult && (
-              <div
-                className={`rounded-xl border p-4 shadow-sm ${
-                  lastScanResult.accessGranted
-                    ? 'border-emerald-500/40 bg-emerald-500/10'
-                    : 'border-rose-500/40 bg-rose-500/10'
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-xl font-bold text-white text-xl ${
-                        lastScanResult.accessGranted ? 'bg-emerald-600' : 'bg-rose-600'
-                      }`}
-                    >
-                      {lastScanResult.accessGranted ? (
-                        <CheckCircle2 className="h-7 w-7" />
-                      ) : (
-                        <ShieldAlert className="h-7 w-7" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`font-black text-sm uppercase tracking-wider ${
-                            lastScanResult.accessGranted ? 'text-emerald-800' : 'text-rose-800'
-                          }`}
-                        >
-                          {lastScanResult.accessGranted ? 'ACCESS GRANTED' : 'ACCESS DENIED'}
-                        </span>
-                        <Badge
-                          variant={lastScanResult.direction === 'IN' ? 'green' : 'amber'}
-                          contrast="low"
-                          size="sm"
-                        >
-                          {lastScanResult.direction}
-                        </Badge>
-                      </div>
-                      <h4 className="font-bold text-[var(--text-heading)] text-base">
-                        {lastScanResult.name}
-                      </h4>
-                      <p className="text-[var(--text-secondary)] text-xs">
-                        {lastScanResult.jobTitle || lastScanResult.entityType}{' '}
-                        {lastScanResult.empCode ? `• ${lastScanResult.empCode}` : ''}
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="font-mono text-[10px] text-[var(--text-muted)]">
-                    {formatScanTime(lastScanResult.scannedAt)}
-                  </span>
-                </div>
-
-                {lastScanResult.denialReason && (
-                  <div className="mt-3 rounded-md bg-rose-100/80 px-3 py-1.5 font-semibold text-rose-800 text-xs">
-                    Denial Reason: {lastScanResult.denialReason}
-                  </div>
-                )}
-
-                <div className="mt-2 text-[11px] text-[var(--text-muted)]">
-                  Gate:{' '}
-                  <span className="font-medium text-[var(--text-secondary)]">
-                    {lastScanResult.gateLocation}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
         </DialogContent>
       </Dialog>
     </div>

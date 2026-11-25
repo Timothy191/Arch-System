@@ -123,17 +123,10 @@ describe('DEPARTMENTS registry', () => {
     ]);
   });
 
-  it('returns dedicated Office tabs (Office Workspace, Office Panels, Documents, Daily Log, Reports, History)', () => {
+  it('returns dedicated Office tabs (Office Workspace, Office Panels, Documents) without Daily Log, Reports, or History', () => {
     const tabs = getDepartmentTabs('office');
     expect(tabs).toBe(OFFICE_TABS);
-    expect(tabs.map((t) => t.name)).toEqual([
-      'dashboard',
-      'panels',
-      'documents',
-      'daily-log',
-      'reports',
-      'history',
-    ]);
+    expect(tabs.map((t) => t.name)).toEqual(['dashboard', 'panels', 'documents']);
   });
 
   it('returns dedicated Presentation tabs (Deck, System Documentation, Architecture, Investor Pack)', () => {

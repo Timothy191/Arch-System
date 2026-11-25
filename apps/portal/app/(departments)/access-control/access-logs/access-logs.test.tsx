@@ -32,7 +32,6 @@ const {
   getEmployeeAttendanceSummary: mockGetEmployeeAttendanceSummary,
   getAllEmployeesAttendanceRegister: mockGetAllEmployeesAttendanceRegister,
   getPersonnelListForFilter: mockGetPersonnelListForFilter,
-  executeEasyScan: mockExecuteEasyScan,
 } = jest.requireMock('../actions') as {
   getAccessLogsWithFilters: jest.Mock;
   getEmployeeAttendanceSummary: jest.Mock;
@@ -248,7 +247,7 @@ describe('AccessLogsClient, AccessLogsPage & Attendance Register', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders access logs with alcohol status, direction, ID/Coy numbers, and inline denial reason', () => {
+  it('renders access logs in a white gold-bordered header panel with golden view tabs, scanner badge, and without Easy Scanner Console', () => {
     render(
       <AccessLogsClient
         initialLogs={mockLogs}
@@ -257,7 +256,20 @@ describe('AccessLogsClient, AccessLogsPage & Attendance Register', () => {
       />
     );
 
-    expect(screen.getByText('Access Logs & Attendance Register')).toBeInTheDocument();
+    const heading = screen.getByText('Access Logs & Attendance Register');
+    expect(heading).toBeInTheDocument();
+    expect(heading.closest('.gold-steel-border')).toHaveClass('!bg-white', 'border-accent-gold/70');
+    expect(screen.queryByText(/Easy Scanner Console/i)).not.toBeInTheDocument();
+    expect(screen.getByText('Registered Scanners Verified')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Access Logs Stream/i })).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim'
+    );
+    expect(screen.getByRole('tab', { name: /Employee Attendance Register/i })).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim'
+    );
+
     expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
     expect(screen.getAllByText(/9001015009081/)[0]).toBeInTheDocument();
     expect(screen.getAllByText(/EMP-001/)[0]).toBeInTheDocument();
@@ -325,14 +337,24 @@ describe('AccessLogsClient, AccessLogsPage & Attendance Register', () => {
       );
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Entry (IN)' }));
-    fireEvent.click(screen.getByRole('button', { name: 'DENIED' }));
+    fireEvent.change(screen.getByLabelText(/Filter by direction/i), {
+      target: { value: 'IN' },
+    });
+    fireEvent.change(screen.getByLabelText(/Filter by status/i), {
+      target: { value: 'DENIED' },
+    });
+    fireEvent.change(screen.getByLabelText(/Filter by date range/i), {
+      target: { value: 'WEEK' },
+    });
     await waitFor(() => {
       expect(mockGetAccessLogsWithFilters).toHaveBeenCalledWith(
         expect.objectContaining({ direction: 'IN' })
       );
       expect(mockGetAccessLogsWithFilters).toHaveBeenCalledWith(
         expect.objectContaining({ statusFilter: 'DENIED' })
+      );
+      expect(mockGetAccessLogsWithFilters).toHaveBeenCalledWith(
+        expect.objectContaining({ dateRange: 'WEEK' })
       );
     });
 
@@ -408,7 +430,9 @@ describe('AccessLogsClient, AccessLogsPage & Attendance Register', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '90D (3 Mo)' }));
+    fireEvent.change(screen.getByLabelText(/Filter by date range/i), {
+      target: { value: 'QUARTER' },
+    });
     await waitFor(() => {
       expect(mockGetAccessLogsWithFilters).toHaveBeenCalledWith(
         expect.objectContaining({ dateRange: 'QUARTER' })
@@ -443,93 +467,6 @@ describe('AccessLogsClient, AccessLogsPage & Attendance Register', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /All Employees/i }));
     expect(screen.getByText('Master Employee Attendance Register')).toBeInTheDocument();
-  });
-
-  it('opens Easy Scanner dialog, handles empty code error, OUT toggle, scan submission, and scan error', async () => {
-    mockExecuteEasyScan
-      .mockResolvedValueOnce({
-        success: true,
-        accessGranted: true,
-        name: 'John Doe',
-        empCode: 'EMP-001',
-        jobTitle: 'Mining Engineer',
-        entityType: 'personnel',
-        message: 'Access Granted - East Pit Boom Gate',
-        denialReason: null,
-        scannedAt: '2026-10-27T08:00:00Z',
-        gateLocation: 'East Pit Boom Gate',
-        direction: 'OUT',
-      })
-      .mockRejectedValueOnce(new Error('Scanner hardware offline'));
-
-    render(
-      <AccessLogsClient
-        initialLogs={mockLogs}
-        initialTotalCount={mockLogs.length}
-        personnelList={mockPersonnel}
-      />
-    );
-
-    fireEvent.click(screen.getByText('⚡ Easy Scanner Console'));
-    expect(screen.getByText('Easy Scanner Terminal')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Verify & Log' }));
-    expect(mockToast.error).toHaveBeenCalledWith('Scan code cannot be empty');
-
-    fireEvent.change(screen.getByLabelText(/Gate Terminal/i), {
-      target: { value: 'East Pit Boom Gate' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: /OUT \(Exit\)/i }));
-
-    const input = screen.getByPlaceholderText(/Scan QR or RFID/i);
-    fireEvent.change(input, { target: { value: 'BADGE-EMP-001' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-
-    await waitFor(() => {
-      expect(mockExecuteEasyScan).toHaveBeenCalledWith({
-        code: 'BADGE-EMP-001',
-        direction: 'OUT',
-        gateLocation: 'East Pit Boom Gate',
-        scannerId: 'EASY-SCANNER-CONSOLE',
-      });
-      expect(screen.getByText('ACCESS GRANTED')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('Bob Dozer'));
-    await waitFor(() => {
-      expect(mockToast.error).toHaveBeenCalledWith('Scanner hardware offline');
-    });
-  });
-
-  it('handles denial feedback and fetch failures cleanly without crashing', async () => {
-    mockExecuteEasyScan.mockResolvedValueOnce({
-      success: false,
-      accessGranted: false,
-      name: 'Unrecognized Badge / RFID',
-      entityType: 'UNKNOWN',
-      message: 'DENIED - Unrecognized Badge / RFID',
-      denialReason: 'DENIED - Unrecognized Badge / RFID',
-      scannedAt: '2026-10-27T08:45:00Z',
-      gateLocation: 'Main Gate North Turnstile',
-      direction: 'IN',
-    });
-    mockGetAccessLogsWithFilters.mockRejectedValueOnce(new Error('Network timeout'));
-
-    render(
-      <AccessLogsClient
-        initialLogs={mockLogs}
-        initialTotalCount={mockLogs.length}
-        personnelList={mockPersonnel}
-      />
-    );
-
-    fireEvent.click(screen.getByText('⚡ Easy Scanner Console'));
-    fireEvent.click(screen.getByText('Unknown Tag'));
-
-    await waitFor(() => {
-      expect(screen.getByText('ACCESS DENIED')).toBeInTheDocument();
-      expect(mockToast.error).toHaveBeenCalledWith('Network timeout');
-    });
   });
 
   it('renders RSC AccessLogsPage gracefully across nullable rows, fleet rows, and rejected loaders', async () => {
