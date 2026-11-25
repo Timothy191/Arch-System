@@ -345,8 +345,8 @@ export function HeroRotator({
           }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="relative w-full cursor-grab touch-pan-y overflow-visible active:cursor-grabbing"
-          style={{ height: 400, transformStyle: 'preserve-3d' }}
+          className="relative h-[520px] w-full cursor-grab touch-pan-y overflow-visible active:cursor-grabbing sm:h-[470px]"
+          style={{ transformStyle: 'preserve-3d' }}
         >
           {panels.map((panel, idx) => (
             <HeroSlide

@@ -6,6 +6,10 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T13:05:00+02:00] - Hero Rotator Stage Sizing & Graph/Image Cutoff Fix
+
+- **Hero Carousel (`packages/ui/src/components/HeroRotator.tsx`, `HeroCardContent.tsx`)**: Increased carousel stage height from hardcoded `400px` to responsive `h-[520px] sm:h-[470px]`, standardized left-column padding (`p-4 sm:p-6 gap-3`), and updated `HeroTelemetryGraph` SVG (`preserveAspectRatio="xMidYMid meet"`, `h-24 sm:h-[104px]`) so all hero cards share identical proportions without clipping graphs or images.
+
 ## [2026-11-25T12:35:00+02:00] - Hub Telemetry Removal, Hourly Loads Operator/Stop SMR Sync, Machine Ops Auto-Fill & Glass/Gold Branding Tokens
 
 - **Hub (`CoreOperationalModules.tsx`)**: Removed `HubLiveTelemetryPulse` (`LIVE SYSTEM FEED`) banner and updated `CoreOperationalModules.test.tsx`.

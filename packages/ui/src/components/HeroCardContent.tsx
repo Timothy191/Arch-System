@@ -326,7 +326,8 @@ function HeroTelemetryGraph({
 
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="relative z-10 h-20 w-full overflow-visible sm:h-24"
+          preserveAspectRatio="xMidYMid meet"
+          className="relative z-10 h-24 w-full sm:h-[104px]"
           role="img"
           aria-label={`${series.title} telemetry trend graph`}
         >
@@ -1122,7 +1123,7 @@ export function HeroCardContent({
   return (
     <div className="relative z-10 flex h-full w-full flex-row">
       {/* Left Column: Text, Controls & Live Telemetry Graph */}
-      <div className="liquid-glass-light relative z-20 flex h-full w-[52%] flex-col justify-between rounded-r-none rounded-l-2xl border border-white/20 p-5 shadow-window sm:w-[50%] sm:p-7">
+      <div className="liquid-glass-light relative z-20 flex h-full w-[52%] flex-col justify-between gap-3 rounded-r-none rounded-l-2xl border border-white/20 p-4 shadow-window sm:w-[50%] sm:p-6">
         <div>
           {/* Urgent Telemetry Readouts (only shown when active incidents/breakdowns/offline exist) */}
           {hasUrgentTelemetry && (
