@@ -4,7 +4,13 @@
 
 ---
 
-<!-- cspell:ignore commandcode autohand Autohand -->
+<!-- cspell:ignore commandcode autohand Autohand styleguides -->
+
+## [2026-11-25T14:35:00+02:00] - Conductor Spec-Driven Development Plugin & Repository Setup
+
+- **Plugin Installed (`~/.gemini/config/plugins/conductor`)**: Installed `https://github.com/gemini-cli-extensions/conductor` via `agy plugins install` (6 Conductor skills + 1 rule).
+- **Repository Scaffolding (`conductor/`)**: Created `index.md`, `product.md`, `product-guidelines.md`, `tech-stack.md`, `workflow.md`, `tracks.md`, `tracks/.gitkeep`, and `code_styleguides/` (`general.md`, `typescript.md`, `javascript.md`, `html-css.md`, `python.md`, `arch-system.md`).
+- **Build Hygiene**: Added `/conductor/` to `.vercelignore` so Conductor documentation stays excluded from Vercel deployment bundles.
 
 ## [2026-11-25T13:57:00+02:00] - Hub Hero Card Parity, Responsive Sizing & SVG Graph Clipping Fix
 
