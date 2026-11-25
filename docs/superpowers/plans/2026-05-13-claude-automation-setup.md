@@ -219,32 +219,32 @@ Expected: No output (exit 0).
 - [ ] **Step 1: Write the failing test**
 
 ```typescript
-import { normalizeRole } from "./middleware";
+import { normalizeRole } from './middleware';
 
-describe("normalizeRole", () => {
-  it("returns the role as-is for valid non-empty strings", () => {
-    expect(normalizeRole("admin")).toBe("admin");
-    expect(normalizeRole("control_room_operator")).toBe("control_room_operator");
-    expect(normalizeRole("supervisor")).toBe("supervisor");
+describe('normalizeRole', () => {
+  it('returns the role as-is for valid non-empty strings', () => {
+    expect(normalizeRole('admin')).toBe('admin');
+    expect(normalizeRole('control_room_operator')).toBe('control_room_operator');
+    expect(normalizeRole('supervisor')).toBe('supervisor');
   });
 
   it("returns 'operator' for empty string", () => {
-    expect(normalizeRole("")).toBe("operator");
+    expect(normalizeRole('')).toBe('operator');
   });
 
   it("returns 'operator' for undefined", () => {
-    expect(normalizeRole(undefined)).toBe("operator");
+    expect(normalizeRole(undefined)).toBe('operator');
   });
 
   it("returns 'operator' for null", () => {
-    expect(normalizeRole(null)).toBe("operator");
+    expect(normalizeRole(null)).toBe('operator');
   });
 
   it("returns 'operator' for non-string values", () => {
-    expect(normalizeRole(42)).toBe("operator");
-    expect(normalizeRole({})).toBe("operator");
-    expect(normalizeRole([])).toBe("operator");
-    expect(normalizeRole(true)).toBe("operator");
+    expect(normalizeRole(42)).toBe('operator');
+    expect(normalizeRole({})).toBe('operator');
+    expect(normalizeRole([])).toBe('operator');
+    expect(normalizeRole(true)).toBe('operator');
   });
 });
 ```
@@ -278,22 +278,22 @@ Expected: 5 tests pass.
 - [ ] **Step 1: Write the E2E test**
 
 ```typescript
-import { test, expect } from "@playwright/test";
+import { test, expect } from '@playwright/test';
 
-test.describe("login page", () => {
-  test("renders login form", async ({ page }) => {
-    await page.goto("/login");
-    await expect(page.locator("form")).toBeVisible();
+test.describe('login page', () => {
+  test('renders login form', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.locator('form')).toBeVisible();
     await expect(page.locator("input[type='email']")).toBeVisible();
     await expect(page.locator("input[type='password']")).toBeVisible();
   });
 
-  test("redirects authenticated users away from login", async ({ page }) => {
+  test('redirects authenticated users away from login', async ({ page }) => {
     // This test documents the expected behavior.
     // Full auth flow (sign up + sign in) requires Supabase local instance.
     // For now we verify the unauthenticated state renders correctly.
-    await page.goto("/login");
-    await expect(page.locator("form")).toBeVisible();
+    await page.goto('/login');
+    await expect(page.locator('form')).toBeVisible();
   });
 });
 ```

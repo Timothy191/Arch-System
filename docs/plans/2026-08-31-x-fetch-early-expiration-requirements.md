@@ -1,9 +1,9 @@
 ---
-title: "Requirements Plan: Adaptive Probabilistic Early Expiration (X-Fetch) for Redis Cache"
-date: "2026-08-31"
-artifact_contract: "ce-unified-plan/v1"
-artifact_readiness: "implementation-ready"
-execution: "knowledge-work"
+title: 'Requirements Plan: Adaptive Probabilistic Early Expiration (X-Fetch) for Redis Cache'
+date: '2026-08-31'
+artifact_contract: 'ce-unified-plan/v1'
+artifact_readiness: 'implementation-ready'
+execution: 'knowledge-work'
 ---
 
 # Unified Product & Requirements Plan: Adaptive Probabilistic Early Expiration (X-Fetch)

@@ -2,7 +2,7 @@
 name: mandatory-ai-engineering-governance
 description: Mandatory AI Engineering Governance, Canonical 8-Step Security Sequence, 5-Tier Permission Matrix, 15 Non-Negotiable Coding Standards, TDD, No Artificial Completion, and Independent Review.
 paths:
-  - "**/*"
+  - '**/*'
 alwaysApply: true
 ---
 

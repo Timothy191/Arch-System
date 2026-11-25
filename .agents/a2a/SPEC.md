@@ -108,13 +108,7 @@ All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/
     "recipientAgent": { "type": "string" },
     "phase": {
       "type": "string",
-      "enum": [
-        "INGESTION",
-        "DISCOVERY",
-        "EXECUTION",
-        "VERIFICATION",
-        "COMPLETION"
-      ]
+      "enum": ["INGESTION", "DISCOVERY", "EXECUTION", "VERIFICATION", "COMPLETION"]
     },
     "targetFiles": {
       "type": "array",
@@ -136,14 +130,7 @@ All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": [
-    "taskId",
-    "auditorAgent",
-    "verdict",
-    "score",
-    "violations",
-    "timestamp"
-  ],
+  "required": ["taskId", "auditorAgent", "verdict", "score", "violations", "timestamp"],
   "properties": {
     "taskId": { "type": "string" },
     "auditorAgent": { "type": "string" },

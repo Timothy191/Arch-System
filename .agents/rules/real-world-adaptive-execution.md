@@ -2,7 +2,7 @@
 name: real-world-adaptive-execution
 description: 10 evidence-based rules for real-world usable code, primary sources, zero-backlog execution, and adaptive thinking per token without dropping quality
 paths:
-  - "**/*"
+  - '**/*'
 alwaysApply: true
 ---
 

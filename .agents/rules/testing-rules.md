@@ -1,12 +1,12 @@
 ---
 name: testing-rules
-description: "Jest 30, @swc/jest, Playwright SSoT, AAA structure, boundary-only mocking, and typed AppError verification."
+description: 'Jest 30, @swc/jest, Playwright SSoT, AAA structure, boundary-only mocking, and typed AppError verification.'
 paths:
-  - "**/*.test.{ts,tsx,mjs}"
-  - "**/*.spec.{ts,tsx}"
-  - "apps/portal/jest*.config.cjs"
-  - "apps/portal/setupTests.ts"
-  - "e2e/**/*"
+  - '**/*.test.{ts,tsx,mjs}'
+  - '**/*.spec.{ts,tsx}'
+  - 'apps/portal/jest*.config.cjs'
+  - 'apps/portal/setupTests.ts'
+  - 'e2e/**/*'
 ---
 
 # Testing Standards & Mocking Rules

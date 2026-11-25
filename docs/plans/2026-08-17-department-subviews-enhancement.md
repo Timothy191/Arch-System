@@ -16,21 +16,21 @@ This implementation plan delivers production-grade departmental sub-views for th
 
 ```ts
 export const drillingDailyLogSchema = z.object({
-  shift: z.enum(["day", "night"]),
+  shift: z.enum(['day', 'night']),
   holesDrilled: z
     .number()
     .int()
-    .min(0, "Holes drilled must be ≥ 0")
-    .max(500, "Unrealistic single-shift count"),
-  totalDepthMeters: z.number().min(0, "Total depth must be ≥ 0").max(5000, "Max depth exceeded"),
+    .min(0, 'Holes drilled must be ≥ 0')
+    .max(500, 'Unrealistic single-shift count'),
+  totalDepthMeters: z.number().min(0, 'Total depth must be ≥ 0').max(5000, 'Max depth exceeded'),
   penetrationRate: z.number().min(0).max(100).optional(),
-  bitWearPercentage: z.number().min(0).max(100, "Bit wear cannot exceed 100%").optional(),
-  drillPatternId: z.string().max(50).optional().or(z.literal("")),
+  bitWearPercentage: z.number().min(0).max(100, 'Bit wear cannot exceed 100%').optional(),
+  drillPatternId: z.string().max(50).optional().or(z.literal('')),
   delayCategory: z
-    .enum(["none", "bit_replacement", "rod_jam", "collar_setup", "mechanical_breakdown", "weather"])
-    .default("none"),
-  delayMinutes: z.number().int().min(0).max(720, "Delay cannot exceed 12 hours").default(0),
-  notes: z.string().max(2000).optional().or(z.literal("")),
+    .enum(['none', 'bit_replacement', 'rod_jam', 'collar_setup', 'mechanical_breakdown', 'weather'])
+    .default('none'),
+  delayMinutes: z.number().int().min(0).max(720, 'Delay cannot exceed 12 hours').default(0),
+  notes: z.string().max(2000).optional().or(z.literal('')),
 });
 ```
 

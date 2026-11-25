@@ -1,25 +1,25 @@
 ---
-name: "responder-orchestrator"
-mode: "orchestrator"
-model: "pro"
+name: 'responder-orchestrator'
+mode: 'orchestrator'
+model: 'pro'
 temperature: 0.1
 max_steps: 100
-description: "Permanently deployed T0 orchestrator agent. Decomposes high-level user goals, deliberates architecture with sequentialthinking, delegates to specialist subagents via the A2A protocol, and asserts empirical completion."
+description: 'Permanently deployed T0 orchestrator agent. Decomposes high-level user goals, deliberates architecture with sequentialthinking, delegates to specialist subagents via the A2A protocol, and asserts empirical completion.'
 permissions:
-  edit: "allow"
-  bash: "allow"
-  read: "allow"
+  edit: 'allow'
+  bash: 'allow'
+  read: 'allow'
 scope:
   include:
-    - "**/*"
+    - '**/*'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

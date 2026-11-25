@@ -92,7 +92,7 @@ Focus: Optimize resource load time (images, video)
 
 ```tsx
 // 1. Use useTransition for non-urgent updates
-import { useTransition } from "react";
+import { useTransition } from 'react';
 
 function Dashboard() {
   const [isPending, startTransition] = useTransition();
@@ -107,7 +107,7 @@ function Dashboard() {
 }
 
 // 2. Memoize expensive calculations
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 function MachineList({ machines }) {
   const sortedMachines = useMemo(() => {
@@ -118,7 +118,7 @@ function MachineList({ machines }) {
 }
 
 // 3. Debounce rapid interactions
-import { debounce } from "lodash";
+import { debounce } from 'lodash';
 
 function SearchInput() {
   const handleChange = debounce((value) => {
@@ -132,7 +132,7 @@ function SearchInput() {
 function Component({ data }) {
   useEffect(() => {
     // Analytics tracking (doesn't block paint)
-    analytics.track("view", { data });
+    analytics.track('view', { data });
   }, [data]);
 
   return <div>{data}</div>;

@@ -7,8 +7,8 @@ problem_type: design_pattern
 component: HeroRotator
 severity: low
 applies_when:
-  - "Building complex 3D or layout-heavy components that degrade poorly on small viewports"
-tags: ["responsive-design", "mobile-fallback", "css-snap", "framer-motion"]
+  - 'Building complex 3D or layout-heavy components that degrade poorly on small viewports'
+tags: ['responsive-design', 'mobile-fallback', 'css-snap', 'framer-motion']
 ---
 
 # Responsive 2D Mobile Fallback for 3D Components

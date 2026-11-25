@@ -72,13 +72,8 @@ Each item in `commandResults` conforms to `commandExecutionResultSchema`:
     "Zod 4 contracts for quality runs, checks, regressions, agent reports, and release certifications",
     "PostgreSQL 17 migration 226 with immutability triggers and InitPlan RLS policies"
   ],
-  "testsCreated": [
-    "packages/contract/src/schemas/quality-intelligence.schema.test.ts"
-  ],
-  "testsExecuted": [
-    "pnpm --filter @repo/contract test",
-    "pnpm --filter @repo/database test"
-  ],
+  "testsCreated": ["packages/contract/src/schemas/quality-intelligence.schema.test.ts"],
+  "testsExecuted": ["pnpm --filter @repo/contract test", "pnpm --filter @repo/database test"],
   "commandsExecuted": [
     "pnpm --filter @repo/contract build",
     "pnpm --filter @repo/contract test",

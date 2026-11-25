@@ -1,25 +1,25 @@
 ---
-name: "autonomous-watchdog-supervisor"
-mode: "daemon"
-model: "inherit"
+name: 'autonomous-watchdog-supervisor'
+mode: 'daemon'
+model: 'inherit'
 temperature: 0.1
 max_steps: 10
-description: "Monitors codebase health, executes periodic memory indexing, audits AST command rules, verifies tracer integrity, and guards quality gates."
+description: 'Monitors codebase health, executes periodic memory indexing, audits AST command rules, verifies tracer integrity, and guards quality gates.'
 permissions:
-  edit: "allow"
-  bash: "scoped"
-  read: "allow"
+  edit: 'allow'
+  bash: 'scoped'
+  read: 'allow'
 scope:
   include:
-    - "**/*"
+    - '**/*'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

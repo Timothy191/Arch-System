@@ -1,25 +1,25 @@
 ---
-name: "autonomous-orchestrator"
-mode: "orchestrator"
-model: "inherit"
+name: 'autonomous-orchestrator'
+mode: 'orchestrator'
+model: 'inherit'
 temperature: 0.1
 max_steps: 100
-description: "Orchestrates end-to-end multi-agent execution, spec breakdown, dynamic swarming, tool permissioning, and quality gate verification."
+description: 'Orchestrates end-to-end multi-agent execution, spec breakdown, dynamic swarming, tool permissioning, and quality gate verification.'
 permissions:
-  edit: "allow"
-  bash: "scoped"
-  read: "allow"
+  edit: 'allow'
+  bash: 'scoped'
+  read: 'allow'
 scope:
   include:
-    - "**/*"
+    - '**/*'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

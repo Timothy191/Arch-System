@@ -73,11 +73,12 @@ Update `turbo.json` with dedicated pipeline targets:
 ### 2.3 Vercel Project Mapping
 
 In Vercel, each project is configured with a distinct **Root Directory**:
-| Service | Vercel Project Name | Root Directory | Framework Preset | Output Directory |
-|---|---|---|---|---|
-| Portal | `arch-system` | `apps/portal` | Next.js | `.next` |
-| Nest Proxy | `arch-system-nest-proxy` | `apps/nest-proxy` | Other / Node.js | `dist` |
-| Serverless Redis | `plantcor-redis-serverless` | `apps/serverless-redis`| Next.js | `.next` |
+
+| Service          | Vercel Project Name         | Root Directory          | Framework Preset | Output Directory |
+| ---------------- | --------------------------- | ----------------------- | ---------------- | ---------------- |
+| Portal           | `arch-system`               | `apps/portal`           | Next.js          | `.next`          |
+| Nest Proxy       | `arch-system-nest-proxy`    | `apps/nest-proxy`       | Other / Node.js  | `dist`           |
+| Serverless Redis | `plantcor-redis-serverless` | `apps/serverless-redis` | Next.js          | `.next`          |
 
 ---
 

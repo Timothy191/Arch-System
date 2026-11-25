@@ -6,13 +6,13 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "0 4 * * 1"
+    - cron: '0 4 * * 1'
   workflow_dispatch:
     inputs:
       mode:
-        description: "Quality verification mode"
+        description: 'Quality verification mode'
         required: true
-        default: "changed"
+        default: 'changed'
         type: choice
         options:
           - changed
@@ -27,13 +27,13 @@ permissions:
   contents: read
 
 env:
-  NEXT_TELEMETRY_DISABLED: "1"
+  NEXT_TELEMETRY_DISABLED: '1'
   NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
   NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
   SUPABASE_URL: ${{ vars.SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
   SUPABASE_ANON_KEY: dummy-anon-key-for-ci
   SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
-  PORT: "3000"
+  PORT: '3000'
   N8N_URL: http://localhost:5678
   FLOWISE_URL: http://localhost:3000
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres # secretlint-disable-line
@@ -192,12 +192,7 @@ jobs:
     name: Full Verification & Release Certification
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs:
-      [
-        changed-quality-gate,
-        database-migration-gate,
-        security-and-agent-governance,
-      ]
+    needs: [changed-quality-gate, database-migration-gate, security-and-agent-governance]
     permissions:
       contents: read
     steps:

@@ -1,26 +1,26 @@
 ---
-name: "core-coordinator"
-mode: "subagent"
-model: "pro"
+name: 'core-coordinator'
+mode: 'subagent'
+model: 'pro'
 temperature: 0.1
 max_steps: 12
-description: "Specialist subagent responsible for multi-agent task decomposition, RISEN prompt orchestration, context token budget allocation, and Langfuse trace management."
+description: 'Specialist subagent responsible for multi-agent task decomposition, RISEN prompt orchestration, context token budget allocation, and Langfuse trace management.'
 permissions:
-  edit: "allow"
-  bash: "deny"
-  read: "allow"
+  edit: 'allow'
+  bash: 'deny'
+  read: 'allow'
 scope:
   include:
-    - "packages/agents/src/**/*.ts"
-    - ".agents/a2a/**"
+    - 'packages/agents/src/**/*.ts'
+    - '.agents/a2a/**'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

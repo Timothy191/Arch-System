@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 # Arch-Systems — Glance + Dashy sidecar services
 # Usage:
@@ -25,7 +25,7 @@ services:
     container_name: plantcor-glance
     restart: unless-stopped
     ports:
-      - "9898:9898"
+      - '9898:9898'
     volumes:
       # Bind-mount the tracked config file.
       - ./glance/config.yaml:/app/config/config.yaml:ro
@@ -34,7 +34,7 @@ services:
     environment:
       - TZ=${TIMEZONE:-America/Denver}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9898/"]
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:9898/']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -42,7 +42,7 @@ services:
     networks:
       - plantcor-dashboards
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     profiles:
       - dashboards
 
@@ -54,7 +54,7 @@ services:
     container_name: plantcor-dashy
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - '8080:80'
     volumes:
       # Bind-mount the tracked config directory.
       - ./dashy/user-data:/app/user-data:ro
@@ -64,7 +64,7 @@ services:
       - NODE_ENV=production
       - DASHY_BACKEND_DB_FILE=/app/user-data/conf.yml
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:80/"]
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:80/']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -72,7 +72,7 @@ services:
     networks:
       - plantcor-dashboards
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     profiles:
       - dashboards
 

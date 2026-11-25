@@ -37,13 +37,13 @@
 ```tsx
 // apps/portal/app/layout.tsx
 export const viewport: Viewport = {
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: "#f5f5f7",
-  viewportFit: "cover",
+  themeColor: '#f5f5f7',
+  viewportFit: 'cover',
 };
 ```
 
@@ -76,8 +76,8 @@ export const viewport: Viewport = {
 
    ```tsx
    const SatelliteMonitoringDashboard = dynamic(
-     () => import("@/features/departments").then((m) => m.SatelliteMonitoringDashboard),
-     { loading: () => <Spinner /> },
+     () => import('@/features/departments').then((m) => m.SatelliteMonitoringDashboard),
+     { loading: () => <Spinner /> }
    );
    ```
 
@@ -260,7 +260,7 @@ return NextResponse.json(weather, {
 
 ```tsx
 // 1. Use Next.js Image component with priority
-import Image from "next/image";
+import Image from 'next/image';
 
 <Image
   src="/hero.webp"
@@ -273,9 +273,9 @@ import Image from "next/image";
 />;
 
 // 2. Preload LCP image
-import { preloadLCPImage } from "@/components/LCPObserver";
+import { preloadLCPImage } from '@/components/LCPObserver';
 
-preloadLCPImage("/hero.webp");
+preloadLCPImage('/hero.webp');
 
 // 3. Use AVIF for better compression
 // AVIF is ~50% smaller than JPEG

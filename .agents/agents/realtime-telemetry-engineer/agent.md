@@ -1,27 +1,27 @@
 ---
-name: "realtime-telemetry-engineer"
-mode: "subagent"
-model: "flash"
+name: 'realtime-telemetry-engineer'
+mode: 'subagent'
+model: 'flash'
 temperature: 0.1
 max_steps: 10
-description: "Specialist subagent responsible for Supabase Realtime CDC channels, WebSocket reconnect jitter, socket leak prevention, and TanStack Query state synchronization."
+description: 'Specialist subagent responsible for Supabase Realtime CDC channels, WebSocket reconnect jitter, socket leak prevention, and TanStack Query state synchronization.'
 permissions:
-  edit: "allow"
-  bash: "scoped"
-  read: "allow"
+  edit: 'allow'
+  bash: 'scoped'
+  read: 'allow'
 scope:
   include:
-    - "apps/portal/lib/realtime/**/*.{ts,tsx}"
-    - "apps/portal/lib/observability/**/*.{ts,tsx}"
-    - "packages/supabase/src/**/*.ts"
+    - 'apps/portal/lib/realtime/**/*.{ts,tsx}'
+    - 'apps/portal/lib/observability/**/*.{ts,tsx}'
+    - 'packages/supabase/src/**/*.ts'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

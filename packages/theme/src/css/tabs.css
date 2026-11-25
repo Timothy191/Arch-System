@@ -47,7 +47,7 @@
   box-shadow: 0 0 0 3px rgba(46, 125, 239, 0.32);
 }
 
-.cir-tabs-t[data-state="active"],
+.cir-tabs-t[data-state='active'],
 .cir-tabs-r:checked + .cir-tabs-t {
   background: var(--color-ink);
   color: var(--color-cloud);

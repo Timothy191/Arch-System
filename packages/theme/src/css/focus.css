@@ -18,8 +18,8 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
-[role="button"]:focus-visible,
-[tabindex="0"]:focus-visible {
+[role='button']:focus-visible,
+[tabindex='0']:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px rgba(255, 255, 255, 0.8),

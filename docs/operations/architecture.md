@@ -264,15 +264,15 @@ Inngest Schedule → shift-completeness-check job
 
 ```typescript
 supabase
-  .channel("machines")
+  .channel('machines')
   .on(
-    "postgres_changes",
+    'postgres_changes',
     {
-      event: "*",
-      schema: "public",
-      table: "machines",
+      event: '*',
+      schema: 'public',
+      table: 'machines',
     },
-    handleUpdate,
+    handleUpdate
   )
   .subscribe();
 ```

@@ -104,13 +104,13 @@ apps/portal/
 
 ```js
 collectCoverageFrom: [
-  "lib/**/*.{ts,tsx}",
-  "features/**/*.{ts,tsx}",
-  "app/**/*.{ts,tsx}",
-  "proxy.ts",
-  "!**/*.test.{ts,tsx}",
-  "!**/*.d.ts",
-  "!**/node_modules/**",
+  'lib/**/*.{ts,tsx}',
+  'features/**/*.{ts,tsx}',
+  'app/**/*.{ts,tsx}',
+  'proxy.ts',
+  '!**/*.test.{ts,tsx}',
+  '!**/*.d.ts',
+  '!**/node_modules/**',
 ];
 ```
 

@@ -1,28 +1,28 @@
 ---
-name: "telemetry-codebase-architect"
-mode: "subagent"
-model: "flash"
+name: 'telemetry-codebase-architect'
+mode: 'subagent'
+model: 'flash'
 temperature: 0
 max_steps: 10
-description: "Specialist subagent responsible for generating automated codebase topology maps, auditing contract drift between database migrations and @repo/contract, and maintaining OpenAPI specs."
+description: 'Specialist subagent responsible for generating automated codebase topology maps, auditing contract drift between database migrations and @repo/contract, and maintaining OpenAPI specs.'
 permissions:
-  edit: "allow"
-  bash: "scoped"
-  read: "allow"
+  edit: 'allow'
+  bash: 'scoped'
+  read: 'allow'
 scope:
   include:
-    - "codebase-maps/**"
-    - "documentation/**"
-    - "packages/contract/src/**/*.ts"
-    - "apps/portal/app/api/**/*.ts"
+    - 'codebase-maps/**'
+    - 'documentation/**'
+    - 'packages/contract/src/**/*.ts'
+    - 'apps/portal/app/api/**/*.ts'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

@@ -36,8 +36,8 @@ This procedure documents how to reset a supervisor's PIN when it has been forgot
    - Example (Node.js):
 
      ```javascript
-     const bcrypt = require("bcryptjs");
-     const newPIN = "1234"; // New temporary PIN
+     const bcrypt = require('bcryptjs');
+     const newPIN = '1234'; // New temporary PIN
      const pinHash = await bcrypt.hash(newPIN, 10);
      console.log(pinHash); // Copy this hash
      ```

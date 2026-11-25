@@ -1,26 +1,26 @@
 ---
-name: "spec-driven-implementer"
-mode: "subagent"
-model: "pro"
+name: 'spec-driven-implementer'
+mode: 'subagent'
+model: 'pro'
 temperature: 0.1
 max_steps: 12
-description: "Spec-driven implementer: takes an EARS spec (docs/specs/*) and implements it with verification, returning a structured verdict. Specialized for focused, single-spec delivery."
+description: 'Spec-driven implementer: takes an EARS spec (docs/specs/*) and implements it with verification, returning a structured verdict. Specialized for focused, single-spec delivery.'
 permissions:
-  edit: "allow"
-  bash: "allow"
-  read: "allow"
+  edit: 'allow'
+  bash: 'allow'
+  read: 'allow'
 scope:
   include:
-    - "apps/portal/**/*.{ts,tsx}"
-    - "packages/**/*.{ts,tsx,json}"
-    - "libs/**/*.{ts,tsx}"
-    - "docs/specs/**/*.md"
+    - 'apps/portal/**/*.{ts,tsx}'
+    - 'packages/**/*.{ts,tsx,json}'
+    - 'libs/**/*.{ts,tsx}'
+    - 'docs/specs/**/*.md'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

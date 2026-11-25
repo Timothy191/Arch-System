@@ -2,7 +2,7 @@
 name: context-lifecycle-and-compaction
 description: Enforces context-first execution (gather context via research, user prompting, or codebase exploration before any action) and automatic post-output context compaction.
 paths:
-  - "**/*"
+  - '**/*'
 alwaysApply: true
 trigger: always_on
 ---

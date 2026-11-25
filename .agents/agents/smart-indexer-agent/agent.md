@@ -1,27 +1,27 @@
 ---
-name: "smart-indexer-agent"
-mode: "indexer"
-model: "flash"
+name: 'smart-indexer-agent'
+mode: 'indexer'
+model: 'flash'
 temperature: 0
 max_steps: 30
-description: "Continuous memory and codebase indexing specialist managing .agents/memory_base/ retrospectives, graph associations, and auto-recall query interfaces."
+description: 'Continuous memory and codebase indexing specialist managing .agents/memory_base/ retrospectives, graph associations, and auto-recall query interfaces.'
 permissions:
-  edit: "allow"
-  bash: "scoped"
-  read: "allow"
+  edit: 'allow'
+  bash: 'scoped'
+  read: 'allow'
 scope:
   include:
-    - ".agents/memory_base/**"
-    - "archive/tracers/**"
-    - "tools/scripts/**"
+    - '.agents/memory_base/**'
+    - 'archive/tracers/**'
+    - 'tools/scripts/**'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

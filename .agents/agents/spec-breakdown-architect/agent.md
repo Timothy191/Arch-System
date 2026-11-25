@@ -1,25 +1,25 @@
 ---
-name: "spec-breakdown-architect"
-mode: "subagent"
-model: "pro"
+name: 'spec-breakdown-architect'
+mode: 'subagent'
+model: 'pro'
 temperature: 0.1
 max_steps: 10
-description: "Translates ambiguous user prompts into structured EARS specifications, designs, and computes 5-pillar Real-World Quality Scores."
+description: 'Translates ambiguous user prompts into structured EARS specifications, designs, and computes 5-pillar Real-World Quality Scores.'
 permissions:
-  edit: "allow"
-  bash: "scoped"
-  read: "allow"
+  edit: 'allow'
+  bash: 'scoped'
+  read: 'allow'
 scope:
   include:
-    - "**/*"
+    - '**/*'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

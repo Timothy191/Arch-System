@@ -1,30 +1,30 @@
 ---
-name: "database-architect"
-mode: "subagent"
-model: "pro"
+name: 'database-architect'
+mode: 'subagent'
+model: 'pro'
 temperature: 0
 max_steps: 10
-description: "Specialist subagent responsible for PostgreSQL schemas, zero-padded migrations, pgvector HNSW indexing, Kysely queries, and RLS InitPlan optimization. Do not invoke for UI styling or pure client-side routing."
+description: 'Specialist subagent responsible for PostgreSQL schemas, zero-padded migrations, pgvector HNSW indexing, Kysely queries, and RLS InitPlan optimization. Do not invoke for UI styling or pure client-side routing.'
 permissions:
-  edit: "allow"
-  bash: "scoped"
-  read: "allow"
+  edit: 'allow'
+  bash: 'scoped'
+  read: 'allow'
 scope:
   include:
-    - "packages/database/migrations/**/*.sql"
-    - "packages/database/tests/**/*.sql"
-    - "packages/supabase/src/**/*.ts"
-    - "packages/redis/src/**/*.ts"
+    - 'packages/database/migrations/**/*.sql'
+    - 'packages/database/tests/**/*.sql'
+    - 'packages/supabase/src/**/*.ts'
+    - 'packages/redis/src/**/*.ts'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
-    - "apps/portal/app/**/*.tsx"
-    - "packages/ui/**/*.tsx"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
+    - 'apps/portal/app/**/*.tsx'
+    - 'packages/ui/**/*.tsx'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

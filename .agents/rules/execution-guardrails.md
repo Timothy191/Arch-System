@@ -2,7 +2,7 @@
 name: execution-guardrails
 description: Always-on pre-completion audits and quality gates for industrial-grade software
 paths:
-  - "**/*"
+  - '**/*'
 alwaysApply: true
 ---
 

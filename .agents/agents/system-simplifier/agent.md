@@ -1,25 +1,25 @@
 ---
-name: "system-simplifier"
-mode: "subagent"
-model: "pro"
+name: 'system-simplifier'
+mode: 'subagent'
+model: 'pro'
 temperature: 0
 max_steps: 10
-description: "Specialist subagent responsible for dead code elimination, AST boundary enforcement, bundle size management (static assets <= 1.0 MB), and dependency pruning."
+description: 'Specialist subagent responsible for dead code elimination, AST boundary enforcement, bundle size management (static assets <= 1.0 MB), and dependency pruning.'
 permissions:
-  edit: "allow"
-  bash: "scoped"
-  read: "allow"
+  edit: 'allow'
+  bash: 'scoped'
+  read: 'allow'
 scope:
   include:
-    - "**/*"
+    - '**/*'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

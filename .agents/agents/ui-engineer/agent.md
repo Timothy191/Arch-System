@@ -1,30 +1,30 @@
 ---
-name: "ui-engineer"
-mode: "subagent"
-model: "flash"
+name: 'ui-engineer'
+mode: 'subagent'
+model: 'flash'
 temperature: 0.1
 max_steps: 10
-description: "Specialist subagent responsible for React 19 components, Tailwind CSS OKLCH design tokens, Radix UI primitives, Framer Motion transitions, and light-mode invariant enforcement. Do not invoke for database migrations or direct auth credential handling."
+description: 'Specialist subagent responsible for React 19 components, Tailwind CSS OKLCH design tokens, Radix UI primitives, Framer Motion transitions, and light-mode invariant enforcement. Do not invoke for database migrations or direct auth credential handling.'
 permissions:
-  edit: "allow"
-  bash: "deny"
-  read: "allow"
+  edit: 'allow'
+  bash: 'deny'
+  read: 'allow'
 scope:
   include:
-    - "packages/ui/src/**/*.{ts,tsx}"
-    - "packages/theme/src/**/*.{ts,css,json}"
-    - "apps/portal/components/**/*.{ts,tsx}"
-    - "libs/features/**/ui/**/*.{ts,tsx}"
+    - 'packages/ui/src/**/*.{ts,tsx}'
+    - 'packages/theme/src/**/*.{ts,css,json}'
+    - 'apps/portal/components/**/*.{ts,tsx}'
+    - 'libs/features/**/ui/**/*.{ts,tsx}'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
-    - "packages/database/**"
-    - "packages/supabase/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
+    - 'packages/database/**'
+    - 'packages/supabase/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

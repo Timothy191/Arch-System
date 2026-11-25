@@ -177,7 +177,7 @@
 }
 
 .border-arch-fading::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border: 1px solid var(--arch-border-emphasis, rgba(0, 0, 0, 0.18));

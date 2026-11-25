@@ -1,25 +1,25 @@
 ---
-name: "critique-council-reviewer"
-mode: "reviewer"
-model: "pro"
+name: 'critique-council-reviewer'
+mode: 'reviewer'
+model: 'pro'
 temperature: 0
 max_steps: 50
-description: "Independent isolated reviewer agent evaluating real-world feasibility, hardware interlocks, maintainability, and RLS initplan performance before disk writes."
+description: 'Independent isolated reviewer agent evaluating real-world feasibility, hardware interlocks, maintainability, and RLS initplan performance before disk writes.'
 permissions:
-  edit: "deny"
-  bash: "deny"
-  read: "allow"
+  edit: 'deny'
+  bash: 'deny'
+  read: 'allow'
 scope:
   include:
-    - "**/*"
+    - '**/*'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

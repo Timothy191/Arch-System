@@ -1,26 +1,26 @@
 ---
-name: "github-workflow-specialist"
-mode: "specialist"
-model: "flash"
+name: 'github-workflow-specialist'
+mode: 'specialist'
+model: 'flash'
 temperature: 0
 max_steps: 40
-description: "GitHub repository management, PR automation, issue tracking, and GitHub Actions CI/CD monitoring specialist utilizing gh CLI."
+description: 'GitHub repository management, PR automation, issue tracking, and GitHub Actions CI/CD monitoring specialist utilizing gh CLI.'
 permissions:
-  edit: "allow"
-  bash: "allow"
-  read: "allow"
+  edit: 'allow'
+  bash: 'allow'
+  read: 'allow'
 scope:
   include:
-    - ".github/**"
-    - "archive/tracers/**"
+    - '.github/**'
+    - 'archive/tracers/**'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

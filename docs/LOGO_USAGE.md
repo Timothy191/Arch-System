@@ -15,7 +15,7 @@
 ### React / Next.js (Header)
 
 ```jsx
-import Logo from "@/assets/plantcor.svg";
+import Logo from '@/assets/plantcor.svg';
 <Link href="/dashboard">
   <img src={Logo} alt="Plantcor" className="h-9 w-auto" />
 </Link>;
@@ -24,7 +24,7 @@ import Logo from "@/assets/plantcor.svg";
 ### React / Next.js (Login Page)
 
 ```jsx
-import Logo from "@/assets/plantcor-login.png";
+import Logo from '@/assets/plantcor-login.png';
 <img src={Logo} alt="Plantcor" className="w-[120px] h-auto mx-auto mb-6" />;
 ```
 

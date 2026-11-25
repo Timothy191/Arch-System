@@ -15,7 +15,7 @@
   color: var(--color-ink);
 }
 
-.cir-check input[type="checkbox"] {
+.cir-check input[type='checkbox'] {
   position: absolute;
   opacity: 0;
   pointer-events: none;
@@ -36,7 +36,7 @@
 }
 
 .cir-check-box::after {
-  content: "";
+  content: '';
   width: 11px;
   height: 11px;
   background-image: var(--icon-cir-check-mark);

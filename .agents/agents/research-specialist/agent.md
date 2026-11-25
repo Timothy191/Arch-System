@@ -1,27 +1,27 @@
 ---
-name: "research-specialist"
-mode: "subagent"
-model: "pro"
+name: 'research-specialist'
+mode: 'subagent'
+model: 'pro'
 temperature: 0.1
 max_steps: 12
-description: "Specialist subagent responsible for frontier systems research, benchmarking against top-starred GitHub repositories (e.g. browser-use, swarms-rs, math-agent), and synthesizing architecture fitness functions."
+description: 'Specialist subagent responsible for frontier systems research, benchmarking against top-starred GitHub repositories (e.g. browser-use, swarms-rs, math-agent), and synthesizing architecture fitness functions.'
 permissions:
-  edit: "allow"
-  bash: "deny"
-  read: "allow"
+  edit: 'allow'
+  bash: 'deny'
+  read: 'allow'
 scope:
   include:
-    - ".dir/**"
-    - "documentation/**"
-    - "packages/agents/docs/**"
+    - '.dir/**'
+    - 'documentation/**'
+    - 'packages/agents/docs/**'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

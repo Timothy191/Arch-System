@@ -177,8 +177,8 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
 3. **Display & Heading Font:** `Anurati` declared in `packages/theme/src/css/typography.css`:
    ```css
    @font-face {
-     font-family: "Anurati";
-     src: url("/fonts/Anurati-Regular.otf") format("opentype");
+     font-family: 'Anurati';
+     src: url('/fonts/Anurati-Regular.otf') format('opentype');
      font-weight: normal;
      font-style: normal;
      font-display: swap;
@@ -189,7 +189,7 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
    h4,
    h5,
    h6 {
-     font-family: "Anurati", sans-serif;
+     font-family: 'Anurati', sans-serif;
      text-transform: uppercase;
    }
    ```
@@ -322,7 +322,7 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
   In `libs/features/hub/ui/src/HeroRotator.tsx`:
   ```tsx
   // 3D Three.js implementation currently bypassed for 2D Framer Motion rotator
-  import { GenericHeroRotator } from "./GenericHeroRotator";
+  import { GenericHeroRotator } from './GenericHeroRotator';
   export function HeroRotator(props: HeroRotatorProps) {
     return <GenericHeroRotator {...props} />;
   }

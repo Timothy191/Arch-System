@@ -1,27 +1,27 @@
 ---
-name: "ai-memory-curator"
-mode: "specialist"
-model: "flash"
+name: 'ai-memory-curator'
+mode: 'specialist'
+model: 'flash'
 temperature: 0
 max_steps: 30
-description: "Cross-session memory synthesis, observation capture, and long-term knowledge curator utilizing memory-gateway-mcp."
+description: 'Cross-session memory synthesis, observation capture, and long-term knowledge curator utilizing memory-gateway-mcp.'
 permissions:
-  edit: "allow"
-  bash: "scoped"
-  read: "allow"
+  edit: 'allow'
+  bash: 'scoped'
+  read: 'allow'
 scope:
   include:
-    - ".agents/memory_base/**"
-    - "docs/**"
-    - "archive/tracers/**"
+    - '.agents/memory_base/**'
+    - 'docs/**'
+    - 'archive/tracers/**'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

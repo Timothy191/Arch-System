@@ -111,7 +111,7 @@ The Next.js `Image` component extends the HTML `<img>` element with four core au
 ### Usage
 
 ```tsx
-import Image from "next/image";
+import Image from 'next/image';
 ```
 
 You can then define the `src` for your image (either local or remote).
@@ -121,8 +121,8 @@ You can then define the `src` for your image (either local or remote).
 To use a local image, `import` your `.jpg`, `.png`, or `.webp` image files. Next.js will automatically determine the `width` and `height` of your image based on the imported file. These values are used to determine the image ratio and prevent Cumulative Layout Shift while your image is loading.
 
 ```tsx title="app/page.tsx"
-import Image from "next/image";
-import profilePic from "./me.png";
+import Image from 'next/image';
+import profilePic from './me.png';
 
 export default function Page() {
   return (
@@ -148,7 +148,7 @@ To use a remote image, the `src` property should be a URL string. Since Next.js 
 The `width` and `height` attributes are used to infer the correct aspect ratio of the image and avoid layout shift from the image loading in. The `width` and `height` do **not** determine the rendered size of the image file.
 
 ```tsx title="app/page.tsx"
-import Image from "next/image";
+import Image from 'next/image';
 
 export default function Page() {
   return (
@@ -169,10 +169,10 @@ module.exports = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "s3.amazonaws.com",
-        port: "",
-        pathname: "/my-bucket/**",
+        protocol: 'https',
+        hostname: 's3.amazonaws.com',
+        port: '',
+        pathname: '/my-bucket/**',
       },
     ],
   },
@@ -191,8 +191,8 @@ You should add the `priority` property (or `preload` in Next.js 16) to the image
 The LCP element is typically the largest image or text block visible within the viewport of the page. When you run `next dev`, you'll see a console warning if the LCP element is an `<Image>` without the `priority` property.
 
 ```tsx title="app/page.tsx"
-import Image from "next/image";
-import profilePic from "../public/me.png";
+import Image from 'next/image';
+import profilePic from '../public/me.png';
 
 export default function Page() {
   return <Image src={profilePic} alt="Picture of the author" priority />;
@@ -226,12 +226,12 @@ Styling the `Image` component is similar to styling a normal `<img>` element, wi
 #### 1. Responsive Image
 
 ```tsx
-import Image from "next/image";
-import mountains from "../public/mountains.jpg";
+import Image from 'next/image';
+import mountains from '../public/mountains.jpg';
 
 export default function Responsive() {
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       <Image
         alt="Mountains"
         // Importing an image automatically sets the width and height
@@ -239,8 +239,8 @@ export default function Responsive() {
         sizes="100vw"
         // Make the image display full width
         style={{
-          width: "100%",
-          height: "auto",
+          width: '100%',
+          height: 'auto',
         }}
       />
     </div>
@@ -251,26 +251,26 @@ export default function Responsive() {
 #### 2. Fill Container (Responsive Grid)
 
 ```tsx
-import Image from "next/image";
-import mountains from "../public/mountains.jpg";
+import Image from 'next/image';
+import mountains from '../public/mountains.jpg';
 
 export default function Fill() {
   return (
     <div
       style={{
-        display: "grid",
-        gridGap: "8px",
-        gridTemplateColumns: "repeat(auto-fit, minmax(400px, auto))",
+        display: 'grid',
+        gridGap: '8px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, auto))',
       }}
     >
-      <div style={{ position: "relative", height: "400px" }}>
+      <div style={{ position: 'relative', height: '400px' }}>
         <Image
           alt="Mountains"
           src={mountains}
           fill
           sizes="(min-width: 808px) 50vw, 100vw"
           style={{
-            objectFit: "cover", // cover, contain, none
+            objectFit: 'cover', // cover, contain, none
           }}
         />
       </div>
@@ -283,8 +283,8 @@ export default function Fill() {
 #### 3. Background Image
 
 ```tsx
-import Image from "next/image";
-import mountains from "../public/mountains.jpg";
+import Image from 'next/image';
+import mountains from '../public/mountains.jpg';
 
 export default function Background() {
   return (
@@ -296,7 +296,7 @@ export default function Background() {
       fill
       sizes="100vw"
       style={{
-        objectFit: "cover",
+        objectFit: 'cover',
       }}
     />
   );
@@ -327,19 +327,15 @@ export default function Background() {
 Import the font you want to use from `next/font/google` as a function. Variable fonts are recommended for the best performance and flexibility:
 
 ```tsx title="app/layout.tsx"
-import { Inter } from "next/font/google";
+import { Inter } from 'next/font/google';
 
 // If loading a variable font, you don't need to specify the font weight
 const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
+  subsets: ['latin'],
+  display: 'swap',
 });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.className}>
       <body>{children}</body>
@@ -351,13 +347,13 @@ export default function RootLayout({
 If you cannot use a variable font, specify a weight (or an array of weights and styles):
 
 ```tsx title="app/layout.tsx"
-import { Roboto } from "next/font/google";
+import { Roboto } from 'next/font/google';
 
 const roboto = Roboto({
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  display: "swap",
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  subsets: ['latin'],
+  display: 'swap',
 });
 ```
 
@@ -368,7 +364,7 @@ const roboto = Roboto({
 Google Fonts are automatically subset to reduce font file size. Define which subsets to preload in the function call (failing to specify `subsets` while `preload` is `true` results in a build warning):
 
 ```tsx title="app/layout.tsx"
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 ```
 
 ### Using Multiple Fonts
@@ -380,16 +376,16 @@ You can import and use multiple fonts using two approaches:
 Calling the font loader in a single shared file ensures the font is hosted only once and preloaded only where rendered:
 
 ```ts title="app/fonts.ts"
-import { Inter, Roboto_Mono } from "next/font/google";
+import { Inter, Roboto_Mono } from 'next/font/google';
 
 export const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 export const roboto_mono = Roboto_Mono({
-  subsets: ["latin"],
-  display: "swap",
+  subsets: ['latin'],
+  display: 'swap',
 });
 ```
 
@@ -398,25 +394,21 @@ export const roboto_mono = Roboto_Mono({
 Define CSS variable names and attach `.variable` to the root `<html>` / `<body>` element:
 
 ```tsx title="app/layout.tsx"
-import { Inter, Roboto_Mono } from "next/font/google";
+import { Inter, Roboto_Mono } from 'next/font/google';
 
 const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
 });
 
 const roboto_mono = Roboto_Mono({
-  subsets: ["latin"],
-  variable: "--font-roboto-mono",
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-roboto-mono',
+  display: 'swap',
 });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${roboto_mono.variable}`}>
       <body>
@@ -433,16 +425,16 @@ export default function RootLayout({
 Import `next/font/local` and specify the `src` of your local `.woff2` font file(s) colocated in `app/`:
 
 ```tsx title="app/layout.tsx"
-import localFont from "next/font/local";
+import localFont from 'next/font/local';
 
 const roboto = localFont({
   src: [
-    { path: "./Roboto-Regular.woff2", weight: "400", style: "normal" },
-    { path: "./Roboto-Italic.woff2", weight: "400", style: "italic" },
-    { path: "./Roboto-Bold.woff2", weight: "700", style: "normal" },
-    { path: "./Roboto-BoldItalic.woff2", weight: "700", style: "italic" },
+    { path: './Roboto-Regular.woff2', weight: '400', style: 'normal' },
+    { path: './Roboto-Italic.woff2', weight: '400', style: 'italic' },
+    { path: './Roboto-Bold.woff2', weight: '700', style: 'normal' },
+    { path: './Roboto-BoldItalic.woff2', weight: '700', style: 'italic' },
   ],
-  display: "swap",
+  display: 'swap',
 });
 ```
 
@@ -453,40 +445,36 @@ const roboto = localFont({
 1. **Define CSS Variables in [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L64-L89)**:
 
 ```tsx title="apps/portal/app/layout.tsx"
-import { IBM_Plex_Sans, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { IBM_Plex_Sans, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 
 const ibmPlexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-sans',
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
   preload: false,
   adjustFontFallback: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  weight: ["400", "500"],
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['400', '500'],
+  display: 'swap',
   preload: false,
   adjustFontFallback: true,
 });
 
 const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-display",
-  weight: "variable",
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-display',
+  weight: 'variable',
+  display: 'swap',
   preload: false,
   adjustFontFallback: true,
 });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
@@ -509,16 +497,16 @@ export default function RootLayout({
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./app/**/*.{js,ts,jsx,tsx}",
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './app/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-sans)"],
-        mono: ["var(--font-mono)"],
-        display: ["var(--font-display)"],
+        sans: ['var(--font-sans)'],
+        mono: ['var(--font-mono)'],
+        display: ['var(--font-display)'],
       },
     },
   },
@@ -549,13 +537,9 @@ You can now apply `font-sans`, `font-mono`, and `font-display` utility classes a
 - **Layout Scripts**: Import `next/script` inside a route segment layout (e.g., `app/dashboard/layout.tsx`). The script is fetched when that folder route or any nested route is accessed, and Next.js guarantees the script **loads only once** even as a user navigates between routes in the same layout:
 
 ```tsx title="app/dashboard/layout.tsx"
-import Script from "next/script";
+import Script from 'next/script';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <section>{children}</section>
@@ -604,16 +588,16 @@ Event handlers work when `next/script` is imported inside a Client Component (`'
 - `onError`: Executes if the script fails to load.
 
 ```tsx title="app/page.tsx"
-"use client";
+'use client';
 
-import Script from "next/script";
+import Script from 'next/script';
 
 export default function Page() {
   return (
     <Script
       src="https://example.com/script.js"
       onLoad={() => {
-        console.log("Script has loaded");
+        console.log('Script has loaded');
       }}
     />
   );
@@ -625,7 +609,7 @@ export default function Page() {
 Additional DOM attributes such as `nonce` or `data-*` are automatically forwarded to the underlying `<script>` element. In Arch-System, [apps/portal/proxy.ts](../../apps/portal/proxy.ts) generates a per-request cryptographic nonce (`x-nonce` header) for strict Content Security Policy enforcement:
 
 ```tsx title="app/page.tsx"
-import Script from "next/script";
+import Script from 'next/script';
 
 export default function Page() {
   return (
@@ -658,14 +642,14 @@ Both static `metadata` and dynamic `generateMetadata` exports are **supported ex
 In Arch-System, the canonical static `metadata` and `viewport` objects are exported from [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L113-L162):
 
 ```tsx title="apps/portal/app/layout.tsx"
-import type { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL(resolveSiteOrigin()),
-  title: "Arch-Systems | Arch OS",
-  description: "Multi-departmental industrial operations portal",
-  applicationName: "Arch-Systems",
-  manifest: "/manifest.json",
+  title: 'Arch-Systems | Arch OS',
+  description: 'Multi-departmental industrial operations portal',
+  applicationName: 'Arch-Systems',
+  manifest: '/manifest.json',
   robots: {
     index: false,
     follow: false,
@@ -673,28 +657,28 @@ export const metadata: Metadata = {
     nosnippet: true,
   },
   openGraph: {
-    type: "website",
-    siteName: "Arch-Systems",
-    locale: "en_GB",
-    title: "Arch-Systems | Arch OS",
-    description: "Multi-departmental industrial operations portal",
-    url: "/",
+    type: 'website',
+    siteName: 'Arch-Systems',
+    locale: 'en_GB',
+    title: 'Arch-Systems | Arch OS',
+    description: 'Multi-departmental industrial operations portal',
+    url: '/',
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Arch-Systems | Arch OS",
-    description: "Multi-departmental industrial operations portal",
+    card: 'summary_large_image',
+    title: 'Arch-Systems | Arch OS',
+    description: 'Multi-departmental industrial operations portal',
   },
 };
 
 export const viewport: Viewport = {
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: "#f5f5f7",
-  viewportFit: "cover",
+  themeColor: '#f5f5f7',
+  viewportFit: 'cover',
 };
 ```
 
@@ -703,7 +687,7 @@ export const viewport: Viewport = {
 Use `generateMetadata` to fetch metadata that depends on dynamic route params or external data. `fetch` requests inside `generateMetadata` are automatically memoized across `generateMetadata`, `generateStaticParams`, Layouts, Pages, and Server Components (or wrapped with `React.cache()` for database queries):
 
 ```tsx title="app/(departments)/[department]/page.tsx"
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata, ResolvingMetadata } from 'next';
 
 type Props = {
   params: Promise<{ department: string }>;
@@ -740,14 +724,14 @@ Next.js recognizes the following special metadata files in `app/` (and static ic
 #### Programmatic File-Based Metadata Implementations (`robots.ts`, `sitemap.ts`, `icon.tsx`, `apple-icon.tsx`, `twitter-image.tsx`)
 
 ```ts title="apps/portal/app/robots.ts"
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: "*",
-        disallow: "/",
+        userAgent: '*',
+        disallow: '/',
       },
     ],
   };
@@ -755,14 +739,14 @@ export default function robots(): MetadataRoute.Robots {
 ```
 
 ```ts title="app/sitemap.ts"
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: "https://arch-system-kappap.vercel.app",
+      url: 'https://arch-system-kappap.vercel.app',
       lastModified: new Date(),
-      changeFrequency: "daily",
+      changeFrequency: 'daily',
       priority: 1,
     },
   ];
@@ -770,46 +754,43 @@ export default function sitemap(): MetadataRoute.Sitemap {
 ```
 
 ```tsx title="app/icon.tsx (and app/apple-icon.tsx)"
-import { ImageResponse } from "next/og";
+import { ImageResponse } from 'next/og';
 
 export const size = { width: 32, height: 32 }; // 180x180 for apple-icon.tsx
-export const contentType = "image/png";
+export const contentType = 'image/png';
 
 export default function Icon(): ImageResponse {
   return new ImageResponse(
-    (
-      <div
-        style={{
-          fontSize: 20,
-          background: "#b45309",
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#ffffff",
-          borderRadius: 8,
-          fontWeight: 700,
-        }}
-      >
-        A
-      </div>
-    ),
+    <div
+      style={{
+        fontSize: 20,
+        background: '#b45309',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#ffffff',
+        borderRadius: 8,
+        fontWeight: 700,
+      }}
+    >
+      A
+    </div>,
     { ...size }
   );
 }
 ```
 
 ```tsx title="app/twitter-image.tsx"
-export { alt, contentType, default, size } from "./opengraph-image";
+export { alt, contentType, default, size } from './opengraph-image';
 ```
 
 ### Metadata Evaluation Behavior
 
 1. **Default Fields**: Two default `meta` tags are always added even if a route defines no metadata:
    ```html
-   <meta charset="utf-8" />
-   <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1" />
    ```
 2. **Ordering**: Metadata is evaluated top-down from the root segment to the leaf `page.tsx` segment:
    - `app/layout.tsx` (Root Layout) → `app/(departments)/[department]/layout.tsx` → `app/(departments)/[department]/page.tsx`.
@@ -824,38 +805,36 @@ export { alt, contentType, default, size } from "./opengraph-image";
 The `ImageResponse` constructor generates dynamic images using JSX and CSS via Satori and Resvg. In [apps/portal/app/opengraph-image.tsx](../../apps/portal/app/opengraph-image.tsx), Arch-System generates a 1200×630 industrial light-mode Open Graph card displaying the six core mining modules (`Control Room`, `Drilling`, `Production`, `Engineering`, `Access Control`, `Database`):
 
 ```tsx title="apps/portal/app/opengraph-image.tsx"
-import { ImageResponse } from "next/og";
+import { ImageResponse } from 'next/og';
 
-export const alt = "Arch-Systems — Arch OS industrial operations portal";
+export const alt = 'Arch-Systems — Arch OS industrial operations portal';
 export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const contentType = 'image/png';
 
 export default function OpengraphImage(): ImageResponse {
   return new ImageResponse(
-    (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        width: '100%',
+        height: '100%',
+        background: '#f3f4f6',
+        padding: 64,
+      }}
+    >
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          width: "100%",
-          height: "100%",
-          background: "#f3f4f6",
-          padding: 64,
+          display: 'flex',
+          fontSize: 66,
+          fontWeight: 700,
+          color: '#111827',
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            fontSize: 66,
-            fontWeight: 700,
-            color: "#111827",
-          }}
-        >
-          Arch-Systems
-        </div>
+        Arch-Systems
       </div>
-    ),
+    </div>,
     { ...size }
   );
 }
@@ -872,17 +851,16 @@ export default function OpengraphImage(): ImageResponse {
 Render JSON-LD structured data as a `<script type="application/ld+json">` tag inside Server Components, optionally typed with `schema-dts`:
 
 ```tsx title="app/overview/page.tsx"
-import type { SoftwareApplication, WithContext } from "schema-dts";
+import type { SoftwareApplication, WithContext } from 'schema-dts';
 
 export default async function Page() {
   const jsonLd: WithContext<SoftwareApplication> = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "Arch-Systems | Arch OS",
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web",
-    description:
-      "Multi-departmental mining operations and SCADA telemetry portal.",
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Arch-Systems | Arch OS',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    description: 'Multi-departmental mining operations and SCADA telemetry portal.',
   };
 
   return (
@@ -905,12 +883,10 @@ export default async function Page() {
 Next.js serves static files under the `public` directory at the application root ([apps/portal/public](../../apps/portal/public)). Files inside `public` are referenced starting from the base URL (`/`):
 
 ```tsx title="components/BrandLogo.tsx"
-import Image from "next/image";
+import Image from 'next/image';
 
 export function BrandLogo() {
-  return (
-    <Image src="/logo.svg" alt="Arch-Systems Logo" width={64} height={64} />
-  );
+  return <Image src="/logo.svg" alt="Arch-Systems Logo" width={64} height={64} />;
 }
 ```
 
@@ -941,10 +917,10 @@ Cache-Control: public, max-age=31536000, immutable
 `@next/bundle-analyzer` (`^16.2.3`) is installed in `apps/portal/package.json` and wired in [apps/portal/next.config.mjs](../../apps/portal/next.config.mjs#L4):
 
 ```js title="apps/portal/next.config.mjs"
-import withBundleAnalyzer from "@next/bundle-analyzer";
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const bundleAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
+  enabled: process.env.ANALYZE === 'true',
 });
 
 export default bundleAnalyzer(nextConfig);
@@ -1023,11 +999,11 @@ flowchart TD
 In [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L22-L50), `HeaderWidgets`, `CommandBar`, and `MacMenuBar` are loaded via `next/dynamic` so `framer-motion` and command-palette dependencies are excluded from the critical initial chunk:
 
 ```tsx title="apps/portal/app/layout.tsx"
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
 const HeaderWidgets = dynamic(
   () =>
-    import("@/components/HeaderWidgets").then((m) => ({
+    import('@/components/HeaderWidgets').then((m) => ({
       default: m.HeaderWidgets,
     })),
   {
@@ -1041,7 +1017,7 @@ const HeaderWidgets = dynamic(
 );
 
 const CommandBar = dynamic(() =>
-  import("@/components/CommandBar").then((m) => ({ default: m.CommandBar }))
+  import('@/components/CommandBar').then((m) => ({ default: m.CommandBar }))
 );
 ```
 
@@ -1050,19 +1026,14 @@ const CommandBar = dynamic(() =>
 In [apps/portal/components/dynamic/LazyHeavyComponents.tsx](../../apps/portal/components/dynamic/LazyHeavyComponents.tsx), heavy visualization libraries (`DataGrid` ~900KB, `WorkflowBuilder` ~300KB, `TelemetryChart` ~200KB — saving **~1.4MB** from the initial bundle) use `ssr: false` with custom loading skeletons:
 
 ```tsx title="apps/portal/components/dynamic/LazyHeavyComponents.tsx"
-"use client";
+'use client';
 
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
-export const DataGrid = dynamic(
-  () => import("@repo/ui/DataGrid").then((mod) => mod.DataGrid),
-  {
-    loading: () => (
-      <div className="h-96 w-full animate-pulse rounded-card bg-black/5" />
-    ),
-    ssr: false,
-  }
-);
+export const DataGrid = dynamic(() => import('@repo/ui/DataGrid').then((mod) => mod.DataGrid), {
+  loading: () => <div className="h-96 w-full animate-pulse rounded-card bg-black/5" />,
+  ssr: false,
+});
 ```
 
 #### 3. Loading External Libraries on Demand (`await import()`)
@@ -1070,11 +1041,11 @@ export const DataGrid = dynamic(
 Defer utility libraries (such as fuzzy search `fuse.js` or PDF/Excel export engines) until user interaction occurs:
 
 ```tsx title="app/page.tsx"
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 
-const names = ["Control Room", "Drilling", "Production", "Engineering"];
+const names = ['Control Room', 'Drilling', 'Production', 'Engineering'];
 
 export default function SearchExample() {
   const [results, setResults] = useState<unknown>();
@@ -1087,7 +1058,7 @@ export default function SearchExample() {
         onChange={async (e) => {
           const { value } = e.currentTarget;
           // Dynamically load fuse.js only when the operator types
-          const Fuse = (await import("fuse.js")).default;
+          const Fuse = (await import('fuse.js')).default;
           const fuse = new Fuse(names);
           setResults(fuse.search(value));
         }}
@@ -1103,7 +1074,7 @@ export default function SearchExample() {
 To dynamically import a named export, return the named property from the Promise returned by `import()`:
 
 ```tsx title="components/hello.tsx"
-"use client";
+'use client';
 
 export function Hello() {
   return <p>Hello!</p>;
@@ -1111,11 +1082,9 @@ export function Hello() {
 ```
 
 ```tsx title="app/page.tsx"
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
-const ClientComponent = dynamic(() =>
-  import("../components/hello").then((mod) => mod.Hello)
-);
+const ClientComponent = dynamic(() => import('../components/hello').then((mod) => mod.Hello));
 ```
 
 ---
@@ -1145,27 +1114,27 @@ Next.js provides built-in support for measuring and reporting real-user performa
 Because `useReportWebVitals` requires the `'use client'` directive, isolate it in a dedicated leaf component imported by `app/layout.tsx` so the client boundary is confined solely to `<WebVitals />`:
 
 ```tsx title="app/_components/web-vitals.tsx"
-"use client";
+'use client';
 
-import { useReportWebVitals } from "next/web-vitals";
+import { useReportWebVitals } from 'next/web-vitals';
 
 export function WebVitals() {
   useReportWebVitals((metric) => {
     switch (metric.name) {
-      case "TTFB":
-      case "FCP":
-      case "LCP":
-      case "FID":
-      case "CLS":
-      case "INP": {
+      case 'TTFB':
+      case 'FCP':
+      case 'LCP':
+      case 'FID':
+      case 'CLS':
+      case 'INP': {
         const body = JSON.stringify(metric);
-        const url = "/api/telemetry/web-vitals";
+        const url = '/api/telemetry/web-vitals';
 
         // Use navigator.sendBeacon() if available, falling back to fetch() with keepalive
         if (navigator.sendBeacon) {
           navigator.sendBeacon(url, body);
         } else {
-          fetch(url, { body, method: "POST", keepalive: true });
+          fetch(url, { body, method: 'POST', keepalive: true });
         }
         break;
       }
@@ -1201,12 +1170,12 @@ Instrumentation integrates monitoring, performance baseline loading, and distrib
 
 ```ts title="apps/portal/instrumentation.ts"
 export async function register() {
-  if (process.env.NEXT_RUNTIME === "nodejs") {
-    await import("./instrumentation-node");
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./instrumentation-node');
   }
 
-  if (process.env.NEXT_RUNTIME === "edge") {
-    await import("./instrumentation-edge");
+  if (process.env.NEXT_RUNTIME === 'edge') {
+    await import('./instrumentation-edge');
   }
 }
 ```
@@ -1237,26 +1206,17 @@ OpenTelemetry provides a vendor-neutral observability standard (_Traces_, _Spans
 
 ```ts title="apps/portal/instrumentation.ts"
 export async function register(): Promise<void> {
-  if (
-    process.env.NEXT_RUNTIME === "nodejs" &&
-    process.env.OTEL_EXPORTER_OTLP_ENDPOINT
-  ) {
-    const { OTLPTraceExporter } = await import(
-      "@opentelemetry/exporter-trace-otlp-http"
-    );
-    const { BatchSpanProcessor } = await import(
-      "@opentelemetry/sdk-trace-base"
-    );
-    const { registerOTel } = await import("@vercel/otel");
+  if (process.env.NEXT_RUNTIME === 'nodejs' && process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
+    const { OTLPTraceExporter } = await import('@opentelemetry/exporter-trace-otlp-http');
+    const { BatchSpanProcessor } = await import('@opentelemetry/sdk-trace-base');
+    const { registerOTel } = await import('@vercel/otel');
 
     const exporter = new OTLPTraceExporter({
-      url:
-        process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
-        "http://localhost:4318/v1/traces",
+      url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
     });
 
     registerOTel({
-      serviceName: "portal-ui",
+      serviceName: 'portal-ui',
       spanProcessors: [new BatchSpanProcessor(exporter)],
     });
   }
@@ -1269,22 +1229,22 @@ When custom resource attributes or gRPC exporters are needed outside `@vercel/ot
 
 ```ts title="instrumentation.ts"
 export async function register() {
-  if (process.env.NEXT_RUNTIME === "nodejs") {
-    await import("./instrumentation.node.ts");
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./instrumentation.node.ts');
   }
 }
 ```
 
 ```ts title="instrumentation.node.ts"
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { Resource } from "@opentelemetry/resources";
-import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
-import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node';
 
 const sdk = new NodeSDK({
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: "portal-ui",
+    [SemanticResourceAttributes.SERVICE_NAME]: 'portal-ui',
   }),
   spanProcessor: new SimpleSpanProcessor(new OTLPTraceExporter()),
 });
@@ -1299,14 +1259,14 @@ sdk.start();
 ### Creating Custom Spans (`@opentelemetry/api`)
 
 ```ts
-import { trace } from "@opentelemetry/api";
+import { trace } from '@opentelemetry/api';
 
 export async function fetchShiftCloseoutSummary(deptId: string) {
   return await trace
-    .getTracer("arch-portal")
-    .startActiveSpan("fetchShiftCloseoutSummary", async (span) => {
+    .getTracer('arch-portal')
+    .startActiveSpan('fetchShiftCloseoutSummary', async (span) => {
       try {
-        span.setAttribute("arch.department_id", deptId);
+        span.setAttribute('arch.department_id', deptId);
         return await queryDepartmentSummary(deptId);
       } finally {
         span.end();
@@ -1390,14 +1350,10 @@ const nextConfig = {
 When wrapping `next/link` in a custom component with `typedRoutes`, accept `Route<T> | URL`:
 
 ```tsx
-import type { Route } from "next";
-import Link from "next/link";
+import type { Route } from 'next';
+import Link from 'next/link';
 
-function DepartmentNavCard<T extends string>({
-  href,
-}: {
-  href: Route<T> | URL;
-}) {
+function DepartmentNavCard<T extends string>({ href }: { href: Route<T> | URL }) {
   return (
     <Link href={href}>
       <div>Open Department</div>
@@ -1465,11 +1421,7 @@ export default async function HubPage() {
 A **layout** is UI **shared** between multiple pages. On navigation, layouts preserve state, remain interactive, and do not re-render. A layout accepts a `children` prop wrapping a child page or nested layout:
 
 ```tsx title="apps/portal/app/layout.tsx"
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -1534,7 +1486,7 @@ Reading `searchParams` opts a Server Component page into **dynamic rendering** b
 Use `<Link>` from `next/link` to extend `<a>` with automatic route prefetching and client-side transitions:
 
 ```tsx title="app/ui/department-list.tsx"
-import Link from "next/link";
+import Link from 'next/link';
 
 export default function DepartmentList({
   departments,
@@ -1563,14 +1515,14 @@ Next.js 16 generates global TypeScript helpers during `next dev`, `next build`, 
 - **`LayoutProps<'/route'>`**: Types `children`, `params`, and any named parallel route slots (e.g., `@analytics`) for a `layout.tsx` component.
 
 ```tsx title="app/blog/[slug]/page.tsx"
-export default async function Page(props: PageProps<"/blog/[slug]">) {
+export default async function Page(props: PageProps<'/blog/[slug]'>) {
   const { slug } = await props.params;
   return <h1>Blog post: {slug}</h1>;
 }
 ```
 
 ```tsx title="app/dashboard/layout.tsx"
-export default function Layout(props: LayoutProps<"/dashboard">) {
+export default function Layout(props: LayoutProps<'/dashboard'>) {
   return (
     <section>
       {props.children}
@@ -1605,15 +1557,11 @@ Dynamic Segments are passed as the asynchronous `params` Promise prop to `layout
 In a `'use client'` page or component, unwrap the `params` Promise using React 19's `use()` API or call `useParams()` from `next/navigation`:
 
 ```tsx title="app/blog/[slug]/page.tsx"
-"use client";
+'use client';
 
-import { use } from "react";
+import { use } from 'react';
 
-export default function BlogPostPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   return (
     <div>
@@ -1628,15 +1576,15 @@ export default function BlogPostPage({
 Because users can enter arbitrary URLs in the address bar, `params` values are typed as `string` at runtime. Use a type-assertion guard with `notFound()` to narrow `params` to canonical department slugs:
 
 ```tsx title="apps/portal/app/(departments)/[department]/page.tsx"
-import { notFound } from "next/navigation";
+import { notFound } from 'next/navigation';
 
 const VALID_DEPARTMENTS = [
-  "control-room",
-  "drilling",
-  "production",
-  "engineering",
-  "access-control",
-  "database",
+  'control-room',
+  'drilling',
+  'production',
+  'engineering',
+  'access-control',
+  'database',
 ] as const;
 type DepartmentSlug = (typeof VALID_DEPARTMENTS)[number];
 
@@ -1646,9 +1594,7 @@ function assertValidDepartment(slug: string): asserts slug is DepartmentSlug {
   }
 }
 
-export default async function DepartmentPage(
-  props: PageProps<"/[department]">
-) {
+export default async function DepartmentPage(props: PageProps<'/[department]'>) {
   const { department } = await props.params;
   assertValidDepartment(department);
   // `department` is now narrowed to `DepartmentSlug`
@@ -1664,9 +1610,9 @@ Arch-System enables `cacheComponents: true` in [apps/portal/next.config.mjs](../
 When `generateStaticParams` is omitted, `params` are unknown at build time and treated as runtime data. Wrap param access in `<Suspense>` (or provide a `loading.tsx`) so Next.js can prerender the static shell at build time and stream dynamic content per request:
 
 ```tsx title="app/blog/[slug]/page.tsx"
-import { Suspense } from "react";
+import { Suspense } from 'react';
 
-export default function Page({ params }: PageProps<"/blog/[slug]">) {
+export default function Page({ params }: PageProps<'/blog/[slug]'>) {
   return (
     <div>
       <h1>Blog Post</h1>
@@ -1698,17 +1644,17 @@ async function Content({ slug }: { slug: string }) {
 Provide known param values at build time via `generateStaticParams()`. During `next build`, Next.js executes the route with each sample param to validate that runtime APIs (`cookies()`, `headers()`) are properly wrapped in `<Suspense>`:
 
 ```tsx title="app/blog/[slug]/page.tsx"
-import { Suspense } from "react";
-import { cookies } from "next/headers";
+import { Suspense } from 'react';
+import { cookies } from 'next/headers';
 
 export async function generateStaticParams() {
-  return [{ slug: "public-post" }, { slug: "hello-world" }];
+  return [{ slug: 'public-post' }, { slug: 'hello-world' }];
 }
 
-export default async function Page({ params }: PageProps<"/blog/[slug]">) {
+export default async function Page({ params }: PageProps<'/blog/[slug]'>) {
   const { slug } = await params;
 
-  if (slug.startsWith("private-")) {
+  if (slug.startsWith('private-')) {
     // Wrap conditional runtime API access (cookies/headers) in <Suspense>
     return (
       <Suspense fallback={<div>Loading...</div>}>
@@ -1721,7 +1667,7 @@ export default async function Page({ params }: PageProps<"/blog/[slug]">) {
 }
 
 async function PublicPost({ slug }: { slug: string }) {
-  "use cache";
+  'use cache';
   const res = await fetch(`https://api.vercel.app/blog/${slug}`);
   const post = await res.json();
   return (
@@ -1732,7 +1678,7 @@ async function PublicPost({ slug }: { slug: string }) {
 }
 
 async function PrivatePost({ slug }: { slug: string }) {
-  const token = (await cookies()).get("token");
+  const token = (await cookies()).get('token');
   return (
     <article>
       <h2>
@@ -1749,20 +1695,17 @@ async function PrivatePost({ slug }: { slug: string }) {
 
 ```ts title="app/api/posts/[id]/route.ts"
 export async function generateStaticParams() {
-  const posts: { id: number }[] = await fetch(
-    "https://api.vercel.app/blog"
-  ).then((res) => res.json());
+  const posts: { id: number }[] = await fetch('https://api.vercel.app/blog').then((res) =>
+    res.json()
+  );
   return posts.map((post) => ({ id: `${post.id}` }));
 }
 
-export async function GET(
-  _request: Request,
-  { params }: RouteContext<"/api/posts/[id]">
-) {
+export async function GET(_request: Request, { params }: RouteContext<'/api/posts/[id]'>) {
   const { id } = await params;
   const res = await fetch(`https://api.vercel.app/blog/${id}`);
   if (!res.ok) {
-    return Response.json({ error: "Post not found" }, { status: 404 });
+    return Response.json({ error: 'Post not found' }, { status: 404 });
   }
   return Response.json(await res.json());
 }
@@ -1787,15 +1730,11 @@ The `app` directory **must** include a root layout (`app/layout.tsx`):
 Layouts do not receive the raw HTTP request object so they can be cached and reused on client navigation without re-rendering. To read request headers or cookies inside a Server Component layout, call `cookies()` or `headers()` from `next/headers` (wrapped in a child `<Suspense>` boundary when `cacheComponents: true` is enabled):
 
 ```tsx title="app/shop/layout.tsx"
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
 
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function Layout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
-  const theme = cookieStore.get("theme");
+  const theme = cookieStore.get('theme');
   return <div data-theme={theme?.value}>{children}</div>;
 }
 ```
@@ -1809,18 +1748,18 @@ Because layouts do not re-render on navigation, they do **not** receive `searchP
 Layouts do not receive the current pathname as a prop. Extract pathname-aware UI (such as active navigation links or breadcrumbs) into a `'use client'` leaf component using `usePathname()`:
 
 ```tsx title="app/ui/breadcrumbs.tsx"
-"use client";
+'use client';
 
-import { usePathname } from "next/navigation";
+import { usePathname } from 'next/navigation';
 
 export function Breadcrumbs() {
   const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean);
+  const segments = pathname.split('/').filter(Boolean);
   return (
     <nav aria-label="Breadcrumb">
       {segments.map((segment, index) => (
         <span key={index}>
-          {" > "}
+          {' > '}
           {segment}
         </span>
       ))}
@@ -1856,26 +1795,17 @@ Layouts cannot pass fetched data down to their `children` prop. Instead, call th
 Server layouts do not have access to route segments below themselves. Use `useSelectedLayoutSegment()` or `useSelectedLayoutSegments()` from `next/navigation` inside a `'use client'` navigation component to highlight active child routes:
 
 ```tsx title="app/ui/nav-link.tsx"
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useSelectedLayoutSegment } from "next/navigation";
+import Link from 'next/link';
+import { useSelectedLayoutSegment } from 'next/navigation';
 
-export default function NavLink({
-  slug,
-  children,
-}: {
-  slug: string;
-  children: React.ReactNode;
-}) {
+export default function NavLink({ slug, children }: { slug: string; children: React.ReactNode }) {
   const segment = useSelectedLayoutSegment();
   const isActive = slug === segment;
 
   return (
-    <Link
-      href={`/blog/${slug}`}
-      style={{ fontWeight: isActive ? "bold" : "normal" }}
-    >
+    <Link href={`/blog/${slug}`} style={{ fontWeight: isActive ? 'bold' : 'normal' }}>
       {children}
     </Link>
   );
@@ -1910,12 +1840,12 @@ pnpm add @next/mdx @mdx-js/loader @mdx-js/react @types/mdx
 Configure `pageExtensions` and `createMDX` in `next.config.mjs`:
 
 ```js title="next.config.mjs"
-import createMDX from "@next/mdx";
+import createMDX from '@next/mdx';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Configure `pageExtensions` to include markdown and MDX files
-  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
 };
 
 const withMDX = createMDX({
@@ -1931,21 +1861,15 @@ export default withMDX(nextConfig);
 The `mdx-components.tsx` (or `.js`) file at the project root (at the same level as `app/`, or inside `src/`) is **required** to use `@next/mdx` with the App Router and must export a single function named `useMDXComponents`:
 
 ```tsx title="apps/portal/mdx-components.tsx"
-import type { MDXComponents } from "mdx/types";
-import Image, { type ImageProps } from "next/image";
+import type { MDXComponents } from 'mdx/types';
+import Image, { type ImageProps } from 'next/image';
 
 const components = {
   h1: ({ children }) => (
-    <h1 className="font-display font-semibold text-4xl text-[var(--text-heading)]">
-      {children}
-    </h1>
+    <h1 className="font-display font-semibold text-4xl text-[var(--text-heading)]">{children}</h1>
   ),
   img: (props) => (
-    <Image
-      sizes="100vw"
-      style={{ width: "100%", height: "auto" }}
-      {...(props as ImageProps)}
-    />
+    <Image sizes="100vw" style={{ width: '100%', height: 'auto' }} {...(props as ImageProps)} />
   ),
 } satisfies MDXComponents;
 
@@ -1961,18 +1885,14 @@ export function useMDXComponents(): MDXComponents {
 3. **Dynamic Imports with `generateStaticParams`**: Load `.mdx` files dynamically by slug and set `export const dynamicParams = false` so unknown slugs return a 404:
 
 ```tsx title="app/docs/[slug]/page.tsx"
-export default async function DocPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function DocPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { default: Post } = await import(`@/content/${slug}.mdx`);
   return <Post />;
 }
 
 export function generateStaticParams() {
-  return [{ slug: "scada-architecture" }, { slug: "shift-closeout" }];
+  return [{ slug: 'scada-architecture' }, { slug: 'shift-closeout' }];
 }
 
 export const dynamicParams = false;
@@ -1985,8 +1905,8 @@ export const dynamicParams = false;
 
 ```mdx title="content/shift-sop.mdx"
 export const metadata = {
-  title: "Shift Handover SOP",
-  author: "Control Room Engineering",
+  title: 'Shift Handover SOP',
+  author: 'Control Room Engineering',
 };
 
 # Shift Handover Standard Operating Procedure
@@ -1997,15 +1917,12 @@ export const metadata = {
 Because **Turbopack** runs in Rust and cannot serialize JavaScript plugin functions across the JS/Rust boundary, specify `remarkPlugins` and `rehypePlugins` using **string package names** and JSON-serializable options tuples:
 
 ```js title="next.config.mjs"
-import createMDX from "@next/mdx";
+import createMDX from '@next/mdx';
 
 const withMDX = createMDX({
   options: {
-    remarkPlugins: ["remark-gfm", ["remark-toc", { heading: "The Table" }]],
-    rehypePlugins: [
-      "rehype-slug",
-      ["rehype-katex", { strict: true, throwOnError: true }],
-    ],
+    remarkPlugins: ['remark-gfm', ['remark-toc', { heading: 'The Table' }]],
+    rehypePlugins: ['rehype-slug', ['rehype-katex', { strict: true, throwOnError: true }]],
   },
 });
 ```
@@ -2108,13 +2025,13 @@ experimental: {
 Libraries that transform data into static markup (such as syntax highlighting with `shiki` vs. client-side `prism-react-renderer`, or Markdown/report compilation) should execute inside `async` **Server Components** so zero library JavaScript is shipped to the browser:
 
 ```tsx title="app/docs/[slug]/CodeBlock.tsx (Server Component — 0 KB Client JS)"
-import { codeToHtml } from "shiki";
+import { codeToHtml } from 'shiki';
 
 export async function ServerCodeBlock({ code }: { code: string }) {
   // Runs on the server; `shiki` is never bundled for the client
   const highlightedHtml = await codeToHtml(code, {
-    lang: "tsx",
-    theme: "github-light",
+    lang: 'tsx',
+    theme: 'github-light',
   });
 
   return (
@@ -2131,7 +2048,7 @@ Packages imported in Server Components and Route Handlers that use native Node.j
 
 ```js title="apps/portal/next.config.mjs"
 const nextConfig = {
-  serverExternalPackages: ["@babel/core", "@babel/traverse", "p-limit"],
+  serverExternalPackages: ['@babel/core', '@babel/traverse', 'p-limit'],
 };
 ```
 
@@ -2277,17 +2194,17 @@ Configured via `compilerOptions.paths` in [apps/portal/tsconfig.json](../../apps
 Draft Mode allows switching a statically prerendered route to dynamic per-request rendering to preview unpublished content (bypassing the Data Cache and returning a `__prerender_bypass` cookie):
 
 ```ts title="app/api/draft/route.ts"
-import { draftMode } from "next/headers";
-import { redirect } from "next/navigation";
+import { draftMode } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  if (searchParams.get("secret") !== process.env.DRAFT_SECRET_TOKEN) {
-    return new Response("Invalid token", { status: 401 });
+  if (searchParams.get('secret') !== process.env.DRAFT_SECRET_TOKEN) {
+    return new Response('Invalid token', { status: 401 });
   }
   const draft = await draftMode();
   draft.enable();
-  redirect("/overview");
+  redirect('/overview');
 }
 ```
 
@@ -2358,7 +2275,7 @@ Caching stores the result of data fetching and server computations so that subse
 In Next.js 16 App Router, Cache Components and Partial Prefetching are enabled explicitly in `next.config.mjs` (`next.config.ts` / `next.config.js`):
 
 ```ts title="next.config.ts"
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -2378,30 +2295,24 @@ The `'use cache'` directive caches the return value of an async data-fetching fu
 #### Caching Data vs. Caching UI
 
 ```tsx title="Data-Level vs. UI-Level Caching"
-import { cacheLife } from "next/cache";
+import { cacheLife } from 'next/cache';
 
 // 1. Data-level caching: reusable across multiple pages, layouts, and Route Handlers
 export async function getActiveMachines(departmentId: string) {
-  "use cache";
-  cacheLife("hours");
-  return db.query(
-    "SELECT * FROM machines WHERE department_id = $1 AND active = true",
-    [departmentId]
-  );
+  'use cache';
+  cacheLife('hours');
+  return db.query('SELECT * FROM machines WHERE department_id = $1 AND active = true', [
+    departmentId,
+  ]);
 }
 
 // 2. Component-level (UI) caching: caches the serialized RSC payload directly
-export async function MachineSummaryCard({
-  departmentId,
-}: {
-  departmentId: string;
-}) {
-  "use cache";
-  cacheLife("hours");
-  const machines = await db.query(
-    "SELECT count(*) FROM machines WHERE department_id = $1",
-    [departmentId]
-  );
+export async function MachineSummaryCard({ departmentId }: { departmentId: string }) {
+  'use cache';
+  cacheLife('hours');
+  const machines = await db.query('SELECT count(*) FROM machines WHERE department_id = $1', [
+    departmentId,
+  ]);
   return <div className="rounded-xl p-4">Active Fleet: {machines.count}</div>;
 }
 ```
@@ -2425,7 +2336,7 @@ In Next.js 16 with `cacheComponents: true`, any async data fetching that is **no
 Wrapping dynamic subtrees in `<Suspense>` allows Next.js to **prerender and immediately send the surrounding static shell**, then stream the dynamic content over the same HTTP response as soon as it resolves:
 
 ```tsx title="app/(departments)/[department]/page.tsx"
-import { Suspense } from "react";
+import { Suspense } from 'react';
 
 export default function Page() {
   return (
@@ -2433,11 +2344,7 @@ export default function Page() {
       <header>
         <h1>SCADA Department Overview</h1>
       </header>
-      <Suspense
-        fallback={
-          <div className="h-32 animate-pulse rounded-2xl bg-neutral-200" />
-        }
-      >
+      <Suspense fallback={<div className="h-32 animate-pulse rounded-2xl bg-neutral-200" />}>
         <DynamicShiftMetrics />
       </Suspense>
     </>
@@ -2475,13 +2382,13 @@ Runtime APIs depend on the incoming HTTP request and can only be read at request
 When a function needs to read `cookies()` or `headers()` directly and cache the result per user in the browser without sharing across users:
 
 ```tsx
-import { cacheLife } from "next/cache";
-import { cookies } from "next/headers";
+import { cacheLife } from 'next/cache';
+import { cookies } from 'next/headers';
 
 async function getOperatorPreferences() {
-  "use cache: private";
+  'use cache: private';
   cacheLife({ stale: 60 }); // Minimum 30s stale time required for runtime prefetching
-  const sessionId = (await cookies()).get("session-id")?.value;
+  const sessionId = (await cookies()).get('session-id')?.value;
   return fetchPreferences(sessionId);
 }
 ```
@@ -2491,9 +2398,9 @@ async function getOperatorPreferences() {
 Prefer extracting the runtime value (`locale`, `departmentId`, `theme`) in a dynamic `<Suspense>` component and passing it as a regular argument to a shared `'use cache'` function so the cache entry is shared across all operators with the same parameter:
 
 ```tsx
-import { cacheLife } from "next/cache";
-import { cookies } from "next/headers";
-import { Suspense } from "react";
+import { cacheLife } from 'next/cache';
+import { cookies } from 'next/headers';
+import { Suspense } from 'react';
 
 export default function ShiftPage() {
   return (
@@ -2504,13 +2411,13 @@ export default function ShiftPage() {
 }
 
 async function LocalizedShiftBulletin() {
-  const shiftCode = (await cookies()).get("active-shift")?.value ?? "DAY";
+  const shiftCode = (await cookies()).get('active-shift')?.value ?? 'DAY';
   return <ShiftBulletinContent shiftCode={shiftCode} />;
 }
 
 async function ShiftBulletinContent({ shiftCode }: { shiftCode: string }) {
-  "use cache";
-  cacheLife("hours");
+  'use cache';
+  cacheLife('hours');
   return getBulletinByShift(shiftCode);
 }
 ```
@@ -2520,13 +2427,13 @@ async function ShiftBulletinContent({ shiftCode }: { shiftCode: string }) {
 In serverless and Fluid Compute environments (such as Vercel), in-memory `'use cache'` entries do not persist across cold lambda instances. For dynamic cache keys that are discovered at request time (e.g., after awaiting `connection()`, `searchParams`, or rare dynamic `[id]` parameters) and backed by expensive database queries, use **`'use cache: remote'`** to store the cached output in a durable platform cache handler shared across all serverless instances:
 
 ```tsx
-import { cacheLife, cacheTag } from "next/cache";
-import { connection } from "next/server";
+import { cacheLife, cacheTag } from 'next/cache';
+import { connection } from 'next/server';
 
 async function getHeavyEquipmentHistory(machineId: string) {
-  "use cache: remote";
+  'use cache: remote';
   cacheTag(`machine-history-${machineId}`);
-  cacheLife("hours");
+  cacheLife('hours');
   return fetchEquipmentTelemetryHistory(machineId);
 }
 ```
@@ -2534,9 +2441,9 @@ async function getHeavyEquipmentHistory(machineId: string) {
 ### 5. Complete Combined Example: Static + Cached Dynamic + Streaming Runtime
 
 ```tsx title="app/(departments)/[department]/overview-example/page.tsx"
-import { cacheLife, cacheTag } from "next/cache";
-import { cookies } from "next/headers";
-import { Suspense } from "react";
+import { cacheLife, cacheTag } from 'next/cache';
+import { cookies } from 'next/headers';
+import { Suspense } from 'react';
 
 export default async function DepartmentOverviewPage() {
   // 1. Cached dynamic data — included in the prerendered static HTML shell!
@@ -2557,11 +2464,7 @@ export default async function DepartmentOverviewPage() {
       </section>
 
       {/* 2. Runtime per-operator content — streams at request time via Suspense */}
-      <Suspense
-        fallback={
-          <div className="h-20 animate-pulse rounded-xl bg-neutral-200" />
-        }
-      >
+      <Suspense fallback={<div className="h-20 animate-pulse rounded-xl bg-neutral-200" />}>
         <OperatorShiftAssignment />
       </Suspense>
     </>
@@ -2569,16 +2472,14 @@ export default async function DepartmentOverviewPage() {
 }
 
 async function getDepartmentAnnouncements() {
-  "use cache";
-  cacheLife("hours");
-  cacheTag("department-announcements");
-  return db.query(
-    "SELECT id, title FROM announcements ORDER BY created_at DESC LIMIT 5"
-  );
+  'use cache';
+  cacheLife('hours');
+  cacheTag('department-announcements');
+  return db.query('SELECT id, title FROM announcements ORDER BY created_at DESC LIMIT 5');
 }
 
 async function OperatorShiftAssignment() {
-  const employeeId = (await cookies()).get("employee_id")?.value;
+  const employeeId = (await cookies()).get('employee_id')?.value;
   if (!employeeId) return <p>Sign in to view shift assignment</p>;
   const assignment = await fetchAssignmentForEmployee(employeeId);
   return <div>Assigned Crew: {assignment.crewName}</div>;
@@ -2596,8 +2497,8 @@ Non-deterministic APIs (`Math.random()`, `Date.now()`, `new Date()`, `crypto.ran
 Call `await connection()` from `next/server` before calling `Math.random()`, `Date.now()`, or `crypto.randomUUID()`, and ensure the component is wrapped in `<Suspense>`:
 
 ```tsx
-import { connection } from "next/server";
-import { Suspense } from "react";
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 export default function CorrelationPage() {
   return (
@@ -2624,11 +2525,11 @@ async function RequestCorrelationBadge() {
 If the timestamp or random sample should be frozen for the duration of a `cacheLife` window (such as a "Last Updated" watermark or a daily featured safety tip), put it inside a `'use cache'` function or component:
 
 ```tsx
-import { cacheLife } from "next/cache";
+import { cacheLife } from 'next/cache';
 
 async function getDailySafetyWatermark() {
-  "use cache";
-  cacheLife("days");
+  'use cache';
+  cacheLife('days');
   return {
     batchId: crypto.randomUUID(),
     generatedAt: new Date().toISOString(),
@@ -2641,10 +2542,10 @@ async function getDailySafetyWatermark() {
 Values read from module imports, synchronous file reads (`fs.readFileSync`), `node:sqlite`, or top-level module-scope `await readFile(...)` are already fixed once the build artifact is created. Next.js treats them as **static** and includes them automatically in the prerendered shell without needing `'use cache'` or `<Suspense>`:
 
 ```tsx
-import { readFile } from "node:fs/promises";
+import { readFile } from 'node:fs/promises';
 
 // Resolves at module load time — treated as a predictable static constant
-const schemaVersion = await readFile("./version.txt", "utf-8");
+const schemaVersion = await readFile('./version.txt', 'utf-8');
 
 export default function VersionFooter() {
   return <footer>Schema v{schemaVersion}</footer>;
@@ -2741,11 +2642,11 @@ Arch-System defines 8 domain-tuned profiles synchronized between [apps/portal/ne
 Call `cacheTag()` inside any `'use cache'` function to attach one or more semantic tags (see [apps/portal/lib/cache-tags.ts](../../apps/portal/lib/cache-tags.ts) for canonical helpers `scopedTag`, `tagTenant`, `tagDepartment`, `tagTable`, `tagAuthUser`):
 
 ```tsx
-import { cacheLife, cacheTag } from "@/lib/server-cache";
+import { cacheLife, cacheTag } from '@/lib/server-cache';
 
 export async function getShiftCloseoutSummary(deptId: string) {
-  "use cache";
-  cacheLife("reports");
+  'use cache';
+  cacheLife('reports');
   cacheTag(`dept:${deptId}:shift_closeout`);
   return fetchShiftCloseoutFromDb(deptId);
 }
@@ -2765,9 +2666,9 @@ Next.js 16 provides two distinct tag invalidation functions with different consi
 > [!IMPORTANT] > **Always Invalidate Before `redirect()`**: In Server Actions, `redirect()` throws an internal Next.js control-flow exception. Always call `await updateTagInAction(...)` **before** calling `redirect('/target')`:
 >
 > ```ts
-> "use server";
-> import { redirect } from "next/navigation";
-> import { updateTagInAction } from "@/lib/server-cache";
+> 'use server';
+> import { redirect } from 'next/navigation';
+> import { updateTagInAction } from '@/lib/server-cache';
 >
 > export async function submitShiftCloseout(rawInput: ShiftCloseoutInput) {
 >   // 1. Validate & authorize
@@ -2783,10 +2684,10 @@ Next.js 16 provides two distinct tag invalidation functions with different consi
 When you need to invalidate all cached data associated with a specific route path or layout segment (rather than individual tags), call `revalidatePath`:
 
 ```ts
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from 'next/cache';
 
-revalidatePath("/control-room"); // Revalidates the page
-revalidatePath("/(departments)/[department]", "layout"); // Revalidates layout + nested pages
+revalidatePath('/control-room'); // Revalidates the page
+revalidatePath('/(departments)/[department]', 'layout'); // Revalidates layout + nested pages
 ```
 
 ### 3. Decision Matrix: What Should I Cache?
@@ -2826,9 +2727,9 @@ Errors in Next.js App Router applications fall into two distinct categories:
 For form submissions and mutations triggered via React 19 `useActionState`, model expected validation or domain errors as structured return values (`{ success: false, message: '...' }`) rather than throwing, so the form preserves user state and renders inline accessible feedback:
 
 ```ts title="app/actions.ts"
-"use server";
+'use server';
 
-import { shiftCloseoutSchema } from "@repo/contract";
+import { shiftCloseoutSchema } from '@repo/contract';
 
 export type ActionState = {
   success?: boolean;
@@ -2844,27 +2745,24 @@ export async function createShiftNote(
   if (!parsed.success) {
     return {
       success: false,
-      message: "Please correct the highlighted fields.",
+      message: 'Please correct the highlighted fields.',
       fieldErrors: parsed.error.flatten().fieldErrors,
     };
   }
-  return { success: true, message: "Shift note saved." };
+  return { success: true, message: 'Shift note saved.' };
 }
 ```
 
 ```tsx title="app/components/ShiftNoteForm.tsx"
-"use client";
+'use client';
 
-import { useActionState } from "react";
-import { createShiftNote, type ActionState } from "@/app/actions";
+import { useActionState } from 'react';
+import { createShiftNote, type ActionState } from '@/app/actions';
 
 const initialState: ActionState = {};
 
 export function ShiftNoteForm() {
-  const [state, formAction, pending] = useActionState(
-    createShiftNote,
-    initialState
-  );
+  const [state, formAction, pending] = useActionState(createShiftNote, initialState);
 
   return (
     <form action={formAction}>
@@ -2875,7 +2773,7 @@ export function ShiftNoteForm() {
         </p>
       )}
       <button disabled={pending} type="submit">
-        {pending ? "Saving..." : "Submit Shift Note"}
+        {pending ? 'Saving...' : 'Submit Shift Note'}
       </button>
     </form>
   );
@@ -2906,45 +2804,30 @@ Adding an `error.tsx` (`'use client'`) file inside a route segment wraps that se
 When you need a reusable, component-level error boundary inside a page (so a single widget failure does not take down the entire route segment) or want to pass custom props into the fallback UI, use `catchError` from `next/error` (or Arch-System's [apps/portal/components/ErrorBoundary.tsx](../../apps/portal/components/ErrorBoundary.tsx)):
 
 ```tsx title="Component-Level Error Boundary with catchError"
-"use client";
+'use client';
 
-import { catchError, type ErrorInfo } from "next/error";
+import { catchError, type ErrorInfo } from 'next/error';
 
 interface TelemetryWidgetProps {
   machineId: string;
   title: string;
 }
 
-function TelemetryWidgetFallback(
-  props: TelemetryWidgetProps,
-  { error, retry }: ErrorInfo
-) {
+function TelemetryWidgetFallback(props: TelemetryWidgetProps, { error, retry }: ErrorInfo) {
   return (
-    <div
-      role="alert"
-      className="rounded-xl border border-red-200 bg-red-50/80 p-4"
-    >
+    <div role="alert" className="rounded-xl border border-red-200 bg-red-50/80 p-4">
       <h3 className="font-semibold text-sm">Failed to load {props.title}</h3>
-      <p className="text-xs">
-        {error instanceof Error ? error.message : "Unknown error"}
-      </p>
-      <button
-        onClick={() => retry()}
-        type="button"
-        className="mt-2 underline text-xs"
-      >
+      <p className="text-xs">{error instanceof Error ? error.message : 'Unknown error'}</p>
+      <button onClick={() => retry()} type="button" className="mt-2 underline text-xs">
         Retry Telemetry Stream
       </button>
     </div>
   );
 }
 
-export default catchError(function TelemetryWidget(
-  props: TelemetryWidgetProps
-) {
+export default catchError(function TelemetryWidget(props: TelemetryWidgetProps) {
   return <div>Live stream for {props.machineId}</div>;
-},
-TelemetryWidgetFallback);
+}, TelemetryWidgetFallback);
 ```
 
 #### Errors in Event Handlers (`useState` vs. `startTransition`)
@@ -3018,18 +2901,18 @@ Unlike `@next/mdx`, **Markdoc** treats Markdown as **structured data** rather th
    - Example pattern for rendering `docs/runbooks/**/*.md` inside `apps/portal/app/docs/[...slug]/page.tsx` with **Turbopack + `'use cache'`**:
 
 ```tsx title="Recommended Turbopack + 'use cache' Markdoc Pattern for apps/portal/app/docs/[...slug]/page.tsx"
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import Markdoc, { type Config } from "@markdoc/markdoc";
-import { CodeBlock } from "@repo/ui/components/ui/code-block";
-import { GlassCard } from "@repo/ui/GlassCard";
-import React from "react";
-import { cacheLife, cacheTag } from "@/lib/server-cache";
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import Markdoc, { type Config } from '@markdoc/markdoc';
+import { CodeBlock } from '@repo/ui/components/ui/code-block';
+import { GlassCard } from '@repo/ui/GlassCard';
+import React from 'react';
+import { cacheLife, cacheTag } from '@/lib/server-cache';
 
 const markdocConfig: Config = {
   nodes: {
     fence: {
-      render: "Fence",
+      render: 'Fence',
       attributes: {
         language: { type: String },
       },
@@ -3037,13 +2920,13 @@ const markdocConfig: Config = {
   },
   tags: {
     callout: {
-      render: "Callout",
+      render: 'Callout',
       attributes: {
         title: { type: String, required: true },
         type: {
           type: String,
-          matches: ["note", "warning", "danger"],
-          default: "note",
+          matches: ['note', 'warning', 'danger'],
+          default: 'note',
         },
       },
     },
@@ -3051,12 +2934,12 @@ const markdocConfig: Config = {
 };
 
 export async function renderRunbookMarkdown(relativeFilePath: string) {
-  "use cache";
-  cacheLife("max");
+  'use cache';
+  cacheLife('max');
   cacheTag(`runbook:${relativeFilePath}`);
 
-  const fullPath = path.join(process.cwd(), "../../docs", relativeFilePath);
-  const rawMarkdown = await readFile(fullPath, "utf-8");
+  const fullPath = path.join(process.cwd(), '../../docs', relativeFilePath);
+  const rawMarkdown = await readFile(fullPath, 'utf-8');
 
   const ast = Markdoc.parse(rawMarkdown);
   const validationErrors = Markdoc.validate(ast, markdocConfig);
@@ -3069,22 +2952,10 @@ export async function renderRunbookMarkdown(relativeFilePath: string) {
   const renderableTree = Markdoc.transform(ast, markdocConfig);
   return Markdoc.renderers.react(renderableTree, React, {
     components: {
-      Fence: ({
-        children,
-        language,
-      }: {
-        children: string;
-        language?: string;
-      }) => (
-        <CodeBlock language={language ?? "bash"}>{String(children)}</CodeBlock>
+      Fence: ({ children, language }: { children: string; language?: string }) => (
+        <CodeBlock language={language ?? 'bash'}>{String(children)}</CodeBlock>
       ),
-      Callout: ({
-        title,
-        children,
-      }: {
-        title: string;
-        children: React.ReactNode;
-      }) => (
+      Callout: ({ title, children }: { title: string; children: React.ReactNode }) => (
         <GlassCard className="my-4 p-4">
           <strong className="block font-semibold text-sm">{title}</strong>
           <div className="mt-1 text-xs">{children}</div>
@@ -3171,32 +3042,30 @@ Rather than fetching data globally at the root layout and threading props throug
 
 ```typescript
 // apps/portal/lib/dept-context.ts
-import { cache } from "react";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { resolveDeptId } from "./dept-registry";
+import { cache } from 'react';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { resolveDeptId } from './dept-registry';
 
 /**
  * React.cache() guarantees that multiple calls with the same slug
  * within a single HTTP request lifecycle share exactly ONE Supabase query.
  */
-export const getDepartmentContext = cache(
-  async ({ department }: { department: string }) => {
-    const deptId = await resolveDeptId(department);
-    const supabase = await createServerSupabaseClient();
-    const today = new Date().toISOString().split("T")[0];
+export const getDepartmentContext = cache(async ({ department }: { department: string }) => {
+  const deptId = await resolveDeptId(department);
+  const supabase = await createServerSupabaseClient();
+  const today = new Date().toISOString().split('T')[0];
 
-    return { deptId, supabase, today };
-  }
-);
+  return { deptId, supabase, today };
+});
 ```
 
 ### Recipe 2: Parallel Fetching with Granular Streaming Suspense
 
 ```tsx
 // apps/portal/app/(departments)/[department]/breakdowns/page.tsx
-import { Suspense } from "react";
-import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
-import { BreakdownsDashboard, BreakdownSkeleton } from "@/features/departments";
+import { Suspense } from 'react';
+import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
+import { BreakdownsDashboard, BreakdownSkeleton } from '@/features/departments';
 
 export default async function BreakdownsPage({
   params,
@@ -3204,7 +3073,7 @@ export default async function BreakdownsPage({
   params: Promise<{ department: string }>;
 }) {
   const { department: deptSlug } = await params;
-  requireDepartment(deptSlug, "engineering");
+  requireDepartment(deptSlug, 'engineering');
 
   const { deptId, supabase } = await getDepartmentContext({
     department: deptSlug,
@@ -3213,25 +3082,22 @@ export default async function BreakdownsPage({
   // Initiate database queries in parallel — never sequentially
   const [{ data: breakdowns }, { data: machines }] = await Promise.all([
     supabase
-      .from("breakdowns")
-      .select("*, machine_name")
-      .eq("department_id", deptId)
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false }),
+      .from('breakdowns')
+      .select('*, machine_name')
+      .eq('department_id', deptId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false }),
     supabase
-      .from("machines")
-      .select("id, name, type, status")
-      .eq("department_id", deptId)
-      .eq("is_active", true),
+      .from('machines')
+      .select('id, name, type, status')
+      .eq('department_id', deptId)
+      .eq('is_active', true),
   ]);
 
   return (
     <div className="space-y-6">
       <Suspense fallback={<BreakdownSkeleton />}>
-        <BreakdownsDashboard
-          breakdowns={breakdowns ?? []}
-          machines={machines ?? []}
-        />
+        <BreakdownsDashboard breakdowns={breakdowns ?? []} machines={machines ?? []} />
       </Suspense>
     </div>
   );
@@ -3242,15 +3108,12 @@ export default async function BreakdownsPage({
 
 ```typescript
 // libs/features/departments/data-access/preload.ts
-import { cache } from "react";
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import { cache } from 'react';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 
 export const getShiftTelemetryData = cache(async (shiftId: string) => {
   const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
-    .from("telemetry_records")
-    .select("*")
-    .eq("shift_id", shiftId);
+  const { data } = await supabase.from('telemetry_records').select('*').eq('shift_id', shiftId);
   return data ?? [];
 });
 
@@ -3267,10 +3130,7 @@ export function preloadShiftTelemetry(shiftId: string): void {
 
 ```typescript
 // apps/portal/lib/security/taint-helpers.ts
-import {
-  experimental_taintObjectReference,
-  experimental_taintUniqueValue,
-} from "react";
+import { experimental_taintObjectReference, experimental_taintUniqueValue } from 'react';
 
 export interface SensitiveEmployeeCredential {
   employeeId: string;
@@ -3282,16 +3142,13 @@ export interface SensitiveEmployeeCredential {
 export function protectEmployeeSecrets(
   record: SensitiveEmployeeCredential
 ): SensitiveEmployeeCredential {
-  if (
-    process.env.NODE_ENV !== "production" ||
-    process.env.__NEXT_EXPERIMENTAL_REACT
-  ) {
+  if (process.env.NODE_ENV !== 'production' || process.env.__NEXT_EXPERIMENTAL_REACT) {
     experimental_taintObjectReference(
-      "Do not pass raw security credentials to Client Components",
+      'Do not pass raw security credentials to Client Components',
       record
     );
     experimental_taintUniqueValue(
-      "Do not expose raw biometric hashes or PINs over RSC",
+      'Do not expose raw biometric hashes or PINs over RSC',
       record,
       record.pinCode
     );
@@ -3388,18 +3245,18 @@ On the server, Next.js orchestrates rendering in chunks:
 
 ```tsx
 // apps/portal/app/(departments)/[department]/reports/StreamingReportView.tsx
-import { Suspense } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { getDepartmentContext } from "~/lib/dept-context";
+import { Suspense } from 'react';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { getDepartmentContext } from '~/lib/dept-context';
 
 async function SlowScadaTelemetryFeed({ deptId }: { deptId: string }) {
   // Heavy data fetch from industrial telemetry database
   const { supabase } = await getDepartmentContext({ department: deptId });
   const { data: telemetry } = await supabase
-    .from("telemetry_records")
-    .select("sensor_id, value, status")
-    .eq("department_id", deptId)
-    .order("created_at", { ascending: false })
+    .from('telemetry_records')
+    .select('sensor_id, value, status')
+    .eq('department_id', deptId)
+    .order('created_at', { ascending: false })
     .limit(100);
 
   return (
@@ -3435,10 +3292,7 @@ export default async function DepartmentReportPage({
         fallback={
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-20 animate-pulse rounded-card bg-bg-tertiary"
-              />
+              <div key={i} className="h-20 animate-pulse rounded-card bg-bg-tertiary" />
             ))}
           </div>
         }
@@ -3737,9 +3591,9 @@ Tailwind does not parse JavaScript ASTs; it regex-tokenizes raw source files for
 
   // CORRECT - Full static strings detectable at build-time
   const STATUS_CLASSES: Record<EquipmentStatus, string> = {
-    operational: "text-arch-emerald",
-    warning: "text-arch-amber",
-    critical: "text-arch-red",
+    operational: 'text-arch-emerald',
+    warning: 'text-arch-amber',
+    critical: 'text-arch-red',
   };
   <div className={STATUS_CLASSES[status]} />;
   ```

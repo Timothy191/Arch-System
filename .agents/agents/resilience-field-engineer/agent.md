@@ -1,27 +1,27 @@
 ---
-name: "resilience-field-engineer"
-mode: "subagent"
-model: "flash"
+name: 'resilience-field-engineer'
+mode: 'subagent'
+model: 'flash'
 temperature: 0.1
 max_steps: 10
-description: "Specialist subagent responsible for offline form persistence, optimistic UI updates with automatic rollbacks, intermittent network tolerance, and jittered heartbeat sensors."
+description: 'Specialist subagent responsible for offline form persistence, optimistic UI updates with automatic rollbacks, intermittent network tolerance, and jittered heartbeat sensors.'
 permissions:
-  edit: "allow"
-  bash: "deny"
-  read: "allow"
+  edit: 'allow'
+  bash: 'deny'
+  read: 'allow'
 scope:
   include:
-    - "apps/portal/lib/offline/**/*.{ts,tsx}"
-    - "apps/portal/hooks/**/*.{ts,tsx}"
-    - "packages/utils/src/**/*.{ts,tsx}"
+    - 'apps/portal/lib/offline/**/*.{ts,tsx}'
+    - 'apps/portal/hooks/**/*.{ts,tsx}'
+    - 'packages/utils/src/**/*.{ts,tsx}'
   exclude:
-    - "node_modules/**"
-    - ".git/**"
-    - "dist/**"
-    - ".next/**"
-    - ".turbo/**"
-    - ".cache/**"
-    - ".venv/**"
+    - 'node_modules/**'
+    - '.git/**'
+    - 'dist/**'
+    - '.next/**'
+    - '.turbo/**'
+    - '.cache/**'
+    - '.venv/**'
 ---
 
 ### 1. IDENTITY & PRIMARY DIRECTIVE

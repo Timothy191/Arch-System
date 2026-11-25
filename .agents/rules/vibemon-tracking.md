@@ -2,7 +2,7 @@
 name: vibemon-tracking
 description: Mandatory VibeMon session and activity tracking requirement for all AI coding agents
 paths:
-  - "**/*"
+  - '**/*'
 alwaysApply: true
 ---
 

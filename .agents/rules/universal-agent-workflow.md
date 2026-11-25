@@ -2,7 +2,7 @@
 name: universal-agent-workflow
 description: Mandatory cross-agent workflow enforcing atomic [ ] checklist breakdown, branch isolation, propagated closure, empirical verification, and safe commit/merge for clean git state
 paths:
-  - "**/*"
+  - '**/*'
 alwaysApply: true
 ---
 

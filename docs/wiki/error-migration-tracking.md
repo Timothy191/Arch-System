@@ -22,7 +22,7 @@ import {
   APIError, // 500+ - External API
   DatabaseError, // 500 - DB failures
   RateLimitError, // 429 - Too many requests
-} from "@repo/errors";
+} from '@repo/errors';
 ```
 
 ---
@@ -83,29 +83,29 @@ import {
 
 ```typescript
 // ❌ Old pattern - generic error
-throw new Error("Invalid email format");
+throw new Error('Invalid email format');
 
 // ❌ Old pattern - no context
 throw new Error(`User ${id} not found`);
 
 // ❌ Old pattern - no status code
-throw new Error("Database connection failed");
+throw new Error('Database connection failed');
 ```
 
 ### After (@repo/errors)
 
 ```typescript
-import { ValidationError, NotFoundError, DatabaseError } from "@repo/errors";
+import { ValidationError, NotFoundError, DatabaseError } from '@repo/errors';
 
 // ✅ New pattern - domain-specific with context
-throw new ValidationError("Invalid email format", {
-  field: "email",
+throw new ValidationError('Invalid email format', {
+  field: 'email',
   value: input.email,
 });
 
 // ✅ New pattern - with resource identification
-throw new NotFoundError("User not found", {
-  resource: "user",
+throw new NotFoundError('User not found', {
+  resource: 'user',
   id: userId,
 });
 
@@ -113,8 +113,8 @@ throw new NotFoundError("User not found", {
 try {
   await db.connect();
 } catch (cause) {
-  throw new DatabaseError("Connection failed", {
-    operation: "connect",
+  throw new DatabaseError('Connection failed', {
+    operation: 'connect',
     cause,
   });
 }
@@ -130,7 +130,7 @@ try {
 
 ```typescript
 // Current:
-throw new Error("SerpAPI request failed");
+throw new Error('SerpAPI request failed');
 throw new Error(`API error: ${response.status}`);
 ```
 
@@ -138,9 +138,9 @@ throw new Error(`API error: ${response.status}`);
 
 ```typescript
 // New:
-throw new APIError("SerpAPI request failed", {
+throw new APIError('SerpAPI request failed', {
   statusCode: response.status,
-  endpoint: "/search",
+  endpoint: '/search',
   cause: originalError,
 });
 ```
@@ -153,21 +153,21 @@ throw new APIError("SerpAPI request failed", {
 
 ```typescript
 // Current:
-throw new Error("Invalid machine ID");
-throw new Error("Failed to create breakdown");
+throw new Error('Invalid machine ID');
+throw new Error('Failed to create breakdown');
 ```
 
 **Migration**:
 
 ```typescript
 // New:
-throw new ValidationError("Invalid machine ID", {
-  field: "machineId",
+throw new ValidationError('Invalid machine ID', {
+  field: 'machineId',
 });
 
-throw new DatabaseError("Failed to create breakdown", {
-  operation: "insert",
-  table: "breakdowns",
+throw new DatabaseError('Failed to create breakdown', {
+  operation: 'insert',
+  table: 'breakdowns',
 });
 ```
 
@@ -179,14 +179,14 @@ throw new DatabaseError("Failed to create breakdown", {
 
 ```typescript
 // Current:
-throw new Error("Embedding generation failed");
+throw new Error('Embedding generation failed');
 ```
 
 **Migration**:
 
 ```typescript
 // New:
-throw new APIError("Embedding generation failed", {
+throw new APIError('Embedding generation failed', {
   statusCode: 500,
   context: { model, inputLength: text.length },
 });
@@ -200,21 +200,21 @@ throw new APIError("Embedding generation failed", {
 
 ```typescript
 // Current:
-throw new Error("Shift already closed");
-throw new Error("Invalid shift data");
+throw new Error('Shift already closed');
+throw new Error('Invalid shift data');
 ```
 
 **Migration**:
 
 ```typescript
 // New:
-throw new ConflictError("Shift already closed", {
-  resource: "shift",
-  field: "status",
+throw new ConflictError('Shift already closed', {
+  resource: 'shift',
+  field: 'status',
 });
 
-throw new ValidationError("Invalid shift data", {
-  field: "shiftDate",
+throw new ValidationError('Invalid shift data', {
+  field: 'shiftDate',
 });
 ```
 
@@ -226,14 +226,14 @@ throw new ValidationError("Invalid shift data", {
 
 ```typescript
 // Current:
-throw new Error("Plugin execution failed");
+throw new Error('Plugin execution failed');
 ```
 
 **Migration**:
 
 ```typescript
 // New:
-throw new APIError("Plugin execution failed", {
+throw new APIError('Plugin execution failed', {
   context: { pluginName, operation },
 });
 ```
@@ -271,7 +271,7 @@ throw new APIError("Plugin execution failed", {
 ### API Routes
 
 ```typescript
-import { isAppError } from "@repo/errors";
+import { isAppError } from '@repo/errors';
 
 // In API route handlers:
 export async function POST(request: Request) {
@@ -283,7 +283,7 @@ export async function POST(request: Request) {
     }
 
     // Fallback for non-AppError
-    return Response.json({ message: "Internal server error" }, { status: 500 });
+    return Response.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
 ```
@@ -320,20 +320,20 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
 ### Unit Test Example
 
 ```typescript
-import { ValidationError } from "@repo/errors";
-import { validateMachineId } from "./actions";
+import { ValidationError } from '@repo/errors';
+import { validateMachineId } from './actions';
 
-describe("validateMachineId", () => {
-  it("throws ValidationError for invalid ID", () => {
-    expect(() => validateMachineId("invalid")).toThrow(ValidationError);
+describe('validateMachineId', () => {
+  it('throws ValidationError for invalid ID', () => {
+    expect(() => validateMachineId('invalid')).toThrow(ValidationError);
 
     try {
-      validateMachineId("invalid");
+      validateMachineId('invalid');
     } catch (error) {
       expect(error).toBeInstanceOf(ValidationError);
-      expect(error.code).toBe("VALIDATION_ERROR");
+      expect(error.code).toBe('VALIDATION_ERROR');
       expect(error.statusCode).toBe(400);
-      expect(error.context?.field).toBe("machineId");
+      expect(error.context?.field).toBe('machineId');
     }
   });
 });

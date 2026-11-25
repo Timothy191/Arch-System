@@ -66,11 +66,11 @@ graph TD
   - Expand the existing `accessibility.spec.ts` using `axe-playwright`:
 
     ```typescript
-    import { test, expect } from "@playwright/test";
-    import { injectAxe, checkA11y } from "axe-playwright";
+    import { test, expect } from '@playwright/test';
+    import { injectAxe, checkA11y } from 'axe-playwright';
 
-    test("should pass accessibility audits", async ({ page }) => {
-      await page.goto("/access-card-actions/card-actions");
+    test('should pass accessibility audits', async ({ page }) => {
+      await page.goto('/access-card-actions/card-actions');
       await injectAxe(page);
       await checkA11y(page, undefined, {
         detailedReport: true,

@@ -1,6 +1,6 @@
 ---
-description: "Real-world engineering standards for industrial mining operations"
-paths: ["apps/**/*", "packages/**/*", "libs/**/*"]
+description: 'Real-world engineering standards for industrial mining operations'
+paths: ['apps/**/*', 'packages/**/*', 'libs/**/*']
 ---
 
 # Real-World Engineering Standards

@@ -152,14 +152,7 @@ services:
       - RI_REDIS_ALIAS2=Langfuse Telemetry Redis
     healthcheck:
       test:
-        [
-          'CMD',
-          'wget',
-          '--no-verbose',
-          '--tries=1',
-          '--spider',
-          'http://127.0.0.1:5540/api/info',
-        ]
+        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://127.0.0.1:5540/api/info']
       interval: 10s
       timeout: 5s
       retries: 5

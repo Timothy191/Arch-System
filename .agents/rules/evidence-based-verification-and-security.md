@@ -2,7 +2,7 @@
 name: evidence-based-verification-and-security
 description: Security verification and evidence-level reporting invariants
 paths:
-  - "**/*"
+  - '**/*'
 alwaysApply: true
 ---
 

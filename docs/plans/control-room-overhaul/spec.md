@@ -21,7 +21,7 @@
        ```tsx
        export default async function ControlRoomPage() {
          const { deptId, dept, today } = await getDepartmentContext({
-           department: "control-room",
+           department: 'control-room',
          });
          return (
            <ErrorBoundary context="Control Room Dashboard">
@@ -30,11 +30,7 @@
                <Suspense fallback={<SummaryGridSkeleton />}>
                  <ControlRoomSummaryGridClient deptId={deptId} today={today} />
                </Suspense>
-               <ControlRoomWidgets
-                 deptId={deptId}
-                 deptSlug="control-room"
-                 today={today}
-               />
+               <ControlRoomWidgets deptId={deptId} deptSlug="control-room" today={today} />
              </div>
            </ErrorBoundary>
          );
@@ -48,18 +44,18 @@
 - **Specification:** Update `CONTROL_ROOM_TABS` to include all active workflows:
   ```typescript
   export const CONTROL_ROOM_TABS = [
-    { name: "dashboard", label: "Dashboard", icon: "BarChart2" },
-    { name: "hourly-loads", label: "Hourly Loads", icon: "Clock" },
-    { name: "machine-operations", label: "Machine Ops", icon: "Cpu" },
+    { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+    { name: 'hourly-loads', label: 'Hourly Loads', icon: 'Clock' },
+    { name: 'machine-operations', label: 'Machine Ops', icon: 'Cpu' },
     {
-      name: "shift-compilation",
-      label: "Shift Handover",
-      icon: "ClipboardCheck",
+      name: 'shift-compilation',
+      label: 'Shift Handover',
+      icon: 'ClipboardCheck',
     },
-    { name: "shift-coverage", label: "Roster & Coverage", icon: "Users" },
-    { name: "engineering-notes", label: "Eng Notes", icon: "ClipboardList" },
-    { name: "excavator-activity", label: "Excavator", icon: "Pickaxe" },
-    { name: "reports", label: "Reports", icon: "FileText" },
+    { name: 'shift-coverage', label: 'Roster & Coverage', icon: 'Users' },
+    { name: 'engineering-notes', label: 'Eng Notes', icon: 'ClipboardList' },
+    { name: 'excavator-activity', label: 'Excavator', icon: 'Pickaxe' },
+    { name: 'reports', label: 'Reports', icon: 'FileText' },
   ] as const;
   ```
 
@@ -75,11 +71,11 @@
   ```typescript
   // Query latest closing SMR per machine from machine_operations or smr_readings
   const { data: previousSMRs } = await supabase
-    .from("machine_operations")
-    .select("machine_id, end_smu")
-    .eq("department_id", deptId)
-    .not("end_smu", "is", null)
-    .order("shift_date", { ascending: false });
+    .from('machine_operations')
+    .select('machine_id, end_smu')
+    .eq('department_id', deptId)
+    .not('end_smu', 'is', null)
+    .order('shift_date', { ascending: false });
 
   const latestSMRMap = new Map<string, number>();
   previousSMRs?.forEach((row) => {
@@ -122,14 +118,12 @@
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Closing SMR (${data.closing_smr}) cannot be less than opening SMR (${data.opening_smr}).`,
-          path: ["closing_smr"],
+          path: ['closing_smr'],
         });
         return;
       }
 
-      const operating_hours = Number(
-        (data.closing_smr - data.opening_smr).toFixed(2)
-      );
+      const operating_hours = Number((data.closing_smr - data.opening_smr).toFixed(2));
       const total_allocated = Number(
         (operating_hours + data.breakdown_hours + data.delay_hours).toFixed(2)
       );
@@ -139,13 +133,13 @@
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Total allocated time (${total_allocated}h) exceeds the 12.5h shift maximum window.`,
-          path: ["closing_smr"],
+          path: ['closing_smr'],
         });
       } else if (total_allocated > 12.0 && !data.overrun_reason?.trim()) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Shift time (${total_allocated}h) exceeds 12h. An overrun reason (e.g. refuel/queue) is required.`,
-          path: ["overrun_reason"],
+          path: ['overrun_reason'],
         });
       }
     });
@@ -204,9 +198,7 @@
       >
         <Minus className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
       </button>
-      <span className="font-mono text-sm font-bold w-7 text-center">
-        {loadValue}
-      </span>
+      <span className="font-mono text-sm font-bold w-7 text-center">{loadValue}</span>
       <button
         type="button"
         data-action="up"
@@ -250,10 +242,10 @@
       refetch,
       isFetching,
     } = useQuery({
-      queryKey: ["scada-status"],
+      queryKey: ['scada-status'],
       queryFn: async () => {
-        const res = await fetch("/api/control-room/scada-status");
-        if (!res.ok) throw new Error("SCADA gateway unreachable");
+        const res = await fetch('/api/control-room/scada-status');
+        if (!res.ok) throw new Error('SCADA gateway unreachable');
         return res.json();
       },
       refetchInterval: 5000,
@@ -298,25 +290,25 @@
   ```typescript
   if (isOnline && !isDegraded) {
     try {
-      const res = await fetch("/api/control-room/shift-closeout", {
-        method: "POST",
+      const res = await fetch('/api/control-room/shift-closeout', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "Idempotency-Key": idempotencyKey,
+          'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey,
         },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Closeout failed");
-      toast.success("Shift closeout submitted and locked.");
-      router.push("/control-room/shift-compilation");
+      if (!res.ok) throw new Error('Closeout failed');
+      toast.success('Shift closeout submitted and locked.');
+      router.push('/control-room/shift-compilation');
     } catch {
       // Fallback to offline queue on network drop
       enqueue({ ...mutationConfig });
-      toast.warning("Network unstable: Closeout stored in offline queue.");
+      toast.warning('Network unstable: Closeout stored in offline queue.');
     }
   } else {
     enqueue({ ...mutationConfig });
-    toast.warning("Offline mode: Closeout saved to local queue.");
+    toast.warning('Offline mode: Closeout saved to local queue.');
   }
   ```
 

@@ -263,7 +263,7 @@ await redis.del(`shift:${deptId}:${date}:${shift}`);
 
 ```typescript
 await Promise.all([
-  cacheDepartmentContext("control-room"),
+  cacheDepartmentContext('control-room'),
   cacheShiftContext(deptId, today, currentShift),
 ]);
 ```
@@ -299,8 +299,8 @@ await Promise.all([
 
 ```typescript
 // Track cache hits
-const cacheHits = promClient.Counter("cache_hits_total");
-const cacheMisses = promClient.Counter("cache_misses_total");
+const cacheHits = promClient.Counter('cache_hits_total');
+const cacheMisses = promClient.Counter('cache_misses_total');
 
 // Use in cache function
 if (cached) {
@@ -366,7 +366,7 @@ Bad: shift_data_for_department_123_on_2026_06_15_day_shift
 **Implementation:**
 
 ```typescript
-import { gzip, ungzip } from "node:zlib";
+import { gzip, ungzip } from 'node:zlib';
 
 const compressed = await gzip(JSON.stringify(data));
 await redis.set(key, compressed);
@@ -424,7 +424,7 @@ if (cached) {
   return JSON.parse(cached);
 }
 const data = await fetchData();
-await redis.set(key, JSON.stringify(data), "EX", ttl);
+await redis.set(key, JSON.stringify(data), 'EX', ttl);
 return data;
 ```
 
@@ -441,7 +441,7 @@ return data;
 **Implementation:**
 
 ```typescript
-await redis.set(key, data, "EX", ttl);
+await redis.set(key, data, 'EX', ttl);
 await database.write(data);
 ```
 
@@ -508,17 +508,17 @@ await database.write(data);
 ### Unit Tests
 
 ```typescript
-describe("Cache Layer", () => {
-  it("should cache shift data", async () => {
-    await setCache("shift:dept-123:2026-06-15:day", data);
-    const cached = await getCache("shift:dept-123:2026-06-15:day");
+describe('Cache Layer', () => {
+  it('should cache shift data', async () => {
+    await setCache('shift:dept-123:2026-06-15:day', data);
+    const cached = await getCache('shift:dept-123:2026-06-15:day');
     expect(cached).toEqual(data);
   });
 
-  it("should respect TTL", async () => {
-    await setCache("key", data, { ttl: 1 });
+  it('should respect TTL', async () => {
+    await setCache('key', data, { ttl: 1 });
     await wait(1100);
-    const cached = await getCache("key");
+    const cached = await getCache('key');
     expect(cached).toBeNull();
   });
 });

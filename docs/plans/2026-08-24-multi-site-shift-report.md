@@ -1,10 +1,10 @@
 ---
-title: "Multi-Site Control Room & Engineering Shift Report"
-date: "2026-08-24"
-status: "ready"
-artifact_contract: "ce-unified-plan/v1"
-artifact_readiness: "implementation-ready"
-product_contract_source: "ce-plan-bootstrap"
+title: 'Multi-Site Control Room & Engineering Shift Report'
+date: '2026-08-24'
+status: 'ready'
+artifact_contract: 'ce-unified-plan/v1'
+artifact_readiness: 'implementation-ready'
+product_contract_source: 'ce-plan-bootstrap'
 ---
 
 # Multi-Site Control Room & Engineering Shift Report

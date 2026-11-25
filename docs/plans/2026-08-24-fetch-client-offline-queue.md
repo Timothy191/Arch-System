@@ -3,8 +3,8 @@ artifact_contract: ce-unified-plan/v1
 artifact_readiness: implementation-ready
 execution: code
 product_contract_source: lfg-pipeline
-title: "FetchClient Centralization, IndexedDB Offline Storage & Context Optimization Plan"
-date: "2026-08-24"
+title: 'FetchClient Centralization, IndexedDB Offline Storage & Context Optimization Plan'
+date: '2026-08-24'
 ---
 
 # FetchClient Centralization, IndexedDB Offline Storage & Context Optimization Plan

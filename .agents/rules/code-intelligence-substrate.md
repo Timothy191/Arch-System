@@ -2,9 +2,9 @@
 name: code-intelligence-substrate
 description: CodeGraph index is the single source of truth for structural knowledge; enforce its integrity, never hand-edit it, and verify before claiming structural work
 paths:
-  - "tools/scripts/ci-*.cjs"
-  - "tools/audits/audit-code-intelligence-drift.cjs"
-  - ".agents/memory_base/index-snapshot.json"
+  - 'tools/scripts/ci-*.cjs'
+  - 'tools/audits/audit-code-intelligence-drift.cjs'
+  - '.agents/memory_base/index-snapshot.json'
 alwaysApply: false
 ---
 
