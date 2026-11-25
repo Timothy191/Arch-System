@@ -621,7 +621,15 @@ export function MachineOperationsForm({
             </span>
           )}
         </div>
-        <div className="gold-steel-border gold-steel-border-slim h-0.5 w-full" />
+        <div
+          data-testid="machine-operations-form-separator"
+          aria-hidden="true"
+          className="my-1 flex w-full items-center justify-center gap-1.5"
+        >
+          <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+          <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-[var(--accent-blue)] bg-[var(--accent-blue)]/40 shadow-2xs" />
+          <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+        </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Machine Dropdown */}

@@ -9,10 +9,6 @@ import { ArrowUpRight, Pickaxe, RefreshCw, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  formatServerTimingSummary,
-  parseServerTimingHeader,
-} from '@/lib/observability/server-timing-client';
-import {
   deriveScadaPanelRows,
   type ExcavatorActivityViewRow,
   mergeScadaRows,
@@ -34,15 +30,6 @@ const SCADA_RECONCILE_DEBOUNCE_MS = 1000;
 /** All operational dates in the control room are resolved in SAST. */
 const OPERATIONAL_TIME_ZONE = 'Africa/Johannesburg';
 
-const SCADA_SLA_HEALTHY_PCT = 100;
-const SCADA_SLA_DEGRADED_PCT = 99.5;
-const SCADA_SLA_OFFLINE_PCT = 0;
-const SCADA_SLA_BY_STATE: Record<'healthy' | 'degraded' | 'offline', number> = {
-  healthy: SCADA_SLA_HEALTHY_PCT,
-  degraded: SCADA_SLA_DEGRADED_PCT,
-  offline: SCADA_SLA_OFFLINE_PCT,
-};
-
 export function ScadaPanel({ departmentId }: { departmentId: string }) {
   // The panel is designed to keep rendering fallback telemetry when Supabase is
   // unconfigured or unreachable, so a missing client must not throw at render.
@@ -59,45 +46,9 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
   const [activities, setActivities] = useState<readonly ScadaActivityRow[]>([]);
   const [fleet, setFleet] = useState<readonly ScadaMachineRow[]>([]);
   const [loads, setLoads] = useState<readonly ScadaLoadRow[]>([]);
-  const [scadaHealth, setScadaHealth] = useState<{
-    state: 'healthy' | 'degraded' | 'offline';
-    cachedTagCount: number;
-    latencyMs: number;
-  } | null>(null);
-  const [scadaServerTimingLabel, setScadaServerTimingLabel] = useState<string | null>(null);
-  const scadaSlaPct = SCADA_SLA_BY_STATE[scadaHealth?.state ?? 'healthy'];
 
   const reconcileTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const loadScadaHealth = useCallback(async () => {
-    if (typeof fetch !== 'function') return;
-    try {
-      const response = await fetch('/api/control-room/scada-status');
-      if (!response?.ok) return;
-      const rawServerTiming =
-        response.headers?.get?.('server-timing') ??
-        response.headers?.get?.('Server-Timing') ??
-        null;
-      const parsedMetrics = parseServerTimingHeader(rawServerTiming);
-      setScadaServerTimingLabel(formatServerTimingSummary(parsedMetrics));
-
-      const payload = (await response.json()) as {
-        state?: 'healthy' | 'degraded' | 'offline';
-        cached_tag_count?: number;
-        latencyMs?: number;
-      };
-      if (payload?.state) {
-        setScadaHealth({
-          state: payload.state,
-          cachedTagCount: Number(payload.cached_tag_count ?? 0),
-          latencyMs: Number(payload.latencyMs ?? 0),
-        });
-      }
-    } catch {
-      // Keep existing SCADA telemetry view when status endpoint is unreachable
-    }
-  }, []);
 
   const loadOperationalData = useCallback(async () => {
     const activeTracer = trace.getTracer?.('arch-portal') ?? tracer;
@@ -210,7 +161,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      await Promise.all([loadOperationalData(), loadScadaHealth()]);
+      await loadOperationalData();
     } finally {
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = setTimeout(() => {
@@ -218,12 +169,11 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
         setIsRefreshing(false);
       }, REFRESH_SPINNER_DURATION_MS);
     }
-  }, [loadOperationalData, loadScadaHealth]);
+  }, [loadOperationalData]);
 
   useEffect(() => {
     void loadOperationalData();
-    void loadScadaHealth();
-  }, [loadOperationalData, loadScadaHealth]);
+  }, [loadOperationalData]);
 
   useEffect(() => {
     return () => {
@@ -329,42 +279,6 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <span
-            data-testid="scada-connection-status-badge"
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono font-semibold text-[10px] uppercase tracking-wider ${
-              scadaHealth?.state === 'degraded'
-                ? 'border-amber-500/40 bg-amber-500/10 text-amber-700'
-                : 'border-accent-green/35 bg-accent-green/10 text-accent-green'
-            }`}
-          >
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${
-                scadaHealth?.state === 'degraded' ? 'bg-amber-500' : 'bg-accent-green'
-              }`}
-              aria-hidden="true"
-            />
-            {loadsStatus === 'SUBSCRIBED' || activityStatus === 'SUBSCRIBED'
-              ? 'LIVE CDC'
-              : 'SCADA SYNC'}
-            {scadaHealth
-              ? ` · ${scadaHealth.cachedTagCount} tags (${scadaHealth.latencyMs}ms)`
-              : ''}
-          </span>
-
-          <span
-            data-testid="scada-server-timing-badge"
-            className="inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-white/80 px-2 py-1 font-mono text-[10px] text-[var(--text-secondary)]"
-          >
-            Server-Timing: {scadaServerTimingLabel ?? '—'}
-          </span>
-
-          <span
-            data-testid="scada-sla-uptime-badge"
-            className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 font-mono font-semibold text-[10px] text-emerald-700"
-          >
-            SLA: {scadaSlaPct}%
-          </span>
-
           <div
             role="tablist"
             aria-label="Excavator and Registered Machine views"

@@ -6,6 +6,13 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T12:09:00+02:00] - Control Room Telemetry Badges, Hourly Timeline Spacing & Separator Updates
+
+- **Control Room SCADA Panel ([`ScadaPanel.tsx`](apps/portal/features/departments/components/control-room/ScadaPanel.tsx))**:
+  - Removed the `LIVE CDC · N tags (ms)`, `Server-Timing`, and `SLA: %` status badges and pruned unused `/api/control-room/scada-status` health/timing state.
+- **Hourly Loads & Machine Operations Separators ([`HourlyLoadsSummaryPanels.tsx`](<apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsSummaryPanels.tsx>), [`MachineOperationsForm.tsx`](<apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx>))**:
+  - Added top spacing and the blue diamond-accented separator above `Live Hourly Production Timeline (06:00 – 17:00)` and replaced the `gold-steel-border` divider line in `MachineOperationsForm` with the same diamond-accented separator.
+
 ## [2026-11-25T12:03:00+02:00] - Global Liquid-Glass Panel Transparency & Interactive Hover
 
 - **Global Panel Normalization ([`GlassCard.tsx`](packages/ui/src/components/GlassCard.tsx), [`GlassCard.test.tsx`](apps/portal/components/ui/GlassCard.test.tsx))**:

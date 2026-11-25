@@ -328,8 +328,19 @@ export function HourlyLoadsTelemetryHeader({
         </div>
       </div>
 
+      {/* Section Separator */}
+      <div
+        data-testid="hourly-timeline-separator"
+        aria-hidden="true"
+        className="mt-4 mb-2 flex w-full items-center justify-center gap-1.5"
+      >
+        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-[var(--accent-blue)] bg-[var(--accent-blue)]/40 shadow-2xs" />
+        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+      </div>
+
       {/* Live Hourly Timeline Graph */}
-      <div className="space-y-3 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 p-3.5">
+      <div className="mt-3 space-y-3 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 p-3.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Logo variant="gold" className="h-4 w-4 shrink-0" />
