@@ -82,8 +82,8 @@ describe('LoginForm', () => {
 
     const signInBtn = screen.getByRole('button', { name: /^Access Arch Systems$|^Sign In$/i });
     expect(signInBtn).toBeInTheDocument();
-    expect(signInBtn.className).toContain('bg-amber-500');
-    expect(signInBtn.className).toContain('text-zinc-950');
+    expect(signInBtn.className).toContain('bg-[var(--color-action-primary)]');
+    expect(signInBtn.className).toContain('text-[var(--text-on-glass)]');
     expect(signInBtn.className).toContain('rounded-xl');
     expect(signInBtn.className).toContain('gold-steel-border');
   });

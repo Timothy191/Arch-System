@@ -26,13 +26,13 @@ const MAX_PASSWORD_LENGTH = 128;
 const LOCK_ICON_STROKE_WIDTH = 1.5;
 
 const LOGIN_INPUT_WRAPPER_CLASS =
-  'liquid-glass-light gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-xl border border-white/40 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md transition-all duration-200 hover:bg-white/95 focus-within:border-amber-500/70 focus-within:bg-white/95 focus-within:ring-2 focus-within:ring-amber-500/15';
+  'liquid-glass-light gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-secondary)] shadow-diffusion-sm backdrop-blur-md transition-all duration-200 hover:bg-[var(--bg-tertiary)] focus-within:border-[var(--accent-gold-border)] focus-within:bg-[var(--bg-tertiary)] focus-within:ring-2 focus-within:ring-[var(--accent-gold)]/15';
 
 const LOGIN_INPUT_CLASS =
-  'h-12 w-full rounded-xl bg-transparent pr-10 pl-10 text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-0';
+  'h-12 w-full rounded-xl bg-transparent pr-10 pl-10 text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-0';
 
 const SIGN_IN_BUTTON_CLASS =
-  'group gold-steel-border gold-steel-border-slim flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-semibold text-[13px] text-zinc-950 shadow-card transition-all duration-150 hover:-translate-y-px hover:bg-amber-400 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-60';
+  'group gold-steel-border gold-steel-border-slim flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[var(--color-action-primary)] py-3 font-semibold text-[13px] text-[var(--text-on-glass)] shadow-card transition-all duration-150 hover:-translate-y-px hover:bg-[var(--color-action-primary-hover)] active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-60';
 
 const ENTERPRISE_ADDONS_BAR_CLASS =
   'liquid-glass-light gold-steel-border gold-steel-border-slim flex rounded-full border border-white/30 bg-[var(--material-ultra-thin)] p-1.5 shadow-diffusion-sm backdrop-blur-md';
@@ -139,7 +139,7 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
                 type="button"
                 onClick={() => setEmployeeId('')}
                 aria-label="Clear email address"
-                className="absolute top-1/2 right-1.5 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-zinc-600 transition-colors hover:text-zinc-800"
+                className="absolute top-1/2 right-1.5 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -188,17 +188,19 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
             <button
               type="button"
               onClick={() => setShowPassword((visible) => !visible)}
-              className="absolute top-1/2 right-1 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-zinc-600 transition-colors hover:text-zinc-800 focus:outline-none"
+              className="absolute top-1/2 right-1 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus:outline-none"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <div className="flex items-center justify-between pt-0.5 font-mono text-[13px] text-zinc-600 leading-[18px]">
+          <div className="flex items-center justify-between pt-0.5 font-mono text-[13px] text-[var(--text-secondary)] leading-[18px]">
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle2
                 className={
-                  password.length > 0 ? 'h-3.5 w-3.5 text-emerald-700' : 'h-3.5 w-3.5 text-zinc-500'
+                  password.length > 0
+                    ? 'h-3.5 w-3.5 text-[var(--accent-green)]'
+                    : 'h-3.5 w-3.5 text-[var(--text-muted)]'
                 }
               />
               <span>{password.length > 0 ? 'Credentials ready' : 'Encrypted session handoff'}</span>
@@ -206,7 +208,7 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
           </div>
           {passwordError && (
             <div
-              className="mt-1 flex items-center gap-1.5 text-[13px] text-red-700 leading-[18px]"
+              className="mt-1 flex items-center gap-1.5 text-[13px] text-[var(--accent-red)] leading-[18px]"
               role="alert"
               aria-live="assertive"
             >
@@ -215,7 +217,7 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
           )}
           {capsLock && (
             <div
-              className="mt-1 flex items-center gap-1.5 text-[13px] text-amber-800 leading-[18px]"
+              className="mt-1 flex items-center gap-1.5 text-[13px] text-[var(--accent-amber)] leading-[18px]"
               role="alert"
               aria-live="polite"
             >
@@ -225,7 +227,7 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
           )}
           {rateLimitCountdown !== null && (
             <div
-              className="mt-1 flex items-center gap-1.5 text-[13px] text-amber-800 leading-[18px]"
+              className="mt-1 flex items-center gap-1.5 text-[13px] text-[var(--accent-amber)] leading-[18px]"
               role="alert"
               aria-live="polite"
             >

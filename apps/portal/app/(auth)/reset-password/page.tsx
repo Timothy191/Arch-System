@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
               </div>
               <Link
                 href="/login"
-                className="block w-full rounded-full bg-[var(--accent-blue)] px-4 py-2.5 text-center font-medium text-sm text-white transition-opacity hover:opacity-90"
+                className="block w-full rounded-full bg-[var(--color-action-primary)] px-4 py-2.5 text-center font-medium text-[var(--text-on-glass)] text-sm transition-opacity hover:opacity-90"
               >
                 Back to Sign In
               </Link>
@@ -147,9 +147,8 @@ export default function ResetPasswordPage() {
                 <AnimatedButton
                   type="submit"
                   disabled={loading}
-                  className="liquid-glass-button w-full"
-                  hoverScale={1}
-                  tapScale={0.97}
+                  variant="default"
+                  className="w-full"
                 >
                   {loading ? 'Sending reset link...' : 'Send Password Reset Link'}
                 </AnimatedButton>
