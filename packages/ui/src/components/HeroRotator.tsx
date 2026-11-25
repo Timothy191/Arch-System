@@ -4,7 +4,6 @@ import { m } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../lib/utils';
-import { type GlobePin, GlobePins } from './GlobePins';
 import { HeroCardContent } from './HeroCardContent';
 import type { Panel } from './hero-types';
 import { ARCH_LOGO_PATH, ARCH_LOGO_VIEWBOX } from './Logo';
@@ -26,7 +25,6 @@ function ArchEmblemIcon({ className }: { className?: string }) {
 
 export interface HeroRotatorProps {
   panels: Panel[];
-  sitePins?: readonly GlobePin[];
   incidentCount?: number;
   breakdownCount?: number;
   offlineMachineCount?: number;
@@ -215,7 +213,6 @@ function HeroSlide({
 
 export function HeroRotator({
   panels,
-  sitePins,
   incidentCount = 0,
   breakdownCount = 0,
   offlineMachineCount = 0,
@@ -426,13 +423,6 @@ export function HeroRotator({
           </div>
         </div>
       )}
-
-      {/* Active Mpumalanga Operational Sites 3D Globe Banner */}
-      <div data-testid="hero-kpi-slim-banner" className="mt-4 w-full">
-        <div className="gold-steel-border gold-steel-border-slim rounded-2xl border border-accent-gold/55 bg-white/85 p-4 shadow-window backdrop-blur-xl sm:p-5">
-          <GlobePins pins={sitePins} activePanel={panels[activeIndex]} />
-        </div>
-      </div>
 
       {/* Golden Separator between Hero Card selection and Bottom Core Operational Modules panel */}
       <div

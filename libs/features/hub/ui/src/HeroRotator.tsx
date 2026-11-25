@@ -1,7 +1,6 @@
 'use client';
 
 import type { Department } from '@repo/departments/data-access';
-import type { GlobePin } from '@repo/ui/components/GlobePins';
 import type { Panel } from '@repo/ui/HeroRotator';
 import { HeroRotator as GenericHeroRotator } from '@repo/ui/HeroRotator';
 import { Logo } from '@repo/ui/Logo';
@@ -17,7 +16,6 @@ export interface HeroRotatorProps {
   secondaryHref: string;
   secondaryLabel: string;
   departments: Department[];
-  sitePins?: readonly GlobePin[];
   incidentCount?: number;
   breakdownCount?: number;
   offlineMachineCount?: number;
@@ -31,7 +29,6 @@ export function HeroRotator({
   secondaryHref,
   secondaryLabel,
   departments,
-  sitePins,
   incidentCount = 0,
   breakdownCount = 0,
   offlineMachineCount = 0,
@@ -145,7 +142,6 @@ export function HeroRotator({
   return (
     <GenericHeroRotator
       panels={panels}
-      sitePins={sitePins}
       incidentCount={incidentCount}
       breakdownCount={breakdownCount}
       offlineMachineCount={offlineMachineCount}
