@@ -94,7 +94,7 @@ pnpm redis:up                  # Start local Redis 7.4 + RedisInsight (:5540) in
 pnpm build                     # sync-assets-smart.cjs → patch-glass-css.mjs → turbo run build
 pnpm type-check                # turbo run type-check --concurrency=2
 pnpm lint                      # turbo run //#lint:ci (Biome across workspace)
-pnpm lint:styles && pnpm lint:spelling && pnpm md:lint
+pnpm lint:styles && pnpm lint:spelling && pnpm md:lint && pnpm format:prettier:check
 pnpm test                      # turbo run test
 ```
 
@@ -132,7 +132,7 @@ pnpm quality                   # Full release-grade verification suite
 ### Formatting & linting
 
 - **Biome 2.5** (`biome.json`): 2-space indent, 100 columns, single quotes in TS/JS, double quotes in JSX, semicolons required, ES5 trailing commas, `noExplicitAny: "error"` (relaxed in test files), `noUnusedVariables` / `noUnusedImports: "error"`, and `nursery/useSortedClasses: "error"` (auto-sorted across `className`, `classList`, `*ClassName`, `cn`, `clsx`, `cva`, `twMerge`). Several Biome `a11y` and `noImgElement` rules are disabled in Biome because dedicated gates enforce them (`audit:images`, Storybook axe, Playwright a11y).
-- **Prettier** (`prettier.config.mjs`, 100 columns) formats `*.md`, `*.css`, `*.scss`, `*.yaml`; **Stylelint** (`stylelint.config.mjs`) enforces CSS token variables (`var(--*)`) and high-performance animations; **CSpell** (`config/tools/cspell.json` + `config/project-words.txt`) enforces `en-US` spelling; **Markdownlint** (`config/tools/.markdownlint.json`) requires blank lines around headings (`MD022`), lists, and fences. **ESLint is not installed** (`config/tools/eslint.boundaries.cjs` is a generated policy artifact only).
+- **Prettier** (`prettier.config.mjs`, root devDependency, 100 columns) formats `*.md`, `*.css`, `*.scss`, `*.yaml` via `pnpm format:prettier`; build/venv output, `codebase-maps/`, generated theme CSS, and `.agents/memory_base/` are in `.prettierignore`, but `pnpm-lock.yaml` stays Prettier-formatted after every install to avoid inline-style churn; **Stylelint** (`stylelint.config.mjs`) enforces CSS token variables (`var(--*)`) and high-performance animations; **CSpell** (`config/tools/cspell.json` + `config/project-words.txt`) enforces `en-US` spelling; **Markdownlint** (`config/tools/.markdownlint.json`) requires blank lines around headings (`MD022`), lists, and fences. **ESLint is not installed** (`config/tools/eslint.boundaries.cjs` is a generated policy artifact only).
 - `.qoder/settings.json` PostToolUse hooks automatically run `biome check --write`, `markdownlint --fix`, `prettier`, and `cspell` on edited files.
 
 ### 10 core code quality rules
@@ -248,11 +248,11 @@ Always acquire external clients through factory functions to preserve pooling an
 
 ## Important Files
 
-- `AGENTS.md` — Canonical repository guidelines (`GEMINI.md` and `CLAUDE.md` -> `GEMINI.md` hold the compact operational summary; `.agents/GUIDE.md` and `.agents/SYSTEMS.md` document agent hooks, skills, and A2A architecture).
+- `AGENTS.md` — Canonical repository guidelines (`GEMINI.md` and `CLAUDE.md` -> `GEMINI.md` hold the compact operational summary; `AGENTS.local.md`, gitignored and higher priority, holds private per-machine overrides; `.agents/GUIDE.md` and `.agents/SYSTEMS.md` document agent hooks, skills, and A2A architecture).
 - `AGENT_TRACER.md` — Single root chronological handover ledger.
 - `apps/portal/proxy.ts` & `apps/portal/server/proxy.ts` — Next.js 16 CSP/nonce proxy and Supabase/Redis session + RBAC gatekeeper.
 - `apps/portal/app/layout.tsx` & `apps/portal/app/ClientProviders.tsx` — Root RSC shell and client query/offline/error providers.
-- `apps/portal/next.config.mjs` — `reactCompiler`, `cacheComponents`, `partialPrefetching`, `cacheLife`, 19 `transpilePackages`, `turbopack.root`.
+- `apps/portal/next.config.mjs` — `reactCompiler`, `cacheComponents`, `partialPrefetching`, `cacheLife`, 20 `transpilePackages`, `turbopack.root`.
 - `apps/portal/lib/server-cache.ts` & `apps/portal/lib/cache-tags.ts` — Cache profiles, tag builders, and dual-tier Next + Redis invalidation.
 - `packages/contract/src/index.ts` — Zod contract SSoT (`src/schemas/*.schema.ts`).
 - `packages/database/migrations/` — Canonical SQL migrations (`packages/supabase/migrations` symlinks here).
@@ -281,10 +281,10 @@ Always acquire external clients through factory functions to preserve pooling an
   - **Vercel**: Single canonical project `arch-system` (`vercel.json`; deploy via `pnpm deploy:vercel:prod` after `vercel link` and explicit user approval). Git auto-deploys from `main` on the account owning `arch-system-kappap.vercel.app`; the `server-management1` team's duplicate projects were deleted — do not relink them.
 - **Code-Intelligence substrate**: Prefer `codemap` and `ast-grep` for structural exploration. The CodeGraph SQLite index resolves via `CODEGRAPH_DB` → `~/local.db` → `.ci-local/local.db` (baseline in `.agents/memory_base/index-snapshot.json`) and is enforced by Gate 28 (`pnpm audit:code-intelligence`, validating >= 50% ranged entities and snapshot integrity; set `CODEGRAPH_STRICT=1` to require a live DB). Never hand-edit `local.db`; rebuild via `pnpm ci:reindex && pnpm ci:snapshot`.
 - **Hooks, MCP, & budgets**:
-  - Husky `pre-commit` runs `lint-staged`, `pre-commit-guards.cjs` (protected `.env`/symlink/tracer paths + migration lint), skill checks, `validate:json`, and `check-enforcement-integrity.cjs` (`--no-verify` is blocked by `commit-guard.sh`). `pre-push` executes `agent-verify.sh` unless `.ci-local/agent-verify-evidence.json` recorded all gates passing within 15 minutes (`FORCE_AGENT_VERIFY=1` bypasses cache).
-  - `.mcp.json` registers `supabase`, `codemap`, `chrome-devtools`, `context7`, and `frontend-checklist` (validated by `pnpm mcp:verify`).
+  - Husky `pre-commit` runs `lint-staged`, `pre-commit-guards.cjs` (protected `.env`/symlink/tracer paths + migration lint), skill checks, `validate:json`, and `check-enforcement-integrity.cjs` (`--no-verify` is blocked by `.qoder/hooks/commit-guard.sh`). `pre-push` executes `agent-verify.sh` unless `.ci-local/agent-verify-evidence.json` recorded all gates passing within 15 minutes (`FORCE_AGENT_VERIFY=1` bypasses cache).
+  - `.mcp.json` registers 11 servers — `supabase`, `codemap`, `chrome-devtools`, `context7`, `frontend-checklist`, `skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`, `vibemon`, `vercel`, `sentry` (validated by `pnpm mcp:verify`).
   - Environment files: optional root `.env`, `apps/portal/.env` (created by `./setup.sh` and validated in `libs/shared/utils/src/env.ts` and `pnpm env:check`), and `.env.tools`. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_KEY`, `SUPABASE_JWT_SECRET`, and `DATABASE*_URL` strictly server-only.
-  - `pnpm token:budget-check` enforces a `40,000`-byte inode-deduplicated ceiling across root instruction files (`AGENTS.md`, `CLAUDE.md`, `.claude.local.md`, `GEMINI.md`, `.cursorrules`). Execution rules for real-world code, zero-backlog WIP=1, and adaptive thinking live in `.agents/rules/real-world-adaptive-execution.md`; cross-agent `[ ]` checklist, branch, and safe `pnpm agent:start` / `pnpm agent:finish` clean-git rules live in `.agents/rules/universal-agent-workflow.md`.
+  - `pnpm token:budget-check` enforces a `40,000`-byte inode-deduplicated ceiling across root instruction files (`AGENTS.md`, `CLAUDE.md`, `AGENTS.local.md`, `.claude.local.md`, `GEMINI.md`, `.cursorrules`). Execution rules for real-world code, zero-backlog WIP=1, and adaptive thinking live in `.agents/rules/real-world-adaptive-execution.md`; cross-agent `[ ]` checklist, branch, and safe `pnpm agent:start` / `pnpm agent:finish` clean-git rules live in `.agents/rules/universal-agent-workflow.md`.
   - **VibeMon Tracking (Mandatory)**: All agents must keep VibeMon updated via `./vibemon.sh update` (`pnpm vibemon:update`) and emit task/session telemetry via `./vibemon.sh` (`pnpm vibemon:track <event> <agent>`, verified via `pnpm vibemon:status`).
 
 ---
@@ -294,7 +294,7 @@ Always acquire external clients through factory functions to preserve pooling an
 ### Test frameworks & suites
 
 - **Unit & Component (`*.test.ts(x)`)**: **Jest 30.2 + `@swc/jest`** across `apps/portal` and 14 `packages/*` / `libs/*` workspaces (no Vitest). `apps/portal/jest.config.cjs` defaults to `jsdom` with `apps/portal/setupTests.ts` (in-memory mocks for `next/cache`, `@repo/redis`, `@repo/agents`, `next/dynamic`, and DOM observers). Server Action and Route Handler tests opt into Node via `/** @jest-environment node */` comments.
-- **Database (`@repo/database`)**: Runs Node `node:test` and `.mjs` security/rollback scripts (`pnpm --filter @repo/database test`; `test:migration-replay` validates against a disposable `postgres:17-alpine` container).
+- **Database (`@repo/database`)**: Runs Node `node:test` and `.mjs` security/rollback scripts (`pnpm --filter @repo/database test`; `pnpm --filter @repo/database test:migration-replay` validates against a disposable `postgres:17-alpine` container).
 - **Redis Integration (`*.integration.test.ts`)**: Live TCP suites in `packages/redis/tests/integration/` and `apps/portal/test/integration/` (drops `setupTests.ts` mocks), gated by `REDIS_INTEGRATION=1` (`pnpm test:redis:integration`).
 - **Python AI Eval (`@repo/eval`)**: `pytest` + `deepeval` in `packages/eval/` (silently skips under `pnpm test` if neither `poetry` nor `uv` is installed; CI enforces `poetry run deepeval test run tests/`).
 - **E2E & Visual (`e2e/*.spec.ts`)**: **Playwright 1.65** (`e2e/playwright.config.ts`) running `setup` -> `chromium`, `mobile-chrome`, `tablet-chrome` with cached auth in `e2e/.auth/user.json` (optional `PLAYWRIGHT_WEBKIT=1`). Automatically starts `portal` on `:3000` unless `BASE_URL` is set; runs headed locally (`CI=1 pnpm test:e2e` for headless). Visual regression (`pnpm test:e2e:visual`) uses Linux Chromium snapshots with `maxDiffPixelRatio: 0.02`. k6 load tests live in `e2e/load/`.
