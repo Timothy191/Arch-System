@@ -1,6 +1,6 @@
 {
   "id": "compaction-9fce1b14",
-  "timestamp": "2026-11-25T05:24:41.447Z",
+  "timestamp": "2026-11-25T05:29:01.866Z",
   "taskTag": "compaction-standard-9fce1b14",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:execute_full_compact",
@@ -22,13 +22,13 @@
     "\"/home/tim/.cache/arch-design-feedback-14/apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorShiftTelemetryControls.tsx\""
   ],
   "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
-  "resolution": "Persisted bounded SKILL.state (461 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "resolution": "Persisted bounded SKILL.state (423 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
   "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
   "metrics": {
     "mode": "standard",
     "decision": "execute_full_compact",
-    "latestInputTokens": 455904,
-    "cacheHitRatio": 0.8925,
+    "latestInputTokens": 460306,
+    "cacheHitRatio": 0.8909,
     "checkpointCount": 6,
     "avoidedCacheRebuildTokens": 0
   }
