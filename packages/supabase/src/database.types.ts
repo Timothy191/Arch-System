@@ -1,11 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: '14.15';
-  };
   graphql_public: {
     Tables: {
       [_ in never]: never;
@@ -15,12 +10,7 @@ export type Database = {
     };
     Functions: {
       graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
+        Args: { extensions?: Json; operationName?: string; query?: string; variables?: Json };
         Returns: Json;
       };
     };
@@ -44,6 +34,7 @@ export type Database = {
           user_id: string | null;
           variant: string;
         };
+        ComputedFields: never;
         Insert: {
           converted?: boolean | null;
           flag_key: string;
@@ -89,6 +80,7 @@ export type Database = {
           operator: string | null;
           scanned_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           access_granted?: boolean | null;
           access_type: string;
@@ -141,6 +133,97 @@ export type Database = {
           },
         ];
       };
+      agent_work_reports: {
+        Row: {
+          actual_changed_files: NonNullable<Json>;
+          agent_id: string;
+          agent_name: string;
+          agent_report: NonNullable<Json>;
+          computed_state: string;
+          created_at: string;
+          created_by: string | null;
+          declared_state: string;
+          ending_commit_sha: string;
+          evidence_run_id: string | null;
+          file_diff_matches: boolean;
+          findings: NonNullable<Json>;
+          id: string;
+          missing_declared_files: NonNullable<Json>;
+          starting_commit_sha: string;
+          submitted_at: string;
+          task_description: string;
+          task_id: string;
+          undeclared_files: NonNullable<Json>;
+          verification_id: string;
+          verified_at: string;
+          verified_by: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actual_changed_files?: NonNullable<Json>;
+          agent_id: string;
+          agent_name: string;
+          agent_report: NonNullable<Json>;
+          computed_state: string;
+          created_at?: string;
+          created_by?: string | null;
+          declared_state: string;
+          ending_commit_sha: string;
+          evidence_run_id?: string | null;
+          file_diff_matches: boolean;
+          findings?: NonNullable<Json>;
+          id?: string;
+          missing_declared_files?: NonNullable<Json>;
+          starting_commit_sha: string;
+          submitted_at: string;
+          task_description: string;
+          task_id: string;
+          undeclared_files?: NonNullable<Json>;
+          verification_id: string;
+          verified_at: string;
+          verified_by: string;
+        };
+        Update: {
+          actual_changed_files?: NonNullable<Json>;
+          agent_id?: string;
+          agent_name?: string;
+          agent_report?: NonNullable<Json>;
+          computed_state?: string;
+          created_at?: string;
+          created_by?: string | null;
+          declared_state?: string;
+          ending_commit_sha?: string;
+          evidence_run_id?: string | null;
+          file_diff_matches?: boolean;
+          findings?: NonNullable<Json>;
+          id?: string;
+          missing_declared_files?: NonNullable<Json>;
+          starting_commit_sha?: string;
+          submitted_at?: string;
+          task_description?: string;
+          task_id?: string;
+          undeclared_files?: NonNullable<Json>;
+          verification_id?: string;
+          verified_at?: string;
+          verified_by?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'agent_work_reports_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'employees';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'agent_work_reports_evidence_run_id_fkey';
+            columns: ['evidence_run_id'];
+            isOneToOne: false;
+            referencedRelation: 'quality_verification_runs';
+            referencedColumns: ['run_id'];
+          },
+        ];
+      };
       ai_token_usage: {
         Row: {
           cached_prompt_tokens: number;
@@ -164,6 +247,7 @@ export type Database = {
           total_tokens: number;
           user_id: string | null;
         };
+        ComputedFields: never;
         Insert: {
           cached_prompt_tokens?: number;
           completion_cost_usd_cents?: number;
@@ -239,6 +323,7 @@ export type Database = {
           site_code: string;
           trip_loads: number | null;
         };
+        ComputedFields: never;
         Insert: {
           activity_notes?: string | null;
           activity_type: string;
@@ -310,6 +395,7 @@ export type Database = {
           table_name: string;
           user_agent: string | null;
         };
+        ComputedFields: never;
         Insert: {
           action: string;
           created_at?: string;
@@ -376,6 +462,7 @@ export type Database = {
           rfid_code: string | null;
           visitor_id: string | null;
         };
+        ComputedFields: never;
         Insert: {
           department_id?: string | null;
           entity_type: string;
@@ -470,6 +557,7 @@ export type Database = {
           time_out: string | null;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           completed_by?: string | null;
           created_at?: string;
@@ -479,7 +567,7 @@ export type Database = {
           delay_hours?: number | null;
           deleted_at?: string | null;
           department_id: string;
-          duration_hours?: number | null;
+          duration_hours?: never;
           duration_minutes?: number | null;
           fleet_id: string;
           id?: string;
@@ -511,7 +599,7 @@ export type Database = {
           delay_hours?: number | null;
           deleted_at?: string | null;
           department_id?: string;
-          duration_hours?: number | null;
+          duration_hours?: never;
           duration_minutes?: number | null;
           fleet_id?: string;
           id?: string;
@@ -573,6 +661,7 @@ export type Database = {
           timestamp: string;
           type: string;
         };
+        ComputedFields: never;
         Insert: {
           details?: Json | null;
           id?: number;
@@ -598,6 +687,7 @@ export type Database = {
           source: string | null;
           timestamp: string;
         };
+        ComputedFields: never;
         Insert: {
           details?: Json | null;
           event: string;
@@ -633,6 +723,7 @@ export type Database = {
           updated_at: string | null;
           vendor_id: string | null;
         };
+        ComputedFields: never;
         Insert: {
           connection_type?: string;
           created_at?: string | null;
@@ -677,10 +768,11 @@ export type Database = {
           fields: string[];
           id: string;
           is_default: boolean | null;
-          layout: Json;
+          layout: NonNullable<Json>;
           name: string;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           background?: string | null;
           created_at?: string | null;
@@ -690,7 +782,7 @@ export type Database = {
           fields?: string[];
           id?: string;
           is_default?: boolean | null;
-          layout?: Json;
+          layout?: NonNullable<Json>;
           name: string;
           updated_at?: string | null;
         };
@@ -703,7 +795,7 @@ export type Database = {
           fields?: string[];
           id?: string;
           is_default?: boolean | null;
-          layout?: Json;
+          layout?: NonNullable<Json>;
           name?: string;
           updated_at?: string | null;
         };
@@ -713,17 +805,18 @@ export type Database = {
         Row: {
           audit_type: string;
           created_at: string;
-          details: Json;
+          details: NonNullable<Json>;
           executed_by: string | null;
           id: string;
           score: number;
           status: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           audit_type: string;
           created_at?: string;
-          details?: Json;
+          details?: NonNullable<Json>;
           executed_by?: string | null;
           id?: string;
           score?: number;
@@ -733,7 +826,7 @@ export type Database = {
         Update: {
           audit_type?: string;
           created_at?: string;
-          details?: Json;
+          details?: NonNullable<Json>;
           executed_by?: string | null;
           id?: string;
           score?: number;
@@ -748,17 +841,18 @@ export type Database = {
           created_at: string;
           id: string;
           next_attempt_at: string;
-          payload: Json;
+          payload: NonNullable<Json>;
           status: Database['public']['Enums']['outbox_status'];
           target: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           attempts?: number;
           created_at?: string;
           id?: string;
           next_attempt_at?: string;
-          payload: Json;
+          payload: NonNullable<Json>;
           status?: Database['public']['Enums']['outbox_status'];
           target: string;
           updated_at?: string;
@@ -768,7 +862,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           next_attempt_at?: string;
-          payload?: Json;
+          payload?: NonNullable<Json>;
           status?: Database['public']['Enums']['outbox_status'];
           target?: string;
           updated_at?: string;
@@ -781,7 +875,7 @@ export type Database = {
           approval_note: string | null;
           approved_at: string | null;
           approver_id: string | null;
-          checklist_items: Json;
+          checklist_items: NonNullable<Json>;
           completed_checklist_count: number;
           created_at: string;
           created_by: string | null;
@@ -802,12 +896,13 @@ export type Database = {
           total_checklist_count: number;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           alarm_response_avg_seconds?: number;
           approval_note?: string | null;
           approved_at?: string | null;
           approver_id?: string | null;
-          checklist_items?: Json;
+          checklist_items?: NonNullable<Json>;
           completed_checklist_count?: number;
           created_at?: string;
           created_by?: string | null;
@@ -833,7 +928,7 @@ export type Database = {
           approval_note?: string | null;
           approved_at?: string | null;
           approver_id?: string | null;
-          checklist_items?: Json;
+          checklist_items?: NonNullable<Json>;
           completed_checklist_count?: number;
           created_at?: string;
           created_by?: string | null;
@@ -907,6 +1002,7 @@ export type Database = {
           updated_at: string | null;
           updated_by: string | null;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           created_by?: string | null;
@@ -980,6 +1076,7 @@ export type Database = {
           severity: string;
           table_name: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           description: string;
@@ -1029,6 +1126,7 @@ export type Database = {
           sort_order: number;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           color?: string;
           created_at?: string;
@@ -1079,6 +1177,7 @@ export type Database = {
           uncommitted_by: string | null;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           committed_at?: string | null;
           committed_by?: string | null;
@@ -1091,7 +1190,7 @@ export type Database = {
           deleted_by?: string | null;
           deleted_reason?: string | null;
           description?: string | null;
-          duration_hours?: number;
+          duration_hours?: never;
           id?: string;
           is_manual_override?: boolean;
           machine_operation_id: string;
@@ -1114,7 +1213,7 @@ export type Database = {
           deleted_by?: string | null;
           deleted_reason?: string | null;
           description?: string | null;
-          duration_hours?: number;
+          duration_hours?: never;
           id?: string;
           is_manual_override?: boolean;
           machine_operation_id?: string;
@@ -1201,6 +1300,7 @@ export type Database = {
           uncommitted_by: string | null;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           committed_at?: string | null;
           committed_by?: string | null;
@@ -1213,7 +1313,7 @@ export type Database = {
           deleted_by?: string | null;
           deleted_reason?: string | null;
           description?: string | null;
-          duration_hours?: number;
+          duration_hours?: never;
           id?: string;
           is_manual_override?: boolean;
           machine_operation_id: string;
@@ -1236,7 +1336,7 @@ export type Database = {
           deleted_by?: string | null;
           deleted_reason?: string | null;
           description?: string | null;
-          duration_hours?: number;
+          duration_hours?: never;
           id?: string;
           is_manual_override?: boolean;
           machine_operation_id?: string;
@@ -1261,6 +1361,7 @@ export type Database = {
           name: string;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           color: string;
           created_at?: string;
@@ -1287,7 +1388,7 @@ export type Database = {
       };
       documents: {
         Row: {
-          content: Json;
+          content: NonNullable<Json>;
           created_at: string;
           created_by: string | null;
           deleted_at: string | null;
@@ -1300,8 +1401,9 @@ export type Database = {
           title: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
-          content?: Json;
+          content?: NonNullable<Json>;
           created_at?: string;
           created_by?: string | null;
           deleted_at?: string | null;
@@ -1315,7 +1417,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
-          content?: Json;
+          content?: NonNullable<Json>;
           created_at?: string;
           created_by?: string | null;
           deleted_at?: string | null;
@@ -1368,8 +1470,9 @@ export type Database = {
           start_smu: number;
           total_bcm: number | null;
         };
+        ComputedFields: never;
         Insert: {
-          calculated_hours?: number | null;
+          calculated_hours?: never;
           created_at?: string | null;
           department_id: string;
           end_smu: number;
@@ -1381,10 +1484,10 @@ export type Database = {
           shift_type: string;
           site_code?: string;
           start_smu: number;
-          total_bcm?: number | null;
+          total_bcm?: never;
         };
         Update: {
-          calculated_hours?: number | null;
+          calculated_hours?: never;
           created_at?: string | null;
           department_id?: string;
           end_smu?: number;
@@ -1396,7 +1499,7 @@ export type Database = {
           shift_type?: string;
           site_code?: string;
           start_smu?: number;
-          total_bcm?: number | null;
+          total_bcm?: never;
         };
         Relationships: [
           {
@@ -1448,6 +1551,7 @@ export type Database = {
           shift_type: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           area_covered_sqm?: number | null;
           blade_passes?: number;
@@ -1555,6 +1659,7 @@ export type Database = {
           shift_type: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           area_covered_sqm?: number | null;
           blade_passes?: number;
@@ -1625,6 +1730,7 @@ export type Database = {
           updated_at: string;
           updated_by: string | null;
         };
+        ComputedFields: never;
         Insert: {
           block_drilled?: string | null;
           close_hours?: number | null;
@@ -1652,7 +1758,7 @@ export type Database = {
           site?: string | null;
           standard_delays_hours?: number | null;
           status?: string | null;
-          total_hours?: number | null;
+          total_hours?: never;
           updated_at?: string;
           updated_by?: string | null;
         };
@@ -1683,7 +1789,7 @@ export type Database = {
           site?: string | null;
           standard_delays_hours?: number | null;
           status?: string | null;
-          total_hours?: number | null;
+          total_hours?: never;
           updated_at?: string;
           updated_by?: string | null;
         };
@@ -1764,6 +1870,7 @@ export type Database = {
           updated_at: string;
           updated_by: string | null;
         };
+        ComputedFields: never;
         Insert: {
           block_drilled?: string | null;
           close_hours?: number | null;
@@ -1791,7 +1898,7 @@ export type Database = {
           site?: string | null;
           standard_delays_hours?: number | null;
           status?: string | null;
-          total_hours?: number | null;
+          total_hours?: never;
           updated_at?: string;
           updated_by?: string | null;
         };
@@ -1822,7 +1929,7 @@ export type Database = {
           site?: string | null;
           standard_delays_hours?: number | null;
           status?: string | null;
-          total_hours?: number | null;
+          total_hours?: never;
           updated_at?: string;
           updated_by?: string | null;
         };
@@ -1835,6 +1942,7 @@ export type Database = {
           text_hash: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           embedding: string;
@@ -1861,6 +1969,7 @@ export type Database = {
           id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           access_level?: Database['public']['Enums']['department_access_level'];
           created_at?: string;
@@ -1920,11 +2029,13 @@ export type Database = {
           areas: string[] | null;
           auth_id: string;
           created_at: string;
+          date_of_birth: string | null;
           deleted_at: string | null;
           department_id: string | null;
           employee_code: string | null;
           first_name: string | null;
           full_name: string;
+          gender: string | null;
           id: string;
           induction_expiry_date: string | null;
           job_title: string | null;
@@ -1934,19 +2045,23 @@ export type Database = {
           photo_url: string | null;
           pin_hash: string | null;
           qr_code_data: string | null;
+          record_type: string | null;
           role: string;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           accessible_departments?: string[] | null;
           areas?: string[] | null;
           auth_id: string;
           created_at?: string;
+          date_of_birth?: string | null;
           deleted_at?: string | null;
           department_id?: string | null;
           employee_code?: string | null;
           first_name?: string | null;
           full_name: string;
+          gender?: string | null;
           id?: string;
           induction_expiry_date?: string | null;
           job_title?: string | null;
@@ -1956,6 +2071,7 @@ export type Database = {
           photo_url?: string | null;
           pin_hash?: string | null;
           qr_code_data?: string | null;
+          record_type?: string | null;
           role?: string;
           updated_at?: string | null;
         };
@@ -1964,11 +2080,13 @@ export type Database = {
           areas?: string[] | null;
           auth_id?: string;
           created_at?: string;
+          date_of_birth?: string | null;
           deleted_at?: string | null;
           department_id?: string | null;
           employee_code?: string | null;
           first_name?: string | null;
           full_name?: string;
+          gender?: string | null;
           id?: string;
           induction_expiry_date?: string | null;
           job_title?: string | null;
@@ -1978,6 +2096,7 @@ export type Database = {
           photo_url?: string | null;
           pin_hash?: string | null;
           qr_code_data?: string | null;
+          record_type?: string | null;
           role?: string;
           updated_at?: string | null;
         };
@@ -2016,6 +2135,7 @@ export type Database = {
           status: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           action_taken: string;
           created_at?: string;
@@ -2106,6 +2226,7 @@ export type Database = {
           status: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           action_taken: string;
           created_at?: string;
@@ -2157,6 +2278,7 @@ export type Database = {
           status: string;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           assigned_to?: string | null;
           calibration_expiry?: string | null;
@@ -2230,6 +2352,7 @@ export type Database = {
           site_id: string | null;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           activity_date: string;
           avg_cycle_time_seconds?: number | null;
@@ -2357,6 +2480,7 @@ export type Database = {
           site_id: string | null;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           activity_date: string;
           avg_cycle_time_seconds?: number | null;
@@ -2411,6 +2535,7 @@ export type Database = {
           total_loads: number;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           dumper_machine_id: string;
@@ -2469,6 +2594,7 @@ export type Database = {
           total_loads: number;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           dumper_machine_id: string;
@@ -2508,6 +2634,7 @@ export type Database = {
           shift_type: string;
           site_code: string;
         };
+        ComputedFields: never;
         Insert: {
           block_id: string;
           created_at?: string | null;
@@ -2577,6 +2704,7 @@ export type Database = {
           truck_id: string;
           truck_name: string;
         };
+        ComputedFields: never;
         Insert: {
           bcm_per_load?: number | null;
           haul_log_id: string;
@@ -2629,6 +2757,7 @@ export type Database = {
           user_id: string | null;
           variant: string;
         };
+        ComputedFields: never;
         Insert: {
           evaluated_at?: string | null;
           flag_key: string;
@@ -2674,6 +2803,7 @@ export type Database = {
           variant_a: Json | null;
           variant_b: Json | null;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string | null;
           description?: string | null;
@@ -2724,6 +2854,7 @@ export type Database = {
           vehicle_type: string;
           year: number | null;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string | null;
           department_id?: string | null;
@@ -2783,6 +2914,7 @@ export type Database = {
           updated_at: string | null;
           updated_by: string | null;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           created_by?: string | null;
@@ -2857,19 +2989,20 @@ export type Database = {
           generated_by: string;
           id: string;
           pdf_url: string | null;
-          report_data: Json;
+          report_data: NonNullable<Json>;
           report_date: string;
           shift_type: string | null;
           template_id: string | null;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           department_id: string;
           generated_at?: string;
           generated_by: string;
           id?: string;
           pdf_url?: string | null;
-          report_data: Json;
+          report_data: NonNullable<Json>;
           report_date: string;
           shift_type?: string | null;
           template_id?: string | null;
@@ -2881,7 +3014,7 @@ export type Database = {
           generated_by?: string;
           id?: string;
           pdf_url?: string | null;
-          report_data?: Json;
+          report_data?: NonNullable<Json>;
           report_date?: string;
           shift_type?: string | null;
           template_id?: string | null;
@@ -2950,6 +3083,7 @@ export type Database = {
           updated_at: string;
           updated_by: string | null;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           created_by?: string | null;
@@ -2977,7 +3111,7 @@ export type Database = {
           material_type?: string;
           shift_type: string;
           start_hour?: number;
-          total_loads?: number | null;
+          total_loads?: never;
           updated_at?: string;
           updated_by?: string | null;
         };
@@ -3008,7 +3142,7 @@ export type Database = {
           material_type?: string;
           shift_type?: string;
           start_hour?: number;
-          total_loads?: number | null;
+          total_loads?: never;
           updated_at?: string;
           updated_by?: string | null;
         };
@@ -3105,17 +3239,18 @@ export type Database = {
           expires_at: string;
           key: string;
           request_hash: string;
-          response_json: Json;
+          response_json: NonNullable<Json>;
           route: string;
           status_code: number;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           expires_at?: string;
           key: string;
           request_hash: string;
-          response_json: Json;
+          response_json: NonNullable<Json>;
           route: string;
           status_code: number;
           user_id: string;
@@ -3125,7 +3260,7 @@ export type Database = {
           expires_at?: string;
           key?: string;
           request_hash?: string;
-          response_json?: Json;
+          response_json?: NonNullable<Json>;
           route?: string;
           status_code?: number;
           user_id?: string;
@@ -3144,6 +3279,7 @@ export type Database = {
           status: string;
           tool_name: string;
         };
+        ComputedFields: never;
         Insert: {
           args_digest?: string | null;
           created_at?: string;
@@ -3180,7 +3316,7 @@ export type Database = {
         Row: {
           auth_type: string;
           author: string | null;
-          capabilities: Json;
+          capabilities: NonNullable<Json>;
           created_at: string;
           description: string | null;
           docs_url: string | null;
@@ -3192,10 +3328,11 @@ export type Database = {
           updated_at: string | null;
           verified: boolean;
         };
+        ComputedFields: never;
         Insert: {
           auth_type?: string;
           author?: string | null;
-          capabilities?: Json;
+          capabilities?: NonNullable<Json>;
           created_at?: string;
           description?: string | null;
           docs_url?: string | null;
@@ -3210,7 +3347,7 @@ export type Database = {
         Update: {
           auth_type?: string;
           author?: string | null;
-          capabilities?: Json;
+          capabilities?: NonNullable<Json>;
           created_at?: string;
           description?: string | null;
           docs_url?: string | null;
@@ -3234,6 +3371,7 @@ export type Database = {
           kind: string;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           ciphertext: string;
           created_at?: string;
@@ -3265,7 +3403,7 @@ export type Database = {
       integration_installations: {
         Row: {
           catalog_id: string;
-          config: Json;
+          config: NonNullable<Json>;
           created_at: string;
           department_id: string | null;
           id: string;
@@ -3273,14 +3411,15 @@ export type Database = {
           last_error: string | null;
           scope: string;
           status: string;
-          tool_allowlist: Json;
+          tool_allowlist: NonNullable<Json>;
           tool_cache: Json | null;
           tools_synced_at: string | null;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           catalog_id: string;
-          config?: Json;
+          config?: NonNullable<Json>;
           created_at?: string;
           department_id?: string | null;
           id?: string;
@@ -3288,14 +3427,14 @@ export type Database = {
           last_error?: string | null;
           scope?: string;
           status?: string;
-          tool_allowlist?: Json;
+          tool_allowlist?: NonNullable<Json>;
           tool_cache?: Json | null;
           tools_synced_at?: string | null;
           updated_at?: string | null;
         };
         Update: {
           catalog_id?: string;
-          config?: Json;
+          config?: NonNullable<Json>;
           created_at?: string;
           department_id?: string | null;
           id?: string;
@@ -3303,7 +3442,7 @@ export type Database = {
           last_error?: string | null;
           scope?: string;
           status?: string;
-          tool_allowlist?: Json;
+          tool_allowlist?: NonNullable<Json>;
           tool_cache?: Json | null;
           tools_synced_at?: string | null;
           updated_at?: string | null;
@@ -3347,6 +3486,7 @@ export type Database = {
           rfid_uid: string | null;
           status: string;
         };
+        ComputedFields: never;
         Insert: {
           expires_at?: string | null;
           id?: string;
@@ -3411,6 +3551,7 @@ export type Database = {
           updated_at: string;
           updated_by: string | null;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           created_by?: string | null;
@@ -3476,6 +3617,7 @@ export type Database = {
           updated_at: string | null;
           updated_by: string | null;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           created_by?: string | null;
@@ -3569,6 +3711,7 @@ export type Database = {
           start_time: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           block_drilled?: string | null;
           created_at?: string;
@@ -3579,7 +3722,7 @@ export type Database = {
           end_smu?: number | null;
           end_time?: string | null;
           holes_drilled?: number | null;
-          hours_worked?: number | null;
+          hours_worked?: never;
           id?: string;
           machine_id: string;
           meters_drilled?: number | null;
@@ -3604,7 +3747,7 @@ export type Database = {
           end_smu?: number | null;
           end_time?: string | null;
           holes_drilled?: number | null;
-          hours_worked?: number | null;
+          hours_worked?: never;
           id?: string;
           machine_id?: string;
           meters_drilled?: number | null;
@@ -3711,6 +3854,7 @@ export type Database = {
           start_time: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           block_drilled?: string | null;
           created_at?: string;
@@ -3721,7 +3865,7 @@ export type Database = {
           end_smu?: number | null;
           end_time?: string | null;
           holes_drilled?: number | null;
-          hours_worked?: number | null;
+          hours_worked?: never;
           id?: string;
           machine_id: string;
           meters_drilled?: number | null;
@@ -3746,7 +3890,7 @@ export type Database = {
           end_smu?: number | null;
           end_time?: string | null;
           holes_drilled?: number | null;
-          hours_worked?: number | null;
+          hours_worked?: never;
           id?: string;
           machine_id?: string;
           meters_drilled?: number | null;
@@ -3789,6 +3933,7 @@ export type Database = {
           weight_on_bit: number | null;
           year_month: string;
         };
+        ComputedFields: never;
         Insert: {
           alert_codes?: string[] | null;
           alert_count?: number | null;
@@ -3812,7 +3957,7 @@ export type Database = {
           standpipe_pressure?: number | null;
           vibration_level?: number | null;
           weight_on_bit?: number | null;
-          year_month?: string;
+          year_month?: never;
         };
         Update: {
           alert_codes?: string[] | null;
@@ -3837,7 +3982,7 @@ export type Database = {
           standpipe_pressure?: number | null;
           vibration_level?: number | null;
           weight_on_bit?: number | null;
-          year_month?: string;
+          year_month?: never;
         };
         Relationships: [
           {
@@ -3898,6 +4043,7 @@ export type Database = {
           weight_on_bit: number | null;
           year_month: string;
         };
+        ComputedFields: never;
         Insert: {
           alert_codes?: string[] | null;
           alert_count?: number | null;
@@ -3968,6 +4114,7 @@ export type Database = {
           tracks_tonnage: boolean;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           code: string;
           created_at?: string;
@@ -4006,6 +4153,7 @@ export type Database = {
           deleted_at: string | null;
           department_id: string;
           id: string;
+          image_url: string | null;
           machine_type: string;
           machine_type_id: string | null;
           manufacturer: string | null;
@@ -4016,6 +4164,7 @@ export type Database = {
           starting_smr: number | null;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           active?: boolean;
           bin_factor?: number | null;
@@ -4025,6 +4174,7 @@ export type Database = {
           deleted_at?: string | null;
           department_id: string;
           id?: string;
+          image_url?: string | null;
           machine_type: string;
           machine_type_id?: string | null;
           manufacturer?: string | null;
@@ -4044,6 +4194,7 @@ export type Database = {
           deleted_at?: string | null;
           department_id?: string;
           id?: string;
+          image_url?: string | null;
           machine_type?: string;
           machine_type_id?: string | null;
           manufacturer?: string | null;
@@ -4093,6 +4244,7 @@ export type Database = {
           material_type: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           density_factor: number;
@@ -4123,6 +4275,7 @@ export type Database = {
           triggered_by: string | null;
           view_name: string;
         };
+        ComputedFields: never;
         Insert: {
           error_message?: string | null;
           id?: string;
@@ -4158,18 +4311,19 @@ export type Database = {
           embedding: string;
           id: string;
           memory_type: Database['public']['Enums']['memory_type'];
-          metadata: Json;
+          metadata: NonNullable<Json>;
           session_id: string;
           updated_at: string;
           user_id: string | null;
         };
+        ComputedFields: never;
         Insert: {
           content: string;
           created_at?: string;
           embedding: string;
           id?: string;
           memory_type?: Database['public']['Enums']['memory_type'];
-          metadata?: Json;
+          metadata?: NonNullable<Json>;
           session_id: string;
           updated_at?: string;
           user_id?: string | null;
@@ -4180,7 +4334,7 @@ export type Database = {
           embedding?: string;
           id?: string;
           memory_type?: Database['public']['Enums']['memory_type'];
-          metadata?: Json;
+          metadata?: NonNullable<Json>;
           session_id?: string;
           updated_at?: string;
           user_id?: string | null;
@@ -4198,6 +4352,7 @@ export type Database = {
           site_id: string | null;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           active?: boolean;
           code: string;
@@ -4238,15 +4393,16 @@ export type Database = {
           is_sealed: boolean;
           machine_count: number;
           month: string;
-          records: Json;
+          records: NonNullable<Json>;
           sealed_at: string;
           sealed_by: string | null;
           shift_type: string;
-          summaries: Json;
+          summaries: NonNullable<Json>;
           total_breakdown_hours: number;
           total_smr_worked: number;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           department_id: string;
@@ -4256,11 +4412,11 @@ export type Database = {
           is_sealed?: boolean;
           machine_count?: number;
           month: string;
-          records?: Json;
+          records?: NonNullable<Json>;
           sealed_at?: string;
           sealed_by?: string | null;
           shift_type?: string;
-          summaries?: Json;
+          summaries?: NonNullable<Json>;
           total_breakdown_hours?: number;
           total_smr_worked?: number;
           updated_at?: string;
@@ -4274,11 +4430,11 @@ export type Database = {
           is_sealed?: boolean;
           machine_count?: number;
           month?: string;
-          records?: Json;
+          records?: NonNullable<Json>;
           sealed_at?: string;
           sealed_by?: string | null;
           shift_type?: string;
-          summaries?: Json;
+          summaries?: NonNullable<Json>;
           total_breakdown_hours?: number;
           total_smr_worked?: number;
           updated_at?: string;
@@ -4320,6 +4476,7 @@ export type Database = {
           recorded_by: string | null;
           status: string;
         };
+        ComputedFields: never;
         Insert: {
           badge_code?: string | null;
           employee_id?: string | null;
@@ -4378,9 +4535,10 @@ export type Database = {
           mutation_id: string;
           node_id: string;
           op: string;
-          payload: Json;
+          payload: NonNullable<Json>;
           tenant_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           entity: string;
@@ -4390,7 +4548,7 @@ export type Database = {
           mutation_id: string;
           node_id: string;
           op: string;
-          payload: Json;
+          payload: NonNullable<Json>;
           tenant_id: string;
         };
         Update: {
@@ -4402,7 +4560,7 @@ export type Database = {
           mutation_id?: string;
           node_id?: string;
           op?: string;
-          payload?: Json;
+          payload?: NonNullable<Json>;
           tenant_id?: string;
         };
         Relationships: [];
@@ -4425,6 +4583,7 @@ export type Database = {
           status: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           affected_machine_id?: string | null;
           created_at?: string;
@@ -4515,6 +4674,7 @@ export type Database = {
           role: string | null;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           active?: boolean;
           created_at?: string;
@@ -4541,31 +4701,38 @@ export type Database = {
         Row: {
           area: string | null;
           created_at: string | null;
+          date_of_birth: string | null;
           department_id: string | null;
           emp_code: string;
           first_name: string;
+          gender: string | null;
           id: string;
           id_number: string;
           induction_expiry: string | null;
           job_title: string | null;
           medical_expiry: string | null;
           photo_url: string | null;
+          record_type: string | null;
           status: string | null;
           surname: string;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           area?: string | null;
           created_at?: string | null;
+          date_of_birth?: string | null;
           department_id?: string | null;
           emp_code: string;
           first_name: string;
+          gender?: string | null;
           id?: string;
           id_number: string;
           induction_expiry?: string | null;
           job_title?: string | null;
           medical_expiry?: string | null;
           photo_url?: string | null;
+          record_type?: string | null;
           status?: string | null;
           surname: string;
           updated_at?: string | null;
@@ -4573,15 +4740,18 @@ export type Database = {
         Update: {
           area?: string | null;
           created_at?: string | null;
+          date_of_birth?: string | null;
           department_id?: string | null;
           emp_code?: string;
           first_name?: string;
+          gender?: string | null;
           id?: string;
           id_number?: string;
           induction_expiry?: string | null;
           job_title?: string | null;
           medical_expiry?: string | null;
           photo_url?: string | null;
+          record_type?: string | null;
           status?: string | null;
           surname?: string;
           updated_at?: string | null;
@@ -4622,6 +4792,7 @@ export type Database = {
           status: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           category: string;
           circuit: string;
@@ -4684,13 +4855,14 @@ export type Database = {
           module_id: string;
           operation_date: string;
           operator_name: string;
-          rows: Json;
+          rows: NonNullable<Json>;
           shift: string;
           total_clean_coal_tonnes: number;
           total_discard_tonnes: number;
           total_rom_tonnes: number;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           avg_yield_pct?: number;
           created_at?: string;
@@ -4699,7 +4871,7 @@ export type Database = {
           module_id?: string;
           operation_date: string;
           operator_name?: string;
-          rows?: Json;
+          rows?: NonNullable<Json>;
           shift: string;
           total_clean_coal_tonnes?: number;
           total_discard_tonnes?: number;
@@ -4714,7 +4886,7 @@ export type Database = {
           module_id?: string;
           operation_date?: string;
           operator_name?: string;
-          rows?: Json;
+          rows?: NonNullable<Json>;
           shift?: string;
           total_clean_coal_tonnes?: number;
           total_discard_tonnes?: number;
@@ -4760,23 +4932,24 @@ export type Database = {
           updated_at: string;
           updated_by: string | null;
         };
+        ComputedFields: never;
         Insert: {
           amount_present?: number;
           amount_required?: number;
           category: string;
           code: string;
-          coverage_pct?: number | null;
+          coverage_pct?: never;
           created_at?: string;
           created_by?: string | null;
           department_id?: string | null;
           description: string;
           id?: string;
-          needs_replenishment?: boolean | null;
+          needs_replenishment?: never;
           plant_equipment: string;
-          shortfall_amount?: number | null;
+          shortfall_amount?: never;
           stock: string;
-          stock_status?: string | null;
-          surplus_amount?: number | null;
+          stock_status?: never;
+          surplus_amount?: never;
           unit?: string;
           updated_at?: string;
           updated_by?: string | null;
@@ -4786,18 +4959,18 @@ export type Database = {
           amount_required?: number;
           category?: string;
           code?: string;
-          coverage_pct?: number | null;
+          coverage_pct?: never;
           created_at?: string;
           created_by?: string | null;
           department_id?: string | null;
           description?: string;
           id?: string;
-          needs_replenishment?: boolean | null;
+          needs_replenishment?: never;
           plant_equipment?: string;
-          shortfall_amount?: number | null;
+          shortfall_amount?: never;
           stock?: string;
-          stock_status?: string | null;
-          surplus_amount?: number | null;
+          stock_status?: never;
+          surplus_amount?: never;
           unit?: string;
           updated_at?: string;
           updated_by?: string | null;
@@ -4849,6 +5022,7 @@ export type Database = {
           unit: string;
           usage_date: string;
         };
+        ComputedFields: never;
         Insert: {
           amount_used: number;
           circuit_area: string;
@@ -4912,6 +5086,7 @@ export type Database = {
           status: string;
           template_id: string | null;
         };
+        ComputedFields: never;
         Insert: {
           cancelled_at?: string | null;
           completed_at?: string | null;
@@ -4999,6 +5174,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5071,6 +5247,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5107,6 +5284,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5143,6 +5321,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5179,6 +5358,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5215,6 +5395,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5251,6 +5432,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5287,6 +5469,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5323,6 +5506,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5359,6 +5543,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5395,6 +5580,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5431,6 +5617,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5467,6 +5654,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5503,6 +5691,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5539,6 +5728,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5575,6 +5765,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5611,6 +5802,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5647,6 +5839,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5683,6 +5876,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5719,6 +5913,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5755,6 +5950,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5791,6 +5987,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5827,6 +6024,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5863,6 +6061,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5899,6 +6098,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5935,6 +6135,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -5971,6 +6172,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6007,6 +6209,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6043,6 +6246,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6079,6 +6283,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6115,6 +6320,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6151,6 +6357,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6187,6 +6394,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6223,6 +6431,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6259,6 +6468,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6295,6 +6505,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6331,6 +6542,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6367,6 +6579,7 @@ export type Database = {
           updated_by: string | null;
           waste_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           coal_tonnes?: number;
           created_at?: string;
@@ -6439,6 +6652,7 @@ export type Database = {
           updated_by: string | null;
           waste_target_tonnes: number;
         };
+        ComputedFields: never;
         Insert: {
           bcm_target?: number;
           coal_target_tonnes?: number;
@@ -6463,6 +6677,176 @@ export type Database = {
         };
         Relationships: [];
       };
+      quality_release_certifications: {
+        Row: {
+          approved_at: string | null;
+          approved_by: string | null;
+          blockers: NonNullable<Json>;
+          branch: string;
+          certified_at: string;
+          commit_sha: string;
+          created_at: string;
+          created_by: string | null;
+          evidence_run_id: string;
+          id: string;
+          notes: string | null;
+          overall_score: number;
+          release_status: string;
+          requirements: NonNullable<Json>;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          approved_at?: string | null;
+          approved_by?: string | null;
+          blockers?: NonNullable<Json>;
+          branch: string;
+          certified_at: string;
+          commit_sha: string;
+          created_at?: string;
+          created_by?: string | null;
+          evidence_run_id: string;
+          id?: string;
+          notes?: string | null;
+          overall_score: number;
+          release_status: string;
+          requirements?: NonNullable<Json>;
+          updated_at?: string;
+        };
+        Update: {
+          approved_at?: string | null;
+          approved_by?: string | null;
+          blockers?: NonNullable<Json>;
+          branch?: string;
+          certified_at?: string;
+          commit_sha?: string;
+          created_at?: string;
+          created_by?: string | null;
+          evidence_run_id?: string;
+          id?: string;
+          notes?: string | null;
+          overall_score?: number;
+          release_status?: string;
+          requirements?: NonNullable<Json>;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'quality_release_certifications_approved_by_fkey';
+            columns: ['approved_by'];
+            isOneToOne: false;
+            referencedRelation: 'employees';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'quality_release_certifications_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'employees';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'quality_release_certifications_evidence_run_id_fkey';
+            columns: ['evidence_run_id'];
+            isOneToOne: false;
+            referencedRelation: 'quality_verification_runs';
+            referencedColumns: ['run_id'];
+          },
+        ];
+      };
+      quality_verification_runs: {
+        Row: {
+          agent_id: string | null;
+          branch: string;
+          checks: NonNullable<Json>;
+          commit_sha: string;
+          confidence_pct: number;
+          coverage_pct: number;
+          created_at: string;
+          created_by: string | null;
+          environment: string;
+          evidence_sha256: string;
+          executed_at: string;
+          id: string;
+          mandatory_failures: number;
+          mode: string;
+          overall_score: number;
+          overall_status: string;
+          parent_commit_sha: string | null;
+          pull_request_id: string | null;
+          regressions: NonNullable<Json>;
+          release_blocked: boolean;
+          repository: string;
+          run_id: string;
+          score_breakdown: NonNullable<Json>;
+          security_risk_level: string;
+          task_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          agent_id?: string | null;
+          branch: string;
+          checks?: NonNullable<Json>;
+          commit_sha: string;
+          confidence_pct: number;
+          coverage_pct: number;
+          created_at?: string;
+          created_by?: string | null;
+          environment: string;
+          evidence_sha256: string;
+          executed_at: string;
+          id?: string;
+          mandatory_failures?: number;
+          mode: string;
+          overall_score: number;
+          overall_status: string;
+          parent_commit_sha?: string | null;
+          pull_request_id?: string | null;
+          regressions?: NonNullable<Json>;
+          release_blocked?: boolean;
+          repository: string;
+          run_id: string;
+          score_breakdown: NonNullable<Json>;
+          security_risk_level: string;
+          task_id?: string | null;
+        };
+        Update: {
+          agent_id?: string | null;
+          branch?: string;
+          checks?: NonNullable<Json>;
+          commit_sha?: string;
+          confidence_pct?: number;
+          coverage_pct?: number;
+          created_at?: string;
+          created_by?: string | null;
+          environment?: string;
+          evidence_sha256?: string;
+          executed_at?: string;
+          id?: string;
+          mandatory_failures?: number;
+          mode?: string;
+          overall_score?: number;
+          overall_status?: string;
+          parent_commit_sha?: string | null;
+          pull_request_id?: string | null;
+          regressions?: NonNullable<Json>;
+          release_blocked?: boolean;
+          repository?: string;
+          run_id?: string;
+          score_breakdown?: NonNullable<Json>;
+          security_risk_level?: string;
+          task_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'quality_verification_runs_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'employees';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       quick_feedback: {
         Row: {
           context: string | null;
@@ -6472,6 +6856,7 @@ export type Database = {
           reaction: string | null;
           session_id: string | null;
         };
+        ComputedFields: never;
         Insert: {
           context?: string | null;
           created_at?: string | null;
@@ -6490,6 +6875,238 @@ export type Database = {
         };
         Relationships: [];
       };
+      remote_support_audit_events: {
+        Row: {
+          actor_employee_id: string | null;
+          created_at: string;
+          event_type: string;
+          id: string;
+          ip_address: string | null;
+          metadata: NonNullable<Json>;
+          session_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_employee_id?: string | null;
+          created_at?: string;
+          event_type: string;
+          id?: string;
+          ip_address?: string | null;
+          metadata?: NonNullable<Json>;
+          session_id: string;
+        };
+        Update: {
+          actor_employee_id?: string | null;
+          created_at?: string;
+          event_type?: string;
+          id?: string;
+          ip_address?: string | null;
+          metadata?: NonNullable<Json>;
+          session_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'remote_support_audit_events_actor_employee_id_fkey';
+            columns: ['actor_employee_id'];
+            isOneToOne: false;
+            referencedRelation: 'employees';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'remote_support_audit_events_session_id_fkey';
+            columns: ['session_id'];
+            isOneToOne: false;
+            referencedRelation: 'remote_support_sessions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      remote_support_devices: {
+        Row: {
+          assigned_employee_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          department_id: string | null;
+          device_class: string;
+          display_name: string;
+          hostname: string;
+          id: string;
+          is_active: boolean;
+          last_connected_at: string | null;
+          network_host: string;
+          network_port: number;
+          protocol: string;
+          protocol_options: NonNullable<Json>;
+          require_user_consent: boolean;
+          site_id: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          assigned_employee_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          department_id?: string | null;
+          device_class: string;
+          display_name: string;
+          hostname: string;
+          id?: string;
+          is_active?: boolean;
+          last_connected_at?: string | null;
+          network_host: string;
+          network_port: number;
+          protocol: string;
+          protocol_options?: NonNullable<Json>;
+          require_user_consent?: boolean;
+          site_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          assigned_employee_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          department_id?: string | null;
+          device_class?: string;
+          display_name?: string;
+          hostname?: string;
+          id?: string;
+          is_active?: boolean;
+          last_connected_at?: string | null;
+          network_host?: string;
+          network_port?: number;
+          protocol?: string;
+          protocol_options?: NonNullable<Json>;
+          require_user_consent?: boolean;
+          site_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'remote_support_devices_assigned_employee_id_fkey';
+            columns: ['assigned_employee_id'];
+            isOneToOne: false;
+            referencedRelation: 'employees';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'remote_support_devices_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'employees';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'remote_support_devices_department_id_fkey';
+            columns: ['department_id'];
+            isOneToOne: false;
+            referencedRelation: 'departments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'remote_support_devices_department_id_fkey';
+            columns: ['department_id'];
+            isOneToOne: false;
+            referencedRelation: 'dept_production_summary';
+            referencedColumns: ['department_id'];
+          },
+          {
+            foreignKeyName: 'remote_support_devices_site_id_fkey';
+            columns: ['site_id'];
+            isOneToOne: false;
+            referencedRelation: 'sites';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      remote_support_sessions: {
+        Row: {
+          agent_employee_id: string | null;
+          client_diagnostics: NonNullable<Json>;
+          cobrowse_enabled: boolean;
+          consent_granted_at: string | null;
+          created_at: string;
+          department_slug: string | null;
+          device_id: string | null;
+          end_reason: string | null;
+          ended_at: string | null;
+          expires_at: string;
+          id: string;
+          issue_summary: string;
+          requester_employee_id: string;
+          resolution_notes: string | null;
+          session_code: string;
+          started_at: string | null;
+          status: string;
+          tier: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          agent_employee_id?: string | null;
+          client_diagnostics?: NonNullable<Json>;
+          cobrowse_enabled?: boolean;
+          consent_granted_at?: string | null;
+          created_at?: string;
+          department_slug?: string | null;
+          device_id?: string | null;
+          end_reason?: string | null;
+          ended_at?: string | null;
+          expires_at: string;
+          id?: string;
+          issue_summary: string;
+          requester_employee_id: string;
+          resolution_notes?: string | null;
+          session_code: string;
+          started_at?: string | null;
+          status: string;
+          tier: string;
+          updated_at?: string;
+        };
+        Update: {
+          agent_employee_id?: string | null;
+          client_diagnostics?: NonNullable<Json>;
+          cobrowse_enabled?: boolean;
+          consent_granted_at?: string | null;
+          created_at?: string;
+          department_slug?: string | null;
+          device_id?: string | null;
+          end_reason?: string | null;
+          ended_at?: string | null;
+          expires_at?: string;
+          id?: string;
+          issue_summary?: string;
+          requester_employee_id?: string;
+          resolution_notes?: string | null;
+          session_code?: string;
+          started_at?: string | null;
+          status?: string;
+          tier?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'remote_support_sessions_agent_employee_id_fkey';
+            columns: ['agent_employee_id'];
+            isOneToOne: false;
+            referencedRelation: 'employees';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'remote_support_sessions_device_id_fkey';
+            columns: ['device_id'];
+            isOneToOne: false;
+            referencedRelation: 'remote_support_devices';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'remote_support_sessions_requester_employee_id_fkey';
+            columns: ['requester_employee_id'];
+            isOneToOne: false;
+            referencedRelation: 'employees';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       report_templates: {
         Row: {
           auto_generate: boolean;
@@ -6502,6 +7119,7 @@ export type Database = {
           report_type: string;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           auto_generate?: boolean;
           config?: Json | null;
@@ -6532,6 +7150,7 @@ export type Database = {
           id: string;
           name: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
@@ -6562,6 +7181,7 @@ export type Database = {
           satellite_name: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           acquisition_date: string;
           cog_url?: string | null;
@@ -6624,6 +7244,7 @@ export type Database = {
           secret_name: string;
           status: string | null;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string | null;
           expires_at?: string | null;
@@ -6660,6 +7281,7 @@ export type Database = {
           shift_date: string;
           shift_type: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           department_id: string;
@@ -6714,19 +7336,20 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
-          report_data: Json;
+          report_data: NonNullable<Json>;
           report_date: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
-          report_data: Json;
+          report_data: NonNullable<Json>;
           report_date: string;
         };
         Update: {
           created_at?: string;
           id?: string;
-          report_data?: Json;
+          report_data?: NonNullable<Json>;
           report_date?: string;
         };
         Relationships: [];
@@ -6745,6 +7368,7 @@ export type Database = {
           status: Database['public']['Enums']['shift_status_type'];
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           approved_by?: string | null;
           closed_at?: string | null;
@@ -6812,6 +7436,7 @@ export type Database = {
           site_code: string;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           active?: boolean;
           created_at?: string;
@@ -6846,6 +7471,7 @@ export type Database = {
           status: string | null;
           target_value: number;
         };
+        ComputedFields: never;
         Insert: {
           actual_value: number;
           created_at?: string | null;
@@ -6886,6 +7512,7 @@ export type Database = {
           reading_at: string;
           tenant_id: string;
         };
+        ComputedFields: never;
         Insert: {
           device_id: string;
           hlc_counter: number;
@@ -6913,7 +7540,7 @@ export type Database = {
       system_logs: {
         Row: {
           category: string;
-          context: Json;
+          context: NonNullable<Json>;
           created_at: string;
           department_id: string | null;
           employee_id: string | null;
@@ -6922,17 +7549,20 @@ export type Database = {
           level: string;
           message: string;
           method: string | null;
+          request_id: string | null;
           resolved: boolean;
           resolved_at: string | null;
           resolved_by: string | null;
           source: string;
           stack: string | null;
+          trace_id: string | null;
           url: string | null;
           user_agent: string | null;
         };
+        ComputedFields: never;
         Insert: {
           category?: string;
-          context?: Json;
+          context?: NonNullable<Json>;
           created_at?: string;
           department_id?: string | null;
           employee_id?: string | null;
@@ -6941,17 +7571,19 @@ export type Database = {
           level: string;
           message: string;
           method?: string | null;
+          request_id?: string | null;
           resolved?: boolean;
           resolved_at?: string | null;
           resolved_by?: string | null;
           source: string;
           stack?: string | null;
+          trace_id?: string | null;
           url?: string | null;
           user_agent?: string | null;
         };
         Update: {
           category?: string;
-          context?: Json;
+          context?: NonNullable<Json>;
           created_at?: string;
           department_id?: string | null;
           employee_id?: string | null;
@@ -6960,11 +7592,13 @@ export type Database = {
           level?: string;
           message?: string;
           method?: string | null;
+          request_id?: string | null;
           resolved?: boolean;
           resolved_at?: string | null;
           resolved_by?: string | null;
           source?: string;
           stack?: string | null;
+          trace_id?: string | null;
           url?: string | null;
           user_agent?: string | null;
         };
@@ -7014,6 +7648,7 @@ export type Database = {
           tire_id: string;
           tread_depth_mm: number;
         };
+        ComputedFields: never;
         Insert: {
           condition_status: string;
           created_at?: string;
@@ -7083,6 +7718,7 @@ export type Database = {
           status: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           brand: string;
           created_at?: string;
@@ -7147,6 +7783,7 @@ export type Database = {
           updated_at: string | null;
           user_id: string | null;
         };
+        ComputedFields: never;
         Insert: {
           assigned_to?: string | null;
           comment?: string | null;
@@ -7199,19 +7836,20 @@ export type Database = {
           created_at: string;
           last_accessed_at: string;
           memory_type: string | null;
-          query_params: Json;
-          result_data: Json;
+          query_params: NonNullable<Json>;
+          result_data: NonNullable<Json>;
           ttl_seconds: number | null;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           access_count?: number | null;
           cache_key: string;
           created_at?: string;
           last_accessed_at?: string;
           memory_type?: string | null;
-          query_params: Json;
-          result_data: Json;
+          query_params: NonNullable<Json>;
+          result_data: NonNullable<Json>;
           ttl_seconds?: number | null;
           user_id: string;
         };
@@ -7221,8 +7859,8 @@ export type Database = {
           created_at?: string;
           last_accessed_at?: string;
           memory_type?: string | null;
-          query_params?: Json;
-          result_data?: Json;
+          query_params?: NonNullable<Json>;
+          result_data?: NonNullable<Json>;
           ttl_seconds?: number | null;
           user_id?: string;
         };
@@ -7240,6 +7878,7 @@ export type Database = {
           search_type: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           cache_hit?: boolean | null;
           created_at?: string;
@@ -7284,6 +7923,7 @@ export type Database = {
           surname: string | null;
           visiting: string | null;
         };
+        ComputedFields: never;
         Insert: {
           check_in_time?: string | null;
           check_out_time?: string | null;
@@ -7360,20 +8000,21 @@ export type Database = {
           error_message: string | null;
           event_type: string;
           id: string;
-          payload: Json;
+          payload: NonNullable<Json>;
           response_body: string | null;
           response_status: number | null;
           retry_count: number;
           success: boolean;
           webhook_endpoint_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           delivered_at?: string | null;
           error_message?: string | null;
           event_type: string;
           id?: string;
-          payload: Json;
+          payload: NonNullable<Json>;
           response_body?: string | null;
           response_status?: number | null;
           retry_count?: number;
@@ -7386,7 +8027,7 @@ export type Database = {
           error_message?: string | null;
           event_type?: string;
           id?: string;
-          payload?: Json;
+          payload?: NonNullable<Json>;
           response_body?: string | null;
           response_status?: number | null;
           retry_count?: number;
@@ -7417,6 +8058,7 @@ export type Database = {
           updated_at: string | null;
           url: string;
         };
+        ComputedFields: never;
         Insert: {
           active?: boolean;
           created_at?: string;
@@ -7472,6 +8114,7 @@ export type Database = {
           total_tokens: number | null;
           week_start: string | null;
         };
+        ComputedFields: never;
         Relationships: [
           {
             foreignKeyName: 'ai_token_usage_department_id_fkey';
@@ -7502,6 +8145,7 @@ export type Database = {
           total_tokens: number | null;
           usage_date: string | null;
         };
+        ComputedFields: never;
         Relationships: [];
       };
       breakdowns_control_room_view: {
@@ -7517,6 +8161,7 @@ export type Database = {
           status: string | null;
           time_in: string | null;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string | null;
           date_in?: string | null;
@@ -7552,6 +8197,7 @@ export type Database = {
           slo_name: string | null;
           target: number | null;
         };
+        ComputedFields: never;
         Relationships: [];
       };
       dept_production_summary: {
@@ -7566,6 +8212,7 @@ export type Database = {
           total_tonnes: number | null;
           total_waste_tonnes: number | null;
         };
+        ComputedFields: never;
         Relationships: [];
       };
       machine_operations_with_delays: {
@@ -7597,6 +8244,7 @@ export type Database = {
           total_delay_hours: number | null;
           updated_at: string | null;
         };
+        ComputedFields: never;
         Insert: {
           block_drilled?: string | null;
           created_at?: string | null;
@@ -7731,6 +8379,7 @@ export type Database = {
           total_hours_worked: number | null;
           utilization_pct: number | null;
         };
+        ComputedFields: never;
         Relationships: [
           {
             foreignKeyName: 'machines_department_id_fkey';
@@ -7759,6 +8408,7 @@ export type Database = {
           reading_at: string | null;
           tenant_id: string | null;
         };
+        ComputedFields: never;
         Relationships: [];
       };
       view_hourly_production: {
@@ -7770,6 +8420,7 @@ export type Database = {
           total_loads: number | null;
           total_tonnes: number | null;
         };
+        ComputedFields: never;
         Relationships: [];
       };
       view_production_summary: {
@@ -7793,6 +8444,7 @@ export type Database = {
           total_fuel_litres: number | null;
           total_hours_worked: number | null;
         };
+        ComputedFields: never;
         Relationships: [
           {
             foreignKeyName: 'daily_logs_department_id_fkey';
@@ -7819,23 +8471,13 @@ export type Database = {
       };
     };
     Functions: {
-      add_partition_check_constraints: { Args: never; Returns: undefined };
-      apply_offline_mutations: {
-        Args: { p_mutations: Json; p_tenant: string };
-        Returns: Json;
-      };
-      archive_monthly_control_room_shifts: { Args: never; Returns: undefined };
-      archive_monthly_drill_operations: { Args: never; Returns: undefined };
-      archive_old_partitions: {
-        Args: { months_to_keep?: number };
-        Returns: undefined;
-      };
+      add_partition_check_constraints: { Args: Record<PropertyKey, never>; Returns: undefined };
+      apply_offline_mutations: { Args: { p_mutations: Json; p_tenant: string }; Returns: Json };
+      archive_monthly_control_room_shifts: { Args: Record<PropertyKey, never>; Returns: undefined };
+      archive_monthly_drill_operations: { Args: Record<PropertyKey, never>; Returns: undefined };
+      archive_old_partitions: { Args: { months_to_keep?: number }; Returns: undefined };
       atomic_approve_shift_report: {
-        Args: {
-          p_approval_note?: string;
-          p_approver_id?: string;
-          p_report_id: string;
-        };
+        Args: { p_approval_note?: string; p_approver_id?: string; p_report_id: string };
         Returns: Json;
       };
       atomic_machine_operator_dispatch: {
@@ -7951,9 +8593,9 @@ export type Database = {
           refresh_status: string;
         }[];
       };
-      cleanup_vector_search_cache: { Args: never; Returns: number };
-      create_next_month_partitions: { Args: never; Returns: undefined };
-      current_employee_id: { Args: never; Returns: string };
+      cleanup_vector_search_cache: { Args: Record<PropertyKey, never>; Returns: number };
+      create_next_month_partitions: { Args: Record<PropertyKey, never>; Returns: undefined };
+      current_employee_id: { Args: Record<PropertyKey, never>; Returns: string };
       evaluate_feature_flag: {
         Args: { p_flag_key: string; p_session_id?: string; p_user_id?: string };
         Returns: Json;
@@ -7967,12 +8609,9 @@ export type Database = {
         };
         Returns: string;
       };
-      get_access_control_metrics_jsonb: {
-        Args: { p_department_id: string };
-        Returns: Json;
-      };
+      get_access_control_metrics_jsonb: { Args: { p_department_id: string }; Returns: Json };
       get_avg_tire_lifespan: {
-        Args: never;
+        Args: Record<PropertyKey, never>;
         Returns: {
           avg_lifespan_days: number;
           avg_lifespan_hours: number;
@@ -7981,16 +8620,9 @@ export type Database = {
           scrapped_count: number;
         }[];
       };
-      get_cached_vector_search: {
-        Args: { p_cache_key: string; p_user_id: string };
-        Returns: Json;
-      };
+      get_cached_vector_search: { Args: { p_cache_key: string; p_user_id: string }; Returns: Json };
       get_conversation_history: {
-        Args: {
-          message_limit?: number;
-          p_session_id: string;
-          p_user_id: string;
-        };
+        Args: { message_limit?: number; p_session_id: string; p_user_id: string };
         Returns: {
           content: string;
           created_at: string;
@@ -8010,21 +8642,11 @@ export type Database = {
           utilization_pct: number;
         }[];
       };
-      get_employee_department: { Args: never; Returns: string };
-      get_machine_latest_closing_smr: {
-        Args: { p_machine_id: string };
-        Returns: number;
-      };
-      get_monolithized_department_dashboard_payload: {
-        Args: { dept_id: string };
-        Returns: Json;
-      };
+      get_employee_department: { Args: Record<PropertyKey, never>; Returns: string };
+      get_machine_latest_closing_smr: { Args: { p_machine_id: string }; Returns: number };
+      get_monolithized_department_dashboard_payload: { Args: { dept_id: string }; Returns: Json };
       get_multi_site_shift_compilation: {
-        Args: {
-          p_department_id: string;
-          p_shift_date: string;
-          p_shift_type: string;
-        };
+        Args: { p_department_id: string; p_shift_date: string; p_shift_type: string };
         Returns: Json;
       };
       get_mv_refresh_stats: {
@@ -8042,7 +8664,7 @@ export type Database = {
         }[];
       };
       get_pg_cron_jobs_health: {
-        Args: never;
+        Args: Record<PropertyKey, never>;
         Returns: {
           active: boolean;
           command: string;
@@ -8101,11 +8723,7 @@ export type Database = {
         }[];
       };
       get_telemetry_summary: {
-        Args: {
-          p_department_id: string;
-          p_granularity?: string;
-          p_machine_id?: string;
-        };
+        Args: { p_department_id: string; p_granularity?: string; p_machine_id?: string };
         Returns: {
           avg_engine_rpm: number;
           avg_engine_temp: number;
@@ -8121,18 +8739,14 @@ export type Database = {
         }[];
       };
       get_unified_shift_compilation: {
-        Args: {
-          p_department_id: string;
-          p_shift_date: string;
-          p_shift_type: string;
-        };
+        Args: { p_department_id: string; p_shift_date: string; p_shift_type: string };
         Returns: Json;
       };
       has_department_access: { Args: { dept_id: string }; Returns: boolean };
       has_permission: { Args: { p_permission: string }; Returns: boolean };
-      is_access_control: { Args: never; Returns: boolean };
+      is_access_control: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_active: { Args: { record_deleted_at: string }; Returns: boolean };
-      is_admin: { Args: never; Returns: boolean };
+      is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       log_mv_refresh_end: {
         Args: {
           p_error_message?: string;
@@ -8143,11 +8757,7 @@ export type Database = {
         Returns: undefined;
       };
       log_mv_refresh_start: {
-        Args: {
-          p_is_concurrent?: boolean;
-          p_triggered_by?: string;
-          p_view_name: string;
-        };
+        Args: { p_is_concurrent?: boolean; p_triggered_by?: string; p_view_name: string };
         Returns: string;
       };
       record_slo_measurement: {
@@ -8174,14 +8784,20 @@ export type Database = {
         };
         Returns: undefined;
       };
-      refresh_dept_production_summary_smart: { Args: never; Returns: undefined };
-      refresh_hourly_production: { Args: never; Returns: undefined };
-      refresh_machine_utilization_weekly_smart: {
-        Args: never;
+      refresh_dept_production_summary_smart: {
+        Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
-      refresh_production_summary: { Args: never; Returns: undefined };
-      refresh_safety_incident_monthly_smart: { Args: never; Returns: undefined };
+      refresh_hourly_production: { Args: Record<PropertyKey, never>; Returns: undefined };
+      refresh_machine_utilization_weekly_smart: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      refresh_production_summary: { Args: Record<PropertyKey, never>; Returns: undefined };
+      refresh_safety_incident_monthly_smart: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       search_memories_hybrid: {
         Args: {
           ef_search?: number;
@@ -8229,12 +8845,7 @@ export type Database = {
         }[];
       };
       submit_quick_feedback: {
-        Args: {
-          p_context?: string;
-          p_page_url: string;
-          p_reaction: string;
-          p_session_id?: string;
-        };
+        Args: { p_context?: string; p_page_url: string; p_reaction: string; p_session_id?: string };
         Returns: string;
       };
       submit_user_feedback: {
@@ -8247,8 +8858,8 @@ export type Database = {
         };
         Returns: string;
       };
-      user_department_id: { Args: never; Returns: string };
-      uuid_generate_v4: { Args: never; Returns: string };
+      user_department_id: { Args: Record<PropertyKey, never>; Returns: string };
+      uuid_generate_v4: { Args: Record<PropertyKey, never>; Returns: string };
     };
     Enums: {
       department_access_level: 'read' | 'operate' | 'supervise' | 'manage';
@@ -8294,9 +8905,7 @@ export type Tables<
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
       Row: infer R;
@@ -8320,9 +8929,7 @@ export type TablesInsert<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Insert: infer I;
     }
@@ -8345,9 +8952,7 @@ export type TablesUpdate<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Update: infer U;
     }
@@ -8370,9 +8975,7 @@ export type Enums<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
     ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
@@ -8387,9 +8990,7 @@ export type CompositeTypes<
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
     ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
