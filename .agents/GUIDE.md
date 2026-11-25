@@ -294,6 +294,7 @@ These hard stops are **always in force**, with no approval path:
 | Resource                       | Location                          | Purpose                                                                           |
 | :----------------------------- | :-------------------------------- | :-------------------------------------------------------------------------------- |
 | **Architecture & Domain SSoT** | `AGENTS.md` (root)                | Full architecture, data flow, personas, invariants, SSoT table                    |
+| **Package-Scoped Addenda**     | `packages/*/AGENTS.md`, `libs/**` | Package-only commands and invariants; shared mandates stay in `.agents/rules/`    |
 | **skills-mcp Registry**        | `skills-mcp/`                     | Anti-bloat on-demand skill, context, and persona registry (MCP stdio)             |
 | **Engineering Rules**          | `.agents/rules/`                  | 50 permanent rule files covering security, verification, testing, thinking        |
 | **Agent Skills**               | `skills-mcp/` / `.agents/skills/` | 10 local (+ 3 symlinked) workflow skills (dynamically leased via `acquire_skill`) |

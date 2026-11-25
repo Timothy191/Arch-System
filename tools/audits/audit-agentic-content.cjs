@@ -265,7 +265,47 @@ ROOT_DOCS.forEach((doc) => {
 });
 console.log(`   ✓ Verified all ${ROOT_DOCS.length} root AI agent guidelines.`);
 
-// ── 6. Results Summary & Report Generation ────────────────────────────────────
+// ── 6. Audit Nested AGENTS.md Hygiene ─────────────────────────────────────────
+console.log('6️⃣  Auditing nested AGENTS.md directives...');
+const NESTED_DIRECTIVE_ROOTS = ['apps', 'packages', 'libs', 'docs', 'tools', 'scripts'];
+const CANONICAL_MANDATE_HEADINGS = [
+  '## Real-World Production Mandate',
+  '## Anti-Assumption Mandate (CRITICAL)',
+  '## Grounded Reasoning Mandate (CRITICAL)',
+];
+let nestedDirectiveCount = 0;
+
+function findNestedAgentDirectives(dirPath, found = []) {
+  if (!fs.existsSync(dirPath)) return found;
+  for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      if (EXCLUDED_WALK_DIRS.has(entry.name)) continue;
+      findNestedAgentDirectives(path.join(dirPath, entry.name), found);
+    } else if (entry.isFile() && /^AGENTS\.md$/.test(entry.name)) {
+      found.push(path.relative(ROOT, path.join(dirPath, entry.name)).split(path.sep).join('/'));
+    }
+  }
+  return found;
+}
+
+for (const scanRoot of NESTED_DIRECTIVE_ROOTS) {
+  for (const nestedDirective of findNestedAgentDirectives(path.join(ROOT, scanRoot))) {
+    nestedDirectiveCount++;
+    const content = fs.readFileSync(path.join(ROOT, nestedDirective), 'utf8');
+    for (const heading of CANONICAL_MANDATE_HEADINGS) {
+      if (content.includes(heading)) {
+        violations.push({
+          file: nestedDirective,
+          type: 'DUPLICATED_MANDATE',
+          description: `Nested AGENTS.md restates "${heading.slice(3)}". Reference .agents/rules/ instead of copying shared mandates.`,
+        });
+      }
+    }
+  }
+}
+console.log(`   ✓ Verified ${nestedDirectiveCount} nested AGENTS.md directive(s).`);
+
+// ── 7. Results Summary & Report Generation ────────────────────────────────────
 console.log('\n==================================================');
 console.log('📊 AI & Agentic Content Audit Results');
 console.log('==================================================');
@@ -305,6 +345,7 @@ const reportMd = `# AI & Agentic Content Audit Report
 - **Agent Skills**: ${skillsCount} verified (${skillRootSummary})
 - **Workspace Tracers**: ${tracerCount} consolidated \`AGENT_TRACER.md\` ledger active
 - **Root Directives**: ${ROOT_DOCS.join(', ')} validated
+- **Nested Directives**: ${nestedDirectiveCount} scoped \`AGENTS.md\` addenda verified
 
 ## Critical Findings
 
