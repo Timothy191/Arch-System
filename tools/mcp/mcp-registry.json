@@ -12,6 +12,7 @@
       "category": "research_and_web",
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"],
+      "cwd": "/tmp",
       "type": "stdio"
     },
     "codemap": {
@@ -23,17 +24,6 @@
       "args": ["mcp", "--root", "${REPO_ROOT}"],
       "type": "stdio"
     },
-    "code-intelligence": {
-      "name": "code-intelligence",
-      "description": "Code intelligence MCP server: tree-sitter based symbol search, token-budgeted context assembly, edit safety preflight, and refactoring planning. Provides 90-99% token savings per code lookup versus traditional file-based approaches.",
-      "required": false,
-      "category": "developer_tools",
-      "type": "remote",
-      "url": "http://localhost:3001/mcp",
-      "env": {
-        "CODEINTELLIGENCE_INDEX_PATH": "${REPO_ROOT}/.code-intelligence-index"
-      }
-    },
     "chrome-devtools": {
       "name": "chrome-devtools",
       "description": "Chrome DevTools MCP for browser inspection and automation",
@@ -41,6 +31,7 @@
       "category": "developer_tools",
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp@1.12.0"],
+      "cwd": "/tmp",
       "type": "stdio"
     },
     "supabase": {

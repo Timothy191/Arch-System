@@ -6,14 +6,17 @@
         "agent-accuracy-enforcement",
         "agent-intercom-coordination",
         "agents-md",
+        "audit-federation",
         "code-intelligence",
         "context-engineering",
         "deep-audit",
+        "deploy-federation",
         "industrial-rca",
         "permanent-engineering-rules",
         "structured-thinking",
         "testing-rules",
-        "todo-completion"
+        "todo-completion",
+        "workspace-onboard"
       ]
     }
   ]

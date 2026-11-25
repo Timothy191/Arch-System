@@ -23,10 +23,13 @@ All paths below are relative to `apps/portal/`. The harness works from any cwd.
   ```
 
 - Playwright comes from the global mise install (it is **not** a repo dependency), and
-  system Chromium is the browser executable (no Playwright browser cache exists):
+  system Chromium is the browser executable (no Playwright browser cache exists). The
+  driver resolves the newest installed version; override with
+  `PLAYWRIGHT_MISE_DIR=/path/to/npm-playwright/<version>` if needed:
 
   ```bash
-  ls /home/timothy/.local/share/mise/installs/npm-playwright/latest/node_modules/playwright/index.mjs >/dev/null && test -x /usr/bin/chromium && echo "playwright + chromium present"
+  PW_DIR="${PLAYWRIGHT_MISE_DIR:-$(ls -d "$HOME"/.local/share/mise/installs/npm-playwright/*/ 2>/dev/null | sort -V | tail -1)}"
+  test -n "$PW_DIR" && test -f "${PW_DIR%/}/node_modules/playwright/index.mjs" && test -x /usr/bin/chromium && echo "playwright + chromium present"
   # -> playwright + chromium present
   ```
 

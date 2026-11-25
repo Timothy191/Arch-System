@@ -3,7 +3,7 @@
 // Usage (from any cwd):
 //   node driver.mjs [--login] [paths...]
 //
-//   --login   authenticate first with the smoke-test creds from apps/portal/.env
+//   --login   authenticate first with the smoke-test credentials from apps/portal/.env
 //   paths...  app paths to visit (default: "/" and "/hub"; with --login: "/hub")
 //
 // Screenshots land in $PORTAL_SHOT_DIR (default /tmp/portal-shots).
@@ -12,15 +12,43 @@
 // Credentials are read from apps/portal/.env and are NEVER printed.
 // Playwright comes from the global mise install - see SKILL.md "Gotchas".
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SKILL_DIR = dirname(fileURLToPath(import.meta.url));
 const PORTAL_DIR = join(SKILL_DIR, '..', '..', '..');
-const PW_DIR = '/home/timothy/.local/share/mise/installs/npm-playwright/latest';
-const { chromium } = await import(pathToFileURL(`${PW_DIR}/node_modules/playwright/index.mjs`));
+
+function resolvePlaywrightDir() {
+  if (process.env.PLAYWRIGHT_MISE_DIR) return process.env.PLAYWRIGHT_MISE_DIR;
+  const pwRoot = join(
+    process.env.HOME ?? '',
+    '.local',
+    'share',
+    'mise',
+    'installs',
+    'npm-playwright'
+  );
+  if (!existsSync(pwRoot)) {
+    console.error(`FATAL: Playwright mise install not found at ${pwRoot}; set PLAYWRIGHT_MISE_DIR`);
+    process.exit(2);
+  }
+  const version = readdirSync(pwRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+    .at(-1);
+  if (!version) {
+    console.error(`FATAL: no Playwright version installed under ${pwRoot}`);
+    process.exit(2);
+  }
+  return join(pwRoot, version);
+}
+
+const { chromium } = await import(
+  pathToFileURL(join(resolvePlaywrightDir(), 'node_modules', 'playwright', 'index.mjs')).href
+);
 
 const BASE = process.env.PORTAL_BASE || 'http://localhost:3000';
 const SHOT_DIR = process.env.PORTAL_SHOT_DIR || '/tmp/portal-shots';
@@ -64,7 +92,10 @@ page.on('pageerror', (e) => {
 let loginOk = !doLogin;
 
 if (doLogin) {
-  await page.goto(`${BASE}/login?redirect=%2Fhub`, { waitUntil: 'networkidle', timeout: 60000 });
+  await page.goto(`${BASE}/login?redirect=${encodeURIComponent('/hub')}`, {
+    waitUntil: 'networkidle',
+    timeout: 60000,
+  });
   await page.waitForTimeout(1000);
 
   for (const label of ['Decline Optional', 'Accept All']) {

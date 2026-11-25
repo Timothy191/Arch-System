@@ -42,6 +42,9 @@ venv/
 # ─── Unified Agent System (.agents/ is tracked; provider-specific runtime is ignored) ───
 # Provider-specific runtime artifacts (NOT project source)
 .claude/
+!apps/portal/.claude/
+apps/portal/.claude/*
+!apps/portal/.claude/skills/
 .claude-flow/
 .junie/
 .swarm/
@@ -235,12 +238,14 @@ vibe-audit.html
 # Compound Engineering local scratch space
 .context/compound-engineering/
 
-# AI tool runtime dirs (crush, mimocode, kilocode, remember, handoff)
+# AI tool runtime dirs (crush, mimocode, kilocode, remember, handoff, delta)
 .crush/
 .mimocode/
 .kilocode/
 .remember/
 .handoff/
+.delta/
+.qoder/settings.local.json
 
 # DAST / security scan artifacts
 .zap/
