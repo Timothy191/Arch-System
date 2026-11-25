@@ -3,7 +3,7 @@
 ## Summary Metrics
 
 - **Agent Rules**: 52 verified in `.agents/rules/`
-- **Agent Skills**: 14 verified in `.agents/skills/`
+- **Agent Skills**: 25 verified (14 in `.agents/skills/`, 11 in `.qoder/skills/`)
 - **Workspace Tracers**: 1 consolidated `AGENT_TRACER.md` ledger active
 - **Root Directives**: AGENTS.md, GEMINI.md, CLAUDE.md validated
 

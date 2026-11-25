@@ -214,6 +214,18 @@ export function getHeroTelemetrySeries(
         fillId: 'grad-presentation',
         points: [78, 82, 85, 88, 90, 92, 94, 96, 97, 98, 99, 100],
       };
+    case 'office':
+      return {
+        title: 'GenOffice AI Document & Cost Studio',
+        unit: 'artifacts',
+        currentValue: stats?.value || 'GenOffice AI',
+        deltaBadge: '+11.2% Output',
+        peakValue: '98%',
+        avgValue: '94%',
+        strokeColor: goldStroke,
+        fillId: 'grad-office',
+        points: [72, 76, 79, 82, 85, 88, 90, 92, 94, 96, 97, 98],
+      };
     default:
       return {
         title: 'Central Operations Telemetry',
@@ -230,11 +242,11 @@ export function getHeroTelemetrySeries(
 }
 
 const GRAPH_VIEWBOX_WIDTH = 420;
-const GRAPH_VIEWBOX_HEIGHT = 92;
-const GRAPH_PAD_LEFT = 28;
-const GRAPH_PAD_RIGHT = 8;
-const GRAPH_PAD_TOP = 6;
-const GRAPH_PAD_BOTTOM = 14;
+const GRAPH_VIEWBOX_HEIGHT = 104;
+const GRAPH_PAD_LEFT = 46;
+const GRAPH_PAD_RIGHT = 14;
+const GRAPH_PAD_TOP = 12;
+const GRAPH_PAD_BOTTOM = 18;
 const GRAPH_MIN_OFFSET = 8;
 const GRAPH_MAX_OFFSET = 4;
 const GRAPH_BAR_HALF_W = 4;
@@ -327,7 +339,7 @@ function HeroTelemetryGraph({
         <svg
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="xMidYMid meet"
-          className="relative z-10 h-24 w-full sm:h-[104px]"
+          className="relative z-10 h-[84px] w-full sm:h-[92px] lg:h-[100px]"
           role="img"
           aria-label={`${series.title} telemetry trend graph`}
         >
@@ -450,7 +462,7 @@ function HeroTelemetryGraph({
                   />
                   <text
                     x={tickX}
-                    y={height - 2}
+                    y={height - 4}
                     textAnchor={anchor}
                     fill="#0f172a"
                     fontSize="7"
@@ -516,7 +528,7 @@ function HeroTelemetryGraph({
           })}
         </svg>
 
-        <div className="relative z-10 flex items-center justify-between border-slate-200 border-t pt-1 font-bold font-mono text-[9.5px] text-slate-900 tabular-nums">
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 border-slate-200 border-t pt-1 font-bold font-mono text-[9px] text-slate-900 tabular-nums">
           <span className="font-bold text-slate-900">00:00 SHIFT START</span>
           <span className="font-bold text-slate-900">AVG {series.avgValue}</span>
           <span className="font-bold text-slate-900">PEAK {series.peakValue}</span>
@@ -1071,6 +1083,42 @@ export interface HeroCardContentProps {
   offlineMachineCount: number;
 }
 
+const DEFAULT_HERO_TARGET_META = {
+  label: 'Operational Target: 98% [98%]',
+  width: '98%',
+} as const;
+
+const HERO_TARGET_META: Readonly<Record<string, { label: string; width: string }>> = {
+  'central-command': { label: 'Portal SLA: 99.9% [99%]', width: '99%' },
+  overview: { label: 'Topology Health: 100% [100%]', width: '100%' },
+  database: { label: 'Query SLA: 99.8% [99%]', width: '99%' },
+  office: { label: 'GenOffice Sync: 98.5% [98%]', width: '98%' },
+  drilling: { label: 'Target: 1,300m [95%]', width: '95%' },
+  production: { label: 'Shift Target: 12,500t [94%]', width: '94%' },
+  'plant-processing': { label: 'Plant Target: 8,500t [92%]', width: '92%' },
+  'plant-inventory': { label: 'Stockpile Capacity: 55,000t [88%]', width: '88%' },
+  'access-control': { label: 'Gate Uptime: 99.8% [99%]', width: '99%' },
+  engineering: { label: 'Fleet Readiness: 92% [92%]', width: '92%' },
+  'control-room': { label: 'SCADA Telemetry: 99.9% [99%]', width: '99%' },
+  'availability-utilization': { label: 'Availability Target: 95.0% [95%]', width: '95%' },
+  reports: { label: 'Availability Target: 95.0% [95%]', width: '95%' },
+  admin: { label: 'System Compliance: 100% [100%]', width: '100%' },
+  executive: { label: 'Reconciliation Target: 99.4% [99%]', width: '99%' },
+  presentation: { label: 'Briefing Deck: 12 / 12 Slides [100%]', width: '100%' },
+};
+
+const HERO_LEFT_COLUMN_CLASS = cn(
+  'liquid-glass-light relative z-20 order-2 flex min-h-0 w-full flex-1 flex-col justify-between gap-2.5',
+  'rounded-b-2xl border border-white/20 p-4 shadow-window sm:p-5',
+  'md:order-1 md:h-full md:w-[48%] md:rounded-r-none md:rounded-l-2xl lg:w-[46%] lg:p-6'
+);
+
+const HERO_MEDIA_COLUMN_CLASS = cn(
+  'group/img relative z-10 order-1 aspect-video max-h-[210px] w-full shrink-0 overflow-hidden rounded-t-2xl',
+  'sm:max-h-[235px] md:order-2 md:aspect-auto md:h-full md:max-h-none md:w-[52%]',
+  'md:rounded-t-none md:rounded-r-2xl lg:w-[54%]'
+);
+
 export function HeroCardContent({
   panel,
   idx,
@@ -1087,28 +1135,7 @@ export function HeroCardContent({
       ? 'Epiroc Pit Viper 351 · Bit Depth Telemetry · Pattern B-14'
       : panel.description);
 
-  const targetMeta =
-    panel.name === 'production'
-      ? { label: 'Shift Target: 12,500t [94%]', width: '94%' }
-      : panel.name === 'plant-processing'
-        ? { label: 'Plant Target: 8,500t [92%]', width: '92%' }
-        : panel.name === 'plant-inventory'
-          ? { label: 'Stockpile Capacity: 55,000t [88%]', width: '88%' }
-          : panel.name === 'access-control'
-            ? { label: 'Gate Uptime: 99.8% [99%]', width: '99%' }
-            : panel.name === 'engineering'
-              ? { label: 'Fleet Readiness: 92% [92%]', width: '92%' }
-              : panel.name === 'control-room'
-                ? { label: 'SCADA Telemetry: 99.9% [99%]', width: '99%' }
-                : panel.name === 'availability-utilization' || panel.name === 'reports'
-                  ? { label: 'Availability Target: 95.0% [95%]', width: '95%' }
-                  : panel.name === 'admin'
-                    ? { label: 'System Compliance: 100% [100%]', width: '100%' }
-                    : panel.name === 'executive'
-                      ? { label: 'Reconciliation Target: 99.4% [99%]', width: '99%' }
-                      : panel.name === 'presentation'
-                        ? { label: 'Briefing Deck: 12 / 12 Slides [100%]', width: '100%' }
-                        : { label: 'Target: 1,300m [95%]', width: '95%' };
+  const targetMeta = HERO_TARGET_META[panel.name] ?? DEFAULT_HERO_TARGET_META;
 
   const isViewLogs =
     panel.primary.label.toLowerCase().includes('log') ||
@@ -1121,9 +1148,9 @@ export function HeroCardContent({
   const hasUrgentTelemetry = incidentCount > 0 || breakdownCount > 0 || offlineMachineCount > 0;
 
   return (
-    <div className="relative z-10 flex h-full w-full flex-row">
+    <div className="relative z-10 flex h-full w-full flex-col md:flex-row">
       {/* Left Column: Text, Controls & Live Telemetry Graph */}
-      <div className="liquid-glass-light relative z-20 flex h-full w-[52%] flex-col justify-between gap-3 rounded-r-none rounded-l-2xl border border-white/20 p-4 shadow-window sm:w-[50%] sm:p-6">
+      <div className={HERO_LEFT_COLUMN_CLASS}>
         <div>
           {/* Urgent Telemetry Readouts (only shown when active incidents/breakdowns/offline exist) */}
           {hasUrgentTelemetry && (
@@ -1164,7 +1191,10 @@ export function HeroCardContent({
               </h2>
             </div>
             <div className="relative space-y-2">
-              <p className="max-w-[95%] font-medium text-slate-800 text-xs leading-relaxed tracking-[0.01em] sm:text-sm">
+              <p
+                title={assetSubtitle}
+                className="line-clamp-2 min-h-[2.5rem] max-w-[95%] font-medium text-slate-800 text-xs leading-relaxed tracking-[0.01em] sm:text-sm"
+              >
                 {assetSubtitle}
               </p>
               <SystemGoldenSeparator
@@ -1212,8 +1242,8 @@ export function HeroCardContent({
       </div>
 
       {/* Right Column: Full Bleed Looping MP4 Video with Live Camera Feed HUD */}
-      <div className="group/img absolute top-0 right-0 z-10 h-full w-[48%] overflow-hidden rounded-r-2xl sm:w-[50%]">
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white/20 to-transparent" />
+      <div className={HERO_MEDIA_COLUMN_CLASS}>
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-16 bg-gradient-to-r from-white/20 to-transparent md:block" />
         {(() => {
           const posterSrc = failedImages.has(panel.image)
             ? '/images/departments/overview.webp'
@@ -1273,10 +1303,10 @@ export function HeroCardContent({
           <div className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-black/60 px-2.5 py-1 text-xs shadow-sm backdrop-blur-md">
             <Activity className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
             <span className="font-medium font-mono text-[10px] text-white/70 uppercase tracking-wider">
-              {panel.stats?.label || 'DEPTH'}:
+              {panel.stats?.label || 'STATUS'}:
             </span>
             <span className="font-bold font-mono text-white tabular-nums">
-              {panel.stats?.value || '1,240m'}
+              {panel.stats?.value || 'Online'}
             </span>
           </div>
 

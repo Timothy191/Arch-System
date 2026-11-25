@@ -189,7 +189,7 @@ function HeroSlide({
         <div
           className={cn(
             'relative h-full w-full select-none overflow-hidden rounded-2xl',
-            'gold-steel-border gold-steel-border-slim border border-white/40 bg-white/60 shadow-window backdrop-blur-xl',
+            'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/40 bg-white/60 shadow-window backdrop-blur-xl',
             'transition-[box-shadow,transform] duration-500 ease-out',
             isCenter ? 'hover:-translate-y-0.5' : 'pointer-events-none'
           )}
@@ -345,7 +345,7 @@ export function HeroRotator({
           }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="relative h-[520px] w-full cursor-grab touch-pan-y overflow-visible active:cursor-grabbing sm:h-[470px]"
+          className="relative h-[600px] w-full cursor-grab touch-pan-y overflow-visible active:cursor-grabbing sm:h-[620px] md:h-[440px] lg:h-[440px]"
           style={{ transformStyle: 'preserve-3d' }}
         >
           {panels.map((panel, idx) => (
@@ -372,7 +372,7 @@ export function HeroRotator({
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="pointer-events-auto absolute top-1/2 -left-2 -translate-y-1/2 border-0 bg-transparent p-3 text-accent-gold shadow-none transition-all duration-300 hover:scale-110 hover:text-accent-gold-hover active:scale-95 sm:-left-4 sm:p-4 lg:-left-6"
+              className="pointer-events-auto absolute top-1/2 left-1 -translate-y-1/2 border-0 bg-transparent p-3 text-accent-gold shadow-none transition-all duration-300 hover:scale-110 hover:text-accent-gold-hover active:scale-95 sm:left-2 sm:p-4 lg:-left-3"
               style={{
                 filter: 'drop-shadow(0 2px 6px rgba(15,23,42,0.22))',
               }}
@@ -383,7 +383,7 @@ export function HeroRotator({
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="pointer-events-auto absolute top-1/2 -right-2 -translate-y-1/2 border-0 bg-transparent p-3 text-accent-gold shadow-none transition-all duration-300 hover:scale-110 hover:text-accent-gold-hover active:scale-95 sm:-right-4 sm:p-4 lg:-right-6"
+              className="pointer-events-auto absolute top-1/2 right-1 -translate-y-1/2 border-0 bg-transparent p-3 text-accent-gold shadow-none transition-all duration-300 hover:scale-110 hover:text-accent-gold-hover active:scale-95 sm:right-2 sm:p-4 lg:-right-3"
               style={{
                 filter: 'drop-shadow(0 2px 6px rgba(15,23,42,0.22))',
               }}

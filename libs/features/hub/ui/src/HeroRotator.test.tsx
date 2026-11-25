@@ -514,4 +514,73 @@ describe('HeroRotator', () => {
     expect(screen.getByTestId('hero-dept-icon-presentation')).toBeInTheDocument();
     expect(screen.getByText('CEO and investor presentation deck')).toBeInTheDocument();
   });
+
+  it('prevents SVG graph clipping and renders uniform target HUD metadata across all departments', () => {
+    const extraDepts: Department[] = [
+      {
+        name: 'office',
+        displayName: 'Office',
+        route: '/office',
+        icon: 'Briefcase',
+        description: 'Enterprise AI Office suite (GenOffice) for metallurgical cost modeling',
+        color: 'amber',
+        type: 'standard',
+        status: 'active',
+        stats: { label: 'Workspace', value: 'GenOffice AI' },
+      },
+      {
+        name: 'database',
+        displayName: 'Database',
+        route: '/database',
+        icon: 'Database',
+        description: 'Cross-department PostgreSQL 17 registry and schema governance',
+        color: 'emerald',
+        type: 'standard',
+        status: 'active',
+        stats: { label: 'Queries/s', value: '342' },
+      },
+      {
+        name: 'overview',
+        displayName: 'System Overview',
+        route: '/overview',
+        icon: 'Activity',
+        description: 'System topology, architectural maps and live audit compliance',
+        color: 'blue',
+        type: 'standard',
+        status: 'active',
+        stats: { label: 'Score', value: '100%' },
+      },
+    ];
+
+    const { container } = render(<HeroRotator {...baseProps} departments={extraDepts} />);
+
+    // Verify Portal SLA HUD on central-command and line-clamp-2 on subtitles for uniform height
+    expect(screen.getByText('Portal SLA: 99.9% [99%]')).toBeInTheDocument();
+    expect(screen.getByText(baseProps.defaultDescription)).toHaveClass('line-clamp-2');
+
+    // Verify expanded viewBox & padded Y-axis x1=46 so wide labels (e.g. 51,400t) never clip
+    const graphSvgs = container.querySelectorAll('svg[aria-label*="telemetry trend graph"]');
+    expect(graphSvgs.length).toBeGreaterThan(0);
+    for (const svg of Array.from(graphSvgs)) {
+      expect(svg).toHaveAttribute('viewBox', '0 0 420 104');
+      expect(svg).toHaveAttribute('preserveAspectRatio', 'xMidYMid meet');
+    }
+    const yAxes = screen.getAllByTestId('hero-graph-y-axis');
+    for (const axis of yAxes) {
+      expect(axis.querySelector('line')).toHaveAttribute('x1', '46');
+    }
+
+    // Advance to office -> dedicated telemetry series & GenOffice Sync HUD
+    fireEvent.click(screen.getByLabelText('Next highlight'));
+    expect(screen.getByText('GenOffice AI Document & Cost Studio')).toBeInTheDocument();
+    expect(screen.getByText('GenOffice Sync: 98.5% [98%]')).toBeInTheDocument();
+
+    // Advance to database -> Query SLA HUD
+    fireEvent.click(screen.getByLabelText('Next highlight'));
+    expect(screen.getByText('Query SLA: 99.8% [99%]')).toBeInTheDocument();
+
+    // Advance to overview -> Topology Health HUD
+    fireEvent.click(screen.getByLabelText('Next highlight'));
+    expect(screen.getByText('Topology Health: 100% [100%]')).toBeInTheDocument();
+  });
 });

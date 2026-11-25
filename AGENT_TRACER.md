@@ -6,6 +6,11 @@
 
 <!-- cspell:ignore commandcode autohand Autohand -->
 
+## [2026-11-25T13:57:00+02:00] - Hub Hero Card Parity, Responsive Sizing & SVG Graph Clipping Fix
+
+- **Hero Cards (`packages/ui/src/components/HeroCardContent.tsx`, `HeroRotator.tsx`, `HeroRotator.test.tsx`)**: Added missing `office` telemetry series, replaced `targetMeta` ternary with `HERO_TARGET_META` lookup table covering all departments, expanded telemetry SVG `viewBox` (`0 0 420 104`) and padding (`GRAPH_PAD_LEFT=46`, `GRAPH_PAD_TOP=12`, `GRAPH_PAD_RIGHT=14`, `GRAPH_PAD_BOTTOM=18`) to prevent label/node clipping, switched to stacked-on-mobile / split-on-desktop layout (`aspect-video` mobile media, `line-clamp-2` uniform subtitles, `h-[600px] sm:h-[620px] md:h-[440px]` stage), and aligned `HeroSlide` controls/liquid-glass classes.
+- **Deployment Audit**: Inspected `arch-system-r2wh32d73-server-management1.vercel.app` (`/api/health`, `/api/health/redis`, route HTTP 307 auth redirects, and build logs).
+
 ## [2026-11-25T13:05:00+02:00] - Hero Rotator Stage Sizing & Graph/Image Cutoff Fix
 
 - **Hero Carousel (`packages/ui/src/components/HeroRotator.tsx`, `HeroCardContent.tsx`)**: Increased carousel stage height from hardcoded `400px` to responsive `h-[520px] sm:h-[470px]`, standardized left-column padding (`p-4 sm:p-6 gap-3`), and updated `HeroTelemetryGraph` SVG (`preserveAspectRatio="xMidYMid meet"`, `h-24 sm:h-[104px]`) so all hero cards share identical proportions without clipping graphs or images.
