@@ -42,7 +42,7 @@ export function ProductionReportsWorkspace({
   initialTab = 'foreman',
   deptId,
 }: ProductionReportsWorkspaceProps) {
-  const [data, setData] = useState<ProductionPerformanceData>(initialData);
+  const [reportData, setReportData] = useState<ProductionPerformanceData>(initialData);
   const [activeTab, setActiveTab] = useState<ProductionReportTab>(
     initialTab === 'pdf-report' ? 'pdf-report' : initialTab
   );
@@ -54,14 +54,14 @@ export function ProductionReportsWorkspace({
     startTransition(async () => {
       try {
         const nextData = await getProductionPerformanceData(nextMonth, deptId);
-        setData(nextData);
+        setReportData(nextData);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to load production report');
       }
     });
   };
 
-  const { foremanSummary, delayGroups, dailyRows, monthlyRows } = data;
+  const { foremanSummary, delayGroups, dailyRows, monthlyRows } = reportData;
   const monthlySummary = monthlyRows[0];
 
   return (
@@ -75,7 +75,7 @@ export function ProductionReportsWorkspace({
                 Production Reports &amp; Combined Delays
               </h2>
               <Badge variant="outline" className="font-mono text-xs">
-                {data.monthLabel}
+                {reportData.monthLabel}
               </Badge>
             </div>
             <p className="mt-1 text-[var(--text-secondary)] text-xs">
@@ -92,7 +92,7 @@ export function ProductionReportsWorkspace({
               disabled={isPending}
               className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs"
             >
-              {data.availableMonths.map((m) => (
+              {reportData.availableMonths.map((m) => (
                 <option key={m.value} value={m.value}>
                   {m.label}
                 </option>
@@ -103,7 +103,7 @@ export function ProductionReportsWorkspace({
               type="button"
               size="sm"
               variant="outline"
-              onClick={() => downloadProductionReportCsv(data)}
+              onClick={() => downloadProductionReportCsv(reportData)}
               className="gap-1.5 text-xs"
             >
               <Download className="h-3.5 w-3.5" />
@@ -151,7 +151,7 @@ export function ProductionReportsWorkspace({
             <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-subtle)] border-b pb-3">
               <div>
                 <h3 className="font-bold text-[var(--text-heading)] text-lg">
-                  Foreman Executive Production Report — {data.monthLabel}
+                  Foreman Executive Production Report — {reportData.monthLabel}
                 </h3>
                 <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
                   {foremanSummary.supervisorSummary}
@@ -244,7 +244,8 @@ export function ProductionReportsWorkspace({
               Daily Production vs Combined Delays Ledger ({dailyRows.length} days)
             </h3>
             <span className="font-mono text-[var(--text-muted)] text-xs">
-              Daily Pit BCM Target: {data.targets.daily.pitBcmTarget.toLocaleString('en-US')} BCM
+              Daily Pit BCM Target: {reportData.targets.daily.pitBcmTarget.toLocaleString('en-US')}{' '}
+              BCM
             </span>
           </div>
           <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
@@ -394,7 +395,7 @@ export function ProductionReportsWorkspace({
         </GlassCard>
       )}
 
-      {activeTab === 'pdf-report' && <ProductionForemanPdfPreview data={data} />}
+      {activeTab === 'pdf-report' && <ProductionForemanPdfPreview performance={reportData} />}
     </div>
   );
 }

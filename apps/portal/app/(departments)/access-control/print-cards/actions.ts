@@ -2,7 +2,6 @@
 
 import { randomBytes } from 'node:crypto';
 import {
-  bulkPrintCardsSchema,
   printCardRequestSchema,
   safePhotoUrlSchema,
 } from '@repo/contract/schemas/access-control.schema';
@@ -604,30 +603,6 @@ export async function sendNeo300PrintJob(personnelId: string) {
   ]);
   revalidatePath('/access-control/print-cards');
   return { success: true, job };
-}
-
-export async function bulkQueueNeo300PrintJobs(personnelIds: string[]) {
-  await assertAccessControlRole();
-
-  const parsed = bulkPrintCardsSchema.safeParse({ personnelIds });
-  if (!parsed.success) {
-    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid bulk print batch');
-  }
-
-  const results = [];
-  for (const id of parsed.data.personnelIds) {
-    try {
-      const res = await sendNeo300PrintJob(id);
-      results.push({ id, success: true, jobId: res.job.id });
-    } catch (err) {
-      results.push({
-        id,
-        success: false,
-        error: err instanceof Error ? err.message : 'Queue failed',
-      });
-    }
-  }
-  return results;
 }
 
 /**

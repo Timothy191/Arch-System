@@ -46,8 +46,8 @@ function getSeverity(statusCode?: number): ErrorSeverity {
 /**
  * Read a string field off a plain object, or undefined.
  */
-function strField(obj: Record<string, unknown>, key: string): string | undefined {
-  const v = obj[key];
+function strField(record: Record<string, unknown>, key: string): string | undefined {
+  const v = record[key];
   return typeof v === 'string' && v.length > 0 ? v : undefined;
 }
 

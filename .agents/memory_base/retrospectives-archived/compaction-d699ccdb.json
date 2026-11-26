@@ -1,0 +1,23 @@
+{
+  "id": "compaction-d699ccdb",
+  "timestamp": "2026-11-26T16:28:39.569Z",
+  "taskTag": "compaction-standard-d699ccdb",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:consolidate_state_spine",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/package.json\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/actions.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/jobs/shift-closeout-report.ts\""
+  ],
+  "rootCause": "Context fill is below 25% idempotent floor or within 4 turns of prior checkpoint; preserving warm prefix cache.",
+  "resolution": "Persisted bounded SKILL.state (304 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "consolidate_state_spine",
+    "latestInputTokens": 55906,
+    "cacheHitRatio": 0.8701,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 42867
+  }
+}

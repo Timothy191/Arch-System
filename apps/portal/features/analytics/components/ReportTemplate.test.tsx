@@ -32,7 +32,7 @@ const data = {
 
 describe('ReportTemplate', () => {
   it('renders the title, subtitle, and section headings', () => {
-    render(<ReportTemplate data={data} />);
+    render(<ReportTemplate reportData={data} />);
     expect(screen.getByText('Executive Production & Fleet Report')).toBeInTheDocument();
     expect(
       screen.getByText('Generated on 2026-08-17 — Month-to-date analysis')
@@ -42,7 +42,7 @@ describe('ReportTemplate', () => {
   });
 
   it('renders KPI labels and values', () => {
-    render(<ReportTemplate data={data} />);
+    render(<ReportTemplate reportData={data} />);
     expect(screen.getByText('Total Tonnage')).toBeInTheDocument();
     expect(screen.getByText('12,340 t')).toBeInTheDocument();
     expect(screen.getByText('Coal Removed')).toBeInTheDocument();
@@ -50,7 +50,7 @@ describe('ReportTemplate', () => {
   });
 
   it('renders table headers and rows', () => {
-    render(<ReportTemplate data={data} />);
+    render(<ReportTemplate reportData={data} />);
     expect(screen.getByText('Date')).toBeInTheDocument();
     expect(screen.getByText('Coal (t)')).toBeInTheDocument();
     expect(screen.getByText('Waste (t)')).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe('ReportTemplate', () => {
   });
 
   it('omits the operational details section when there are no rows', () => {
-    render(<ReportTemplate data={{ ...data, tableRows: [] }} />);
+    render(<ReportTemplate reportData={{ ...data, tableRows: [] }} />);
     expect(screen.queryByText('Operational Details')).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import { connection } from 'next/server';
 import { getBadgesInventory, getEntityOptions } from './actions';
-import { QrManagementStudio } from './qr-management-studio';
+import { QrManagementStudio } from './QrManagementStudio';
 
 export default async function QrCodesPage() {
   await connection();

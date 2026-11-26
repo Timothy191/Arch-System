@@ -154,27 +154,27 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
     return Number((totalDepthMeters / holesDrilled).toFixed(1));
   }, [holesDrilled, totalDepthMeters]);
 
-  async function onSubmit(data: UnifiedFormValues) {
+  async function onSubmit(formValues: UnifiedFormValues) {
     setStatus('submitting');
 
     const supabase = createBrowserSupabaseClient();
     const today = new Date().toISOString().split('T')[0];
 
     // Format consolidated notes for cross-system searchability
-    let finalNotes = data.notes || '';
+    let finalNotes = formValues.notes || '';
     if (isDrilling) {
-      const summaryPrefix = `[Drilling Operations] Holes: ${data.holesDrilled || 0} | Total Depth: ${data.totalDepthMeters || 0}m (Avg: ${averageDepth}m/hole) | Penetration: ${data.penetrationRate || 0}m/h | Bit Wear: ${data.bitWearPercentage || 0}% | Delay: ${data.delayCategory || 'none'} (${data.delayMinutes || 0} min)`;
+      const summaryPrefix = `[Drilling Operations] Holes: ${formValues.holesDrilled || 0} | Total Depth: ${formValues.totalDepthMeters || 0}m (Avg: ${averageDepth}m/hole) | Penetration: ${formValues.penetrationRate || 0}m/h | Bit Wear: ${formValues.bitWearPercentage || 0}% | Delay: ${formValues.delayCategory || 'none'} (${formValues.delayMinutes || 0} min)`;
       finalNotes = finalNotes.trim() ? `${summaryPrefix}\n\nNotes:\n${finalNotes}` : summaryPrefix;
     }
 
     const payload = {
       departmentId,
       today,
-      shift: data.shift,
+      shift: formValues.shift,
       notes: finalNotes === '' ? null : finalNotes,
       isProduction,
-      actualCoalTonnes: data.actualCoalTonnes,
-      actualWasteTonnes: data.actualWasteTonnes,
+      actualCoalTonnes: formValues.actualCoalTonnes,
+      actualWasteTonnes: formValues.actualWasteTonnes,
     };
 
     if (!navigator.onLine) {

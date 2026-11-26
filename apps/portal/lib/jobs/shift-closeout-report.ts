@@ -86,7 +86,7 @@ export const shiftCloseoutReportFn = inngest.createFunction(
         ],
       };
 
-      const doc = React.createElement(ReportTemplate, { data: reportData });
+      const doc = React.createElement(ReportTemplate, { reportData });
       const buffer = await pdf(doc as unknown as Parameters<typeof pdf>[0]).toBuffer();
 
       const filename = `shift-reports/${report.department_id}/${report.report_date}_${report.shift_type}_${reportId}.pdf`;

@@ -18,7 +18,7 @@ function triggerBlobDownload(blob: Blob, fileName: string): void {
  * Generates the vector A4 Production Foreman & Combined Delays PDF on demand.
  */
 export async function downloadProductionForemanPdf(options: {
-  data: ProductionPerformanceData;
+  performance: ProductionPerformanceData;
   scope: ProductionPdfScope;
 }): Promise<boolean> {
   try {
@@ -28,11 +28,11 @@ export async function downloadProductionForemanPdf(options: {
       import('react'),
     ]);
     const docElement = React.createElement(ProductionForemanPdfDocument, {
-      data: options.data,
+      performance: options.performance,
       scope: options.scope,
     });
     const blob = await pdf(docElement as never).toBlob();
-    triggerBlobDownload(blob, `Production-Foreman-Delays-${options.data.selectedMonth}.pdf`);
+    triggerBlobDownload(blob, `Production-Foreman-Delays-${options.performance.selectedMonth}.pdf`);
     toast.success('Production Foreman & Delays PDF downloaded.');
     return true;
   } catch (error: unknown) {
@@ -43,7 +43,7 @@ export async function downloadProductionForemanPdf(options: {
   }
 }
 
-export function downloadProductionReportCsv(data: ProductionPerformanceData): void {
+export function downloadProductionReportCsv(performance: ProductionPerformanceData): void {
   const headers = [
     'Date',
     'Status',
@@ -56,7 +56,7 @@ export function downloadProductionReportCsv(data: ProductionPerformanceData): vo
     'Overburden Waste (t)',
     'Combined Delays (hrs)',
   ];
-  const rows = data.dailyRows.map((row) => [
+  const rows = performance.dailyRows.map((row) => [
     row.date,
     row.hasData ? 'Captured' : 'No data captured',
     row.pitBcm,
@@ -71,7 +71,7 @@ export function downloadProductionReportCsv(data: ProductionPerformanceData): vo
   const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
   triggerBlobDownload(
     new Blob([csv], { type: 'text/csv;charset=utf-8;' }),
-    `production-foreman-delays-${data.selectedMonth}.csv`
+    `production-foreman-delays-${performance.selectedMonth}.csv`
   );
-  toast.success(`Exported ${data.monthLabel} Production vs Delays CSV.`);
+  toast.success(`Exported ${performance.monthLabel} Production vs Delays CSV.`);
 }

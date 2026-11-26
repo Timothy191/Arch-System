@@ -33,8 +33,8 @@ function fixed(raw: number, decimals: number): string {
   return raw.toFixed(decimals);
 }
 
-export function buildExportRows(data: ExecutiveData): Record<string, string>[] {
-  return data.daily.map((point) => ({
+export function buildExportRows(executive: ExecutiveData): Record<string, string>[] {
+  return executive.daily.map((point) => ({
     Date: point.date,
     'Coal (t)': fixed(point.coal, TONNE_DECIMALS),
     'Waste (t)': fixed(point.waste, TONNE_DECIMALS),
@@ -47,8 +47,8 @@ export function buildExportRows(data: ExecutiveData): Record<string, string>[] {
   }));
 }
 
-function buildPdfKpis(data: ExecutiveData): PdfReportData['kpis'] {
-  const { mtd, fleet, breakdowns, target } = data;
+function buildPdfKpis(executive: ExecutiveData): PdfReportData['kpis'] {
+  const { mtd, fleet, breakdowns, target } = executive;
   const fuel = mtd.fuelPerTonne === null ? EM_DASH : formatNumber(mtd.fuelPerTonne, RATE_DECIMALS);
   return [
     { label: 'Total Tonnage', value: formatTonnes(mtd.total) },
@@ -63,13 +63,13 @@ function buildPdfKpis(data: ExecutiveData): PdfReportData['kpis'] {
   ];
 }
 
-export function buildPdfReport(data: ExecutiveData): PdfReportData {
+export function buildPdfReport(executive: ExecutiveData): PdfReportData {
   return {
     title: 'Executive Production & Fleet Report',
-    subtitle: `Generated on ${data.today} — Month-to-date analysis`,
-    kpis: buildPdfKpis(data),
+    subtitle: `Generated on ${executive.today} — Month-to-date analysis`,
+    kpis: buildPdfKpis(executive),
     tableHeaders: [...PDF_TABLE_HEADERS],
-    tableRows: data.daily.map((point) => [
+    tableRows: executive.daily.map((point) => [
       point.date,
       fixed(point.coal, TONNE_DECIMALS),
       fixed(point.waste, TONNE_DECIMALS),

@@ -212,7 +212,7 @@ describe('ProductionReportsWorkspace & Foreman PDF', () => {
   });
 
   it('renders ProductionForemanPdfDocument sections without machine rows', () => {
-    render(<ProductionForemanPdfDocument data={mockPerformanceData} scope="full" />);
+    render(<ProductionForemanPdfDocument performance={mockPerformanceData} scope="full" />);
 
     expect(screen.getByTestId('production-pdf-doc')).toBeInTheDocument();
     expect(screen.getByText('Foreman Executive Production Summary')).toBeInTheDocument();

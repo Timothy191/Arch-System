@@ -19,7 +19,7 @@ interface ComboboxContextType {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   disabled: boolean;
-  errored: boolean;
+  hasError: boolean;
   size: 'small' | 'medium' | 'large';
   clearable: boolean;
   placeholder: string;
@@ -47,7 +47,7 @@ export interface ComboboxProps {
   onChange?: (value: string | null) => void;
   placeholder?: string;
   disabled?: boolean;
-  errored?: boolean;
+  hasError?: boolean;
   clearable?: boolean;
   size?: 'small' | 'medium' | 'large';
   width?: number | string;
@@ -63,7 +63,7 @@ export function Combobox({
   onChange,
   placeholder = 'Search...',
   disabled = false,
-  errored = false,
+  hasError = false,
   clearable = false,
   size = 'medium',
   width,
@@ -151,7 +151,7 @@ export function Combobox({
         isOpen,
         setIsOpen,
         disabled,
-        errored,
+        hasError,
         size,
         clearable,
         placeholder,
@@ -191,7 +191,7 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
       isOpen,
       setIsOpen,
       disabled,
-      errored,
+      hasError,
       size,
       clearable,
       placeholder,
@@ -274,7 +274,7 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
           className={cn(
             'w-full rounded-md border bg-white pr-8 text-neutral-900 outline-none transition-colors placeholder:text-neutral-400',
             heightClass,
-            errored
+            hasError
               ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
               : 'border-neutral-200 hover:border-neutral-300 focus:border-neutral-900',
             disabled && 'cursor-not-allowed bg-neutral-100 opacity-50',

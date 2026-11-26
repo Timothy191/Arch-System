@@ -35,7 +35,7 @@ export function Tier2DesktopViewer({ session, device, onSessionClosed }: Tier2De
     disconnect: () => void;
     sendKeyEvent: (pressed: number, keysym: number) => void;
     createClipboardStream: (mimetype: string) => {
-      sendBlob: (data: string) => void;
+      sendBlob: (chunkBase64: string) => void;
       sendEnd: () => void;
     };
     getDisplay: () => {

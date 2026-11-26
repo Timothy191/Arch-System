@@ -33,7 +33,6 @@ export const ALLOWED_TIRE_ACTIVITY_ROLES: ReadonlySet<string> = new Set([
   'manager',
 ]);
 
-export type TirePosition = (typeof TIRE_POSITIONS)[number];
 export type TireActivityMode = (typeof TIRE_ACTIVITY_MODES)[number];
 export type TireConditionStatus = (typeof TIRE_CONDITION_STATUSES)[number];
 export type TireRemovedOutcome = (typeof TIRE_REMOVED_OUTCOMES)[number];

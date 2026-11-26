@@ -173,17 +173,17 @@ export function CommandBar() {
   selectedIndexRef.current = selectedIndex;
 
   const handleSelect = useCallback(
-    (item: CommandItem) => {
+    (command: CommandItem) => {
       setOpen(false);
       setQuery('');
-      if (item.href) {
-        if (item.href.startsWith('http')) {
-          window.open(item.href, '_blank', 'noopener,noreferrer');
+      if (command.href) {
+        if (command.href.startsWith('http')) {
+          window.open(command.href, '_blank', 'noopener,noreferrer');
         } else {
-          router.push(item.href);
+          router.push(command.href);
         }
       }
-      if (item.action) item.action();
+      if (command.action) command.action();
     },
     [router]
   );

@@ -95,17 +95,17 @@ const SIMILARITY_SCORE_SCALE = 100;
 /**
  * Format breakdown details into high-density semantic text for vector search.
  */
-export function formatBreakdownText(item: BreakdownVectorItem): string {
+export function formatBreakdownText(breakdown: BreakdownVectorItem): string {
   const parts = [
-    `Fleet: ${item.fleet_id}`,
-    `Type: ${item.machine_type}`,
-    `Symptom/Reason: ${item.reason}`,
+    `Fleet: ${breakdown.fleet_id}`,
+    `Type: ${breakdown.machine_type}`,
+    `Symptom/Reason: ${breakdown.reason}`,
   ];
-  if (item.repair_notes && item.repair_notes.trim() !== '') {
-    parts.push(`Repair/Resolution: ${item.repair_notes}`);
+  if (breakdown.repair_notes && breakdown.repair_notes.trim() !== '') {
+    parts.push(`Repair/Resolution: ${breakdown.repair_notes}`);
   }
-  if (item.status) {
-    parts.push(`Status: ${item.status}`);
+  if (breakdown.status) {
+    parts.push(`Status: ${breakdown.status}`);
   }
   return parts.join(' | ');
 }
@@ -113,14 +113,14 @@ export function formatBreakdownText(item: BreakdownVectorItem): string {
 /**
  * Format shift notes into high-density semantic text for cross-shift intelligence.
  */
-export function formatShiftNoteText(item: ShiftNoteVectorItem): string {
+export function formatShiftNoteText(note: ShiftNoteVectorItem): string {
   const parts = [
-    `Shift: ${item.shift_type.toUpperCase()}`,
-    `Date: ${item.note_date}`,
-    `Observation: ${item.note_text}`,
+    `Shift: ${note.shift_type.toUpperCase()}`,
+    `Date: ${note.note_date}`,
+    `Observation: ${note.note_text}`,
   ];
-  if (item.delay_minutes && item.delay_minutes > 0) {
-    parts.push(`Delay: ${item.delay_minutes} min`);
+  if (note.delay_minutes && note.delay_minutes > 0) {
+    parts.push(`Delay: ${note.delay_minutes} min`);
   }
   return parts.join(' | ');
 }
@@ -129,11 +129,11 @@ export function formatShiftNoteText(item: ShiftNoteVectorItem): string {
  * Index a machine breakdown into the semantic vector store.
  */
 export async function indexBreakdownVector(
-  item: BreakdownVectorItem,
+  breakdown: BreakdownVectorItem,
   userId: string
 ): Promise<{ success: boolean; id?: string }> {
   try {
-    const text = formatBreakdownText(item);
+    const text = formatBreakdownText(breakdown);
     const vector = await generateEmbedding(text, userId);
     const supabase = await createServerSupabaseClient();
 
@@ -147,10 +147,10 @@ export async function indexBreakdownVector(
         memory_type: 'semantic',
         metadata: {
           source: 'breakdown',
-          breakdown_id: item.id,
-          fleet_id: item.fleet_id,
-          machine_type: item.machine_type,
-          status: item.status || 'active',
+          breakdown_id: breakdown.id,
+          fleet_id: breakdown.fleet_id,
+          machine_type: breakdown.machine_type,
+          status: breakdown.status || 'active',
         },
       })
       .select('id')
@@ -159,7 +159,7 @@ export async function indexBreakdownVector(
     if (error) {
       logError(new Error(error.message), {
         context: 'index_breakdown_vector_failed',
-        breakdownId: item.id,
+        breakdownId: breakdown.id,
       });
       return { success: false };
     }
@@ -177,11 +177,11 @@ export async function indexBreakdownVector(
               user_id: userId,
               content: text,
               source: 'breakdown',
-              breakdown_id: item.id,
-              fleet_id: item.fleet_id,
-              machine_type: item.machine_type,
-              repair_notes: item.repair_notes ?? '',
-              status: item.status || 'active',
+              breakdown_id: breakdown.id,
+              fleet_id: breakdown.fleet_id,
+              machine_type: breakdown.machine_type,
+              repair_notes: breakdown.repair_notes ?? '',
+              status: breakdown.status || 'active',
               created_at: new Date().toISOString(),
             },
           });
@@ -189,7 +189,7 @@ export async function indexBreakdownVector(
       } catch (redisErr) {
         logError(redisErr instanceof Error ? redisErr : new Error(String(redisErr)), {
           context: 'index_breakdown_redis_stack_failed',
-          breakdownId: item.id,
+          breakdownId: breakdown.id,
         });
       }
     }
@@ -198,7 +198,7 @@ export async function indexBreakdownVector(
   } catch (err) {
     logError(err instanceof Error ? err : new Error(String(err)), {
       context: 'index_breakdown_vector_exception',
-      breakdownId: item.id,
+      breakdownId: breakdown.id,
     });
     return { success: false };
   }
@@ -208,11 +208,11 @@ export async function indexBreakdownVector(
  * Index a shift note into the semantic vector store.
  */
 export async function indexShiftNoteVector(
-  item: ShiftNoteVectorItem,
+  note: ShiftNoteVectorItem,
   userId: string
 ): Promise<{ success: boolean; id?: string }> {
   try {
-    const text = formatShiftNoteText(item);
+    const text = formatShiftNoteText(note);
     const vector = await generateEmbedding(text, userId);
     const supabase = await createServerSupabaseClient();
 
@@ -226,9 +226,9 @@ export async function indexShiftNoteVector(
         memory_type: 'semantic',
         metadata: {
           source: 'shift_note',
-          note_id: item.id,
-          shift_type: item.shift_type,
-          note_date: item.note_date,
+          note_id: note.id,
+          shift_type: note.shift_type,
+          note_date: note.note_date,
         },
       })
       .select('id')
@@ -237,7 +237,7 @@ export async function indexShiftNoteVector(
     if (error) {
       logError(new Error(error.message), {
         context: 'index_shift_note_vector_failed',
-        noteId: item.id,
+        noteId: note.id,
       });
       return { success: false };
     }
@@ -255,9 +255,9 @@ export async function indexShiftNoteVector(
               user_id: userId,
               content: text,
               source: 'shift_note',
-              note_id: item.id,
-              shift_type: item.shift_type,
-              note_date: item.note_date,
+              note_id: note.id,
+              shift_type: note.shift_type,
+              note_date: note.note_date,
               created_at: new Date().toISOString(),
             },
           });
@@ -265,7 +265,7 @@ export async function indexShiftNoteVector(
       } catch (redisErr) {
         logError(redisErr instanceof Error ? redisErr : new Error(String(redisErr)), {
           context: 'index_shift_note_redis_stack_failed',
-          noteId: item.id,
+          noteId: note.id,
         });
       }
     }
@@ -274,7 +274,7 @@ export async function indexShiftNoteVector(
   } catch (err) {
     logError(err instanceof Error ? err : new Error(String(err)), {
       context: 'index_shift_note_vector_exception',
-      noteId: item.id,
+      noteId: note.id,
     });
     return { success: false };
   }

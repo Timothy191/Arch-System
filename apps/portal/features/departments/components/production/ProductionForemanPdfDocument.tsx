@@ -8,7 +8,7 @@ import type {
 } from './production-types';
 
 export interface ProductionForemanPdfDocumentProps {
-  data: ProductionPerformanceData;
+  performance: ProductionPerformanceData;
   scope?: ProductionPdfScope;
 }
 
@@ -283,16 +283,16 @@ function MonthlySummaryTable({
 }
 
 export function ProductionForemanPdfDocument({
-  data,
+  performance,
   scope = 'full',
 }: ProductionForemanPdfDocumentProps) {
-  const { foremanSummary, delayGroups, dailyRows, monthlyRows } = data;
+  const { foremanSummary, delayGroups, dailyRows, monthlyRows } = performance;
   const showForemanAndDelays = scope === 'full' || scope === 'foreman-delays';
   const showDailyAndMonthly = scope === 'full' || scope === 'daily-monthly';
 
   return (
     <Document
-      title={`Production Foreman & Combined Delays Report — ${data.monthLabel}`}
+      title={`Production Foreman & Combined Delays Report — ${performance.monthLabel}`}
       author="Arch OS"
     >
       <Page size="A4" orientation="portrait" style={styles.page}>
@@ -302,12 +302,12 @@ export function ProductionForemanPdfDocument({
             <Text style={styles.title}>Foreman Production vs Combined Delays Report</Text>
             <Text style={styles.subtitle}>
               Pit BCM Moved, ROM Coal, Overburden Waste, Rollover &amp; Delay Impact —{' '}
-              {data.monthLabel}
+              {performance.monthLabel}
             </Text>
           </View>
           <View style={styles.metaBlock}>
-            <Text>Report Month: {data.selectedMonth}</Text>
-            <Text>Document ID: PRD-FRM-{data.selectedMonth}</Text>
+            <Text>Report Month: {performance.selectedMonth}</Text>
+            <Text>Document ID: PRD-FRM-{performance.selectedMonth}</Text>
             <Text>Scope: {SCOPE_LABELS[scope]}</Text>
           </View>
         </View>

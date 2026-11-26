@@ -13,7 +13,7 @@ import { assertAdmin, logAdminAuditEvent } from './shared';
 const MAX_FLEET_OPERATIONS_HISTORY_ROWS = 5000;
 const FLEET_CACHE_TAGS = ['table:fleet', 'table:equipment', 'table:machines'];
 
-export async function adminAddMachine(data: {
+export async function adminAddMachine(machineInput: {
   name: string;
   machine_type: string;
   manufacturer?: string;
@@ -31,23 +31,23 @@ export async function adminAddMachine(data: {
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  if (!data.machine_type?.trim()) return { error: 'Machine Type is required.' };
-  if (!data.manufacturer?.trim()) return { error: 'Machine Manufacturer is required.' };
-  if (!data.serial_number?.trim() && !data.name?.trim()) {
+  if (!machineInput.machine_type?.trim()) return { error: 'Machine Type is required.' };
+  if (!machineInput.manufacturer?.trim()) return { error: 'Machine Manufacturer is required.' };
+  if (!machineInput.serial_number?.trim() && !machineInput.name?.trim()) {
     return { error: 'Machine Id is required.' };
   }
   if (
-    data.starting_smr === undefined ||
-    data.starting_smr === null ||
-    Number.isNaN(data.starting_smr)
+    machineInput.starting_smr === undefined ||
+    machineInput.starting_smr === null ||
+    Number.isNaN(machineInput.starting_smr)
   ) {
     return { error: 'Starting SMR on Site is required.' };
   }
-  if (!data.department_id?.trim()) return { error: 'Department is required.' };
+  if (!machineInput.department_id?.trim()) return { error: 'Department is required.' };
 
   const parsed = adminAddMachineSchema.safeParse({
-    ...data,
-    starting_smr: data.starting_smr,
+    ...machineInput,
+    starting_smr: machineInput.starting_smr,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message || 'Invalid machine details.' };
@@ -127,7 +127,7 @@ export async function adminAddMachine(data: {
 
 export async function adminUpdateMachine(
   id: string,
-  data: {
+  machinePatch: {
     name?: string;
     machine_type?: string;
     manufacturer?: string | null;
@@ -146,14 +146,14 @@ export async function adminUpdateMachine(
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  if (data.name !== undefined && !data.name.trim()) {
+  if (machinePatch.name !== undefined && !machinePatch.name.trim()) {
     return { error: 'Machine ID cannot be empty.' };
   }
-  if (data.machine_type !== undefined && !data.machine_type.trim()) {
+  if (machinePatch.machine_type !== undefined && !machinePatch.machine_type.trim()) {
     return { error: 'Machine type cannot be empty.' };
   }
 
-  const parsed = adminUpdateMachineSchema.safeParse({ id, ...data });
+  const parsed = adminUpdateMachineSchema.safeParse({ id, ...machinePatch });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message || 'Invalid machine update payload.' };
   }
@@ -162,7 +162,7 @@ export async function adminUpdateMachine(
   const { supabase, userId } = auth;
 
   const primaryBinFactor =
-    data.bin_factor_waste !== undefined || data.bin_factor_coal !== undefined
+    machinePatch.bin_factor_waste !== undefined || machinePatch.bin_factor_coal !== undefined
       ? (valid.bin_factor_waste ?? valid.bin_factor_coal ?? valid.bin_factor ?? null)
       : valid.bin_factor;
 
@@ -171,13 +171,13 @@ export async function adminUpdateMachine(
     ...fields,
     ...(valid.name !== undefined ? { name: valid.name.trim() } : {}),
     ...(valid.machine_type !== undefined ? { machine_type: valid.machine_type.trim() } : {}),
-    ...(data.manufacturer !== undefined
+    ...(machinePatch.manufacturer !== undefined
       ? { manufacturer: valid.manufacturer?.trim() || null }
       : {}),
-    ...(data.serial_number !== undefined
+    ...(machinePatch.serial_number !== undefined
       ? { serial_number: valid.serial_number?.trim() || null }
       : {}),
-    ...(data.image_url !== undefined ? { image_url: valid.image_url?.trim() || null } : {}),
+    ...(machinePatch.image_url !== undefined ? { image_url: valid.image_url?.trim() || null } : {}),
     ...(primaryBinFactor !== undefined ? { bin_factor: primaryBinFactor } : {}),
     updated_at: new Date().toISOString(),
   };

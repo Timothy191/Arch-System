@@ -317,8 +317,6 @@ export const DETAILED_LIVE_COUNT_TABLES = [
   'ai_token_usage',
 ] as const;
 
-export type TrackedDatabaseTableName = (typeof DETAILED_LIVE_COUNT_TABLES)[number];
-
 /** Return all operational department names that read or write the given table. */
 export function getTableConsumerDepartments(tableName: string): readonly string[] {
   const consumers: string[] = [];

@@ -63,7 +63,7 @@ export interface ButtonProps
   typeName?: 'button' | 'submit' | 'reset';
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
-  svgOnly?: boolean;
+  isSvgOnly?: boolean;
   shadow?: boolean;
   loading?: boolean;
   asChild?: boolean;
@@ -80,7 +80,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       typeName,
       prefix,
       suffix,
-      svgOnly = false,
+      isSvgOnly = false,
       shadow = false,
       loading = false,
       disabled = false,
@@ -119,7 +119,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         shape,
       }),
       shadow && 'shadow-lg hover:shadow-xl',
-      svgOnly && 'aspect-square p-0',
+      isSvgOnly && 'aspect-square p-0',
       className
     );
 
@@ -177,7 +177,7 @@ export interface ButtonLinkProps
   shape?: ButtonShape;
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
-  svgOnly?: boolean;
+  isSvgOnly?: boolean;
   shadow?: boolean;
 }
 
@@ -190,7 +190,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
       shape,
       prefix,
       suffix,
-      svgOnly = false,
+      isSvgOnly = false,
       shadow = false,
       children,
       ...props
@@ -203,7 +203,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
         className={cn(
           buttonVariants({ variant, size, shape }),
           shadow && 'shadow-lg hover:shadow-xl',
-          svgOnly && 'aspect-square p-0',
+          isSvgOnly && 'aspect-square p-0',
           className
         )}
         {...props}

@@ -5,7 +5,7 @@ import {
   type AccessReportRange,
   AccessReportsStudio,
   type AccessReportTab,
-} from './access-reports-studio';
+} from './AccessReportsStudio';
 
 interface AccessControlReportsPageProps {
   readonly searchParams?: Promise<{ tab?: string; range?: string }>;

@@ -47,7 +47,7 @@ export interface SpeedInsightsEvent {
 
 export interface SpeedInsightsConfig {
   sampleRate?: number; // 0 to 1, default 1
-  beforeSend?: (data: SpeedInsightsEvent) => SpeedInsightsEvent | null;
+  beforeSend?: (event: SpeedInsightsEvent) => SpeedInsightsEvent | null;
   debug?: boolean;
   route?: string;
   endpoint?: string;

@@ -21,13 +21,13 @@ export interface MenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   showChevron?: boolean;
   variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'unstyled';
   size?: 'default' | 'small' | 'large' | 'icon';
-  svgOnly?: boolean;
+  isSvgOnly?: boolean;
   shape?: 'square' | 'circle';
 }
 
 export const MenuButton = React.forwardRef<HTMLButtonElement, MenuButtonProps>(
   (
-    { children, showChevron, variant = 'default', size, svgOnly, shape, className, ...props },
+    { children, showChevron, variant = 'default', size, isSvgOnly, shape, className, ...props },
     ref
   ) => {
     if (variant === 'unstyled') {
@@ -46,7 +46,7 @@ export const MenuButton = React.forwardRef<HTMLButtonElement, MenuButtonProps>(
           ref={ref}
           variant={variant}
           size={size}
-          className={cn(className, svgOnly && 'px-2')}
+          className={cn(className, isSvgOnly && 'px-2')}
           {...props}
         >
           {children}

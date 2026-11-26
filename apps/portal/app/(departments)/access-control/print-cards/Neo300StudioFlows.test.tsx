@@ -87,7 +87,7 @@ jest.mock('sonner', () => ({
   },
 }));
 
-import { Neo300PrintStudio } from './neo300-print-studio';
+import { Neo300PrintStudio } from './Neo300PrintStudio';
 
 const basePrinter = {
   id: 'pr-1',

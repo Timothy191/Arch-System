@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { MusterSummary } from '../actions';
-import { MusterRollCallView } from './muster-roll-call-view';
+import { MusterRollCallView } from './MusterRollCallView';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({

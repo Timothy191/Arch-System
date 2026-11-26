@@ -20,14 +20,14 @@ export function ProductionTrendChart({ data, showForecast = true }: ProductionTr
 
   const lastDate = data.at(-1)?.date ?? new Date().toISOString().split('T')[0]!;
 
-  const forecastPoints = forecast.map((val: number, i: number) => {
+  const forecastPoints = forecast.map((forecastValue: number, dayOffset: number) => {
     const d = new Date(lastDate);
-    d.setDate(d.getDate() + i + 1);
+    d.setDate(d.getDate() + dayOffset + 1);
     return {
       date: d.toISOString().split('T')[0]!,
       coal: undefined,
       waste: undefined,
-      'Coal Forecast': Math.max(0, Math.round(val)),
+      'Coal Forecast': Math.max(0, Math.round(forecastValue)),
     };
   });
 

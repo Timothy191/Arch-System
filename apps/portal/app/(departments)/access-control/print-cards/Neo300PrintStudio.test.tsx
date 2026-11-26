@@ -8,7 +8,7 @@ import type {
   Neo300Printer,
 } from './actions';
 import { getEmployeeCardProfiles, upsertEmployeeForCardPrinting } from './actions';
-import { Neo300PrintStudio } from './neo300-print-studio';
+import { Neo300PrintStudio } from './Neo300PrintStudio';
 
 jest.mock('next/image', () => ({
   __esModule: true,

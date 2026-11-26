@@ -4,25 +4,25 @@
  */
 
 // Step 1: Collect recent compliance logs from database
-async function fetchComplianceLogs(data: unknown) {
+async function fetchComplianceLogs(payload: unknown) {
   'use step';
-  console.log('[Step] fetchComplianceLogs executing:', data);
+  console.log('[Step] fetchComplianceLogs executing:', payload);
   // Autonomous step logic (full Node.js, database, and API access)
   return { step: 'fetchComplianceLogs', status: 'completed', timestamp: new Date().toISOString() };
 }
 
 // Step 2: Compare logs against safety threshold
-async function evaluateSafetyDrift(data: unknown) {
+async function evaluateSafetyDrift(payload: unknown) {
   'use step';
-  console.log('[Step] evaluateSafetyDrift executing:', data);
+  console.log('[Step] evaluateSafetyDrift executing:', payload);
   // Autonomous step logic (full Node.js, database, and API access)
   return { step: 'evaluateSafetyDrift', status: 'completed', timestamp: new Date().toISOString() };
 }
 
 // Step 3: Send emergency notification to safety supervisor
-async function notifySupervisor(data: unknown) {
+async function notifySupervisor(payload: unknown) {
   'use step';
-  console.log('[Step] notifySupervisor executing:', data);
+  console.log('[Step] notifySupervisor executing:', payload);
   // Autonomous step logic (full Node.js, database, and API access)
   return { step: 'notifySupervisor', status: 'completed', timestamp: new Date().toISOString() };
 }

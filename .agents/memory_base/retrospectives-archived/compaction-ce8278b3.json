@@ -1,0 +1,21 @@
+{
+  "id": "compaction-ce8278b3",
+  "timestamp": "2026-11-26T16:35:59.648Z",
+  "taskTag": "compaction-standard-ce8278b3",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:consolidate_state_spine",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/apps/portal/jest.config.cjs\""
+  ],
+  "rootCause": "Context fill is below 25% idempotent floor or within 4 turns of prior checkpoint; preserving warm prefix cache.",
+  "resolution": "Persisted bounded SKILL.state (304 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "consolidate_state_spine",
+    "latestInputTokens": 42144,
+    "cacheHitRatio": 0.8463,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 29812
+  }
+}

@@ -27,12 +27,12 @@ import {
   manualCheckOutVisitor,
   rejectPreRegisteredVisitor,
 } from './actions';
+import { VisitorForm } from './VisitorForm';
 import {
   AUTO_EXITED_VISITOR_STATUS,
   formatRemainingOrElapsed,
   MANUAL_CHECKED_OUT_STATUS,
 } from './visitor-auto-exit';
-import { VisitorForm } from './visitor-form';
 
 const CLOCK_TICK_INTERVAL_MS = 60_000;
 

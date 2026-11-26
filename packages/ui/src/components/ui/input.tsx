@@ -5,12 +5,12 @@ import * as React from 'react';
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'prefix'> {
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
-  errored?: boolean;
+  hasError?: boolean;
   wrapperClassName?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, wrapperClassName, type, prefix, suffix, errored, ...props }, ref) => {
+  ({ className, wrapperClassName, type, prefix, suffix, hasError, ...props }, ref) => {
     const gridSpanClass = className
       ?.split(/\s+/)
       .filter((c) => c.includes('col-span'))
@@ -28,7 +28,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           type={type}
           className={cn(
             'flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50',
-            errored
+            hasError
               ? 'border-red-500 text-red-900 placeholder:text-red-300 focus-visible:ring-red-500/20'
               : 'border-input focus-visible:border-ring focus-visible:ring-ring',
             prefix && 'pl-9',

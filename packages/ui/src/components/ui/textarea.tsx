@@ -3,16 +3,16 @@ import * as React from 'react';
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   className?: string;
-  errored?: boolean;
+  hasError?: boolean;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, rows, errored, ...props }, ref) => (
+  ({ className, rows, hasError, ...props }, ref) => (
     <textarea
       ref={ref}
       className={cn(
         'flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-        errored
+        hasError
           ? 'border-red-500 text-red-900 placeholder:text-red-300 focus-visible:ring-red-500/20'
           : 'border-input focus-visible:border-ring focus-visible:ring-ring',
         className

@@ -12,4 +12,5 @@ This registry tracks all feature, bug-fix, and chore tracks managed with Conduct
 
 ## Active Tracks
 
-_No active tracks yet. Run `/conductor:conductor-new-track` to create your first track._
+- [x] **Track: Dead-Code Cleanup & `effect` Vulnerability Triage**
+      _Link: [./tracks/chore_cleanup_20261126/index.md](./tracks/chore_cleanup_20261126/index.md)_

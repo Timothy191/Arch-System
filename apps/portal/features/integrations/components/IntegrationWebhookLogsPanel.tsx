@@ -651,9 +651,9 @@ export function IntegrationWebhookLogsPanel({
 interface IntegrationCatalogMarketplaceProps {
   kindCounts: { all: number; mcp: number; lsp: number; action: number; native: number };
   catalogFilter: CatalogFilter;
-  setCatalogFilter: (val: CatalogFilter) => void;
+  setCatalogFilter: (nextFilter: CatalogFilter) => void;
   searchQuery: string;
-  setSearchQuery: (val: string) => void;
+  setSearchQuery: (nextQuery: string) => void;
   filteredCatalog: CatalogEntry[];
   installedCatalogIds: Set<string>;
   installingCatalogId: string | null;

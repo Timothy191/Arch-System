@@ -286,8 +286,8 @@ export function ShiftPdfReportTab({
   };
 
   const printablePdfHtml = useMemo(() => {
-    const escapeHtml = (val: string) =>
-      val
+    const escapeHtml = (text: string) =>
+      text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')

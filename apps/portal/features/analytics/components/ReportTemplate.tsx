@@ -118,21 +118,21 @@ interface ReportData {
   tableRows: string[][];
 }
 
-export function ReportTemplate({ data }: { data: ReportData }) {
+export function ReportTemplate({ reportData }: { reportData: ReportData }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>{data.title}</Text>
-          <Text style={styles.subtitle}>{data.subtitle}</Text>
+          <Text style={styles.title}>{reportData.title}</Text>
+          <Text style={styles.subtitle}>{reportData.subtitle}</Text>
         </View>
 
         {/* KPIs Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Key Performance Indicators</Text>
           <View style={styles.grid}>
-            {data.kpis.map((kpi, idx) => (
+            {reportData.kpis.map((kpi, idx) => (
               <View key={idx} style={styles.card}>
                 <Text style={styles.cardLabel}>{kpi.label}</Text>
                 <Text style={styles.cardValue}>{kpi.value}</Text>
@@ -142,20 +142,20 @@ export function ReportTemplate({ data }: { data: ReportData }) {
         </View>
 
         {/* Table Section */}
-        {data.tableRows.length > 0 && (
+        {reportData.tableRows.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Operational Details</Text>
             <View style={styles.table}>
               {/* Header */}
               <View style={styles.tableHeader}>
-                {data.tableHeaders.map((header, idx) => (
+                {reportData.tableHeaders.map((header, idx) => (
                   <Text key={idx} style={styles.tableCellHeader}>
                     {header}
                   </Text>
                 ))}
               </View>
               {/* Rows */}
-              {data.tableRows.map((row, rowIdx) => (
+              {reportData.tableRows.map((row, rowIdx) => (
                 <View key={rowIdx} style={styles.tableRow}>
                   {row.map((cell, cellIdx) => (
                     <Text key={cellIdx} style={styles.tableCell}>

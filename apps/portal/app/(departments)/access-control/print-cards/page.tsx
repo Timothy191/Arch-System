@@ -6,7 +6,7 @@ import {
   getNeo300PrinterStatus,
   getRecentNeo300Jobs,
 } from './actions';
-import { Neo300PrintStudio } from './neo300-print-studio';
+import { Neo300PrintStudio } from './Neo300PrintStudio';
 
 const RECENT_PRINT_JOB_LIMIT = 15;
 

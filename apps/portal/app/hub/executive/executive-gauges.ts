@@ -62,8 +62,8 @@ function gaugeMax(reference: number | null, fallback: number | null): number {
   return Math.max(basis * REFERENCE_HEADROOM, MIN_GAUGE_SPAN);
 }
 
-function fleetGauge(data: ExecutiveData): GaugeSpec {
-  const { availabilityPct, active, total } = data.fleet;
+function fleetGauge(executive: ExecutiveData): GaugeSpec {
+  const { availabilityPct, active, total } = executive.fleet;
   return {
     id: 'fleet-availability',
     label: 'Availability',
@@ -77,15 +77,15 @@ function fleetGauge(data: ExecutiveData): GaugeSpec {
   };
 }
 
-function paceCaption(data: ExecutiveData): string {
-  if (!data.summaryAvailable) return SUMMARY_UNAVAILABLE;
-  if (!data.target) return 'No monthly coal target set';
-  const attained = formatPercent(data.target.coalAttainmentPct);
-  return `${attained} of ${formatTonnes(data.target.coalTargetTonnes)} monthly target`;
+function paceCaption(executive: ExecutiveData): string {
+  if (!executive.summaryAvailable) return SUMMARY_UNAVAILABLE;
+  if (!executive.target) return 'No monthly coal target set';
+  const attained = formatPercent(executive.target.coalAttainmentPct);
+  return `${attained} of ${formatTonnes(executive.target.coalTargetTonnes)} monthly target`;
 }
 
-function paceGauge(data: ExecutiveData): GaugeSpec {
-  const pace = data.summaryAvailable ? (data.target?.coalPacePct ?? null) : null;
+function paceGauge(executive: ExecutiveData): GaugeSpec {
+  const pace = executive.summaryAvailable ? (executive.target?.coalPacePct ?? null) : null;
   return {
     id: 'coal-target-pace',
     label: 'Coal Target Pace',
@@ -95,12 +95,12 @@ function paceGauge(data: ExecutiveData): GaugeSpec {
     unit: '%',
     decimals: 0,
     tone: toneHigherIsBetter(pace, PACE_THRESHOLDS),
-    caption: paceCaption(data),
+    caption: paceCaption(executive),
   };
 }
 
-function driftGauge(data: ExecutiveData): GaugeSpec {
-  const drift = data.summaryAvailable ? data.mtd.avgAbsDriftPct : null;
+function driftGauge(executive: ExecutiveData): GaugeSpec {
+  const drift = executive.summaryAvailable ? executive.mtd.avgAbsDriftPct : null;
   const level = classifyReconciliationDrift(drift ?? 0);
   return {
     id: 'reconciliation-drift',
@@ -115,9 +115,9 @@ function driftGauge(data: ExecutiveData): GaugeSpec {
   };
 }
 
-function fuelGauge(data: ExecutiveData): GaugeSpec {
-  const fuel = data.summaryAvailable ? data.mtd.fuelPerTonne : null;
-  const reference = data.summaryAvailable ? data.window.fuelPerTonne : null;
+function fuelGauge(executive: ExecutiveData): GaugeSpec {
+  const fuel = executive.summaryAvailable ? executive.mtd.fuelPerTonne : null;
+  const reference = executive.summaryAvailable ? executive.window.fuelPerTonne : null;
   const caption =
     reference === null
       ? 'No 30-day baseline'
@@ -131,13 +131,13 @@ function fuelGauge(data: ExecutiveData): GaugeSpec {
     unit: ' L/t',
     decimals: RATE_DECIMALS,
     tone: reference === null ? 'neutral' : toneLowerIsBetter(fuel, referenceThresholds(reference)),
-    caption: data.summaryAvailable ? caption : SUMMARY_UNAVAILABLE,
+    caption: executive.summaryAvailable ? caption : SUMMARY_UNAVAILABLE,
   };
 }
 
-function stripGauge(data: ExecutiveData): GaugeSpec {
-  const strip = data.summaryAvailable ? data.mtd.stripRatio : null;
-  const planned = data.target?.plannedStripRatio ?? null;
+function stripGauge(executive: ExecutiveData): GaugeSpec {
+  const strip = executive.summaryAvailable ? executive.mtd.stripRatio : null;
+  const planned = executive.target?.plannedStripRatio ?? null;
   const caption = planned === null ? 'No planned strip ratio' : `Plan ${formatRatio(planned)}`;
   return {
     id: 'strip-ratio',
@@ -148,10 +148,16 @@ function stripGauge(data: ExecutiveData): GaugeSpec {
     unit: ' : 1',
     decimals: RATE_DECIMALS,
     tone: planned === null ? 'neutral' : toneLowerIsBetter(strip, referenceThresholds(planned)),
-    caption: data.summaryAvailable ? caption : SUMMARY_UNAVAILABLE,
+    caption: executive.summaryAvailable ? caption : SUMMARY_UNAVAILABLE,
   };
 }
 
-export function buildGaugeSpecs(data: ExecutiveData): GaugeSpec[] {
-  return [fleetGauge(data), paceGauge(data), driftGauge(data), fuelGauge(data), stripGauge(data)];
+export function buildGaugeSpecs(executive: ExecutiveData): GaugeSpec[] {
+  return [
+    fleetGauge(executive),
+    paceGauge(executive),
+    driftGauge(executive),
+    fuelGauge(executive),
+    stripGauge(executive),
+  ];
 }

@@ -157,18 +157,18 @@ export function PlantInventoryWorkspaceClient({
     }
   };
 
-  const handleConfirmRemoveOne = (item: PlantInventoryStockItem) => {
-    if (item.amountPresent <= 0) {
+  const handleConfirmRemoveOne = (stockItem: PlantInventoryStockItem) => {
+    if (stockItem.amountPresent <= 0) {
       setPendingRemoveItem(null);
       return;
     }
 
-    const nextPresent = Math.max(0, Number((item.amountPresent - 1).toFixed(2)));
-    const removedAmount = Math.max(0, Number((item.amountPresent - nextPresent).toFixed(2)));
-    const flags = computeStockAutomatedFlags(item.amountRequired, nextPresent);
+    const nextPresent = Math.max(0, Number((stockItem.amountPresent - 1).toFixed(2)));
+    const removedAmount = Math.max(0, Number((stockItem.amountPresent - nextPresent).toFixed(2)));
+    const flags = computeStockAutomatedFlags(stockItem.amountRequired, nextPresent);
 
     const updated = stockItems.map((row) =>
-      row.id === item.id ? { ...row, amountPresent: nextPresent } : row
+      row.id === stockItem.id ? { ...row, amountPresent: nextPresent } : row
     );
     persistStockItems(updated);
 
@@ -176,33 +176,33 @@ export function PlantInventoryWorkspaceClient({
       id: `use-${Date.now()}`,
       date: today,
       shift: usageShift,
-      stockId: item.id,
-      stock: item.stock,
-      description: `Quick -1 unit removal from Inventory List (${item.code})`,
+      stockId: stockItem.id,
+      stock: stockItem.stock,
+      description: `Quick -1 unit removal from Inventory List (${stockItem.code})`,
       amountUsed: removedAmount > 0 ? removedAmount : 1,
-      unit: item.unit,
+      unit: stockItem.unit,
       circuitArea: 'Inventory List Quick Drawdown',
-      plantEquipment: item.plantEquipment,
+      plantEquipment: stockItem.plantEquipment,
       loggedBy: usageOperator.trim() || 'Plant Shift Supervisor',
     };
     persistUsageHistory([usageEntry, ...usageHistory]);
 
     setPendingRemoveItem(null);
     setInlineFeedback(
-      `Removed 1 ${item.unit} from "${item.stock}" — Have: ${formatQty(nextPresent)} ${item.unit} (${flags.statusLabel}, ${flags.coveragePct}% coverage).`
+      `Removed 1 ${stockItem.unit} from "${stockItem.stock}" — Have: ${formatQty(nextPresent)} ${stockItem.unit} (${flags.statusLabel}, ${flags.coveragePct}% coverage).`
     );
 
     void updatePlantInventoryAmountsAction({
-      id: item.id,
-      code: item.code,
-      amountRequired: item.amountRequired,
+      id: stockItem.id,
+      code: stockItem.code,
+      amountRequired: stockItem.amountRequired,
       amountPresent: nextPresent,
     }).catch(() => undefined);
 
     void recordPlantInventoryUsageAction({
-      stockId: item.id,
-      stockCode: item.code,
-      stockName: item.stock,
+      stockId: stockItem.id,
+      stockCode: stockItem.code,
+      stockName: stockItem.stock,
       date: usageEntry.date,
       shift: usageEntry.shift,
       amountUsed: usageEntry.amountUsed,

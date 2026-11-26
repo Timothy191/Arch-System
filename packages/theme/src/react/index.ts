@@ -1,1 +1,1 @@
-export { ArchThemeProvider, useArchTheme } from './theme-provider';
+export { ArchThemeProvider, useArchTheme } from './ThemeProvider';

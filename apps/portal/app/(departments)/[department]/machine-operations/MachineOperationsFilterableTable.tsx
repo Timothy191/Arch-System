@@ -95,8 +95,8 @@ interface SharedSmrColumnsOptions {
   readonly inlineStartSmrDrafts: Record<string, string>;
   readonly inlineHoursDrafts: Record<string, string>;
   readonly savingMachineId: string | null;
-  readonly onStartSmrDraftChange: (machineId: string, val: string) => void;
-  readonly onHoursDraftChange: (machineId: string, val: string) => void;
+  readonly onStartSmrDraftChange: (machineId: string, draftText: string) => void;
+  readonly onHoursDraftChange: (machineId: string, draftText: string) => void;
   readonly onSaveInlineHours: (row: MachineTableRow) => void;
 }
 
@@ -461,12 +461,12 @@ export function MachineOperationsFilterableTable({
   };
 
   // Transform items into typed table rows
-  const transformRow = (item: MachineWithMeta): MachineTableRow => {
-    const machine = item.machine;
-    const ops = item.operations || [];
+  const transformRow = (machineRow: MachineWithMeta): MachineTableRow => {
+    const machine = machineRow.machine;
+    const ops = machineRow.operations || [];
     const latestOp = ops[ops.length - 1];
 
-    const category = item.category;
+    const category = machineRow.category;
     const isDozer = category === 'dozer';
     const isDrill = category === 'drill';
     const isAdt = category === 'adt';
@@ -478,7 +478,7 @@ export function MachineOperationsFilterableTable({
     const effectiveStartSmr = opStartSmu ?? carriedOverStartSmu;
     const isStartSmrCarriedOver = opStartSmu === null && carriedOverStartSmu !== null;
     const effectiveStopSmr = latestOp?.end_smu ?? null;
-    const hasMissingHours = item.totalHours <= 0 || effectiveStopSmr === null;
+    const hasMissingHours = machineRow.totalHours <= 0 || effectiveStopSmr === null;
 
     // ADT metrics
     const loadsCount = loadsByMachine.get(machine.id) || 0;
@@ -493,25 +493,25 @@ export function MachineOperationsFilterableTable({
       ? ops.reduce((sum, op) => sum + (op.holes_drilled || 0), 0) || null
       : null;
     const penetrationRate =
-      isDrill && totalMetersDrilled && item.totalHours > 0
-        ? `${(totalMetersDrilled / item.totalHours).toFixed(1)} m/h`
+      isDrill && totalMetersDrilled && machineRow.totalHours > 0
+        ? `${(totalMetersDrilled / machineRow.totalHours).toFixed(1)} m/h`
         : null;
 
     // Dozer metrics
-    const rolloverBcm = isDozer ? item.totalHours * DOZER_PUSH_FACTOR_BCM_PER_HOUR : null;
+    const rolloverBcm = isDozer ? machineRow.totalHours * DOZER_PUSH_FACTOR_BCM_PER_HOUR : null;
 
     return {
       id: machine.id,
       name: machine.name,
       machine_type: machine.machine_type,
       serial_number: machine.serial_number,
-      status: item.status,
+      status: machineRow.status,
       category,
       start_smu: effectiveStartSmr,
       stop_smu: effectiveStopSmr,
       is_start_smr_carried_over: isStartSmrCarriedOver,
       has_missing_hours: hasMissingHours,
-      total_hours: item.totalHours,
+      total_hours: machineRow.totalHours,
       operator: latestOp?.operator?.full_name || null,
       site: machine.site?.name || latestOp?.site?.name || null,
       loads: isAdt || isExcavator ? loadsCount : undefined,
@@ -851,13 +851,13 @@ export function MachineOperationsFilterableTable({
                     pageSize={15}
                     searchable={true}
                     searchPlaceholder="Search machine, type, or SN..."
-                    searchFilter={(item: MachineTableRow, query: string) => {
+                    searchFilter={(row: MachineTableRow, query: string) => {
                       const lowerQuery = query.toLowerCase();
                       return (
-                        item.name.toLowerCase().includes(lowerQuery) ||
-                        item.machine_type.toLowerCase().includes(lowerQuery) ||
-                        Boolean(item.serial_number?.toLowerCase().includes(lowerQuery)) ||
-                        item.status.toLowerCase().includes(lowerQuery)
+                        row.name.toLowerCase().includes(lowerQuery) ||
+                        row.machine_type.toLowerCase().includes(lowerQuery) ||
+                        Boolean(row.serial_number?.toLowerCase().includes(lowerQuery)) ||
+                        row.status.toLowerCase().includes(lowerQuery)
                       );
                     }}
                     emptyState={

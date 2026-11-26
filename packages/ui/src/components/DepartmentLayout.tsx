@@ -46,7 +46,7 @@ import {
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ADMIN_SUBTAB_ICONS } from '../icons/admin-icons';
+import { ADMIN_SUBTAB_ICONS } from '../icons/AdminIcons';
 import { getDepartmentIcon } from '../icons/department-icons';
 import { cn } from '../lib/utils';
 import { Logo } from './Logo';

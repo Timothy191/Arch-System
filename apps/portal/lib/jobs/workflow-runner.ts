@@ -24,26 +24,6 @@ export interface TrackedWorkflowOptions<TResponse> extends TriggerN8nOptions<TRe
 }
 
 /**
- * Reads the persisted execution status of a tracked workflow job from Redis (`workflow_job_<jobId>`).
- * Note: BullMQ queue jobs are inspected separately via `/api/workflows/jobs/[jobId]`.
- */
-export async function getTrackedWorkflowStatus(jobId: string): Promise<WorkflowJobStatus | null> {
-  const cached: unknown = await serverlessRedis.get(`workflow_job_${jobId}`);
-  if (!cached) return null;
-  if (typeof cached === 'string') {
-    try {
-      return JSON.parse(cached) as WorkflowJobStatus;
-    } catch {
-      return null;
-    }
-  }
-  if (typeof cached === 'object') {
-    return cached as WorkflowJobStatus;
-  }
-  return null;
-}
-
-/**
  * Triggers an n8n workflow and tracks its lifecycle (`pending` -> `running` -> `completed` | `failed`)
  * in Redis under `workflow_job_<jobId>` (1-hour TTL).
  *

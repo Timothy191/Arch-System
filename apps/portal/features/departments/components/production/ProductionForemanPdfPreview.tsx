@@ -8,7 +8,7 @@ import { downloadProductionForemanPdf } from './production-pdf-export';
 import type { ProductionPdfScope, ProductionPerformanceData } from './production-types';
 
 export interface ProductionForemanPdfPreviewProps {
-  data: ProductionPerformanceData;
+  performance: ProductionPerformanceData;
 }
 
 type ZoomLevel = 'fit' | '100' | '75';
@@ -101,19 +101,19 @@ function SegmentedControl<TOption extends string>({
   );
 }
 
-export function ProductionForemanPdfPreview({ data }: ProductionForemanPdfPreviewProps) {
+export function ProductionForemanPdfPreview({ performance }: ProductionForemanPdfPreviewProps) {
   const [scope, setScope] = useState<ProductionPdfScope>('full');
   const [zoom, setZoom] = useState<ZoomLevel>('fit');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const { foremanSummary, delayGroups, dailyRows, monthlyRows } = data;
+  const { foremanSummary, delayGroups, dailyRows, monthlyRows } = performance;
   const showForemanAndDelays = scope === 'full' || scope === 'foreman-delays';
   const showDailyAndMonthly = scope === 'full' || scope === 'daily-monthly';
 
   const handleDownload = async () => {
     setIsGenerating(true);
     try {
-      await downloadProductionForemanPdf({ data, scope });
+      await downloadProductionForemanPdf({ performance, scope });
     } finally {
       setIsGenerating(false);
     }
@@ -136,7 +136,7 @@ export function ProductionForemanPdfPreview({ data }: ProductionForemanPdfPrevie
             </div>
             <span className={PILL_CLASS}>
               <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
-              Report Period: {data.monthLabel}
+              Report Period: {performance.monthLabel}
             </span>
           </div>
 
@@ -199,9 +199,9 @@ export function ProductionForemanPdfPreview({ data }: ProductionForemanPdfPrevie
             </div>
             <dl className="grid grid-cols-[auto_auto] gap-x-3 text-right text-[10px]">
               <dt className="text-[var(--text-muted)]">Report Month</dt>
-              <dd className="font-semibold">{data.selectedMonth}</dd>
+              <dd className="font-semibold">{performance.selectedMonth}</dd>
               <dt className="text-[var(--text-muted)]">Document ID</dt>
-              <dd className="font-semibold">PRD-FRM-{data.selectedMonth}</dd>
+              <dd className="font-semibold">PRD-FRM-{performance.selectedMonth}</dd>
               <dt className="text-[var(--text-muted)]">Scope</dt>
               <dd className="font-semibold">{SCOPE_LABELS[scope]}</dd>
             </dl>

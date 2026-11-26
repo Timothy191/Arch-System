@@ -128,8 +128,8 @@ export function PlantHourlyRollupSection({
     const minVal = 330;
     const maxVal = Math.max(510, totals.peakHourRom + 20);
 
-    const toY = (val: number) => {
-      const clamped = Math.max(minVal, Math.min(maxVal, val));
+    const toY = (seriesValue: number) => {
+      const clamped = Math.max(minVal, Math.min(maxVal, seriesValue));
       const y = padTop + usableH - ((clamped - minVal) / (maxVal - minVal)) * usableH;
       return Number(y.toFixed(1));
     };

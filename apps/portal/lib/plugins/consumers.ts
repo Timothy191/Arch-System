@@ -11,10 +11,10 @@ import { type PluginHooks, type PluginWidget } from './types';
 
 type HookName = keyof PluginHooks;
 
-export async function triggerPluginHook(hookName: HookName, data: unknown): Promise<void> {
+export async function triggerPluginHook(hookName: HookName, payload: unknown): Promise<void> {
   try {
     const { pluginOrchestrator } = await import('./orchestrator');
-    await pluginOrchestrator.triggerHook(hookName, data);
+    await pluginOrchestrator.triggerHook(hookName, payload);
   } catch (error) {
     logError(error, { context: 'plugin_hook_dispatch', hookName });
   }
