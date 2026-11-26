@@ -6,6 +6,14 @@
 
 <!-- cspell:ignore commandcode autohand Autohand styleguides EOVERRIDE PLAYWRIGHT_MISE_DIR btrim unevidenced fastapi agentsroom typegen -->
 
+## [2026-11-26T07:03:12+02:00] - Admin Contract Schemas for Fleet, Departments, Employees & Portal Settings
+
+- **New contracts (`packages/contract/src/schemas/admin.schema.ts`)**: `adminAddMachineSchema` (name-or-serial refine, non-negative SMR, positive bin factors), `adminUpdateMachineSchema`, `adminArchiveMachineSchema`, `adminDeleteEmployeeSchema`, `adminUpdateDepartmentSchema`, and `adminPortalSettingsSchema` (HH:MM shift boundaries, shift duration, site timezone, idle warning minutes, operational notice). `adminArchiveDepartmentSchema` IDs are now trimmed, and `upsertAdminEmployeeSchema` accepts an optional `email` (or empty string) plus nullable `photo_storage_path`.
+- **Barrel exports (`packages/contract/src/index.ts`)**: Added the new schemas/types and exported the previously package-private mine-block and card-template schemas so portal consumers can import them from `@repo/contract`.
+- **Tests**: New `admin.schema.test.ts` covers employee email acceptance/rejection, delete-employee and update-department validation, machine add/update/archive rules, and portal-settings defaults plus invalid HH:MM rejection (4/4 passing).
+- **Verification**: `pnpm --filter @repo/contract type-check` passes; `pnpm --filter @repo/contract test -- --testPathPatterns="admin.schema"` passes; `biome check` is clean on the three changed files.
+- **Pending wiring**: No portal action or form consumes the machine/settings/delete-employee schemas yet; `photo_storage_path` has no backing column or consumer at time of commit.
+
 ## [2026-11-26T06:39:13+02:00] - Turbopack Build Trace Fix for Earth-Imagery Fallback
 
 - **Build failure (Gate 18)**: A fresh Turbopack analysis of `apps/portal/app/api/hub/earth-imagery/route.ts` failed with "Static analysis determined that this filesystem access causes the whole project to be traced" at `readFile(candidatePath)`; the earlier 19:48 pass reused the filesystem build cache and masked it.

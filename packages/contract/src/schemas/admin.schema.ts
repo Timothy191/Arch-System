@@ -91,6 +91,7 @@ export type DepartmentPermissionsMap = z.infer<typeof departmentPermissionsMapSc
 export const upsertAdminEmployeeSchema = z.object({
   id: z.string().nullable().optional(),
   record_type: employeeRecordTypeSchema.optional().default('employee'),
+  email: z.string().email('Enter a valid email address').or(z.literal('')).optional(),
   names: z.string().max(120),
   surname: z.string().max(120),
   full_name: z.string().max(240),
@@ -108,6 +109,7 @@ export const upsertAdminEmployeeSchema = z.object({
   coy_number: z.string().max(64),
   qr_code: z.string().max(128),
   photo_url: z.string(),
+  photo_storage_path: z.string().max(512).nullable().optional(),
   role: z.string().min(1).max(64),
   department_id: z.string().nullable(),
   accessible_departments: z.array(z.string()),
@@ -115,16 +117,100 @@ export const upsertAdminEmployeeSchema = z.object({
 });
 export type UpsertAdminEmployeeSchemaInput = z.infer<typeof upsertAdminEmployeeSchema>;
 
+export const adminDeleteEmployeeSchema = z.object({
+  id: z.string().trim().min(1, 'Employee ID is required'),
+});
+export type AdminDeleteEmployeeInput = z.infer<typeof adminDeleteEmployeeSchema>;
+
 export const adminAddDepartmentSchema = z.object({
   display_name: z.string().trim().min(1, 'Department name is required').max(120),
   name: z.string().trim().min(1).max(120).optional(),
 });
 export type AdminAddDepartmentInput = z.infer<typeof adminAddDepartmentSchema>;
 
+export const adminUpdateDepartmentSchema = z.object({
+  id: z.string().trim().min(1, 'Department ID is required'),
+  display_name: z.string().trim().min(1, 'Department name is required').max(120).optional(),
+  description: z.string().trim().max(500).nullable().optional(),
+  color: z.string().trim().min(1).max(64).optional(),
+  icon: z.string().trim().min(1).max(64).optional(),
+});
+export type AdminUpdateDepartmentInput = z.infer<typeof adminUpdateDepartmentSchema>;
+
 export const adminArchiveDepartmentSchema = z.object({
-  id: z.string().min(1, 'Department ID is required'),
+  id: z.string().trim().min(1, 'Department ID is required'),
 });
 export type AdminArchiveDepartmentInput = z.infer<typeof adminArchiveDepartmentSchema>;
+
+export const adminAddMachineSchema = z
+  .object({
+    name: z.string().trim().max(120).optional().default(''),
+    serial_number: z.string().trim().max(160).optional(),
+    machine_type: z.string().trim().min(1, 'Machine Type is required.').max(120),
+    manufacturer: z.string().trim().min(1, 'Machine Manufacturer is required.').max(120),
+    image_url: z.string().trim().max(512).nullable().optional(),
+    starting_smr: z
+      .number()
+      .refine((n) => !Number.isNaN(n), 'Starting SMR on Site is required.')
+      .min(0, 'Starting SMR cannot be negative.'),
+    bin_factor: z.number().positive().nullable().optional(),
+    bin_factor_waste: z.number().positive().nullable().optional(),
+    bin_factor_coal: z.number().positive().nullable().optional(),
+    department_id: z.string().trim().min(1, 'Department is required.'),
+    site_id: z.string().trim().nullable().optional(),
+    active: z.boolean().optional().default(true),
+    report_exempt: z.boolean().optional().default(false),
+  })
+  .refine((val) => Boolean(val.name.trim() || val.serial_number?.trim()), {
+    message: 'Machine Id is required.',
+    path: ['name'],
+  });
+export type AdminAddMachineInput = z.infer<typeof adminAddMachineSchema>;
+
+export const adminUpdateMachineSchema = z.object({
+  id: z.string().trim().min(1, 'Machine ID is required.'),
+  name: z.string().trim().min(1, 'Machine ID cannot be empty.').max(120).optional(),
+  machine_type: z.string().trim().min(1, 'Machine type cannot be empty.').max(120).optional(),
+  manufacturer: z.string().trim().max(120).nullable().optional(),
+  serial_number: z.string().trim().max(160).nullable().optional(),
+  image_url: z.string().trim().max(512).nullable().optional(),
+  starting_smr: z.number().min(0, 'Starting SMR cannot be negative.').nullable().optional(),
+  bin_factor: z.number().positive().nullable().optional(),
+  bin_factor_waste: z.number().positive().nullable().optional(),
+  bin_factor_coal: z.number().positive().nullable().optional(),
+  department_id: z.string().trim().min(1, 'Department cannot be empty.').optional(),
+  site_id: z.string().trim().nullable().optional(),
+  active: z.boolean().optional(),
+  report_exempt: z.boolean().optional(),
+});
+export type AdminUpdateMachineInput = z.infer<typeof adminUpdateMachineSchema>;
+
+export const adminArchiveMachineSchema = z.object({
+  id: z.string().trim().min(1, 'Machine ID is required.'),
+});
+export type AdminArchiveMachineInput = z.infer<typeof adminArchiveMachineSchema>;
+
+export const adminPortalSettingsSchema = z.object({
+  dayShiftStart: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Day shift start must use HH:MM format')
+    .default('06:00'),
+  nightShiftStart: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Night shift start must use HH:MM format')
+    .default('18:00'),
+  shiftDurationHours: z.coerce.number().int().min(1).max(24).default(12),
+  siteTimezone: z
+    .string()
+    .trim()
+    .min(1, 'Site timezone is required')
+    .max(80)
+    .default('Africa/Johannesburg'),
+  sessionIdleWarningMinutes: z.coerce.number().int().min(5).max(480).default(30),
+  operationalNoticeBanner: z.string().trim().max(500).default(''),
+  operationalNoticeActive: z.boolean().default(false),
+});
+export type AdminPortalSettings = z.infer<typeof adminPortalSettingsSchema>;
 
 export const adminCardTemplateUploadSchema = z.object({
   name: z.string().trim().min(1, 'Template name is required').max(120),
