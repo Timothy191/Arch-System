@@ -320,12 +320,11 @@ describe('VisitorsRegistryClient', () => {
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
-    await act(async () => {
-      jest.advanceTimersByTime(60_000);
-      await Promise.resolve();
-    });
+    fireEvent.click(screen.getByRole('button', { name: /Enforce 12h Auto-Exit/i }));
 
-    expect(mockAutoExit).toHaveBeenCalledWith('dept-ac-1');
+    await waitFor(() => {
+      expect(mockAutoExit).toHaveBeenCalledWith('dept-ac-1');
+    });
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('Pieter Botha');
     });

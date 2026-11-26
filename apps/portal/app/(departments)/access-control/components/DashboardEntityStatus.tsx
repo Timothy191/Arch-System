@@ -1,4 +1,6 @@
+import { GlassCard } from '@repo/ui/GlassCard';
 import { Car, ChevronRight, type LucideIcon, Users, Wrench } from 'lucide-react';
+import Link from 'next/link';
 import { useMemo } from 'react';
 
 interface EntityRow {
@@ -19,8 +21,13 @@ const typeToIcon: Record<string, LucideIcon> = {
   Equipment: Wrench,
 };
 
+const TYPE_TO_ENTITY_FILTER: Record<string, string> = {
+  Employees: 'personnel',
+  Vehicles: 'vehicle',
+  Equipment: 'equipment',
+};
+
 export default function DashboardEntityStatus({ entityStatus }: DashboardEntityStatusProps) {
-  // Optimization: Single-pass accumulation of entity totals to avoid 3 separate .reduce() traversals on render
   const summaryCards = useMemo(() => {
     let totalActive = 0;
     let totalExpiring = 0;
@@ -55,7 +62,7 @@ export default function DashboardEntityStatus({ entityStatus }: DashboardEntityS
   }, [entityStatus]);
 
   return (
-    <div className="h-full rounded-xl border border-border bg-card shadow-card">
+    <GlassCard className="h-full p-0">
       <div className="border-border border-b px-5 py-4">
         <h2 className="font-bold text-foreground text-sm">Entity QR Status</h2>
         <p className="mt-0.5 text-muted-foreground text-xs">Coverage across all entity types</p>
@@ -64,10 +71,12 @@ export default function DashboardEntityStatus({ entityStatus }: DashboardEntityS
         {entityStatus.map((row) => {
           const Icon = typeToIcon[row.type] ?? Wrench;
           const coveragePct = row.total > 0 ? Math.round((row.active / row.total) * 100) : 0;
+          const entityParam = TYPE_TO_ENTITY_FILTER[row.type] ?? 'all';
           return (
-            <div
+            <Link
               key={row.type}
-              className="group cursor-pointer px-5 py-4 transition-colors duration-100 hover:bg-secondary/40"
+              href={`/access-control/badges?entity=${entityParam}`}
+              className="group block px-5 py-4 transition-colors duration-100 hover:bg-secondary/40"
             >
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -98,7 +107,7 @@ export default function DashboardEntityStatus({ entityStatus }: DashboardEntityS
                 <span className="text-danger tabular-nums">{row.expired} expired</span>
                 <span className="font-bold text-foreground tabular-nums">{coveragePct}%</span>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
@@ -112,6 +121,6 @@ export default function DashboardEntityStatus({ entityStatus }: DashboardEntityS
           ))}
         </div>
       </div>
-    </div>
+    </GlassCard>
   );
 }

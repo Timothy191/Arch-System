@@ -20,7 +20,7 @@ const ACTION_ITEMS = [
   {
     href: '/access-control/access-logs',
     icon: Zap,
-    label: 'Easy Scanner & Register',
+    label: 'Access Logs & Register',
     color: 'text-amber-600',
   },
   {
@@ -62,10 +62,7 @@ export function QuickActionHub() {
   const handleFastGatePulse = async () => {
     try {
       setPulseLoading(true);
-      const res = await triggerGatePulse(
-        'Main Gate Inbound Boom',
-        'Emergency Quick-Pulse from SOC Hub'
-      );
+      const res = await triggerGatePulse('Main Gate', 'Manual Gate Override from SOC Hub');
       toast.success(res.message);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Gate pulse failed';
@@ -149,7 +146,7 @@ export function QuickActionHub() {
             className="flex shrink-0 items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 font-bold text-amber-800 text-xs transition-all hover:bg-amber-500 hover:text-white active:scale-95"
           >
             <Zap className="h-3.5 w-3.5" />
-            <span>{pulseLoading ? 'Pulsing...' : 'Override Pulse'}</span>
+            <span>{pulseLoading ? 'Logging...' : 'Log Gate Override'}</span>
           </button>
         </div>
       </div>

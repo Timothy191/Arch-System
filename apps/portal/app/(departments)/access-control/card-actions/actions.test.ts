@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { AuthError, DatabaseError } from '@/lib/errors/error-classes';
+import { AuthError, DatabaseError, ValidationError } from '@/lib/errors/error-classes';
 import { getPersonnelDetail, printCardForPersonnel, searchPersonnel } from './actions';
 
 // ---------------------------------------------------------------------------
@@ -412,9 +412,17 @@ describe('getPersonnelDetail()', () => {
 describe('printCardForPersonnel()', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  const VALID_PERS_ID = '00000000-0000-4000-8000-000000000001';
+  const MISSING_PERS_ID = '00000000-0000-4000-8000-000000000099';
+
   it('throws AuthError when user is not authenticated', async () => {
     buildMockClient({ user: null });
-    await expect(printCardForPersonnel('pers-1')).rejects.toThrow(AuthError);
+    await expect(printCardForPersonnel(VALID_PERS_ID)).rejects.toThrow(AuthError);
+  });
+
+  it('throws ValidationError when personnelId is not a valid UUID', async () => {
+    buildMockClient();
+    await expect(printCardForPersonnel('pers-1')).rejects.toThrow(ValidationError);
   });
 
   it('throws DatabaseError when personnel not found', async () => {
@@ -426,7 +434,7 @@ describe('printCardForPersonnel()', () => {
         },
       },
     });
-    await expect(printCardForPersonnel('pers-missing')).rejects.toThrow(DatabaseError);
+    await expect(printCardForPersonnel(MISSING_PERS_ID)).rejects.toThrow(DatabaseError);
   });
 
   it('creates a print job and submits to CUPS when printer is available', async () => {
@@ -473,12 +481,16 @@ describe('printCardForPersonnel()', () => {
       },
     });
 
-    const result = await printCardForPersonnel('pers-1');
+    const result = await printCardForPersonnel(VALID_PERS_ID);
 
     expect(result.job.id).toBe('job-1');
     expect(result.printer?.id).toBe('printer-1');
     expect(result.job.cups_job_id).toBe(42);
-    expect(mockSubmitCupsPrintJob).toHaveBeenCalledWith('card-printer-1', 'card-pers-1');
+    expect(mockSubmitCupsPrintJob).toHaveBeenCalledWith(
+      'card-printer-1',
+      `card-${VALID_PERS_ID}`,
+      expect.any(String)
+    );
   });
 
   it('handles missing printer gracefully', async () => {
@@ -521,7 +533,7 @@ describe('printCardForPersonnel()', () => {
       },
     });
 
-    const result = await printCardForPersonnel('pers-1');
+    const result = await printCardForPersonnel(VALID_PERS_ID);
 
     expect(result.job.id).toBe('job-1');
     expect(result.printer).toBeNull();
@@ -572,7 +584,7 @@ describe('printCardForPersonnel()', () => {
       },
     });
 
-    const result = await printCardForPersonnel('pers-1');
+    const result = await printCardForPersonnel(VALID_PERS_ID);
     expect(result.job.id).toBe('job-1');
   });
 
@@ -608,6 +620,6 @@ describe('printCardForPersonnel()', () => {
       },
     });
 
-    await expect(printCardForPersonnel('pers-1')).rejects.toThrow(DatabaseError);
+    await expect(printCardForPersonnel(VALID_PERS_ID)).rejects.toThrow(DatabaseError);
   });
 });

@@ -1,24 +1,19 @@
 /**
  * CUPS Printer Detection Utility
  *
- * Wraps Linux CUPS commands (lpstat, lpq, lp) for detecting and interacting
- * with card printers. Runs on-prem with direct system access.
- *
- * All top-level exported functions catch errors gracefully and return partial
- * results — never throw from exported functions.
+ * Wraps Linux CUPS commands (lpstat, lpq, lp) without invoking a shell (`execFile` / `spawn`).
+ * Runs on-prem when local gatehouse USB/CUPS hardware is attached.
  *
  * @module printer-detection
  */
 
-import { exec } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { promisify } from 'node:util';
+import { safeCupsNameRegex, safeJobNameRegex } from '@repo/contract/schemas/access-control.schema';
+import { ValidationError } from '@repo/errors';
 
-const execAsync = promisify(exec);
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+const execFileAsync = promisify(execFile);
 
 interface DetectedPrinter {
   cupsName: string;
@@ -38,40 +33,35 @@ interface PrintQueueEntry {
   size: number;
 }
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-/** Known Neo Magic 300 model identifiers (case-insensitive match). */
 const NEO_MAGIC_KEYWORDS = ['neo magic 300', 'magicard', 'neo', 'matica'];
+const COMMAND_TIMEOUT_MS = 10_000;
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+function assertSafeCupsName(cupsName: string): string {
+  const trimmed = cupsName.trim();
+  if (!safeCupsNameRegex.test(trimmed)) {
+    throw new ValidationError('Invalid CUPS printer name');
+  }
+  return trimmed;
+}
 
-/**
- * Check whether a model string indicates a Neo Magic 300 printer family.
- * Performs case-insensitive keyword matching.
- */
+function assertSafeJobName(jobName: string): string {
+  const trimmed = jobName.trim();
+  if (!safeJobNameRegex.test(trimmed)) {
+    throw new ValidationError('Invalid CUPS print job name');
+  }
+  return trimmed;
+}
+
 function isNeoMagicModel(model: string): boolean {
   const lower = model.toLowerCase();
   return NEO_MAGIC_KEYWORDS.some((keyword) => lower.includes(keyword));
 }
 
-/**
- * Parse the status string from lpstat -a output.
- * Returns "online" when the printer is accepting requests,
- * "offline" when explicitly not accepting, and "error" otherwise.
- */
 function parseAcceptingStatus(line: string): {
   status: DetectedPrinter['status'];
   statusMessage?: string;
 } {
-  // Check the negative case first since "accepting requests" is a substring
-  // of "not accepting requests".
   if (line.includes('not accepting requests')) {
-    // Extract optional reason after the date portion
-    // Format: <name> not accepting requests since <date> - <reason>
     const reasonIndex = line.indexOf(' - ');
     const statusMessage = reasonIndex !== -1 ? line.slice(reasonIndex + 3).trim() : undefined;
     return { status: 'offline', statusMessage };
@@ -84,25 +74,18 @@ function parseAcceptingStatus(line: string): {
   return { status: 'error', statusMessage: line.trim() };
 }
 
-/**
- * Extract the first printer name from an lpstat line.
- * The printer name is everything before the first space.
- */
 function extractPrinterName(line: string): string | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
   const spaceIndex = trimmed.indexOf(' ');
-  return spaceIndex !== -1 ? trimmed.slice(0, spaceIndex) : trimmed;
+  const candidate = spaceIndex !== -1 ? trimmed.slice(0, spaceIndex) : trimmed;
+  return safeCupsNameRegex.test(candidate) ? candidate : null;
 }
 
-/**
- * Determine connection type and extract USB vendor/product IDs from a device URI.
- */
 function parseDeviceUri(
   uri: string
 ): Pick<DetectedPrinter, 'connectionType' | 'vendorId' | 'productId' | 'devicePath'> {
   if (uri.startsWith('usb://')) {
-    // Format: usb://Vendor/Product?serial=... or usb://Vendor:Product/...
     const ids = uri.match(/usb:\/\/([^/?#]+)[/:]([^/?#]+)/);
     return {
       connectionType: 'usb',
@@ -118,34 +101,24 @@ function parseDeviceUri(
   return { connectionType: 'unknown' };
 }
 
-/**
- * Execute a shell command and return stdout, or null on failure.
- * This is the single exec entry point — all command execution flows through here
- * to ensure consistent error handling.
- */
-async function safeExec(command: string): Promise<{ stdout: string; stderr: string } | null> {
+async function safeExecFile(
+  file: string,
+  args: readonly string[]
+): Promise<{ stdout: string; stderr: string } | null> {
   try {
-    const result = await execAsync(command, { timeout: 10_000 });
+    const result = await execFileAsync(file, [...args], {
+      timeout: COMMAND_TIMEOUT_MS,
+      shell: false,
+    });
     return { stdout: result.stdout.trim(), stderr: result.stderr.trim() };
   } catch {
     return null;
   }
 }
 
-// ---------------------------------------------------------------------------
-// Printer details (internal)
-// ---------------------------------------------------------------------------
-
-/**
- * Execute lpstat -l -p <printer> to get detailed info including device URI.
- * Used to determine connection type and USB VID/PID.
- *
- * Parse: "Device: uri" line to get connection info.
- * If URI starts with "usb://" extract vendor/product IDs.
- * If URI starts with "socket://" or "lpd://" it's network.
- */
 async function getPrinterDetails(cupsName: string): Promise<Partial<DetectedPrinter>> {
-  const result = await safeExec(`lpstat -l -p "${cupsName}"`);
+  const safeName = assertSafeCupsName(cupsName);
+  const result = await safeExecFile('lpstat', ['-l', '-p', safeName]);
   if (!result) return {};
 
   const lines = result.stdout.split('\n');
@@ -155,21 +128,18 @@ async function getPrinterDetails(cupsName: string): Promise<Partial<DetectedPrin
   for (const line of lines) {
     const trimmed = line.trim();
 
-    // Parse device URI
     if (trimmed.startsWith('Device:')) {
       const uri = trimmed.replace(/^Device:\s*/, '').trim();
       Object.assign(details, parseDeviceUri(uri));
       continue;
     }
 
-    // Collect model-related lines for Neo Magic detection
     if (trimmed.startsWith('Description:') || trimmed.startsWith('Make and model:')) {
       const value = trimmed.replace(/^(Description|Make and model):\s*/, '');
       modelParts.push(value);
     }
   }
 
-  // Derive model string from description / make-and-model
   const model = modelParts.join(' ').trim();
   if (model) {
     details.model = model;
@@ -179,20 +149,9 @@ async function getPrinterDetails(cupsName: string): Promise<Partial<DetectedPrin
   return details;
 }
 
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
-/**
- * Execute lpstat -a to list all configured CUPS printers with status.
- * Returns an array of DetectedPrinter objects.
- *
- * Handles CUPS not installed, no printers configured, and offline printers.
- */
 export async function scanCupsPrinters(): Promise<DetectedPrinter[]> {
-  const result = await safeExec('lpstat -a');
+  const result = await safeExecFile('lpstat', ['-a']);
   if (!result) {
-    // lpstat not found, not installed, or no printers — return empty
     return [];
   }
 
@@ -206,8 +165,6 @@ export async function scanCupsPrinters(): Promise<DetectedPrinter[]> {
     if (!cupsName) continue;
 
     const { status, statusMessage } = parseAcceptingStatus(line);
-
-    // Fetch detailed info for each printer (device URI, model, etc.)
     const details = await getPrinterDetails(cupsName);
 
     printers.push({
@@ -226,23 +183,17 @@ export async function scanCupsPrinters(): Promise<DetectedPrinter[]> {
   return printers;
 }
 
-/**
- * Execute lpq -P <printer> to get the print queue for a printer.
- * Returns array of queued jobs or empty array if no jobs or printer unreachable.
- */
 export async function getPrinterQueue(cupsName: string): Promise<PrintQueueEntry[]> {
-  const result = await safeExec(`lpq -P "${cupsName}"`);
+  const safeName = assertSafeCupsName(cupsName);
+  const result = await safeExecFile('lpq', ['-P', safeName]);
   if (!result) return [];
 
   const lines = result.stdout.split('\n').filter(Boolean);
-
-  // Skip header lines — find the column header first, then parse data rows
   const dataStartIndex = lines.findIndex(
     (l) => l.includes('Rank') && l.includes('Owner') && l.includes('Job') && l.includes('File')
   );
   if (dataStartIndex === -1) return [];
 
-  // "no entries" means the queue is empty
   const dataLines = lines.slice(dataStartIndex + 1).filter((l) => {
     const trimmed = l.trim();
     return trimmed.length > 0 && !trimmed.includes('no entries');
@@ -251,16 +202,12 @@ export async function getPrinterQueue(cupsName: string): Promise<PrintQueueEntry
   const entries: PrintQueueEntry[] = [];
 
   for (const line of dataLines) {
-    // Columns: Rank, Owner, Job#, File(s), Total Size
-    // Example: "active  user    42      card_abc123.png     1024 bytes"
     const parts = line.trim().split(/\s+/);
     if (parts.length < 5) continue;
 
-    // All indices are safe because length >= 5 was checked above
     const jobId = Number.parseInt(parts[2]!, 10);
     if (Number.isNaN(jobId)) continue;
 
-    // Size is the second-to-last token (before "bytes" or "kB")
     const sizeToken = parts[parts.length - 2]!;
     const size = Number.parseInt(sizeToken, 10) || 0;
 
@@ -270,13 +217,9 @@ export async function getPrinterQueue(cupsName: string): Promise<PrintQueueEntry
   return entries;
 }
 
-/**
- * Check if a printer is reachable by running lpstat -p <printer>
- * and checking the status line.
- * Returns "online" | "offline" | "error"
- */
 export async function getPrinterStatus(cupsName: string): Promise<'online' | 'offline' | 'error'> {
-  const result = await safeExec(`lpstat -p "${cupsName}"`);
+  const safeName = assertSafeCupsName(cupsName);
+  const result = await safeExecFile('lpstat', ['-p', safeName]);
   if (!result) return 'error';
 
   const statusLine = result.stdout.split('\n').find((l) => l.toLowerCase().includes('printer'));
@@ -295,11 +238,6 @@ export async function getPrinterStatus(cupsName: string): Promise<'online' | 'of
   return 'error';
 }
 
-/**
- * Scan /dev/usb/lp* to find USB printer device paths.
- * Returns list of device paths like ["/dev/usb/lp0", "/dev/usb/lp1"].
- * Uses fs.promises.access for each enumerated device.
- */
 export async function scanUsbDevices(): Promise<string[]> {
   const candidates = ['/dev/usb/lp0', '/dev/usb/lp1', '/dev/usb/lp2', '/dev/usb/lp3'];
   const found: string[] = [];
@@ -317,44 +255,69 @@ export async function scanUsbDevices(): Promise<string[]> {
 }
 
 /**
- * Submit a print job to a CUPS printer.
- * Uses lp command to send job data to the specified printer.
- * Returns the CUPS job ID on success, or throws on failure.
+ * Submit a print job payload to CUPS via `lp` stdin without spawning a shell.
+ * Rejects empty payloads instead of submitting `/dev/null`.
  */
 export async function submitCupsPrintJob(
   cupsName: string,
   jobName: string,
-  data?: string
+  payload: Buffer | string,
+  copies = 1
 ): Promise<{ cupsJobId: number | null }> {
-  const cmd = data
-    ? `echo ${JSON.stringify(data)} | lp -d "${cupsName}" -t "${jobName}"`
-    : `lp -d "${cupsName}" -t "${jobName}" /dev/null`;
+  const safeName = assertSafeCupsName(cupsName);
+  const safeJob = assertSafeJobName(jobName);
+  const payloadBuffer = typeof payload === 'string' ? Buffer.from(payload, 'utf8') : payload;
 
-  const result = await safeExec(cmd);
-  if (!result) {
+  if (!payloadBuffer || payloadBuffer.length === 0) {
+    throw new ValidationError('Print job payload cannot be empty');
+  }
+
+  const safeCopies = Math.max(1, Math.min(5, Math.trunc(copies)));
+
+  const stdout = await new Promise<string | null>((resolve) => {
+    const child = spawn('lp', ['-d', safeName, '-t', safeJob, '-n', String(safeCopies)], {
+      shell: false,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+
+    const outChunks: Buffer[] = [];
+    const timer = setTimeout(() => {
+      child.kill('SIGTERM');
+      resolve(null);
+    }, COMMAND_TIMEOUT_MS);
+
+    child.stdout.on('data', (chunk: Buffer) => outChunks.push(chunk));
+    child.on('error', () => {
+      clearTimeout(timer);
+      resolve(null);
+    });
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      if (code !== 0) {
+        resolve(null);
+        return;
+      }
+      resolve(Buffer.concat(outChunks).toString('utf8').trim());
+    });
+
+    child.stdin.write(payloadBuffer);
+    child.stdin.end();
+  });
+
+  if (!stdout) {
     return { cupsJobId: null };
   }
 
-  // lp outputs: "request id is <printer>-<jobId> (1 file(s))"
-  const match = result.stdout.match(/request id is [\w-]+-(\d+)/);
+  const match = stdout.match(/request id is [\w.-]+-(\d+)/);
   const cupsJobId = match ? Number.parseInt(match[1]!, 10) : null;
 
   return { cupsJobId };
 }
 
-/**
- * Perform a comprehensive scan: check CUPS + USB, merge results,
- * and detect Neo Magic 300 printers.
- *
- * This is the main function called by the API.
- */
 export async function detectAllPrinters(): Promise<DetectedPrinter[]> {
   const [cupsPrinters, usbDevices] = await Promise.all([scanCupsPrinters(), scanUsbDevices()]);
-
-  // Build a set of device paths already represented in CUPS results
   const knownDevicePaths = new Set(cupsPrinters.map((p) => p.devicePath).filter(Boolean));
 
-  // Add fallback entries for USB devices that CUPS doesn't know about
   for (const devPath of usbDevices) {
     if (knownDevicePaths.has(devPath)) continue;
 

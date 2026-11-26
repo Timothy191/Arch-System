@@ -308,18 +308,24 @@ export function Neo300EmployeeEditorModal({
             <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
               Site Clearance Zone
             </label>
-            <select
+            <input
+              type="text"
               aria-label="Site Clearance Zone"
-              value={formState.area || 'Main Complex'}
+              list="neo300-clearance-zones"
+              value={formState.area || ''}
               onChange={(e) => setFormState((prev) => ({ ...prev, area: e.target.value }))}
+              placeholder="e.g. Main Gate / Control Room"
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm"
-            >
-              <option value="Main Complex">Main Complex &amp; Control Room</option>
-              <option value="North Pit">North Pit &amp; Haul Roads</option>
-              <option value="South Pit">South Pit &amp; Blast Zone</option>
-              <option value="Engineering Workshop">Engineering Workshop-03</option>
-              <option value="Processing Plant">Coal Wash Plant &amp; Weighbridge</option>
-            </select>
+            />
+            <datalist id="neo300-clearance-zones">
+              <option value="Control Room" />
+              <option value="Access Control" />
+              <option value="Engineering" />
+              <option value="Plant Processing" />
+              <option value="Production" />
+              <option value="Drilling" />
+              <option value="Office" />
+            </datalist>
           </div>
 
           <div>

@@ -1,9 +1,11 @@
 'use client';
 
+import { useSupabaseRealtime, useThrottledDebounce } from '@repo/shared/hooks';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { Avatar, Badge } from '@repo/ui';
 import { Alert, AlertDescription, AlertTitle } from '@repo/ui/components/ui/alert';
 import { Button } from '@repo/ui/components/ui/button';
-import { Pagination } from '@repo/ui/components/ui/pagination';
+import { Input } from '@repo/ui/components/ui/input';
 import {
   Table,
   TableBody,
@@ -14,24 +16,25 @@ import {
 } from '@repo/ui/components/ui/table';
 import { EmptyState } from '@repo/ui/EmptyState';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Clock, Inbox, LogOut, X } from 'lucide-react';
+import { Check, Clock, Inbox, LogOut, Search, X, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import {
   type AutoExitedVisitorRecord,
+  approveAndCheckInVisitor,
   autoExitOverdueVisitors,
   manualCheckOutVisitor,
+  rejectPreRegisteredVisitor,
 } from './actions';
 import {
   AUTO_EXITED_VISITOR_STATUS,
   formatRemainingOrElapsed,
-  isVisitorOverdueForAutoExit,
   MANUAL_CHECKED_OUT_STATUS,
 } from './visitor-auto-exit';
 import { VisitorForm } from './visitor-form';
 
-const AUTO_EXIT_TIMER_INTERVAL_MS = 60_000;
+const CLOCK_TICK_INTERVAL_MS = 60_000;
 
 export interface VisitorRegistryRow {
   readonly id: string;
@@ -102,6 +105,13 @@ function renderStatusBadge(status: string | null) {
       </Badge>
     );
   }
+  if (status === 'Rejected') {
+    return (
+      <Badge variant="red" contrast="low" size="sm">
+        Rejected
+      </Badge>
+    );
+  }
   return (
     <Badge variant="gray" contrast="low" size="sm">
       {status || 'Pre-Registered'}
@@ -112,34 +122,51 @@ function renderStatusBadge(status: string | null) {
 export function VisitorsRegistryClient({
   visitors,
   initialAutoExited,
-  page,
-  totalPages,
+  page: _page,
+  totalPages: _totalPages,
   totalCount,
-  pageSize,
+  pageSize: _pageSize,
   deptId,
 }: VisitorsRegistryClientProps) {
   const router = useRouter();
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
   const [autoExitedNotices, setAutoExitedNotices] =
     useState<readonly AutoExitedVisitorRecord[]>(initialAutoExited);
-  const [checkingOutId, setCheckingOutId] = useState<string | null>(null);
-  const [isCheckingOut, startCheckOutTransition] = useTransition();
+  const [pendingVisitorId, setPendingVisitorId] = useState<string | null>(null);
+  const [isMutating, startMutationTransition] = useTransition();
+  const [isSweepingAutoExit, startSweepTransition] = useTransition();
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useThrottledDebounce(searchQuery, 200);
 
   const notifiedIdsRef = useRef<Set<string>>(new Set());
-  const isAutoExitPollingRef = useRef(false);
-  const visitorsRef = useRef(visitors);
-  visitorsRef.current = visitors;
+
+  const supabase = useMemo(() => {
+    try {
+      return createBrowserSupabaseClient();
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useSupabaseRealtime({
+    supabaseClient: supabase,
+    table: 'visitors',
+    filter: deptId ? `department_id=eq.${deptId}` : undefined,
+    event: '*',
+    enabled: Boolean(deptId && supabase),
+    onChange: () => {
+      router.refresh();
+    },
+  });
 
   useEffect(() => {
     if (initialAutoExited.length === 0) return;
-
     setAutoExitedNotices((prev) => mergeAutoExitedRecords(prev, initialAutoExited));
 
     const freshRecords = initialAutoExited.filter(
       (record) => !notifiedIdsRef.current.has(record.id)
     );
     if (freshRecords.length === 0) return;
-
     for (const record of freshRecords) {
       notifiedIdsRef.current.add(record.id);
     }
@@ -151,51 +178,86 @@ export function VisitorsRegistryClient({
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      const currentNowMs = Date.now();
-      setNowMs(currentNowMs);
-
-      const hasOverdueVisitor = visitorsRef.current.some((visitor) =>
-        isVisitorOverdueForAutoExit(visitor, currentNowMs)
-      );
-      if (!hasOverdueVisitor || isAutoExitPollingRef.current) return;
-
-      isAutoExitPollingRef.current = true;
-      void autoExitOverdueVisitors(deptId)
-        .then((result) => {
-          if (result.autoExited.length === 0) return;
-
-          setAutoExitedNotices((prev) => mergeAutoExitedRecords(prev, result.autoExited));
-
-          const freshRecords = result.autoExited.filter(
-            (record) => !notifiedIdsRef.current.has(record.id)
-          );
-          for (const record of freshRecords) {
-            notifiedIdsRef.current.add(record.id);
-          }
-
-          if (freshRecords.length > 0) {
-            toast.warning('12-Hour Auto-Exit Triggered', {
-              description: formatAutoExitToastDescription(freshRecords),
-            });
-          }
-          router.refresh();
-        })
-        .catch((err) => {
-          const message = err instanceof Error ? err.message : 'Auto-exit check failed';
-          toast.error('Auto-exit check failed', { description: message });
-        })
-        .finally(() => {
-          isAutoExitPollingRef.current = false;
-        });
-    }, AUTO_EXIT_TIMER_INTERVAL_MS);
-
+      setNowMs(Date.now());
+    }, CLOCK_TICK_INTERVAL_MS);
     return () => clearInterval(intervalId);
-  }, [deptId, router]);
+  }, []);
+
+  const filteredVisitors = useMemo(() => {
+    const query = debouncedSearch.trim().toLowerCase();
+    if (!query) return visitors;
+    return visitors.filter((v) => {
+      const fullName = `${v.first_name ?? ''} ${v.surname ?? ''}`.toLowerCase();
+      return (
+        fullName.includes(query) ||
+        (v.company ?? '').toLowerCase().includes(query) ||
+        (v.visiting ?? '').toLowerCase().includes(query) ||
+        (v.id_number ?? '').toLowerCase().includes(query) ||
+        (v.reason_for_entry ?? '').toLowerCase().includes(query)
+      );
+    });
+  }, [visitors, debouncedSearch]);
+
+  function handleRunAutoExitSweep() {
+    startSweepTransition(async () => {
+      try {
+        const result = await autoExitOverdueVisitors(deptId);
+        if (result.autoExited.length === 0) {
+          toast.info('No visitors have exceeded the 12-hour limit');
+          return;
+        }
+        setAutoExitedNotices((prev) => mergeAutoExitedRecords(prev, result.autoExited));
+        toast.warning('12-Hour Auto-Exit Triggered', {
+          description: formatAutoExitToastDescription(result.autoExited),
+        });
+        router.refresh();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Auto-exit sweep failed';
+        toast.error('Auto-exit check failed', { description: message });
+      }
+    });
+  }
+
+  function handleApproveCheckIn(visitor: VisitorRegistryRow) {
+    const fullName = `${visitor.first_name ?? ''} ${visitor.surname ?? ''}`.trim() || 'Visitor';
+    setPendingVisitorId(visitor.id);
+    startMutationTransition(async () => {
+      try {
+        await approveAndCheckInVisitor(visitor.id);
+        toast.success(`${fullName} approved & checked in`, {
+          description: 'Temporary 8-hour credential activated at gatehouse.',
+        });
+        router.refresh();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to approve visitor';
+        toast.error('Approval failed', { description: message });
+      } finally {
+        setPendingVisitorId(null);
+      }
+    });
+  }
+
+  function handleRejectVisitor(visitor: VisitorRegistryRow) {
+    const fullName = `${visitor.first_name ?? ''} ${visitor.surname ?? ''}`.trim() || 'Visitor';
+    setPendingVisitorId(visitor.id);
+    startMutationTransition(async () => {
+      try {
+        await rejectPreRegisteredVisitor(visitor.id);
+        toast.warning(`${fullName} pre-registration rejected`);
+        router.refresh();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to reject visitor';
+        toast.error('Rejection failed', { description: message });
+      } finally {
+        setPendingVisitorId(null);
+      }
+    });
+  }
 
   function handleManualCheckOut(visitor: VisitorRegistryRow) {
     const fullName = `${visitor.first_name ?? ''} ${visitor.surname ?? ''}`.trim() || 'Visitor';
-    setCheckingOutId(visitor.id);
-    startCheckOutTransition(async () => {
+    setPendingVisitorId(visitor.id);
+    startMutationTransition(async () => {
       try {
         await manualCheckOutVisitor(visitor.id);
         toast.success(`${fullName} ${MANUAL_CHECKED_OUT_STATUS.toLowerCase()}`, {
@@ -206,7 +268,7 @@ export function VisitorsRegistryClient({
         const message = err instanceof Error ? err.message : 'Failed to check out visitor';
         toast.error('Check-out failed', { description: message });
       } finally {
-        setCheckingOutId(null);
+        setPendingVisitorId(null);
       }
     });
   }
@@ -246,29 +308,53 @@ export function VisitorsRegistryClient({
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Registration Form (Left, 1 col) */}
         <div className="space-y-4 lg:col-span-1">
           <VisitorForm />
         </div>
 
-        {/* Active Visitors Table (Right, 2 cols) */}
         <div className="lg:col-span-2">
           <GlassCard className="flex h-full flex-col overflow-hidden p-0">
-            <div className="flex items-center justify-between border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
-              <h3 className="flex items-center font-semibold text-[var(--text-heading)]">
-                <Clock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
-                Today&apos;s Visitors
-              </h3>
-              <span className="text-[var(--text-muted)] text-xs">{totalCount} total visitors</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
+              <div className="flex items-center gap-3">
+                <h3 className="flex items-center font-semibold text-[var(--text-heading)]">
+                  <Clock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
+                  Today&apos;s Visitors
+                </h3>
+                <span className="text-[var(--text-muted)] text-xs">
+                  {totalCount} total visitors
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
+                  <Input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Filter visitors..."
+                    className="h-8 w-48 border-[var(--border-default)] bg-[var(--bg-primary)] pl-8 text-xs"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isSweepingAutoExit}
+                  onClick={handleRunAutoExitSweep}
+                  className="h-8 border-[var(--border-default)] px-2.5 text-xs"
+                >
+                  {isSweepingAutoExit ? 'Sweeping...' : 'Enforce 12h Auto-Exit'}
+                </Button>
+              </div>
             </div>
 
-            <div className="flex-1">
-              {visitors.length === 0 ? (
+            <div className="flex-1 overflow-x-auto">
+              {filteredVisitors.length === 0 ? (
                 <div className="flex h-full items-center justify-center py-20">
                   <EmptyState
                     icon={Inbox}
                     title="No visitors registered"
-                    description="There are no visitors recorded for this department today. Use the form to register a new guest."
+                    description="There are no matching visitors recorded for this department."
                   />
                 </div>
               ) : (
@@ -276,7 +362,7 @@ export function VisitorsRegistryClient({
                   <TableHeader>
                     <TableRow className="border-[var(--border-default)] border-b hover:bg-transparent">
                       <TableHead className="text-[var(--text-muted)]">Visitor Name</TableHead>
-                      <TableHead className="text-[var(--text-muted)]">Company</TableHead>
+                      <TableHead className="text-[var(--text-muted)]">Company &amp; Host</TableHead>
                       <TableHead className="text-[var(--text-muted)]">Reason</TableHead>
                       <TableHead className="text-[var(--text-muted)]">
                         Check-In &amp; 12h Limit
@@ -286,12 +372,14 @@ export function VisitorsRegistryClient({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {visitors.map((visitor) => {
+                    {filteredVisitors.map((visitor) => {
                       const isCheckedIn = visitor.status === 'Checked In';
+                      const isPreRegistered =
+                        !visitor.status || visitor.status === 'Pre-Registered';
                       const durationStatus = isCheckedIn
                         ? formatRemainingOrElapsed(visitor.check_in_time, nowMs)
                         : null;
-                      const isRowPending = isCheckingOut && checkingOutId === visitor.id;
+                      const isRowPending = isMutating && pendingVisitorId === visitor.id;
 
                       return (
                         <TableRow
@@ -305,13 +393,27 @@ export function VisitorsRegistryClient({
                                 letter={`${visitor.first_name?.[0] ?? ''}${visitor.surname?.[0] ?? ''}`}
                                 title={`${visitor.first_name ?? ''} ${visitor.surname ?? ''}`}
                               />
-                              <span>
-                                {visitor.first_name} {visitor.surname}
-                              </span>
+                              <div className="flex flex-col">
+                                <span>
+                                  {visitor.first_name} {visitor.surname}
+                                </span>
+                                {visitor.id_number && (
+                                  <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                                    ID: {visitor.id_number}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell className="text-[var(--text-secondary)]">
-                            {visitor.company || '—'}
+                            <div className="flex flex-col">
+                              <span>{visitor.company || '—'}</span>
+                              {visitor.visiting && (
+                                <span className="text-[var(--text-muted)] text-xs">
+                                  Host: {visitor.visiting}
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="text-[var(--text-secondary)]">
                             {visitor.reason_for_entry || '—'}
@@ -334,7 +436,32 @@ export function VisitorsRegistryClient({
                           </TableCell>
                           <TableCell>{renderStatusBadge(visitor.status)}</TableCell>
                           <TableCell className="text-right">
-                            {isCheckedIn ? (
+                            {isPreRegistered ? (
+                              <div className="flex justify-end gap-1.5">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={isRowPending}
+                                  onClick={() => handleApproveCheckIn(visitor)}
+                                  className="h-7 border-[var(--accent-emerald)]/40 px-2 text-[var(--accent-emerald)] text-xs"
+                                >
+                                  <Check className="mr-1 h-3 w-3" />
+                                  Approve
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={isRowPending}
+                                  onClick={() => handleRejectVisitor(visitor)}
+                                  className="h-7 border-[var(--accent-red)]/40 px-2 text-[var(--accent-red)] text-xs"
+                                >
+                                  <XCircle className="mr-1 h-3 w-3" />
+                                  Reject
+                                </Button>
+                              </div>
+                            ) : isCheckedIn ? (
                               <Button
                                 type="button"
                                 variant="outline"
@@ -361,18 +488,6 @@ export function VisitorsRegistryClient({
                 </Table>
               )}
             </div>
-
-            {/* Pagination */}
-            {totalCount > 0 && (
-              <div className="border-[var(--border-default)] border-t p-4">
-                <Pagination
-                  currentPage={page}
-                  totalPages={totalPages}
-                  totalCount={totalCount}
-                  pageSize={pageSize}
-                />
-              </div>
-            )}
           </GlassCard>
         </div>
       </div>

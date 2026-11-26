@@ -260,10 +260,36 @@ export const gateDenialSchema = z.object({
 
 export type GateDenialInput = z.infer<typeof gateDenialSchema>;
 
+export const safeCupsNameRegex = /^[A-Za-z0-9._-]{1,64}$/;
+export const safeJobNameRegex = /^[A-Za-z0-9._ -]{1,128}$/;
+export const safePhotoUrlSchema = z
+  .string()
+  .trim()
+  .max(1000)
+  .refine(
+    (rawUrl) => {
+      if (rawUrl.length === 0) return true;
+      if (rawUrl.startsWith('/')) return !rawUrl.startsWith('//');
+      try {
+        const parsed = new URL(rawUrl);
+        return parsed.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    },
+    { message: 'Photo URL must be a valid HTTPS URL or relative storage path' }
+  )
+  .nullable()
+  .optional();
+
 export const musterStatusSchema = z.object({
   entityId: z.string().trim().min(1, 'Entity ID cannot be empty'),
+  entityType: z.enum(['personnel', 'visitor']).default('personnel'),
+  entityName: z.string().trim().min(1).max(150).optional(),
   status: z.enum(['accounted', 'unaccounted', 'evacuated']),
   station: z.string().max(150, 'Station name must be 150 characters or less').optional().nullable(),
+  sessionId: z.string().trim().max(64).optional().nullable(),
+  recordedAt: z.string().datetime().optional(),
 });
 
 export type MusterStatusInput = z.infer<typeof musterStatusSchema>;
@@ -275,3 +301,92 @@ export const printCardRequestSchema = z.object({
 });
 
 export type PrintCardRequestInput = z.infer<typeof printCardRequestSchema>;
+
+export const bulkPrintCardsSchema = z.object({
+  personnelIds: z
+    .array(uuidSchema)
+    .min(1, 'Select at least one personnel record')
+    .max(50, 'Bulk print batch cannot exceed 50 cards'),
+  templateId: uuidSchema.optional().nullable(),
+});
+
+export type BulkPrintCardsInput = z.infer<typeof bulkPrintCardsSchema>;
+
+export const registerPrinterSchema = z.object({
+  cups_name: z
+    .string()
+    .trim()
+    .regex(safeCupsNameRegex, 'CUPS printer name may only contain letters, digits, ., _, or -'),
+  name: nonEmptyString.max(150, 'Printer display name must be 150 characters or less'),
+  model: z.string().trim().max(100).default('Neo Magic 300'),
+  connection_type: z.enum(['usb', 'network', 'cups']).default('usb'),
+  vendor_id: z.string().trim().max(32).optional().nullable(),
+  product_id: z.string().trim().max(32).optional().nullable(),
+  device_path: z.string().trim().max(200).optional().nullable(),
+});
+
+export type RegisterPrinterInput = z.infer<typeof registerPrinterSchema>;
+
+export const visitorApprovalSchema = z.object({
+  visitorId: uuidSchema,
+  reason: z.string().trim().max(256).optional(),
+});
+
+export type VisitorApprovalInput = z.infer<typeof visitorApprovalSchema>;
+
+export const qrCreateEntityBadgeSchema = z.discriminatedUnion('entityType', [
+  z.object({
+    entityType: z.literal('personnel'),
+    firstName: nonEmptyString.max(100),
+    surname: nonEmptyString.max(100),
+    empCode: nonEmptyString.max(50),
+    idNumber: nonEmptyString.max(50),
+    jobTitle: z.string().trim().max(100).optional(),
+  }),
+  z.object({
+    entityType: z.literal('visitor'),
+    firstName: nonEmptyString.max(100),
+    surname: nonEmptyString.max(100),
+    company: nonEmptyString.max(150),
+    idNumber: z.string().trim().max(50).optional().nullable(),
+    visiting: z.string().trim().max(150).optional(),
+    reasonForEntry: nonEmptyString.max(300),
+  }),
+  z.object({
+    entityType: z.enum(['vehicle', 'coal_truck']),
+    fleetCode: nonEmptyString.max(50),
+    registrationNumber: z.string().trim().max(50).optional(),
+    vehicleType: nonEmptyString.max(100),
+    make: z.string().trim().max(100).optional(),
+    model: z.string().trim().max(100).optional(),
+  }),
+  z.object({
+    entityType: z.literal('equipment'),
+    equipCode: nonEmptyString.max(50),
+    equipmentType: nonEmptyString.max(100),
+    serialNumber: z.string().trim().max(100).optional(),
+    manufacturer: z.string().trim().max(100).optional(),
+    model: z.string().trim().max(100).optional(),
+  }),
+]);
+
+export type QrCreateEntityBadgeInput = z.infer<typeof qrCreateEntityBadgeSchema>;
+
+/** Canonical contract schema matching `public.perimeter_gates` (migration 235). */
+export const perimeterGatesSchema = z.object({
+  id: nonEmptyString.max(64),
+  name: nonEmptyString.max(150),
+  gate_location: nonEmptyString.max(150),
+  zone: nonEmptyString.max(150),
+  gate_type: z
+    .enum(['BOOM_BARRIER', 'TURNSTILE_ARRAY', 'WEIGHBRIDGE_BOOM', 'HIGH_SEC_PORTAL'])
+    .default('BOOM_BARRIER'),
+  interlock_active: z.boolean().default(false),
+  is_maintenance: z.boolean().default(false),
+  last_heartbeat_at: z.string().datetime().nullable().optional(),
+  department_id: uuidSchema.nullable().optional(),
+  created_at: z.string().datetime().optional(),
+  updated_at: z.string().datetime().optional(),
+});
+
+export type PerimeterGateRow = z.infer<typeof perimeterGatesSchema>;

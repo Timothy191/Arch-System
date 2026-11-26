@@ -1,10 +1,47 @@
 'use server';
 
-import { cacheInvalidateTags } from '@repo/redis';
+import {
+  bulkPrintCardsSchema,
+  printCardRequestSchema,
+  safePhotoUrlSchema,
+} from '@repo/contract/schemas/access-control.schema';
+import { logger } from '@repo/logger/server';
+import { FixedWindowStrategy, MemoryStore, RateLimiter, RedisStore } from '@repo/rate-limiter';
+import { cacheInvalidateTags, getRedisClient } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
-import { DatabaseError } from '@/lib/errors/error-classes';
+import {
+  DatabaseError,
+  ForbiddenError,
+  RateLimitError,
+  ValidationError,
+} from '@/lib/errors/error-classes';
 import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
 import { ACCESS_CONTROL_WRITE_ROLES, assertAccessControlRoleFor } from '../actions/shared';
+
+const PRINTER_HEARTBEAT_TTL_MS = 5 * 60_000;
+
+function createNeo300Limiter(keyPrefix: string): RateLimiter {
+  try {
+    const redis = getRedisClient();
+    return new RateLimiter({
+      store: redis ? new RedisStore(redis as never) : new MemoryStore(),
+      strategy: new FixedWindowStrategy(),
+      limit: 30,
+      windowMs: 60_000,
+      keyPrefix,
+    });
+  } catch {
+    return new RateLimiter({
+      store: new MemoryStore(),
+      strategy: new FixedWindowStrategy(),
+      limit: 30,
+      windowMs: 60_000,
+      keyPrefix,
+    });
+  }
+}
+
+const neo300PrintLimiter = createNeo300Limiter('ratelimit:neo300_print:');
 
 export interface Neo300Printer {
   id: string;
@@ -117,7 +154,7 @@ export async function getDepartmentsForCardStudio(): Promise<CardStudioDepartmen
 export async function getNeo300PrinterStatus(): Promise<Neo300Printer> {
   const { supabase } = await assertAccessControlRole();
 
-  let { data: printer } = await supabase
+  let { data: printer, error } = await supabase
     .from('card_printers')
     .select('*')
     .ilike('model', '%Neo%300%')
@@ -126,8 +163,14 @@ export async function getNeo300PrinterStatus(): Promise<Neo300Printer> {
     .limit(1)
     .maybeSingle();
 
+  if (error) {
+    throw new DatabaseError('Failed to query card printer registry', {
+      table: 'card_printers',
+      cause: error,
+    });
+  }
+
   if (!printer) {
-    // Check by cups_name
     const { data: byName } = await supabase
       .from('card_printers')
       .select('*')
@@ -140,31 +183,31 @@ export async function getNeo300PrinterStatus(): Promise<Neo300Printer> {
   }
 
   if (!printer) {
-    // Auto-register default Neo 300 printer
-    const { data: inserted, error } = await supabase
-      .from('card_printers')
-      .insert({
-        cups_name: 'Magicard_Neo300',
-        name: 'Security Gate Neo300 Card Printer',
-        model: 'Neo Magic 300',
-        connection_type: 'usb',
-        status: 'online',
-        status_message: 'Ready to print ID cards',
-        last_online_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new DatabaseError('Failed to register Neo 300 printer', {
-        table: 'card_printers',
-        cause: error,
-      });
-    }
-    printer = inserted;
+    return {
+      id: '',
+      name: 'Magicard Neo 300 (Unconfigured)',
+      model: 'Neo Magic 300',
+      cups_name: 'Magicard_Neo300',
+      connection_type: 'usb',
+      status: 'offline',
+      status_message: 'Not Connected — Configure Local Print Bridge or use Browser CR80 Print',
+      last_online_at: null,
+    };
   }
 
-  return printer as Neo300Printer;
+  const typed = printer as Neo300Printer;
+  const lastOnlineMs = typed.last_online_at ? Date.parse(typed.last_online_at) : Number.NaN;
+  const hasFreshHeartbeat =
+    Number.isFinite(lastOnlineMs) && Date.now() - lastOnlineMs <= PRINTER_HEARTBEAT_TTL_MS;
+
+  return {
+    ...typed,
+    status: hasFreshHeartbeat && typed.status === 'online' ? 'online' : 'offline',
+    status_message:
+      hasFreshHeartbeat && typed.status === 'online'
+        ? typed.status_message
+        : 'Offline — Awaiting local print bridge heartbeat (jobs queue cleanly)',
+  };
 }
 
 /**
@@ -323,9 +366,12 @@ export async function upsertEmployeeForCardPrinting(
   const targetDeptId = input.department_id || employee.department_id || null;
 
   if (!empCode || !firstName || !surname || !idNumber) {
-    throw new DatabaseError('Coy Number, First Name, Surname, and ID Number are required', {
-      table: 'personnel',
-    });
+    throw new ValidationError('Coy Number, First Name, Surname, and ID Number are required');
+  }
+
+  const parsedPhoto = safePhotoUrlSchema.safeParse(input.photo_url || null);
+  if (!parsedPhoto.success) {
+    throw new ValidationError(parsedPhoto.error.issues[0]?.message ?? 'Invalid photo URL');
   }
 
   let personnelId = input.id;
@@ -341,7 +387,7 @@ export async function upsertEmployeeForCardPrinting(
     status: input.status || 'Active',
     induction_expiry: input.induction_expiry || null,
     medical_expiry: input.medical_expiry || null,
-    photo_url: input.photo_url || null,
+    photo_url: parsedPhoto.data ?? null,
   };
 
   if (personnelId) {
@@ -384,16 +430,23 @@ export async function upsertEmployeeForCardPrinting(
     .maybeSingle();
 
   if (existingBadge) {
-    await supabase
+    const { error: badgeUpdateErr } = await supabase
       .from('badges')
       .update({
         qr_code: desiredQr,
         rfid_code: desiredRfid,
         department_id: targetDeptId,
       })
-      .eq('id', existingBadge.id);
+      .eq('id', existingBadge.id)
+      .select('id');
+    if (badgeUpdateErr) {
+      throw new DatabaseError('Failed to update employee badge', {
+        table: 'badges',
+        cause: badgeUpdateErr,
+      });
+    }
   } else {
-    await supabase.from('badges').insert({
+    const { error: badgeInsertErr } = await supabase.from('badges').insert({
       qr_code: desiredQr,
       rfid_code: desiredRfid,
       entity_type: 'personnel',
@@ -401,23 +454,20 @@ export async function upsertEmployeeForCardPrinting(
       department_id: targetDeptId,
       is_active: true,
     });
+    if (badgeInsertErr) {
+      throw new DatabaseError('Failed to create employee badge', {
+        table: 'badges',
+        cause: badgeInsertErr,
+      });
+    }
   }
 
-  // Also sync directly to operators table so Control Room, Drilling & Production see this employee immediately
-  try {
-    await supabase.from('operators').upsert(
-      {
-        full_name: `${firstName} ${surname}`,
-        employee_code: empCode,
-        role: jobTitle,
-        active: (input.status || 'Active').toLowerCase() === 'active',
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'employee_code' }
-    );
-  } catch {
-    // Handled by DB trigger trg_sync_personnel_to_operators when migration 189 is active
-  }
+  logger.info({
+    event: 'neo300_employee_saved',
+    actorId: employee.id,
+    personnelId,
+    departmentId: targetDeptId,
+  });
 
   await cacheInvalidateTags([
     'table:personnel',
@@ -460,23 +510,31 @@ export async function upsertEmployeeForCardPrinting(
  * Send an employee card print job to the Magicard Neo 300
  */
 export async function sendNeo300PrintJob(personnelId: string) {
-  const { supabase, employee } = await assertAccessControlRole();
-
-  const { data: person } = await supabase
-    .from('personnel')
-    .select('id, first_name, surname, job_title, emp_code, induction_expiry')
-    .eq('id', personnelId)
-    .single();
-
-  if (!person) {
-    throw new DatabaseError('Personnel not found', { table: 'personnel' });
+  const { supabase, employee, departmentId } = await assertAccessControlRole();
+  const parsed = printCardRequestSchema.safeParse({ personnelId, printCopies: 1 });
+  if (!parsed.success) {
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid personnel ID');
   }
 
-  // Check or create badge if missing
+  const { allowed } = await neo300PrintLimiter.check(employee.id);
+  if (!allowed) {
+    throw new RateLimitError('Print job rate limit exceeded. Please wait.');
+  }
+
+  const { data: person, error: personErr } = await supabase
+    .from('personnel')
+    .select('id, first_name, surname, job_title, emp_code, induction_expiry')
+    .eq('id', parsed.data.personnelId)
+    .single();
+
+  if (personErr || !person) {
+    throw new DatabaseError('Personnel not found', { table: 'personnel', cause: personErr });
+  }
+
   let { data: badge } = await supabase
     .from('badges')
     .select('id, qr_code, rfid_code')
-    .eq('personnel_id', personnelId)
+    .eq('personnel_id', parsed.data.personnelId)
     .eq('is_active', true)
     .maybeSingle();
 
@@ -487,8 +545,8 @@ export async function sendNeo300PrintJob(personnelId: string) {
       .insert({
         qr_code: generatedQr,
         entity_type: 'personnel',
-        personnel_id: personnelId,
-        department_id: employee.department_id,
+        personnel_id: parsed.data.personnelId,
+        department_id: departmentId ?? employee.department_id,
         is_active: true,
       })
       .select()
@@ -505,7 +563,6 @@ export async function sendNeo300PrintJob(personnelId: string) {
 
   const printer = await getNeo300PrinterStatus();
 
-  // Create print job
   const { data: job, error: jobError } = await supabase
     .from('print_jobs')
     .insert({
@@ -514,32 +571,59 @@ export async function sendNeo300PrintJob(personnelId: string) {
       role_title: person.job_title,
       qr_code_data: badge?.qr_code,
       status: 'queued',
-      printer_id: printer.id,
+      printer_id: printer.id || null,
       created_by: employee.id,
       expires_at: person.induction_expiry ?? undefined,
+      note: 'Queued for Print Bridge',
     })
     .select()
     .single();
 
   if (jobError) {
-    throw new DatabaseError('Failed to dispatch print job to Neo 300', {
+    throw new DatabaseError('Failed to queue print job for Neo 300', {
       table: 'print_jobs',
       cause: jobError,
     });
   }
 
-  // Update card_printers status to active
-  await supabase
-    .from('card_printers')
-    .update({
-      status: 'online',
-      last_online_at: new Date().toISOString(),
-      status_message: `Printing job #${job.id.substring(0, 8)} for ${person.first_name} ${person.surname}`,
-    })
-    .eq('id', printer.id);
+  logger.info({
+    event: 'neo300_print_job_queued',
+    actorId: employee.id,
+    personnelId: person.id,
+    jobId: job.id,
+  });
 
+  await cacheInvalidateTags([
+    'table:print_jobs',
+    'table:badges',
+    ...(departmentId ? [`dept:${departmentId}`] : []),
+  ]);
   revalidatePath('/access-control/print-cards');
   return { success: true, job };
+}
+
+export async function bulkQueueNeo300PrintJobs(personnelIds: string[]) {
+  await assertAccessControlRole();
+
+  const parsed = bulkPrintCardsSchema.safeParse({ personnelIds });
+  if (!parsed.success) {
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid bulk print batch');
+  }
+
+  const results = [];
+  for (const id of parsed.data.personnelIds) {
+    try {
+      const res = await sendNeo300PrintJob(id);
+      results.push({ id, success: true, jobId: res.job.id });
+    } catch (err) {
+      results.push({
+        id,
+        success: false,
+        error: err instanceof Error ? err.message : 'Queue failed',
+      });
+    }
+  }
+  return results;
 }
 
 /**
@@ -582,17 +666,34 @@ export async function getRecentNeo300Jobs(limit = 10): Promise<CardPrintJob[]> {
  * Cancel a queued print job
  */
 export async function cancelNeo300Job(jobId: string) {
-  const { supabase } = await assertAccessControlRole();
+  const { supabase, employee, departmentId } = await assertAccessControlRole();
 
-  const { error } = await supabase
+  const { data: cancelledRows, error } = await supabase
     .from('print_jobs')
     .update({ status: 'cancelled' })
-    .eq('id', jobId);
+    .eq('id', jobId)
+    .select('id');
 
   if (error) {
     throw new DatabaseError('Failed to cancel job', { table: 'print_jobs', cause: error });
   }
+  if (!cancelledRows || cancelledRows.length === 0) {
+    throw new ForbiddenError('Print job cancel blocked or job not found', {
+      resource: 'print_jobs',
+      action: 'cancel',
+    });
+  }
 
+  logger.info({
+    event: 'neo300_print_job_cancelled',
+    actorId: employee.id,
+    jobId,
+  });
+
+  await cacheInvalidateTags([
+    'table:print_jobs',
+    ...(departmentId ? [`dept:${departmentId}`] : []),
+  ]);
   revalidatePath('/access-control/print-cards');
   return { success: true };
 }

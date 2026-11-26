@@ -65,20 +65,20 @@ describe('print-cards actions edge cases', () => {
     ).rejects.toThrow('Coy Number, First Name, Surname, and ID Number are required');
   });
 
-  it('auto-registers a default Neo 300 printer when none exists and dispatches print job', async () => {
+  it('registers an offline Neo 300 printer when none exists and fails closed on dispatch', async () => {
     let printerSelectCount = 0;
     mockFrom.mockImplementation((table: string) => {
       if (table === 'card_printers') {
         const printerChain = makeChain({
           data: {
-            id: 'pr-new',
+            id: '00000000-0000-4000-8000-000000000010',
             name: 'Neo 300',
             model: 'Magicard Neo 300',
             cups_name: 'Magicard_Neo300',
             connection_type: 'usb',
-            status: 'online',
-            status_message: 'Ready',
-            last_online_at: '2026-11-20T08:00:00Z',
+            status: 'offline',
+            status_message: 'Printer offline / awaiting hardware verification',
+            last_online_at: null,
           },
           error: null,
         });
@@ -128,10 +128,12 @@ describe('print-cards actions edge cases', () => {
     });
 
     const printer = await getNeo300PrinterStatus();
-    expect(printer.id).toBe('pr-new');
+    expect(printer.id).toBe('00000000-0000-4000-8000-000000000010');
+    expect(printer.status).toBe('offline');
 
-    const result = await sendNeo300PrintJob('p1');
+    const result = await sendNeo300PrintJob('00000000-0000-4000-8000-000000000001');
     expect(result.success).toBe(true);
     expect(result.job.id).toBe('job-99');
+    expect(result.job.status).toBe('queued');
   });
 });

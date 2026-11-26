@@ -406,7 +406,7 @@ describe('P0 /api/c66 secure access checks', () => {
   });
 
   it('device scanned_at timestamp is preserved in access_logs insert', async () => {
-    const deviceTime = '2026-10-27T07:15:30.000Z';
+    const deviceTime = new Date(Date.now() - 60_000).toISOString();
     const insertMock = jest.fn().mockResolvedValue({ error: null });
     const mock = buildServiceRoleMock();
     mock.from.mockImplementation((table: string) => {
@@ -462,6 +462,19 @@ describe('P0 /api/c66 secure access checks', () => {
         }),
       ])
     );
+  });
+
+  it('rejects future scanned_at timestamps beyond 5m clock-skew window with 400', async () => {
+    const futureTime = new Date(Date.now() + 10 * 60_000).toISOString();
+    buildServiceRoleMock();
+    const res = await POST(
+      makeRequest({
+        source: 'C66-HARDWARE',
+        token: TEST_TOKEN,
+        body: { code: 'BADGE-FUTURE-01', scanned_at: futureTime },
+      })
+    );
+    expect(res.status).toBe(400);
   });
 
   it('expired credential returns 403 Expired Credential', async () => {

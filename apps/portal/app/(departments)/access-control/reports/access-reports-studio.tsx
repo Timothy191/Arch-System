@@ -18,6 +18,7 @@ import {
   Sliders,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { type CSSProperties, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import type { AccessReportsData } from '../actions';
@@ -268,7 +269,7 @@ function StudioHeader(props: {
   readonly onDownloadPdf: () => void;
 }) {
   return (
-    <GlassCard className="gold-steel-border gold-steel-border-slim !bg-none !bg-white border border-accent-gold/70 p-6 shadow-sm print:hidden">
+    <GlassCard className="p-6 print:hidden">
       <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
         <div className="flex items-start gap-3.5">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-green)]">
@@ -297,10 +298,14 @@ function StudioHeader(props: {
           <nav aria-label="Access control report views" className={SEGMENT_GROUP_CLASS}>
             {REPORT_TABS.map((tab) => {
               const isCurrent = tab.id === props.activeTab;
+              const hrefWithRange =
+                tab.id === 'dashboard'
+                  ? `/access-control/reports?range=${props.dateRange}`
+                  : `${tab.href}&range=${props.dateRange}`;
               return (
                 <Link
                   key={tab.id}
-                  href={tab.href}
+                  href={hrefWithRange}
                   aria-current={isCurrent ? 'page' : undefined}
                   onClick={() => props.onSelectTab(tab.id)}
                   className={`${SEGMENT_BASE_CLASS} ${isCurrent ? SEGMENT_ACTIVE_CLASS : SEGMENT_INACTIVE_CLASS}`}
@@ -971,11 +976,22 @@ export function AccessReportsStudio(props: AccessReportsStudioProps) {
     reportDate = new Date().toISOString().slice(0, 10),
   } = props;
 
+  const router = useRouter();
   const reportData = initialData;
   const [activeTab, setActiveTab] = useState<AccessReportTab>(initialTab);
   const [dateRange, setDateRange] = useState<AccessReportRange>(initialRange);
   const [zoom, setZoom] = useState<ZoomLevel>('fit');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const handleSelectRange = (nextRange: AccessReportRange) => {
+    setDateRange(nextRange);
+    const params = new URLSearchParams();
+    if (activeTab !== 'dashboard') {
+      params.set('tab', activeTab);
+    }
+    params.set('range', nextRange);
+    router.replace(`/access-control/reports?${params.toString()}`);
+  };
 
   useEffect(() => {
     setActiveTab(initialTab);
@@ -1027,7 +1043,7 @@ export function AccessReportsStudio(props: AccessReportsStudioProps) {
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         dateRange={dateRange}
-        onSelectRange={setDateRange}
+        onSelectRange={handleSelectRange}
         reportDate={reportDate}
         reportData={reportData}
         isGeneratingPdf={isGeneratingPdf}

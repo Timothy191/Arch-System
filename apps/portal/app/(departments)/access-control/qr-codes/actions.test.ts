@@ -205,7 +205,7 @@ describe('access-control/qr-codes/actions', () => {
       data: { id: 'badge-new', qr_code: 'TRK-CUSTOM-1' },
       error: null,
     });
-    const badgeUpdateChain = createFluentQuery({ data: null, error: null });
+    const badgeUpdateChain = createFluentQuery({ data: [{ id: 'badge-new' }], error: null });
 
     const fromMock = jest
       .fn()

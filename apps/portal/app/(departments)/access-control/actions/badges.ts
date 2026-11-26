@@ -1,15 +1,15 @@
 'use server';
 
+import { randomBytes } from 'node:crypto';
 import { visitorPassRequestSchema } from '@repo/contract';
 import { logger } from '@repo/logger/server';
 import { cacheInvalidateTags } from '@repo/redis';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { DatabaseError, ValidationError } from '@/lib/errors/error-classes';
-import { logError } from '@/lib/errors/error-logger';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 import { type AccessLogCategory, classifyAccessLogCategory } from './badges-category';
-import { assertAccessControlRole } from './shared';
+import { assertAccessControlRole, resolveAccessControlDeptId } from './shared';
 
 export type { AccessLogCategory } from './badges-category';
 
@@ -49,6 +49,10 @@ export async function getBadgesForDepartment(deptId: string, page = 1, pageSize 
     .range(from, to);
 
   if (error) {
+    logger.warn(
+      { event: 'badges_primary_query_failed', deptId, error: error.message },
+      'Falling back to core badge columns'
+    );
     const fallback = await supabase
       .from('badges')
       .select(
@@ -58,11 +62,13 @@ export async function getBadgesForDepartment(deptId: string, page = 1, pageSize 
         entity_type,
         is_active,
         issued_at,
+        expires_at,
         personnel:personnel_id(first_name, surname),
         visitor:visitor_id(name)
       `,
         { count: 'exact' }
       )
+      .eq('department_id', deptId)
       .order('issued_at', { ascending: false })
       .range(from, to);
 
@@ -78,7 +84,7 @@ export async function getBadgesForDepartment(deptId: string, page = 1, pageSize 
       const [firstName = '', ...rest] = (v?.name ?? '').split(' ');
       return {
         ...b,
-        expires_at: null,
+        expires_at: (b as { expires_at?: string | null }).expires_at ?? null,
         visitor: v ? { first_name: firstName, surname: rest.join(' ') } : null,
         fleet: null,
         equipment: null,
@@ -123,6 +129,10 @@ export async function getVisitorsForDepartment(deptId: string, page = 1, pageSiz
     .range(from, to);
 
   if (error) {
+    logger.warn(
+      { event: 'visitors_primary_query_failed', deptId, error: error.message },
+      'Falling back to legacy visitor columns'
+    );
     const fallback = await supabase
       .from('visitors')
       .select(
@@ -137,6 +147,7 @@ export async function getVisitorsForDepartment(deptId: string, page = 1, pageSiz
       `,
         { count: 'exact' }
       )
+      .eq('department_id', deptId)
       .order('check_in_time', { ascending: false })
       .range(from, to);
 
@@ -194,6 +205,11 @@ export async function registerVisitor(formData: FormData) {
     );
   }
 
+  const targetDeptId =
+    (typeof resolveAccessControlDeptId === 'function'
+      ? await resolveAccessControlDeptId()
+      : null) ?? employee.department_id;
+
   const { data: visitor, error } = await supabase
     .from('visitors')
     .insert({
@@ -203,7 +219,7 @@ export async function registerVisitor(formData: FormData) {
       visiting: parsed.data.visiting,
       reason_for_entry: parsed.data.reason_for_entry,
       id_number: parsed.data.id_number,
-      department_id: employee.department_id,
+      department_id: targetDeptId,
       status: 'Checked In',
       check_in_time: new Date().toISOString(),
     })
@@ -217,33 +233,42 @@ export async function registerVisitor(formData: FormData) {
     });
   }
 
-  // Issue an 8-hour temporary badge using canonical lowercase 'visitor' entity_type
-  const qrCode = `TEMP-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  // Issue an 8-hour temporary badge using cryptographically random token
+  const qrCode = `TEMP-${randomBytes(4).toString('hex').toUpperCase()}`;
   const { error: badgeError } = await supabase.from('badges').insert({
     qr_code: qrCode,
     entity_type: 'visitor',
     visitor_id: visitor.id,
-    department_id: employee.department_id,
+    department_id: targetDeptId,
     is_active: true,
     issued_at: new Date().toISOString(),
     expires_at: new Date(Date.now() + VISITOR_BADGE_TTL_MS).toISOString(),
   });
 
   if (badgeError) {
-    logError(
-      new DatabaseError('Failed to issue temporary badge for registered visitor', {
-        context: { error: badgeError.message, visitorId: visitor.id },
-      })
-    );
+    await supabase.from('visitors').delete().eq('id', visitor.id);
+    throw new DatabaseError('Failed to issue temporary badge for registered visitor', {
+      operation: 'insert',
+      table: 'badges',
+      context: { error: badgeError.message, visitorId: visitor.id },
+    });
   }
+
+  logger.info({
+    event: 'visitor_registered_with_badge',
+    actorId: employee.id,
+    visitorId: visitor.id,
+    departmentId: targetDeptId,
+  });
 
   await cacheInvalidateTags([
     'table:visitors',
     'table:badges',
-    ...(employee.department_id ? [`dept:${employee.department_id}`] : []),
+    ...(targetDeptId ? [`dept:${targetDeptId}`] : []),
   ]);
   revalidatePath('/access-control/visitors');
   revalidatePath('/access-control/badges');
+  revalidatePath('/access-control/expired');
   revalidatePath('/access-control');
   return { success: true, qrCode };
 }
@@ -526,8 +551,12 @@ const UNREGISTERED_SCANNER_IDS = new Set([
 ]);
 
 function isRegisteredScannerDeviceId(deviceId: string | null | undefined): boolean {
-  const normalized = (deviceId ?? '').trim().toUpperCase();
-  return normalized.length > 0 && !UNREGISTERED_SCANNER_IDS.has(normalized);
+  if (deviceId === null || deviceId === undefined || deviceId.trim().length === 0) {
+    // Allow manual overrides and unrecognized denials without a physical scanner device_id
+    return true;
+  }
+  const normalized = deviceId.trim().toUpperCase();
+  return !UNREGISTERED_SCANNER_IDS.has(normalized);
 }
 
 function isRegisteredScannerRow(logRow: AccessLogFilterQueryRow): boolean {
@@ -573,9 +602,6 @@ function applyAccessLogQueryFilters<TQuery extends FilterableAccessLogQuery<TQue
     activeQuery = activeQuery.gte('scanned_at', filterState.startIso);
   }
   if (filterState.requireRegisteredScanner) {
-    if (typeof activeQuery.not === 'function') {
-      activeQuery = activeQuery.not!('device_id', 'is', null);
-    }
     if (typeof activeQuery.neq === 'function') {
       for (const excludedId of UNREGISTERED_SCANNER_IDS) {
         activeQuery = activeQuery.neq!('device_id', excludedId);
@@ -918,7 +944,8 @@ async function fetchPersonnelDirectory(
     let primaryQuery = supabase
       .from('personnel')
       .select('id, first_name, surname, emp_code, id_number, job_title')
-      .order('surname', { ascending: true });
+      .order('surname', { ascending: true })
+      .limit(500);
     if (departmentId) {
       primaryQuery = primaryQuery.eq('department_id', departmentId);
     }
@@ -938,7 +965,8 @@ async function fetchPersonnelDirectory(
     let fallbackQuery = supabase
       .from('personnel')
       .select('id, first_name, surname, emp_code')
-      .order('surname', { ascending: true });
+      .order('surname', { ascending: true })
+      .limit(500);
     if (departmentId) {
       fallbackQuery = fallbackQuery.eq('department_id', departmentId);
     }
@@ -1467,26 +1495,40 @@ export async function getAllEmployeesAttendanceRegister(
 }
 
 const BADGE_SELECT_COLUMNS =
-  'id, is_active, entity_type, personnel_id, visitor_id, fleet_id, expires_at, department_id';
+  'id, is_active, entity_type, personnel_id, visitor_id, fleet_id, equipment_id, expires_at, department_id';
 
 async function findBadgeByQrOrRfid(
   supabase: ReturnType<typeof createServiceRoleClient>,
   sanitizedCode: string
 ) {
-  const { data: byQr } = await supabase
+  const { data: byQr, error: qrErr } = await supabase
     .from('badges')
     .select(BADGE_SELECT_COLUMNS)
     .eq('qr_code', sanitizedCode)
     .maybeSingle();
 
+  if (qrErr) {
+    throw new DatabaseError('Failed to look up QR credential', {
+      operation: 'select',
+      table: 'badges',
+      context: { error: qrErr.message },
+    });
+  }
   if (byQr) return byQr;
 
-  const { data: byRfid } = await supabase
+  const { data: byRfid, error: rfidErr } = await supabase
     .from('badges')
     .select(BADGE_SELECT_COLUMNS)
     .eq('rfid_code', sanitizedCode)
     .maybeSingle();
 
+  if (rfidErr) {
+    throw new DatabaseError('Failed to look up RFID credential', {
+      operation: 'select',
+      table: 'badges',
+      context: { error: rfidErr.message },
+    });
+  }
   return byRfid;
 }
 
@@ -1565,7 +1607,7 @@ export async function executeEasyScan(input: {
   const badge = await findBadgeByQrOrRfid(supabase, rawCode);
 
   if (!badge) {
-    await supabase.from('access_logs').insert([
+    const { error: logErr } = await supabase.from('access_logs').insert([
       {
         badge_id: null,
         access_type: 'UNKNOWN',
@@ -1574,12 +1616,19 @@ export async function executeEasyScan(input: {
         access_granted: false,
         denial_reason: 'DENIED - Unrecognized Badge / RFID',
         department_id: null,
-        alcohol_tested: 'Approved',
+        alcohol_tested: 'Not Tested',
         operator: 'Easy Scanner Web',
         device_id: scannerId,
         scanned_at: new Date().toISOString(),
       },
     ]);
+    if (logErr) {
+      throw new DatabaseError('Failed to persist scan audit log', {
+        operation: 'insert',
+        table: 'access_logs',
+        context: { error: logErr.message },
+      });
+    }
 
     await invalidateScanCaches(null);
     return {
@@ -1605,7 +1654,7 @@ export async function executeEasyScan(input: {
         access_granted: false,
         denial_reason: 'DENIED - Badge Revoked',
         department_id: badge.department_id,
-        alcohol_tested: 'Approved',
+        alcohol_tested: 'Not Tested',
         operator: 'Easy Scanner Web',
         device_id: scannerId,
         scanned_at: new Date().toISOString(),
@@ -1636,7 +1685,7 @@ export async function executeEasyScan(input: {
         access_granted: false,
         denial_reason: 'DENIED - Credential Expired',
         department_id: badge.department_id,
-        alcohol_tested: 'Approved',
+        alcohol_tested: 'Not Tested',
         operator: 'Easy Scanner Web',
         device_id: scannerId,
         scanned_at: new Date().toISOString(),
@@ -1671,13 +1720,16 @@ export async function executeEasyScan(input: {
   let denialReason: string | null = null;
 
   if (badge.entity_type === 'personnel' && badge.personnel_id) {
-    const { data: person } = await supabase
+    const { data: person, error: personErr } = await supabase
       .from('personnel')
       .select('first_name, surname, emp_code, job_title, status, induction_expiry, medical_expiry')
       .eq('id', badge.personnel_id)
       .single();
 
-    if (person) {
+    if (personErr || !person) {
+      isAccessGranted = false;
+      denialReason = 'DENIED - Linked Personnel Record Missing';
+    } else {
       entityName = `${person.first_name} ${person.surname}`;
       empCode = person.emp_code || '';
       jobTitle = person.job_title || '';
@@ -1694,13 +1746,16 @@ export async function executeEasyScan(input: {
       }
     }
   } else if (badge.entity_type === 'visitor' && badge.visitor_id) {
-    const { data: visitor } = await supabase
+    const { data: visitor, error: visitorErr } = await supabase
       .from('visitors')
       .select('first_name, surname, company, status')
       .eq('id', badge.visitor_id)
       .single();
 
-    if (visitor) {
+    if (visitorErr || !visitor) {
+      isAccessGranted = false;
+      denialReason = 'DENIED - Linked Visitor Record Missing';
+    } else {
       entityName = `${visitor.first_name} ${visitor.surname} (${visitor.company || 'Visitor'})`;
       jobTitle = 'Visitor';
       if (visitor.status !== 'Checked In') {
@@ -1709,13 +1764,16 @@ export async function executeEasyScan(input: {
       }
     }
   } else if (badge.fleet_id) {
-    const { data: fleet } = await supabase
+    const { data: fleet, error: fleetErr } = await supabase
       .from('fleet')
       .select('fleet_code, registration_number, vehicle_type, status')
       .eq('id', badge.fleet_id)
       .single();
 
-    if (fleet) {
+    if (fleetErr || !fleet) {
+      isAccessGranted = false;
+      denialReason = 'DENIED - Linked Fleet Record Missing';
+    } else {
       entityName = `${fleet.vehicle_type || 'Vehicle'}: ${fleet.fleet_code} [${fleet.registration_number || ''}]`;
       jobTitle = fleet.fleet_code;
       if (fleet.status !== 'Active') {
@@ -1723,9 +1781,39 @@ export async function executeEasyScan(input: {
         denialReason = `DENIED - Fleet Status: ${fleet.status}`;
       }
     }
+  } else if (
+    badge.entity_type === 'equipment' &&
+    (badge as { equipment_id?: string | null }).equipment_id
+  ) {
+    const { data: equipment, error: equipErr } = await supabase
+      .from('equipment')
+      .select('equip_code, equipment_type, status, calibration_expiry')
+      .eq('id', (badge as { equipment_id: string }).equipment_id)
+      .single();
+
+    if (equipErr || !equipment) {
+      isAccessGranted = false;
+      denialReason = 'DENIED - Linked Equipment Record Missing';
+    } else {
+      entityName = `Equipment: ${equipment.equip_code} (${equipment.equipment_type})`;
+      jobTitle = equipment.equip_code;
+      if (equipment.status !== 'Active') {
+        isAccessGranted = false;
+        denialReason = `DENIED - Equipment Status: ${equipment.status}`;
+      } else if (
+        equipment.calibration_expiry &&
+        new Date(equipment.calibration_expiry) < new Date()
+      ) {
+        isAccessGranted = false;
+        denialReason = 'DENIED - Calibration Expired';
+      }
+    }
+  } else {
+    isAccessGranted = false;
+    denialReason = 'DENIED - Unrecognized or Unlinked Entity Type';
   }
 
-  await supabase.from('access_logs').insert([
+  const { error: finalLogErr } = await supabase.from('access_logs').insert([
     {
       badge_id: badge.id,
       access_type: badge.entity_type,
@@ -1734,12 +1822,20 @@ export async function executeEasyScan(input: {
       access_granted: isAccessGranted,
       denial_reason: isAccessGranted ? null : denialReason,
       department_id: badge.department_id,
-      alcohol_tested: 'Approved',
+      alcohol_tested: 'Not Tested',
       operator: 'Easy Scanner Web',
       device_id: scannerId,
       scanned_at: new Date().toISOString(),
     },
   ]);
+
+  if (finalLogErr) {
+    throw new DatabaseError('Failed to persist scan audit log', {
+      operation: 'insert',
+      table: 'access_logs',
+      context: { error: finalLogErr.message },
+    });
+  }
 
   if (!isAccessGranted && denialReason) {
     await enforceRepeatedDenialsPolicy({

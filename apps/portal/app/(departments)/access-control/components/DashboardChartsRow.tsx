@@ -1,6 +1,7 @@
 'use client';
 
 import { Skeleton } from '@repo/ui/components/ui/skeleton';
+import { GlassCard } from '@repo/ui/GlassCard';
 import dynamic from 'next/dynamic';
 import type { BadgeStatusDistribution, HourlyAccessPoint } from '../actions';
 
@@ -24,7 +25,7 @@ export default function DashboardChartsRow({ hourlyStats, distribution }: Dashbo
 
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-      <div className="rounded-xl border border-border bg-card p-5 shadow-card lg:col-span-2">
+      <GlassCard className="p-5 lg:col-span-2">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="font-bold text-foreground text-sm">Access Events — Today</h2>
@@ -37,8 +38,8 @@ export default function DashboardChartsRow({ hourlyStats, distribution }: Dashbo
           </span>
         </div>
         <HourlyAccessChart data={hourlyStats} />
-      </div>
-      <div className="rounded-xl border border-border bg-card p-5 shadow-card lg:col-span-1">
+      </GlassCard>
+      <GlassCard className="p-5 lg:col-span-1">
         <div className="mb-4">
           <h2 className="font-bold text-foreground text-sm">QR Code Status Distribution</h2>
           <p className="mt-0.5 text-muted-foreground text-xs">
@@ -46,7 +47,7 @@ export default function DashboardChartsRow({ hourlyStats, distribution }: Dashbo
           </p>
         </div>
         <QRStatusDistributionChart data={distribution} />
-      </div>
+      </GlassCard>
     </div>
   );
 }

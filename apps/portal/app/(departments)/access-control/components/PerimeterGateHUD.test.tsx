@@ -87,7 +87,7 @@ describe('PerimeterGateHUD', () => {
   it('triggers remote barrier pulse when Pulse Barrier button is clicked', async () => {
     render(<PerimeterGateHUD initialGates={sampleGates} />);
 
-    const pulseButtons = screen.getAllByRole('button', { name: /Pulse Barrier/i });
+    const pulseButtons = screen.getAllByRole('button', { name: /Log Gate Override/i });
     fireEvent.click(pulseButtons[0]!);
 
     await waitFor(() => {

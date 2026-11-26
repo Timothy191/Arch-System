@@ -59,18 +59,30 @@ const mockSendPrintJob = jest.fn(async () => ({
 }));
 
 const mockCancelPrintJob = jest.fn(async () => undefined);
+const mockGetNeo300PrinterStatus = jest.fn(async () => ({
+  id: 'pr-1',
+  name: 'Magicard Neo 300',
+  model: 'Magicard Neo 300',
+  cups_name: 'Magicard_Neo300',
+  connection_type: 'usb',
+  status: 'online',
+  status_message: 'Ready to print ID cards',
+  last_online_at: '2026-11-20T08:00:00Z',
+}));
 
 jest.mock('./actions', () => ({
   getEmployeeCardProfiles: (...args: unknown[]) => mockGetEmployeeCardProfiles(...args),
   upsertEmployeeForCardPrinting: (...args: unknown[]) => mockUpsertEmployee(...args),
   sendNeo300PrintJob: (...args: unknown[]) => mockSendPrintJob(...args),
   cancelNeo300Job: (...args: unknown[]) => mockCancelPrintJob(...args),
+  getNeo300PrinterStatus: () => mockGetNeo300PrinterStatus(),
 }));
 
 jest.mock('sonner', () => ({
   toast: {
     info: jest.fn(),
     success: jest.fn(),
+    warning: jest.fn(),
     error: jest.fn(),
   },
 }));
@@ -140,7 +152,9 @@ describe('Neo300PrintStudio full interactive flows', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /check status/i }));
-    expect(toast.info).toHaveBeenCalledWith('Printer status synchronized');
+    await waitFor(() => {
+      expect(toast.info).toHaveBeenCalledWith('Printer status: ONLINE', expect.any(Object));
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /\+ add employee to db/i }));
     const coyInput = container.querySelector('#neo300-coy-number') as HTMLInputElement;
@@ -234,7 +248,7 @@ describe('Neo300PrintStudio full interactive flows', () => {
     }
   });
 
-  it('toggles USB Connection Setup panel and switches between Vehicle, Company Fleet, and Coal Trucks directory tabs', () => {
+  it('toggles USB Connection Setup panel and switches between Vehicle, Company Fleet, and Coal Trucks directory tabs', async () => {
     render(
       <Neo300PrintStudio
         initialPrinter={basePrinter}
@@ -273,8 +287,10 @@ describe('Neo300PrintStudio full interactive flows', () => {
     fireEvent.click(screen.getByRole('button', { name: /Setup USB Connection/i }));
     expect(screen.getByText(/USB & CUPS Printer Setup/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /Verify USB Link/i }));
-    expect(toast.success).toHaveBeenCalledWith('USB handshake verified on queue Magicard_Neo300');
+    fireEvent.click(screen.getByRole('button', { name: /Check Bridge Heartbeat/i }));
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Bridge heartbeat online for Magicard_Neo300');
+    });
 
     const coalTab = screen.getByRole('tab', { name: 'Coal Trucks' });
     fireEvent.mouseDown(coalTab);

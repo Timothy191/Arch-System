@@ -185,7 +185,7 @@ describe('AccessControlDashboardPage', () => {
     const menu = screen.getByRole('menu');
     expect(menu).toBeInTheDocument();
     expect(screen.getByText('Print Badge (Neo300)')).toBeInTheDocument();
-    expect(screen.getByText('Easy Scanner & Register')).toBeInTheDocument();
+    expect(screen.getByText('Access Logs & Register')).toBeInTheDocument();
     fireEvent.keyDown(menu, { key: 'Escape' });
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });

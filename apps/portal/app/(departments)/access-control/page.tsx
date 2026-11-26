@@ -59,18 +59,19 @@ export default async function AccessControlDashboardPage() {
       <HeadcountMusterBanner
         totalSouls={musterSummary.totalSoulsOnSite}
         employeesCount={
-          entityStatus.find((e) => e.type === 'Employees')?.active ??
-          musterSummary.records.filter((r) => r.entityType === 'personnel').length
+          musterSummary.records.filter(
+            (r) => r.entityType === 'personnel' && r.company === 'Plantcor Operations'
+          ).length
         }
         contractorsCount={
-          entityStatus.find((e) => e.type === 'Contractors')?.active ??
           musterSummary.records.filter(
-            (r) => r.company !== 'Mine Operations' && r.company !== 'Internal'
+            (r) => r.entityType === 'personnel' && r.company !== 'Plantcor Operations'
           ).length
         }
         visitorsCount={musterSummary.records.filter((r) => r.entityType === 'visitor').length}
         vehiclesCount={entityStatus.find((e) => e.type === 'Vehicles')?.active ?? 0}
         blastStatus={musterSummary.blastStatus}
+        siteName="Active Site Perimeter"
       />
 
       {/* 2. Rapid Operational Action Center */}

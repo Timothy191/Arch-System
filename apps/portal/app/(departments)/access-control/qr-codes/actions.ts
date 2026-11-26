@@ -1,10 +1,42 @@
 'use server';
 
-import { cacheInvalidateTags } from '@repo/redis';
+import { randomBytes } from 'node:crypto';
+import { qrCreateEntityBadgeSchema } from '@repo/contract/schemas/access-control.schema';
+import { logger } from '@repo/logger/server';
+import { FixedWindowStrategy, MemoryStore, RateLimiter, RedisStore } from '@repo/rate-limiter';
+import { cacheInvalidateTags, getRedisClient } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
-import { DatabaseError } from '@/lib/errors/error-classes';
+import {
+  DatabaseError,
+  ForbiddenError,
+  RateLimitError,
+  ValidationError,
+} from '@/lib/errors/error-classes';
 import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
-import { assertAccessControlRoleFor } from '../actions/shared';
+import { assertAccessControlRoleFor, resolveAccessControlDeptId } from '../actions/shared';
+
+function createQrLimiter(keyPrefix: string): RateLimiter {
+  try {
+    const redis = getRedisClient();
+    return new RateLimiter({
+      store: redis ? new RedisStore(redis as never) : new MemoryStore(),
+      strategy: new FixedWindowStrategy(),
+      limit: 30,
+      windowMs: 60_000,
+      keyPrefix,
+    });
+  } catch {
+    return new RateLimiter({
+      store: new MemoryStore(),
+      strategy: new FixedWindowStrategy(),
+      limit: 30,
+      windowMs: 60_000,
+      keyPrefix,
+    });
+  }
+}
+
+const qrMutationLimiter = createQrLimiter('ratelimit:qr_management:');
 
 export type CredentialEntityType = 'personnel' | 'vehicle' | 'coal_truck' | 'visitor' | 'equipment';
 
@@ -365,24 +397,44 @@ export interface CreateBadgePayload {
  */
 export async function createBadgeCredential(payload: CreateBadgePayload) {
   const { supabase, employee } = await assertAccessControlRole();
+  const { allowed } = await qrMutationLimiter.check(employee.id);
+  if (!allowed) {
+    throw new RateLimitError('Too many badge creation requests. Please wait.');
+  }
+  const canonicalDeptId =
+    (typeof resolveAccessControlDeptId === 'function'
+      ? await resolveAccessControlDeptId()
+      : null) ?? employee.department_id;
 
-  let entityId = payload.targetEntityId ?? null;
+  let entityId = payload.targetEntityId?.trim() || null;
   const entityType = payload.entityType;
 
   // 1. Handle on-the-fly entity creation if needed
   if (!entityId && payload.newEntityData) {
     const d = payload.newEntityData;
+    const randCode = randomBytes(2).toString('hex').toUpperCase();
     if (entityType === 'coal_truck') {
-      const fleetCode = d.code || `CT-${Math.floor(10 + Math.random() * 90)}`;
+      const fleetCode = d.code?.trim() || `CT-${randCode}`;
+      const validated = qrCreateEntityBadgeSchema.safeParse({
+        entityType: 'coal_truck',
+        fleetCode,
+        registrationNumber: d.regNumber?.trim() || undefined,
+        vehicleType: 'Coal Truck',
+        make: d.make?.trim() || undefined,
+        model: d.model?.trim() || undefined,
+      });
+      if (!validated.success) {
+        throw new ValidationError(validated.error.issues[0]?.message ?? 'Invalid Coal Truck data');
+      }
       const { data: fleetRec, error: fErr } = await supabase
         .from('fleet')
         .insert({
           fleet_code: fleetCode,
           vehicle_type: 'Coal Truck',
-          registration_number: d.regNumber || 'REG-COAL',
-          make: d.make || 'Scania',
-          model: d.model || 'R500 6x4',
-          department_id: employee.department_id,
+          registration_number: d.regNumber?.trim() || null,
+          make: d.make?.trim() || null,
+          model: d.model?.trim() || null,
+          department_id: canonicalDeptId,
           status: 'Active',
         })
         .select()
@@ -391,16 +443,27 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
         throw new DatabaseError('Failed to create Coal Truck', { table: 'fleet', cause: fErr });
       entityId = fleetRec.id;
     } else if (entityType === 'vehicle') {
-      const fleetCode = d.code || `VEH-${Math.floor(100 + Math.random() * 900)}`;
+      const fleetCode = d.code?.trim() || `VEH-${randCode}`;
+      const validated = qrCreateEntityBadgeSchema.safeParse({
+        entityType: 'vehicle',
+        fleetCode,
+        registrationNumber: d.regNumber?.trim() || undefined,
+        vehicleType: 'Light Vehicle',
+        make: d.make?.trim() || undefined,
+        model: d.model?.trim() || undefined,
+      });
+      if (!validated.success) {
+        throw new ValidationError(validated.error.issues[0]?.message ?? 'Invalid Vehicle data');
+      }
       const { data: fleetRec, error: fErr } = await supabase
         .from('fleet')
         .insert({
           fleet_code: fleetCode,
           vehicle_type: 'Light Vehicle',
-          registration_number: d.regNumber || 'REG-VEH',
-          make: d.make || 'Toyota',
-          model: d.model || 'Hilux',
-          department_id: employee.department_id,
+          registration_number: d.regNumber?.trim() || null,
+          make: d.make?.trim() || null,
+          model: d.model?.trim() || null,
+          department_id: canonicalDeptId,
           status: 'Active',
         })
         .select()
@@ -409,15 +472,29 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
         throw new DatabaseError('Failed to create vehicle', { table: 'fleet', cause: fErr });
       entityId = fleetRec.id;
     } else if (entityType === 'visitor') {
-      const [fName, ...sNames] = (d.name || 'Guest Visitor').split(' ');
+      const [fName, ...sNames] = (d.name || '').trim().split(/\s+/);
+      const validated = qrCreateEntityBadgeSchema.safeParse({
+        entityType: 'visitor',
+        firstName: fName || 'Guest',
+        surname: sNames.join(' ') || 'Visitor',
+        company: d.company?.trim() || 'Contractor',
+        reasonForEntry: d.reason?.trim() || 'Site Visit',
+      });
+      if (!validated.success || validated.data.entityType !== 'visitor') {
+        throw new ValidationError(
+          !validated.success
+            ? (validated.error.issues[0]?.message ?? 'Invalid visitor data')
+            : 'Invalid visitor'
+        );
+      }
       const { data: visRec, error: vErr } = await supabase
         .from('visitors')
         .insert({
-          first_name: fName || 'Guest',
-          surname: sNames.join(' ') || 'Visitor',
-          company: d.company || 'Contractor',
-          reason_for_entry: d.reason || 'Site Visit',
-          department_id: employee.department_id,
+          first_name: validated.data.firstName,
+          surname: validated.data.surname,
+          company: validated.data.company,
+          reason_for_entry: validated.data.reasonForEntry,
+          department_id: canonicalDeptId,
           status: 'Checked In',
         })
         .select()
@@ -426,13 +503,21 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
         throw new DatabaseError('Failed to create visitor', { table: 'visitors', cause: vErr });
       entityId = visRec.id;
     } else if (entityType === 'equipment') {
-      const eqCode = d.code || `EQP-${Math.floor(100 + Math.random() * 900)}`;
+      const eqCode = d.code?.trim() || `EQP-${randCode}`;
+      const validated = qrCreateEntityBadgeSchema.safeParse({
+        entityType: 'equipment',
+        equipCode: eqCode,
+        equipmentType: d.model?.trim() || 'Heavy Machinery',
+      });
+      if (!validated.success) {
+        throw new ValidationError(validated.error.issues[0]?.message ?? 'Invalid equipment data');
+      }
       const { data: eqRec, error: eqErr } = await supabase
         .from('equipment')
         .insert({
           equip_code: eqCode,
-          equipment_type: d.model || 'Heavy Machinery',
-          department_id: employee.department_id,
+          equipment_type: d.model?.trim() || 'Heavy Machinery',
+          department_id: canonicalDeptId,
           status: 'Active',
         })
         .select()
@@ -443,10 +528,16 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
     }
   }
 
-  // 2. Generate or format QR code
+  if (!entityId) {
+    throw new ValidationError(
+      'An existing entity must be selected or valid new entity details provided before issuing a badge.'
+    );
+  }
+
+  // 2. Generate cryptographically random QR code if omitted
   let qrCode = payload.code?.trim();
   if (!qrCode) {
-    const randomSuffix = Math.floor(10000 + Math.random() * 90000);
+    const randomSuffix = randomBytes(4).toString('hex').toUpperCase();
     switch (entityType) {
       case 'coal_truck':
         qrCode = `TRK-COAL-${randomSuffix}`;
@@ -490,7 +581,7 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
     qr_code: qrCode,
     rfid_code: payload.rfidCode?.trim() || null,
     entity_type: dbEntityType,
-    department_id: employee.department_id,
+    department_id: canonicalDeptId,
     is_active: true,
     issued_at: new Date().toISOString(),
     expires_at: expiresAt,
@@ -514,16 +605,25 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
     });
   }
 
+  logger.info({
+    event: 'qr_badge_credential_created',
+    actorId: employee.id,
+    badgeId: newBadge.id,
+    entityType: dbEntityType,
+    entityId,
+  });
+
   await cacheInvalidateTags([
     'table:badges',
     'table:personnel',
     'table:fleet',
     'table:equipment',
     'table:visitors',
-    ...(employee.department_id ? [`dept:${employee.department_id}`] : []),
+    ...(canonicalDeptId ? [`dept:${canonicalDeptId}`] : []),
   ]);
   revalidatePath('/access-control/qr-codes');
   revalidatePath('/access-control/badges');
+  revalidatePath('/access-control/expired');
   revalidatePath('/access-control');
   return { success: true, badge: newBadge };
 }
@@ -532,26 +632,41 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
  * Revoke a badge
  */
 export async function revokeBadgeCredential(badgeId: string) {
-  const { supabase, employee } = await assertAccessControlRole();
+  const { supabase, employee, departmentId } = await assertAccessControlRole();
+  const { allowed } = await qrMutationLimiter.check(employee.id);
+  if (!allowed) {
+    throw new RateLimitError('Too many badge revocation requests. Please wait.');
+  }
 
-  const { error } = await supabase
+  const { data: revokedRows, error } = await supabase
     .from('badges')
     .update({
       is_active: false,
       revoked_at: new Date().toISOString(),
     })
-    .eq('id', badgeId);
+    .eq('id', badgeId)
+    .select('id');
 
   if (error) {
     throw new DatabaseError('Failed to revoke badge', { table: 'badges', cause: error });
   }
+  if (!revokedRows || revokedRows.length === 0) {
+    throw new ForbiddenError('Badge revocation blocked or badge not found', {
+      resource: 'badges',
+      action: 'revoke',
+    });
+  }
 
-  await cacheInvalidateTags([
-    'table:badges',
-    ...(employee.department_id ? [`dept:${employee.department_id}`] : []),
-  ]);
+  logger.info({
+    event: 'qr_badge_credential_revoked',
+    actorId: employee.id,
+    badgeId,
+  });
+
+  await cacheInvalidateTags(['table:badges', ...(departmentId ? [`dept:${departmentId}`] : [])]);
   revalidatePath('/access-control/qr-codes');
   revalidatePath('/access-control/badges');
+  revalidatePath('/access-control/expired');
   revalidatePath('/access-control');
   return { success: true };
 }

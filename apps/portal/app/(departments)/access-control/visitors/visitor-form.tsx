@@ -123,6 +123,36 @@ export function VisitorForm() {
 
         <div className="space-y-2">
           <label
+            htmlFor="visiting"
+            className="block font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
+          >
+            Person / Department Visiting
+          </label>
+          <Input
+            id="visiting"
+            name="visiting"
+            placeholder="Control Room / Site Host"
+            className="border-[var(--border-default)] bg-[var(--bg-tertiary)]"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label
+            htmlFor="id_number"
+            className="block font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
+          >
+            ID / Passport Number
+          </label>
+          <Input
+            id="id_number"
+            name="id_number"
+            placeholder="8901015009087"
+            className="border-[var(--border-default)] bg-[var(--bg-tertiary)]"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label
             htmlFor="reason"
             className="block font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
           >

@@ -1,3 +1,4 @@
+import { GlassCard } from '@repo/ui/GlassCard';
 import { connection } from 'next/server';
 import { getProvisioningReferenceData } from '@/actions/employee-provisioning';
 import { EmployeeProvisioningModal } from '@/components/employee/EmployeeProvisioningModal';
@@ -18,15 +19,24 @@ interface BadgeWithRelations {
   equipment: { equip_code: string; equipment_type: string } | null;
 }
 
+const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 100;
+
+function parseBoundedInt(raw: string | undefined, fallback: number, min: number, max: number) {
+  const parsed = Number.parseInt(raw ?? '', 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, parsed));
+}
+
 export default async function BadgesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; pageSize?: string }>;
+  searchParams: Promise<{ page?: string; pageSize?: string; entity?: string }>;
 }) {
   await connection();
   const params = await searchParams;
-  const page = parseInt(params.page || '1', 10);
-  const pageSize = parseInt(params.pageSize || '50', 10);
+  const page = parseBoundedInt(params.page, 1, 1, 10_000);
+  const pageSize = parseBoundedInt(params.pageSize, DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE);
 
   const { deptId } = await getDepartmentContext({
     department: 'access-control',
@@ -37,9 +47,8 @@ export default async function BadgesPage({
     getProvisioningReferenceData(),
   ]);
 
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
-  // Resolve entity names from nested relation data
   const resolvedBadges = (badges as unknown as BadgeWithRelations[]).map((b) => {
     let entityName = 'Unknown';
     if (b.personnel) {
@@ -56,8 +65,7 @@ export default async function BadgesPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="gold-steel-border gold-steel-border-slim !bg-none !bg-white flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent-gold/70 p-5 shadow-sm">
+      <GlassCard variant="window" className="flex flex-wrap items-center justify-between gap-4 p-5">
         <div>
           <h2 className="font-bold text-2xl text-[var(--text-heading)]">Credential Management</h2>
           <p className="mt-1 text-[var(--text-muted)] text-sm">
@@ -68,7 +76,7 @@ export default async function BadgesPage({
           departments={departments}
           triggerLabel="Add Employee & Issue Badge"
         />
-      </div>
+      </GlassCard>
 
       <BadgesRegistryClient
         badges={resolvedBadges}

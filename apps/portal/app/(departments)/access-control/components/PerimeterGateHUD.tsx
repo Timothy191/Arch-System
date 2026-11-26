@@ -63,13 +63,14 @@ export function PerimeterGateHUD({ initialGates }: PerimeterGateHUDProps) {
   const handlePulse = useCallback(async (gate: PerimeterGate) => {
     try {
       setPulsingGateId(gate.id);
+      const canonicalLocation = gate.gateLocation ?? gate.name;
       const res = await triggerGatePulse(
-        gate.name,
-        `Authorized remote pulse from SOC Terminal (Gate: ${gate.id})`
+        canonicalLocation,
+        `Authorized manual override from SOC Terminal (Gate: ${gate.id})`
       );
       toast.success(res.message);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to pulse gate barrier';
+      const message = err instanceof Error ? err.message : 'Failed to log gate override';
       toast.error(message);
     } finally {
       setPulsingGateId(null);
@@ -103,6 +104,14 @@ export function PerimeterGateHUD({ initialGates }: PerimeterGateHUDProps) {
   const isRealtimeConnected = realtimeStatus === 'SUBSCRIBED';
   const strokeDashoffset =
     RING_CIRCUMFERENCE - (telemetryStats.readinessPct / 100) * RING_CIRCUMFERENCE;
+  const perimeterStatusBadge =
+    gates.length === 0
+      ? { label: 'NO GATES CONFIGURED', cls: 'bg-slate-500/10 text-slate-700' }
+      : telemetryStats.onlineCount === gates.length
+        ? { label: 'ALL GATES ONLINE', cls: 'bg-emerald-500/10 text-emerald-700' }
+        : telemetryStats.onlineCount > 0
+          ? { label: 'PARTIAL TELEMETRY', cls: 'bg-amber-500/10 text-amber-700' }
+          : { label: 'TELEMETRY OFFLINE', cls: 'bg-red-500/10 text-red-700' };
 
   return (
     <GlassCard variant="window" className="p-5">
@@ -114,8 +123,13 @@ export function PerimeterGateHUD({ initialGates }: PerimeterGateHUDProps) {
           <div>
             <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
               <span>Perimeter Barriers &amp; Gate Telemetry HUD</span>
-              <span className="rounded bg-emerald-500/10 px-2 py-0.5 font-mono font-semibold text-[11px] text-emerald-700">
-                ALL PERIMETERS ARMED
+              <span
+                className={cn(
+                  'rounded px-2 py-0.5 font-mono font-semibold text-[11px]',
+                  perimeterStatusBadge.cls
+                )}
+              >
+                {perimeterStatusBadge.label}
               </span>
             </h3>
             <p className="text-[var(--text-muted)] text-xs">
@@ -449,12 +463,12 @@ export function PerimeterGateHUD({ initialGates }: PerimeterGateHUDProps) {
                   {isPulsing ? (
                     <>
                       <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                      <span>Pulsing...</span>
+                      <span>Logging...</span>
                     </>
                   ) : (
                     <>
                       <Zap className="h-3.5 w-3.5 text-amber-500" />
-                      <span>Pulse Barrier</span>
+                      <span>Log Gate Override</span>
                     </>
                   )}
                 </button>

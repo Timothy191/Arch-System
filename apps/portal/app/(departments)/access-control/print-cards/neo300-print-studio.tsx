@@ -17,7 +17,7 @@ import {
 import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { QRCodeSection } from '../card-actions/qr-section';
+import { QRCodeSection } from '../components/QRCodeSection';
 import type {
   CardPrintJob,
   CardStudioDepartment,
@@ -30,6 +30,7 @@ import type {
 import {
   cancelNeo300Job,
   getEmployeeCardProfiles,
+  getNeo300PrinterStatus,
   sendNeo300PrintJob,
   upsertEmployeeForCardPrinting,
 } from './actions';
@@ -162,7 +163,7 @@ export function Neo300PrintStudio({
   departments = [],
   initialFleetBadges = [],
 }: Neo300PrintStudioProps) {
-  const [printer] = useState<Neo300Printer>(initialPrinter);
+  const [printer, setPrinter] = useState<Neo300Printer>(initialPrinter);
   const [directoryTab, setDirectoryTab] = useState<DirectoryTabKey>('employees');
   const [showUsbSetup, setShowUsbSetup] = useState(false);
   const [employees, setEmployees] = useState<EmployeeCardProfile[]>(initialEmployees);
@@ -221,7 +222,7 @@ export function Neo300PrintStudio({
       medical_expiry: DEFAULT_EXPIRY_ONE_YEAR(),
       induction_expiry: DEFAULT_EXPIRY_ONE_YEAR(),
       photo_url: '',
-      rfid_code: `RFID-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      rfid_code: '',
       qr_code: `EMP-${nextCode}`,
     });
     setShowEditor(true);
@@ -287,7 +288,7 @@ export function Neo300PrintStudio({
         const result = await sendNeo300PrintJob(employeeId);
         if (result.success && result.job) {
           toast.success(
-            `Print job sent to ${printer.model} for ${selectedEmp?.first_name} ${selectedEmp?.surname}!`
+            `Print job queued for ${printer.model} (${selectedEmp?.first_name} ${selectedEmp?.surname})`
           );
           setJobs((prev) => [result.job as CardPrintJob, ...prev]);
         }
@@ -369,7 +370,22 @@ export function Neo300PrintStudio({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => toast.info('Printer status synchronized')}
+              disabled={isPending}
+              onClick={() => {
+                startTransition(async () => {
+                  try {
+                    const latest = await getNeo300PrinterStatus();
+                    setPrinter(latest);
+                    toast.info(`Printer status: ${latest.status.toUpperCase()}`, {
+                      description: latest.status_message ?? undefined,
+                    });
+                  } catch (err) {
+                    toast.error(
+                      err instanceof Error ? err.message : 'Failed to check printer status'
+                    );
+                  }
+                });
+              }}
               className="gap-1.5 text-xs"
             >
               <RefreshCw className="h-3.5 w-3.5" />
@@ -398,13 +414,31 @@ export function Neo300PrintStudio({
               <Button
                 type="button"
                 size="sm"
-                onClick={() =>
-                  toast.success(`USB handshake verified on queue ${printer.cups_name}`)
-                }
+                disabled={isPending}
+                onClick={() => {
+                  startTransition(async () => {
+                    try {
+                      const latest = await getNeo300PrinterStatus();
+                      setPrinter(latest);
+                      if (latest.status === 'online') {
+                        toast.success(`Bridge heartbeat online for ${latest.cups_name}`);
+                      } else {
+                        toast.warning(
+                          latest.status_message ??
+                            'Printer bridge offline — jobs queue cleanly until local bridge connects.'
+                        );
+                      }
+                    } catch (err) {
+                      toast.error(
+                        err instanceof Error ? err.message : 'Failed to verify printer bridge'
+                      );
+                    }
+                  });
+                }}
                 className="gap-1.5 bg-blue-600 text-white text-xs hover:bg-blue-700"
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Verify USB Link
+                Check Bridge Heartbeat
               </Button>
               <Button
                 type="button"

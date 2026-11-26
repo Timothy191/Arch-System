@@ -1,16 +1,24 @@
 'use server';
 
 import { gateDenialSchema, gatePulseSchema } from '@repo/contract';
-import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
-import { cacheInvalidateTags } from '@repo/redis';
+import { logger } from '@repo/logger/server';
+import { FixedWindowStrategy, MemoryStore, RateLimiter, RedisStore } from '@repo/rate-limiter';
+import { cacheInvalidateTags, getRedisClient } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
-import { DatabaseError, RateLimitError } from '@/lib/errors/error-classes';
+import { after } from 'next/server';
+import {
+  DatabaseError,
+  ForbiddenError,
+  RateLimitError,
+  ValidationError,
+} from '@/lib/errors/error-classes';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 import { assertAccessControlRole } from './shared';
 
 export interface PerimeterGate {
   id: string;
   name: string;
+  gateLocation?: string;
   type: 'boom_barrier' | 'turnstile' | 'weighbridge_rfid' | 'biometric_portal';
   zone: string;
   status: 'ONLINE' | 'INTERLOCK_ARMED' | 'MAINTENANCE' | 'OFFLINE';
@@ -24,78 +32,45 @@ export interface PerimeterGate {
 const GATE_RATE_LIMIT_WINDOW_MS = 60_000;
 const GATE_PULSE_MAX_REQUESTS = 10;
 const GATE_DENIAL_MAX_REQUESTS = 20;
+const HEARTBEAT_TTL_MS = 5 * 60_000;
 
-const GATE_PULSE_LIMITER = new RateLimiter({
-  store: new MemoryStore(),
-  strategy: new FixedWindowStrategy(),
-  limit: GATE_PULSE_MAX_REQUESTS,
-  windowMs: GATE_RATE_LIMIT_WINDOW_MS,
-  keyPrefix: 'ratelimit:gate_pulse:',
-});
+function createGateLimiter(limit: number, keyPrefix: string): RateLimiter {
+  try {
+    const redis = getRedisClient();
+    return new RateLimiter({
+      store: redis ? new RedisStore(redis as never) : new MemoryStore(),
+      strategy: new FixedWindowStrategy(),
+      limit,
+      windowMs: GATE_RATE_LIMIT_WINDOW_MS,
+      keyPrefix,
+    });
+  } catch {
+    return new RateLimiter({
+      store: new MemoryStore(),
+      strategy: new FixedWindowStrategy(),
+      limit,
+      windowMs: GATE_RATE_LIMIT_WINDOW_MS,
+      keyPrefix,
+    });
+  }
+}
 
-const GATE_DENIAL_LIMITER = new RateLimiter({
-  store: new MemoryStore(),
-  strategy: new FixedWindowStrategy(),
-  limit: GATE_DENIAL_MAX_REQUESTS,
-  windowMs: GATE_RATE_LIMIT_WINDOW_MS,
-  keyPrefix: 'ratelimit:gate_denial:',
-});
+const GATE_PULSE_LIMITER = createGateLimiter(GATE_PULSE_MAX_REQUESTS, 'ratelimit:gate_pulse:');
+const GATE_DENIAL_LIMITER = createGateLimiter(GATE_DENIAL_MAX_REQUESTS, 'ratelimit:gate_denial:');
 
-const GATE_REGISTRY: readonly {
-  readonly id: string;
-  readonly name: string;
-  readonly type: PerimeterGate['type'];
-  readonly zone: string;
-  readonly mode: PerimeterGate['mode'];
-  readonly interlockActive: boolean;
-  readonly gateLocation: string;
-}[] = [
-  {
-    id: 'GATE-01-NORTH',
-    name: 'Main North Inbound Boom Barrier',
-    type: 'boom_barrier',
-    zone: 'Perimeter Access Road',
-    mode: 'Auto-Pulse',
-    interlockActive: false,
-    gateLocation: 'Main Gate',
-  },
-  {
-    id: 'GATE-02-SOUTH',
-    name: 'Main South Outbound Boom Barrier',
-    type: 'boom_barrier',
-    zone: 'Perimeter Exit Road',
-    mode: 'Auto-Pulse',
-    interlockActive: false,
-    gateLocation: 'Main Gate Exit',
-  },
-  {
-    id: 'TURN-01-04-PIT',
-    name: 'Pit Alpha Turnstiles 1-4 (BAC Interlock)',
-    type: 'turnstile',
-    zone: 'Pit Extraction Ramp',
-    mode: 'BAC Enforced (0.00‰)',
-    interlockActive: true,
-    gateLocation: 'Turnstile',
-  },
-  {
-    id: 'WEIGH-03-ROM',
-    name: 'ROM Weighbridge Long-Range RFID',
-    type: 'weighbridge_rfid',
-    zone: 'ROM Pad Stockpile',
-    mode: 'EPC Gen2 Long-Range',
-    interlockActive: false,
-    gateLocation: 'ROM Weighbridge',
-  },
-  {
-    id: 'VAULT-05-MAG',
-    name: 'Explosives Magazine Biometric Lock',
-    type: 'biometric_portal',
-    zone: 'Magazine Bunker Area',
-    mode: 'Dual-Key Auth',
-    interlockActive: true,
-    gateLocation: 'Explosives Magazine',
-  },
-];
+function mapGateType(rawType: string): PerimeterGate['type'] {
+  if (rawType === 'TURNSTILE_ARRAY') return 'turnstile';
+  if (rawType === 'WEIGHBRIDGE_BOOM') return 'weighbridge_rfid';
+  if (rawType === 'HIGH_SEC_PORTAL') return 'biometric_portal';
+  return 'boom_barrier';
+}
+
+function mapGateMode(rawType: string, interlockActive: boolean): PerimeterGate['mode'] {
+  if (rawType === 'TURNSTILE_ARRAY' && interlockActive) return 'BAC Enforced (0.00‰)';
+  if (rawType === 'WEIGHBRIDGE_BOOM') return 'EPC Gen2 Long-Range';
+  if (rawType === 'HIGH_SEC_PORTAL') return 'Dual-Key Auth';
+  return 'Auto-Pulse';
+}
 
 function formatRelativeTime(isoTimestamp: string): string {
   const now = new Date();
@@ -116,170 +91,249 @@ interface LastLogEntry {
   badge_id: string | null;
 }
 
+interface DbGateRow {
+  id: string;
+  name: string;
+  gate_location: string;
+  zone: string;
+  gate_type: string;
+  interlock_active: boolean;
+  is_maintenance: boolean;
+  last_heartbeat_at: string | null;
+}
+
 export async function getLivePerimeterGates(): Promise<PerimeterGate[]> {
-  const { supabase } = await assertAccessControlRole();
+  const { supabase, departmentId } = await assertAccessControlRole();
 
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
-  try {
-    const { data: logs } = await supabase
-      .from('access_logs')
-      .select('gate_location, scanned_at, badge_id')
-      .gte('scanned_at', today.toISOString())
-      .order('scanned_at', { ascending: false });
+  const gatesRes = await supabase
+    .from('perimeter_gates')
+    .select(
+      'id, name, gate_location, zone, gate_type, interlock_active, is_maintenance, last_heartbeat_at'
+    )
+    .order('id', { ascending: true })
+    .limit(50);
 
-    const cycleCounts: Record<string, number> = {};
-    const lastLogPerGate: Record<string, LastLogEntry> = {};
-
-    for (const log of logs ?? []) {
-      const loc = log.gate_location;
-      cycleCounts[loc] = (cycleCounts[loc] ?? 0) + 1;
-      if (!lastLogPerGate[loc] || log.scanned_at > lastLogPerGate[loc].scanned_at) {
-        lastLogPerGate[loc] = { scanned_at: log.scanned_at, badge_id: log.badge_id };
-      }
-    }
-
-    const lastEntityNames: Record<string, string> = {};
-    const badgeIds = Object.values(lastLogPerGate)
-      .map((entry) => entry.badge_id)
-      .filter((id): id is string => id !== null);
-
-    if (badgeIds.length > 0) {
-      const { data: badges } = await supabase
-        .from('badges')
-        .select(
-          `
-          id,
-          entity_type,
-          personnel:personnel_id(first_name, surname),
-          visitor:visitor_id(first_name, surname),
-          fleet:fleet_id(fleet_code, vehicle_type)
-        `
-        )
-        .in('id', badgeIds);
-
-      const badgeById = new Map<
-        string,
-        | { id: string; entity_type: string; personnel: unknown; visitor: unknown; fleet: unknown }
-        | undefined
-      >();
-      for (const b of badges ?? []) {
-        badgeById.set(b.id, b);
-      }
-
-      for (const [gateLoc, entry] of Object.entries(lastLogPerGate)) {
-        if (!entry.badge_id) continue;
-        const badge = badgeById.get(entry.badge_id);
-        if (!badge) {
-          lastEntityNames[gateLoc] = 'Unknown Badge';
-          continue;
-        }
-
-        if (badge.entity_type === 'personnel' && badge.personnel) {
-          const p = badge.personnel as { first_name?: string; surname?: string } | null;
-          lastEntityNames[gateLoc] =
-            `${p?.first_name ?? ''} ${p?.surname ?? ''}`.trim() || 'Personnel';
-        } else if (badge.entity_type === 'visitor' && badge.visitor) {
-          const v = badge.visitor as { first_name?: string; surname?: string } | null;
-          lastEntityNames[gateLoc] =
-            `${v?.first_name ?? ''} ${v?.surname ?? ''}`.trim() || 'Visitor';
-        } else if (badge.entity_type === 'vehicle' && badge.fleet) {
-          const f = badge.fleet as { fleet_code?: string; vehicle_type?: string } | null;
-          lastEntityNames[gateLoc] =
-            `${f?.vehicle_type ?? 'Vehicle'}: ${f?.fleet_code ?? ''}`.trim() || 'Vehicle';
-        } else {
-          lastEntityNames[gateLoc] = `Badge ${badge.id.slice(0, 8)}`;
-        }
-      }
-    }
-
-    return GATE_REGISTRY.map((gate) => {
-      const count = cycleCounts[gate.gateLocation] ?? 0;
-      const lastLog = lastLogPerGate[gate.gateLocation];
-      const lastEventTime = lastLog ? formatRelativeTime(lastLog.scanned_at) : 'No recent activity';
-      const lastEntityPassed = lastLog ? (lastEntityNames[gate.gateLocation] ?? '—') : '—';
-
-      let status: PerimeterGate['status'];
-      if (gate.interlockActive) {
-        status = 'INTERLOCK_ARMED';
-      } else if (count > 0) {
-        status = 'ONLINE';
-      } else {
-        status = 'ONLINE';
-      }
-
-      return {
-        id: gate.id,
-        name: gate.name,
-        type: gate.type,
-        zone: gate.zone,
-        status,
-        mode: gate.mode,
-        cycleCountToday: count,
-        lastEventTime,
-        lastEntityPassed,
-        interlockActive: gate.interlockActive,
-      };
+  if (gatesRes.error) {
+    throw new DatabaseError('Failed to load perimeter gates telemetry', {
+      operation: 'select',
+      table: 'perimeter_gates',
+      context: { error: gatesRes.error.message },
     });
-  } catch {
-    return GATE_REGISTRY.map((gate) => ({
+  }
+
+  const dbGates = (gatesRes.data ?? []) as DbGateRow[];
+  if (dbGates.length === 0) {
+    return [];
+  }
+
+  let logsQuery = supabase
+    .from('access_logs')
+    .select('gate_location, scanned_at, badge_id')
+    .gte('scanned_at', today.toISOString())
+    .order('scanned_at', { ascending: false })
+    .limit(1000);
+
+  if (departmentId) {
+    logsQuery = logsQuery.eq('department_id', departmentId);
+  }
+
+  const { data: logs, error: logsError } = await logsQuery;
+  if (logsError) {
+    throw new DatabaseError('Failed to load today gate cycle counts', {
+      operation: 'select',
+      table: 'access_logs',
+      context: { error: logsError.message },
+    });
+  }
+
+  const cycleCounts: Record<string, number> = {};
+  const lastLogPerGate: Record<string, LastLogEntry> = {};
+
+  for (const log of logs ?? []) {
+    const loc = log.gate_location;
+    cycleCounts[loc] = (cycleCounts[loc] ?? 0) + 1;
+    if (!lastLogPerGate[loc] || log.scanned_at > lastLogPerGate[loc].scanned_at) {
+      lastLogPerGate[loc] = { scanned_at: log.scanned_at, badge_id: log.badge_id };
+    }
+  }
+
+  const lastEntityNames: Record<string, string> = {};
+  const badgeIds = Object.values(lastLogPerGate)
+    .map((entry) => entry.badge_id)
+    .filter((id): id is string => id !== null);
+
+  if (badgeIds.length > 0) {
+    const { data: badges } = await supabase
+      .from('badges')
+      .select(
+        `
+        id,
+        entity_type,
+        personnel:personnel_id(first_name, surname),
+        visitor:visitor_id(first_name, surname),
+        fleet:fleet_id(fleet_code, vehicle_type)
+      `
+      )
+      .in('id', badgeIds);
+
+    const badgeById = new Map<
+      string,
+      | { id: string; entity_type: string; personnel: unknown; visitor: unknown; fleet: unknown }
+      | undefined
+    >();
+    for (const b of badges ?? []) {
+      badgeById.set(b.id, b);
+    }
+
+    for (const [gateLoc, entry] of Object.entries(lastLogPerGate)) {
+      if (!entry.badge_id) continue;
+      const badge = badgeById.get(entry.badge_id);
+      if (!badge) {
+        lastEntityNames[gateLoc] = 'Unknown Badge';
+        continue;
+      }
+
+      if (badge.entity_type === 'personnel' && badge.personnel) {
+        const p = badge.personnel as { first_name?: string; surname?: string } | null;
+        lastEntityNames[gateLoc] =
+          `${p?.first_name ?? ''} ${p?.surname ?? ''}`.trim() || 'Personnel';
+      } else if (badge.entity_type === 'visitor' && badge.visitor) {
+        const v = badge.visitor as { first_name?: string; surname?: string } | null;
+        lastEntityNames[gateLoc] = `${v?.first_name ?? ''} ${v?.surname ?? ''}`.trim() || 'Visitor';
+      } else if (
+        (badge.entity_type === 'vehicle' || badge.entity_type === 'fleet') &&
+        badge.fleet
+      ) {
+        const f = badge.fleet as { fleet_code?: string; vehicle_type?: string } | null;
+        lastEntityNames[gateLoc] =
+          `${f?.vehicle_type ?? 'Vehicle'}: ${f?.fleet_code ?? ''}`.trim() || 'Vehicle';
+      } else {
+        lastEntityNames[gateLoc] = `Badge ${badge.id.slice(0, 8)}`;
+      }
+    }
+  }
+
+  const nowMs = Date.now();
+  return dbGates.map((gate) => {
+    const count = cycleCounts[gate.gate_location] ?? 0;
+    const lastLog = lastLogPerGate[gate.gate_location];
+    const lastEventTime = lastLog ? formatRelativeTime(lastLog.scanned_at) : 'No recent activity';
+    const lastEntityPassed = lastLog ? (lastEntityNames[gate.gate_location] ?? '—') : '—';
+
+    const heartbeatMs = gate.last_heartbeat_at ? Date.parse(gate.last_heartbeat_at) : Number.NaN;
+    const hasLiveHeartbeat =
+      Number.isFinite(heartbeatMs) && nowMs - heartbeatMs <= HEARTBEAT_TTL_MS;
+
+    let status: PerimeterGate['status'];
+    if (gate.is_maintenance) {
+      status = 'MAINTENANCE';
+    } else if (!hasLiveHeartbeat) {
+      status = 'OFFLINE';
+    } else if (gate.interlock_active) {
+      status = 'INTERLOCK_ARMED';
+    } else {
+      status = 'ONLINE';
+    }
+
+    return {
       id: gate.id,
       name: gate.name,
-      type: gate.type,
+      gateLocation: gate.gate_location,
+      type: mapGateType(gate.gate_type),
       zone: gate.zone,
-      status: gate.interlockActive ? ('INTERLOCK_ARMED' as const) : ('ONLINE' as const),
-      mode: gate.mode,
-      cycleCountToday: 0,
-      lastEventTime: 'Unavailable',
-      lastEntityPassed: '—',
-      interlockActive: gate.interlockActive,
-    }));
-  }
+      status,
+      mode: mapGateMode(gate.gate_type, gate.interlock_active),
+      cycleCountToday: count,
+      lastEventTime,
+      lastEntityPassed,
+      interlockActive: gate.interlock_active,
+    };
+  });
 }
 
 export async function triggerGatePulse(
   gateId: string,
   reason: string
 ): Promise<{ success: boolean; message: string }> {
-  const { supabase, user, employee } = await assertAccessControlRole({ requireWrite: true });
+  const { supabase, employee, departmentId } = await assertAccessControlRole({
+    requireWrite: true,
+  });
 
   const parsed = gatePulseSchema.safeParse({ gateId, reason });
   if (!parsed.success) {
-    throw new DatabaseError('Invalid gate pulse input', {
-      context: { issues: parsed.error.issues },
-    });
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid gate override input');
   }
 
-  // Rate limiting check
-  const { allowed, limit, remaining, resetTime } = await GATE_PULSE_LIMITER.check(gateId);
+  const { allowed, limit, remaining, resetTime } = await GATE_PULSE_LIMITER.check(employee.id);
   if (!allowed) {
     throw new RateLimitError('Rate limit exceeded', { limit, remaining, resetTime });
   }
 
+  const relayWebhookUrl = process.env.GATE_RELAY_WEBHOOK_URL?.trim();
+  let relayDispatched = false;
+  if (relayWebhookUrl) {
+    const relayRes = await fetch(relayWebhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        gateLocation: parsed.data.gateId,
+        reason: parsed.data.reason,
+        operatorId: employee.id,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+    if (!relayRes.ok) {
+      throw new DatabaseError(`Physical gate relay rejected command (${relayRes.status})`, {
+        operation: 'relay_dispatch',
+        table: 'perimeter_gates',
+      });
+    }
+    relayDispatched = true;
+  }
+
   const { error } = await supabase.from('access_logs').insert({
-    gate_location: gateId,
+    gate_location: parsed.data.gateId,
     access_type: 'REMOTE_OVERRIDE',
     direction: 'IN',
     access_granted: true,
-    denial_reason: `Operator Pulse: ${parsed.data.reason} (Authorized by ${employee?.role ?? 'admin'})`,
-    department_id: employee?.department_id,
-    operator: user?.id ?? employee?.id ?? 'system',
+    denial_reason: `Manual Gate Override: ${parsed.data.reason} (Authorized by ${employee.role})`,
+    department_id: departmentId ?? employee.department_id,
+    operator: employee.id,
     device_id: parsed.data.scannerId ?? null,
+    alcohol_tested: 'Not Tested',
     scanned_at: new Date().toISOString(),
   });
 
   if (error) {
-    throw new DatabaseError('Failed to record gate override pulse', {
+    throw new DatabaseError('Failed to record manual gate override', {
       operation: 'insert',
       table: 'access_logs',
       context: { error: error.message },
     });
   }
 
-  await cacheInvalidateTags(['table:access_logs']);
+  logger.info({
+    event: 'manual_gate_override_logged',
+    actorId: employee.id,
+    gateLocation: parsed.data.gateId,
+    relayDispatched,
+  });
+
+  await cacheInvalidateTags([
+    'table:access_logs',
+    ...(departmentId ? [`dept:${departmentId}`] : []),
+  ]);
   revalidatePath('/access-control');
-  return { success: true, message: `Gate ${gateId} pulsed successfully. Audit event recorded.` };
+
+  return {
+    success: true,
+    message: relayDispatched
+      ? `Gate relay pulsed and override logged for ${parsed.data.gateId}.`
+      : `Manual gate override logged for ${parsed.data.gateId} (no PLC relay endpoint configured).`,
+  };
 }
 
 export async function logGateDenial(
@@ -288,17 +342,14 @@ export async function logGateDenial(
   badgeId: string,
   reason: string
 ): Promise<{ success: boolean; message: string; blacklisted?: boolean }> {
-  const { supabase } = await assertAccessControlRole({ requireWrite: true });
+  const { supabase, employee } = await assertAccessControlRole({ requireWrite: true });
 
   const parsed = gateDenialSchema.safeParse({ gateId, badgeId, reason });
   if (!parsed.success) {
-    throw new DatabaseError('Invalid gate denial input', {
-      context: { issues: parsed.error.issues },
-    });
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid gate denial input');
   }
 
-  // Rate limiting check
-  const { allowed, limit, remaining, resetTime } = await GATE_DENIAL_LIMITER.check(gateId);
+  const { allowed, limit, remaining, resetTime } = await GATE_DENIAL_LIMITER.check(employee.id);
   if (!allowed) {
     throw new RateLimitError('Rate limit exceeded', { limit, remaining, resetTime });
   }
@@ -313,6 +364,8 @@ export async function logGateDenial(
       denial_reason: parsed.data.reason,
       department_id: deptId,
       badge_id: parsed.data.badgeId,
+      operator: employee.id,
+      alcohol_tested: 'Not Tested',
     })
     .select('id')
     .single();
@@ -338,23 +391,55 @@ export async function logGateDenial(
 
   if (denialsCount && denialsCount >= 3) {
     const jobId = `SOC-ALERT-${log.id}`;
-    await triggerTrackedWorkflow(jobId, '/webhook/soc-alert-blacklist', {
-      badgeId: parsed.data.badgeId,
-      gateId: parsed.data.gateId,
-      reason: 'Repeated Denials Threshold Exceeded',
-      count: denialsCount,
-      departmentId: deptId,
-    });
+    after(() =>
+      triggerTrackedWorkflow(
+        jobId,
+        '/webhook/soc-alert-blacklist',
+        {
+          badgeId: parsed.data.badgeId,
+          gateId: parsed.data.gateId,
+          reason: 'Repeated Denials Threshold Exceeded',
+          count: denialsCount,
+          departmentId: deptId,
+        },
+        { awaitCompletion: true }
+      )
+    );
 
-    await supabase
+    const { data: revokedRows, error: revokeErr } = await supabase
       .from('badges')
       .update({ is_active: false, revoked_at: new Date().toISOString() })
-      .eq('id', parsed.data.badgeId);
+      .eq('id', parsed.data.badgeId)
+      .select('id');
+
+    if (revokeErr) {
+      throw new DatabaseError('Failed to blacklist badge after 3 denials', {
+        operation: 'update',
+        table: 'badges',
+        context: { error: revokeErr.message, badgeId: parsed.data.badgeId },
+      });
+    }
+    if (!revokedRows || revokedRows.length === 0) {
+      throw new ForbiddenError('Badge blacklist blocked or badge not found', {
+        resource: 'badges',
+        action: 'blacklist',
+      });
+    }
     blacklisted = true;
   }
 
+  logger.info({
+    event: 'gate_denial_logged',
+    actorId: employee.id,
+    badgeId: parsed.data.badgeId,
+    gateId: parsed.data.gateId,
+    blacklisted,
+  });
+
   await cacheInvalidateTags(['table:access_logs', 'table:badges', `dept:${deptId}`]);
   revalidatePath('/access-control');
+  revalidatePath('/access-control/badges');
+  revalidatePath('/access-control/expired');
 
   return { success: true, message: 'Gate denial logged.', blacklisted };
 }

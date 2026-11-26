@@ -11,7 +11,7 @@ jest.mock('./shared', () => ({
 const mockAssertRole = jest.mocked(assertAccessControlRole);
 
 function buildTableMock(rows: unknown[], err: unknown = null) {
-  const promise = Promise.resolve({ data: rows, error: err });
+  const promise = Promise.resolve({ data: rows, count: rows.length, error: err });
   const chain: Record<string, unknown> = {
     select: jest.fn().mockReturnThis(),
     eq: jest.fn().mockReturnThis(),
@@ -93,11 +93,7 @@ describe('getAccessReportsData', () => {
 
     const report = await getAccessReportsData('dept-1');
     expect(report.summary.totalEvents).toBe(0);
-    expect(report.denialTaxonomy).toEqual([
-      { reason: 'No denials recorded', count: 0, percentage: 0 },
-    ]);
-    expect(report.gateTraffic).toEqual([
-      { gateName: 'No traffic recorded', inbound: 0, outbound: 0, peakHour: '—' },
-    ]);
+    expect(report.denialTaxonomy).toEqual([]);
+    expect(report.gateTraffic).toEqual([]);
   });
 });

@@ -237,7 +237,7 @@ describe('print-cards actions', () => {
     });
 
     const saved = await upsertEmployeeForCardPrinting({
-      id: 'p1',
+      id: '00000000-0000-4000-8000-000000000001',
       emp_code: 'Brak 0043',
       coy_number: 'Brak 0043',
       first_name: 'Alice',
@@ -251,12 +251,9 @@ describe('print-cards actions', () => {
 
     expect(saved.emp_code).toBe('Brak 0043');
     expect(saved.coy_number).toBe('Brak 0043');
-    expect(mockUpsertOperators).toHaveBeenCalledWith(
-      expect.objectContaining({ employee_code: 'Brak 0043' }),
-      { onConflict: 'employee_code' }
-    );
+    expect(mockUpsertOperators).not.toHaveBeenCalled();
 
-    const printRes = await sendNeo300PrintJob('p1');
+    const printRes = await sendNeo300PrintJob('00000000-0000-4000-8000-000000000001');
     expect(printRes.success).toBe(true);
 
     await cancelNeo300Job('job-12345678');

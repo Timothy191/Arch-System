@@ -4,7 +4,19 @@ import { toast } from 'sonner';
 import { revokeBadgeCredential } from '../qr-codes/actions';
 import { BadgesRegistryClient, type ResolvedDepartmentBadge } from './BadgesRegistryClient';
 
-jest.mock('../card-actions/qr-section', () => ({
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: jest.fn() }),
+}));
+
+jest.mock('@repo/shared/hooks', () => ({
+  useSupabaseRealtime: jest.fn(),
+}));
+
+jest.mock('@repo/supabase/client', () => ({
+  createBrowserSupabaseClient: () => ({}),
+}));
+
+jest.mock('../components/QRCodeSection', () => ({
   QRCodeSection: ({ data, size }: { data: string; size?: number }) => (
     <div data-testid="qr-code-section" data-qr={data} data-size={size}>
       {data}
@@ -112,6 +124,7 @@ describe('BadgesRegistryClient', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /Revoke Badge/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Confirm Revoke/i }));
 
     await waitFor(() => {
       expect(mockRevokeBadge).toHaveBeenCalledWith('badge-1');
@@ -135,6 +148,7 @@ describe('BadgesRegistryClient', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /Revoke Badge/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Confirm Revoke/i }));
 
     await waitFor(() => {
       expect(mockToastError).toHaveBeenCalledWith('Revocation failed', {
@@ -143,7 +157,7 @@ describe('BadgesRegistryClient', () => {
     });
 
     mockRevokeBadge.mockRejectedValueOnce('unknown-failure');
-    fireEvent.click(screen.getByRole('button', { name: /Revoke Badge/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Confirm Revoke/i }));
 
     await waitFor(() => {
       expect(mockToastError).toHaveBeenCalledWith('Revocation failed', {

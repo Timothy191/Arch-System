@@ -1,5 +1,7 @@
 'use client';
 
+import { useSupabaseRealtime } from '@repo/shared/hooks';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { Badge } from '@repo/ui';
 import { Button } from '@repo/ui/components/ui/button';
 import { Pagination } from '@repo/ui/components/ui/pagination';
@@ -14,9 +16,10 @@ import {
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Printer, QrCode, ShieldOff, UserCheck } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { QRCodeSection } from '../card-actions/qr-section';
+import { QRCodeSection } from '../components/QRCodeSection';
 import { revokeBadgeCredential } from '../qr-codes/actions';
 
 export interface ResolvedDepartmentBadge {
@@ -44,8 +47,28 @@ export function BadgesRegistryClient({
   totalCount,
   pageSize,
 }: BadgesRegistryClientProps) {
+  const router = useRouter();
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(badges[0]?.id ?? null);
+  const [confirmingRevokeId, setConfirmingRevokeId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const supabase = useMemo(() => {
+    try {
+      return createBrowserSupabaseClient();
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useSupabaseRealtime({
+    supabaseClient: supabase,
+    table: 'badges',
+    event: '*',
+    enabled: Boolean(supabase),
+    onChange: () => {
+      router.refresh();
+    },
+  });
 
   const selectedBadge = badges.find((b) => b.id === selectedBadgeId) ?? badges[0] ?? null;
 
@@ -62,12 +85,18 @@ export function BadgesRegistryClient({
 
   function handleRevokeSelected() {
     if (!selectedBadge?.is_active) return;
+    if (confirmingRevokeId !== selectedBadge.id) {
+      setConfirmingRevokeId(selectedBadge.id);
+      return;
+    }
     startTransition(async () => {
       try {
         await revokeBadgeCredential(selectedBadge.id);
+        setConfirmingRevokeId(null);
         toast.success('Credential revoked', {
           description: `${selectedBadge.qr_code} (${selectedBadge.entity_name}) has been deactivated.`,
         });
+        router.refresh();
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to revoke badge';
         toast.error('Revocation failed', { description: message });
@@ -124,15 +153,38 @@ export function BadgesRegistryClient({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {badge.is_active ? (
-                        <Badge variant="green" contrast="low" size="sm">
-                          Active
-                        </Badge>
-                      ) : (
-                        <Badge variant="red" contrast="low" size="sm">
-                          Revoked
-                        </Badge>
-                      )}
+                      {(() => {
+                        if (!badge.is_active) {
+                          return (
+                            <Badge variant="red" contrast="low" size="sm">
+                              Revoked
+                            </Badge>
+                          );
+                        }
+                        const expMs = badge.expires_at ? Date.parse(badge.expires_at) : Number.NaN;
+                        if (Number.isFinite(expMs) && expMs <= Date.now()) {
+                          return (
+                            <Badge variant="red" contrast="low" size="sm">
+                              Expired
+                            </Badge>
+                          );
+                        }
+                        if (
+                          Number.isFinite(expMs) &&
+                          expMs <= Date.now() + 7 * 24 * 60 * 60 * 1_000
+                        ) {
+                          return (
+                            <Badge variant="amber" contrast="low" size="sm">
+                              Expiring Soon
+                            </Badge>
+                          );
+                        }
+                        return (
+                          <Badge variant="green" contrast="low" size="sm">
+                            Active
+                          </Badge>
+                        );
+                      })()}
                     </TableCell>
                   </TableRow>
                 );
@@ -216,7 +268,11 @@ export function BadgesRegistryClient({
                 className="w-full border-accent-red/20 font-medium text-accent-red text-xs hover:bg-accent-red/10 hover:text-accent-red"
               >
                 <ShieldOff className="mr-2 h-3 w-3" />
-                {isPending ? 'Revoking...' : 'Revoke Badge'}
+                {isPending
+                  ? 'Revoking...'
+                  : confirmingRevokeId === selectedBadge?.id
+                    ? 'Confirm Revoke'
+                    : 'Revoke Badge'}
               </Button>
             </div>
           </div>

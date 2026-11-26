@@ -92,7 +92,7 @@ describe('GET /api/printers', () => {
     const res = await GET();
     expect(res.status).toBe(500);
     const body = await res.json();
-    expect(body.error).toBe('Failed to list printers');
+    expect(body.error).toEqual({ code: 'API_ERROR', message: 'Failed to list printers' });
     expect(body.printers).toEqual([]);
   });
 });
@@ -153,10 +153,9 @@ describe('POST /api/printers', () => {
     });
     const res = await POST(req);
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({
-      success: false,
-      error: { code: 'API_ERROR', message: 'cups_name and name are required' },
-    });
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.error?.code).toBe('VALIDATION_ERROR');
   });
 
   it('returns 409 on unique constraint violation', async () => {

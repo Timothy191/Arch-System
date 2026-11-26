@@ -1,7 +1,13 @@
+import { registerPrinterSchema } from '@repo/contract/schemas/access-control.schema';
+import { logger } from '@repo/logger/server';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createBearerSupabaseClient, createServerSupabaseClient } from '@repo/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
+import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 
-function getClient(request?: NextRequest) {
+const PRINTER_ROLES = new Set(['admin', 'access_control']);
+
+function getBearerClient(request?: NextRequest) {
   const authHeader = request?.headers?.get('authorization');
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
@@ -12,23 +18,19 @@ function getClient(request?: NextRequest) {
 
 type PrinterAuthClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
-/**
- * Resolve the request's Supabase client (Bearer or session-cookie auth) and
- * confirm the caller holds one of the allowed roles. Returns either the
- * authenticated client + employee row or a ready-to-return error response.
- */
-async function authorizePrinterRequest(
-  request: NextRequest | undefined,
-  allowedRoles: readonly string[]
-): Promise<
-  | { ok: true; supabase: PrinterAuthClient; userId: string; role: string }
+async function authorizePrinterRequest(request?: NextRequest): Promise<
+  | {
+      ok: true;
+      supabase: PrinterAuthClient;
+      userId: string;
+      employeeId: string;
+      role: string;
+    }
   | { ok: false; response: NextResponse }
 > {
-  const supabase = getClient(request) || (await createServerSupabaseClient());
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const supabase = getBearerClient(request) || (await createServerSupabaseClient());
+  const principal = await getAuthenticatedEmployee(supabase);
+  if (!principal?.employee) {
     return {
       ok: false,
       response: NextResponse.json(
@@ -37,12 +39,7 @@ async function authorizePrinterRequest(
       ),
     };
   }
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role')
-    .eq('auth_id', user.id)
-    .single();
-  if (!employee || !allowedRoles.includes(employee.role)) {
+  if (!PRINTER_ROLES.has(principal.employee.role)) {
     return {
       ok: false,
       response: NextResponse.json(
@@ -51,87 +48,119 @@ async function authorizePrinterRequest(
       ),
     };
   }
-  return { ok: true, supabase, userId: user.id, role: employee.role };
+  return {
+    ok: true,
+    supabase,
+    userId: principal.user.id,
+    employeeId: principal.employee.id,
+    role: principal.employee.role,
+  };
 }
 
 export async function GET(request?: NextRequest) {
-  try {
-    const auth = await authorizePrinterRequest(request, ['admin', 'access_control']);
-    if (!auth.ok) return auth.response;
-    const { supabase } = auth;
+  const runGet = async () => {
+    try {
+      const auth = await authorizePrinterRequest(request);
+      if (!auth.ok) return auth.response;
+      const { supabase } = auth;
 
-    const { data, error } = await supabase
-      .from('card_printers')
-      .select('*')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('card_printers')
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return NextResponse.json({ printers: data ?? [] });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    const details = (error as { code?: string; details?: string }).details ?? '';
-    // eslint-disable-next-line no-console
-    console.error('Failed to list printers:', { message, details, error });
-    return NextResponse.json(
-      { error: 'Failed to list printers', message, details, printers: [] },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const auth = await authorizePrinterRequest(request, ['admin', 'access_control']);
-    if (!auth.ok) return auth.response;
-    const { supabase } = auth;
-
-    const body = await request.json();
-    const { cups_name, name, model, connection_type, vendor_id, product_id, device_path } = body;
-
-    if (!cups_name || !name) {
+      if (error) throw error;
+      return NextResponse.json({ printers: data ?? [] });
+    } catch (error) {
+      logger.error({ event: 'printers_list_failed', err: error }, 'Failed to list printers');
       return NextResponse.json(
         {
           success: false,
-          error: { message: 'cups_name and name are required', code: 'API_ERROR' },
+          error: { message: 'Failed to list printers', code: 'API_ERROR' },
+          printers: [],
         },
-        { status: 400 }
+        { status: 500 }
       );
     }
-    const { data, error } = await supabase
-      .from('card_printers')
-      .insert({
-        cups_name,
-        name,
-        model: model ?? 'Neo Magic 300',
-        connection_type: connection_type ?? 'usb',
-        vendor_id: vendor_id ?? null,
-        product_id: product_id ?? null,
-        device_path: device_path ?? null,
-        status: 'online',
-        last_online_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+  };
+  return request
+    ? withRateLimit(request, runGet, { customLimit: { windowMs: 60_000, maxRequests: 60 } })
+    : runGet();
+}
 
-    if (error) {
-      // Handle unique constraint violation
-      if (error.code === '23505') {
+export async function POST(request: NextRequest) {
+  return withRateLimit(
+    request,
+    async () => {
+      try {
+        const auth = await authorizePrinterRequest(request);
+        if (!auth.ok) return auth.response;
+        const { supabase } = auth;
+
+        const rawBody = await request.json().catch(() => null);
+        const parsed = registerPrinterSchema.safeParse(rawBody);
+        if (!parsed.success) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                message: parsed.error.issues[0]?.message ?? 'Invalid printer registration payload',
+                code: 'VALIDATION_ERROR',
+              },
+            },
+            { status: 400 }
+          );
+        }
+
+        const { cups_name, name, model, connection_type, vendor_id, product_id, device_path } =
+          parsed.data;
+
+        const { data, error } = await supabase
+          .from('card_printers')
+          .insert({
+            cups_name,
+            name,
+            model,
+            connection_type,
+            vendor_id: vendor_id ?? null,
+            product_id: product_id ?? null,
+            device_path: device_path ?? null,
+            status: 'offline',
+            status_message: 'Registered — awaiting local print bridge or CUPS heartbeat',
+            last_online_at: null,
+          })
+          .select()
+          .single();
+
+        if (error) {
+          if (error.code === '23505') {
+            return NextResponse.json(
+              { error: 'A printer with this CUPS name is already registered' },
+              { status: 409 }
+            );
+          }
+          throw error;
+        }
+
+        logger.info({
+          event: 'printer_registered',
+          actorId: auth.employeeId,
+          cupsName: cups_name,
+        });
+
+        return NextResponse.json({ printer: data }, { status: 201 });
+      } catch (error) {
+        logger.error(
+          { event: 'printer_register_failed', err: error },
+          'Failed to register printer'
+        );
         return NextResponse.json(
-          { error: 'A printer with this CUPS name is already registered' },
-          { status: 409 }
+          { success: false, error: { message: 'Failed to register printer', code: 'API_ERROR' } },
+          { status: 500 }
         );
       }
-      throw error;
-    }
-
-    return NextResponse.json({ printer: data }, { status: 201 });
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Failed to register printer:', error);
-    return NextResponse.json(
-      { success: false, error: { message: 'Failed to register printer', code: 'API_ERROR' } },
-      { status: 500 }
-    );
-  }
+    },
+    { customLimit: { windowMs: 60_000, maxRequests: 20 } }
+  );
 }

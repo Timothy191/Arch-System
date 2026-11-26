@@ -1,18 +1,21 @@
 'use server';
 
 import { musterStatusSchema } from '@repo/contract';
+import { logger } from '@repo/logger/server';
 import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
-import { DatabaseError } from '@/lib/errors/error-classes';
+import { DatabaseError, ValidationError } from '@/lib/errors/error-classes';
+import { CANONICAL_MUSTER_STATIONS } from './constants';
 import { assertAccessControlRole } from './shared';
 
-const MUSTER_PERSONNEL_LIMIT = 100;
-const MUSTER_VISITORS_LIMIT = 50;
-const MUSTER_RECENT_LOGS_LIMIT = 50;
-const MUSTER_EVENTS_LIMIT = 100;
+const MUSTER_PERSONNEL_LIMIT = 500;
+const MUSTER_VISITORS_LIMIT = 200;
+const MUSTER_RECENT_LOGS_LIMIT = 500;
+const MUSTER_EVENTS_LIMIT = 500;
 
 interface MusterEventRow {
   readonly personnel_id: string | null;
+  readonly visitor_id?: string | null;
   readonly badge_code: string | null;
   readonly muster_point: string | null;
   readonly status: string;
@@ -22,21 +25,30 @@ interface MusterEventRow {
 async function fetchRecentMusterEvents(
   supabase: Awaited<ReturnType<typeof assertAccessControlRole>>['supabase']
 ): Promise<readonly MusterEventRow[]> {
-  try {
-    const { data, error } = await supabase
+  const { data, error } = await supabase
+    .from('muster_events')
+    .select('personnel_id, visitor_id, badge_code, muster_point, status, recorded_at')
+    .order('recorded_at', { ascending: false })
+    .limit(MUSTER_EVENTS_LIMIT);
+
+  if (error) {
+    // Graceful fallback if visitor_id column is not yet present on an un-migrated DB
+    const legacy = await supabase
       .from('muster_events')
       .select('personnel_id, badge_code, muster_point, status, recorded_at')
       .order('recorded_at', { ascending: false })
       .limit(MUSTER_EVENTS_LIMIT);
-
-    if (error || !data) {
-      return [];
+    if (legacy.error) {
+      throw new DatabaseError('Failed to load emergency muster events', {
+        operation: 'select',
+        table: 'muster_events',
+        context: { error: legacy.error.message },
+      });
     }
-
-    return data as MusterEventRow[];
-  } catch {
-    return [];
+    return (legacy.data ?? []) as MusterEventRow[];
   }
+
+  return (data ?? []) as MusterEventRow[];
 }
 
 function formatRelativeTime(isoTimestamp: string): string {
@@ -95,6 +107,7 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
         'id, department_id, first_name, surname, emp_code, job_title, induction_expiry, medical_expiry, status'
       )
       .eq('department_id', deptId)
+      .eq('status', 'Active')
       .limit(MUSTER_PERSONNEL_LIMIT),
     supabase
       .from('visitors')
@@ -104,22 +117,44 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       .limit(MUSTER_VISITORS_LIMIT),
     supabase
       .from('access_logs')
-      .select('gate_location, scanned_at, access_granted, badge_id')
+      .select('gate_location, scanned_at, access_granted, direction, badge_id')
       .eq('department_id', deptId)
       .order('scanned_at', { ascending: false })
       .limit(MUSTER_RECENT_LOGS_LIMIT),
     fetchRecentMusterEvents(supabase),
   ]);
 
+  if (personnelRes.error) {
+    throw new DatabaseError('Failed to load personnel for muster roll call', {
+      operation: 'select',
+      table: 'personnel',
+      context: { error: personnelRes.error.message },
+    });
+  }
+  if (visitorsRes.error) {
+    throw new DatabaseError('Failed to load visitors for muster roll call', {
+      operation: 'select',
+      table: 'visitors',
+      context: { error: visitorsRes.error.message },
+    });
+  }
+  if (logsRes.error) {
+    throw new DatabaseError('Failed to load access logs for muster roll call', {
+      operation: 'select',
+      table: 'access_logs',
+      context: { error: logsRes.error.message },
+    });
+  }
+
   const persistedMusterMap = new Map<
     string,
     { status: MusterPersonnelRecord['status']; station: string | null; checkedOffAt: string | null }
   >();
   for (const ev of musterEvents) {
-    const key = ev.personnel_id || ev.badge_code;
+    const key = ev.visitor_id || ev.personnel_id || ev.badge_code;
     if (!key || persistedMusterMap.has(key)) continue;
     const mappedStatus: MusterPersonnelRecord['status'] =
-      ev.status === 'missing'
+      ev.status === 'missing' || ev.status === 'unaccounted'
         ? 'unaccounted'
         : ev.status === 'medical'
           ? 'hospitalized'
@@ -146,9 +181,10 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
   const visitorsList = visitorsRes.data ?? [];
   const recentLogs = logsRes.data ?? [];
 
-  // Resolve last-seen gate/time per entity from recent access logs.
-  // access_logs.badge_id → badges.id → badges.personnel_id / badges.visitor_id
-  const lastSeenByEntity = new Map<string, { lastSeenTime: string; lastSeenGate: string }>();
+  const lastSeenByEntity = new Map<
+    string,
+    { lastSeenTime: string; lastSeenGate: string; direction: string }
+  >();
   const badgeIdsInLogs = [
     ...new Set(recentLogs.map((l) => l.badge_id).filter(Boolean)),
   ] as string[];
@@ -167,7 +203,6 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       badgeById.set(b.id, b);
     }
 
-    // recentLogs is already ordered by scanned_at desc, so first occurrence per badge is the latest
     for (const log of recentLogs) {
       if (!log.badge_id) continue;
       const badge = badgeById.get(log.badge_id);
@@ -177,49 +212,37 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       lastSeenByEntity.set(entityId, {
         lastSeenTime: formatRelativeTime(log.scanned_at),
         lastSeenGate: log.gate_location,
+        direction: String(log.direction ?? 'IN').toUpperCase(),
       });
     }
   }
 
-  // Default muster stations mapped to operational departments
-  const stations = [
-    {
-      id: 'STA-ENG',
-      name: 'Engineering Department',
-      location: 'Engineering Office & Workshop Plaza',
-      count: 0,
-      targetZone: 'Engineering & Maintenance Yard',
-    },
-    {
-      id: 'STA-OFF',
-      name: 'Office Department',
-      location: 'Administration Complex',
-      count: 0,
-      targetZone: 'Administration Offices',
-    },
-    {
-      id: 'STA-PROD',
-      name: 'Production & Logistics Department',
-      location: 'Main Gate & Pit Surface',
-      count: 0,
-      targetZone: 'Production & Logistics Assembly',
-    },
-  ];
+  const stations = CANONICAL_MUSTER_STATIONS.map((s) => ({
+    ...s,
+    count: 0,
+  }));
 
   for (const p of personnelList) {
+    const lastSeen = lastSeenByEntity.get(p.id);
+    // Include personnel who have not explicitly scanned OUT
+    if (lastSeen && lastSeen.direction === 'OUT') {
+      continue;
+    }
+
     const isInductionValid = p.induction_expiry ? new Date(p.induction_expiry) > now : true;
     const isMedicalValid = p.medical_expiry ? new Date(p.medical_expiry) > now : true;
 
     const persisted = persistedMusterMap.get(p.id) ?? persistedMusterMap.get(p.emp_code);
-    const isAccounted = persisted ? persisted.status === 'accounted' : true;
-    const assignedStation = persisted ? persisted.station : isAccounted ? stations[0]!.name : null;
-    if (isAccounted && assignedStation) {
+    const resolvedStatus: MusterPersonnelRecord['status'] = persisted
+      ? persisted.status
+      : 'unaccounted';
+    const assignedStation =
+      resolvedStatus === 'accounted' ? (persisted?.station ?? stations[0]!.name) : null;
+
+    if (resolvedStatus === 'accounted' && assignedStation) {
       const matchedStation = stations.find((st) => st.name === assignedStation) ?? stations[0]!;
       matchedStation.count += 1;
     }
-
-    const lastSeen = lastSeenByEntity.get(p.id);
-    const assignedZone = p.department_id ? 'Assigned Zone' : 'Unassigned';
 
     records.push({
       id: p.id,
@@ -227,20 +250,12 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       name: `${p.first_name} ${p.surname} (${p.emp_code})`,
       company: 'Plantcor Operations',
       roleOrPurpose: p.job_title ?? 'Mining Technician',
-      assignedZone,
+      assignedZone: p.department_id ? 'Assigned Zone' : 'Unassigned',
       lastSeenTime: lastSeen?.lastSeenTime ?? 'No recent scan',
       lastSeenGate: lastSeen?.lastSeenGate ?? '—',
-      status: persisted ? persisted.status : isAccounted ? 'accounted' : 'unaccounted',
+      status: resolvedStatus,
       station: assignedStation,
-      checkedOffAt: persisted
-        ? persisted.checkedOffAt
-        : isAccounted
-          ? new Date().toLocaleTimeString('en-US', {
-              hour12: false,
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-          : null,
+      checkedOffAt: persisted?.checkedOffAt ?? null,
       inductionValid: isInductionValid,
       medicalValid: isMedicalValid,
     });
@@ -249,9 +264,13 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
   for (const v of visitorsList) {
     const visitorFullName = `${v.first_name} ${v.surname}`;
     const persisted = persistedMusterMap.get(v.id) ?? persistedMusterMap.get(visitorFullName);
-    const isAccounted = persisted ? persisted.status === 'accounted' : true;
-    const assignedStation = persisted ? persisted.station : isAccounted ? stations[0]!.name : null;
-    if (isAccounted && assignedStation) {
+    const resolvedStatus: MusterPersonnelRecord['status'] = persisted
+      ? persisted.status
+      : 'unaccounted';
+    const assignedStation =
+      resolvedStatus === 'accounted' ? (persisted?.station ?? stations[0]!.name) : null;
+
+    if (resolvedStatus === 'accounted' && assignedStation) {
       const matchedStation = stations.find((st) => st.name === assignedStation) ?? stations[0]!;
       matchedStation.count += 1;
     }
@@ -267,17 +286,9 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       assignedZone: 'Administration Complex',
       lastSeenTime: lastSeen?.lastSeenTime ?? 'No recent scan',
       lastSeenGate: lastSeen?.lastSeenGate ?? '—',
-      status: persisted ? persisted.status : isAccounted ? 'accounted' : 'unaccounted',
+      status: resolvedStatus,
       station: assignedStation,
-      checkedOffAt: persisted
-        ? persisted.checkedOffAt
-        : isAccounted
-          ? new Date().toLocaleTimeString('en-US', {
-              hour12: false,
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-          : null,
+      checkedOffAt: persisted?.checkedOffAt ?? null,
       inductionValid: true,
       medicalValid: true,
     });
@@ -293,7 +304,7 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
     accountedCount: accounted,
     unaccountedCount: unaccounted,
     evacuatedCount: evacuated,
-    blastStatus: unaccounted === 0 ? 'ALL_CLEAR' : 'STANDBY_BLAST_SCHEDULED',
+    blastStatus: totalSouls > 0 && unaccounted === 0 ? 'ALL_CLEAR' : 'STANDBY_BLAST_SCHEDULED',
     musterStations: stations,
     records,
   };
@@ -301,36 +312,65 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
 
 export async function markPersonnelMusterStatus(payload: {
   entityId: string;
+  entityType?: 'personnel' | 'visitor';
+  entityName?: string;
   status: 'accounted' | 'unaccounted' | 'evacuated';
   station?: string;
 }): Promise<{ success: boolean }> {
-  const { supabase, user } = await assertAccessControlRole({ requireWrite: true });
+  const { supabase, employee, departmentId } = await assertAccessControlRole({
+    requireWrite: true,
+  });
 
   const parsed = musterStatusSchema.safeParse(payload);
   if (!parsed.success) {
-    throw new DatabaseError('Invalid muster status input', {
-      context: { issues: parsed.error.issues },
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid muster status input');
+  }
+
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    parsed.data.entityId
+  );
+  const isVisitor = parsed.data.entityType === 'visitor';
+
+  const insertPayload: Record<string, unknown> = {
+    personnel_id: !isVisitor && isUuid ? parsed.data.entityId : null,
+    visitor_id: isVisitor && isUuid ? parsed.data.entityId : null,
+    department_id: departmentId,
+    badge_code: parsed.data.entityId,
+    full_name: parsed.data.entityName ?? parsed.data.entityId,
+    muster_point: parsed.data.station ?? CANONICAL_MUSTER_STATIONS[0].name,
+    status: parsed.data.status === 'unaccounted' ? 'missing' : parsed.data.status,
+    recorded_by: employee.id,
+  };
+
+  let { error } = await supabase.from('muster_events').insert(insertPayload);
+
+  if (error && (error.message.includes('visitor_id') || error.message.includes('department_id'))) {
+    // Fallback for un-migrated schema missing visitor_id/department_id
+    const { visitor_id: _v, department_id: _d, ...legacyPayload } = insertPayload;
+    const legacyRes = await supabase.from('muster_events').insert(legacyPayload);
+    error = legacyRes.error;
+  }
+
+  if (error) {
+    throw new DatabaseError('Failed to persist muster status update', {
+      operation: 'insert',
+      table: 'muster_events',
+      context: { error: error.message, entityId: parsed.data.entityId },
     });
   }
 
-  try {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      parsed.data.entityId
-    );
+  logger.info({
+    event: 'muster_status_updated',
+    actorId: employee.id,
+    entityId: parsed.data.entityId,
+    entityType: parsed.data.entityType,
+    status: parsed.data.status,
+  });
 
-    await supabase.from('muster_events').insert({
-      personnel_id: isUuid ? parsed.data.entityId : null,
-      badge_code: parsed.data.entityId,
-      full_name: parsed.data.entityId,
-      muster_point: parsed.data.station ?? 'Primary Assembly Point A',
-      status: parsed.data.status === 'unaccounted' ? 'missing' : parsed.data.status,
-      recorded_by: user?.id ?? null,
-    });
-  } catch {
-    // Non-fatal fallback for offline/preview environments
-  }
-
-  await cacheInvalidateTags(['table:muster_events']);
+  await cacheInvalidateTags([
+    'table:muster_events',
+    ...(departmentId ? [`dept:${departmentId}`] : []),
+  ]);
   revalidatePath('/access-control/muster');
   revalidatePath('/access-control');
   return { success: true };

@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import { getProvisioningReferenceData } from '@/actions/employee-provisioning';
 import { getDepartmentContext } from '~/lib/dept-context';
-import { getBadgesForDepartment } from '../actions';
+import { assertAccessControlRole } from '../actions/shared';
 import ExpiredCredentialsPage from './page';
 
 jest.mock('next/server', () => ({
@@ -40,8 +40,8 @@ jest.mock('~/lib/dept-context', () => ({
   getDepartmentContext: jest.fn(),
 }));
 
-jest.mock('../actions', () => ({
-  getBadgesForDepartment: jest.fn(),
+jest.mock('../actions/shared', () => ({
+  assertAccessControlRole: jest.fn(),
 }));
 
 jest.mock('../badges/BadgesRegistryClient', () => ({
@@ -74,45 +74,77 @@ describe('/access-control/expired Page', () => {
     const soonIso = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString();
     const farIso = new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString();
 
-    (getBadgesForDepartment as jest.Mock).mockResolvedValue({
-      badges: [
-        {
-          id: 'b-expired',
-          qr_code: 'EMP-EXP-01',
-          entity_type: 'personnel',
-          is_active: false,
-          issued_at: '2025-01-01T00:00:00Z',
-          expires_at: pastIso,
-          personnel: { first_name: 'Expired', surname: 'Operator' },
-          visitor: null,
-          fleet: null,
-          equipment: null,
-        },
-        {
-          id: 'b-soon',
-          qr_code: 'EMP-SOON-02',
-          entity_type: 'visitor',
-          is_active: true,
-          issued_at: '2026-01-01T00:00:00Z',
-          expires_at: soonIso,
-          personnel: null,
-          visitor: { first_name: 'Expiring', surname: 'Visitor' },
-          fleet: null,
-          equipment: null,
-        },
-        {
-          id: 'b-far',
-          qr_code: 'FLT-OK-03',
-          entity_type: 'fleet',
-          is_active: true,
-          issued_at: '2026-01-01T00:00:00Z',
-          expires_at: farIso,
-          personnel: null,
-          visitor: null,
-          fleet: { fleet_code: 'DT-77', vehicle_type: 'Haul Truck' },
-          equipment: null,
-        },
-      ],
+    const sampleBadges = [
+      {
+        id: 'b-expired',
+        qr_code: 'EMP-EXP-01',
+        entity_type: 'personnel',
+        is_active: true,
+        issued_at: '2025-01-01T00:00:00Z',
+        expires_at: pastIso,
+        personnel: { first_name: 'Expired', surname: 'Operator' },
+        visitor: null,
+        fleet: null,
+        equipment: null,
+      },
+      {
+        id: 'b-soon',
+        qr_code: 'EMP-SOON-02',
+        entity_type: 'visitor',
+        is_active: true,
+        issued_at: '2026-01-01T00:00:00Z',
+        expires_at: soonIso,
+        personnel: null,
+        visitor: { first_name: 'Expiring', surname: 'Visitor' },
+        fleet: null,
+        equipment: null,
+      },
+      {
+        id: 'b-far',
+        qr_code: 'FLT-OK-03',
+        entity_type: 'fleet',
+        is_active: true,
+        issued_at: '2026-01-01T00:00:00Z',
+        expires_at: farIso,
+        personnel: null,
+        visitor: null,
+        fleet: { fleet_code: 'DT-77', vehicle_type: 'Haul Truck' },
+        equipment: null,
+      },
+    ];
+
+    (assertAccessControlRole as jest.Mock).mockResolvedValue({
+      supabase: {
+        from: jest.fn(() => {
+          let lteCutoff: string | null = null;
+          let isHead = false;
+          const chain: Record<string, unknown> = {
+            select: jest.fn((_cols: string, opts?: { head?: boolean }) => {
+              isHead = Boolean(opts?.head);
+              return chain;
+            }),
+            eq: jest.fn(() => chain),
+            not: jest.fn(() => chain),
+            lte: jest.fn((_col: string, val: string) => {
+              lteCutoff = val;
+              return chain;
+            }),
+            order: jest.fn(() => chain),
+            range: jest.fn(() => chain),
+            then: (onFulfilled: (val: unknown) => unknown) => {
+              const filtered = lteCutoff
+                ? sampleBadges.filter((b) => b.expires_at <= lteCutoff!)
+                : sampleBadges;
+              return Promise.resolve({
+                data: isHead ? null : filtered,
+                count: filtered.length,
+                error: null,
+              }).then(onFulfilled);
+            },
+          };
+          return chain;
+        }),
+      },
     });
   });
 

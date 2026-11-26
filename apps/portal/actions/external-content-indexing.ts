@@ -60,7 +60,7 @@ function validateLocalDocsPath(rawPath: string): string | null {
     return 'Path traversal segments are not permitted in dirPath';
   }
   const docsRoot = path.resolve(process.cwd(), 'docs');
-  const resolvedTarget = path.resolve(process.cwd(), trimmed);
+  const resolvedTarget = path.resolve(/*turbopackIgnore: true*/ process.cwd(), trimmed);
   if (resolvedTarget !== docsRoot && !resolvedTarget.startsWith(`${docsRoot}${path.sep}`)) {
     return 'Local docs indexing is restricted to paths under the workspace docs/ directory';
   }

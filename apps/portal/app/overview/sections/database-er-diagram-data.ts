@@ -102,7 +102,7 @@ const ER_TABLE_PLACEMENTS: Readonly<Record<string, ErTablePlacement>> = {
   material_density: { domainGroup: 'org', colIndex: 0, rowIndex: 6 },
   delay_categories: { domainGroup: 'org', colIndex: 0, rowIndex: 7 },
   visitors: { domainGroup: 'access', colIndex: 1, rowIndex: 0 },
-  card_print_jobs: { domainGroup: 'access', colIndex: 1, rowIndex: 1 },
+  print_jobs: { domainGroup: 'access', colIndex: 1, rowIndex: 1 },
   badges: { domainGroup: 'access', colIndex: 1, rowIndex: 2 },
   access_logs: { domainGroup: 'access', colIndex: 1, rowIndex: 3 },
   muster_events: { domainGroup: 'access', colIndex: 1, rowIndex: 4 },
@@ -276,7 +276,7 @@ export const ER_RELATIONSHIPS: readonly ErRelationshipEdge[] = [
   {
     id: 'fk-employees-card-print',
     sourceTable: 'employees',
-    targetTable: 'card_print_jobs',
+    targetTable: 'print_jobs',
     fkColumn: 'employee_id',
     cardinality: '1:N',
     description: 'CR80 badge print spooler jobs track employee issuance requests',

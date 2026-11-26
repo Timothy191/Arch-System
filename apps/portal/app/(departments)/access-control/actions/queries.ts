@@ -232,7 +232,7 @@ export async function getRecentAccessActivity(
 ): Promise<AccessActivityEntry[]> {
   const { supabase } = await assertAccessControlRole();
 
-  const { data: logs } = await supabase
+  const { data: logs, error } = await supabase
     .from('access_logs')
     .select(
       `
@@ -241,19 +241,45 @@ export async function getRecentAccessActivity(
       gate_location,
       access_granted,
       denial_reason,
-      badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(first_name, surname))
+      access_type,
+      badge:badges(
+        qr_code,
+        entity_type,
+        personnel:personnel_id(first_name, surname),
+        visitor:visitor_id(first_name, surname),
+        fleet:fleet_id(fleet_code, vehicle_type),
+        equipment:equipment_id(equip_code, equipment_type)
+      )
     `
     )
     .eq('department_id', deptId)
     .order('scanned_at', { ascending: false })
     .limit(limit);
 
+  if (error) {
+    throw new DatabaseError('Failed to load recent access activity', {
+      operation: 'select',
+      table: 'access_logs',
+      context: { error: error.message },
+    });
+  }
+
   if (!logs) return [];
 
-  return (logs as unknown as AccessLogWithBadge[]).map((log) => {
+  return (
+    logs as unknown as (AccessLogWithBadge & {
+      access_type?: string | null;
+      badge:
+        | (AccessLogWithBadge['badge'] & {
+            fleet?: { fleet_code: string; vehicle_type: string } | null;
+            equipment?: { equip_code: string; equipment_type: string } | null;
+          })
+        | null;
+    })[]
+  ).map((log) => {
     const { badge } = log;
-    let entityName = 'Unknown';
-    let entityType = badge?.entity_type ?? 'Unknown';
+    let entityName = log.access_type === 'REMOTE_OVERRIDE' ? 'Manual Gate Override' : 'Unknown';
+    let entityType = badge?.entity_type ?? log.access_type ?? 'Unknown';
 
     if (badge?.personnel) {
       entityName = `${badge.personnel.first_name} ${badge.personnel.surname}`;
@@ -261,6 +287,12 @@ export async function getRecentAccessActivity(
     } else if (badge?.visitor) {
       entityName = `${badge.visitor.first_name} ${badge.visitor.surname}`;
       entityType = 'Visitor';
+    } else if (badge?.fleet) {
+      entityName = `${badge.fleet.fleet_code} (${badge.fleet.vehicle_type})`;
+      entityType = 'Vehicle';
+    } else if (badge?.equipment) {
+      entityName = `${badge.equipment.equip_code} (${badge.equipment.equipment_type})`;
+      entityType = 'Equipment';
     }
 
     let status: AccessActivityEntry['status'] = 'Granted';
@@ -368,28 +400,56 @@ export async function getHourlyAccessStats(
 ): Promise<HourlyAccessPoint[]> {
   const { supabase } = await assertAccessControlRole();
 
-  const targetDate = date ?? new Date().toISOString().split('T')[0];
-  const start = `${targetDate}T00:00:00Z`;
-  const end = `${targetDate}T23:59:59Z`;
-
-  const { data: logs } = await supabase
-    .from('access_logs')
-    .select('scanned_at, access_granted')
-    .eq('department_id', deptId)
-    .gte('scanned_at', start)
-    .lte('scanned_at', end);
-
-  // Aggregate into hourly buckets
   const hours = Array.from({ length: 24 }, (_, i) => ({
     hour: `${String(i).padStart(2, '0')}:00`,
     granted: 0,
     denied: 0,
   }));
 
-  if (!logs) return hours;
+  if (!date) {
+    const { data: rpcRows, error: rpcError } = await supabase.rpc('get_hourly_access_stats', {
+      p_department_id: deptId,
+      p_days: 1,
+    });
+    if (!rpcError && Array.isArray(rpcRows)) {
+      for (const row of rpcRows as Array<{
+        hour_bucket?: number;
+        entries?: number;
+        exits?: number;
+        denials?: number;
+      }>) {
+        const idx = Number(row.hour_bucket);
+        if (Number.isInteger(idx) && idx >= 0 && idx < 24) {
+          hours[idx]!.granted = Number(row.entries ?? 0) + Number(row.exits ?? 0);
+          hours[idx]!.denied = Number(row.denials ?? 0);
+        }
+      }
+      return hours;
+    }
+  }
+
+  const targetDate = date ?? new Date().toISOString().split('T')[0];
+  const start = `${targetDate}T00:00:00+02:00`;
+  const end = `${targetDate}T23:59:59+02:00`;
+
+  const { data: logs, error } = await supabase
+    .from('access_logs')
+    .select('scanned_at, access_granted')
+    .eq('department_id', deptId)
+    .gte('scanned_at', start)
+    .lte('scanned_at', end)
+    .limit(2000);
+
+  if (error || !logs) return hours;
 
   for (const log of logs) {
-    const h = new Date(log.scanned_at).getUTCHours();
+    const hourStr = new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      hour12: false,
+      timeZone: 'Africa/Johannesburg',
+    }).format(new Date(log.scanned_at));
+    const h = Number.parseInt(hourStr, 10);
+    if (!Number.isInteger(h) || h < 0 || h > 23) continue;
     if (log.access_granted) {
       hours[h]!.granted++;
     } else {
@@ -484,10 +544,10 @@ export async function getBadgeStatusDistribution(
       }
 
       return [
-        { name: 'Active', value: active, fill: 'var(--success)' },
-        { name: 'Expiring Soon', value: expiring_soon, fill: 'var(--warning)' },
-        { name: 'Expired', value: expired, fill: 'var(--danger)' },
-        { name: 'Revoked', value: revoked, fill: 'var(--muted-foreground)' },
+        { name: 'Active', value: active, fill: 'hsl(var(--success))' },
+        { name: 'Expiring Soon', value: expiring_soon, fill: 'hsl(var(--warning))' },
+        { name: 'Expired', value: expired, fill: 'hsl(var(--danger))' },
+        { name: 'Revoked', value: revoked, fill: 'hsl(var(--muted-foreground))' },
       ];
     },
     {

@@ -28,9 +28,17 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
     }
 
     // Initialize offline queue sync listeners with proper cleanup
-    import('@repo/shared/hooks').then((mod) => {
+    let isUnmounted = false;
+    let cleanupOfflineListeners: (() => void) | undefined;
+    void import('@repo/shared/hooks').then((mod) => {
       const cleanup = mod.initOfflineQueueListeners();
-      return cleanup;
+      if (typeof cleanup === 'function') {
+        if (isUnmounted) {
+          cleanup();
+        } else {
+          cleanupOfflineListeners = cleanup;
+        }
+      }
     });
 
     // Initialize global error handling with autonomous recovery
@@ -41,6 +49,11 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
         console.error('Global error handled:', error, info);
       },
     });
+
+    return () => {
+      isUnmounted = true;
+      cleanupOfflineListeners?.();
+    };
   }, []);
 
   return <ReactQueryProvider>{children}</ReactQueryProvider>;

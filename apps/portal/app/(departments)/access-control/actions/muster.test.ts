@@ -158,7 +158,7 @@ describe('Access Control Muster Server Actions', () => {
     expect(summary.blastStatus).toBe('STANDBY_BLAST_SCHEDULED');
   });
 
-  it('degrades gracefully when muster_events rejects or returns a database error', async () => {
+  it('fails visibly when muster_events rejects or returns a database error', async () => {
     const mockSupabase = {
       from: jest.fn((table: string) => {
         if (table === 'muster_events') {
@@ -176,12 +176,9 @@ describe('Access Control Muster Server Actions', () => {
       employee: { id: 'emp-1', role: 'access_control' },
     });
 
-    const summary = await getMusterRollCall('dept-access-1');
-
-    expect(summary.totalSoulsOnSite).toBe(0);
-    expect(summary.accountedCount).toBe(0);
-    expect(summary.unaccountedCount).toBe(0);
-    expect(summary.records).toEqual([]);
+    await expect(getMusterRollCall('dept-access-1')).rejects.toThrow(
+      'PGRST205: table muster_events missing'
+    );
   });
 
   it('records muster status via supabase.from("muster_events").insert and revalidates paths', async () => {
@@ -214,11 +211,13 @@ describe('Access Control Muster Server Actions', () => {
     expect(insertCalls).toEqual([
       {
         personnel_id: uuid,
+        visitor_id: null,
         badge_code: uuid,
         full_name: uuid,
         muster_point: 'Muster Point Bravo',
         status: 'missing',
-        recorded_by: 'auth-user-42',
+        recorded_by: 'emp-42',
+        department_id: undefined,
       },
     ]);
     expect(mockRevalidatePath).toHaveBeenCalledWith('/access-control/muster');

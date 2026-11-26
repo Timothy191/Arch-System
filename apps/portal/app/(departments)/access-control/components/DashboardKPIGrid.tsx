@@ -24,7 +24,7 @@ interface KPICardProps {
 }
 
 const KPI_CARD_MOTION_CLASS =
-  'gold-steel-border gold-steel-border-slim !bg-none !bg-white border-accent-gold/65 shadow-sm transition-all hover:shadow-xl active:scale-95';
+  'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/25 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md transition-all hover:shadow-xl active:scale-95';
 
 const variantStyles = {
   default: {

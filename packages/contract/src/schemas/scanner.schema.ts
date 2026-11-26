@@ -11,6 +11,7 @@ export const scannerBadgeSchema = z.object({
   epc: z.string().min(1).max(256).optional(),
   uid: z.string().min(1).max(256).optional(),
   access_type: z.enum(['gate_entry', 'gate_exit', 'boom_entry']).optional(),
+  gate: z.string().max(100).optional(),
   gate_location: z.string().max(100).optional(),
   operator: z.string().max(100).optional(),
   alcohol_tested: z.enum(['Approved', 'Failed', 'Not Tested']).optional(),

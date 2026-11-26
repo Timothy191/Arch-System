@@ -59,7 +59,7 @@ describe('Access Control Dashboard Widgets', () => {
     expect(screen.getByText('All cleared')).toBeInTheDocument();
 
     const activeQrCard = screen.getByText('Active QR Codes').closest('div.rounded-xl');
-    expect(activeQrCard).toHaveClass('!bg-white', 'gold-steel-border', 'border-accent-gold/65');
+    expect(activeQrCard).toHaveClass('liquid-glass-light', 'gold-steel-border');
   });
 
   it('renders DashboardChartsRow and QRStatusDistributionChart with en-US numbers', () => {

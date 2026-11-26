@@ -246,7 +246,7 @@ describe('Given POST /api/auth/visitor-request', () => {
       expect.objectContaining({
         entity_type: 'visitor',
         visitor_id: 'vis-uuid-001',
-        is_active: true,
+        is_active: false,
       })
     );
   });
@@ -277,7 +277,7 @@ describe('Given POST /api/auth/visitor-request', () => {
     expect(responseBody.error).toBeTruthy();
   });
 
-  it('When a repeat visitor submits an existing id_number with an active unexpired VIS badge, Then it reuses the badge idempotently', async () => {
+  it('When a repeat visitor submits an existing id_number, Then it creates a new immutable Pre-Registered visit with an inactive pending badge', async () => {
     const futureExpiry = new Date(Date.now() + 3_600_000).toISOString();
     const supabaseMock = buildSupabaseMock({
       existingVisitor: {
@@ -312,23 +312,21 @@ describe('Given POST /api/auth/visitor-request', () => {
       pass: { qrCode: string; visitorId: string };
     };
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(201);
     expect(responseBody.success).toBe(true);
-    expect(responseBody.pass.qrCode).toBe('VIS-REPEAT');
-    expect(supabaseMock.insertedBadges).toHaveLength(0);
-    expect(supabaseMock.updatedVisitors).toHaveLength(1);
-    expect(supabaseMock.updatedVisitors[0]).toEqual(
+    expect(responseBody.pass.visitorId).toBe('vis-uuid-001');
+    expect(supabaseMock.updatedVisitors).toHaveLength(0);
+    expect(supabaseMock.insertedVisitors).toHaveLength(1);
+    expect(supabaseMock.insertedBadges).toHaveLength(1);
+    expect(supabaseMock.insertedBadges[0]).toEqual(
       expect.objectContaining({
-        name: 'Thabo Mokoena',
-        purpose: 'Follow-up calibration',
-        status: 'Pre-Registered',
-        check_in_time: null,
-        check_out_time: null,
+        entity_type: 'visitor',
+        is_active: false,
       })
     );
   });
 
-  it('When an id_number belongs to an already Checked In on-site visitor, Then it returns 409 Conflict without mutating muster records or issuing a badge', async () => {
+  it('When an id_number belongs to an already Checked In on-site visitor, Then it creates a separate Pre-Registered request without leaking on-site status (no 409 oracle)', async () => {
     const supabaseMock = buildSupabaseMock({
       existingVisitor: {
         id: 'vis-onsite-01',
@@ -359,16 +357,14 @@ describe('Given POST /api/auth/visitor-request', () => {
     const response = await POST(request);
     const responseBody = (await response.json()) as {
       success: boolean;
-      error: string;
-      pass?: unknown;
+      pass?: { visitorId: string };
     };
 
-    expect(response.status).toBe(409);
-    expect(responseBody.success).toBe(false);
-    expect(responseBody.pass).toBeUndefined();
+    expect(response.status).toBe(201);
+    expect(responseBody.success).toBe(true);
     expect(supabaseMock.updatedVisitors).toHaveLength(0);
-    expect(supabaseMock.insertedVisitors).toHaveLength(0);
-    expect(supabaseMock.insertedBadges).toHaveLength(0);
+    expect(supabaseMock.insertedVisitors).toHaveLength(1);
+    expect(supabaseMock.insertedBadges[0]).toEqual(expect.objectContaining({ is_active: false }));
   });
 
   it('When required fields contain only whitespace, Then it rejects with 400 Bad Request', async () => {

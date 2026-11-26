@@ -15,7 +15,6 @@ export * from './useLifecycle';
 export * from './useLocalStorage';
 export * from './useMainThreadYield';
 export * from './useMediaQuery';
-export * from './useOfflineMuster';
 export * from './useOfflineQueue';
 // Network & Realtime
 export * from './useOnlineStatus';

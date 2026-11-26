@@ -279,7 +279,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
       selectPersonnel(initialSelectedId);
     }
     getCardTemplates()
-      .then((res) => {
+      .then((res: Awaited<ReturnType<typeof getCardTemplates>>) => {
         setTemplates(res);
         if (res.length > 0) {
           setSelectedTemplateId(res[0]?.id ?? '');

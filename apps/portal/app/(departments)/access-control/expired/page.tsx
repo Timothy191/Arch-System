@@ -1,9 +1,10 @@
+import { GlassCard } from '@repo/ui/GlassCard';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { getProvisioningReferenceData } from '@/actions/employee-provisioning';
 import { EmployeeProvisioningModal } from '@/components/employee/EmployeeProvisioningModal';
 import { getDepartmentContext } from '~/lib/dept-context';
-import { getBadgesForDepartment } from '../actions';
+import { assertAccessControlRole } from '../actions/shared';
 import { BadgesRegistryClient, type ResolvedDepartmentBadge } from '../badges/BadgesRegistryClient';
 
 interface BadgeWithRelations {
@@ -26,7 +27,7 @@ const DAYS_30_WINDOW_MS = 30 * MS_PER_DAY;
 const DAYS_60_WINDOW_MS = 60 * MS_PER_DAY;
 const DAYS_90_WINDOW_MS = 90 * MS_PER_DAY;
 const DEFAULT_PAGE_SIZE = 50;
-const MAX_FETCH_LIMIT = 500;
+const MAX_PAGE_SIZE = 100;
 
 const FILTER_OPTIONS: ReadonlyArray<{ readonly key: ExpiryFilterKey; readonly label: string }> = [
   { key: 'all', label: 'ALL' },
@@ -43,9 +44,10 @@ const WINDOW_BY_FILTER: Readonly<Record<Exclude<ExpiryFilterKey, 'all'>, number>
   '90d': DAYS_90_WINDOW_MS,
 };
 
-function parsePositiveInt(rawValue: string | undefined, fallback: number): number {
+function parseBoundedInt(rawValue: string | undefined, fallback: number, min: number, max: number) {
   const parsed = Number.parseInt(rawValue ?? '', 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, parsed));
 }
 
 function normalizeFilterKey(rawFilter: string | undefined): ExpiryFilterKey {
@@ -71,18 +73,6 @@ function resolveBadgeEntityName(badge: BadgeWithRelations): string {
   return 'Unknown';
 }
 
-function matchesExpiryFilter(
-  expiresAt: string | null,
-  filterKey: ExpiryFilterKey,
-  nowMs: number
-): boolean {
-  if (!expiresAt) return false;
-  const expiryMs = new Date(expiresAt).getTime();
-  if (Number.isNaN(expiryMs)) return false;
-  if (filterKey === 'all') return true;
-  return expiryMs <= nowMs + WINDOW_BY_FILTER[filterKey];
-}
-
 export default async function ExpiredCredentialsPage({
   searchParams,
 }: {
@@ -90,61 +80,113 @@ export default async function ExpiredCredentialsPage({
 }) {
   await connection();
   const params = await searchParams;
-  const page = parsePositiveInt(params.page, 1);
-  const pageSize = parsePositiveInt(params.pageSize, DEFAULT_PAGE_SIZE);
+  const page = parseBoundedInt(params.page, 1, 1, 10_000);
+  const pageSize = parseBoundedInt(params.pageSize, DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE);
   const activeFilter = normalizeFilterKey(params.filter);
 
-  const { deptId } = await getDepartmentContext({
-    department: 'access-control',
-  });
-
-  const [{ badges }, { departments }] = await Promise.all([
-    getBadgesForDepartment(deptId, 1, MAX_FETCH_LIMIT),
+  const [{ deptId }, { supabase }, { departments }] = await Promise.all([
+    getDepartmentContext({ department: 'access-control' }),
+    assertAccessControlRole(),
     getProvisioningReferenceData(),
   ]);
 
   const nowMs = Date.now();
-  const allBadges = badges as unknown as readonly BadgeWithRelations[];
-  const filteredBadges = allBadges.filter((badge) =>
-    matchesExpiryFilter(badge.expires_at, activeFilter, nowMs)
-  );
+  const nowIso = new Date(nowMs).toISOString();
+  const cutoffIso =
+    activeFilter === 'all' ? null : new Date(nowMs + WINDOW_BY_FILTER[activeFilter]).toISOString();
 
-  const totalPages = Math.ceil(filteredBadges.length / pageSize);
-  const startIndex = (page - 1) * pageSize;
-  const pagedBadges: readonly ResolvedDepartmentBadge[] = filteredBadges
-    .slice(startIndex, startIndex + pageSize)
-    .map((badge) => ({
-      id: badge.id,
-      qr_code: badge.qr_code,
-      entity_type: badge.entity_type,
-      entity_name: resolveBadgeEntityName(badge),
-      is_active: badge.is_active,
-      issued_at: badge.issued_at,
-      expires_at: badge.expires_at,
-    }));
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let pagedQuery = supabase
+    .from('badges')
+    .select(
+      `
+      id,
+      qr_code,
+      entity_type,
+      is_active,
+      issued_at,
+      expires_at,
+      personnel:personnel_id(first_name, surname),
+      visitor:visitor_id(first_name, surname),
+      fleet:fleet_id(fleet_code, vehicle_type),
+      equipment:equipment_id(equip_code, equipment_type)
+    `,
+      { count: 'exact' }
+    )
+    .eq('department_id', deptId)
+    .eq('is_active', true)
+    .not('expires_at', 'is', null);
+
+  if (cutoffIso) {
+    pagedQuery = pagedQuery.lte('expires_at', cutoffIso);
+  }
+
+  const countWindow = (windowMs: number | null) => {
+    let q = supabase
+      .from('badges')
+      .select('id', { count: 'exact', head: true })
+      .eq('department_id', deptId)
+      .eq('is_active', true)
+      .not('expires_at', 'is', null);
+    if (windowMs !== null) {
+      q = q.lte('expires_at', new Date(nowMs + windowMs).toISOString());
+    }
+    return q;
+  };
+
+  const [pagedRes, allCountRes, expiredCountRes, d30Res, d60Res, d90Res] = await Promise.all([
+    pagedQuery.order('expires_at', { ascending: true }).range(from, to),
+    countWindow(null),
+    supabase
+      .from('badges')
+      .select('id', { count: 'exact', head: true })
+      .eq('department_id', deptId)
+      .eq('is_active', true)
+      .not('expires_at', 'is', null)
+      .lte('expires_at', nowIso),
+    countWindow(DAYS_30_WINDOW_MS),
+    countWindow(DAYS_60_WINDOW_MS),
+    countWindow(DAYS_90_WINDOW_MS),
+  ]);
+
+  const totalCount = pagedRes.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const pagedBadges: readonly ResolvedDepartmentBadge[] = (
+    (pagedRes.data ?? []) as unknown as readonly BadgeWithRelations[]
+  ).map((badge) => ({
+    id: badge.id,
+    qr_code: badge.qr_code,
+    entity_type: badge.entity_type,
+    entity_name: resolveBadgeEntityName(badge),
+    is_active: badge.is_active,
+    issued_at: badge.issued_at,
+    expires_at: badge.expires_at,
+  }));
 
   const countByFilter: Record<ExpiryFilterKey, number> = {
-    all: allBadges.filter((b) => matchesExpiryFilter(b.expires_at, 'all', nowMs)).length,
-    expired: allBadges.filter((b) => matchesExpiryFilter(b.expires_at, 'expired', nowMs)).length,
-    '30d': allBadges.filter((b) => matchesExpiryFilter(b.expires_at, '30d', nowMs)).length,
-    '60d': allBadges.filter((b) => matchesExpiryFilter(b.expires_at, '60d', nowMs)).length,
-    '90d': allBadges.filter((b) => matchesExpiryFilter(b.expires_at, '90d', nowMs)).length,
+    all: allCountRes.count ?? 0,
+    expired: expiredCountRes.count ?? 0,
+    '30d': d30Res.count ?? 0,
+    '60d': d60Res.count ?? 0,
+    '90d': d90Res.count ?? 0,
   };
 
   return (
     <div className="space-y-6">
-      <div className="gold-steel-border gold-steel-border-slim !bg-none !bg-white flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent-gold/70 p-5 shadow-sm">
+      <GlassCard variant="window" className="flex flex-wrap items-center justify-between gap-4 p-5">
         <div>
           <h2 className="font-bold text-2xl text-[var(--text-heading)]">Expired Credentials</h2>
           <p className="mt-1 text-[var(--text-muted)] text-sm">
-            Badges that are expired or approaching expiry. Filter by 30/60/90-day windows.
+            Active badges that are expired or approaching expiry. Filter by 30/60/90-day windows.
           </p>
         </div>
         <EmployeeProvisioningModal
           departments={departments}
           triggerLabel="Add Employee & Issue Badge"
         />
-      </div>
+      </GlassCard>
 
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <span className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
@@ -171,7 +213,7 @@ export default async function ExpiredCredentialsPage({
         badges={pagedBadges}
         page={page}
         totalPages={totalPages}
-        totalCount={filteredBadges.length}
+        totalCount={totalCount}
         pageSize={pageSize}
       />
     </div>

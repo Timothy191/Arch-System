@@ -21,18 +21,20 @@ interface HeadcountMusterBannerProps {
   visitorsCount?: number;
   vehiclesCount?: number;
   blastStatus?: 'ALL_CLEAR' | 'STANDBY_BLAST_SCHEDULED' | 'MUSTER_EVACUATION_ACTIVE';
+  siteName?: string;
 }
 
 const MUSTER_PILL_BASE_CLASS =
   'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium text-[var(--text-heading)] shadow-lg transition-all hover:shadow-xl active:scale-95';
 
 export function HeadcountMusterBanner({
-  totalSouls = 142,
-  employeesCount = 88,
-  contractorsCount = 42,
-  visitorsCount = 12,
-  vehiclesCount = 34,
-  blastStatus = 'ALL_CLEAR',
+  totalSouls = 0,
+  employeesCount = 0,
+  contractorsCount = 0,
+  visitorsCount = 0,
+  vehiclesCount = 0,
+  blastStatus = 'STANDBY_BLAST_SCHEDULED',
+  siteName = 'Active Site Perimeter',
 }: HeadcountMusterBannerProps) {
   const isEmergency = blastStatus === 'MUSTER_EVACUATION_ACTIVE';
   const isStandby = blastStatus === 'STANDBY_BLAST_SCHEDULED';
@@ -55,7 +57,7 @@ export function HeadcountMusterBanner({
               </span>
               <div className="flex items-center gap-1.5 font-medium text-[var(--text-secondary)] text-xs">
                 <span className="h-2 w-2 animate-ping rounded-full bg-emerald-500" />
-                <span>Brakfontein Pit & Surface Facilities</span>
+                <span>{siteName}</span>
               </div>
             </div>
             <div className="mt-1 flex items-baseline gap-3">
@@ -132,7 +134,7 @@ export function HeadcountMusterBanner({
               </span>
             </div>
             <p className="font-mono text-[11px] text-[var(--text-muted)]">
-              Pit Bench 04 • Next Roll: 14:00
+              Live Roll Call Telemetry
             </p>
           </div>
 

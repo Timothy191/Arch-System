@@ -1,6 +1,8 @@
 import { randomBytes } from 'node:crypto';
 import { type VisitorPassRequestInput, visitorPassRequestSchema } from '@repo/contract';
-import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
+import { cacheInvalidateTags } from '@repo/redis';
+import { getAuthenticatedEmployee } from '@repo/supabase';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
@@ -13,17 +15,14 @@ const QR_CODE_SUFFIX_LENGTH = 6;
 const PASS_VALIDITY_MS = 86_400_000; // 24 hours
 const QR_ALPHABET = 'A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,T,U,V,W,X,Y,Z,2,3,4,5,6,7,8,9'.split(',');
 
-const STATUS_OK = 200;
 const STATUS_CREATED = 201;
 const STATUS_BAD_REQUEST = 400;
 const STATUS_FORBIDDEN = 403;
-const STATUS_CONFLICT = 409;
 const STATUS_UNSUPPORTED_MEDIA = 415;
 const STATUS_INTERNAL_ERROR = 500;
 
 const ACCESS_CONTROL_TAG = 'access-control';
 const PRE_REGISTERED_STATUS = 'Pre-Registered';
-const CHECKED_IN_STATUS = 'Checked In';
 
 type ServiceSupabaseClient = ReturnType<typeof createServiceRoleClient>;
 
@@ -34,17 +33,11 @@ interface PersistedVisitorRecord {
   readonly company: string;
   readonly visiting: string;
   readonly status: typeof PRE_REGISTERED_STATUS;
-  readonly isExistingReuse: boolean;
 }
-
-type VisitorUpsertOutcome =
-  | { readonly kind: 'conflict_checked_in' }
-  | { readonly kind: 'persisted'; readonly visitor: PersistedVisitorRecord };
 
 interface PersistedBadgeRecord {
   readonly qrCode: string;
   readonly expiresAt: string;
-  readonly isReusedBadge: boolean;
 }
 
 function generateVisitorQrCode(): string {
@@ -57,15 +50,6 @@ function generateVisitorQrCode(): string {
   return `VIS-${suffix}`;
 }
 
-function resolveHostOrigin(request: NextRequest): string | null {
-  const hostHeader = request.headers.get('x-forwarded-host') || request.headers.get('host');
-  if (!hostHeader) {
-    return null;
-  }
-  const protocolPrefix = hostHeader.includes('localhost') ? 'http' : 'https';
-  return `${protocolPrefix}://${hostHeader}`;
-}
-
 function isOriginPermitted(request: NextRequest): boolean {
   if (process.env.NODE_ENV !== 'production') {
     return true;
@@ -73,7 +57,7 @@ function isOriginPermitted(request: NextRequest): boolean {
 
   const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (!configuredAppUrl) {
-    return true;
+    return false;
   }
 
   let expectedAppOrigin: string;
@@ -83,10 +67,10 @@ function isOriginPermitted(request: NextRequest): boolean {
     return false;
   }
 
-  const hostOrigin = resolveHostOrigin(request);
+  const serverOrigin = request.nextUrl?.origin ?? expectedAppOrigin;
   const requestOrigin = request.headers.get('origin');
   if (requestOrigin) {
-    return requestOrigin === expectedAppOrigin || requestOrigin === hostOrigin;
+    return requestOrigin === expectedAppOrigin || requestOrigin === serverOrigin;
   }
 
   const requestReferer = request.headers.get('referer');
@@ -96,17 +80,17 @@ function isOriginPermitted(request: NextRequest): boolean {
 
   try {
     const parsedRefererOrigin = new URL(requestReferer).origin;
-    return parsedRefererOrigin === expectedAppOrigin || parsedRefererOrigin === hostOrigin;
+    return parsedRefererOrigin === expectedAppOrigin || parsedRefererOrigin === serverOrigin;
   } catch {
     return false;
   }
 }
 
-async function resolveOptionalCallerUserId(): Promise<string | null> {
+async function resolveOptionalHostEmployeeId(): Promise<string | null> {
   try {
     const sessionSupabase = await createServerSupabaseClient();
-    const callerUser = await getUserSafely(sessionSupabase);
-    return typeof callerUser?.id === 'string' && callerUser.id.length > 0 ? callerUser.id : null;
+    const principal = await getAuthenticatedEmployee(sessionSupabase);
+    return principal?.employee?.id ?? null;
   } catch {
     return null;
   }
@@ -136,15 +120,15 @@ function isMissingLegacyVisitorColumn(
   );
 }
 
-async function insertVisitorRow(
+async function insertImmutableVisitorRequest(
   supabase: ServiceSupabaseClient,
   options: {
     readonly validatedInput: VisitorPassRequestInput;
     readonly departmentId: string | null;
-    readonly hostUserId: string | null;
+    readonly hostEmployeeId: string | null;
   }
 ): Promise<PersistedVisitorRecord> {
-  const { validatedInput, departmentId, hostUserId } = options;
+  const { validatedInput, departmentId, hostEmployeeId } = options;
   const fullName = `${validatedInput.first_name} ${validatedInput.surname}`;
 
   const primaryPayload: Record<string, unknown> = {
@@ -157,7 +141,7 @@ async function insertVisitorRow(
     purpose: validatedInput.reason_for_entry,
     reason_for_entry: validatedInput.reason_for_entry,
     department_id: departmentId,
-    host_user_id: hostUserId,
+    host_user_id: hostEmployeeId,
     status: PRE_REGISTERED_STATUS,
     check_in_time: null,
   };
@@ -171,7 +155,6 @@ async function insertVisitorRow(
       company: validatedInput.company,
       visiting: validatedInput.visiting,
       status: PRE_REGISTERED_STATUS,
-      isExistingReuse: false,
     };
   }
 
@@ -187,6 +170,7 @@ async function insertVisitorRow(
     visiting: validatedInput.visiting,
     reason_for_entry: validatedInput.reason_for_entry,
     department_id: departmentId,
+    host_user_id: hostEmployeeId,
     status: PRE_REGISTERED_STATUS,
     check_in_time: null,
   };
@@ -203,165 +187,21 @@ async function insertVisitorRow(
     company: validatedInput.company,
     visiting: validatedInput.visiting,
     status: PRE_REGISTERED_STATUS,
-    isExistingReuse: false,
   };
 }
 
-async function updateExistingVisitorRow(
-  supabase: ServiceSupabaseClient,
-  options: {
-    readonly existingId: string;
-    readonly validatedInput: VisitorPassRequestInput;
-    readonly departmentId: string | null;
-  }
-): Promise<PersistedVisitorRecord> {
-  const { existingId, validatedInput, departmentId } = options;
-  const fullName = `${validatedInput.first_name} ${validatedInput.surname}`;
-
-  const primaryPayload: Record<string, unknown> = {
-    name: fullName,
-    first_name: validatedInput.first_name,
-    surname: validatedInput.surname,
-    company: validatedInput.company,
-    visiting: validatedInput.visiting,
-    purpose: validatedInput.reason_for_entry,
-    reason_for_entry: validatedInput.reason_for_entry,
-    department_id: departmentId,
-    status: PRE_REGISTERED_STATUS,
-    check_in_time: null,
-    check_out_time: null,
-  };
-
-  const primaryUpdate = await supabase
-    .from('visitors')
-    .update(primaryPayload)
-    .eq('id', existingId)
-    .select()
-    .single();
-
-  if (!primaryUpdate.error && primaryUpdate.data) {
-    return {
-      id: String(primaryUpdate.data.id),
-      firstName: validatedInput.first_name,
-      surname: validatedInput.surname,
-      company: validatedInput.company,
-      visiting: validatedInput.visiting,
-      status: PRE_REGISTERED_STATUS,
-      isExistingReuse: true,
-    };
-  }
-
-  if (!isMissingLegacyVisitorColumn(primaryUpdate.error)) {
-    throw new Error(primaryUpdate.error?.message || 'Failed to update repeat visitor record');
-  }
-
-  const modernPayload: Record<string, unknown> = {
-    first_name: validatedInput.first_name,
-    surname: validatedInput.surname,
-    company: validatedInput.company,
-    visiting: validatedInput.visiting,
-    reason_for_entry: validatedInput.reason_for_entry,
-    department_id: departmentId,
-    status: PRE_REGISTERED_STATUS,
-    check_in_time: null,
-    check_out_time: null,
-  };
-
-  const fallbackUpdate = await supabase
-    .from('visitors')
-    .update(modernPayload)
-    .eq('id', existingId)
-    .select()
-    .single();
-
-  if (fallbackUpdate.error || !fallbackUpdate.data) {
-    throw new Error(fallbackUpdate.error?.message || 'Failed to update modern visitor record');
-  }
-
-  return {
-    id: String(fallbackUpdate.data.id),
-    firstName: validatedInput.first_name,
-    surname: validatedInput.surname,
-    company: validatedInput.company,
-    visiting: validatedInput.visiting,
-    status: PRE_REGISTERED_STATUS,
-    isExistingReuse: true,
-  };
-}
-
-async function upsertPreRegisteredVisitor(
-  supabase: ServiceSupabaseClient,
-  options: {
-    readonly validatedInput: VisitorPassRequestInput;
-    readonly departmentId: string | null;
-    readonly hostUserId: string | null;
-  }
-): Promise<VisitorUpsertOutcome> {
-  const { validatedInput, departmentId, hostUserId } = options;
-
-  if (validatedInput.id_number) {
-    const { data: existingRow } = await supabase
-      .from('visitors')
-      .select('id, status')
-      .eq('id_number', validatedInput.id_number)
-      .maybeSingle();
-
-    if (existingRow?.id) {
-      if (existingRow.status === CHECKED_IN_STATUS) {
-        return { kind: 'conflict_checked_in' };
-      }
-
-      const updatedVisitor = await updateExistingVisitorRow(supabase, {
-        existingId: String(existingRow.id),
-        validatedInput,
-        departmentId,
-      });
-
-      return { kind: 'persisted', visitor: updatedVisitor };
-    }
-  }
-
-  const insertedVisitor = await insertVisitorRow(supabase, {
-    validatedInput,
-    departmentId,
-    hostUserId,
-  });
-  return { kind: 'persisted', visitor: insertedVisitor };
-}
-
-async function resolveOrCreateVisitorBadge(
+async function createPendingVisitorBadge(
   supabase: ServiceSupabaseClient,
   options: {
     readonly visitorId: string;
     readonly departmentId: string | null;
-    readonly shouldCheckExistingBadge: boolean;
   }
 ): Promise<PersistedBadgeRecord> {
   const nowIso = new Date().toISOString();
-
-  if (options.shouldCheckExistingBadge) {
-    const { data: activeBadge } = await supabase
-      .from('badges')
-      .select('id, qr_code, expires_at')
-      .eq('visitor_id', options.visitorId)
-      .eq('is_active', true)
-      .gt('expires_at', nowIso)
-      .order('issued_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (activeBadge?.qr_code && activeBadge.expires_at) {
-      return {
-        qrCode: String(activeBadge.qr_code),
-        expiresAt: String(activeBadge.expires_at),
-        isReusedBadge: true,
-      };
-    }
-  }
-
   const generatedQrCode = generateVisitorQrCode();
   const expiresAtIso = new Date(Date.now() + PASS_VALIDITY_MS).toISOString();
 
+  // Badge starts inactive until approved & checked in at the gatehouse.
   const { data: createdBadge, error: badgeInsertError } = await supabase
     .from('badges')
     .insert({
@@ -369,7 +209,7 @@ async function resolveOrCreateVisitorBadge(
       entity_type: 'visitor',
       visitor_id: options.visitorId,
       department_id: options.departmentId,
-      is_active: true,
+      is_active: false,
       issued_at: nowIso,
       expires_at: expiresAtIso,
     })
@@ -383,7 +223,6 @@ async function resolveOrCreateVisitorBadge(
   return {
     qrCode: String(createdBadge.qr_code),
     expiresAt: String(createdBadge.expires_at ?? expiresAtIso),
-    isReusedBadge: false,
   };
 }
 
@@ -409,40 +248,30 @@ async function handleVisitorPassPost(request: NextRequest): Promise<NextResponse
   }
 
   try {
-    const [hostUserId, supabase] = await Promise.all([
-      resolveOptionalCallerUserId(),
+    const [hostEmployeeId, supabase] = await Promise.all([
+      resolveOptionalHostEmployeeId(),
       Promise.resolve(createServiceRoleClient()),
     ]);
     const accessControlDeptId = await resolveAccessControlDeptId(supabase);
 
-    const upsertOutcome = await upsertPreRegisteredVisitor(supabase, {
+    const visitorRecord = await insertImmutableVisitorRequest(supabase, {
       validatedInput: validation.data,
       departmentId: accessControlDeptId,
-      hostUserId,
+      hostEmployeeId,
     });
 
-    if (upsertOutcome.kind === 'conflict_checked_in') {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            'A visitor with this ID or Passport is already checked in on site. Please report to gate security.',
-        },
-        { status: STATUS_CONFLICT }
-      );
-    }
-
-    const visitorRecord = upsertOutcome.visitor;
-
-    const badgeRecord = await resolveOrCreateVisitorBadge(supabase, {
+    const badgeRecord = await createPendingVisitorBadge(supabase, {
       visitorId: visitorRecord.id,
       departmentId: accessControlDeptId,
-      shouldCheckExistingBadge: visitorRecord.isExistingReuse,
     });
 
     revalidateTag(ACCESS_CONTROL_TAG, 'max');
+    await cacheInvalidateTags([
+      'table:visitors',
+      'table:badges',
+      ...(accessControlDeptId ? [`dept:${accessControlDeptId}`] : []),
+    ]).catch(() => undefined);
 
-    const httpStatus = badgeRecord.isReusedBadge ? STATUS_OK : STATUS_CREATED;
     return NextResponse.json(
       {
         success: true,
@@ -456,7 +285,7 @@ async function handleVisitorPassPost(request: NextRequest): Promise<NextResponse
           expiresAt: badgeRecord.expiresAt,
         },
       },
-      { status: httpStatus }
+      { status: STATUS_CREATED }
     );
   } catch (caughtError) {
     await logError(caughtError, {

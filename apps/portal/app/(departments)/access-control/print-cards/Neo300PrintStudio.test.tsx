@@ -19,12 +19,13 @@ jest.mock('sonner', () => ({
   toast: { success: jest.fn(), error: jest.fn(), info: jest.fn() },
 }));
 
-jest.mock('../card-actions/qr-section', () => ({
+jest.mock('../components/QRCodeSection', () => ({
   QRCodeSection: ({ data }: { data: string }) => <div data-testid="qr">{data}</div>,
 }));
 
 jest.mock('./actions', () => ({
   getEmployeeCardProfiles: jest.fn(),
+  getNeo300PrinterStatus: jest.fn(),
   upsertEmployeeForCardPrinting: jest.fn(),
   sendNeo300PrintJob: jest.fn(),
   cancelNeo300Job: jest.fn(),

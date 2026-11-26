@@ -1,5 +1,7 @@
 'use client';
 
+import { useSupabaseRealtime } from '@repo/shared/hooks';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { AvatarWithIcon } from '@repo/ui/components/ui/avatar-with-icon';
 import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
@@ -41,7 +43,7 @@ import {
   Wine,
   X,
 } from 'lucide-react';
-import { useCallback, useEffect, useId, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import {
   getAccessLogsWithFilters,
@@ -639,6 +641,13 @@ export function AccessLogsClient({
   const [inspectedLog, setInspectedLog] = useState<ResolvedAccessLog | null>(null);
 
   const [isPending, startTransition] = useTransition();
+  const supabase = useMemo(() => {
+    try {
+      return createBrowserSupabaseClient();
+    } catch {
+      return null;
+    }
+  }, []);
   const searchInputId = useId();
   const employeeSelectId = useId();
   const directionSelectId = useId();
@@ -704,6 +713,16 @@ export function AccessLogsClient({
       categoryFilter,
     ]
   );
+
+  useSupabaseRealtime({
+    supabaseClient: supabase,
+    table: 'access_logs',
+    event: 'INSERT',
+    enabled: Boolean(supabase),
+    onChange: () => {
+      void fetchUpdatedLogs();
+    },
+  });
 
   const fetchAttendanceRegister = useCallback(
     async (
@@ -828,7 +847,7 @@ export function AccessLogsClient({
   return (
     <div className="space-y-6">
       {/* Top Banner Panel, View Tabs, and Primary Actions */}
-      <div className="gold-steel-border gold-steel-border-slim !bg-none !bg-white flex flex-col items-start justify-between gap-4 rounded-2xl border border-accent-gold/70 p-5 shadow-sm lg:flex-row lg:items-center">
+      <div className="liquid-glass-light gold-steel-border gold-steel-border-slim flex flex-col items-start justify-between gap-4 rounded-2xl border border-white/25 bg-[var(--material-ultra-thin)] p-5 shadow-diffusion-sm backdrop-blur-md lg:flex-row lg:items-center">
         <div>
           <h2 className="font-bold text-2xl text-[var(--text-heading)]">
             Access Logs & Attendance Register

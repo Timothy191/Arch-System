@@ -64,20 +64,15 @@ export default async function AccessControlReportsPage({
 
   const reportDate = today || new Date().toISOString().slice(0, 10);
   const initialTab = resolveAccessReportTab(resolvedParams.tab);
-  const explicitRange = resolveAccessReportRange(resolvedParams.range);
-
-  const reportsData = explicitRange
-    ? await (() => {
-        const { startDate, endDate } = resolveQueryWindow(explicitRange, reportDate);
-        return getAccessReportsData(deptId, startDate, endDate);
-      })()
-    : await getAccessReportsData(deptId);
+  const effectiveRange = resolveAccessReportRange(resolvedParams.range) ?? '7days';
+  const { startDate, endDate } = resolveQueryWindow(effectiveRange, reportDate);
+  const reportsData = await getAccessReportsData(deptId, startDate, endDate);
 
   return (
     <AccessReportsStudio
       initialData={reportsData}
       initialTab={initialTab}
-      initialRange={explicitRange ?? '7days'}
+      initialRange={effectiveRange}
       reportDate={reportDate}
     />
   );

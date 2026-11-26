@@ -1,4 +1,5 @@
 import { AutoAnimateList } from '@repo/ui/AnimatedList';
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
   AlertTriangle,
   ArrowRight,
@@ -39,7 +40,7 @@ interface DashboardActivityFeedProps {
 
 export default function DashboardActivityFeed({ activity }: DashboardActivityFeedProps) {
   return (
-    <div className="rounded-xl border border-border bg-card shadow-card">
+    <GlassCard className="p-0">
       <div className="flex items-center justify-between border-border border-b px-5 py-4">
         <div>
           <h2 className="font-bold text-foreground text-sm">Recent Access Events</h2>
@@ -99,6 +100,6 @@ export default function DashboardActivityFeed({ activity }: DashboardActivityFee
           );
         })}
       </AutoAnimateList>
-    </div>
+    </GlassCard>
   );
 }

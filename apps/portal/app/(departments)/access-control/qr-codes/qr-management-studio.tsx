@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { QRCodeSection } from '../card-actions/qr-section';
+import { QRCodeSection } from '../components/QRCodeSection';
 import type {
   BadgeInventoryItem,
   CreateBadgePayload,
@@ -49,9 +49,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
   const [isPending, startTransition] = useTransition();
 
   // Form State for Quick Issue
-  const [formEntityType, setFormEntityType] = useState<CredentialEntityType>(
-    'employee' as unknown as CredentialEntityType
-  );
+  const [formEntityType, setFormEntityType] = useState<CredentialEntityType>('personnel');
   const [selectedEntityId, setSelectedEntityId] = useState<string>('');
   const [isCustomEntity, setIsCustomEntity] = useState(false);
   const [customName, setCustomName] = useState('');
@@ -183,8 +181,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                 <h2 className="font-bold text-[var(--text-heading)] text-xl tracking-tight">
                   Universal QR & RFID Credential Hub
                 </h2>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 font-medium text-blue-400 text-xs">
-                  <Radio className="h-3 w-3 animate-pulse text-blue-400" />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/25 bg-blue-500/10 px-2.5 py-0.5 font-medium text-blue-700 text-xs">
+                  <Radio className="h-3 w-3 animate-pulse text-blue-600" />
                   C66 RFID Ready
                 </span>
               </div>
@@ -192,7 +190,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                 Issue and manage credentials for{' '}
                 <strong className="text-[var(--text-primary)]">Employees</strong>,{' '}
                 <strong className="text-[var(--text-primary)]">Vehicles</strong>,{' '}
-                <strong className="text-amber-400">Coal Trucks</strong>,{' '}
+                <strong className="text-amber-700">Coal Trucks</strong>,{' '}
                 <strong className="text-[var(--text-primary)]">Visitors</strong>, and{' '}
                 <strong className="text-[var(--text-primary)]">Heavy Equipment</strong>.
               </p>
@@ -233,7 +231,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                 className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 font-medium text-xs transition-all ${
                   active
                     ? 'border-blue-500 bg-blue-600 text-white shadow-sm'
-                    : 'border-[var(--border-default)] bg-[var(--bg-secondary)]/50 text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-white'
+                    : 'border-[var(--border-default)] bg-[var(--bg-secondary)]/50 text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-heading)]'
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -289,8 +287,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
                   <td className="p-3.5">
                     {b.rfid_code ? (
-                      <span className="inline-flex items-center gap-1 rounded border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-mono text-[11px] text-blue-300">
-                        <Radio className="h-3 w-3 text-blue-400" />
+                      <span className="inline-flex items-center gap-1 rounded border border-blue-500/25 bg-blue-500/10 px-2 py-0.5 font-mono text-[11px] text-blue-700">
+                        <Radio className="h-3 w-3 text-blue-600" />
                         {b.rfid_code}
                       </span>
                     ) : (
@@ -309,14 +307,14 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     <span
                       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-medium text-[10px] ${
                         b.entity_subtitle.toLowerCase().includes('coal')
-                          ? 'border-amber-500/20 bg-amber-500/10 text-amber-400'
+                          ? 'border-amber-500/25 bg-amber-500/10 text-amber-700'
                           : b.entity_type === 'personnel'
-                            ? 'border-blue-500/20 bg-blue-500/10 text-blue-400'
+                            ? 'border-blue-500/25 bg-blue-500/10 text-blue-700'
                             : b.entity_type === 'vehicle'
-                              ? 'border-cyan-500/20 bg-cyan-500/10 text-cyan-400'
+                              ? 'border-cyan-500/25 bg-cyan-500/10 text-cyan-700'
                               : b.entity_type === 'visitor'
-                                ? 'border-purple-500/20 bg-purple-500/10 text-purple-400'
-                                : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
+                                ? 'border-purple-500/25 bg-purple-500/10 text-purple-700'
+                                : 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700'
                       }`}
                     >
                       {b.entity_subtitle.toLowerCase().includes('coal') ? (
@@ -334,8 +332,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-[10px] ${
                         b.is_active
-                          ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
-                          : 'border border-red-500/20 bg-red-500/10 text-red-400'
+                          ? 'border border-emerald-500/25 bg-emerald-500/10 text-emerald-700'
+                          : 'border border-red-500/25 bg-red-500/10 text-red-700'
                       }`}
                     >
                       {b.is_active ? (
@@ -347,11 +345,11 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     </span>
                   </td>
 
-                  <td className="p-3.5 text-slate-400">
+                  <td className="p-3.5 text-[var(--text-muted)]">
                     <div>
                       <span>Issued: {new Date(b.issued_at).toLocaleDateString('en-ZA')}</span>
                       {b.expires_at && (
-                        <p className="text-[10px] text-amber-400">
+                        <p className="text-[10px] text-amber-700">
                           Exp: {new Date(b.expires_at).toLocaleDateString('en-ZA')}
                         </p>
                       )}
@@ -362,7 +360,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     <button
                       type="button"
                       onClick={() => setInspectBadge(b)}
-                      className="inline-flex items-center gap-1 font-medium text-blue-400 text-xs hover:text-blue-300"
+                      className="inline-flex items-center gap-1 font-medium text-blue-700 text-xs hover:text-blue-600"
                     >
                       <QrCode className="h-3 w-3" /> View
                     </button>
@@ -370,7 +368,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                       <button
                         type="button"
                         onClick={() => handleRevoke(b.id)}
-                        className="inline-flex items-center gap-1 font-medium text-red-400 text-xs hover:text-red-300"
+                        className="inline-flex items-center gap-1 font-medium text-red-700 text-xs hover:text-red-600"
                       >
                         <XCircle className="h-3 w-3" /> Revoke
                       </button>

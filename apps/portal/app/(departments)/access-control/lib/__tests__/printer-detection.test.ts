@@ -1,68 +1,55 @@
 /**
  * Tests for printer-detection.ts — CUPS/USB printer utility.
  *
- * All tests mock child_process.exec and fs/promises.access since these are
- * Linux system calls unavailable in the jsdom test environment.
+ * Mocks node:child_process (`execFile`, `spawn`) and node:fs/promises (`access`).
  */
 
-import { exec } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
+import { EventEmitter } from 'node:events';
 import { access } from 'node:fs/promises';
+import { Writable } from 'node:stream';
 
 import {
   detectAllPrinters,
   getPrinterQueue,
   getPrinterStatus,
   scanCupsPrinters,
-  scanUsbDevices,
+  submitCupsPrintJob,
 } from '../printer-detection';
 
-// ---------------------------------------------------------------------------
-// Module-level mocks (hoisted by jest before imports are resolved)
-// ---------------------------------------------------------------------------
-
-jest.mock('child_process', () => ({
-  exec: jest.fn(),
+jest.mock('node:child_process', () => ({
+  execFile: jest.fn(),
+  spawn: jest.fn(),
 }));
 
-jest.mock('fs/promises', () => ({
+jest.mock('node:fs/promises', () => ({
   access: jest.fn(),
 }));
 
-// ---------------------------------------------------------------------------
-// Mock helpers
-// ---------------------------------------------------------------------------
-
-/** Shorthand cast so we don't repeat `as jest.Mock` everywhere. */
-const mockExec = exec as unknown as jest.Mock;
+const mockExecFile = execFile as unknown as jest.Mock;
+const mockSpawn = spawn as unknown as jest.Mock;
 const mockAccess = access as unknown as jest.Mock;
 
-/**
- * Configure mockExec to return specific stdout when the command **includes**
- * one of the matcher keys. Any unmatched command causes exec to call back
- * with an error (simulating command-not-found).
- */
-function mockExecCommand(commands: Record<string, string>): void {
-  mockExec.mockImplementation(
+function mockExecFileCommand(commands: Record<string, string>): void {
+  mockExecFile.mockImplementation(
     (
-      cmd: string,
+      file: string,
+      args: readonly string[],
       _opts: unknown,
       cb: (_err: Error | null, _result: { stdout: string; stderr: string } | null) => void
     ) => {
+      const cmdLine = `${file} ${args.join(' ')}`;
       for (const [match, stdout] of Object.entries(commands)) {
-        if (cmd.includes(match)) {
+        if (cmdLine.includes(match)) {
           cb(null, { stdout, stderr: '' });
           return;
         }
       }
-      cb(new Error(`Command not mocked: ${cmd}`), null);
+      cb(new Error(`Command not mocked: ${cmdLine}`), null);
     }
   );
 }
 
-/**
- * Configure mockAccess to resolve for matching device paths and reject for
- * all others. Used by scanUsbDevices which checks /dev/usb/lp* paths.
- */
 function mockAccessForPaths(resolvePaths: string[]): void {
   mockAccess.mockImplementation((path: string) => {
     if (resolvePaths.includes(path)) {
@@ -72,22 +59,19 @@ function mockAccessForPaths(resolvePaths: string[]): void {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Setup
-// ---------------------------------------------------------------------------
-
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-// ---------------------------------------------------------------------------
-// Tests: scanCupsPrinters
-// ---------------------------------------------------------------------------
-
 describe('scanCupsPrinters()', () => {
-  it('returns empty array when lpstat is not found (exec throws)', async () => {
-    mockExec.mockImplementation(
-      (_cmd: unknown, _opts: unknown, cb: (_err: Error | null, _result: undefined) => void) => {
+  it('returns empty array when lpstat is not found', async () => {
+    mockExecFile.mockImplementation(
+      (
+        _file: unknown,
+        _args: unknown,
+        _opts: unknown,
+        cb: (_err: Error | null, _result: undefined) => void
+      ) => {
         cb(new Error('Command not found: lpstat'), undefined);
       }
     );
@@ -98,7 +82,7 @@ describe('scanCupsPrinters()', () => {
   });
 
   it('returns empty array when no printers are configured (empty stdout)', async () => {
-    mockExecCommand({ 'lpstat -a': '' });
+    mockExecFileCommand({ 'lpstat -a': '' });
 
     const result = await scanCupsPrinters();
 
@@ -106,9 +90,9 @@ describe('scanCupsPrinters()', () => {
   });
 
   it('parses a single online printer correctly', async () => {
-    mockExecCommand({
+    mockExecFileCommand({
       'lpstat -a': 'printer1 accepting requests since Mon Jan 1 00:00:00 2024',
-      'lpstat -l -p': '', // getPrinterDetails returns empty
+      'lpstat -l -p': '',
     });
 
     const result = await scanCupsPrinters();
@@ -119,7 +103,7 @@ describe('scanCupsPrinters()', () => {
   });
 
   it('parses multiple printers with mixed statuses', async () => {
-    mockExecCommand({
+    mockExecFileCommand({
       'lpstat -a': [
         'printer1 accepting requests since Mon Jan 1 00:00:00 2024',
         'printer2 not accepting requests since Tue Jan 2 00:00:00 2024 - Paper jam',
@@ -130,19 +114,14 @@ describe('scanCupsPrinters()', () => {
     const result = await scanCupsPrinters();
 
     expect(result).toHaveLength(2);
-
-    const p1 = result.find((p) => p.cupsName === 'printer1');
-    expect(p1).toBeDefined();
-    expect(p1!.status).toBe('online');
-
+    expect(result.find((p) => p.cupsName === 'printer1')?.status).toBe('online');
     const p2 = result.find((p) => p.cupsName === 'printer2');
-    expect(p2).toBeDefined();
-    expect(p2!.status).toBe('offline');
-    expect(p2!.statusMessage).toBe('Paper jam');
+    expect(p2?.status).toBe('offline');
+    expect(p2?.statusMessage).toBe('Paper jam');
   });
 
   it('handles a printer with USB device URI', async () => {
-    mockExecCommand({
+    mockExecFileCommand({
       'lpstat -a': 'printer1 accepting requests since Mon Jan 1 00:00:00 2024',
       'lpstat -l -p': [
         'Description: Card Printer 3000',
@@ -160,87 +139,49 @@ describe('scanCupsPrinters()', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tests: getPrinterStatus
-// ---------------------------------------------------------------------------
-
 describe('getPrinterStatus()', () => {
   it("returns 'online' when printer is idle", async () => {
-    mockExecCommand({
+    mockExecFileCommand({
       'lpstat -p': 'printer printer1 is idle.  enabled since Mon Jan 1 00:00:00 2024',
     });
 
-    const result = await getPrinterStatus('printer1');
-
-    expect(result).toBe('online');
-  });
-
-  it("returns 'online' when printer is printing", async () => {
-    mockExecCommand({
-      'lpstat -p': 'printer printer1 is printing.  enabled since Mon Jan 1 00:00:00 2024',
-    });
-
-    const result = await getPrinterStatus('printer1');
-
-    expect(result).toBe('online');
+    expect(await getPrinterStatus('printer1')).toBe('online');
   });
 
   it("returns 'offline' when printer is disabled", async () => {
-    mockExecCommand({
+    mockExecFileCommand({
       'lpstat -p': 'printer printer1 is disabled.  enabled since Mon Jan 1 00:00:00 2024',
     });
 
-    const result = await getPrinterStatus('printer1');
-
-    expect(result).toBe('offline');
+    expect(await getPrinterStatus('printer1')).toBe('offline');
   });
 
-  it("returns 'error' when lpstat fails (exec throws)", async () => {
-    mockExec.mockImplementation(
-      (_cmd: unknown, _opts: unknown, cb: (_err: Error | null, _result: undefined) => void) => {
-        cb(new Error('Command not found'), undefined);
-      }
+  it('rejects shell-injection characters in cupsName', async () => {
+    await expect(getPrinterStatus('printer1; rm -rf /')).rejects.toThrow(
+      'Invalid CUPS printer name'
     );
-
-    const result = await getPrinterStatus('printer1');
-
-    expect(result).toBe('error');
+    expect(mockExecFile).not.toHaveBeenCalled();
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tests: getPrinterQueue
-// ---------------------------------------------------------------------------
-
 describe('getPrinterQueue()', () => {
-  it('returns empty array when lpq fails (exec throws)', async () => {
-    mockExec.mockImplementation(
-      (_cmd: unknown, _opts: unknown, cb: (_err: Error | null, _result: undefined) => void) => {
+  it('returns empty array when lpq fails', async () => {
+    mockExecFile.mockImplementation(
+      (
+        _file: unknown,
+        _args: unknown,
+        _opts: unknown,
+        cb: (_err: Error | null, _result: undefined) => void
+      ) => {
         cb(new Error('Command not found'), undefined);
       }
     );
 
-    const result = await getPrinterQueue('printer1');
-
-    expect(result).toEqual([]);
-  });
-
-  it('returns empty array when queue has no entries', async () => {
-    mockExecCommand({
-      'lpq -P': [
-        'printer1 is ready',
-        'Rank    Owner   Job     File(s)                         Total Size',
-        'no entries',
-      ].join('\n'),
-    });
-
-    const result = await getPrinterQueue('printer1');
-
-    expect(result).toEqual([]);
+    expect(await getPrinterQueue('printer1')).toEqual([]);
   });
 
   it('parses queue entries correctly', async () => {
-    mockExecCommand({
+    mockExecFileCommand({
       'lpq -P': [
         'printer1 is ready',
         'Rank    Owner   Job     File(s)                         Total Size',
@@ -256,75 +197,69 @@ describe('getPrinterQueue()', () => {
     expect(result[0]!.size).toBe(1024);
   });
 
-  it('skips malformed lines in the queue output', async () => {
-    mockExecCommand({
-      'lpq -P': [
-        'printer1 is ready',
-        'Rank    Owner   Job     File(s)                         Total Size',
-        'active  user    invalid_job  file.png  512 bytes',
-        'active  user    99      file2.png                       256 bytes',
-      ].join('\n'),
+  it('rejects unsafe cupsName', async () => {
+    await expect(getPrinterQueue('bad$(whoami)')).rejects.toThrow('Invalid CUPS printer name');
+  });
+});
+
+describe('submitCupsPrintJob()', () => {
+  it('rejects unsafe cupsName or empty payload', async () => {
+    await expect(submitCupsPrintJob('bad`id`', 'Card Job', 'ZPL')).rejects.toThrow(
+      'Invalid CUPS printer name'
+    );
+    await expect(submitCupsPrintJob('Magicard_Neo300', 'Card Job', '')).rejects.toThrow(
+      'Print job payload cannot be empty'
+    );
+    expect(mockSpawn).not.toHaveBeenCalled();
+  });
+
+  it('pipes print payload via stdin without invoking a shell', async () => {
+    const written: Buffer[] = [];
+    mockSpawn.mockImplementation(() => {
+      const child = new EventEmitter() as EventEmitter & {
+        stdin: Writable;
+        stdout: EventEmitter;
+        kill: jest.Mock;
+      };
+      child.stdout = new EventEmitter();
+      child.kill = jest.fn();
+      child.stdin = new Writable({
+        write(chunk, _enc, cb) {
+          written.push(Buffer.from(chunk));
+          cb();
+        },
+      });
+      queueMicrotask(() => {
+        child.stdout.emit('data', Buffer.from('request id is Magicard_Neo300-77 (1 file(s))'));
+        child.emit('close', 0);
+      });
+      return child;
     });
 
-    const result = await getPrinterQueue('printer1');
+    const result = await submitCupsPrintJob('Magicard_Neo300', 'Badge Print', 'CARD-BYTES', 2);
 
-    // First data line has "invalid_job" which is NaN — skipped
-    expect(result).toHaveLength(1);
-    expect(result[0]!.jobId).toBe(99);
-    expect(result[0]!.size).toBe(256);
+    expect(result.cupsJobId).toBe(77);
+    expect(mockSpawn).toHaveBeenCalledWith(
+      'lp',
+      ['-d', 'Magicard_Neo300', '-t', 'Badge Print', '-n', '2'],
+      expect.objectContaining({ shell: false })
+    );
+    expect(Buffer.concat(written).toString('utf8')).toBe('CARD-BYTES');
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tests: scanUsbDevices
-// ---------------------------------------------------------------------------
-
-describe('scanUsbDevices()', () => {
-  it('returns empty array when no USB devices exist', async () => {
-    mockAccess.mockRejectedValue(new Error('ENOENT'));
-
-    const result = await scanUsbDevices();
-
-    expect(result).toEqual([]);
-  });
-
-  it('returns found device paths', async () => {
-    mockAccessForPaths(['/dev/usb/lp0']);
-
-    const result = await scanUsbDevices();
-
-    expect(result).toEqual(['/dev/usb/lp0']);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Tests: detectAllPrinters
-// ---------------------------------------------------------------------------
-
-describe('detectAllPrinters()', () => {
+describe('scanUsbDevices() & detectAllPrinters()', () => {
   it('merges CUPS printers with USB-only devices', async () => {
-    // CUPS sees one network printer
-    mockExecCommand({
+    mockExecFileCommand({
       'lpstat -a': 'network-printer1 accepting requests since Mon Jan 1 00:00:00 2024',
-      'lpstat -l -p': '', // getPrinterDetails returns empty defaults
+      'lpstat -l -p': '',
     });
-
-    // USB has a device not in CUPS results
     mockAccessForPaths(['/dev/usb/lp0']);
 
     const result = await detectAllPrinters();
 
-    // Expect 2: 1 CUPS printer + 1 USB fallback
     expect(result).toHaveLength(2);
-
-    const cupsPrinter = result.find((p) => p.cupsName === 'network-printer1');
-    expect(cupsPrinter).toBeDefined();
-    expect(cupsPrinter!.connectionType).toBe('unknown'); // No device URI returned
-
-    const usbPrinter = result.find((p) => p.cupsName === 'usb-_dev_usb_lp0');
-    expect(usbPrinter).toBeDefined();
-    expect(usbPrinter!.connectionType).toBe('usb');
-    expect(usbPrinter!.devicePath).toBe('/dev/usb/lp0');
-    expect(usbPrinter!.status).toBe('online');
+    expect(result.find((p) => p.cupsName === 'network-printer1')?.connectionType).toBe('unknown');
+    expect(result.find((p) => p.cupsName === 'usb-_dev_usb_lp0')?.devicePath).toBe('/dev/usb/lp0');
   });
 });

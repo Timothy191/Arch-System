@@ -91,7 +91,7 @@ describe('access-control/visitors/actions', () => {
             });
             chain.update = jest.fn((payload: Record<string, unknown>) => {
               visitorUpdates.push(payload);
-              return createFluentQuery({ data: null, error: null });
+              return createFluentQuery({ data: [{ id: 'v-overdue' }], error: null });
             });
             return chain;
           }
@@ -189,7 +189,9 @@ describe('access-control/visitors/actions', () => {
               ],
               error: null,
             });
-            fallbackChain.update = jest.fn(() => createFluentQuery({ data: null, error: null }));
+            fallbackChain.update = jest.fn(() =>
+              createFluentQuery({ data: [{ id: 'v-badge-overdue' }], error: null })
+            );
             return fallbackChain;
           }
 
@@ -256,7 +258,7 @@ describe('access-control/visitors/actions', () => {
             const chain = createFluentQuery({ data: null, error: null });
             chain.update = jest.fn((payload: Record<string, unknown>) => {
               visitorUpdates.push(payload);
-              return createFluentQuery({ data: null, error: null });
+              return createFluentQuery({ data: [{ id: 'v-overdue' }], error: null });
             });
             return chain;
           }

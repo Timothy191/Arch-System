@@ -1,6 +1,7 @@
 'use client';
 
-import { useOfflineQueue, usePitConnectivity } from '@repo/shared/hooks';
+import { useOfflineQueue, usePitConnectivity, useSupabaseRealtime } from '@repo/shared/hooks';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
   AlertCircle,
@@ -14,7 +15,8 @@ import {
   Search,
   Users,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useTypewriterPlaceholder } from '@/hooks/useTypewriterPlaceholder';
 import {
@@ -43,6 +45,7 @@ interface MusterRollCallViewProps {
 }
 
 export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) {
+  const router = useRouter();
   const [summary] = useState<MusterSummary>(initialSummary);
   const [records, setRecords] = useState<MusterPersonnelRecord[]>(initialSummary.records);
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,6 +59,39 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const { isOnline } = usePitConnectivity();
   const { enqueue, queue, isSyncing } = useOfflineQueue();
+
+  useEffect(() => {
+    setRecords(initialSummary.records);
+  }, [initialSummary.records]);
+
+  useEffect(() => {
+    if (isOnline && queue.length > 0 && !isSyncing) {
+      void useOfflineQueue
+        .getState()
+        .sync()
+        .then(() => {
+          router.refresh();
+        });
+    }
+  }, [isOnline, queue.length, isSyncing, router]);
+
+  const supabase = useMemo(() => {
+    try {
+      return createBrowserSupabaseClient();
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useSupabaseRealtime({
+    supabaseClient: supabase,
+    table: 'muster_events',
+    event: '*',
+    enabled: Boolean(supabase),
+    onChange: () => {
+      router.refresh();
+    },
+  });
 
   // Bolt Optimization: Aggregate status counts and per-station counts in a single pass O(R) loop.
   // Replaces multiple O(R) .filter calls and O(S * R) station count lookups inside render loops.
@@ -98,6 +134,9 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
       minute: '2-digit',
     });
 
+    const defaultStation = summary.musterStations[0]?.name ?? 'Production & Logistics Department';
+    const targetStation = record.station || defaultStation;
+
     // Optimistic update
     setRecords((prev) =>
       prev.map((r) =>
@@ -106,7 +145,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
               ...r,
               status: nextStatus,
               checkedOffAt: nextStatus === 'accounted' ? nowTime : null,
-              station: nextStatus === 'accounted' ? r.station || 'Muster Point Alpha' : null,
+              station: nextStatus === 'accounted' ? targetStation : null,
             }
           : r
       )
@@ -114,8 +153,10 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
 
     const musterPayload = {
       entityId: record.id,
+      entityType: record.entityType,
+      entityName: record.name,
       status: nextStatus === 'accounted' ? ('accounted' as const) : ('unaccounted' as const),
-      station: nextStatus === 'accounted' ? record.station || 'Muster Point Alpha' : undefined,
+      station: nextStatus === 'accounted' ? targetStation : undefined,
     };
 
     try {
@@ -134,8 +175,9 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            personnel_id: musterPayload.entityId,
+            personnel_id: record.entityType === 'personnel' ? musterPayload.entityId : undefined,
             entityId: musterPayload.entityId,
+            entityType: record.entityType,
             status: musterPayload.status,
             station: musterPayload.station,
             muster_point: musterPayload.station,
@@ -143,6 +185,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
             entityName: record.name,
             name: record.name,
             badge_code: record.id,
+            recordedAt: new Date().toISOString(),
           }),
           description: `Muster ${nextStatus}: ${record.name}`,
         });
@@ -151,14 +194,17 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
         );
       }
     } catch {
-      // Revert on failure
-      setRecords((prev) =>
-        prev.map((r) => (r.id === record.id ? { ...r, status: record.status } : r))
-      );
+      // Revert full record (status, station, checkedOffAt) on failure
+      setRecords((prev) => prev.map((r) => (r.id === record.id ? record : r)));
       toast.error('Failed to update muster status');
     } finally {
       setIsUpdating(null);
     }
+  };
+
+  const escapeCsvCell = (raw: string): string => {
+    const formulaNeutralized = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
+    return `"${formulaNeutralized.replace(/"/g, '""')}"`;
   };
 
   const handleExportCSV = () => {
@@ -174,22 +220,23 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
       'Induction Valid',
     ];
     const rows = records.map((r) => [
-      `"${r.name}"`,
-      r.entityType,
-      `"${r.company}"`,
-      `"${r.roleOrPurpose}"`,
-      `"${r.assignedZone}"`,
-      r.status.toUpperCase(),
-      r.station || 'N/A',
-      r.checkedOffAt || 'N/A',
-      r.inductionValid ? 'YES' : 'NO',
+      escapeCsvCell(r.name),
+      escapeCsvCell(r.entityType),
+      escapeCsvCell(r.company),
+      escapeCsvCell(r.roleOrPurpose),
+      escapeCsvCell(r.assignedZone),
+      escapeCsvCell(r.status.toUpperCase()),
+      escapeCsvCell(r.station || 'N/A'),
+      escapeCsvCell(r.checkedOffAt || 'N/A'),
+      escapeCsvCell(r.inductionValid ? 'YES' : 'NO'),
     ]);
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const csvText = [headers.map(escapeCsvCell).join(','), ...rows.map((e) => e.join(','))].join(
+      '\n'
+    );
+    const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+    const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.setAttribute('href', objectUrl);
     link.setAttribute(
       'download',
       `emergency_muster_roll_call_${new Date().toISOString().split('T')[0]}.csv`
@@ -197,6 +244,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
     toast.success('Emergency roll call exported for safety marshals.');
   };
 
@@ -363,10 +411,11 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
         {summary.musterStations.map((station) => {
           const stationCount = stationCounts.get(station.name) || 0;
           return (
-            <div
+            <button
+              type="button"
               key={station.id}
               onClick={() => setSelectedStation(station.name)}
-              className={`${MUSTER_STATION_CARD_BASE} ${
+              className={`${MUSTER_STATION_CARD_BASE} text-left ${
                 selectedStation === station.name
                   ? 'border-accent-gold ring-2 ring-accent-gold/30'
                   : 'border-accent-gold/60'
@@ -385,7 +434,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
               <p className="mt-2 font-mono text-[11px] text-[var(--text-secondary)]">
                 Target: {station.targetZone}
               </p>
-            </div>
+            </button>
           );
         })}
       </div>

@@ -19,6 +19,10 @@ import {
 } from './access-reports-studio';
 import AccessControlReportsPage from './page';
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: jest.fn(), refresh: jest.fn(), push: jest.fn() }),
+}));
+
 jest.mock('next/server', () => ({
   connection: jest.fn(async () => undefined),
 }));
@@ -372,11 +376,14 @@ describe('AccessReportsStudio', () => {
     const pdfLink = within(nav).getByRole('link', { name: 'PDF Report' });
     const whatsappLink = within(nav).getByRole('link', { name: 'WhatsApp Report' });
 
-    expect(dashboardLink).toHaveAttribute('href', '/access-control/reports');
+    expect(dashboardLink).toHaveAttribute('href', '/access-control/reports?range=7days');
     expect(dashboardLink).toHaveAttribute('aria-current', 'page');
-    expect(pdfLink).toHaveAttribute('href', '/access-control/reports?tab=pdf-report');
+    expect(pdfLink).toHaveAttribute('href', '/access-control/reports?tab=pdf-report&range=7days');
     expect(pdfLink).not.toHaveAttribute('aria-current');
-    expect(whatsappLink).toHaveAttribute('href', '/access-control/reports?tab=whatsapp-report');
+    expect(whatsappLink).toHaveAttribute(
+      'href',
+      '/access-control/reports?tab=whatsapp-report&range=7days'
+    );
     expect(whatsappLink).not.toHaveAttribute('aria-current');
 
     expect(screen.getByText('1,240')).toBeInTheDocument();
@@ -609,7 +616,11 @@ describe('AccessControlReportsPage', () => {
 
     expect(mockConnection).toHaveBeenCalledTimes(1);
     expect(mockGetDepartmentContext).toHaveBeenCalledWith({ department: 'access-control' });
-    expect(mockGetAccessReportsData).toHaveBeenCalledWith('dept-access-1');
+    expect(mockGetAccessReportsData).toHaveBeenCalledWith(
+      'dept-access-1',
+      expect.any(String),
+      expect.any(String)
+    );
     expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page');
   });
 

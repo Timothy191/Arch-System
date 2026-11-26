@@ -57,8 +57,6 @@ export const DEPARTMENTS: Department[] = [
     type: 'standard',
     status: 'active',
     gridSpan: 'md:col-span-1 xl:col-span-1',
-    stats: { label: 'On-site', value: '142' },
-    trend: [135, 138, 140, 139, 141, 142, 142, 143],
     actions: [
       { label: 'Print Cards', href: '/access-control/print-cards' },
       { label: 'QR & RFID Codes', href: '/access-control/qr-codes' },

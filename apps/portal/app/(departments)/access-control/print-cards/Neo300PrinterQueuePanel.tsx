@@ -4,7 +4,6 @@ import { Button } from '@repo/ui/components/ui/button';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Clock, Cpu, Download, Edit3, Printer } from 'lucide-react';
 import Image from 'next/image';
-import { toast } from 'sonner';
 import type { CardPrintJob, EmployeeCardProfile, Neo300Printer } from './actions';
 
 interface Neo300PrinterQueuePanelProps {
@@ -143,11 +142,15 @@ export function Neo300PrinterQueuePanel({
 
               <Button
                 variant="outline"
-                className="gap-2"
-                onClick={() => toast.info('PDF card preview ready for download')}
+                className="gap-2 print:hidden"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.print();
+                  }
+                }}
               >
                 <Download className="h-4 w-4" />
-                PDF
+                Print / PDF
               </Button>
             </div>
           </div>
@@ -220,10 +223,10 @@ export function Neo300PrinterQueuePanel({
                         Cancel
                       </button>
                     )}
-                    {j.status === 'completed' && (
+                    {j.status === 'completed' && j.personnel_id && (
                       <button
                         type="button"
-                        onClick={() => onPrint(j.personnel_id || '')}
+                        onClick={() => onPrint(j.personnel_id!)}
                         className="font-medium text-blue-600 text-xs hover:text-blue-500"
                       >
                         Reprint

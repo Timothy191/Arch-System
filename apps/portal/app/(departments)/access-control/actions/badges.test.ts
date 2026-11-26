@@ -100,6 +100,7 @@ function buildSupabaseChain(
       return chain;
     }),
     order: jest.fn(() => chain),
+    limit: jest.fn(() => chain),
     range: jest.fn((from: number, to: number) => {
       state.rangeFrom = from;
       state.rangeTo = to;

@@ -4,9 +4,20 @@ import type { MusterSummary } from '../actions';
 import { MusterRollCallView } from './muster-roll-call-view';
 
 // Mock dependencies
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: jest.fn() }),
+}));
+
+jest.mock('@repo/supabase/client', () => ({
+  createBrowserSupabaseClient: () => ({}),
+}));
+
 jest.mock('@repo/shared/hooks', () => ({
   usePitConnectivity: () => ({ isOnline: true }),
-  useOfflineQueue: () => ({ enqueue: jest.fn(), queue: [], isSyncing: false }),
+  useOfflineQueue: Object.assign(() => ({ enqueue: jest.fn(), queue: [], isSyncing: false }), {
+    getState: () => ({ sync: jest.fn().mockResolvedValue(undefined) }),
+  }),
+  useSupabaseRealtime: jest.fn(),
 }));
 
 jest.mock('../actions', () => ({

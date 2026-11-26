@@ -1,16 +1,19 @@
 'use server';
 
+import {
+  bulkPrintCardsSchema,
+  printCardRequestSchema,
+} from '@repo/contract/schemas/access-control.schema';
+import { logger } from '@repo/logger/server';
+import { FixedWindowStrategy, MemoryStore, RateLimiter, RedisStore } from '@repo/rate-limiter';
+import { cacheInvalidateTags, getRedisClient } from '@repo/redis';
 import type { BadgesRow, IssuedCardsRow, PersonnelRow } from '@repo/supabase';
-import { getAuthenticatedEmployee } from '@repo/supabase';
-import { createServerSupabaseClient } from '@repo/supabase/server';
 import { RawSocketBridge } from '@repo/utils';
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
+import { revalidatePath } from 'next/cache';
+import { DatabaseError, RateLimitError, ValidationError } from '@/lib/errors/error-classes';
 import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
+import { assertAccessControlRoleFor } from '../actions/shared';
 import { submitCupsPrintJob } from '../lib/printer-detection';
-
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
 
 export interface PersonnelSearchResult {
   id: string;
@@ -30,28 +33,38 @@ export interface PersonnelDetail extends PersonnelRow {
   photo_signed_url: string | null;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Auth helper                                                        */
-/* ------------------------------------------------------------------ */
+const CARD_ACTION_ROLES = ['admin', 'access_control'] as const;
 
-async function assertAccessCardActionsRole() {
-  const supabase = await createServerSupabaseClient();
-  const principal = await getAuthenticatedEmployee(supabase);
-  if (!principal?.employee) throw new AuthError('Unauthorized');
-
-  if (!['admin', 'access_control'].includes(principal.employee.role)) {
-    throw new ForbiddenError('Forbidden: access_control or admin role required', {
-      resource: 'card_actions',
-      action: 'assert_role',
+function createCardPrintLimiter(): RateLimiter {
+  try {
+    const redis = getRedisClient();
+    return new RateLimiter({
+      store: redis ? new RedisStore(redis as never) : new MemoryStore(),
+      strategy: new FixedWindowStrategy(),
+      limit: 30,
+      windowMs: 60_000,
+      keyPrefix: 'ratelimit:card_actions_print:',
+    });
+  } catch {
+    return new RateLimiter({
+      store: new MemoryStore(),
+      strategy: new FixedWindowStrategy(),
+      limit: 30,
+      windowMs: 60_000,
+      keyPrefix: 'ratelimit:card_actions_print:',
     });
   }
-
-  return { supabase, user: principal.user, employee: principal.employee };
 }
 
-/* ------------------------------------------------------------------ */
-/*  1. Search Personnel                                                */
-/* ------------------------------------------------------------------ */
+const cardPrintLimiter = createCardPrintLimiter();
+
+async function assertAccessCardActionsRole() {
+  return assertAccessControlRoleFor({
+    allowedRoles: CARD_ACTION_ROLES,
+    resource: 'card_actions',
+    forbiddenMessage: 'Forbidden: access_control or admin role required',
+  });
+}
 
 export async function searchPersonnel(query: string): Promise<PersonnelSearchResult[]> {
   const { supabase } = await assertAccessCardActionsRole();
@@ -102,10 +115,6 @@ export async function searchPersonnel(query: string): Promise<PersonnelSearchRes
   }));
 }
 
-/* ------------------------------------------------------------------ */
-/*  2. Get Personnel Detail                                            */
-/* ------------------------------------------------------------------ */
-
 export async function getPersonnelDetail(personnelId: string): Promise<PersonnelDetail | null> {
   const { supabase } = await assertAccessCardActionsRole();
 
@@ -122,6 +131,7 @@ export async function getPersonnelDetail(personnelId: string): Promise<Personnel
       table: 'personnel',
     });
   }
+  if (!personnel) return null;
 
   const { data: badge } = await supabase
     .from('badges')
@@ -139,9 +149,9 @@ export async function getPersonnelDetail(personnelId: string): Promise<Personnel
 
   let photoSignedUrl: string | null = null;
   if (personnel.photo_url) {
-    if (personnel.photo_url.startsWith('http')) {
+    if (personnel.photo_url.startsWith('https://')) {
       photoSignedUrl = personnel.photo_url;
-    } else {
+    } else if (!personnel.photo_url.startsWith('http')) {
       const { data: signedData } = await supabase.storage
         .from('personnel-photos')
         .createSignedUrl(personnel.photo_url, 3600);
@@ -157,14 +167,30 @@ export async function getPersonnelDetail(personnelId: string): Promise<Personnel
   };
 }
 
-/* ------------------------------------------------------------------ */
-/*  3. Print Card for Personnel                                        */
-/* ------------------------------------------------------------------ */
+function buildCr80CardZpl(detail: PersonnelDetail, qrCode: string | null): string {
+  const fullName = `${detail.first_name} ${detail.surname}`.replace(/[\^~]/g, '');
+  const role = (detail.job_title ?? 'Personnel').replace(/[\^~]/g, '');
+  const qr = (qrCode ?? detail.id).replace(/[\^~]/g, '');
+  return `^XA^FO40,40^A0N,32,32^FD${fullName}^FS^FO40,85^A0N,22,22^FD${role}^FS^FO40,130^BQN,2,6^FDQA,${qr}^FS^XZ`;
+}
 
 export async function printCardForPersonnel(personnelId: string, templateId?: string) {
-  const { supabase, employee } = await assertAccessCardActionsRole();
+  const { supabase, employee, departmentId } = await assertAccessCardActionsRole();
+  const parsed = printCardRequestSchema.safeParse({
+    personnelId,
+    templateId: templateId ?? null,
+    printCopies: 1,
+  });
+  if (!parsed.success) {
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid print card request');
+  }
 
-  const detail = await getPersonnelDetail(personnelId);
+  const { allowed } = await cardPrintLimiter.check(employee.id);
+  if (!allowed) {
+    throw new RateLimitError('Print rate limit exceeded. Please wait.');
+  }
+
+  const detail = await getPersonnelDetail(parsed.data.personnelId);
   if (!detail) {
     throw new DatabaseError('Personnel not found', { table: 'personnel' });
   }
@@ -182,13 +208,13 @@ export async function printCardForPersonnel(personnelId: string, templateId?: st
   const { data: job, error } = await supabase
     .from('print_jobs')
     .insert({
-      personnel_id: personnelId,
+      personnel_id: parsed.data.personnelId,
       employee_name: `${detail.first_name} ${detail.surname}`,
       role_title: detail.job_title,
       qr_code_data: qrCode,
       status: 'queued',
       printer_id: printer?.id ?? null,
-      template_id: templateId ?? null,
+      template_id: parsed.data.templateId ?? null,
       created_by: employee.id,
       expires_at: detail.induction_expiry ?? undefined,
     })
@@ -205,20 +231,21 @@ export async function printCardForPersonnel(personnelId: string, templateId?: st
   let cupsJobId: number | null = null;
   if (printer?.cups_name) {
     try {
+      const zplPayload = buildCr80CardZpl(detail, qrCode);
       if (printer.cups_name.startsWith('Zebra-') || printer.cups_name.startsWith('ZPL-')) {
-        // Use production-ready RawSocketBridge for direct ZPL binary transmission on Port 9100
         const host = process.env.PRINTER_HOST || '127.0.0.1';
         const bridge = new RawSocketBridge({ host, port: 9100, timeout: 5000 });
-        const zplPayload = Buffer.from(`^XA^FO50,50^BQN,2,10^FDQA,${qrCode}^FS^XZ`);
-        await bridge.send(zplPayload);
-        // Raw socket transmission has no CUPS job ID; leave cupsJobId null so
-        // the print_jobs row stays 'queued' rather than recording a fake ID.
+        await bridge.send(Buffer.from(zplPayload, 'utf8'));
       } else {
-        const result = await submitCupsPrintJob(printer.cups_name, `card-${personnelId}`);
+        const result = await submitCupsPrintJob(
+          printer.cups_name,
+          `card-${parsed.data.personnelId}`,
+          zplPayload
+        );
         cupsJobId = result.cupsJobId;
       }
     } catch {
-      // Submission is best-effort; job remains queued in DB
+      // On-prem bridge/CUPS unreachable from cloud — job remains queued for print bridge
     }
   }
 
@@ -229,18 +256,38 @@ export async function printCardForPersonnel(personnelId: string, templateId?: st
       .eq('id', job.id);
   }
 
+  logger.info({
+    event: 'card_print_job_queued',
+    actorId: employee.id,
+    personnelId: parsed.data.personnelId,
+    jobId: job.id,
+    cupsJobId,
+  });
+
+  await cacheInvalidateTags([
+    'table:print_jobs',
+    ...(departmentId ? [`dept:${departmentId}`] : []),
+  ]);
+  revalidatePath('/access-control/print-cards');
+
   return { job: { ...job, cups_job_id: cupsJobId }, printer };
 }
 
-/* ------------------------------------------------------------------ */
-/*  4. Bulk Print Cards for Personnel                                  */
-/* ------------------------------------------------------------------ */
-
 export async function bulkPrintCardsForPersonnel(personnelIds: string[], templateId?: string) {
+  await assertAccessCardActionsRole();
+
+  const parsed = bulkPrintCardsSchema.safeParse({
+    personnelIds,
+    templateId: templateId ?? null,
+  });
+  if (!parsed.success) {
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid bulk print payload');
+  }
+
   const results = [];
-  for (const id of personnelIds) {
+  for (const id of parsed.data.personnelIds) {
     try {
-      const res = await printCardForPersonnel(id, templateId);
+      const res = await printCardForPersonnel(id, parsed.data.templateId ?? undefined);
       results.push({ id, status: 'success', data: res });
     } catch (err) {
       results.push({
@@ -253,15 +300,11 @@ export async function bulkPrintCardsForPersonnel(personnelIds: string[], templat
   return results;
 }
 
-/* ------------------------------------------------------------------ */
-/*  5. Get Card Templates                                              */
-/* ------------------------------------------------------------------ */
-
 export async function getCardTemplates() {
   const { supabase } = await assertAccessCardActionsRole();
   const { data, error } = await supabase
     .from('card_templates')
-    .select('id, name, background, is_default')
+    .select('id, name, description, layout, is_default, background')
     .is('deleted_at', null)
     .order('is_default', { ascending: false });
 

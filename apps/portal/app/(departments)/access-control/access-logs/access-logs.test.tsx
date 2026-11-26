@@ -258,7 +258,10 @@ describe('AccessLogsClient, AccessLogsPage & Attendance Register', () => {
 
     const heading = screen.getByText('Access Logs & Attendance Register');
     expect(heading).toBeInTheDocument();
-    expect(heading.closest('.gold-steel-border')).toHaveClass('!bg-white', 'border-accent-gold/70');
+    expect(heading.closest('.gold-steel-border')).toHaveClass(
+      'liquid-glass-light',
+      'gold-steel-border'
+    );
     expect(screen.queryByText(/Easy Scanner Console/i)).not.toBeInTheDocument();
     expect(screen.getByText('Registered Scanners Verified')).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Access Logs Stream/i })).toHaveClass(
