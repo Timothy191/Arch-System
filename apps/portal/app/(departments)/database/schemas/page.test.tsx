@@ -74,8 +74,13 @@ describe('DatabaseSchemasPage (/database/schemas) & Visual ER Diagram', () => {
 
     fireEvent.change(searchInput, { target: { value: '' } });
     fireEvent.click(screen.getByRole('button', { name: 'Access Control & Gate' }));
+    const accessControlTableCount = ER_TABLES.filter(
+      (table) => table.domainGroup === 'access'
+    ).length;
     expect(
-      screen.getByText(new RegExp(`Table Definitions \\(5 of ${ER_TABLES.length}\\)`, 'i'))
+      screen.getByText(
+        new RegExp(`Table Definitions \\(${accessControlTableCount} of ${ER_TABLES.length}\\)`, 'i')
+      )
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /All Domains/i }));
