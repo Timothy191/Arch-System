@@ -2,6 +2,7 @@ import { logger } from '@repo/logger/server';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { NextResponse } from 'next/server';
 import { executeVisitorAutoExitSweep } from '@/app/(departments)/access-control/visitors/auto-exit-service';
+import { triggerOperationalAlertWorkflow } from '@/lib/alerts/operational-alert-triggers';
 import { authorizeCronRequest } from '@/lib/api/cron-auth';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
@@ -31,6 +32,16 @@ export async function GET(req: Request) {
     }
 
     const result = await executeVisitorAutoExitSweep(supabase, deptRow.id);
+    await triggerOperationalAlertWorkflow({
+      event: {
+        eventType: 'visitor.auto_exit.completed',
+        source: 'cron.visitor-auto-exit',
+        autoExitedCount: result.autoExited.length,
+        visitorIds: result.autoExited.map((visitor) => visitor.id),
+        departmentId: deptRow.id,
+        timestamp: new Date().toISOString(),
+      },
+    });
     recordJobExecution(JOB_ID, Date.now() - startedAtMs, true);
     return NextResponse.json({
       success: true,

@@ -18,6 +18,12 @@ jest.mock('@/app/(departments)/access-control/visitors/auto-exit-service', () =>
   executeVisitorAutoExitSweep: (...args: unknown[]) => mockExecuteVisitorAutoExitSweep(...args),
 }));
 
+const mockSendOperationalAlert = jest.fn().mockResolvedValue({ acknowledged: true });
+jest.mock('@repo/utils/novu', () => ({
+  sendOperationalAlert: (...args: unknown[]) => mockSendOperationalAlert(...args),
+}));
+
+import { resetAlertTriggerCooldowns } from '@/lib/alerts/operational-alert-triggers';
 import { GET } from './route';
 
 function makeRequest(url: string, headers?: Record<string, string>): Request {
@@ -33,9 +39,11 @@ describe('GET /api/cron/visitor-auto-exit', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetAlertTriggerCooldowns();
     process.env = {
       ...originalEnv,
       CRON_SECRET: 'test-cron-secret',
+      NOVU_API_KEY: 'test-novu-key',
     };
   });
 
@@ -69,5 +77,35 @@ describe('GET /api/cron/visitor-auto-exit', () => {
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.autoExitedCount).toBe(1);
+    expect(mockSendOperationalAlert).toHaveBeenCalledWith(
+      'access-control-ops',
+      'visitor-auto-exit-alert',
+      expect.objectContaining({
+        autoExitedCount: 1,
+        visitorIds: ['visitor-1'],
+        departmentId: 'dept-access-control',
+      })
+    );
+  });
+
+  it('suppresses sendOperationalAlert when zero visitors are auto-exited', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({
+      data: { id: 'dept-access-control' },
+      error: null,
+    });
+    mockExecuteVisitorAutoExitSweep.mockResolvedValueOnce({
+      autoExited: [],
+    });
+
+    const req = makeRequest('http://localhost/api/cron/visitor-auto-exit', {
+      authorization: 'Bearer test-cron-secret',
+    });
+
+    const res = await GET(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.autoExitedCount).toBe(0);
+    expect(mockSendOperationalAlert).not.toHaveBeenCalled();
   });
 });

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { logger } from '@repo/logger/server';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { NextResponse } from 'next/server';
+import { triggerOperationalAlertWorkflow } from '@/lib/alerts/operational-alert-triggers';
 import { authorizeCronRequest } from '@/lib/api/cron-auth';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
@@ -55,22 +56,17 @@ export async function GET(req: Request) {
               cutoffIso,
             });
 
-            if (expiringCount > 0 && process.env.NOVU_API_KEY) {
-              try {
-                const { sendOperationalAlert } = await import('@repo/utils/novu');
-                await sendOperationalAlert('access-control-ops', 'contractor-expiry-alert', {
-                  expiringCount,
-                  cutoffIso,
-                  runTimestamp,
-                });
-              } catch (alertErr) {
-                logger.warn({
-                  event: 'contractor_expiry_alert_failed',
-                  jobId,
-                  error: alertErr instanceof Error ? alertErr.message : String(alertErr),
-                });
-              }
-            }
+            await triggerOperationalAlertWorkflow({
+              event: {
+                eventType: 'contractor.expiry.threshold',
+                source: 'cron.contractor-expiry',
+                expiringCount,
+                thresholdCount: 1,
+                cutoffIso,
+                runTimestamp,
+                jobId,
+              },
+            });
 
             return { expiringCount, cutoffIso, runTimestamp };
           },

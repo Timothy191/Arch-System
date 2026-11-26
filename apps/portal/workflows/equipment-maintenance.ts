@@ -1,5 +1,6 @@
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { FatalError, sleep } from 'workflow';
+import { triggerOperationalAlertWorkflow } from '@/lib/alerts/operational-alert-triggers';
 import { logError } from '@/lib/errors/error-logger';
 
 // Step 1: Notify engineering
@@ -26,7 +27,18 @@ async function notifyEngineering(equipmentId: string, description: string) {
     logError(error, { context: 'notify_engineering_workflow' });
   }
 
-  return { notifiedAt: new Date().toISOString() };
+  const reportedAt = new Date().toISOString();
+  await triggerOperationalAlertWorkflow({
+    event: {
+      eventType: 'equipment.breakdown.reported',
+      source: 'workflow.equipment-maintenance',
+      equipmentId,
+      description,
+      reportedAt,
+    },
+  });
+
+  return { notifiedAt: reportedAt };
 }
 
 // Step 2: Escalate to supervisor
@@ -53,7 +65,20 @@ async function escalateToSupervisor(equipmentId: string) {
     logError(error, { context: 'escalate_supervisor_workflow' });
   }
 
-  return { escalatedAt: new Date().toISOString() };
+  const escalatedAt = new Date().toISOString();
+  await triggerOperationalAlertWorkflow({
+    event: {
+      eventType: 'equipment.breakdown.escalated',
+      source: 'workflow.equipment-maintenance',
+      equipmentId,
+      status: 'breakdown',
+      downtimeHours: 24,
+      escalationThresholdHours: 24,
+      escalatedAt,
+    },
+  });
+
+  return { escalatedAt };
 }
 
 // Step 3: Check equipment status

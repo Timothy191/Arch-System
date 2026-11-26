@@ -4,6 +4,7 @@ import { logger } from '@repo/logger/server';
 import { cacheInvalidateTags } from '@repo/redis/cache';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { NextResponse } from 'next/server';
+import { triggerOperationalAlertWorkflow } from '@/lib/alerts/operational-alert-triggers';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 
 const HEARTBEAT_ONLINE_WINDOW_MS = 5 * 60 * 1000;
@@ -148,25 +149,20 @@ export async function POST(req: Request) {
         hasFault: Boolean(faultMessage && faultMessage.length > 0),
       });
 
-      if (faultMessage && faultMessage.length > 0 && process.env.NOVU_API_KEY) {
-        try {
-          const { sendOperationalAlert } = await import('@repo/utils/novu');
-          await sendOperationalAlert('access-control-ops', 'access-control-gate-fault', {
-            gateId: gate.id,
-            gateName: gate.name,
-            gateLocation: gate.gate_location,
-            faultMessage,
-            firmwareVersion: firmwareVersion ?? null,
-            timestamp: nowIso,
-          });
-        } catch (alertErr) {
-          logger.warn({
-            event: 'gate_fault_alert_failed',
-            gateId: gate.id,
-            error: alertErr instanceof Error ? alertErr.message : String(alertErr),
-          });
-        }
-      }
+      await triggerOperationalAlertWorkflow({
+        event: {
+          eventType: 'gate.heartbeat.fault',
+          source: 'api.access-control.gates.heartbeat',
+          gateId: gate.id,
+          gateName: gate.name,
+          gateLocation: gate.gate_location,
+          faultMessage: faultMessage ?? '',
+          isMaintenance: gate.is_maintenance,
+          interlockActive: gate.interlock_active,
+          firmwareVersion: firmwareVersion ?? null,
+          timestamp: nowIso,
+        },
+      });
 
       return NextResponse.json({ success: true, gate });
     },

@@ -44,6 +44,7 @@ jest.mock('@repo/logger/server', () => ({
   },
 }));
 
+import { resetAlertTriggerCooldowns } from '@/lib/alerts/operational-alert-triggers';
 import { GET, POST } from './route';
 
 function makeRequest(
@@ -63,6 +64,7 @@ describe('API /api/access-control/gates/heartbeat', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetAlertTriggerCooldowns();
     process.env = {
       ...originalEnv,
       SCANNER_API_KEY: 'test-scanner-secret',
@@ -158,6 +160,63 @@ describe('API /api/access-control/gates/heartbeat', () => {
         faultMessage: 'Turnstile optical sensor obstructed',
       })
     );
+  });
+
+  it('does not trigger sendOperationalAlert on normal heartbeat or during gate maintenance', async () => {
+    mockMaybeSingle
+      .mockResolvedValueOnce({
+        data: {
+          id: 'GATE-01-NORTH',
+          name: 'Main Gate North Turnstile',
+          gate_location: 'Main Gate North Turnstile',
+          zone: 'ZONE-01',
+          last_heartbeat_at: '2026-11-26T10:00:00.000Z',
+          interlock_active: false,
+          is_maintenance: false,
+          department_id: null,
+        },
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: {
+          id: 'GATE-03-PLANT',
+          name: 'Processing Plant Turnstile',
+          gate_location: 'Processing Plant Turnstile',
+          zone: 'ZONE-03',
+          last_heartbeat_at: '2026-11-26T10:00:00.000Z',
+          interlock_active: false,
+          is_maintenance: true,
+          department_id: null,
+        },
+        error: null,
+      });
+
+    const healthyReq = makeRequest('http://localhost/api/access-control/gates/heartbeat', {
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer test-scanner-secret',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ gateId: 'GATE-01-NORTH', interlockActive: false }),
+    });
+    const healthyRes = await POST(healthyReq);
+    expect(healthyRes.status).toBe(200);
+
+    const maintenanceReq = makeRequest('http://localhost/api/access-control/gates/heartbeat', {
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer test-scanner-secret',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        gateId: 'GATE-03-PLANT',
+        isMaintenance: true,
+        faultMessage: 'Planned calibration',
+      }),
+    });
+    const maintenanceRes = await POST(maintenanceReq);
+    expect(maintenanceRes.status).toBe(200);
+    expect(mockSendOperationalAlert).not.toHaveBeenCalled();
   });
 
   it('GET returns 200 with gate status summary', async () => {

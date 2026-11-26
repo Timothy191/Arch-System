@@ -32,6 +32,7 @@ jest.mock('@/lib/jobs/workflow-runner', () => ({
   triggerTrackedWorkflow: (...args: unknown[]) => mockTriggerTrackedWorkflow(...args),
 }));
 
+import { resetAlertTriggerCooldowns } from '@/lib/alerts/operational-alert-triggers';
 import { GET } from './route';
 
 function makeRequest(url: string, headers?: Record<string, string>): Request {
@@ -47,6 +48,7 @@ describe('GET /api/cron/contractor-expiry', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetAlertTriggerCooldowns();
     process.env = {
       ...originalEnv,
       CRON_SECRET: 'test-cron-secret',
@@ -98,5 +100,35 @@ describe('GET /api/cron/contractor-expiry', () => {
       'contractor-expiry-alert',
       expect.objectContaining({ expiringCount: 1 })
     );
+  });
+
+  it('does not trigger sendOperationalAlert when expiringCount is zero', async () => {
+    mockLte.mockResolvedValueOnce({
+      data: [],
+      error: null,
+    });
+
+    mockTriggerTrackedWorkflow.mockImplementationOnce(
+      async (
+        _jobId: string,
+        _path: string,
+        _payload: unknown,
+        options?: { fallback?: () => Promise<unknown> }
+      ) => {
+        const result = options?.fallback ? await options.fallback() : null;
+        return { jobId: _jobId, status: 'completed', result };
+      }
+    );
+
+    const req = makeRequest('http://localhost/api/cron/contractor-expiry', {
+      authorization: 'Bearer test-cron-secret',
+    });
+
+    const res = await GET(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.result.expiringCount).toBe(0);
+    expect(mockSendOperationalAlert).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,6 @@
 import { logger } from '@repo/logger/server';
 import { NextResponse } from 'next/server';
+import { triggerOperationalAlertWorkflow } from '@/lib/alerts/operational-alert-triggers';
 import { authorizeCronRequest } from '@/lib/api/cron-auth';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
 import { captureAndPersistSloSnapshot } from '@/lib/observability/slo-snapshot';
@@ -19,6 +20,24 @@ export async function GET(req: Request) {
   const startedAtMs = Date.now();
   try {
     const snapshot = await captureAndPersistSloSnapshot();
+    const checkedAt = new Date().toISOString();
+    await Promise.allSettled(
+      snapshot.summaries.map((summary) =>
+        triggerOperationalAlertWorkflow({
+          event: {
+            eventType: 'observability.slo.breached',
+            source: 'cron.observability-slo',
+            targetId: summary.targetId,
+            label: summary.label,
+            currentStatus: summary.currentStatus,
+            sloBudgetState: summary.sloBudgetState,
+            sla24hPct: summary.sla24hPct,
+            p95LatencyMs: summary.p95LatencyMs,
+            checkedAt,
+          },
+        })
+      )
+    );
     recordJobExecution(JOB_ID, Date.now() - startedAtMs, true);
 
     return NextResponse.json({
