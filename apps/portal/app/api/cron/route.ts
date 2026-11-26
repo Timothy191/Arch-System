@@ -5,6 +5,8 @@ import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
 const logger = createLogger('portal:cron-orchestrator');
 
+export const maxDuration = 30;
+
 export interface CronScheduleDescriptor {
   readonly path: string;
   readonly schedule: string;

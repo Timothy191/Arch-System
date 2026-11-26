@@ -1,7 +1,10 @@
+import { logger } from '@repo/logger/server';
 import { NextResponse } from 'next/server';
 import { authorizeCronRequest } from '@/lib/api/cron-auth';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
 import { captureAndPersistSloSnapshot } from '@/lib/observability/slo-snapshot';
+
+export const maxDuration = 60;
 
 const JOB_ID = 'cron.observability-slo';
 const HTTP_INTERNAL_ERROR = 500;
@@ -29,8 +32,15 @@ export async function GET(req: Request) {
         p95LatencyMs: summary.p95LatencyMs,
       })),
     });
-  } catch {
+  } catch (err) {
     recordJobExecution(JOB_ID, Date.now() - startedAtMs, false);
+    logger.error(
+      {
+        event: 'observability_slo_cron_failed',
+        err: err instanceof Error ? err.message : String(err),
+      },
+      'Observability SLO cron failed'
+    );
     return NextResponse.json({ success: false }, { status: HTTP_INTERNAL_ERROR });
   }
 }

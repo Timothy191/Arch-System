@@ -4,15 +4,21 @@ import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { NextResponse } from 'next/server';
 import { authorizeCronRequest } from '@/lib/api/cron-auth';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
+import { recordJobExecution } from '@/lib/observability/simple-metrics';
+
+export const maxDuration = 60;
 
 const EXPIRY_WINDOW_HOURS = 48;
+const METRIC_JOB_ID = 'cron.contractor-expiry';
 
 export async function GET(req: Request) {
   const unauthorizedResponse = authorizeCronRequest(req);
   if (unauthorizedResponse) {
+    recordJobExecution(METRIC_JOB_ID, 0, false);
     return unauthorizedResponse;
   }
 
+  const startedAtMs = Date.now();
   try {
     const jobId = randomUUID();
     const runTimestamp = new Date().toISOString();
@@ -73,19 +79,29 @@ export async function GET(req: Request) {
     ]);
 
     if (dispatchResult.status === 'rejected' || dispatchResult.value.status === 'failed') {
+      recordJobExecution(METRIC_JOB_ID, Date.now() - startedAtMs, false);
       return NextResponse.json(
         { success: false, error: 'Failed to dispatch contractor expiry workflow', jobId },
         { status: 502 }
       );
     }
 
+    recordJobExecution(METRIC_JOB_ID, Date.now() - startedAtMs, true);
     return NextResponse.json({
       success: true,
       message: 'Contractor expiry sweep completed',
       jobId,
       result: dispatchResult.value.result ?? null,
     });
-  } catch {
+  } catch (err) {
+    recordJobExecution(METRIC_JOB_ID, Date.now() - startedAtMs, false);
+    logger.error(
+      {
+        event: 'contractor_expiry_cron_failed',
+        err: err instanceof Error ? err.message : String(err),
+      },
+      'Contractor expiry cron failed'
+    );
     return NextResponse.json(
       { success: false, error: 'Failed to initiate sweep' },
       { status: 500 }

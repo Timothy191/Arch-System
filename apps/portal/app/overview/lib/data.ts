@@ -909,7 +909,7 @@ export const DATABASE_SCHEMA = [
     description: 'High-frequency SCADA tag streaming data from Modbus and OPC-UA PLCs',
   },
   {
-    name: 'card_print_jobs',
+    name: 'print_jobs',
     rls: true,
     columns: [
       'id (UUID PK)',
@@ -1891,7 +1891,7 @@ export const EXAMPLE_BACKEND_FLOW_PIPELINES: FlowDiagramPipeline[] = [
         id: 'magicard-spooler',
         step: 'BLOCK 04',
         title: 'Magicard Neo 300 Spooler',
-        role: 'card_print_jobs Queue',
+        role: 'print_jobs Queue',
         protocol: 'TCP Raw 9100 / IPP',
         detail: 'Renders dual-sided CR80 PVC badge with live photo, QR payload, and RFID UID.',
         color: '#7c3aed',

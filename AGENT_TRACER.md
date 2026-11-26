@@ -6,6 +6,17 @@
 
 <!-- cspell:ignore commandcode autohand Autohand styleguides EOVERRIDE PLAYWRIGHT_MISE_DIR btrim unevidenced fastapi agentsroom typegen -->
 
+## [2026-11-26T12:32:00+02:00] - Database Migration/RLS Hardening (235 & 236), Vercel Cron Audit & Access Control Live Operator Verification
+
+- **Database Migrations & RLS Hardening**:
+  - Updated `235_reconcile_access_control_rls_and_triggers.sql` with idempotent `public.access_logs_archive` creation and aligned the 5 `public.perimeter_gates` seed rows with production `access_logs` gate locations (`Main Gate North Turnstile`, `East Pit Boom Gate`, `Processing Plant Turnstile`, `Weighbridge Inbound`, `South Haul Road Turnstile`), then applied to production Supabase (`mrwhtxbhrzyttlsyuofc`).
+  - Added forward-only `236_harden_fleet_equipment_and_legacy_rls_initplan.sql` fixing missing `UPDATE` `USING` clauses and unwrapped `auth.uid()` policies on `fleet`, `equipment`, `roles`, `cache_events`, `cache_anomalies`, `shift_completeness_alerts`, `data_integrity_issues`, and `shift_integrity_reports`; applied to production Supabase and verified `anon` denial across all Access Control and fleet tables.
+- **Vercel Crons & Gate Heartbeat Ingestion**:
+  - Added `/api/cron/visitor-auto-exit` (`*/15 * * * *`) to `vercel.json` and `REGISTERED_VERCEL_CRONS`, and hardened all 7 cron routes (`/api/cron`, `visitor-auto-exit`, `contractor-expiry`, `preventative-maintenance`, `shift-handoff`, `webhook-deliveries`, `observability-slo`) with `maxDuration`, `recordJobExecution` latency telemetry, structured error logging, dynamic `@repo/utils/novu` import, and Supabase fallback handlers (`badges.qr_code` / `is_active = true`).
+  - Added `gateHeartbeatSchema` to `@repo/contract`, implemented `POST`/`GET /api/access-control/gates/heartbeat`, and added `scripts/gate-heartbeat-probe.mjs` plus unit tests for cron and heartbeat routes.
+  - Synced `card_print_jobs` -> `print_jobs` in `apps/portal/app/overview/lib/data.ts` so `database/schemas/page.test.tsx` matches `ER_TABLES`.
+- **Verification**: All 186 migrations linted and rollback-tested (`0` errors, `0` warnings), `audit-rls-matrix` (`113/113` tables RLS enabled, `100.0%`), `@repo/contract` (`15/15` suites, `82/82` tests), `audit:drift` (`100%` DHI), and full `git push origin HEAD:main` 28-gate `.husky/pre-push` verification.
+
 ## [2026-11-26T11:12:00+02:00] - Access Control Department Production Finalization & Evidence-Based Review/Debate Remediation
 
 - **Audit & Debate (`task-816`)**: Completed 4 parallel domain review streams (Shell/Auth/Dashboard/Gates/C66, Badges/Expired/Visitors, Muster/Reports, Print Cards/Card Actions/QR/Migrations/RLS) and Phase 2 Adversarial Debate Adjudicator (`29a0b7f5-2d40-48af-8fe1-38b72e296964`), confirming **16 MUST_FIX gaps** (8 P0, 6 P1, 2 P2), rejecting 3 false positives, and documenting 6 external hardware/cloud dependencies.

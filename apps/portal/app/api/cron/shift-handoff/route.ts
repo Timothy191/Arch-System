@@ -1,20 +1,27 @@
 import { randomUUID } from 'node:crypto';
 import { evaluateFleetMaintenanceRisk, synthesizeShiftHandoverBrief } from '@repo/intelligence';
+import { logger } from '@repo/logger/server';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { NextResponse } from 'next/server';
 import { authorizeCronRequest } from '@/lib/api/cron-auth';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
+import { recordJobExecution } from '@/lib/observability/simple-metrics';
+
+export const maxDuration = 60;
 
 const DAY_SHIFT_END_HOUR_UTC = 17;
 const DAY_SHIFT_START_HOUR_UTC = 5;
 const FULL_COMPLETENESS_PCT = 100;
+const METRIC_JOB_ID = 'cron.shift-handoff';
 
 export async function GET(req: Request) {
   const unauthorizedResponse = authorizeCronRequest(req);
   if (unauthorizedResponse) {
+    recordJobExecution(METRIC_JOB_ID, 0, false);
     return unauthorizedResponse;
   }
 
+  const startedAtMs = Date.now();
   try {
     const jobId = randomUUID();
     const now = new Date();
@@ -94,20 +101,38 @@ export async function GET(req: Request) {
     });
 
     await Promise.allSettled([
-      triggerTrackedWorkflow(jobId, '/webhook/shift-handoff-generation', {
-        shift_date: shiftDate,
-        timestamp: now.toISOString(),
-        brief,
-      }),
+      triggerTrackedWorkflow(
+        jobId,
+        '/webhook/shift-handoff-generation',
+        {
+          shift_date: shiftDate,
+          timestamp: now.toISOString(),
+          brief,
+        },
+        {
+          awaitCompletion: true,
+          fallback: async () => ({
+            deliveredVia: 'local-synthesis',
+            shiftDate,
+            shiftType,
+          }),
+        }
+      ),
     ]);
 
+    recordJobExecution(METRIC_JOB_ID, Date.now() - startedAtMs, true);
     return NextResponse.json({
       success: true,
       message: 'Shift handoff generation completed',
       jobId,
       brief,
     });
-  } catch {
+  } catch (err) {
+    recordJobExecution(METRIC_JOB_ID, Date.now() - startedAtMs, false);
+    logger.error(
+      { event: 'shift_handoff_cron_failed', err: err instanceof Error ? err.message : String(err) },
+      'Shift handoff cron failed'
+    );
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
