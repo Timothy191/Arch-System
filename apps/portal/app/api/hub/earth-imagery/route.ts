@@ -94,23 +94,28 @@ async function fetchLiveSatelliteBytes(layer: EarthImageryLayer): Promise<Uint8A
   }
 }
 
+// AGENT-TRACE: Keep each readFile argument a static path.join so Turbopack traces only the
+// bundled image instead of the entire repository when building the route.
 async function readBundledEarthFallback(): Promise<Uint8Array | null> {
-  const candidatePaths = [
-    path.resolve(process.cwd(), 'public', 'images', 'earth-blue-marble.jpg'),
-    path.resolve(process.cwd(), 'apps', 'portal', 'public', 'images', 'earth-blue-marble.jpg'),
-  ];
-
-  for (const candidatePath of candidatePaths) {
-    try {
-      const fileBuffer = await readFile(candidatePath);
-      if (fileBuffer.byteLength > 0) {
-        return new Uint8Array(fileBuffer);
-      }
-    } catch {
-      // Try next workspace root resolution
+  try {
+    const localImage = await readFile(
+      path.join(process.cwd(), 'public', 'images', 'earth-blue-marble.jpg')
+    );
+    if (localImage.byteLength > 0) {
+      return new Uint8Array(localImage);
     }
+  } catch {
+    // Fall through to workspace-root resolution
   }
-  return null;
+
+  try {
+    const workspaceImage = await readFile(
+      path.join(process.cwd(), 'apps', 'portal', 'public', 'images', 'earth-blue-marble.jpg')
+    );
+    return workspaceImage.byteLength > 0 ? new Uint8Array(workspaceImage) : null;
+  } catch {
+    return null;
+  }
 }
 
 function buildImageResponse(entry: CachedEarthImagery): Response {

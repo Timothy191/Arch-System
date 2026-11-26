@@ -6,6 +6,12 @@
 
 <!-- cspell:ignore commandcode autohand Autohand styleguides EOVERRIDE PLAYWRIGHT_MISE_DIR btrim unevidenced fastapi agentsroom typegen -->
 
+## [2026-11-26T06:39:13+02:00] - Turbopack Build Trace Fix for Earth-Imagery Fallback
+
+- **Build failure (Gate 18)**: A fresh Turbopack analysis of `apps/portal/app/api/hub/earth-imagery/route.ts` failed with "Static analysis determined that this filesystem access causes the whole project to be traced" at `readFile(candidatePath)`; the earlier 19:48 pass reused the filesystem build cache and masked it.
+- **Fix**: Replaced the computed `candidatePaths` loop with two statically scoped `readFile(path.join(process.cwd(), ...))` calls (portal `public/images`, then workspace-root `apps/portal/public/images`), so Turbopack traces only the bundled `earth-blue-marble.jpg` instead of the repository root. Fallback order and runtime behavior are unchanged.
+- **Verification**: `SKIP_VERSION_SYNC=1 pnpm --filter portal build` passes; `.next/server/app/api/hub/earth-imagery/route.js.nft.json` (307 entries) includes `earth-blue-marble.jpg` with no project-wide leak; route Jest suite 5/5; `pnpm agent:verify` 28/28 gates; `pnpm audit:compliance`, `turbo run lint:tokens lint:css`, `format:prettier:check`, `html:check`, and `lint:css-perf` (113.78 KB / 115 KB) all pass.
+
 ## [2026-11-25T19:40:00+02:00] - Observability Consolidation, SLO Persistence & Sentry Runtime Wiring
 
 - **Single local stack (`infra/monitoring/docker-compose.yml`)**: Removed `infra/docker/compose.observability.yml` and its `infra/docker/observability/` configs (duplicate `plantcor-grafana` container/port collision); merged Woodpecker under an optional `ci` profile; rewrote `otel-collector-config.yaml` (dropped the invalid `cloudflare` processor and trace-pipeline `prometheus` exporter), added `tempo.yaml`, and mounted `infra/observability/prometheus-rules` into Prometheus. `docker compose config -q` and `promtool check config` (18 + 3 rules) pass.
