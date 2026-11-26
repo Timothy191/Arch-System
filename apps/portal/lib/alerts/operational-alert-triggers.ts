@@ -7,7 +7,6 @@ import {
   operationalAlertEventSchema,
 } from '@repo/contract';
 import { logger } from '@repo/logger/server';
-import { sendOperationalAlert } from '@repo/utils/novu';
 
 const SECONDS_TO_MS = 1000;
 const CONTRACTOR_COOLDOWN_MS = 3600 * SECONDS_TO_MS;
@@ -342,6 +341,7 @@ export async function triggerOperationalAlertWorkflow(
   };
 
   try {
+    const { sendOperationalAlert } = await import('@repo/utils/novu');
     const receipt = await sendOperationalAlert(subscriberId, route.workflowId, enrichedPayload);
     recordCooldownTimestamp(evaluation.dedupeKey, nowMs);
     logger.info({
