@@ -341,6 +341,91 @@
   }
 }
 
+/* 3D elevated + shining surface paired with StatChip across /hub controls */
+.chip-elevated-3d {
+  position: relative;
+  overflow: hidden;
+  transform: translateY(0) translateZ(0);
+  box-shadow:
+    inset 0 1.5px 0 var(--chip-bevel-top, oklch(100% 0 0deg / 0.82)),
+    inset 0 -1.5px 0 var(--chip-bevel-bottom, oklch(20% 0.02 255deg / 0.22)),
+    0 1px 2px oklch(20% 0.02 255deg / 0.14),
+    0 4px 10px -2px oklch(20% 0.02 255deg / 0.16),
+    0 8px 18px -6px oklch(20% 0.02 255deg / 0.12);
+  transition:
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chip-elevated-3d:hover {
+  transform: translateY(-1.5px) translateZ(0);
+  box-shadow:
+    inset 0 1.5px 0 var(--chip-bevel-top, oklch(100% 0 0deg / 0.92)),
+    inset 0 -1.5px 0 var(--chip-bevel-bottom, oklch(20% 0.02 255deg / 0.28)),
+    0 2px 4px oklch(20% 0.02 255deg / 0.16),
+    0 7px 14px -3px oklch(20% 0.02 255deg / 0.2),
+    0 12px 24px -8px oklch(20% 0.02 255deg / 0.14);
+}
+
+.chip-elevated-3d:active {
+  transform: translateY(0.5px) scale(0.985) translateZ(0);
+  box-shadow:
+    inset 0 1px 2px oklch(20% 0.02 255deg / 0.26),
+    inset 0 -1px 0 oklch(100% 0 0deg / 0.5),
+    0 1px 2px oklch(20% 0.02 255deg / 0.12);
+}
+
+.chip-elevated-3d::after {
+  content: '';
+  position: absolute;
+  top: -15%;
+  bottom: -15%;
+  left: 0;
+  width: 48%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(84% 0.13 88deg / 0.22) 28%,
+    oklch(100% 0 0deg / 0.72) 50%,
+    oklch(84% 0.13 88deg / 0.2) 72%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: translateX(-140%) skewX(-22deg);
+  pointer-events: none;
+  z-index: 15;
+}
+
+.chip-elevated-3d.shining::after {
+  opacity: 1;
+  animation: stat-shine 2.8s cubic-bezier(0.4, 0, 0.2, 1) var(--chip-shine-delay, 0s) infinite;
+}
+
+.stat-chip-shine.chip-elevated-3d {
+  --chip-bevel-top: oklch(100% 0 0deg / 0.45);
+  --chip-bevel-bottom: oklch(12% 0.02 255deg / 0.48);
+}
+
+.stat-chip-shine.chip-elevated-3d::after {
+  display: none;
+}
+
+.chip-shine-delay-1 {
+  --chip-shine-delay: 0.45s;
+}
+
+.chip-shine-delay-2 {
+  --chip-shine-delay: 0.9s;
+}
+
+/* High-contrast light-mode heading legibility boost on translucent glass */
+.heading-crisp-ink {
+  text-shadow:
+    0 1px 0 oklch(100% 0 0deg / 0.92),
+    0 0 12px oklch(100% 0 0deg / 0.65);
+  filter: contrast(1.18) brightness(1.05);
+}
+
 /* Preserve shimmer on hover/focus with enhanced visibility */
 .gold-steel-border:hover::before,
 .gold-steel-border:focus-visible::before {
@@ -373,10 +458,18 @@ input.gold-steel-border:focus {
   .gold-steel-border::before,
   .gold-steel-border:hover::before,
   .stat-chip-shine.shining::before,
+  .chip-elevated-3d.shining::after,
   input.gold-steel-border:hover,
   input.gold-steel-border:focus {
     animation: none;
     background-position: 50% 50%;
+  }
+
+  .chip-elevated-3d,
+  .chip-elevated-3d:hover,
+  .chip-elevated-3d:active {
+    transition: none;
+    transform: none;
   }
 }
 

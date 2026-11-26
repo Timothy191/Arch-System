@@ -117,12 +117,14 @@ export default async function HubPage() {
     liveMetricsResult,
     userRoleResult,
     clearanceResult,
+    pluginWidgetsResult,
   ] = await Promise.allSettled([
     getDashboardCounts(today),
     getAccessibleDepartmentNames(userId),
     getLiveDepartmentMetrics(today),
     getEmployeeRole(userId),
     getEmployeeClearance(userId),
+    getPluginWidgets(),
   ]);
 
   const { incidentCount, breakdownCount, offlineMachineCount } =
@@ -144,7 +146,7 @@ export default async function HubPage() {
 
   // Plugin widgets come from the failure-isolated consumers wrapper — a broken
   // plugin orchestrator degrades to an empty grid, never a broken hub page.
-  const pluginWidgets = await getPluginWidgets();
+  const pluginWidgets = pluginWidgetsResult.status === 'fulfilled' ? pluginWidgetsResult.value : [];
 
   const canSeeExecutive = userRole === 'admin' || userRole === 'manager';
 

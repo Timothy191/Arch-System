@@ -71,9 +71,13 @@ interface MachineActiveRow {
 
 const PERCENT_SCALE = 100;
 
+function unwrapSettled<T>(settled: PromiseSettledResult<T>): T | undefined {
+  return settled.status === 'fulfilled' ? settled.value : undefined;
+}
+
 /**
  * Query and aggregate real-time shift telemetry across core operational tables.
- * AGENT-TRACE: Consolidates multi-table queries into parallel roundtrips with safe fallbacks.
+ * AGENT-TRACE: Consolidates multi-table queries into parallel settled roundtrips with safe fallbacks.
  */
 export async function fetchLiveDepartmentMetrics(
   db: GenericDbClient,
@@ -85,15 +89,15 @@ export async function fetchLiveDepartmentMetrics(
 
   try {
     const [
-      hourlyLoadsRes,
-      productionRes,
-      breakdownsRes,
-      machinesRes,
-      badgesRes,
-      employeesRes,
-      unresolvedLogsRes,
-      departmentsRes,
-    ] = await Promise.all([
+      hourlyLoadsSettled,
+      productionSettled,
+      breakdownsSettled,
+      machinesSettled,
+      badgesSettled,
+      employeesSettled,
+      unresolvedLogsSettled,
+      departmentsSettled,
+    ] = await Promise.allSettled([
       // 1. Control Room Hourly Loads for today
       queryTable<HourlyLoadsRow>('hourly_loads')
         .select(
@@ -132,6 +136,15 @@ export async function fetchLiveDepartmentMetrics(
       // 8. Administration active departments
       queryTable('departments').select('id', { count: 'exact', head: true }).is('deleted_at', null),
     ]);
+
+    const hourlyLoadsRes = unwrapSettled(hourlyLoadsSettled);
+    const productionRes = unwrapSettled(productionSettled);
+    const breakdownsRes = unwrapSettled(breakdownsSettled);
+    const machinesRes = unwrapSettled(machinesSettled);
+    const badgesRes = unwrapSettled(badgesSettled);
+    const employeesRes = unwrapSettled(employeesSettled);
+    const unresolvedLogsRes = unwrapSettled(unresolvedLogsSettled);
+    const departmentsRes = unwrapSettled(departmentsSettled);
 
     // --- Control Room Overlay ---
     if (hourlyLoadsRes?.data) {

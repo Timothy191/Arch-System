@@ -61,6 +61,13 @@ describe('CoreOperationalModules', () => {
 
     const heading = screen.getByRole('heading', { name: /Mining Department Modules/i });
     expect(heading).toBeInTheDocument();
+    expect(heading).toHaveClass('heading-crisp-ink', 'text-slate-950');
+    const headingInitials = heading.querySelectorAll('span');
+    expect(headingInitials).toHaveLength(3);
+    expect(Array.from(headingInitials).map((el) => el.textContent)).toEqual(['M', 'D', 'M']);
+    for (const initial of Array.from(headingInitials)) {
+      expect(initial).toHaveClass('text-[1.35em]');
+    }
 
     const banner = heading.closest('.gold-steel-border');
     expect(banner).toBeInTheDocument();
@@ -72,17 +79,23 @@ describe('CoreOperationalModules', () => {
       'border-white/40'
     );
 
-    const logoSvg = banner?.querySelector('span.rounded-2xl > svg');
+    const logoBadge = banner?.querySelector('span.rounded-2xl');
+    expect(logoBadge).toBeInTheDocument();
+    expect(logoBadge).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim',
+      'chip-elevated-3d',
+      'shining'
+    );
+
+    const logoSvg = logoBadge?.querySelector('svg');
     expect(logoSvg).toBeInTheDocument();
     expect(logoSvg).toHaveAttribute('viewBox', '22.75 16.625 166.16 166.19');
 
     expect(screen.getByLabelText('Pin Administration')).toBeInTheDocument();
     expect(screen.getByLabelText('Pin Stock Control Department')).toBeInTheDocument();
     expect(screen.getAllByTestId('arch-bookmark-icon')).toHaveLength(2);
-    expect(screen.getByTestId('core-modules-count-badge')).toHaveClass(
-      'gold-steel-border',
-      'gold-steel-border-slim'
-    );
+    expect(screen.queryByTestId('core-modules-count-badge')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Executive Dashboard/i })).toHaveClass(
       'gold-steel-border',
       'gold-steel-border-slim'
@@ -95,6 +108,7 @@ describe('CoreOperationalModules', () => {
     );
     expect(screen.getAllByText('Active')[0]?.parentElement).toHaveClass(
       'stat-chip-shine',
+      'chip-elevated-3d',
       'shining',
       'bg-emerald-950',
       'text-white'
@@ -102,6 +116,7 @@ describe('CoreOperationalModules', () => {
     expect(screen.getByText('Pinned').parentElement).toHaveClass(
       'stat-chip-shine',
       'stat-chip-shine-delay-1',
+      'chip-elevated-3d',
       'shining',
       'bg-amber-950',
       'text-amber-50'
@@ -109,15 +124,30 @@ describe('CoreOperationalModules', () => {
     expect(screen.getAllByText('Alerts')[0]?.parentElement).toHaveClass(
       'stat-chip-shine',
       'stat-chip-shine-delay-2',
+      'chip-elevated-3d',
       'shining',
       'bg-rose-950',
       'text-white'
     );
-    expect(screen.getByRole('button', { name: /Active/i })).toHaveClass('border-slate-500/80');
-    expect(screen.getByRole('button', { name: /Alerts/i })).toHaveClass('border-slate-500/80');
+    expect(screen.getByRole('button', { name: /^All$/i })).toHaveClass(
+      'chip-elevated-3d',
+      'shining'
+    );
+    expect(screen.getByRole('button', { name: /Active/i })).toHaveClass(
+      'border-slate-500/80',
+      'chip-elevated-3d',
+      'shining'
+    );
+    expect(screen.getByRole('button', { name: /Alerts/i })).toHaveClass(
+      'border-slate-500/80',
+      'chip-elevated-3d',
+      'shining'
+    );
     expect(screen.getByRole('group', { name: 'Filter modules by category' })).toHaveClass(
       'gold-steel-border',
-      'gold-steel-border-slim'
+      'gold-steel-border-slim',
+      'chip-elevated-3d',
+      'shining'
     );
     expect(screen.getByTestId('core-modules-header-separator')).toBeInTheDocument();
     expect(screen.getByTestId('core-modules-header-separator').querySelector('svg')).toHaveClass(

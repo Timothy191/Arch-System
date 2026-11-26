@@ -6,7 +6,7 @@ import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import { Activity, AlertTriangle, ArrowUpRight, BarChart3, Search, Star } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useClearanceNotification } from '@/hooks/useClearanceNotification';
 import { useDepartmentFilter } from '@/hooks/useDepartmentFilter';
 import { usePinnedDepartments } from '@/hooks/usePinnedDepartments';
@@ -32,8 +32,22 @@ interface ModuleSearchInputProps {
   readonly onSearchChange: (nextQuery: string) => void;
 }
 
+const FILTER_GROUP_CLASS = cn(
+  'gold-steel-border gold-steel-border-slim chip-elevated-3d shining',
+  'flex min-h-11 items-center gap-1.5 rounded-full border border-arch-border-subtle',
+  'bg-arch-surface-secondary/90 p-1.5 font-medium text-[13px]'
+);
+
+const FILTER_TAB_BASE_CLASS =
+  'chip-elevated-3d shining inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] tabular-nums leading-[18px] transition-all';
+
 const FILTER_TAB_INACTIVE_CLASS =
-  'border border-slate-500/80 font-medium text-arch-text-secondary hover:border-slate-800 hover:bg-white/80 hover:text-arch-text-primary';
+  'border border-slate-500/80 bg-white/70 font-medium text-arch-text-secondary hover:border-slate-800 hover:bg-white/95 hover:text-arch-text-primary';
+
+const LOGO_BADGE_CLASS =
+  'gold-steel-border gold-steel-border-slim chip-elevated-3d shining flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-arch-accent-blue/30 bg-white';
+
+const HEADING_INITIAL_CLASS = 'font-black text-[1.35em] leading-none';
 
 interface StatChipProps {
   label: string;
@@ -65,7 +79,7 @@ function StatChip({ label, count, color, icon, shineDelayClass }: StatChipProps)
   return (
     <div
       className={cn(
-        'stat-chip-shine shining flex items-center gap-1.5 rounded-full border px-3 py-1.5 shadow-sm',
+        'stat-chip-shine chip-elevated-3d shining flex items-center gap-1.5 rounded-full border px-3 py-1.5',
         chipTheme.bg,
         chipTheme.text,
         `ring-1 ${chipTheme.ring}`,
@@ -198,20 +212,23 @@ export function CoreOperationalModules({
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           {/* Identity block */}
           <div className="flex items-center gap-3.5">
-            <span className="gold-steel-border gold-steel-border-slim flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-arch-accent-blue/30 bg-white shadow-sm">
+            <span className={LOGO_BADGE_CLASS}>
               <Logo className="h-6 w-6 scale-110 text-arch-accent-blue drop-shadow-xs" />
             </span>
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-anurati font-bold text-[var(--text-heading)] text-base tracking-[0.06em] sm:text-lg">
-                  Mining Department Modules
-                </h2>
-                <span
-                  data-testid="core-modules-count-badge"
-                  className="gold-steel-border gold-steel-border-slim rounded-full border border-accent-gold/45 bg-arch-surface-secondary px-2.5 py-0.5 font-mono text-[13px] text-arch-text-secondary tabular-nums leading-[18px]"
+                <h2
+                  aria-label="Mining Department Modules"
+                  className="heading-crisp-ink font-anurati font-extrabold text-base text-slate-950 tracking-[0.06em] sm:text-lg"
                 >
-                  {filteredDepartments.length} / {departments.length}
-                </span>
+                  {['Mining', 'Department', 'Modules'].map((word, wordIdx) => (
+                    <Fragment key={word}>
+                      {wordIdx > 0 && ' '}
+                      <span className={HEADING_INITIAL_CLASS}>{word[0]}</span>
+                      {word.slice(1)}
+                    </Fragment>
+                  ))}
+                </h2>
               </div>
               <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-[0.14em]">
                 Live operational surface
@@ -260,19 +277,15 @@ export function CoreOperationalModules({
           <ModuleSearchInput searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
           {/* Filter Pills */}
-          <div
-            className="gold-steel-border gold-steel-border-slim flex min-h-11 items-center gap-1 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/85 p-1 font-medium text-[13px] shadow-xs"
-            role="group"
-            aria-label="Filter modules by category"
-          >
+          <div className={FILTER_GROUP_CLASS} role="group" aria-label="Filter modules by category">
             <button
               type="button"
               aria-pressed={activeFilter === 'all'}
               onClick={() => handleFilterSelect('all')}
               className={cn(
-                'min-h-9 rounded-full px-3 py-1.5 text-[13px] tabular-nums leading-[18px] transition-all',
+                FILTER_TAB_BASE_CLASS,
                 activeFilter === 'all'
-                  ? 'border border-slate-700/85 bg-white font-semibold text-arch-text-primary shadow-card'
+                  ? 'border border-slate-700/85 bg-white font-semibold text-arch-text-primary'
                   : FILTER_TAB_INACTIVE_CLASS
               )}
             >
@@ -284,9 +297,10 @@ export function CoreOperationalModules({
                 aria-pressed={activeFilter === 'pinned'}
                 onClick={() => handleFilterSelect('pinned')}
                 className={cn(
-                  'flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] tabular-nums leading-[18px] transition-all',
+                  FILTER_TAB_BASE_CLASS,
+                  'chip-shine-delay-1',
                   activeFilter === 'pinned'
-                    ? 'border border-arch-accent-blue/75 bg-white font-semibold text-arch-accent-blue shadow-card'
+                    ? 'border border-arch-accent-blue/75 bg-white font-semibold text-arch-accent-blue'
                     : FILTER_TAB_INACTIVE_CLASS
                 )}
               >
@@ -299,9 +313,10 @@ export function CoreOperationalModules({
               aria-pressed={activeFilter === 'active'}
               onClick={() => handleFilterSelect('active')}
               className={cn(
-                'inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] tabular-nums leading-[18px] transition-all',
+                FILTER_TAB_BASE_CLASS,
+                'chip-shine-delay-1',
                 activeFilter === 'active'
-                  ? 'border border-emerald-800/85 bg-white font-semibold text-accent-green shadow-card ring-1 ring-emerald-900/20'
+                  ? 'border border-emerald-800/85 bg-white font-semibold text-accent-green ring-1 ring-emerald-900/20'
                   : FILTER_TAB_INACTIVE_CLASS
               )}
             >
@@ -313,9 +328,10 @@ export function CoreOperationalModules({
               aria-pressed={activeFilter === 'critical'}
               onClick={() => handleFilterSelect('critical')}
               className={cn(
-                'inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] tabular-nums leading-[18px] transition-all',
+                FILTER_TAB_BASE_CLASS,
+                'chip-shine-delay-2',
                 activeFilter === 'critical'
-                  ? 'border border-amber-800/85 bg-white font-semibold text-accent-amber shadow-card ring-1 ring-amber-900/20'
+                  ? 'border border-amber-800/85 bg-white font-semibold text-accent-amber ring-1 ring-amber-900/20'
                   : FILTER_TAB_INACTIVE_CLASS
               )}
             >

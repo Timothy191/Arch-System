@@ -213,6 +213,10 @@ jest.mock('@/lib/tools', () => ({
   getTools: jest.fn(async () => []),
 }));
 
+jest.mock('@/lib/plugins/consumers', () => ({
+  getPluginWidgets: jest.fn(async () => []),
+}));
+
 jest.mock('@/lib/hub-departments', () => ({
   getAccessibleDepartmentNames: jest.fn(async () => ['drilling']),
   getEmployeeRole: jest.fn(async () => 'operator'),
@@ -340,6 +344,16 @@ describe('HubPage — graceful degradation', () => {
     };
     expect(passedProps.canSeeExecutive).toBe(false);
     expect(passedProps.departments.map((d) => d.name)).toEqual(['control-room']);
+  });
+
+  it('resolves without throwing when getPluginWidgets rejects', async () => {
+    const { getPluginWidgets } = await import('@/lib/plugins/consumers');
+    (getPluginWidgets as jest.Mock).mockRejectedValueOnce(new Error('Plugin orchestrator timeout'));
+
+    const jsx = await HubPage();
+    const { container } = render(jsx);
+    expect(container.firstChild).not.toBeNull();
+    expect(screen.queryByText(/Hub Error/i)).toBeNull();
   });
 
   it('shows all departments for an admin user even when accessibleDeptIds is empty', async () => {

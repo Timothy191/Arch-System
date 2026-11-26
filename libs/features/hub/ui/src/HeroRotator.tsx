@@ -5,8 +5,11 @@ import type { Panel } from '@repo/ui/HeroRotator';
 import { HeroRotator as GenericHeroRotator } from '@repo/ui/HeroRotator';
 import { Logo } from '@repo/ui/Logo';
 import { ArrowUpRight } from 'lucide-react';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { toTitleCase } from './DepartmentCard';
+
+const ARROW_UP_RIGHT_ICON = <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />;
+const GOLD_LOGO_ICON = <Logo variant="gold" className="h-4 w-4 text-accent-gold" />;
 
 export interface HeroRotatorProps {
   defaultTitle: string;
@@ -21,7 +24,7 @@ export interface HeroRotatorProps {
   offlineMachineCount?: number;
 }
 
-export function HeroRotator({
+export const HeroRotator = memo(function HeroRotator({
   defaultTitle,
   defaultDescription,
   primaryHref,
@@ -34,8 +37,6 @@ export function HeroRotator({
   offlineMachineCount = 0,
 }: HeroRotatorProps) {
   const panels = useMemo<Panel[]>(() => {
-    const arrowIcon = <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />;
-
     const overviewPanel: Panel = {
       id: 'central-command',
       name: 'central-command',
@@ -44,10 +45,10 @@ export function HeroRotator({
       category: 'Central Command',
       image: '/images/departments/overview.webp',
       video: '/images/departments/overview.mp4',
-      icon: <Logo variant="gold" className="h-4 w-4 text-accent-gold" />,
+      icon: GOLD_LOGO_ICON,
       iconBgColor: 'bg-accent-gold/10',
-      primary: { href: primaryHref, label: primaryLabel, icon: arrowIcon },
-      secondary: { href: secondaryHref, label: secondaryLabel, icon: arrowIcon },
+      primary: { href: primaryHref, label: primaryLabel, icon: ARROW_UP_RIGHT_ICON },
+      secondary: { href: secondaryHref, label: secondaryLabel, icon: ARROW_UP_RIGHT_ICON },
     };
 
     const deptPanels = departments.map((dept): Panel => {
@@ -72,17 +73,17 @@ export function HeroRotator({
         stats: dept.stats,
         trend: dept.trend,
         status: dept.status,
-        icon: <Logo variant="gold" className="h-4 w-4 text-accent-gold" />,
+        icon: GOLD_LOGO_ICON,
         iconBgColor: 'bg-accent-gold/10',
         primary: dept.actions?.[0]
-          ? { href: dept.actions[0].href, label: dept.actions[0].label, icon: arrowIcon }
+          ? { href: dept.actions[0].href, label: dept.actions[0].label, icon: ARROW_UP_RIGHT_ICON }
           : {
               href: dept.route || `/${dept.name}`,
               label: `Launch ${dept.displayName}`,
-              icon: arrowIcon,
+              icon: ARROW_UP_RIGHT_ICON,
             },
         secondary: dept.actions?.[1]
-          ? { href: dept.actions[1].href, label: dept.actions[1].label, icon: arrowIcon }
+          ? { href: dept.actions[1].href, label: dept.actions[1].label, icon: ARROW_UP_RIGHT_ICON }
           : undefined,
       };
     });
@@ -106,4 +107,4 @@ export function HeroRotator({
       offlineMachineCount={offlineMachineCount}
     />
   );
-}
+});

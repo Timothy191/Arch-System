@@ -211,11 +211,14 @@ describe('HeroRotator', () => {
       expect(cta).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
     }
 
-    // Small Arch-System logo icons on telemetry graphs instead of circle dots
+    // Small Arch-System logo icons on telemetry graphs instead of circle dots or nested <svg>
     const archNodes = screen.getAllByTestId('hero-graph-arch-node');
     expect(archNodes).toHaveLength(6);
     expect(
       container.querySelectorAll('[data-testid^="hero-telemetry-graph-"] circle')
+    ).toHaveLength(0);
+    expect(
+      container.querySelectorAll('[data-testid^="hero-telemetry-graph-"] svg svg')
     ).toHaveLength(0);
 
     // Header separators are present on every hero card; no fabricated graph separators.
@@ -224,15 +227,28 @@ describe('HeroRotator', () => {
     expect(screen.getByTestId('hero-header-separator-drilling')).toBeInTheDocument();
     expect(screen.getByTestId('hero-header-separator-production')).toBeInTheDocument();
 
-    // Looping MP4 videos on each hero card + slim gold steel borders
+    // Only the active center slide renders <video>; inactive preview slides render lightweight poster <img>
     const overviewVideo = screen.getByTestId('hero-video-central-command');
-    const drillingVideo = screen.getByTestId('hero-video-drilling');
-    const productionVideo = screen.getByTestId('hero-video-production');
     expect(overviewVideo).toHaveAttribute('src', '/images/departments/overview.mp4');
-    expect(drillingVideo).toHaveAttribute('src', '/images/departments/drilling.mp4');
-    expect(productionVideo).toHaveAttribute('src', '/images/departments/production.mp4');
-    expect(productionVideo).toHaveProperty('loop', true);
+    expect(overviewVideo).toHaveProperty('loop', true);
+    expect(screen.queryByTestId('hero-video-drilling')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('hero-video-production')).not.toBeInTheDocument();
+    const drillingPoster = screen.getByTestId('hero-poster-drilling');
+    const productionPoster = screen.getByTestId('hero-poster-production');
+    expect(drillingPoster).toHaveAttribute('src', '/images/departments/drilling.webp');
+    expect(drillingPoster).toHaveAttribute('decoding', 'async');
+    expect(productionPoster).toHaveAttribute('src', '/images/departments/production.webp');
+    expect(productionPoster).toHaveAttribute('decoding', 'async');
     expect(container.querySelectorAll('.gold-steel-border').length).toBeGreaterThanOrEqual(3);
+
+    // Advancing to Drilling mounts its <video> and demotes Central Command to poster <img>
+    fireEvent.click(screen.getByLabelText('Next highlight'));
+    expect(screen.getByTestId('hero-video-drilling')).toHaveAttribute(
+      'src',
+      '/images/departments/drilling.mp4'
+    );
+    expect(screen.queryByTestId('hero-video-central-command')).not.toBeInTheDocument();
+    expect(screen.getByTestId('hero-poster-central-command')).toBeInTheDocument();
   });
 
   it('does not render the control HUD when there is only one panel', () => {
@@ -266,6 +282,7 @@ describe('HeroRotator', () => {
       opacity: '0.78',
       zIndex: '20',
     });
+    expect(slides[1].style.filter).toBe('');
 
     // Left slide (index 2 - Production): angled away left, scale(0.86), opacity 0.78, z-index 20
     expect(slides[2]).toHaveStyle({
@@ -273,6 +290,7 @@ describe('HeroRotator', () => {
       opacity: '0.78',
       zIndex: '20',
     });
+    expect(slides[2].style.filter).toBe('');
   });
 
   it('activates slide when clicking adjacent preview flank panels', () => {
@@ -469,11 +487,16 @@ describe('HeroRotator', () => {
 
     render(<HeroRotator {...baseProps} departments={[availabilityDept]} />);
 
+    expect(screen.getByTestId('hero-poster-availability-utilization')).toHaveAttribute(
+      'src',
+      '/images/departments/availability-utilization.webp'
+    );
+    expect(screen.queryByTestId('hero-video-availability-utilization')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Next highlight'));
     const video = screen.getByTestId('hero-video-availability-utilization');
     expect(video).toHaveAttribute('src', '/images/departments/availability-utilization.mp4');
     expect(video).toHaveAttribute('poster', '/images/departments/availability-utilization.webp');
-
-    fireEvent.click(screen.getByLabelText('Next highlight'));
     const telemetry = screen.getByTestId('hero-telemetry-graph-availability-utilization');
     expect(within(telemetry).getByText('Availability Trend')).toBeInTheDocument();
     expect(within(telemetry).getByText('94.6%')).toBeInTheDocument();
@@ -495,11 +518,16 @@ describe('HeroRotator', () => {
 
     render(<HeroRotator {...baseProps} departments={[presentationDept]} />);
 
+    expect(screen.getByTestId('hero-poster-presentation')).toHaveAttribute(
+      'src',
+      '/images/departments/overview.webp'
+    );
+    expect(screen.queryByTestId('hero-video-presentation')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Next highlight'));
     const video = screen.getByTestId('hero-video-presentation');
     expect(video).toHaveAttribute('src', '/images/departments/overview.mp4');
     expect(video).toHaveAttribute('poster', '/images/departments/overview.webp');
-
-    fireEvent.click(screen.getByLabelText('Next highlight'));
     expect(screen.getByTestId('hero-dept-icon-presentation')).toBeInTheDocument();
     expect(screen.getByText('CEO and investor presentation deck')).toBeInTheDocument();
   });

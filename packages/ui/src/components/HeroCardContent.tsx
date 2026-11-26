@@ -2,6 +2,7 @@
 
 import { Activity, AlertTriangle, Power, Wrench } from 'lucide-react';
 import Link from 'next/link';
+import { memo, useId } from 'react';
 import { cn } from '../lib/utils';
 import type { Panel } from './hero-types';
 import { ARCH_LOGO_VIEWBOX, Logo } from './Logo';
@@ -15,8 +16,11 @@ const GRAPH_PAD_TOP = 12;
 const GRAPH_PAD_BOTTOM = 24;
 const GRAPH_NODE_SIZE = 8;
 const GRAPH_LAST_NODE_SIZE = 11;
+const ARCH_GRAPH_NODE_VIEWBOX_SIZE = 172.61;
+const ARCH_GRAPH_NODE_PATH =
+  'M86.31 0 55.25 31.05 0 86.31l55.25 55.25L86.31 172.61l31.05-31.05L172.61 86.31 117.36 31.05 86.31 0Zm0 31.05 25.19 25.2-25.19 25.19L61.12 56.25 86.31 31.05ZM31.05 86.31l25.2-25.19 25.19 25.19-25.19 25.2-25.2-25.2Zm55.26 55.26-25.19-25.2 25.19-25.19 25.19 25.19-25.19 25.2Z';
 
-export function SystemGoldenSeparator({
+export const SystemGoldenSeparator = memo(function SystemGoldenSeparator({
   testId,
   className,
 }: {
@@ -33,16 +37,17 @@ export function SystemGoldenSeparator({
       <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />
       <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 items-center justify-center rounded-full border border-accent-gold/45 bg-white/90 text-accent-gold shadow-2xs">
         <svg viewBox={ARCH_LOGO_VIEWBOX} className="h-3 w-3 fill-current motion-safe:animate-pulse">
-          <path d="M86.31 0 55.25 31.05 0 86.31l55.25 55.25L86.31 172.61l31.05-31.05L172.61 86.31 117.36 31.05 86.31 0Zm0 31.05 25.19 25.2-25.19 25.19L61.12 56.25 86.31 31.05ZM31.05 86.31l25.2-25.19 25.19 25.19-25.19 25.2-25.2-25.2Zm55.26 55.26-25.19-25.2 25.19-25.19 25.19 25.19-25.19 25.2Z" />
+          <path d={ARCH_GRAPH_NODE_PATH} />
         </svg>
       </span>
       <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />
       <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-gold/55 to-accent-gold motion-safe:animate-pulse" />
     </div>
   );
-}
+});
 
-function HeroTelemetryGraph({ panel }: { panel: Panel }) {
+const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: Panel }) {
+  const nodeSymbolId = useId();
   const trend = panel.trend?.filter((value) => Number.isFinite(value)) ?? [];
   const hasTrend = trend.length >= TELEMETRY_MIN_POINTS;
   const plotLeft = GRAPH_PAD_LEFT;
@@ -94,6 +99,15 @@ function HeroTelemetryGraph({ panel }: { panel: Panel }) {
             role="img"
             aria-label={`${panel.stats?.label ?? panel.title} recorded trend`}
           >
+            <defs>
+              <path
+                id={nodeSymbolId}
+                d={ARCH_GRAPH_NODE_PATH}
+                fill="var(--accent-gold)"
+                fillRule="evenodd"
+              />
+            </defs>
+
             <g data-testid="hero-graph-y-axis">
               <line
                 x1={plotLeft}
@@ -128,23 +142,17 @@ function HeroTelemetryGraph({ panel }: { panel: Panel }) {
             {coordinates.map((point, index) => {
               const size =
                 index === coordinates.length - 1 ? GRAPH_LAST_NODE_SIZE : GRAPH_NODE_SIZE;
+              const scale = size / ARCH_GRAPH_NODE_VIEWBOX_SIZE;
+              const tx = point.x - size / 2;
+              const ty = point.y - size / 2;
               return (
-                <svg
-                  key={`${point.x}-${point.y}`}
-                  x={point.x - size / 2}
-                  y={point.y - size / 2}
-                  width={size}
-                  height={size}
-                  viewBox={ARCH_LOGO_VIEWBOX}
-                  aria-hidden="true"
+                <g
+                  key={`${index}-${point.x.toFixed(1)}`}
+                  transform={`translate(${tx.toFixed(1)}, ${ty.toFixed(1)}) scale(${scale.toFixed(4)})`}
                   data-testid="hero-graph-arch-node"
                 >
-                  <path
-                    d="M86.31 0 55.25 31.05 0 86.31l55.25 55.25L86.31 172.61l31.05-31.05L172.61 86.31 117.36 31.05 86.31 0Zm0 31.05 25.19 25.2-25.19 25.19L61.12 56.25 86.31 31.05ZM31.05 86.31l25.2-25.19 25.19 25.19-25.19 25.2-25.2-25.2Zm55.26 55.26-25.19-25.2 25.19-25.19 25.19 25.19-25.19 25.2Z"
-                    fill="var(--accent-gold)"
-                    fillRule="evenodd"
-                  />
-                </svg>
+                  <use href={`#${nodeSymbolId}`} />
+                </g>
               );
             })}
           </svg>
@@ -159,12 +167,13 @@ function HeroTelemetryGraph({ panel }: { panel: Panel }) {
       </div>
     </div>
   );
-}
+});
 
 export interface HeroCardContentProps {
   panel: Panel;
   idx: number;
   isActive: boolean;
+  isNext?: boolean;
   failedImages: Set<string>;
   onImageError: (src: string) => void;
   incidentCount: number;
@@ -184,10 +193,11 @@ const HERO_MEDIA_COLUMN_CLASS = cn(
   'md:rounded-t-none md:rounded-r-2xl lg:w-[54%]'
 );
 
-export function HeroCardContent({
+export const HeroCardContent = memo(function HeroCardContent({
   panel,
   idx,
   isActive,
+  isNext = false,
   failedImages,
   onImageError,
   incidentCount,
@@ -307,24 +317,44 @@ export function HeroCardContent({
           return (
             <>
               {isActive && <link rel="preload" as="image" href={posterSrc} fetchPriority="high" />}
-              <video
-                key={resolvedVideoSrc}
-                src={resolvedVideoSrc}
-                poster={posterSrc}
-                aria-label={`${panel.title} visual`}
-                data-testid={`hero-video-${panel.name}`}
-                autoPlay={isActive}
-                loop
-                muted
-                playsInline
-                preload={isActive ? 'metadata' : 'none'}
-                className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover/img:scale-105"
-                onError={() => {
-                  if (!failedImages.has(rawVideoSrc)) {
-                    onImageError(rawVideoSrc);
-                  }
-                }}
-              />
+              {!isActive && isNext && (
+                <link rel="preload" as="image" href={posterSrc} fetchPriority="low" />
+              )}
+              {isActive ? (
+                <video
+                  key={resolvedVideoSrc}
+                  src={resolvedVideoSrc}
+                  poster={posterSrc}
+                  aria-label={`${panel.title} visual`}
+                  data-testid={`hero-video-${panel.name}`}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover/img:scale-105"
+                  onError={() => {
+                    if (!failedImages.has(rawVideoSrc)) {
+                      onImageError(rawVideoSrc);
+                    }
+                  }}
+                />
+              ) : (
+                <img
+                  src={posterSrc}
+                  alt={`${panel.title} visual`}
+                  data-testid={`hero-poster-${panel.name}`}
+                  loading="lazy"
+                  decoding="async"
+                  fetchPriority={isNext ? 'low' : 'auto'}
+                  className="h-full w-full object-cover object-center"
+                  onError={() => {
+                    if (panel.image && !failedImages.has(panel.image)) {
+                      onImageError(panel.image);
+                    }
+                  }}
+                />
+              )}
             </>
           );
         })()}
@@ -359,4 +389,4 @@ export function HeroCardContent({
       </div>
     </div>
   );
-}
+});

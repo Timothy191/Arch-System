@@ -1,7 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../lib/utils';
 import { HeroCardContent } from './HeroCardContent';
@@ -44,6 +44,7 @@ interface HeroSlideProps {
   activeIndex: number;
   total: number;
   isActive: boolean;
+  isNext: boolean;
   failedImages: Set<string>;
   onImageError: (src: string) => void;
   onJumpTo: (idx: number) => void;
@@ -52,12 +53,13 @@ interface HeroSlideProps {
   offlineMachineCount: number;
 }
 
-function HeroSlide({
+const HeroSlide = memo(function HeroSlide({
   panel,
   idx,
   activeIndex,
   total,
   isActive,
+  isNext,
   failedImages,
   onImageError,
   onJumpTo,
@@ -86,7 +88,6 @@ function HeroSlide({
   let transform = 'translate3d(0, 0, -250px) scale(0.7)';
   let opacity = 0;
   let zIndex = 0;
-  let filter = 'blur(4px)';
   let pointerEvents: 'auto' | 'none' = 'none';
   let maskStyle: React.CSSProperties = {};
   let cursorClass = '';
@@ -95,7 +96,6 @@ function HeroSlide({
     transform = 'translate3d(0%, 0, 0) rotateY(0deg) scale(1)';
     opacity = 1;
     zIndex = 30;
-    filter = 'blur(0px)';
     pointerEvents = 'auto';
   } else if (isLeft1 || isRight1) {
     // Immediate left/right preview slides
@@ -105,7 +105,6 @@ function HeroSlide({
       : 'translate3d(58%, 0, -140px) rotateY(-26deg) scale(0.86)';
     opacity = 0.78;
     zIndex = 20;
-    filter = 'blur(0px)';
     pointerEvents = 'auto';
     cursorClass = 'cursor-pointer hover:opacity-95';
     maskStyle = {
@@ -124,7 +123,6 @@ function HeroSlide({
       : 'translate3d(85%, 0, -200px) rotateY(-18deg) scale(0.75)';
     opacity = 0.45;
     zIndex = 10;
-    filter = 'blur(1px)';
     pointerEvents = 'auto';
     cursorClass = 'cursor-pointer hover:opacity-75';
     maskStyle = {
@@ -143,7 +141,6 @@ function HeroSlide({
         : 'translate3d(100%, 0, -250px) rotateY(-35deg) scale(0.7)';
     opacity = 0;
     zIndex = 0;
-    filter = 'blur(4px)';
     pointerEvents = 'none';
   }
 
@@ -175,13 +172,12 @@ function HeroSlide({
         transform,
         opacity,
         zIndex,
-        filter,
         pointerEvents,
         transformStyle: 'preserve-3d',
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
         transition:
-          'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+          'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
         ...maskStyle,
       }}
     >
@@ -199,6 +195,7 @@ function HeroSlide({
             panel={panel}
             idx={idx}
             isActive={isCenter}
+            isNext={isNext}
             failedImages={failedImages}
             onImageError={onImageError}
             incidentCount={incidentCount}
@@ -209,7 +206,7 @@ function HeroSlide({
       )}
     </div>
   );
-}
+});
 
 export function HeroRotator({
   panels,
@@ -225,6 +222,8 @@ export function HeroRotator({
   const touchStartX = useRef<number | null>(null);
 
   const total = panels.length;
+  const nextIndex = total > 1 ? (activeIndex + 1) % total : -1;
+  const activeImage = panels[activeIndex]?.image;
 
   const nextSlide = useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % total);
@@ -356,6 +355,7 @@ export function HeroRotator({
               activeIndex={activeIndex}
               total={total}
               isActive={idx === activeIndex}
+              isNext={idx === nextIndex && panel.image !== activeImage}
               failedImages={failedImages}
               onImageError={handleImageError}
               onJumpTo={jumpToSlide}
