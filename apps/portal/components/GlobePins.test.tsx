@@ -161,7 +161,8 @@ describe('GlobePins interactive 3D Canvas component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reset 3D globe view' }));
     expect(screen.getByRole('button', { name: 'Resume globe rotation' })).toBeInTheDocument();
 
-    expect(screen.getByTestId('globe-dept-metrics-overview')).toBeInTheDocument();
+    expect(screen.getByTestId('globe-dept-metrics-unavailable')).toBeInTheDocument();
+    expect(screen.getByText('Department telemetry unavailable')).toBeInTheDocument();
     const layerToggle = screen.getByRole('button', {
       name: /Switch to NASA Live VIIRS satellite imagery/i,
     });
@@ -200,14 +201,13 @@ describe('GlobePins interactive 3D Canvas component', () => {
           icon: <span aria-hidden="true" />,
           iconBgColor: 'bg-accent-gold/10',
           primary: { href: '/drilling', label: 'Drilling', icon: <span aria-hidden="true" /> },
-          assetOverline: 'FIELD OPERATIONS // UNIT-PV351',
         }}
       />
     );
 
     expect(screen.getByTestId('globe-dept-metrics-drilling')).toBeInTheDocument();
     expect(screen.getByText('Drilling Operations Telemetry')).toBeInTheDocument();
-    expect(screen.getByText('FIELD OPERATIONS // UNIT-PV351')).toBeInTheDocument();
-    expect(screen.getByText('DELTA +66.7%')).toBeInTheDocument();
+    expect(screen.getByText('Depth: 1,240m')).toBeInTheDocument();
+    expect(screen.queryByText(/DELTA/)).not.toBeInTheDocument();
   });
 });

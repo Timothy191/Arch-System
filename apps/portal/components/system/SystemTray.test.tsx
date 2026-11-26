@@ -12,7 +12,6 @@ import {
 import { WifiNetworkPopover } from './SystemTrayRows';
 
 jest.mock('@repo/utils/client', () => ({
-  analytics: { track: jest.fn() },
   fetchClient: { post: jest.fn().mockResolvedValue({ ok: true }) },
 }));
 

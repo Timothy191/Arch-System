@@ -35,7 +35,7 @@ describe('DepartmentReviews', () => {
 
     await waitFor(() => {
       expect(screen.getByText('37ms RTT')).toBeInTheDocument();
-      expect(screen.getByText('14ms Avg')).toBeInTheDocument();
+      expect(screen.getByText('14ms probe')).toBeInTheDocument();
     });
 
     expect(screen.getByTestId('footer-slide-server')).toBeInTheDocument();
@@ -94,7 +94,9 @@ describe('DepartmentReviews', () => {
     expect(dialog).toBeInTheDocument();
     expect(screen.getByText('PostgreSQL 17 · Managed Supabase Cloud')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Refresh environment telemetry' }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Refresh environment telemetry' }));
+    });
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledTimes(2);
     });
@@ -103,7 +105,7 @@ describe('DepartmentReviews', () => {
     expect(screen.queryByTestId('footer-environment-preview-dialog')).not.toBeInTheDocument();
   });
 
-  it('keeps baseline telemetry gracefully when /api/health probe fails', async () => {
+  it('shows unavailable telemetry without inventing baselines when /api/health probe fails', async () => {
     global.fetch = jest
       .fn()
       .mockRejectedValue(new Error('Network down')) as unknown as typeof fetch;
@@ -113,6 +115,7 @@ describe('DepartmentReviews', () => {
       expect(global.fetch).toHaveBeenCalledTimes(1);
     });
     expect(screen.getByTestId('footer-slide-server')).toBeInTheDocument();
-    expect(screen.getByText('18ms Avg')).toBeInTheDocument();
+    expect(screen.getByText('Health probe unavailable')).toBeInTheDocument();
+    expect(screen.queryByText(/18ms|4ms|24ms|Baseline Active|Zero-Drift/)).not.toBeInTheDocument();
   });
 });

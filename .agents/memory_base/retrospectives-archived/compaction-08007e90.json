@@ -1,0 +1,22 @@
+{
+  "id": "compaction-08007e90",
+  "timestamp": "2026-11-26T10:10:07.218Z",
+  "taskTag": "compaction-standard-08007e90",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/.gemini/antigravity-cli/brain/4498f167-56dc-40a1-98c5-89fd382a0793/access_control_production_operator_plan_and_spec.md\"",
+    "\"/home/tim/.gemini/antigravity-cli/brain/08007e90-8df1-4105-bf4b-93975420a6b5/access_control_production_operator_plan_and_spec.md\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (420 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 71274,
+    "cacheHitRatio": 0.7035,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

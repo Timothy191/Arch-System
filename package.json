@@ -189,7 +189,6 @@
     "deploy:local": "bash scripts/deploy.sh local",
     "deploy:cloudflare": "bash scripts/deploy-cloudflare.sh",
     "deploy:production": "bash scripts/deploy.sh production",
-    "deploy:rollback": "bash scripts/deploy.sh production --rollback",
     "deploy:staging": "bash scripts/deploy.sh staging",
     "deploy:vercel:preflight": "node tools/scripts/vercel-preflight.cjs",
     "deploy:vercel:preflight:preview": "node tools/scripts/vercel-preflight.cjs --env=preview",

@@ -1,6 +1,5 @@
 'use client';
 
-import { analytics } from '@repo/utils/client';
 import { Download, Share, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -76,10 +75,6 @@ export function PWAInstallButton() {
       setIsInstalled(true);
       setShowInstallPrompt(false);
       setDeferredPrompt(null);
-      analytics.track({
-        eventName: 'PWA Installed',
-        properties: { platform: 'web' },
-      });
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -96,11 +91,6 @@ export function PWAInstallButton() {
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-
-    analytics.track({
-      eventName: outcome === 'accepted' ? 'PWA Install Accepted' : 'PWA Install Dismissed',
-      properties: { outcome },
-    });
 
     setDeferredPrompt(null);
     setShowInstallPrompt(false);

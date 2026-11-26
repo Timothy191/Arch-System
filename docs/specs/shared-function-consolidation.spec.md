@@ -18,12 +18,12 @@ Eliminate redundant function, component, hook, and utility implementations acros
 ### 2.1 Ubiquitous Requirements
 
 - **REQ-001**: The system SHALL maintain a single canonical implementation for repeated server action and API route guards (`assertAdmin`, `assertAccessControlRole`, `authorizeRedisProxyRequest`), CSV export utilities (`sanitizeCsvCell`), and BullMQ workflow queue initialization (`getRedisConnectionOptions`, `getWorkflowQueue`).
-- **REQ-002**: The `@repo/ui/Logo` module SHALL export the canonical `ARCH_LOGO_PATH` and `ARCH_LOGO_VIEWBOX` constants consumed across all UI components and telemetry sparkline graphs.
+- **REQ-002**: The `@repo/ui/Logo` module SHALL export the canonical `ARCH_LOGO_PATH` and `ARCH_LOGO_VIEWBOX` constants consumed across all UI components that render the Arch mark.
 - **REQ-003**: The `@repo/supabase` package SHALL resolve `supabaseUrl` and `supabaseAnonKey` from a single `resolveSupabasePublicConfig()` helper across `middleware.ts`, `proxy.ts`, and `server.ts`.
 
 ### 2.2 Event-Driven Requirements
 
-- **REQ-004**: WHEN a department telemetry dashboard (`ControlRoomSummaryGridClient`, `ExcavatorActivityTelemetryOverview`, `MachineOperationsKpiStrip`) renders a golden telemetry sparkline or computes sparkline points, THE system SHALL invoke the shared `<GoldenTelemetrySparkline />` and `buildSparklinePoints()` module.
+- **REQ-004**: WHEN a department telemetry dashboard (`ControlRoomSummaryGridClient`, `ExcavatorActivityTelemetryOverview`, `MachineOperationsKpiStrip`) renders metrics, THE system SHALL render only values derived from real persisted records and SHALL NOT synthesize history points, averages, or peaks from a single current value.
 - **REQ-005**: WHEN an error boundary (`app/error.tsx`, `app/hub/error.tsx`, `app/(departments)/[department]/error.tsx`, `ErrorFallback.tsx`) formats an `Error` or `AppError`, THE system SHALL delegate to the shared `error-display.ts` helpers (`getErrorTitle`, `getErrorMessage`, `getActionLink`).
 - **REQ-006**: WHEN client telemetry or HLC comparison is invoked in `apps/portal` or `libs/shared/hooks`, THE system SHALL delegate to `@repo/shared/hooks` (`client-telemetry.ts`) and `@repo/utils/hlc` (`compareHlc`) respectively.
 

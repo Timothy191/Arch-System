@@ -1,5 +1,6 @@
 'use server';
 
+import { randomBytes } from 'node:crypto';
 import {
   bulkPrintCardsSchema,
   printCardRequestSchema,
@@ -337,7 +338,7 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       job_title: p.job_title,
       area: (p as Record<string, unknown>).area as string | null | undefined,
       department_id: p.department_id,
-      department_name: deptRecord?.display_name ?? 'General Operations',
+      department_name: deptRecord?.display_name ?? undefined,
       induction_expiry: p.induction_expiry,
       medical_expiry: p.medical_expiry,
       status: p.status,
@@ -362,7 +363,7 @@ export async function upsertEmployeeForCardPrinting(
   const firstName = input.first_name.trim();
   const surname = input.surname.trim();
   const idNumber = input.id_number.trim();
-  const jobTitle = input.job_title.trim() || 'Site Operator';
+  const jobTitle = input.job_title.trim();
   const targetDeptId = input.department_id || employee.department_id || null;
 
   if (!empCode || !firstName || !surname || !idNumber) {
@@ -383,7 +384,7 @@ export async function upsertEmployeeForCardPrinting(
     id_number: idNumber,
     job_title: jobTitle,
     department_id: targetDeptId,
-    area: input.area?.trim() || 'Main Complex',
+    area: input.area?.trim() || null,
     status: input.status || 'Active',
     induction_expiry: input.induction_expiry || null,
     medical_expiry: input.medical_expiry || null,
@@ -419,8 +420,9 @@ export async function upsertEmployeeForCardPrinting(
   }
 
   // Ensure active badge (QR + RFID) is provisioned for the card
-  const desiredQr = input.qr_code?.trim() || `EMP-${empCode.replace(/\s+/g, '-').toUpperCase()}`;
+  const suppliedQr = input.qr_code?.trim() || undefined;
   const desiredRfid = input.rfid_code?.trim() || null;
+  let persistedQr: string | null = suppliedQr ?? null;
 
   const { data: existingBadge } = await supabase
     .from('badges')
@@ -430,10 +432,11 @@ export async function upsertEmployeeForCardPrinting(
     .maybeSingle();
 
   if (existingBadge) {
+    persistedQr = suppliedQr ?? existingBadge.qr_code;
     const { error: badgeUpdateErr } = await supabase
       .from('badges')
       .update({
-        qr_code: desiredQr,
+        qr_code: suppliedQr ?? existingBadge.qr_code,
         rfid_code: desiredRfid,
         department_id: targetDeptId,
       })
@@ -446,8 +449,10 @@ export async function upsertEmployeeForCardPrinting(
       });
     }
   } else {
+    const generatedQr = `QR-${randomBytes(8).toString('hex').toUpperCase()}`;
+    persistedQr = suppliedQr ?? generatedQr;
     const { error: badgeInsertErr } = await supabase.from('badges').insert({
-      qr_code: desiredQr,
+      qr_code: suppliedQr ?? generatedQr,
       rfid_code: desiredRfid,
       entity_type: 'personnel',
       personnel_id: personnelId,
@@ -493,13 +498,12 @@ export async function upsertEmployeeForCardPrinting(
     surname,
     id_number: idNumber,
     job_title: jobTitle,
-    area: input.area?.trim() || 'Main Complex',
+    area: input.area?.trim() || null,
     department_id: targetDeptId,
-    department_name: 'Assigned Department',
     induction_expiry: input.induction_expiry || null,
     medical_expiry: input.medical_expiry || null,
     status: input.status || 'Active',
-    qr_code: desiredQr,
+    qr_code: persistedQr,
     rfid_code: desiredRfid,
     has_card: true,
     photo_url: input.photo_url || null,
@@ -539,7 +543,7 @@ export async function sendNeo300PrintJob(personnelId: string) {
     .maybeSingle();
 
   if (!badge) {
-    const generatedQr = `EMP-${person.emp_code || person.id.substring(0, 8).toUpperCase()}`;
+    const generatedQr = `QR-${randomBytes(8).toString('hex').toUpperCase()}`;
     const { data: newBadge, error: bError } = await supabase
       .from('badges')
       .insert({

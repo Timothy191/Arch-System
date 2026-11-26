@@ -3,10 +3,6 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Activity, AlertTriangle, Clock, Gauge, Layers, TrendingUp } from 'lucide-react';
 import { memo } from 'react';
-import {
-  buildSparklinePoints,
-  GoldenTelemetrySparkline,
-} from '@/components/telemetry/GoldenTelemetrySparkline';
 
 export interface MachineOperationsKpiStripProps {
   totalHours: number;
@@ -33,24 +29,6 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
   controlRoomDelayHours = 0,
   totalEngineeringDelayHours = 0,
 }: MachineOperationsKpiStripProps) {
-  // Sparkline data points calculated from metrics
-  const hoursPoints = buildSparklinePoints(Math.min(100, Math.round(totalHours * 1.5)), {
-    hasSineWave: true,
-  });
-  const machinesPoints = buildSparklinePoints(Math.min(100, Math.round(activeMachines * 4)), {
-    hasSineWave: true,
-  });
-  const materialPoints = buildSparklinePoints(Math.min(100, Math.round(totalMaterialBCM / 40)), {
-    hasSineWave: true,
-  });
-  const bcmRatePoints = buildSparklinePoints(Math.min(100, Math.round(avgBcmPerHour / 2)), {
-    hasSineWave: true,
-  });
-  const delaysPoints = buildSparklinePoints(Math.min(100, Math.round(totalDelayHours * 6)), {
-    isInverted: true,
-    hasSineWave: true,
-  });
-
   return (
     <div
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
@@ -73,14 +51,6 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
             {totalHours.toFixed(1)}h
           </p>
         </div>
-        <GoldenTelemetrySparkline
-          id="today-hours"
-          variant="kpi"
-          points={hoursPoints}
-          avgValue={`${(totalHours * 0.72).toFixed(1)}h`}
-          peakValue={`${(totalHours * 1.05).toFixed(1)}h`}
-          currentValue={`${totalHours.toFixed(1)}h`}
-        />
       </GlassCard>
 
       {/* 2. Active Machines */}
@@ -97,15 +67,6 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
             {activeMachines}
           </p>
         </div>
-        <GoldenTelemetrySparkline
-          id="active-machines"
-          variant="kpi"
-          points={machinesPoints}
-          avgValue={`${Math.max(1, Math.round(activeMachines * 0.8))}`}
-          peakValue={`${Math.max(activeMachines, Math.round(activeMachines * 1.15))}`}
-          currentValue={`${activeMachines}`}
-          strokeColor="#10b981"
-        />
       </GlassCard>
 
       {/* 3. Material Moved */}
@@ -124,15 +85,6 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
             {totalMaterialBCM.toFixed(1)} <span className="font-normal text-sm">BCM</span>
           </p>
         </div>
-        <GoldenTelemetrySparkline
-          id="material-moved"
-          variant="kpi"
-          points={materialPoints}
-          avgValue={`${(totalMaterialBCM * 0.65).toFixed(0)}`}
-          peakValue={`${(totalMaterialBCM * 1.08).toFixed(0)}`}
-          currentValue={`${totalMaterialBCM.toFixed(0)}`}
-          strokeColor="#3b82f6"
-        />
       </GlassCard>
 
       {/* 4. BCM/Hour */}
@@ -151,14 +103,6 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
             {avgBcmPerHour.toFixed(1)}
           </p>
         </div>
-        <GoldenTelemetrySparkline
-          id="bcm-rate"
-          variant="kpi"
-          points={bcmRatePoints}
-          avgValue={`${(avgBcmPerHour * 0.85).toFixed(1)}`}
-          peakValue={`${(avgBcmPerHour * 1.12).toFixed(1)}`}
-          currentValue={`${avgBcmPerHour.toFixed(1)}`}
-        />
       </GlassCard>
 
       {/* 5. Total Delays */}
@@ -183,15 +127,6 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
             </p>
           )}
         </div>
-        <GoldenTelemetrySparkline
-          id="total-delays"
-          variant="kpi"
-          points={delaysPoints}
-          avgValue={`${(totalDelayHours * 0.6).toFixed(1)}h`}
-          peakValue={`${(totalDelayHours * 1.25).toFixed(1)}h`}
-          currentValue={`${totalDelayHours.toFixed(1)}h`}
-          strokeColor="#ef4444"
-        />
       </GlassCard>
     </div>
   );

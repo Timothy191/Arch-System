@@ -2,14 +2,14 @@ import { getRedisClient } from '@repo/redis';
 import { type NextRequest, NextResponse } from 'next/server';
 
 const PROBE_TIMEOUT_MS = 2_500;
-const DEFAULT_FUXA_URL = 'http://localhost:1881';
 const HTTP_STATUS_OK = 200;
-const HTTP_STATUS_SERVICE_UNAVAILABLE = 503;
 
-type FuxaHealthStatus = 'healthy' | 'degraded' | 'unhealthy';
+type FuxaHealthStatus = 'healthy' | 'degraded' | 'unavailable' | 'unconfigured';
 
 export interface FuxaHealthResponse {
   status: FuxaHealthStatus;
+  optional: boolean;
+  configured: boolean;
   fuxa_healthy: boolean;
   iframeLoadable: boolean;
   corsAllowed: boolean;
@@ -32,11 +32,36 @@ async function isRedisFallbackHealthy(): Promise<boolean> {
   }
 }
 
+function getFuxaUrl(): string {
+  const raw = process.env.FUXA_URL || process.env.NEXT_PUBLIC_FUXA_URL || '';
+  return raw.trim().replace(/\/+$/, '');
+}
+
 export async function GET(_req?: NextRequest) {
   const startedAt = Date.now();
-  const fuxaUrl = process.env.FUXA_URL || process.env.NEXT_PUBLIC_FUXA_URL || DEFAULT_FUXA_URL;
+  const fuxaUrl = getFuxaUrl();
+  const configured = fuxaUrl.length > 0;
 
-  let status: FuxaHealthStatus = 'unhealthy';
+  // FUXA is an optional integration: when unconfigured, report clearly and
+  // never block deployment or core portal operations.
+  if (!configured) {
+    const payload: FuxaHealthResponse = {
+      status: 'unconfigured',
+      optional: true,
+      configured: false,
+      fuxa_healthy: false,
+      iframeLoadable: false,
+      corsAllowed: false,
+      latencyMs: Date.now() - startedAt,
+      timestamp: new Date().toISOString(),
+    };
+    return NextResponse.json(payload, {
+      status: HTTP_STATUS_OK,
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
+    });
+  }
+
+  let status: FuxaHealthStatus = 'unavailable';
   let fuxaHealthy = false;
   let iframeLoadable = false;
   let corsAllowed = false;
@@ -60,17 +85,17 @@ export async function GET(_req?: NextRequest) {
       status = 'degraded';
     } else {
       const redisHealthy = await isRedisFallbackHealthy();
-      status = redisHealthy ? 'degraded' : 'unhealthy';
+      status = redisHealthy ? 'degraded' : 'unavailable';
     }
   } catch {
     const redisHealthy = await isRedisFallbackHealthy();
-    status = redisHealthy ? 'degraded' : 'unhealthy';
+    status = redisHealthy ? 'degraded' : 'unavailable';
   }
-
-  const httpStatus = status === 'unhealthy' ? HTTP_STATUS_SERVICE_UNAVAILABLE : HTTP_STATUS_OK;
 
   const payload: FuxaHealthResponse = {
     status,
+    optional: true,
+    configured: true,
     fuxa_healthy: fuxaHealthy,
     iframeLoadable,
     corsAllowed,
@@ -78,8 +103,9 @@ export async function GET(_req?: NextRequest) {
     timestamp: new Date().toISOString(),
   };
 
+  // FUXA is optional: always return HTTP 200 so monitors do not alert.
   return NextResponse.json(payload, {
-    status: httpStatus,
+    status: HTTP_STATUS_OK,
     headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
   });
 }

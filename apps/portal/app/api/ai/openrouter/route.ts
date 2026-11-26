@@ -1,6 +1,5 @@
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import {
-  AgentCursorTracker,
   createChatCompletion,
   getAccountCredits,
   getAvailableModels,
@@ -106,18 +105,10 @@ async function handlePost(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    // Caller-supplied messages are passed through unchanged. Injecting unrelated
+    // sleep/location telemetry here previously produced false personalization and
+    // unbounded prompt drift; operational grounding belongs in /api/ai/operations-copilot.
     const body: OpenRouterChatRequest = parsed.data;
-
-    // --- FULCRA LIFE CONTEXT INJECTION ---
-    const lifeContext = await AgentCursorTracker.getLifeContext();
-    const systemInstruction = {
-      role: 'system' as const,
-      content: `[REAL-TIME CONTEXT] You are a highly personalized AI. Current user telemetry: ${JSON.stringify(lifeContext)}`,
-    };
-
-    // Prepend the system instruction to the messages array
-    body.messages = [systemInstruction, ...body.messages];
-
     const completion = await createChatCompletion(body);
 
     return NextResponse.json(completion, { status: 200 });

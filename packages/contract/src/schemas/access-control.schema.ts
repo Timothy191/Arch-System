@@ -334,44 +334,6 @@ export const visitorApprovalSchema = z.object({
 
 export type VisitorApprovalInput = z.infer<typeof visitorApprovalSchema>;
 
-export const qrCreateEntityBadgeSchema = z.discriminatedUnion('entityType', [
-  z.object({
-    entityType: z.literal('personnel'),
-    firstName: nonEmptyString.max(100),
-    surname: nonEmptyString.max(100),
-    empCode: nonEmptyString.max(50),
-    idNumber: nonEmptyString.max(50),
-    jobTitle: z.string().trim().max(100).optional(),
-  }),
-  z.object({
-    entityType: z.literal('visitor'),
-    firstName: nonEmptyString.max(100),
-    surname: nonEmptyString.max(100),
-    company: nonEmptyString.max(150),
-    idNumber: z.string().trim().max(50).optional().nullable(),
-    visiting: z.string().trim().max(150).optional(),
-    reasonForEntry: nonEmptyString.max(300),
-  }),
-  z.object({
-    entityType: z.enum(['vehicle', 'coal_truck']),
-    fleetCode: nonEmptyString.max(50),
-    registrationNumber: z.string().trim().max(50).optional(),
-    vehicleType: nonEmptyString.max(100),
-    make: z.string().trim().max(100).optional(),
-    model: z.string().trim().max(100).optional(),
-  }),
-  z.object({
-    entityType: z.literal('equipment'),
-    equipCode: nonEmptyString.max(50),
-    equipmentType: nonEmptyString.max(100),
-    serialNumber: z.string().trim().max(100).optional(),
-    manufacturer: z.string().trim().max(100).optional(),
-    model: z.string().trim().max(100).optional(),
-  }),
-]);
-
-export type QrCreateEntityBadgeInput = z.infer<typeof qrCreateEntityBadgeSchema>;
-
 /** Canonical contract schema matching `public.perimeter_gates` (migration 235). */
 export const perimeterGatesSchema = z.object({
   id: nonEmptyString.max(64),

@@ -47,8 +47,8 @@ jest.mock('~/features/admin/actions/targets', () => ({
   adminSaveOperationalTargets: jest.fn().mockResolvedValue({ success: true }),
 }));
 
-describe('Control Room Redesigned Panels & Summary Golden Graphs', () => {
-  it('renders Golden Graphs in ControlRoomSummaryGridClient using HeroCard layout', () => {
+describe('Control Room Redesigned Panels & Summary KPIs', () => {
+  it('renders real summary KPIs in ControlRoomSummaryGridClient without synthetic sparklines', () => {
     render(<ControlRoomSummaryGridClient deptId="dept-cr" today="2026-10-23" />);
 
     expect(screen.getByText('Hours Today')).toBeInTheDocument();
@@ -57,17 +57,17 @@ describe('Control Room Redesigned Panels & Summary Golden Graphs', () => {
     expect(screen.getByText('Machines')).toBeInTheDocument();
     expect(screen.getByText('Delay Entries')).toBeInTheDocument();
 
-    expect(screen.getByTestId('summary-golden-graph-hours-today')).toBeInTheDocument();
-    expect(screen.getByTestId('summary-golden-graph-total-loads')).toBeInTheDocument();
-    expect(screen.getByTestId('summary-golden-graph-delay-hours')).toBeInTheDocument();
-    expect(screen.getByTestId('summary-golden-graph-machines')).toBeInTheDocument();
-    expect(screen.getByTestId('summary-golden-graph-delay-entries')).toBeInTheDocument();
+    expect(screen.queryByTestId('summary-golden-graph-hours-today')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('summary-golden-graph-total-loads')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('summary-golden-graph-delay-hours')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('summary-golden-graph-machines')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('summary-golden-graph-delay-entries')).not.toBeInTheDocument();
     expect(screen.getByTestId('summary-kpi-separator-hours-today')).toBeInTheDocument();
     expect(screen.getByTestId('summary-kpi-separator-total-loads')).toBeInTheDocument();
     expect(screen.getByTestId('summary-kpi-separator-delay-hours')).toBeInTheDocument();
     expect(screen.getByTestId('summary-kpi-separator-machines')).toBeInTheDocument();
     expect(screen.getByTestId('summary-kpi-separator-delay-entries')).toBeInTheDocument();
-    expect(screen.getAllByTestId('summary-graph-arch-node').length).toBeGreaterThan(10);
+    expect(screen.queryByTestId('summary-graph-arch-node')).not.toBeInTheDocument();
   });
 
   it('renders Excavator Activity and Registered Machines with Loaded Loads in ScadaPanel', () => {

@@ -57,14 +57,6 @@ const CANONICAL_SSOT_SYMBOLS = [
     canonicalPath: 'packages/ui/src/components/Logo.tsx',
   },
   {
-    symbol: 'GoldenTelemetrySparkline',
-    canonicalPath: 'apps/portal/components/telemetry/GoldenTelemetrySparkline.tsx',
-  },
-  {
-    symbol: 'buildSparklinePoints',
-    canonicalPath: 'apps/portal/components/telemetry/GoldenTelemetrySparkline.tsx',
-  },
-  {
     symbol: 'DepartmentPageLoadingSkeleton',
     canonicalPath: 'apps/portal/components/skeletons/DepartmentPageLoadingSkeleton.tsx',
   },

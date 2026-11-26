@@ -6,7 +6,6 @@ import { MacTitleBar } from '@repo/ui/MacTitleBar';
 import {
   Activity,
   BookOpen,
-  Bot,
   Building2,
   ChevronRight,
   Database,
@@ -28,7 +27,6 @@ const DepartmentBreakdown = lazy(() => import('./sections/DepartmentBreakdown'))
 const TechStack = lazy(() => import('./sections/TechStack'));
 const DatabaseSchema = lazy(() => import('./sections/DatabaseSchema'));
 const DocumentationMaps = lazy(() => import('./sections/DocumentationMaps'));
-const AgenticMonitor = lazy(() => import('./sections/AgenticMonitor'));
 const AuditReportsSection = lazy(() => import('./sections/AuditReportsSection'));
 const ObservabilityConsole = lazy(() =>
   import('@/components/observability/ObservabilityConsole').then((m) => ({
@@ -78,12 +76,6 @@ const OVERVIEW_NAV_ITEMS = [
     label: 'Audit & Compliance',
     badge: 'RLS + ISO',
     icon: ShieldCheck,
-  },
-  {
-    value: 'agentic',
-    label: 'Agentic Monitor',
-    badge: 'AI Mesh',
-    icon: Bot,
   },
   {
     value: 'observability',
@@ -385,12 +377,6 @@ export default function OverviewPage() {
           <TabsContent value="audit" className="m-0 focus-visible:outline-none">
             <Suspense fallback={<SectionLoader />}>
               <AuditReportsSection />
-            </Suspense>
-          </TabsContent>
-
-          <TabsContent value="agentic" className="m-0 focus-visible:outline-none">
-            <Suspense fallback={<SectionLoader />}>
-              <AgenticMonitor />
             </Suspense>
           </TabsContent>
 

@@ -2123,9 +2123,9 @@ pnpm add @next/third-parties@latest
 | **`<GoogleMapsEmbed apiKey="..." />`**     | `@next/third-parties/google` | Uses `loading="lazy"` by default to defer offscreen map iframes until scrolled near the viewport.                                    |
 | **`<YouTubeEmbed videoid="..." />`**       | `@next/third-parties/google` | Uses `lite-youtube-embed` under the hood to render a lightweight poster first and load the full YouTube player only on user click.   |
 
-### Arch-System First-Party Telemetry Script Proxy
+### Client Telemetry
 
-In [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx#L275-L276), Arch-System loads Vercel Analytics via a first-party relative script path (`<Analytics scriptSrc="/va/script.js" />`) alongside `<SpeedInsights />` so telemetry scripts respect the strict Content Security Policy (`script-src 'self' https://va.vercel-scripts.com`) and avoid third-party DNS/TLS handshake overhead.
+`<SpeedInsights />` remains in [apps/portal/app/layout.tsx](../../apps/portal/app/layout.tsx) for Vercel Speed Insights. The former first-party `/va/script.js` analytics stub was removed: it only queued calls in memory and posted to an endpoint that does not exist. The portal shell loads no client analytics script.
 
 ---
 

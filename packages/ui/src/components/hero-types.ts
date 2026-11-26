@@ -10,11 +10,9 @@ export interface Panel {
   video?: string;
   stats?: { label: string; value: string };
   trend?: readonly number[];
-  status: string;
+  status?: string;
   icon: ReactNode;
   iconBgColor: string;
   primary: { href: string; label: string; icon: ReactNode };
   secondary?: { href: string; label: string; icon: ReactNode };
-  assetOverline?: string;
-  assetSubtitle?: string;
 }

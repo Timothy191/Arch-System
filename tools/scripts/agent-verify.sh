@@ -118,10 +118,6 @@ run_gate 7  "🤖" "MCP Server Registration & Toolchain" \
   "pnpm mcp:verify" \
   "Run 'pnpm mcp:onboard' to register required MCP servers."
 
-run_gate 8  "💰" "Context Budget Tracking (Non-Blocking)" \
-  "pnpm token:budget-check" \
-  "Informational only — token budget never restrains or blocks agent execution."
-
 run_gate 9  "📜" "Agent Rule Drift (workspace ↔ project)" \
   "node tools/audits/audit-agent-rules-drift.cjs && node tools/audits/audit-agentic-content.cjs --check && node tools/audits/audit-ssot-duplicates.cjs" \
   "Run 'node tools/audits/audit-agent-rules-drift.cjs' and sync the diverged rule to BOTH .agents/rules/ trees."

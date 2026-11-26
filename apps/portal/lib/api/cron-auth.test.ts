@@ -11,12 +11,6 @@ jest.mock('@/lib/jobs/workflow-runner', () => ({
   triggerTrackedWorkflow: jest.fn().mockResolvedValue({ jobId: 'job-123', status: 'pending' }),
 }));
 
-jest.mock('@repo/utils', () => ({
-  AgentCursorTracker: {
-    recordState: jest.fn().mockResolvedValue(undefined),
-  },
-}));
-
 describe('authorizeCronRequest & Scheduled Cron Route Authentication', () => {
   const ORIGINAL_CRON_SECRET = process.env.CRON_SECRET;
   const TEST_SECRET = 'cron-secret-test-value-2026-secure';

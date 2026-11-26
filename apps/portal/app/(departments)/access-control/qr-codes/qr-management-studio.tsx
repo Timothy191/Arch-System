@@ -51,11 +51,6 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
   // Form State for Quick Issue
   const [formEntityType, setFormEntityType] = useState<CredentialEntityType>('personnel');
   const [selectedEntityId, setSelectedEntityId] = useState<string>('');
-  const [isCustomEntity, setIsCustomEntity] = useState(false);
-  const [customName, setCustomName] = useState('');
-  const [customCode, setCustomCode] = useState('');
-  const [customReg, setCustomReg] = useState('');
-  const [customMake, setCustomMake] = useState('');
   const [qrCodeInput, setQrCodeInput] = useState('');
   const [rfidCodeInput, setRfidCodeInput] = useState('');
   const [validityDays, setValidityDays] = useState<number>(365);
@@ -74,27 +69,6 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
       const results = await getBadgesInventory(filterType, term);
       setBadges(results);
     });
-  };
-
-  const handleAutoGenerateCode = (entityType: CredentialEntityType) => {
-    const randomSuffix = Math.floor(10000 + Math.random() * 90000);
-    switch (entityType) {
-      case 'coal_truck':
-        setQrCodeInput(`TRK-COAL-${randomSuffix}`);
-        break;
-      case 'vehicle':
-        setQrCodeInput(`VEH-${randomSuffix}`);
-        break;
-      case 'visitor':
-        setQrCodeInput(`VIS-${randomSuffix}`);
-        break;
-      case 'equipment':
-        setQrCodeInput(`EQP-${randomSuffix}`);
-        break;
-      default:
-        setQrCodeInput(`EMP-${randomSuffix}`);
-        break;
-    }
   };
 
   const handleRevoke = (badgeId: string) => {
@@ -119,15 +93,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
           entityType: formEntityType,
           code: qrCodeInput,
           rfidCode: rfidCodeInput,
-          targetEntityId: isCustomEntity ? undefined : selectedEntityId || undefined,
-          newEntityData: isCustomEntity
-            ? {
-                name: customName,
-                code: customCode,
-                regNumber: customReg,
-                make: customMake,
-              }
-            : undefined,
+          targetEntityId: selectedEntityId,
           expiresInDays: validityDays,
         };
 
@@ -142,11 +108,6 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
           setQrCodeInput('');
           setRfidCodeInput('');
           setSelectedEntityId('');
-          setIsCustomEntity(false);
-          setCustomName('');
-          setCustomCode('');
-          setCustomReg('');
-          setCustomMake('');
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Failed to create badge';
@@ -200,7 +161,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
           <Button
             onClick={() => {
               setFormEntityType('personnel');
-              handleAutoGenerateCode('personnel');
+              setSelectedEntityId('');
               setIsModalOpen(true);
             }}
             className="gap-2 self-end bg-gradient-to-r from-emerald-600 to-teal-600 py-2 font-semibold text-white shadow-emerald-600/30 shadow-lg hover:from-emerald-500 hover:to-teal-500 md:self-center"
@@ -433,9 +394,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                         key={t.id}
                         type="button"
                         onClick={() => {
-                          const val = t.id as CredentialEntityType;
-                          setFormEntityType(val);
-                          handleAutoGenerateCode(val);
+                          setFormEntityType(t.id as CredentialEntityType);
                           setSelectedEntityId('');
                         }}
                         className={`flex flex-col items-center justify-center rounded p-2 font-medium text-[11px] transition-all ${
@@ -452,120 +411,48 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                 </div>
               </div>
 
-              {/* Select Existing or Create New */}
+              {/* Existing target entity is required */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="font-medium text-[var(--text-secondary)] text-xs">
-                    Assign Target Entity
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsCustomEntity(!isCustomEntity)}
-                    className="text-[11px] text-[var(--accent-blue)] hover:underline"
-                  >
-                    {isCustomEntity ? 'Select Existing Entity' : '+ Register New On-The-Fly'}
-                  </button>
-                </div>
-
-                {!isCustomEntity ? (
-                  <select
-                    value={selectedEntityId}
-                    onChange={(e) => setSelectedEntityId(e.target.value)}
-                    className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  >
-                    <option value="">-- Choose {formEntityType.replace('_', ' ')} --</option>
-                    {currentOptions.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
-                        {opt.label} • {opt.sublabel}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)]/50 p-3">
-                    {formEntityType === 'coal_truck' || formEntityType === 'vehicle' ? (
-                      <>
-                        <input
-                          type="text"
-                          placeholder="Fleet / Truck Code (e.g. CT-99)"
-                          value={customCode}
-                          onChange={(e) => setCustomCode(e.target.value)}
-                          className="rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)]"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Registration (e.g. ABC 999 GP)"
-                          value={customReg}
-                          onChange={(e) => setCustomReg(e.target.value)}
-                          className="rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)]"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Make & Model (e.g. Scania R500)"
-                          value={customMake}
-                          onChange={(e) => setCustomMake(e.target.value)}
-                          className="col-span-2 rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)]"
-                        />
-                      </>
-                    ) : formEntityType === 'visitor' ? (
-                      <>
-                        <input
-                          type="text"
-                          placeholder="Visitor Full Name"
-                          value={customName}
-                          onChange={(e) => setCustomName(e.target.value)}
-                          className="rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)]"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Company (e.g. TransCol Logistics)"
-                          value={customMake}
-                          onChange={(e) => setCustomMake(e.target.value)}
-                          className="rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)]"
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <input
-                          type="text"
-                          placeholder="Code (e.g. EQP-991)"
-                          value={customCode}
-                          onChange={(e) => setCustomCode(e.target.value)}
-                          className="rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)]"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Type / Description"
-                          value={customMake}
-                          onChange={(e) => setCustomMake(e.target.value)}
-                          className="rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)]"
-                        />
-                      </>
-                    )}
-                  </div>
-                )}
+                <label
+                  htmlFor="credential-target-entity"
+                  className="font-medium text-[var(--text-secondary)] text-xs"
+                >
+                  Assign Existing Target Entity
+                </label>
+                <select
+                  id="credential-target-entity"
+                  required
+                  value={selectedEntityId}
+                  onChange={(e) => setSelectedEntityId(e.target.value)}
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                >
+                  <option value="">-- Choose {formEntityType.replace('_', ' ')} --</option>
+                  {currentOptions.map((opt) => (
+                    <option key={opt.id} value={opt.id}>
+                      {opt.label} • {opt.sublabel}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-[var(--text-muted)]">
+                  Credentials are issued only against an existing registered entity.
+                </p>
               </div>
 
               {/* QR Code & RFID Input */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="font-medium text-[var(--text-secondary)] text-xs">
-                      QR Code String
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => handleAutoGenerateCode(formEntityType)}
-                      className="flex items-center gap-1 font-medium text-[10px] text-emerald-600 hover:underline"
-                    >
-                      <Sparkles className="h-2.5 w-2.5" /> Auto
-                    </button>
-                  </div>
+                  <label
+                    htmlFor="credential-qr-code"
+                    className="font-medium text-[var(--text-secondary)] text-xs"
+                  >
+                    QR Code String (Optional)
+                  </label>
                   <input
+                    id="credential-qr-code"
                     type="text"
-                    required
                     value={qrCodeInput}
                     onChange={(e) => setQrCodeInput(e.target.value)}
-                    placeholder="e.g. TRK-COAL-1002"
+                    placeholder="Leave blank to generate a secure token"
                     className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono font-semibold text-emerald-700 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
@@ -588,12 +475,18 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
               {/* Live QR Preview Thumbnail */}
               <div className="flex items-center gap-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/60 p-3">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-[var(--border-default)] bg-white p-1 shadow-inner">
-                  <QRCodeSection data={qrCodeInput || 'SAMPLE'} size={56} />
+                  {qrCodeInput ? (
+                    <QRCodeSection data={qrCodeInput} size={56} />
+                  ) : (
+                    <span className="px-1 text-center font-mono text-[9px] text-[var(--text-muted)]">
+                      SECURE TOKEN
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-1 text-xs">
                   <p className="font-semibold text-[var(--text-heading)]">Live Code Preview</p>
                   <p className="truncate font-bold font-mono text-[11px] text-emerald-700">
-                    {qrCodeInput}
+                    {qrCodeInput || 'Generated on save'}
                   </p>
                   <p className="text-[10px] text-[var(--text-muted)]">
                     Verifiable by optical 2D barcode imager and Chainway C66 RFID reader.
@@ -641,7 +534,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                 <Button
                   type="submit"
                   size="sm"
-                  disabled={isPending || !qrCodeInput}
+                  disabled={isPending || !selectedEntityId}
                   className="bg-emerald-600 font-semibold text-white hover:bg-emerald-500"
                 >
                   {isPending ? 'Activating...' : 'Save & Activate Credential'}

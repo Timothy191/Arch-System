@@ -373,11 +373,6 @@ export const DEPARTMENTS = [
         name: 'Audit & Compliance',
         description: 'Automated drift, security & quality reports',
       },
-      {
-        path: '/overview?tab=agentic',
-        name: 'Agentic Monitor',
-        description: 'Multi-agent token cache & ZAR cost telemetry',
-      },
     ],
     roles: ['admin', 'executive', 'supervisor', 'engineer'],
   },
@@ -1181,32 +1176,6 @@ const _DB_RELATIONSHIPS = [
   { from: 'production_logs', to: 'daily_logs', type: 'many-to-one' },
 ];
 
-export interface ScadaTelemetryTag {
-  tagId: string;
-  name: string;
-  sourceProtocol: 'OPC-UA' | 'Modbus-TCP';
-  registerAddress?: string;
-  nodeId?: string;
-  dataType: 'FLOAT32' | 'INT16' | 'BOOLEAN' | 'UINT32';
-  baseValue: number | boolean;
-  unit?: string;
-  pollingRateHz: number;
-  variance?: number;
-  quality: 'GOOD (0x00)' | 'UNCERTAIN (0x40)';
-  equipment: string;
-}
-
-export interface ScadaMetrics {
-  opcUaPollingRateHz: number;
-  opcUaJitterMs: number;
-  modbusRegisterCount: number;
-  modbusActiveNodes: number;
-  frameLossRatePct: number;
-  throughputKbps: number;
-  activeSubscriptions: number;
-  tags: ScadaTelemetryTag[];
-}
-
 export interface BackendService {
   id: string;
   name: string;
@@ -1219,7 +1188,6 @@ export interface BackendService {
   security: string;
   sla: string;
   features: string[];
-  scadaMetrics?: ScadaMetrics;
 }
 
 interface BackendConnection {
@@ -1268,7 +1236,7 @@ export const BACKEND_SERVICES: BackendService[] = [
     sla: '<16ms 60fps interactive rendering',
     features: [
       'Interactive System Graph',
-      'Live Telemetry Simulator',
+      'SCADA Stream Inspection',
       'DB Schema Graph',
       'Drift Health Audit (DHI)',
     ],
@@ -1407,122 +1375,6 @@ export const BACKEND_SERVICES: BackendService[] = [
       'Dozer Pitch & Roll Inclinometer',
       'Drill Rig Depth Sensors',
     ],
-    // AGENT-TRACE: Simulated live SCADA telemetry metrics for FUXA HMI gateway
-    scadaMetrics: {
-      opcUaPollingRateHz: 10,
-      opcUaJitterMs: 1.8,
-      modbusRegisterCount: 1284,
-      modbusActiveNodes: 16,
-      frameLossRatePct: 0.0,
-      throughputKbps: 42.8,
-      activeSubscriptions: 8,
-      tags: [
-        {
-          tagId: 'TAG-EX901-PAYLOAD',
-          name: 'EX901_Bucket_Payload',
-          sourceProtocol: 'OPC-UA',
-          nodeId: 'ns=2;s=Mining.EX901.Payload_Ton',
-          dataType: 'FLOAT32',
-          baseValue: 42.6,
-          unit: 't',
-          pollingRateHz: 10,
-          variance: 1.4,
-          quality: 'GOOD (0x00)',
-          equipment: 'Cat 6040 Excavator #01',
-        },
-        {
-          tagId: 'TAG-EX901-HYD-PRESS',
-          name: 'EX901_Hydraulic_Pressure',
-          sourceProtocol: 'Modbus-TCP',
-          registerAddress: 'HR_40012',
-          dataType: 'INT16',
-          baseValue: 3425,
-          unit: 'PSI',
-          pollingRateHz: 20,
-          variance: 22,
-          quality: 'GOOD (0x00)',
-          equipment: 'Cat 6040 Excavator #01',
-        },
-        {
-          tagId: 'TAG-DR104-PEN-RATE',
-          name: 'DR104_Penetration_Rate',
-          sourceProtocol: 'OPC-UA',
-          nodeId: 'ns=2;s=Drilling.DR104.PenRate_m_hr',
-          dataType: 'FLOAT32',
-          baseValue: 24.8,
-          unit: 'm/h',
-          pollingRateHz: 5,
-          variance: 0.7,
-          quality: 'GOOD (0x00)',
-          equipment: 'Pit Viper 271 Drill #04',
-        },
-        {
-          tagId: 'TAG-DR104-BIT-DEPTH',
-          name: 'DR104_Hole_Depth',
-          sourceProtocol: 'Modbus-TCP',
-          registerAddress: 'HR_40024',
-          dataType: 'FLOAT32',
-          baseValue: 14.2,
-          unit: 'm',
-          pollingRateHz: 5,
-          variance: 0.2,
-          quality: 'GOOD (0x00)',
-          equipment: 'Pit Viper 271 Drill #04',
-        },
-        {
-          tagId: 'TAG-HT402-INCLINE',
-          name: 'HT402_Ramp_Incline_Grade',
-          sourceProtocol: 'OPC-UA',
-          nodeId: 'ns=2;s=Haulage.HT402.Incline_Pct',
-          dataType: 'FLOAT32',
-          baseValue: 8.2,
-          unit: '%',
-          pollingRateHz: 10,
-          variance: 0.3,
-          quality: 'GOOD (0x00)',
-          equipment: 'Komatsu 930E Haul Truck #02',
-        },
-        {
-          tagId: 'TAG-CV101-BELT-SPEED',
-          name: 'CV101_Overland_Belt_Speed',
-          sourceProtocol: 'Modbus-TCP',
-          registerAddress: 'HR_40040',
-          dataType: 'FLOAT32',
-          baseValue: 4.8,
-          unit: 'm/s',
-          pollingRateHz: 10,
-          variance: 0.1,
-          quality: 'GOOD (0x00)',
-          equipment: 'Main Pit Conveyor CV-101',
-        },
-        {
-          tagId: 'TAG-CV101-BEARING-TEMP',
-          name: 'CV101_Drive_Bearing_Temp',
-          sourceProtocol: 'Modbus-TCP',
-          registerAddress: 'HR_40048',
-          dataType: 'FLOAT32',
-          baseValue: 68.4,
-          unit: '°C',
-          pollingRateHz: 2,
-          variance: 0.6,
-          quality: 'GOOD (0x00)',
-          equipment: 'Main Pit Conveyor CV-101',
-        },
-        {
-          tagId: 'TAG-PS201-VOLT-L1',
-          name: 'PS201_Bus_Voltage_L1',
-          sourceProtocol: 'Modbus-TCP',
-          registerAddress: 'HR_40102',
-          dataType: 'FLOAT32',
-          baseValue: 4160,
-          unit: 'V',
-          pollingRateHz: 1,
-          variance: 15,
-          quality: 'GOOD (0x00)',
-          equipment: 'Pit Substation PS-201',
-        },
-      ],
-    },
   },
   {
     id: 'c66-badge-scanner',
@@ -1761,7 +1613,8 @@ export const EXAMPLE_BACKEND_FLOW_PIPELINES: FlowDiagramPipeline[] = [
         title: 'FUXA SCADA Gateway',
         role: 'Edge Protocol Concentrator',
         protocol: 'WSS / JSON-RPC',
-        detail: 'Normalizes 1,284 registers across 16 nodes with 0.0% frame loss at 10Hz.',
+        detail:
+          'Accepts authenticated telemetry pushes and serves cached tag values through the SCADA API.',
         color: '#06b6d4',
       },
       {

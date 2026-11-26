@@ -44,59 +44,18 @@ export function HeroRotator({
       category: 'Central Command',
       image: '/images/departments/overview.webp',
       video: '/images/departments/overview.mp4',
-      stats: { label: 'System Health', value: '100% Optimal' },
-      trend: [62, 68, 72, 76, 81, 86, 90, 94, 96, 99],
-      status: 'active',
       icon: <Logo variant="gold" className="h-4 w-4 text-accent-gold" />,
       iconBgColor: 'bg-accent-gold/10',
       primary: { href: primaryHref, label: primaryLabel, icon: arrowIcon },
       secondary: { href: secondaryHref, label: secondaryLabel, icon: arrowIcon },
-      assetOverline: 'CENTRAL COMMAND // SYS-MAIN',
-      assetSubtitle: defaultDescription,
     };
 
     const deptPanels = departments.map((dept): Panel => {
-      const assetOverline =
-        dept.name === 'admin'
-          ? 'ENTERPRISE GOVERNANCE // ADM-CORE'
-          : dept.name === 'drilling'
-            ? 'FIELD OPERATIONS // UNIT-PV351'
-            : dept.name === 'production'
-              ? 'EXTRACTION & YIELD // PLANT-EXT01'
-              : dept.name === 'plant-processing'
-                ? 'WASH PLANT & BENEFICIATION // PLANT-WASH01'
-                : dept.name === 'plant-inventory'
-                  ? 'STOCKPILE & REAGENTS // PLANT-INV01'
-                  : dept.name === 'access-control'
-                    ? 'SITE SECURITY // SEC-GATE01'
-                    : dept.name === 'engineering'
-                      ? 'PLANT MAINTENANCE // WORKSHOP-03'
-                      : dept.name === 'control-room'
-                        ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
-                        : dept.name === 'availability-utilization'
-                          ? 'FLEET AVAILABILITY & OEE // FLEET-AV01'
-                          : dept.name === 'overview'
-                            ? 'SYSTEM ARCHITECTURE // ARCH-OS'
-                            : dept.name === 'database'
-                              ? 'SUPABASE POSTGRESQL // DB-CORE'
-                              : dept.name === 'presentation'
-                                ? 'EXECUTIVE BRIEFING // INVESTOR-DECK'
-                                : dept.name === 'executive'
-                                  ? 'EXECUTIVE ANALYTICS // EXEC-BI01'
-                                  : 'FIELD OPERATIONS // MINE-UNIT';
-
-      const assetSubtitle =
-        dept.name === 'drilling'
-          ? 'Epiroc Pit Viper 351 · Bit Depth Telemetry · Pattern B-14'
-          : dept.description;
-
       return {
         id: dept.name,
         name: dept.name,
         title: toTitleCase(dept.displayName),
         description: dept.description,
-        assetOverline,
-        assetSubtitle,
         category: dept.type === 'control_room' ? 'SCADA & Telemetry' : 'Field Operations',
         image:
           dept.name === 'reports'
@@ -110,9 +69,9 @@ export function HeroRotator({
             : dept.name === 'executive' || dept.name === 'office' || dept.name === 'presentation'
               ? '/images/departments/overview.mp4'
               : `/images/departments/${dept.name}.mp4`,
-        stats: dept.stats || { label: 'Telemetry', value: 'Online' },
+        stats: dept.stats,
         trend: dept.trend,
-        status: dept.status || 'active',
+        status: dept.status,
         icon: <Logo variant="gold" className="h-4 w-4 text-accent-gold" />,
         iconBgColor: 'bg-accent-gold/10',
         primary: dept.actions?.[0]

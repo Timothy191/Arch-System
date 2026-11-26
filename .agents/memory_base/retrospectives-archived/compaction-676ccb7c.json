@@ -1,0 +1,24 @@
+{
+  "id": "compaction-676ccb7c",
+  "timestamp": "2026-11-26T10:22:16.618Z",
+  "taskTag": "compaction-standard-676ccb7c",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/.local/share/mise/installs/node/24.15.0/lib/node_modules/vercel/dist/vc.js\"",
+    "\"/home/tim/.local/share/mise/installs/node/26.8.1/lib/node_modules/vercel/dist/vc.js\"",
+    "\"/home/tim/.local/share/mise/installs/node/24.15.0/lib/node_modules/vercel/dist/index.js\"",
+    "\"/home/tim/.local/share/mise/installs/node/26.8.1/lib/node_modules/vercel/dist/index.js\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (419 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 174634,
+    "cacheHitRatio": 0.9136,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

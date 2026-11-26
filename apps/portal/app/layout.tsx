@@ -4,7 +4,6 @@ import { ArchThemeProvider } from '@repo/theme/react';
 import { AnimationProvider } from '@repo/ui';
 import { EveLogo } from '@repo/ui/EveLogo';
 import { Toaster } from '@repo/ui/Toaster';
-import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import dynamic from 'next/dynamic';
@@ -288,7 +287,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
 
               <CommandBar />
               <ClientOverlays />
-              <Analytics scriptSrc="/va/script.js" />
               <SpeedInsights />
               <Toaster />
             </AnimationProvider>

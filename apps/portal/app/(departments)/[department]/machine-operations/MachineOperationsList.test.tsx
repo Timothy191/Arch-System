@@ -618,8 +618,8 @@ describe('MachineOperationsList', () => {
       expect(screen.getByText(/Opening SMR is locked to Stop SMR/i)).toBeInTheDocument();
     });
 
-    // 5. KPI Strip with Telemetry Sparklines
-    it('renders all 5 KPI panels with telemetry sparklines in MachineOperationsKpiStrip', () => {
+    // 5. KPI Strip with real metrics only
+    it('renders all 5 KPI panels without synthetic telemetry sparklines in MachineOperationsKpiStrip', () => {
       render(
         <MachineOperationsKpiStrip
           totalHours={48.5}
@@ -634,24 +634,24 @@ describe('MachineOperationsList', () => {
 
       expect(screen.getByText("Today's Hours")).toBeInTheDocument();
       expect(screen.getAllByText('48.5h').length).toBeGreaterThan(0);
-      expect(screen.getByTestId('kpi-sparkline-today-hours')).toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-sparkline-today-hours')).not.toBeInTheDocument();
 
       expect(screen.getByText('Active Machines')).toBeInTheDocument();
       expect(screen.getAllByText('12').length).toBeGreaterThan(0);
-      expect(screen.getByTestId('kpi-sparkline-active-machines')).toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-sparkline-active-machines')).not.toBeInTheDocument();
 
       expect(screen.getByText('Material Moved')).toBeInTheDocument();
       expect(screen.getAllByText(/3420/).length).toBeGreaterThan(0);
-      expect(screen.getByTestId('kpi-sparkline-material-moved')).toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-sparkline-material-moved')).not.toBeInTheDocument();
 
       expect(screen.getByText('BCM/Hour')).toBeInTheDocument();
       expect(screen.getAllByText('70.5').length).toBeGreaterThan(0);
-      expect(screen.getByTestId('kpi-sparkline-bcm-rate')).toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-sparkline-bcm-rate')).not.toBeInTheDocument();
 
       expect(screen.getByText('Total Delays')).toBeInTheDocument();
       expect(screen.getAllByText('3.2h').length).toBeGreaterThan(0);
       expect(screen.getByText(/CR: 1\.2h \+ Eng: 2\.0h/i)).toBeInTheDocument();
-      expect(screen.getByTestId('kpi-sparkline-total-delays')).toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-sparkline-total-delays')).not.toBeInTheDocument();
     });
 
     // 6. Filter Tabs: Breakdown always visible and Inactive

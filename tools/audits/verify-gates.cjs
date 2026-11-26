@@ -196,12 +196,30 @@ if (manifest && violations.length === 0) {
     });
   }
 
-  // Verify sequential gate-ID continuity (1..totalGates) in full runs
+  // Verify gate-ID uniqueness and completeness (no gaps in mandatory gate coverage).
+  // Gate IDs need not be strictly sequential after intentional removal of
+  // non-functional gates; instead verify no mandatory gate is missing.
   if (!isFastMode) {
     const idSet = new Set(manifest.gates.map((g) => g.id));
-    for (let id = 1; id <= manifest.gates.length; id += 1) {
+    const expectedGateIds = new Set();
+    try {
+      const scriptSrc = fs.readFileSync(
+        path.join(ROOT, 'tools', 'scripts', 'agent-verify.sh'),
+        'utf8'
+      );
+      for (const match of scriptSrc.matchAll(/^run_gate (\d+)/gm)) {
+        expectedGateIds.add(Number(match[1]));
+      }
+    } catch {
+      // fall back to sequential range
+      for (let id = 1; id <= manifest.gates.length; id += 1) expectedGateIds.add(id);
+    }
+    // Self-recorded gates (24, 27) are added by this verifier during the epilogue.
+    expectedGateIds.add(24);
+    expectedGateIds.add(27);
+    for (const id of expectedGateIds) {
       if (!idSet.has(id)) {
-        violations.push(`Missing sequential Gate ID #${id} in full verification manifest.`);
+        violations.push(`Missing Gate ID #${id} in full verification manifest.`);
       }
     }
   }

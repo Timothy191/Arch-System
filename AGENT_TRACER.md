@@ -4,7 +4,15 @@
 
 ---
 
-<!-- cspell:ignore commandcode autohand Autohand styleguides EOVERRIDE PLAYWRIGHT_MISE_DIR btrim unevidenced fastapi agentsroom typegen -->
+<!-- cspell:ignore commandcode autohand Autohand styleguides EOVERRIDE PLAYWRIGHT_MISE_DIR btrim unevidenced fastapi agentsroom typegen fulcra uvx -->
+
+## [2026-11-26T13:40:00+02:00] - Production Hardening & Model Accuracy/Token-Drift Audit (uncommitted)
+
+- **Scope & approval**: Phase 1 safe-first review and Phase 2 both approved ("Proceed (Recommended)"); all pre-existing uncommitted user work preserved; no commit/push/merge.
+- **Non-production removals**: Deleted fabricated hub pulse, analytics stub + VA script, raster 404 asset (neutral SVG replacement), sparkline component and usages, SCADA tag registry/live preview, static Agentic Monitor tab, hero/globe synthetic telemetry and badge rows, QR on-the-fly entity creation + random/sample fallbacks, fake scanner defaults, fabricated telemetry SDK docs/runbooks, `example-flag`, and four phantom feature flags (SCADA-v2 viewer, BullMQ dispatcher, tire-degradation ML model, autonomous copilot) with zero consumers. Fixed `scripts/deploy.sh` false success/rollback claims and removed `deploy:rollback`; corrected rollback docs to `vercel rollback <deployment-url-or-id>`. Retained `C66-SCANNER` as a real allowlisted hardware endpoint identity.
+- **Model accuracy/drift fixes**: Removed unrelated Fulcra sleep/location injection from the generic `openrouter` proxy (deleted `packages/utils/src/fulcra.ts`); bounded copilot dashboard context with Zod (8 scalar keys, 240 chars/value) and excluded the 15-entry integration-tool catalog from prompts; deduplicated RAG facts with 280-char caps and a 10,000-char prompt ceiling; set `COPILOT_TEMPERATURE = 0` with `max_tokens: 700` and logged provider failures; applied `MIN_GROUNDING_SCORE = 55` across breakdown/shift/external RAG; normalized external-document similarity to 0–100; added grounded-answer guards rejecting invented telemetry and executed-action claims; added `external_document` citation source and rebuilt `@repo/contract`.
+- **Measured token reduction**: Representative fixture dropped from 12,023 chars / ~3,006 estimated tokens to 2,873 chars / ~719 estimated tokens (76% lower); tool-catalog and arbitrary-payload leakage eliminated. `ai_token_usage` remains the authoritative real usage backend.
+- **Verification**: `@repo/intelligence` 12/12, portal type-check clean, portal AI/RAG/cron 27/27, earlier portal regression 51, access-control 22/126, `@repo/utils` 7/41, hub UI 2/24, `policy:check`, `audit:drift` (100%), `audit:compliance` (RLS 113/113, 185 rollback-safe migrations), `@repo/contract` rebuild, `lint:ci` clean, `agent:verify` 28/28 (exit 0). Full manifest, evidence, and token/accuracy measurements appended to `documentation/03-audit-reports/production-readiness-report-2026-09-30.md`.
 
 ## [2026-11-26T12:32:00+02:00] - Database Migration/RLS Hardening (235 & 236), Vercel Cron Audit & Access Control Live Operator Verification
 

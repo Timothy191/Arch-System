@@ -11,7 +11,7 @@ and JSON response shaping. Business logic stays in `lib/` or packages; no DB acc
 ## Design
 
 - HTTP methods: POST, GET, PUT, DELETE, PATCH
-- Client components ("use client"): ClientProviders.tsx, ReactQueryProvider.tsx, ServiceWorkerRegister.tsx, error.tsx, page.tsx, page.tsx, page.tsx, error.tsx, global-error.tsx, error.tsx, ReloadButton.tsx, AuditReportsSection.tsx, page.tsx, AgenticMonitor.tsx, AuditReportsSection.tsx, BackendArchitecture.tsx, DocumentationMaps.tsx, SystemArchitecture.tsx
+- Client components ("use client"): ClientProviders.tsx, ReactQueryProvider.tsx, ServiceWorkerRegister.tsx, error.tsx, page.tsx, page.tsx, page.tsx, error.tsx, global-error.tsx, error.tsx, ReloadButton.tsx, AuditReportsSection.tsx, page.tsx, AuditReportsSection.tsx, BackendArchitecture.tsx, DocumentationMaps.tsx, SystemArchitecture.tsx
 - Hooks referenced: useEffect, useState, useEdgesState, useNodesState, useCallback, useMemo
 - Database tables touched: documents, employees, audit_logs, ai_token_usage, badges, personnel, visitors, fleet, equipment, access_logs, machines, operators, sites, machine_operations, daily_logs, departments, tires, tire_inspections, breakdowns, card_printers, machine_telemetry, webhook_endpoints, webhook_delivery_logs
 - Exports:
@@ -31,7 +31,6 @@ and JSON response shaping. Business logic stays in `lib/` or packages; no DB acc
   - `ReloadButton.tsx` → ReloadButton, default
   - `AuditReportsSection.tsx` → AuditReportsSection, default
   - `data.ts` → DEPARTMENTS, TECH_STACK, DATABASE_SCHEMA, BACKEND_SERVICES, BACKEND_CONNECTIONS
-  - `AgenticMonitor.tsx` → AgenticMonitor, default
   - `BackendArchitecture.tsx` → BackendArchitecture, default
   - `DatabaseSchema.tsx` → DatabaseSchema, default
   - `DepartmentBreakdown.tsx` → DepartmentBreakdown, default

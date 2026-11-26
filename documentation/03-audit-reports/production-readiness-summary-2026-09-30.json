@@ -218,7 +218,7 @@
       "build": "pnpm build",
       "start": "pnpm start",
       "docker": "docker compose -f infra/docker/compose.portal.yml up -d --build",
-      "rollback": "pnpm deploy:rollback"
+      "rollback": "vercel rollback <deployment-url-or-id>"
     },
     "requirements": {
       "node": ">= 24.0.0",

@@ -1,14 +1,10 @@
 import { Book } from '@repo/ui/components/ui/book';
 import { Breadcrumb, BreadcrumbItem } from '@repo/ui/components/ui/breadcrumb';
-import { Browser } from '@repo/ui/components/ui/browser';
 import { ButtonLink } from '@repo/ui/components/ui/button';
-import { CodeBlock } from '@repo/ui/components/ui/code-block';
-import { Collapse, CollapseGroup } from '@repo/ui/components/ui/collapse';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
   ArrowRight,
   BookOpen,
-  Bot,
   ExternalLink,
   FileCode,
   Layers,
@@ -19,7 +15,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Documentation & Runbooks | Arch Systems',
-  description: 'Official system manuals, security architecture, and operational runbooks.',
+  description: 'Official system manuals, architecture references, and API specifications.',
 };
 
 const DOCUMENTATION_VOLUMES = [
@@ -49,19 +45,6 @@ const DOCUMENTATION_VOLUMES = [
     icon: <ShieldCheck className="h-4 w-4" />,
     href: '/overview?tab=audit',
     badge: 'Security & Compliance',
-  },
-  {
-    id: 'multi-agent',
-    title: 'Multi-Agent Specialist Handbook',
-    subtitle: 'Autonomous Agents',
-    description:
-      'Operational mandates for the 8 specialist agent mesh: Antigravity, Claude, Codex, Gemini, Grok, Cline, Pi, and Goose.',
-    variant: 'stripe' as const,
-    color: '#7DC1C1',
-    textColor: '#ffffff',
-    icon: <Bot className="h-4 w-4" />,
-    href: '/overview?tab=agentic',
-    badge: 'Agent Mesh',
   },
   {
     id: 'mining-dispatch',
@@ -104,22 +87,6 @@ const DOCUMENTATION_VOLUMES = [
     badge: 'Frontend Performance',
   },
 ];
-
-const TELEMETRY_CODE_EXAMPLE = `import { ArchTelemetryClient } from "@arch/telemetry-sdk";
-
-// Initialize SCADA Telemetry Gateway Client
-const client = new ArchTelemetryClient({
-  endpoint: process.env.ARCH_TELEMETRY_URL,
-  apiKey: process.env.ARCH_INGEST_KEY,
-});
-
-// Record machine load measurement
-await client.recordMetric({
-  machineId: "HAUL-TRUCK-08",
-  metric: "payload_tonnes",
-  value: 248.5,
-  timestamp: new Date().toISOString(),
-});`;
 
 export default function DocsLandingPage() {
   return (
@@ -216,128 +183,6 @@ export default function DocsLandingPage() {
             </div>
           </GlassCard>
         ))}
-      </div>
-
-      {/* Code Snippet Example with Geist CodeBlock */}
-      <div className="space-y-4 pt-4">
-        <div>
-          <h2 className="font-bold text-[var(--text-heading)] text-lg">
-            Telemetry Client Ingestion API
-          </h2>
-          <p className="text-[var(--text-muted)] text-xs">
-            Publish SCADA sensor measurements directly to the Arch edge telemetry gateway.
-          </p>
-        </div>
-
-        <CodeBlock
-          filename="ingest-telemetry.ts"
-          language="typescript"
-          highlightedLinesNumbers={[4, 5]}
-        >
-          {TELEMETRY_CODE_EXAMPLE}
-        </CodeBlock>
-      </div>
-
-      {/* Operational Runbooks Disclosure with Geist Collapse */}
-      <div className="space-y-4 pt-4">
-        <div>
-          <h2 className="font-bold text-[var(--text-heading)] text-lg">
-            Frequently Referenced Operational Runbooks
-          </h2>
-          <p className="text-[var(--text-muted)] text-xs">
-            Standard emergency response procedures, cryptographic credential rotation, and shift
-            protocols.
-          </p>
-        </div>
-
-        <GlassCard className="p-6">
-          <CollapseGroup multiple>
-            <Collapse defaultExpanded title="Emergency SCADA Failover Procedure">
-              <p className="text-[var(--text-secondary)] text-xs leading-relaxed">
-                In the event of an edge telemetry connection interruption exceeding 90 seconds, the
-                local gateway buffers all PLC tag events in memory. Standby Redis clusters
-                automatically initiate replica promotion within 450ms.
-              </p>
-            </Collapse>
-            <Collapse title="Cryptographic Access Card Key Rotation">
-              <p className="text-[var(--text-secondary)] text-xs leading-relaxed">
-                RFID credentials and QR badges are signed with rotating SHA-256 HMAC tokens. Access
-                keys expire every 24 hours and can be manually refreshed from the Access Control
-                Credential Manager.
-              </p>
-            </Collapse>
-            <Collapse title="Multi-Agent Mesh Coordinator Handover">
-              <p className="text-[var(--text-secondary)] text-xs leading-relaxed">
-                When transferring supervisory control between agents (e.g., Antigravity to Claude),
-                ensure all active background workers have concluded transactions before
-                synchronizing state trees.
-              </p>
-            </Collapse>
-          </CollapseGroup>
-        </GlassCard>
-      </div>
-
-      {/* Live Operations Portal Preview inside Geist Browser Chrome */}
-      <div className="space-y-4 pt-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-bold text-[var(--text-heading)] text-lg">
-              Live Operations Interface
-            </h2>
-            <p className="text-[var(--text-muted)] text-xs">
-              Real-time telemetry and supervisory control visualizer running across the pit.
-            </p>
-          </div>
-          <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[var(--accent-green)] text-xs">
-            ● SCADA Engine Active
-          </span>
-        </div>
-
-        <Browser address="https://arch.coal/operations/live" className="max-w-5xl shadow-2xl">
-          <div className="flex min-h-[220px] flex-col justify-between bg-[var(--bg-secondary)] p-8 text-[var(--text-heading)]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-600" />
-                <span className="font-mono text-[var(--text-muted)] text-xs uppercase tracking-widest">
-                  Telemetry Stream · Opencast Mine Sector 7
-                </span>
-              </div>
-              <span className="font-mono text-[var(--text-muted)] text-xs">12 Active Vehicles</span>
-            </div>
-
-            <div className="my-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-4">
-                <span className="block font-mono text-[var(--text-muted)] text-xs">
-                  Haul Fleet Output
-                </span>
-                <span className="mt-1 block font-bold text-2xl text-[var(--text-heading)]">
-                  4,280 t/h
-                </span>
-              </div>
-              <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-4">
-                <span className="block font-mono text-[var(--text-muted)] text-xs">
-                  Blast Hole Drills
-                </span>
-                <span className="mt-1 block font-bold text-2xl text-emerald-700">
-                  98.4% Nominal
-                </span>
-              </div>
-              <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-4">
-                <span className="block font-mono text-[var(--text-muted)] text-xs">
-                  RFID Gate Verifications
-                </span>
-                <span className="mt-1 block font-bold text-2xl text-blue-700">342 Today</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between border-[var(--border-default)] border-t pt-3 text-[var(--text-muted)] text-xs">
-              <span>Arch Industrial OS v2.4</span>
-              <Link href="/overview" className="text-blue-700 hover:underline">
-                Explore Full Topology &rarr;
-              </Link>
-            </div>
-          </div>
-        </Browser>
       </div>
     </div>
   );

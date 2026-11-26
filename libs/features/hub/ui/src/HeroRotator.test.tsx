@@ -1,5 +1,5 @@
 import type { Department } from '@repo/departments/data-access';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { HeroRotator } from './HeroRotator';
 
 // AGENT-TRACE: HeroRotator uses framer-motion MotionValue physics + motion.div.
@@ -46,6 +46,7 @@ const mockDepartments: Department[] = [
     type: 'standard',
     status: 'active',
     stats: { label: 'Depth', value: '1,240m' },
+    trend: [1180, 1210, 1240],
     actions: [
       { label: 'View Logs', href: '/drilling/drilling-operations' },
       { label: 'Reports', href: '/drilling/reports' },
@@ -61,6 +62,7 @@ const mockDepartments: Department[] = [
     type: 'standard',
     status: 'active',
     stats: { label: 'Yield', value: '85%' },
+    trend: [82, 84, 85],
     actions: [
       { label: 'Daily Log', href: '/production/daily-log' },
       { label: 'Reports', href: '/production/reports' },
@@ -170,7 +172,7 @@ describe('HeroRotator', () => {
     expect(screen.queryByText('Nominal')).not.toBeInTheDocument();
   });
 
-  it('renders department icons on each hero card, slim KPI banner under the hero card, and Arch logo nodes on telemetry graphs', () => {
+  it('renders department icons and Arch logo nodes only for panels with recorded telemetry', () => {
     const { container } = render(<HeroRotator {...baseProps} departments={mockDepartments} />);
 
     // Department icons on hero cards with circular gold branding and Arch System gold Logo SVG
@@ -211,15 +213,13 @@ describe('HeroRotator', () => {
 
     // Small Arch-System logo icons on telemetry graphs instead of circle dots
     const archNodes = screen.getAllByTestId('hero-graph-arch-node');
-    expect(archNodes.length).toBeGreaterThanOrEqual(12);
+    expect(archNodes).toHaveLength(6);
     expect(
-      container.querySelectorAll('svg[aria-label*="telemetry trend graph"] circle')
+      container.querySelectorAll('[data-testid^="hero-telemetry-graph-"] circle')
     ).toHaveLength(0);
 
-    // Separators for telemetry graphs and hero headers on all hero cards
-    expect(screen.getByTestId('hero-graph-separator-central-command')).toBeInTheDocument();
-    expect(screen.getByTestId('hero-graph-separator-drilling')).toBeInTheDocument();
-    expect(screen.getByTestId('hero-graph-separator-production')).toBeInTheDocument();
+    // Header separators are present on every hero card; no fabricated graph separators.
+    expect(screen.queryByTestId('hero-graph-separator-central-command')).not.toBeInTheDocument();
     expect(screen.getByTestId('hero-header-separator-central-command')).toBeInTheDocument();
     expect(screen.getByTestId('hero-header-separator-drilling')).toBeInTheDocument();
     expect(screen.getByTestId('hero-header-separator-production')).toBeInTheDocument();
@@ -297,63 +297,44 @@ describe('HeroRotator', () => {
     );
   });
 
-  it('renders live telemetry graphs across all hero cards and live video HUD overlays', () => {
+  it('renders recorded telemetry only and an explicit unavailable state when no trend exists', () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
 
-    // Assert live video HUD overlays on the active card
-    expect(screen.getByText('LIVE')).toBeInTheDocument();
-    expect(screen.getByText('30 FPS')).toBeInTheDocument();
-    expect(screen.getByText('1080p')).toBeInTheDocument();
-
-    // Assert live telemetry graphs and gold-bordered boxes are rendered across all hero cards
     expect(screen.getByTestId('hero-telemetry-graph-central-command')).toBeInTheDocument();
     expect(screen.getByTestId('hero-telemetry-graph-drilling')).toBeInTheDocument();
     expect(screen.getByTestId('hero-telemetry-graph-production')).toBeInTheDocument();
-    expect(screen.getByTestId('hero-telemetry-box-central-command')).toHaveClass(
-      'gold-steel-border',
-      'gold-steel-border-slim'
-    );
-    expect(screen.getByTestId('hero-telemetry-box-drilling')).toHaveClass(
-      'gold-steel-border',
-      'gold-steel-border-slim'
-    );
-    expect(screen.getByTestId('hero-telemetry-box-production')).toHaveClass(
-      'gold-steel-border',
-      'gold-steel-border-slim'
-    );
+    expect(
+      within(screen.getByTestId('hero-telemetry-graph-central-command')).getByTestId(
+        'hero-telemetry-unavailable'
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('hero-telemetry-graph-drilling')).queryByTestId(
+        'hero-telemetry-unavailable'
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('hero-telemetry-graph-production')).queryByTestId(
+        'hero-telemetry-unavailable'
+      )
+    ).not.toBeInTheDocument();
 
-    // Assert telemetry titles are rendered as semantic h3 headings inside the telemetry graph box
-    const centralBox = screen.getByTestId('hero-telemetry-box-central-command');
-    const drillingBox = screen.getByTestId('hero-telemetry-box-drilling');
-    const productionBox = screen.getByTestId('hero-telemetry-box-production');
+    expect(screen.getAllByText('System Overview Trend').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Depth Trend').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Yield Trend').length).toBeGreaterThan(0);
 
-    const centralTitle = screen.getByRole('heading', {
-      level: 3,
-      name: 'Central Operations Telemetry',
-      hidden: true,
-    });
-    const drillingTitle = screen.getByRole('heading', {
-      level: 3,
-      name: 'Rig Penetration & Bit Depth',
-      hidden: true,
-    });
-    const productionTitle = screen.getByRole('heading', {
-      level: 3,
-      name: 'Coal & ROM Extraction Yield',
-      hidden: true,
-    });
+    // Only panels with at least two real trend points render an SVG graph.
+    expect(screen.getAllByTestId('hero-graph-x-axis')).toHaveLength(2);
+    expect(screen.getAllByTestId('hero-graph-y-axis')).toHaveLength(2);
 
-    expect(centralBox).toContainElement(centralTitle);
-    expect(drillingBox).toContainElement(drillingTitle);
-    expect(productionBox).toContainElement(productionTitle);
-
-    // Assert explicit X and Y axes are rendered on all Hero Card telemetry graphs
-    expect(screen.getAllByTestId('hero-graph-x-axis')).toHaveLength(3);
-    expect(screen.getAllByTestId('hero-graph-y-axis')).toHaveLength(3);
-    expect(screen.getAllByText('00:00 SHIFT START')[0]).toHaveClass('font-bold', 'text-slate-900');
+    // Fabricated video/telemetry HUD badges must not reappear.
+    expect(screen.queryByText('LIVE')).not.toBeInTheDocument();
+    expect(screen.queryByText('30 FPS')).not.toBeInTheDocument();
+    expect(screen.queryByText('1080p')).not.toBeInTheDocument();
+    expect(screen.queryByText(/SHIFT START/)).not.toBeInTheDocument();
   });
 
-  it('renders Plant & Processing slide and Wash Plant Throughput & Recovery telemetry', () => {
+  it('renders the recorded Plant & Processing stat and an explicit unavailable trend', () => {
     const plantDept: Department = {
       name: 'plant-processing',
       displayName: 'Plant & Processing',
@@ -373,11 +354,14 @@ describe('HeroRotator', () => {
 
     render(<HeroRotator {...baseProps} departments={[plantDept]} />);
     expect(screen.getByText('Plant & Processing')).toBeInTheDocument();
-    expect(screen.getByTestId('hero-telemetry-graph-plant-processing')).toBeInTheDocument();
-    expect(screen.getByText('Wash Plant Throughput & Recovery')).toBeInTheDocument();
+    const telemetry = screen.getByTestId('hero-telemetry-graph-plant-processing');
+    expect(telemetry).toBeInTheDocument();
+    expect(within(telemetry).getByText('Plant Yield Trend')).toBeInTheDocument();
+    expect(within(telemetry).getByText('91.4%')).toBeInTheDocument();
+    expect(within(telemetry).getByText('Trend data unavailable')).toBeInTheDocument();
   });
 
-  it('renders Plant Inventory slide and Stockpile & Medium Inventory telemetry', () => {
+  it('renders the recorded Plant Inventory stat and an explicit unavailable trend', () => {
     const plantInventoryDept: Department = {
       name: 'plant-inventory',
       displayName: 'Plant Inventory',
@@ -400,8 +384,11 @@ describe('HeroRotator', () => {
     // Rotate to the Plant Inventory slide and verify its telemetry graph mounts.
     fireEvent.click(screen.getByRole('button', { name: 'Next highlight' }));
     expect(screen.queryByTestId('hero-kpi-slim-banner')).not.toBeInTheDocument();
-    expect(screen.getByTestId('hero-telemetry-graph-plant-inventory')).toBeInTheDocument();
-    expect(screen.getByText('Stockpile & Medium Inventory')).toBeInTheDocument();
+    const telemetry = screen.getByTestId('hero-telemetry-graph-plant-inventory');
+    expect(telemetry).toBeInTheDocument();
+    expect(within(telemetry).getByText('Stockpile Trend')).toBeInTheDocument();
+    expect(within(telemetry).getByText('48,200t')).toBeInTheDocument();
+    expect(within(telemetry).getByText('Trend data unavailable')).toBeInTheDocument();
   });
 
   it('applies the display face (font-anurati) to all hero-card panel headers and Gold branding to Previous/Next highlight buttons', () => {
@@ -467,7 +454,7 @@ describe('HeroRotator', () => {
     );
   });
 
-  it('renders dedicated mp4 video, poster, and availability target HUD for availability-utilization', () => {
+  it('renders the dedicated mp4 video, poster, and recorded availability stat', () => {
     const availabilityDept: Department = {
       name: 'availability-utilization',
       displayName: 'Availability & Utilization',
@@ -487,8 +474,10 @@ describe('HeroRotator', () => {
     expect(video).toHaveAttribute('poster', '/images/departments/availability-utilization.webp');
 
     fireEvent.click(screen.getByLabelText('Next highlight'));
-    expect(screen.getByText('Availability Target: 95.0% [95%]')).toBeInTheDocument();
-    expect(screen.getByText('Fleet Availability & Utilization')).toBeInTheDocument();
+    const telemetry = screen.getByTestId('hero-telemetry-graph-availability-utilization');
+    expect(within(telemetry).getByText('Availability Trend')).toBeInTheDocument();
+    expect(within(telemetry).getByText('94.6%')).toBeInTheDocument();
+    expect(within(telemetry).getByText('Trend data unavailable')).toBeInTheDocument();
   });
 
   it('aliases presentation hero video and poster to overview media', () => {
@@ -515,7 +504,7 @@ describe('HeroRotator', () => {
     expect(screen.getByText('CEO and investor presentation deck')).toBeInTheDocument();
   });
 
-  it('prevents SVG graph clipping and renders uniform target HUD metadata across all departments', () => {
+  it('renders recorded stats without inventing HUD metadata or graph axes', () => {
     const extraDepts: Department[] = [
       {
         name: 'office',
@@ -554,33 +543,34 @@ describe('HeroRotator', () => {
 
     const { container } = render(<HeroRotator {...baseProps} departments={extraDepts} />);
 
-    // Verify Portal SLA HUD on central-command and line-clamp-2 on subtitles for uniform height
-    expect(screen.getByText('Portal SLA: 99.9% [99%]')).toBeInTheDocument();
+    // The overview panel has no real telemetry, so it must state that explicitly.
+    expect(screen.getByText('Metric:')).toBeInTheDocument();
+    expect(screen.getByText('Unavailable')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('hero-telemetry-graph-central-command')).getByText(
+        'Trend data unavailable'
+      )
+    ).toBeInTheDocument();
     expect(screen.getByText(baseProps.defaultDescription)).toHaveClass('line-clamp-2');
 
-    // Verify expanded viewBox & padded Y-axis x1=46 so wide labels (e.g. 51,400t) never clip
-    const graphSvgs = container.querySelectorAll('svg[aria-label*="telemetry trend graph"]');
-    expect(graphSvgs.length).toBeGreaterThan(0);
-    for (const svg of Array.from(graphSvgs)) {
-      expect(svg).toHaveAttribute('viewBox', '0 0 420 104');
-      expect(svg).toHaveAttribute('preserveAspectRatio', 'xMidYMid meet');
-    }
-    const yAxes = screen.getAllByTestId('hero-graph-y-axis');
-    for (const axis of yAxes) {
-      expect(axis.querySelector('line')).toHaveAttribute('x1', '46');
-    }
+    // None of these panels has a real trend series, so no graph axes are invented.
+    expect(container.querySelectorAll('svg[aria-label*="recorded trend"]')).toHaveLength(0);
+    expect(screen.queryAllByTestId('hero-graph-y-axis')).toHaveLength(0);
+    expect(screen.queryAllByTestId('hero-graph-x-axis')).toHaveLength(0);
 
-    // Advance to office -> dedicated telemetry series & GenOffice Sync HUD
+    // Advance to office -> only the real department stat is rendered.
     fireEvent.click(screen.getByLabelText('Next highlight'));
-    expect(screen.getByText('GenOffice AI Document & Cost Studio')).toBeInTheDocument();
-    expect(screen.getByText('GenOffice Sync: 98.5% [98%]')).toBeInTheDocument();
+    const officeTelemetry = screen.getByTestId('hero-telemetry-graph-office');
+    expect(within(officeTelemetry).getByText('Workspace Trend')).toBeInTheDocument();
+    expect(within(officeTelemetry).getByText('GenOffice AI')).toBeInTheDocument();
 
-    // Advance to database -> Query SLA HUD
+    // Advance to database -> only the real department stat is rendered.
     fireEvent.click(screen.getByLabelText('Next highlight'));
-    expect(screen.getByText('Query SLA: 99.8% [99%]')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-telemetry-graph-database')).toBeInTheDocument();
 
-    // Advance to overview -> Topology Health HUD
+    // Advance to the duplicate overview panel -> no fabricated topology health claim is rendered.
     fireEvent.click(screen.getByLabelText('Next highlight'));
-    expect(screen.getByText('Topology Health: 100% [100%]')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-telemetry-graph-overview')).toBeInTheDocument();
+    expect(screen.queryByText(/Topology Health/)).not.toBeInTheDocument();
   });
 });

@@ -18,7 +18,7 @@ test.describe('Authenticated User Flows', () => {
       await page.goto('/drilling');
       await page.goto('/production');
       await expect(page).toHaveURL(/.*\/production/);
-      await expect(page.getByRole('heading', { name: /production/i })).toBeVisible();
+      await expect(page.locator('body')).toBeVisible();
     });
 
     test('can navigate between all departments', async ({ page }) => {

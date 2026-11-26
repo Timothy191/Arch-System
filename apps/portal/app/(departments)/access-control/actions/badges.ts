@@ -543,12 +543,7 @@ function formatPersonFullName(
   return fallbackName?.trim() || 'Employee';
 }
 
-const UNREGISTERED_SCANNER_IDS = new Set([
-  'LEGACY',
-  'PORTAL-EASY-SCANNER',
-  'EASY-SCANNER-CONSOLE',
-  'SIMULATED',
-]);
+const UNREGISTERED_SCANNER_IDS = new Set(['LEGACY']);
 
 function isRegisteredScannerDeviceId(deviceId: string | null | undefined): boolean {
   if (deviceId === null || deviceId === undefined || deviceId.trim().length === 0) {
@@ -1590,7 +1585,7 @@ export async function executeEasyScan(input: {
   readonly gateLocation?: string;
   readonly scannerId?: string;
 }) {
-  await assertAccessControlRole({ requireWrite: true });
+  const { employee } = await assertAccessControlRole({ requireWrite: true });
   const rawCode = (input.code ?? '').trim();
   if (!rawCode) {
     throw new ValidationError('Badge or RFID code cannot be empty');
@@ -1598,11 +1593,18 @@ export async function executeEasyScan(input: {
   if (rawCode.length > MAX_BADGE_CODE_LENGTH) {
     throw new ValidationError('Badge or RFID code exceeds maximum allowed length');
   }
+  if (!input.gateLocation?.trim()) {
+    throw new ValidationError('Gate location is required for scan audit logging');
+  }
+  if (!input.scannerId?.trim()) {
+    throw new ValidationError('Scanner device ID is required for scan audit logging');
+  }
 
   const supabase = createServiceRoleClient();
   const direction = input.direction ?? 'IN';
-  const gateLocation = input.gateLocation ?? 'Main Gate North Turnstile';
-  const scannerId = input.scannerId ?? 'PORTAL-EASY-SCANNER';
+  const gateLocation = input.gateLocation.trim();
+  const scannerId = input.scannerId.trim();
+  const operatorEmployeeId = employee.id;
 
   const badge = await findBadgeByQrOrRfid(supabase, rawCode);
 
@@ -1616,8 +1618,7 @@ export async function executeEasyScan(input: {
         access_granted: false,
         denial_reason: 'DENIED - Unrecognized Badge / RFID',
         department_id: null,
-        alcohol_tested: 'Not Tested',
-        operator: 'Easy Scanner Web',
+        operator: operatorEmployeeId,
         device_id: scannerId,
         scanned_at: new Date().toISOString(),
       },
@@ -1654,8 +1655,7 @@ export async function executeEasyScan(input: {
         access_granted: false,
         denial_reason: 'DENIED - Badge Revoked',
         department_id: badge.department_id,
-        alcohol_tested: 'Not Tested',
-        operator: 'Easy Scanner Web',
+        operator: operatorEmployeeId,
         device_id: scannerId,
         scanned_at: new Date().toISOString(),
       },
@@ -1685,8 +1685,7 @@ export async function executeEasyScan(input: {
         access_granted: false,
         denial_reason: 'DENIED - Credential Expired',
         department_id: badge.department_id,
-        alcohol_tested: 'Not Tested',
-        operator: 'Easy Scanner Web',
+        operator: operatorEmployeeId,
         device_id: scannerId,
         scanned_at: new Date().toISOString(),
       },
@@ -1822,8 +1821,7 @@ export async function executeEasyScan(input: {
       access_granted: isAccessGranted,
       denial_reason: isAccessGranted ? null : denialReason,
       department_id: badge.department_id,
-      alcohol_tested: 'Not Tested',
-      operator: 'Easy Scanner Web',
+      operator: operatorEmployeeId,
       device_id: scannerId,
       scanned_at: new Date().toISOString(),
     },

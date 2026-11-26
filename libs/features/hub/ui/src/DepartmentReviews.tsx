@@ -18,12 +18,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type EnvironmentSlideId = 'server' | 'database' | 'system';
 
-type HealthState = 'healthy' | 'degraded' | 'unhealthy';
+type HealthState = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
 
 interface HealthServiceSummary {
   readonly status: HealthState;
-  readonly latencyMs: number;
-  readonly mode?: string;
+  readonly latencyMs: number | null;
+  readonly mode?: string | null;
 }
 
 interface FooterHealthSummary {
@@ -65,21 +65,21 @@ const FOOTER_NAV_BTN_CLASS =
   'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-accent-gold/30 bg-white/60 text-accent-gold transition-colors hover:border-accent-gold hover:bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold';
 
 const INITIAL_HEALTH_SUMMARY: FooterHealthSummary = {
-  overallStatus: 'healthy',
+  overallStatus: 'unknown',
   totalLatencyMs: null,
   isLoaded: false,
-  supabase: { status: 'healthy', latencyMs: 18 },
-  redis: { status: 'healthy', latencyMs: 4, mode: 'L1/L2 Cache' },
-  fuxa: { status: 'healthy', latencyMs: 24 },
+  supabase: { status: 'unknown', latencyMs: null },
+  redis: { status: 'unknown', latencyMs: null, mode: null },
+  fuxa: { status: 'unknown', latencyMs: null },
 };
 
 const INITIAL_USER_SYSTEM: UserSystemSnapshot = {
   osLabel: 'Detecting OS',
   browserLabel: 'Detecting Browser',
-  viewportLabel: 'Auto Viewport',
-  hardwareLabel: 'Auto Compute',
-  networkLabel: 'Online',
-  timeZoneLabel: 'UTC',
+  viewportLabel: 'Detecting Viewport',
+  hardwareLabel: 'Detecting Hardware',
+  networkLabel: 'Checking Connectivity',
+  timeZoneLabel: 'Detecting Timezone',
 };
 
 function parseOsLabel(userAgentText: string, platformText: string): string {
@@ -132,9 +132,14 @@ function detectUserSystemSnapshot(): UserSystemSnapshot {
 }
 
 function resolveHealthState(rawState: unknown): HealthState {
-  if (rawState === 'unhealthy') return 'unhealthy';
-  if (rawState === 'degraded') return 'degraded';
-  return 'healthy';
+  if (rawState === 'healthy' || rawState === 'degraded' || rawState === 'unhealthy') {
+    return rawState;
+  }
+  return 'unknown';
+}
+
+function resolveLatencyMs(rawLatencyMs: unknown): number | null {
+  return typeof rawLatencyMs === 'number' ? rawLatencyMs : null;
 }
 
 async function fetchFooterHealthSummary(signal: AbortSignal): Promise<FooterHealthSummary | null> {
@@ -159,24 +164,20 @@ async function fetchFooterHealthSummary(signal: AbortSignal): Promise<FooterHeal
     const services = payload.services ?? {};
     return {
       overallStatus: resolveHealthState(payload.status),
-      totalLatencyMs: typeof payload.latencyMs === 'number' ? payload.latencyMs : null,
+      totalLatencyMs: resolveLatencyMs(payload.latencyMs),
       isLoaded: true,
       supabase: {
         status: resolveHealthState(services.supabase?.status),
-        latencyMs:
-          typeof services.supabase?.latencyMs === 'number' ? services.supabase.latencyMs : 18,
+        latencyMs: resolveLatencyMs(services.supabase?.latencyMs),
       },
       redis: {
         status: resolveHealthState(services.redis?.status),
-        latencyMs: typeof services.redis?.latencyMs === 'number' ? services.redis.latencyMs : 4,
-        mode:
-          typeof services.redis?.mode === 'string' && services.redis.mode
-            ? services.redis.mode
-            : 'L1/L2 Cache',
+        latencyMs: resolveLatencyMs(services.redis?.latencyMs),
+        mode: typeof services.redis?.mode === 'string' ? services.redis.mode : null,
       },
       fuxa: {
         status: resolveHealthState(services.fuxa?.status),
-        latencyMs: typeof services.fuxa?.latencyMs === 'number' ? services.fuxa.latencyMs : 24,
+        latencyMs: resolveLatencyMs(services.fuxa?.latencyMs),
       },
     };
   } catch {
@@ -184,9 +185,20 @@ async function fetchFooterHealthSummary(signal: AbortSignal): Promise<FooterHeal
   }
 }
 
+function formatServiceDetail(service: HealthServiceSummary): string {
+  if (service.latencyMs === null) return `Unavailable (${service.status})`;
+  return `${service.latencyMs.toLocaleString('en-US')}ms (${service.status})`;
+}
+
+function formatProbeLatency(latencyMs: number | null): string {
+  if (latencyMs === null) return 'Unavailable';
+  return `${latencyMs.toLocaleString('en-US')}ms probe`;
+}
+
 function getStatusDotClass(tone: HealthState): string {
   if (tone === 'unhealthy') return 'bg-[var(--accent-red)]';
   if (tone === 'degraded') return 'bg-[var(--accent-amber)]';
+  if (tone === 'unknown') return 'bg-[var(--border-emphasis)]';
   return 'bg-[var(--accent-green)]';
 }
 
@@ -195,16 +207,16 @@ function buildEnvironmentSlides(
   userSystem: UserSystemSnapshot
 ): readonly EnvironmentSlide[] {
   const hostLatency =
-    health.totalLatencyMs !== null
-      ? `${health.totalLatencyMs.toLocaleString('en-US')}ms RTT`
-      : 'Sub-50ms Poll';
-  const dbLatency = `${health.supabase.latencyMs.toLocaleString('en-US')}ms Avg`;
+    health.totalLatencyMs === null
+      ? 'Health probe unavailable'
+      : `${health.totalLatencyMs.toLocaleString('en-US')}ms RTT`;
+  const redisLabel = health.redis.mode || 'mode unavailable';
 
   return [
     {
       id: 'server',
       title: 'Server Machine',
-      headline: `App Server · Vercel Edge & Node 24 · Redis ${health.redis.mode ?? 'L1/L2'}`,
+      headline: `App Server · Redis ${redisLabel} · ${health.overallStatus}`,
       metricBadge: hostLatency,
       icon: Server,
       statusTone: health.overallStatus,
@@ -212,30 +224,29 @@ function buildEnvironmentSlides(
         { label: 'Hosting Machine', detail: 'Vercel Serverless Edge · Node.js 24 Runtime' },
         {
           label: 'Memory Cache',
-          detail: `Redis ${health.redis.mode ?? 'L1/L2'} · ${health.redis.latencyMs}ms (${health.redis.status})`,
+          detail: `${redisLabel} · ${formatServiceDetail(health.redis)}`,
         },
         {
           label: 'SCADA Telemetry',
-          detail: `Real-time Poll · ${health.fuxa.latencyMs}ms (${health.fuxa.status})`,
+          detail: formatServiceDetail(health.fuxa),
         },
-        { label: 'Policy Integrity', detail: 'Zero-Drift Verification Active' },
+        { label: 'Health Probe', detail: health.overallStatus },
       ],
     },
     {
       id: 'database',
       title: 'Database Engine',
-      headline: `Database · PostgreSQL 17 (Supabase Cloud) · RLS Enforced`,
-      metricBadge: dbLatency,
+      headline: `Database · PostgreSQL 17 (Supabase Cloud) · ${health.supabase.status}`,
+      metricBadge: formatProbeLatency(health.supabase.latencyMs),
       icon: Database,
       statusTone: health.supabase.status,
       specs: [
         { label: 'Primary Engine', detail: 'PostgreSQL 17 · Managed Supabase Cloud' },
-        { label: 'Connection Pool', detail: 'Pooled TLS Session (:6543) + Read Replica' },
-        { label: 'Security Matrix', detail: 'Row-Level Security & Audit Logs Enabled' },
         {
           label: 'Probe Latency',
-          detail: `${health.supabase.latencyMs}ms query check (${health.supabase.status})`,
+          detail: formatProbeLatency(health.supabase.latencyMs),
         },
+        { label: 'Probe Status', detail: health.supabase.status },
       ],
     },
     {
@@ -564,7 +575,8 @@ export function DepartmentReviews() {
           <div className="mt-2.5 flex items-center justify-between text-[9.5px] text-[var(--text-muted)]">
             <span>Timezone: {userSystem.timeZoneLabel}</span>
             <span>
-              Status: {health.isLoaded ? `Live Probe (${health.overallStatus})` : 'Baseline Active'}
+              Status:{' '}
+              {health.isLoaded ? `Live Probe (${health.overallStatus})` : 'Probe unavailable'}
             </span>
           </div>
         </div>

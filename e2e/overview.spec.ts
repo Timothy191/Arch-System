@@ -105,19 +105,11 @@ test.describe('Overview & Interactive React Flow Topology E2E', () => {
       timeout: 10000,
     });
 
-    // 11. Tab 8: Agentic Monitor
-    const tabAgentic = page.getByRole('tab', { name: /Agentic Monitor/i });
-    await expect(tabAgentic).toBeVisible();
-    await tabAgentic.click();
-    await expect(
-      page.locator('text=Multi-Agent Coding System Distribution & Token Share').first()
-    ).toBeVisible({ timeout: 10000 });
-
-    // 12. Assert Zero Console and Page Errors
+    // 11. Assert Zero Console and Page Errors
     expect(pageErrors).toEqual([]);
     expect(consoleErrors).toEqual([]);
     console.log(
-      '✅ All 8 Overview tabs validated successfully with 0 console errors in React Flow'
+      '✅ All 7 Overview tabs validated successfully with 0 console errors in React Flow'
     );
   });
 });

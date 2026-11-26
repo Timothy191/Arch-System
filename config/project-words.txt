@@ -780,3 +780,5 @@ yugioh
 yxxx
 zricethezav
 zscore
+dryrun
+SARIF

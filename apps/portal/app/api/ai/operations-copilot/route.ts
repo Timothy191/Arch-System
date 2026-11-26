@@ -2,25 +2,40 @@ import { type CopilotGroundingContext, executeOperationsCopilot } from '@repo/in
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { connection, NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { generateEmbedding } from '@/lib/ai/embeddings';
 import {
   searchExternalDocuments,
   searchShiftIntelligence,
   searchSimilarBreakdowns,
 } from '@/lib/ai/mining-rag';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
-import { listEmployeeTools } from '@/lib/integrations/tool-bridge';
-
-const requestSchema = z.object({
-  question: z.string().trim().min(3).max(4_000),
-  context: z.record(z.string(), z.unknown()).optional(),
-});
+import { logError } from '@/lib/errors/error-logger';
 
 const PROVIDER_TIMEOUT_MS = 20_000;
 const MAX_COMPLETION_TOKENS = 700;
-const COPILOT_TEMPERATURE = 0.2;
+const MAX_ANSWER_WORDS = 180;
+const COPILOT_TEMPERATURE = 0;
 const RAG_RESULT_LIMIT = 3;
+const MIN_GROUNDING_SCORE = 55;
+const MAX_EXTERNAL_DOC_SOURCE_CHARS = 1_200;
+const MAX_DASHBOARD_CONTEXT_KEYS = 8;
+const MAX_DASHBOARD_CONTEXT_VALUE_CHARS = 240;
 
-const SYSTEM_PROMPT = `You are the Arch Systems operations copilot. Give concise, evidence-based guidance for mining operations. Never invent telemetry, permissions, incidents, or actions. Clearly separate observed facts from recommendations. Recommend escalation for safety-critical, compliance, or production-impacting decisions. Do not execute actions; describe the next safe step.`;
+const SYSTEM_PROMPT = `You are the Arch Operations Copilot. Use only the supplied grounded evidence. If evidence is absent or insufficient, say "not available in retrieved evidence". Separate Observed facts from Recommendations. Never claim an action was executed. Escalate safety-critical or compliance decisions to the shift supervisor. Keep the answer under ${MAX_ANSWER_WORDS} words.`;
+
+const contextSchema = z
+  .record(
+    z.string(),
+    z.union([z.string().max(MAX_DASHBOARD_CONTEXT_VALUE_CHARS), z.number(), z.boolean()])
+  )
+  .refine((context) => Object.keys(context).length <= MAX_DASHBOARD_CONTEXT_KEYS, {
+    message: `Dashboard context is limited to ${MAX_DASHBOARD_CONTEXT_KEYS} fields`,
+  });
+
+const requestSchema = z.object({
+  question: z.string().trim().min(3).max(4_000),
+  context: contextSchema.optional(),
+});
 
 async function callProvider(options: {
   readonly baseUrl: string;
@@ -62,23 +77,40 @@ async function callProvider(options: {
   return answer;
 }
 
+async function warmQuestionEmbedding(question: string, userId: string): Promise<void> {
+  try {
+    await generateEmbedding(question, userId, { requireSemantic: true });
+  } catch (error) {
+    logError(error instanceof Error ? error : new Error(String(error)), {
+      context: 'copilot_query_embedding_warm_failed',
+      userId,
+    });
+  }
+}
+
+function filterGroundedMatches<T extends { readonly score: number }>(matches: readonly T[]): T[] {
+  return matches
+    .filter((match) => Number.isFinite(match.score) && match.score >= MIN_GROUNDING_SCORE)
+    .slice(0, RAG_RESULT_LIMIT);
+}
+
 async function gatherGroundingContext(
   question: string,
   userId: string,
-  departmentId: string,
-  dashboardContext: Record<string, unknown> | undefined
+  dashboardContext: Record<string, string | number | boolean> | undefined
 ): Promise<CopilotGroundingContext> {
-  const [breakdownResult, shiftNoteResult, externalDocResult, toolsResult] =
-    await Promise.allSettled([
-      searchSimilarBreakdowns(question, userId, RAG_RESULT_LIMIT),
-      searchShiftIntelligence(question, userId, RAG_RESULT_LIMIT),
-      searchExternalDocuments(question, userId, RAG_RESULT_LIMIT),
-      listEmployeeTools(departmentId),
-    ]);
+  // One embedding is shared by all three retrieval paths instead of three duplicate provider calls.
+  await warmQuestionEmbedding(question, userId);
+
+  const [breakdownResult, shiftNoteResult, externalDocResult] = await Promise.allSettled([
+    searchSimilarBreakdowns(question, userId, RAG_RESULT_LIMIT),
+    searchShiftIntelligence(question, userId, RAG_RESULT_LIMIT),
+    searchExternalDocuments(question, userId, RAG_RESULT_LIMIT),
+  ]);
 
   const breakdownMatches =
     breakdownResult.status === 'fulfilled'
-      ? breakdownResult.value.map((match) => ({
+      ? filterGroundedMatches(breakdownResult.value).map((match) => ({
           id: match.id,
           fleetId: match.fleetId,
           reason: match.reason,
@@ -89,7 +121,7 @@ async function gatherGroundingContext(
 
   const shiftNoteMatches =
     shiftNoteResult.status === 'fulfilled'
-      ? shiftNoteResult.value.map((note) => ({
+      ? filterGroundedMatches(shiftNoteResult.value).map((note) => ({
           id: note.id,
           shiftType: note.shiftType,
           noteDate: note.noteDate,
@@ -100,54 +132,34 @@ async function gatherGroundingContext(
 
   const externalDocuments =
     externalDocResult.status === 'fulfilled'
-      ? externalDocResult.value.map((doc) => ({
+      ? filterGroundedMatches(externalDocResult.value).map((doc) => ({
           id: doc.id,
           title: doc.title,
           source: doc.source,
-          content: doc.content.slice(0, 600),
+          content: doc.content.slice(0, MAX_EXTERNAL_DOC_SOURCE_CHARS),
           score: doc.score,
-        }))
-      : [];
-
-  const availableIntegrationTools =
-    toolsResult.status === 'fulfilled'
-      ? toolsResult.value.slice(0, 15).map((tool) => ({
-          qualifiedName: tool.qualifiedName,
-          description: tool.description,
-          riskClass: tool.riskClass,
         }))
       : [];
 
   return {
     question,
-    dashboardContext: {
-      ...(dashboardContext ?? {}),
-      ...(externalDocuments.length > 0 ? { externalDocuments } : {}),
-      ...(availableIntegrationTools.length > 0 ? { availableIntegrationTools } : {}),
-    },
+    dashboardContext,
     breakdownMatches,
     shiftNoteMatches,
+    externalDocuments,
     fleetPredictions: [],
     telemetryAnomalies: [],
   };
 }
 
-async function handlePost(request: NextRequest): Promise<NextResponse> {
-  const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
+async function handlePost(request: NextRequest, userId: string): Promise<NextResponse> {
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid copilot request' }, { status: 400 });
   }
 
   const { question, context } = parsed.data;
-  const grounding = await gatherGroundingContext(
-    question,
-    principal.user.id,
-    principal.employee?.department_id ?? '',
-    context
-  );
+  const grounding = await gatherGroundingContext(question, userId, context);
 
   const groqKey = process.env.GROQ_API_KEY;
   const openRouterKey = process.env.OPENROUTER_API_KEY;
@@ -166,8 +178,11 @@ async function handlePost(request: NextRequest): Promise<NextResponse> {
             provider: 'groq',
           });
           return { answer, provider: 'groq', model };
-        } catch {
-          // Fall through to OpenRouter or deterministic fallback.
+        } catch (error) {
+          logError(error instanceof Error ? error : new Error(String(error)), {
+            context: 'copilot_groq_failed',
+            userId,
+          });
         }
       }
 
@@ -182,8 +197,11 @@ async function handlePost(request: NextRequest): Promise<NextResponse> {
             provider: 'openrouter',
           });
           return { answer, provider: 'openrouter', model };
-        } catch {
-          // Fall through to deterministic fallback.
+        } catch (error) {
+          logError(error instanceof Error ? error : new Error(String(error)), {
+            context: 'copilot_openrouter_failed',
+            userId,
+          });
         }
       }
 
@@ -196,7 +214,10 @@ async function handlePost(request: NextRequest): Promise<NextResponse> {
 
 export async function POST(request: NextRequest) {
   await connection();
-  return withRateLimit(request, () => handlePost(request), {
+  const principal = await getAuthenticatedEmployee();
+  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  return withRateLimit(request, () => handlePost(request, principal.user.id), {
     customLimit: { windowMs: 60_000, maxRequests: 10 },
   });
 }

@@ -78,7 +78,6 @@ const routeIcons: Record<string, React.ReactNode> = {
   'Backend Topology': <Server className="h-4 w-4" />,
   'Database Schema': <Database className="h-4 w-4" />,
   'Audit & Compliance': <ShieldCheck className="h-4 w-4" />,
-  'Agentic Monitor': <Bot className="h-4 w-4" />,
   Schemas: <Database className="h-4 w-4" />,
   Panels: <Activity className="h-4 w-4" />,
   'Presentation Deck': <Presentation className="h-4 w-4" />,

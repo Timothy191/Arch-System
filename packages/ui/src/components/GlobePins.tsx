@@ -66,22 +66,6 @@ const MAX_FRAME_DELTA_SEC = 0.05;
 const MAX_DPR = 2;
 const BUNDLED_BLUE_MARBLE_SRC = '/images/earth-blue-marble.jpg';
 
-const FALLBACK_OVERVIEW_PANEL: Panel = {
-  id: 'overview',
-  name: 'overview',
-  title: 'System Overview',
-  description: 'Global operations command surface',
-  category: 'Command',
-  image: '/images/departments/overview.webp',
-  stats: { label: 'System Health', value: '100% Optimal' },
-  trend: [62, 68, 72, 76, 81, 86, 90, 94, 96, 99],
-  status: 'active',
-  icon: <span aria-hidden="true" />,
-  iconBgColor: 'bg-accent-gold/10',
-  primary: { href: '/overview', label: 'Overview', icon: <span aria-hidden="true" /> },
-  assetOverline: 'CENTRAL COMMAND // SYS-MAIN',
-};
-
 const CONTROL_BUTTON_CLASS =
   'inline-flex items-center gap-1 rounded-full border border-white/60 bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-slate-800 shadow-xs transition-colors hover:bg-white hover:text-slate-950';
 
@@ -171,7 +155,6 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
   autoRotateRef.current = isAutoRotating;
 
   const surfaceDots = useMemo(() => buildEarthSurfaceDots(), []);
-  const resolvedPanel = activePanel ?? FALLBACK_OVERVIEW_PANEL;
 
   const focusPin = useCallback((pin: GlobePin) => {
     setSelectedPinId(pin.id);
@@ -633,7 +616,7 @@ export function GlobePins({ pins = DEFAULT_GLOBE_PINS, activePanel, className }:
           </div>
         </div>
 
-        <GlobeDepartmentMetrics activePanel={resolvedPanel} />
+        <GlobeDepartmentMetrics activePanel={activePanel} />
       </div>
     </div>
   );

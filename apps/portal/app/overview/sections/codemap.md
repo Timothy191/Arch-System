@@ -8,10 +8,9 @@ Supporting module directory for overview/sections.
 
 ## Design
 
-- Client components ("use client"): AgenticMonitor.tsx, AuditReportsSection.tsx, BackendArchitecture.tsx, DocumentationMaps.tsx, SystemArchitecture.tsx
+- Client components ("use client"): AuditReportsSection.tsx, BackendArchitecture.tsx, DocumentationMaps.tsx, SystemArchitecture.tsx
 - Hooks referenced: useState, useEffect, useEdgesState, useNodesState, useCallback, useMemo
 - Exports:
-  - `AgenticMonitor.tsx` → AgenticMonitor, default
   - `AuditReportsSection.tsx` → AuditReportsSection, default
   - `BackendArchitecture.tsx` → BackendArchitecture, default
   - `DatabaseSchema.tsx` → DatabaseSchema, default

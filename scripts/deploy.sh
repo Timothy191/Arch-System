@@ -48,7 +48,6 @@ SKIP_TESTS=false
 CLEAN_ONLY=false
 DRY_RUN=false
 MIGRATE_ONLY=false
-ROLLBACK=false
 FORCE=false
 LIGHTWEIGHT=false
 NO_BROWSER=false
@@ -66,7 +65,6 @@ for arg in "${@:2}"; do
     --clean) CLEAN_ONLY=true ;;
     --dry-run) DRY_RUN=true ;;
     --migrate-only) MIGRATE_ONLY=true ;;
-    --rollback) ROLLBACK=true ;;
     --force) FORCE=true ;;
     --lightweight) LIGHTWEIGHT=true ;;
     --no-browser) NO_BROWSER=true ;;
@@ -294,15 +292,15 @@ validate_prerequisites() {
   log "Checking Node.js..."
   local node_version
   node_version=$(node -v 2>/dev/null | sed 's/v//' || echo "0.0.0")
-  if [ "$(printf '%s\n' "20.17.0" "$node_version" | sort -V | head -n1)" != "20.17.0" ]; then
-    collect_error "Node.js >= 20.17.0 required. Found: $node_version"
+  if [ "$(printf '%s\n' "24.0.0" "$node_version" | sort -V | head -n1)" != "24.0.0" ]; then
+    collect_error "Node.js >= 24.0.0 required. Found: $node_version"
   else
     success "Node.js v$node_version"
   fi
 
   log "Checking pnpm..."
   if ! command -v pnpm > /dev/null 2>&1; then
-    collect_error "pnpm not found. Install: npm install -g pnpm@9.12.0"
+    collect_error "pnpm not found. Install: npm install -g pnpm@9.15.9"
   else
     success "pnpm $(pnpm -v)"
   fi
@@ -823,7 +821,8 @@ phase_start_infrastructure() {
       ;;
       
     production|staging)
-        
+
+        if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ]; then
         # Start Arch-Base web app if not running
         if [ -n "$ARCH_BASE_WEB_DIR" ] && [ -d "$ARCH_BASE_WEB_DIR" ]; then
           if ! is_arch_base_web_running; then
@@ -1059,8 +1058,8 @@ echo -e "\${CLR_BORDER}║\${CLR_RESET}   \${CLR_GREEN}\${CLR_BOLD}██║  �
 echo -e "\${CLR_BORDER}║\${CLR_RESET}   \${CLR_GREEN}\${CLR_BOLD}██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║   \${CLR_RESET}  \${CLR_YELLOW}\${CLR_BOLD}[ COMPLETE ]\${CLR_RESET}    \${CLR_BORDER}║\${CLR_RESET}"
 echo -e "\${CLR_BORDER}║\${CLR_RESET}   \${CLR_GREEN}\${CLR_BOLD}╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝   \${CLR_RESET}                  \${CLR_BORDER}║\${CLR_RESET}"
 echo -e "\${CLR_BORDER}╠════════════════════════════════════════════════════════════════════════════╣\${CLR_RESET}"
-echo -e "\${CLR_BORDER}║\${CLR_RESET}  \${CLR_WHITE}\${CLR_BOLD}🎉 ARCH-SYSTEMS PRODUCTION DEPLOYMENT OPERATIONAL\${CLR_RESET}                         \${CLR_BORDER}║\${CLR_RESET}"
-echo -e "\${CLR_BORDER}║\${CLR_RESET}     \${CLR_GRAY}Sequential Pipeline Finalized · Zero-Downtime Verified · Node v22\${CLR_RESET}      \${CLR_BORDER}║\${CLR_RESET}"
+echo -e "\${CLR_BORDER}║\${CLR_RESET}  \${CLR_WHITE}\${CLR_BOLD}ARCH-SYSTEMS DEPLOYMENT RESULTS\${CLR_RESET}                                  \${CLR_BORDER}║\${CLR_RESET}"
+echo -e "\${CLR_BORDER}║\${CLR_RESET}     \${CLR_GRAY}Mode: $DEPLOY_MODE · Runtime: \$(node -v)\${CLR_RESET}                            \${CLR_BORDER}║\${CLR_RESET}"
 echo -e "\${CLR_BORDER}╠════════════════════════════════════════════════════════════════════════════╣\${CLR_RESET}"
 echo -e "\${CLR_BORDER}║\${CLR_RESET}  \${CLR_CYAN}\${CLR_BOLD}🌐 SERVICES STATUS MATRIX:\${CLR_RESET}                                                \${CLR_BORDER}║\${CLR_RESET}"
 
@@ -1112,7 +1111,7 @@ echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_BOLD}SysOps HUD:\${CLR_RESET} 
 echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_BOLD}Live Logs:\${CLR_RESET}     tail -f $DEPLOY_LOG run/portal.log"
 echo -e "\${CLR_BORDER}╚════════════════════════════════════════════════════════════════════════════╝\${CLR_RESET}"
 echo ""
-echo -e "\${CLR_GREEN}\${CLR_BOLD}✔ All deployment verification gates passed. Press [Enter] to close...\${CLR_RESET}"
+echo -e "\${CLR_GREEN}\${CLR_BOLD}Deployment pipeline finished. Review service status above. Press [Enter] to close...\${CLR_RESET}"
 read -r
 RESULTSEOF
   chmod +x "$results_script"
@@ -1159,7 +1158,6 @@ main() {
       echo "  --clean          Clean restart"
       echo "  --dry-run        Preview only"
       echo "  --migrate-only   Only migrations"
-      echo "  --rollback       Rollback"
       echo "  --force          Skip confirmation"
       echo "  --lightweight    Skip Flowise, Redis tools, and monitoring (portal + Supabase only)"
       echo "  --no-browser     Don't open browser"
@@ -1169,11 +1167,6 @@ main() {
   esac
   
   # Special modes
-  if [ "$ROLLBACK" = true ]; then
-    echo "Rollback not yet implemented - use manual restore"
-    exit 1
-  fi
-  
   if [ "$CLEAN_ONLY" = true ]; then
     acquire_lock
     phase_stop_services
@@ -1231,8 +1224,8 @@ main() {
   # Summary
   echo
   echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════════════════════════════════════╗${NC}"
-  echo -e "${GREEN}${BOLD}║  🎉 DEPLOYMENT COMPLETE — ALL PRODUCTION SYSTEMS OPERATIONAL             ║${NC}"
-  echo -e "${GREEN}${BOLD}║     Zero-Downtime Pipeline Finalized · Health Probes Verified (200 OK)   ║${NC}"
+  echo -e "${GREEN}${BOLD}║  DEPLOYMENT PIPELINE FINISHED                                            ║${NC}"
+  echo -e "${GREEN}${BOLD}║     Mode: $DEPLOY_MODE · Review service status before use                ║${NC}"
   echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
   echo
   log "Portal:     http://localhost:$PORT"

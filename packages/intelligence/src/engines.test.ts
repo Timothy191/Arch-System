@@ -1,5 +1,6 @@
 /* cspell:words ewma flatline flatlined cusum */
 import {
+  buildGroundedCopilotPrompt,
   calculateFmeaRpn,
   detectSensorFlatline,
   evaluateFleetMaintenanceRisk,
@@ -161,5 +162,119 @@ describe('OperationsCopilotEngine', () => {
     expect(response.provider).toBe('deterministic_fallback');
     expect(response.citations).toHaveLength(1);
     expect(response.observedFacts[0]).toContain('Main pump seal wear');
+  });
+
+  it('builds a bounded prompt from grounded evidence and excludes tool catalog bloat', () => {
+    const prompt = buildGroundedCopilotPrompt({
+      question: 'Why is DR-01 losing pressure?',
+      breakdownMatches: [
+        {
+          id: 'bd-1',
+          fleetId: 'DR-01',
+          reason: 'Main pump seal wear',
+          repairNotes: 'Replaced O-ring kit',
+          score: 91,
+        },
+      ],
+      shiftNoteMatches: [],
+      externalDocuments: [
+        {
+          id: 'doc-1',
+          title: 'Hydraulic manual',
+          source: 'oem',
+          content: 'Verify relief valve setting before restart',
+          score: 88,
+        },
+      ],
+      fleetPredictions: [],
+      telemetryAnomalies: [],
+      dashboardContext: {
+        availableIntegrationTools: [{ qualifiedName: 'tool.execute', description: 'write' }],
+        region: 'North shaft',
+        oversized: 'x'.repeat(4_000),
+      },
+    });
+
+    expect(prompt).toContain('Grounded Evidence');
+    expect(prompt).toContain('Reference document [Hydraulic manual]');
+    expect(prompt).toContain('region: North shaft');
+    expect(prompt).not.toContain('availableIntegrationTools');
+    expect(prompt).not.toContain('tool.execute');
+    expect(prompt.length).toBeLessThan(6_000);
+  });
+
+  it('rejects LLM answers that invent telemetry without grounding evidence', async () => {
+    const response = await executeOperationsCopilot({
+      grounding: {
+        question: 'What is the current hydraulic pressure?',
+        breakdownMatches: [],
+        shiftNoteMatches: [],
+        fleetPredictions: [],
+        telemetryAnomalies: [],
+      },
+      llmResponder: async () => ({
+        answer: 'Hydraulic pressure is 92% nominal across all drill rigs this shift.',
+        provider: 'groq',
+        model: 'llama-3.3-70b-versatile',
+      }),
+    });
+
+    expect(response.fallbackUsed).toBe(true);
+    expect(response.answer).toContain('No matching breakdowns');
+  });
+
+  it('rejects LLM answers that claim an action was executed', async () => {
+    const response = await executeOperationsCopilot({
+      grounding: {
+        question: 'Should we restart DR-01?',
+        breakdownMatches: [
+          {
+            id: 'bd-1',
+            fleetId: 'DR-01',
+            reason: 'Main pump seal wear',
+            score: 91,
+          },
+        ],
+        shiftNoteMatches: [],
+        fleetPredictions: [],
+        telemetryAnomalies: [],
+      },
+      llmResponder: async () => ({
+        answer: 'We have restarted DR-01 and will monitor pressure.',
+        provider: 'groq',
+        model: 'llama-3.3-70b-versatile',
+      }),
+    });
+
+    expect(response.fallbackUsed).toBe(true);
+    expect(response.provider).toBe('deterministic_fallback');
+  });
+
+  it('accepts a concise grounded LLM answer', async () => {
+    const response = await executeOperationsCopilot({
+      grounding: {
+        question: 'Why is DR-01 losing pressure?',
+        breakdownMatches: [
+          {
+            id: 'bd-1',
+            fleetId: 'DR-01',
+            reason: 'Main pump seal wear',
+            score: 91,
+          },
+        ],
+        shiftNoteMatches: [],
+        fleetPredictions: [],
+        telemetryAnomalies: [],
+      },
+      llmResponder: async () => ({
+        answer:
+          'Observed facts: historical seal wear on DR-01. Recommendation: inspect the pump seal before restart.',
+        provider: 'groq',
+        model: 'llama-3.3-70b-versatile',
+      }),
+    });
+
+    expect(response.fallbackUsed).toBe(false);
+    expect(response.answer).toContain('inspect the pump seal');
   });
 });

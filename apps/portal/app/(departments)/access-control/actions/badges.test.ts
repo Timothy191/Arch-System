@@ -641,7 +641,7 @@ describe('access-control badges & attendance server actions', () => {
             return buildSupabaseChain(() => ({ data: null, error: null }));
           }),
         },
-        employee: { department_id: 'dept-1' },
+        employee: { id: 'emp-1', department_id: 'dept-1' },
       } as never);
 
       const formData = new FormData();
@@ -655,8 +655,13 @@ describe('access-control badges & attendance server actions', () => {
       expect(regRes.success).toBe(true);
       expect(regRes.qrCode).toMatch(/^TEMP-/);
 
+      let scanLogChain: ReturnType<typeof buildSupabaseChain> | null = null;
       mockServiceClient.mockReturnValue({
         from: jest.fn((table: string) => {
+          if (table === 'access_logs') {
+            scanLogChain = buildSupabaseChain(() => ({ data: null, error: null }));
+            return scanLogChain;
+          }
           if (table === 'badges') {
             return buildSupabaseChain(() => ({
               data: {
@@ -694,9 +699,26 @@ describe('access-control badges & attendance server actions', () => {
         code: 'BADGE-EMP-001',
         direction: 'IN',
         gateLocation: 'Main Gate',
+        scannerId: 'C66-01',
       });
       expect(scanRes.accessGranted).toBe(true);
       expect(scanRes.name).toBe('Alice ADT');
+
+      if (!scanLogChain) {
+        throw new Error('Expected access log insert chain');
+      }
+      const auditRows = (scanLogChain.insert as jest.Mock).mock.calls
+        .flatMap((call: unknown[]) => call)
+        .flatMap((rows: unknown) => (Array.isArray(rows) ? rows : [rows]));
+      expect(auditRows).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            device_id: 'C66-01',
+            gate_location: 'Main Gate',
+            operator: 'emp-1',
+          }),
+        ])
+      );
     });
 
     it('classifies and filters access logs across employees, contractors, and all 4 fleet categories', async () => {

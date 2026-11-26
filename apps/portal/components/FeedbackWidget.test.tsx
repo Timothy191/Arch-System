@@ -15,7 +15,6 @@ jest.mock('@/features/remote-support/actions', () => ({
 }));
 
 jest.mock('@repo/utils/client', () => ({
-  analytics: { track: jest.fn() },
   fetchClient: { post: jest.fn().mockResolvedValue({ ok: true }) },
 }));
 

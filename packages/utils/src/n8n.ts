@@ -14,8 +14,9 @@ export interface N8nHealthOptions {
 }
 
 export interface N8nHealthResult {
-  status: 'healthy' | 'degraded' | 'unavailable';
+  status: 'healthy' | 'degraded' | 'unavailable' | 'unconfigured';
   optional: true;
+  configured: boolean;
   latencyMs: number;
   url: string;
   statusCode: number | null;
@@ -79,8 +80,9 @@ export async function checkN8nHealth(options: N8nHealthOptions = {}): Promise<N8
   const url = getN8nBaseUrl(options.url);
   if (!url) {
     return {
-      status: 'unavailable',
+      status: 'unconfigured',
       optional: true,
+      configured: false,
       latencyMs: 0,
       url: '',
       statusCode: null,
@@ -105,6 +107,7 @@ export async function checkN8nHealth(options: N8nHealthOptions = {}): Promise<N8
       return {
         status: 'healthy',
         optional: true,
+        configured: true,
         latencyMs,
         url,
         statusCode: response.status,
@@ -114,6 +117,7 @@ export async function checkN8nHealth(options: N8nHealthOptions = {}): Promise<N8
     return {
       status: 'degraded',
       optional: true,
+      configured: true,
       latencyMs,
       url,
       statusCode: response.status,
@@ -126,6 +130,7 @@ export async function checkN8nHealth(options: N8nHealthOptions = {}): Promise<N8
     return {
       status: 'unavailable',
       optional: true,
+      configured: true,
       latencyMs,
       url,
       statusCode: null,

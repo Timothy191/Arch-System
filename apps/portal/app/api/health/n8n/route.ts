@@ -47,6 +47,7 @@ export async function GET(_req: NextRequest) {
   const payload = {
     status: result.status,
     optional: true,
+    configured: result.configured,
     backend_status: 'normal',
     latency_ms: result.latencyMs,
     last_check: new Date().toISOString(),

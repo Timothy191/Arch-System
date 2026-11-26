@@ -563,49 +563,6 @@ jobs:
         working-directory: packages/ui
 
   # Self-healing job - runs after all jobs
-  self-healing:
-    name: Self-Healing CI
-    runs-on: ubuntu-latest
-    needs:
-      [
-        deps-lint,
-        security-audit,
-        knip,
-        policy-check,
-        html-meta-check,
-        md-lint,
-        quality,
-        e2e,
-        lighthouse,
-        a11y,
-      ]
-    if: always()
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-        with:
-          version: 9.15.9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run Self-Healing CI
-        run: pnpm turbo run //#lint:ci --force
-
   tier2-check:
     name: Tier 2 Review Policy Check
     runs-on: ubuntu-latest

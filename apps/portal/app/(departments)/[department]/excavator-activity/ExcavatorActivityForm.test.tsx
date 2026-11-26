@@ -324,7 +324,7 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     });
   });
 
-  it('renders ExcavatorActivityTelemetryOverview with full-width header, golden separator, global tally, golden borders, % badges, and graphs', () => {
+  it('renders ExcavatorActivityTelemetryOverview with full-width header, golden separator, global tally, golden borders, and % badges without synthetic graphs', () => {
     render(
       <ExcavatorActivityTelemetryOverview
         totalBcm={1350}
@@ -352,9 +352,11 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     expect(screen.getByTestId('total-loads-pct-badge')).toHaveTextContent('25.0%');
     expect(screen.getByTestId('active-excavators-pct-badge')).toHaveTextContent('50.0% (3/6)');
 
-    expect(screen.getByTestId('excavator-golden-graph-total-bcm')).toBeInTheDocument();
-    expect(screen.getByTestId('excavator-golden-graph-total-loads')).toBeInTheDocument();
-    expect(screen.getByTestId('excavator-golden-graph-active-excavators')).toBeInTheDocument();
+    expect(screen.queryByTestId('excavator-golden-graph-total-bcm')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('excavator-golden-graph-total-loads')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('excavator-golden-graph-active-excavators')
+    ).not.toBeInTheDocument();
   });
 
   it('pre-populates Start SMR, validates Stop SMR against Start SMR, and saves Operator, SMR, and Comment', async () => {

@@ -377,10 +377,13 @@ All critical path validations passed. There are **zero blocking issues** prevent
 
 2. **Application Rollback:**
 
+   There is no `deploy:rollback` command. Restore the last known-good deployment explicitly:
+
    ```bash
-   # Deploy previous version
-   pnpm deploy:rollback
+   vercel rollback <deployment-url-or-id>
    ```
+
+   Alternatively, revert the offending commit on `main` and let the configured Git auto-deploy publish the previous revision.
 
 3. **Cache Invalidation:**
    ```bash
@@ -547,3 +550,121 @@ All detailed audit reports are available in `documentation/03-audit-reports/`:
 ---
 
 _This report was generated automatically using the Arch-System quality assurance pipeline. For questions or clarifications, refer to the AGENTS.md documentation or contact the platform engineering team._
+
+---
+
+# Addendum: Evidence-Based Production Hardening & Model Accuracy Audit (2026-11-26)
+
+This addendum records a follow-up audit performed against the live working tree. All changes
+remain **uncommitted**; the original sign-off above reflects the historical `c1febd9` baseline and
+is not replaced. The audit had two mandates: (1) remove non-production/fabricated elements while
+preserving all pre-existing uncommitted user work, and (2) find and fix inaccurate model outputs,
+context drift, and token waste across prompts, context windows, RAG sources, templates, and
+inference parameters.
+
+## A. Removal Manifest (documented, no fabricated replacements)
+
+| Removed element                                                                                          | File(s)                                                                                                               | Reason / replacement                                                                                                                                                                                                              |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `HubLiveTelemetryPulse` component + test                                                                 | `apps/portal/features/hub/components/HubLiveTelemetryPulse.tsx` (deleted)                                             | Synthetic hub pulse; real telemetry is in `Panel.stats`/`Panel.trend`.                                                                                                                                                            |
+| Analytics stub module                                                                                    | `packages/utils/src/analytics.ts` (deleted)                                                                           | Placeholder analytics calls with no real backend.                                                                                                                                                                                 |
+| VA analytics script + `<Analytics>` tag                                                                  | `apps/portal/public/va/script.js` (deleted), `app/layout.tsx`                                                         | No verified analytics endpoint.                                                                                                                                                                                                   |
+| Raster 404 asset                                                                                         | `apps/portal/public/error-pages/404-error.png` (deleted)                                                              | Replaced with neutral `404-error.svg`; no fabricated error data.                                                                                                                                                                  |
+| `example-flag`                                                                                           | `apps/portal/flags/flags.ts`                                                                                          | Example-only flag with no consumer.                                                                                                                                                                                               |
+| Four phantom flags + discovery definitions                                                               | `apps/portal/flags/flags.ts`, `app/.well-known/vercel/flags/route.ts`                                                 | Advertised unimplemented SCADA-v2 viewer, BullMQ dispatcher, tire-degradation ML model, and autonomous operator copilot with zero application consumers. Flags infrastructure retained, definitions now empty.                    |
+| Fabricated `deploy:rollback` capability                                                                  | `package.json`, `scripts/deploy.sh`                                                                                   | False automated rollback claim; corrected docs to manual `vercel rollback <deployment-url-or-id>`.                                                                                                                                |
+| Sparkline component + usages                                                                             | `GoldenTelemetrySparkline.tsx` (deleted), Control Room / Excavator / Machine Operations components and tests          | Visualized invented series; `apps/portal/lib/performance-analyzer.ts` retained as dev-only diagnostics.                                                                                                                           |
+| Fabricated SCADA tag registry / live preview / "1,284 registers" narrative                               | `app/overview/lib/data.ts`, `BackendArchitecture.tsx`                                                                 | No live SCADA source behind the table; removed rather than invent partial data.                                                                                                                                                   |
+| Static Agentic Monitor tab                                                                               | Section, data, test, nav, page/E2E assertions, codemaps, docs                                                         | Hardcoded dashboard data with no real backend.                                                                                                                                                                                    |
+| Synthetic hero/globe telemetry, `MIN`/`MAX`/`LATEST` badges, fallback overview panel, trend graphs       | `HeroCardContent.tsx`, `GlobeDepartmentMetrics.tsx`, `HeroRotator.tsx`, `GlobePins.tsx`, `DepartmentReviews.tsx`      | Now render only real fetched `Panel.stats`/`Panel.trend`, `/api/health`, or explicit unavailable states.                                                                                                                          |
+| QR on-the-fly entity creation, `Math.random()` tokens, `SAMPLE`/`EMP-*` fallbacks, fake scanner defaults | access-control actions, schemas, and studios                                                                          | QR issuance now requires an existing registered entity and generates a secure random token; `scannerId`/`gateLocation` required; authenticated `employee.id` used as `operator`; `LEGACY` retained as a real historical sentinel. |
+| Fabricated telemetry SDK docs / false runbook claims / dead handbook volume                              | `apps/portal/app/docs/page.tsx`                                                                                       | Removed non-existent SDK example, fake live SCADA preview, and unimplemented runbook references.                                                                                                                                  |
+| Unrelated Fulcra sleep/location injection into generic AI proxy                                          | `packages/utils/src/fulcra.ts` (deleted), `packages/utils/src/index.ts`, `apps/portal/app/api/ai/openrouter/route.ts` | `AgentCursorTracker.getLifeContext()` injected `uvx fulcra-api` sleep/location data as "highly personalized AI" context — a source of factual drift. Generic proxy now passes caller messages through unchanged.                  |
+
+`C66-SCANNER` was reviewed and **retained**: it is validated against `ALLOWED_SCANNER_SOURCES` and
+identifies the real hardware endpoint, not a fabricated entity (unlike the removed Easy Scanner
+sentinels).
+
+## B. Evidence That Remaining Features Use Real Backends
+
+- Hub hero and globe render only `PortalMetric` values (`stats`, `trend`) from
+  `department-live-metrics.ts`; no synthetic series, peaks, averages, or deltas remain.
+- `DepartmentReviews` fetches `/api/health`; unavailable states are explicit, never defaulted.
+- QR badges resolve against registered entities via `@repo/supabase`; credential tokens are random
+  identifiers (legitimate), while fabricated employee/scanner records were removed.
+- Easy Scan audit rows require real `scannerId`/`gateLocation` and use the authenticated employee ID
+  as `operator`; `alcohol_tested` is omitted and relies on the database default `'Not Tested'`.
+- AI spend metrics come from `public.ai_token_usage` via `GET /api/ai/metrics` (admin-only), not
+  fabricated snapshots.
+- Operations Copilot evidence is retrieved from `searchSimilarBreakdowns`, `searchShiftIntelligence`,
+  and `searchExternalDocuments` (Redis RediSearch + Supabase pgvector), not hardcoded tool catalogs.
+
+## C. Model Accuracy, Drift & Token Efficiency Audit
+
+### C.1 Findings and fixes
+
+| Surface                    | Finding                                                                                                          | Fix                                                                                                                                                              |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openrouter` proxy         | Injected unrelated Fulcra sleep/location telemetry as personalized context into every chat completion            | Removed `AgentCursorTracker` entirely; caller messages passed through unchanged.                                                                                 |
+| Operations Copilot context | Unbounded JSON dump of dashboard context and a 15-entry integration-tool catalog into the user prompt            | Zod-bounded context (max 8 scalar keys, 240 chars/value); tool catalog excluded from the prompt.                                                                 |
+| Copilot prompt assembly    | Duplicated observed facts, recommendations, and large raw context; no prompt ceiling                             | `buildGroundedCopilotPrompt` deduplicates bounded evidence (280 chars/item), emits explicit grounded/unavailable framing, and caps total prompt at 10,000 chars. |
+| Inference parameters       | `COPILOT_TEMPERATURE = 0.2` allowed variance on factual operational answers                                      | Set to `0`; added `max_tokens: 700`, `PROVIDER_TIMEOUT_MS = 20_000`, and error logging instead of silent provider failure swallowing.                            |
+| RAG relevance              | No minimum relevance threshold; low-score matches were presented as evidence                                     | `MIN_GROUNDING_SCORE = 55` applied to all three retrieval paths; explicit "not available in retrieved evidence" fallback.                                        |
+| RAG score scaling          | Redis `cosineDistanceToScore` (0–100) and pgvector `combined_score * 100` were mixed with raw `similarity` (0–1) | Normalized external-document similarity to the same 0–100 scale.                                                                                                 |
+| Answer drift               | LLM could invent telemetry or claim actions were executed                                                        | `isGroundedAnswer` rejects specific telemetry claims without evidence and rejects executed-action phrasing; falls back to a deterministic, cited summary.        |
+| Citation types             | External manuals retrieved but not representable in the response contract                                        | Added `external_document` to `groundedCopilotResponseSchema.citations[].source`; rebuilt `@repo/contract`.                                                       |
+| `@repo/agents` SDK         | Default temperatures 0.1–0.2 in agent orchestration                                                              | Reviewed and retained: these are agent-SDK orchestration paths, already low-variance, and do not produce operator-facing factual answers.                        |
+
+### C.2 Measured token reduction
+
+A deterministic representative fixture (multi-source RAG hits, 3 external documents, 15 tool
+descriptors, and a 2.4 KB arbitrary dashboard payload) was measured with the same prompt assembly
+before and after the fix:
+
+| Metric                            | Before               | After        | Reduction  |
+| --------------------------------- | -------------------- | ------------ | ---------- |
+| Prompt characters (system + user) | 12,023               | 2,873        | 76% lower  |
+| Estimated tokens (chars / 4)      | 3,006                | 719          | 76% lower  |
+| Tool-catalog leakage              | present (15 entries) | none         | eliminated |
+| Arbitrary payload leakage         | present              | none         | eliminated |
+| Prompt ceiling                    | none                 | 10,000 chars | bounded    |
+
+`ai_token_usage` in `public.ai_token_usage` remains the authoritative real-token/cost source; the
+figures above are deterministic prompt-assembly measurements, not invented provider usage records.
+
+### C.3 Accuracy behavior verified by tests
+
+Added focused tests in `packages/intelligence/src/engines.test.ts` covering:
+
+- bounded prompt assembly with external-document evidence and tool-catalog exclusion;
+- rejection of LLM answers that invent telemetry without grounding evidence;
+- rejection of LLM answers that claim an action was executed;
+- acceptance of concise grounded LLM answers;
+- deterministic cited fallback when the provider fails.
+
+`COPILOT_TEMPERATURE = 0` plus the grounded-answer guard means the operator-facing answer is either
+evidence-backed or explicitly unavailable — never a plausible-but-unsupported operational claim.
+
+## D. Regression & Gate Evidence
+
+All results below were captured on the final working tree with all changes uncommitted:
+
+- `pnpm --filter @repo/intelligence test -- --runTestsByPath src/engines.test.ts`: **12/12 passing**.
+- `pnpm --filter portal type-check`: **0 errors**.
+- `pnpm --filter portal test -- --runTestsByPath lib/ai/mining-rag.test.ts lib/ai/embeddings.test.ts lib/api/cron-auth.test.ts --runInBand`: **27/27 passing**.
+- Earlier portal regression (globe/overview/control-room/excavator/machine operations): **51 passing**.
+- Access-control regression: **22 suites / 126 tests**; `@repo/utils`: **7 suites / 41 tests**;
+  hub UI: **2 suites / 24 tests**.
+- `pnpm policy:check`: passed, no security violations.
+- `pnpm audit:drift`: **100% COMPLETE & PASS**.
+- `pnpm audit:compliance`: passed — contract drift clean, RLS 113/113, agentic compliance 100%,
+  SSoT duplicates 0, 185 migrations rollback-safe.
+- `pnpm turbo run build --filter=@repo/contract`: passed after the schema change.
+- `pnpm lint:ci`: clean; `pnpm agent:verify`: **28/28 gates, exit 0** (evidence in `.ci-local/`).
+
+## E. Scope & Preservation Statement
+
+Every pre-existing uncommitted file was preserved; this audit only modified files within the
+approved production-hardening and accuracy scope. No commit, push, or merge was performed. No
+real backend was replaced with mock data, and no fabricated record, metric, or capability claim was
+introduced as a substitute for a removed one.

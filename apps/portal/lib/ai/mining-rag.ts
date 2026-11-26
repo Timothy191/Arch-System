@@ -90,6 +90,7 @@ const SAME_FLEET_WEIGHT = 0.95;
 const SAME_MACHINE_TYPE_WEIGHT = 0.65;
 const CORRELATED_SHIFT_WEIGHT = 0.85;
 const DATE_PREFIX_LEN = 10;
+const SIMILARITY_SCORE_SCALE = 100;
 
 /**
  * Format breakdown details into high-density semantic text for vector search.
@@ -640,7 +641,7 @@ export async function searchExternalDocuments(
         title: String(meta.title ?? meta.source_id ?? 'External Document'),
         source: String(meta.source ?? 'external_content'),
         content: String(row.content ?? ''),
-        score: Number(row.similarity ?? 0),
+        score: Math.round(Number(row.similarity ?? 0) * SIMILARITY_SCORE_SCALE),
       };
     });
   } catch (err) {

@@ -200,7 +200,6 @@ describe('access-control/qr-codes/actions', () => {
   });
 
   it('createBadgeCredential and revokeBadgeCredential persist records and invalidate caches', async () => {
-    const fleetChain = createFluentQuery({ data: { id: 'fleet-new' }, error: null });
     const badgeInsertChain = createFluentQuery({
       data: { id: 'badge-new', qr_code: 'TRK-CUSTOM-1' },
       error: null,
@@ -209,7 +208,6 @@ describe('access-control/qr-codes/actions', () => {
 
     const fromMock = jest
       .fn()
-      .mockReturnValueOnce(fleetChain)
       .mockReturnValueOnce(badgeInsertChain)
       .mockReturnValueOnce(badgeUpdateChain);
 
@@ -221,11 +219,12 @@ describe('access-control/qr-codes/actions', () => {
     const created = await createBadgeCredential({
       entityType: 'coal_truck',
       code: 'TRK-CUSTOM-1',
+      targetEntityId: 'fleet-new',
       expiresInDays: 30,
-      newEntityData: { code: 'CT-99', make: 'MAN', model: 'TGS' },
     });
     expect(created.success).toBe(true);
     expect(created.badge).toEqual({ id: 'badge-new', qr_code: 'TRK-CUSTOM-1' });
+    expect(fromMock).not.toHaveBeenCalledWith('fleet');
 
     const revoked = await revokeBadgeCredential('badge-new');
     expect(revoked.success).toBe(true);

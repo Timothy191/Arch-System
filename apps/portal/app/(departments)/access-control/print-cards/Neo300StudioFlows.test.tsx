@@ -159,6 +159,13 @@ describe('Neo300PrintStudio full interactive flows', () => {
     fireEvent.click(screen.getByRole('button', { name: /\+ add employee to db/i }));
     const coyInput = container.querySelector('#neo300-coy-number') as HTMLInputElement;
     expect(coyInput).toBeTruthy();
+    expect(coyInput.value).toBe('');
+    expect(
+      Array.from(container.querySelectorAll('form input[type="date"]')).every(
+        (input) => (input as HTMLInputElement).value === ''
+      )
+    ).toBe(true);
+    expect(container.textContent).not.toMatch(/EMP-\d{4}/);
     fireEvent.change(coyInput, { target: { value: 'Brak 0099' } });
 
     const textInputs = Array.from(
@@ -193,6 +200,9 @@ describe('Neo300PrintStudio full interactive flows', () => {
     await waitFor(() => {
       expect(mockUpsertEmployee).toHaveBeenCalledTimes(1);
     });
+    expect(mockUpsertEmployee.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({ emp_code: 'Brak 0099', qr_code: '' })
+    );
   });
 
   it('opens Edit Photo & Details modal, filters search, prints card, and cancels queued job', async () => {

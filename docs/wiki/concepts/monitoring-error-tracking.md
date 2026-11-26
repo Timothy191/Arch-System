@@ -24,7 +24,7 @@ Built on `@repo/contract/schemas/observability-layer.schema`, the portal exposes
 - **Golden Signals**: Latency (p50/p95/p99), traffic (req/s), error ratio, and saturation across portal routes, Supabase, and Redis.
 - **Container & Collector Health**: Live health checks for `plantcor-otel-collector` (`:4318` / `:13133`), `plantcor-prometheus` (`:9090`), and `plantcor-grafana` (`:3005`, configured with `GF_DEFAULT_THEME=light`).
 - **CI Pipeline & 6-Check Gatekeeper Telemetry**: Displays Woodpecker CI pipeline status alongside the local 28-gate `pnpm agent:verify` + `pnpm ci:gatekeeper` status checks (`Quality Gates`, `Policy Check`, `Dead Code Detection`, `Dependency Lint`, `Security Audit`, `Tier 2 Review Policy Check`).
-- **VibeMon Multi-Agent Pulse (`/api/health/vibemon`)**: Tracks active coding agent sessions, task budgets, and Work State v1 handoffs in `AgenticMonitor.tsx`.
+- **VibeMon Multi-Agent Pulse (`/api/health/vibemon`)**: Exposes active coding agent sessions, task budgets, and Work State v1 handoffs through an authenticated health API. The former static Agentic Monitor tab was removed; real AI token spend is available at `/admin/ai-metrics`.
 
 ## Sentry Integration
 

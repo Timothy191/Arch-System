@@ -1,0 +1,65 @@
+name: Semgrep SAST
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  semgrep:
+    name: Semgrep Static Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Semgrep
+        run: |
+          pipx install semgrep
+          semgrep --version
+
+      - name: Run Semgrep SAST Scan
+        run: |
+          semgrep scan \
+            --config p/typescript \
+            --config p/react \
+            --config p/nextjs \
+            --config p/owasp-top-ten \
+            --config tools/audits/semgrep.yml \
+            --json \
+            --quiet \
+            --exclude node_modules \
+            --exclude .next \
+            --exclude dist \
+            --exclude '*.test.*' \
+            --exclude '*.spec.*' \
+            --sarif \
+            --output semgrep-results.sarif \
+            . || true
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: semgrep-results.sarif
+          category: semgrep
+
+      - name: Run Custom Rules (blocking)
+        run: node tools/audits/semgrep-scan.cjs
+        env:
+          CI: true

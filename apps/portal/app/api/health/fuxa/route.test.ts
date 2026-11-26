@@ -111,6 +111,7 @@ describe('GET /api/health/fuxa', () => {
   });
 
   it('returns 200 degraded fallback when FUXA fetch throws but Redis is open', async () => {
+    process.env.FUXA_URL = 'http://fuxa.local:1881';
     global.fetch = jest.fn().mockRejectedValue(new Error('connect ECONNREFUSED 127.0.0.1:1881'));
     mockedGetRedisClient.mockResolvedValue({
       isOpen: true,
@@ -133,6 +134,7 @@ describe('GET /api/health/fuxa', () => {
   });
 
   it('returns 200 degraded fallback when FUXA returns non-OK HTTP status and Redis is open', async () => {
+    process.env.FUXA_URL = 'http://fuxa.local:1881';
     global.fetch = jest.fn().mockResolvedValue(
       createMockFetchResponse({
         ok: false,
@@ -156,26 +158,30 @@ describe('GET /api/health/fuxa', () => {
     });
   });
 
-  it('returns 503 unhealthy when both FUXA fetch and Redis fallback fail', async () => {
+  it('returns 200 unavailable (non-blocking) when both FUXA fetch and Redis fallback fail', async () => {
+    process.env.FUXA_URL = 'http://fuxa.local:1881';
     global.fetch = jest.fn().mockRejectedValue(new Error('FUXA unreachable'));
     mockedGetRedisClient.mockRejectedValue(new Error('Redis connection refused'));
 
     const response = await GET();
     const body = await response.json();
 
-    expect(response.status).toBe(503);
+    expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe(
       'no-store, no-cache, must-revalidate, max-age=0'
     );
     expect(body).toMatchObject({
-      status: 'unhealthy',
+      status: 'unavailable',
+      optional: true,
+      configured: true,
       fuxa_healthy: false,
       iframeLoadable: false,
       corsAllowed: false,
     });
   });
 
-  it('returns 503 unhealthy when FUXA fetch fails and Redis client is not open', async () => {
+  it('returns 200 unavailable (non-blocking) when FUXA fetch fails and Redis client is not open', async () => {
+    process.env.FUXA_URL = 'http://fuxa.local:1881';
     global.fetch = jest.fn().mockRejectedValue(new Error('FUXA timeout'));
     mockedGetRedisClient.mockResolvedValue({
       isOpen: false,
@@ -184,7 +190,7 @@ describe('GET /api/health/fuxa', () => {
     const response = await GET();
     const body = await response.json();
 
-    expect(response.status).toBe(503);
-    expect(body.status).toBe('unhealthy');
+    expect(response.status).toBe(200);
+    expect(body.status).toBe('unavailable');
   });
 });

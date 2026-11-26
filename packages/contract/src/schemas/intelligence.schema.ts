@@ -99,7 +99,13 @@ export const groundedCopilotResponseSchema = z.object({
   recommendations: z.array(z.string()),
   citations: z.array(
     z.object({
-      source: z.enum(['breakdown_rag', 'shift_note_rag', 'fleet_health', 'telemetry_anomaly']),
+      source: z.enum([
+        'breakdown_rag',
+        'shift_note_rag',
+        'external_document',
+        'fleet_health',
+        'telemetry_anomaly',
+      ]),
       referenceId: z.string(),
       summary: z.string(),
     })

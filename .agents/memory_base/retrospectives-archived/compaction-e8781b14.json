@@ -1,0 +1,33 @@
+{
+  "id": "compaction-e8781b14",
+  "timestamp": "2026-11-26T10:15:47.904Z",
+  "taskTag": "compaction-standard-e8781b14",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/apps/portal/app/api/access-control/gates/heartbeat/route.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/apps/portal/app/api/access-control/gates/heartbeat/route.test.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/apps/portal/app/api/cron/contractor-expiry/route.test.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/apps/portal/app/api/cron/visitor-auto-exit/route.test.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/scripts/gate-heartbeat-probe.mjs\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/packages/database/migrations/235_reconcile_access_control_rls_and_triggers.sql\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/vercel.json\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/packages/contract/src/schemas/access-control.schema.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/packages/contract/src/index.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/apps/portal/app/api/cron/contractor-expiry/route.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/apps/portal/app/api/cron/contractor-expiry/route.test.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/apps/portal/app/api/access-control/gates/heartbeat/route.test.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ac-ops-code/apps/portal/app/api/cron/visitor-auto-exit/route.test.ts\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (420 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 89435,
+    "cacheHitRatio": 0.8798,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

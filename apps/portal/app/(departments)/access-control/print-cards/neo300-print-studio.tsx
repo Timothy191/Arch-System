@@ -34,7 +34,7 @@ import {
   sendNeo300PrintJob,
   upsertEmployeeForCardPrinting,
 } from './actions';
-import { DEFAULT_EXPIRY_ONE_YEAR, Neo300EmployeeEditorModal } from './Neo300EmployeeEditorModal';
+import { Neo300EmployeeEditorModal } from './Neo300EmployeeEditorModal';
 import { Neo300PrinterQueuePanel } from './Neo300PrinterQueuePanel';
 
 type DirectoryTabKey = 'employees' | FleetCardBadgeCategory;
@@ -56,6 +56,27 @@ const DIRECTORY_CARD_DEFAULT =
   'border-[var(--border-default)] bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)]/60';
 const SEARCH_INPUT_CLASS =
   'w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] py-2 pr-4 pl-9 text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/40';
+
+function createEmptyEmployeeForm(
+  departments: readonly CardStudioDepartment[]
+): UpsertEmployeeCardInput {
+  return {
+    emp_code: '',
+    coy_number: '',
+    first_name: '',
+    surname: '',
+    id_number: '',
+    job_title: '',
+    department_id: departments[0]?.id ?? null,
+    area: '',
+    status: 'Active',
+    medical_expiry: null,
+    induction_expiry: null,
+    photo_url: '',
+    rfid_code: '',
+    qr_code: '',
+  };
+}
 
 interface Neo300PrintStudioProps {
   initialPrinter: Neo300Printer;
@@ -177,22 +198,9 @@ export function Neo300PrintStudio({
   const [editorMode, setEditorMode] = useState<'create' | 'edit'>('create');
   const [isPending, startTransition] = useTransition();
 
-  const [formState, setFormState] = useState<UpsertEmployeeCardInput>({
-    emp_code: '',
-    coy_number: '',
-    first_name: '',
-    surname: '',
-    id_number: '',
-    job_title: 'Haul Truck Operator',
-    department_id: departments[0]?.id ?? null,
-    area: 'Main Complex',
-    status: 'Active',
-    medical_expiry: DEFAULT_EXPIRY_ONE_YEAR(),
-    induction_expiry: DEFAULT_EXPIRY_ONE_YEAR(),
-    photo_url: '',
-    rfid_code: '',
-    qr_code: '',
-  });
+  const [formState, setFormState] = useState<UpsertEmployeeCardInput>(() =>
+    createEmptyEmployeeForm(departments)
+  );
 
   const fleetByCategory = useMemo(() => {
     const grouped: Record<FleetCardBadgeCategory, FleetCardBadgeProfile[]> = {
@@ -207,24 +215,8 @@ export function Neo300PrintStudio({
   }, [initialFleetBadges]);
 
   const openCreateEmployeeModal = () => {
-    const nextCode = `EMP-${String(employees.length + 101).padStart(4, '0')}`;
     setEditorMode('create');
-    setFormState({
-      emp_code: nextCode,
-      coy_number: nextCode,
-      first_name: '',
-      surname: '',
-      id_number: '',
-      job_title: 'Site Operator',
-      department_id: departments[0]?.id ?? null,
-      area: 'Main Complex',
-      status: 'Active',
-      medical_expiry: DEFAULT_EXPIRY_ONE_YEAR(),
-      induction_expiry: DEFAULT_EXPIRY_ONE_YEAR(),
-      photo_url: '',
-      rfid_code: '',
-      qr_code: `EMP-${nextCode}`,
-    });
+    setFormState(createEmptyEmployeeForm(departments));
     setShowEditor(true);
   };
 
@@ -237,15 +229,15 @@ export function Neo300PrintStudio({
       first_name: emp.first_name,
       surname: emp.surname,
       id_number: emp.id_number,
-      job_title: emp.job_title || 'Site Operator',
-      department_id: emp.department_id ?? departments[0]?.id ?? null,
-      area: emp.area || 'Main Complex',
-      status: emp.status || 'Active',
-      medical_expiry: emp.medical_expiry || DEFAULT_EXPIRY_ONE_YEAR(),
-      induction_expiry: emp.induction_expiry || DEFAULT_EXPIRY_ONE_YEAR(),
-      photo_url: emp.photo_url || '',
-      rfid_code: emp.rfid_code || '',
-      qr_code: emp.qr_code || `EMP-${emp.emp_code}`,
+      job_title: emp.job_title ?? '',
+      department_id: emp.department_id ?? null,
+      area: emp.area ?? '',
+      status: emp.status,
+      medical_expiry: emp.medical_expiry ?? null,
+      induction_expiry: emp.induction_expiry ?? null,
+      photo_url: emp.photo_url ?? '',
+      rfid_code: emp.rfid_code ?? '',
+      qr_code: emp.qr_code ?? '',
     });
     setShowEditor(true);
   };
@@ -560,7 +552,13 @@ export function Neo300PrintStudio({
                             data-testid={`employee-row-qr-${emp.id}`}
                             className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-accent-gold/55 bg-white p-0.5 shadow-2xs"
                           >
-                            <QRCodeSection data={emp.qr_code || `EMP-${emp.emp_code}`} size={38} />
+                            {emp.qr_code ? (
+                              <QRCodeSection data={emp.qr_code} size={38} />
+                            ) : (
+                              <span className="px-1 text-center font-mono text-[8px] text-[var(--text-muted)]">
+                                NO QR
+                              </span>
+                            )}
                           </div>
                           <div className="min-w-0">
                             <p className="truncate font-medium text-[var(--text-heading)] text-sm">

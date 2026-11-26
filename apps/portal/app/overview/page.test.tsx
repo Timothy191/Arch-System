@@ -19,7 +19,7 @@ describe('OverviewPage & SystemArchitecture (/overview)', () => {
     expect(screen.getByText(/Active View: Audit & Compliance/i)).toBeInTheDocument();
   });
 
-  it('should render the Department-style left side panel navigation with all 8 topology tabs and pin toggle', async () => {
+  it('should render the Department-style left side panel navigation with all 7 topology tabs and pin toggle', async () => {
     render(<OverviewPage />);
     await screen.findByTestId('system-architecture-header-panel');
     const sidebar = screen.getByTestId('overview-sidebar');
@@ -40,7 +40,6 @@ describe('OverviewPage & SystemArchitecture (/overview)', () => {
       'Database Schema',
       'Docs & Maps',
       'Audit & Compliance',
-      'Agentic Monitor',
     ];
 
     for (const label of expectedTabs) {

@@ -2,7 +2,7 @@
 
 import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
-import { analytics, fetchClient } from '@repo/utils/client';
+import { fetchClient } from '@repo/utils/client';
 import { Bug, LifeBuoy, MessageSquare, MonitorUp, Send, Sparkles, X } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type React from 'react';
@@ -84,11 +84,6 @@ export function FeedbackWidget({ variant = 'header', embedded = false }: Feedbac
     if (!message.trim()) return;
     setSubmitting(true);
 
-    analytics.track({
-      eventName: 'User Feedback Submitted',
-      properties: { type, messageLength: message.length },
-    });
-
     try {
       await fetchClient.post('/api/feedback', { type, message });
       setMessage('');
@@ -129,10 +124,6 @@ export function FeedbackWidget({ variant = 'header', embedded = false }: Feedbac
         expiresAt: result.session.expires_at,
       });
 
-      analytics.track({
-        eventName: 'Remote Support Requested',
-        properties: { departmentSlug: departmentSlug ?? 'unknown' },
-      });
       setIsOpen(false);
       toast.success(`Support code ${result.session.session_code} ready`);
     } catch (err) {

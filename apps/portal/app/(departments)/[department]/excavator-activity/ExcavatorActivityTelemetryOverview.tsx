@@ -4,10 +4,6 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
 import { Activity, Layers, Truck } from 'lucide-react';
 import { memo } from 'react';
-import {
-  buildSparklinePoints,
-  GoldenTelemetrySparkline,
-} from '@/components/telemetry/GoldenTelemetrySparkline';
 
 export interface ExcavatorActivityTelemetryOverviewProps {
   readonly totalBcm: number;
@@ -53,11 +49,6 @@ function ExcavatorActivityTelemetryOverviewBase({
   const bcmAttainmentPct = Math.min(100, Math.round((totalBcm / safeTargetBcm) * 1000) / 10);
   const loadsAttainmentPct = Math.min(100, Math.round((totalLoads / safeTargetLoads) * 1000) / 10);
   const activeFleetPct = Math.min(100, Math.round((activeExcavators / safeFleetCount) * 1000) / 10);
-
-  const avgBcmPerExcavator =
-    activeExcavators > 0 ? totalBcm / activeExcavators : totalBcm / safeFleetCount;
-  const avgLoadsPerExcavator =
-    activeExcavators > 0 ? totalLoads / activeExcavators : totalLoads / safeFleetCount;
 
   return (
     <div className="space-y-6">
@@ -134,16 +125,6 @@ function ExcavatorActivityTelemetryOverviewBase({
               className={`mt-2 ${GOLDEN_SEPARATOR_CLASS}`}
             />
           </div>
-          <GoldenTelemetrySparkline
-            id="total-bcm"
-            variant="excavator"
-            title="Volume Moved Curve"
-            badgeLabel={`${bcmAttainmentPct.toFixed(1)}% target`}
-            currentValue={`${totalBcm.toFixed(1)} BCM`}
-            avgValue={`${avgBcmPerExcavator.toFixed(1)}/ex`}
-            peakValue={`${safeTargetBcm.toLocaleString('en-US')} BCM`}
-            points={buildSparklinePoints(Math.max(bcmAttainmentPct, 32))}
-          />
         </GlassCard>
 
         {/* Card 2: Total Loads */}
@@ -171,16 +152,6 @@ function ExcavatorActivityTelemetryOverviewBase({
               className={`mt-2 ${GOLDEN_SEPARATOR_CLASS}`}
             />
           </div>
-          <GoldenTelemetrySparkline
-            id="total-loads"
-            variant="excavator"
-            title="Haulage Loads Velocity"
-            badgeLabel={`${loadsAttainmentPct.toFixed(1)}% target`}
-            currentValue={`${totalLoads.toLocaleString('en-US')} ld`}
-            avgValue={`${avgLoadsPerExcavator.toFixed(1)}/ex`}
-            peakValue={`${safeTargetLoads} ld`}
-            points={buildSparklinePoints(Math.max(loadsAttainmentPct, 35))}
-          />
         </GlassCard>
 
         {/* Card 3: Active Excavators */}
@@ -208,16 +179,6 @@ function ExcavatorActivityTelemetryOverviewBase({
               className={`mt-2 ${GOLDEN_SEPARATOR_CLASS}`}
             />
           </div>
-          <GoldenTelemetrySparkline
-            id="active-excavators"
-            variant="excavator"
-            title="Fleet Deployment Rate"
-            badgeLabel={`${activeFleetPct.toFixed(1)}% active`}
-            currentValue={`${activeExcavators} active`}
-            avgValue={`${plantUnitsCount + otherUnitsCount} aux`}
-            peakValue={`${fleetExcavatorsCount} fleet`}
-            points={buildSparklinePoints(Math.max(activeFleetPct, 38))}
-          />
         </GlassCard>
       </div>
     </div>

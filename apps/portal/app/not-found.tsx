@@ -8,7 +8,7 @@ export default function NotFound() {
       <div className="w-full max-w-sm space-y-6 text-center">
         <div className="flex justify-center">
           <Image
-            src="/error-pages/404-error.png"
+            src="/error-pages/404-error.svg"
             alt="404 Not Found"
             width={120}
             height={120}

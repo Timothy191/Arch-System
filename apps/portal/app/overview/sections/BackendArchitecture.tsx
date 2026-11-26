@@ -14,7 +14,6 @@ import {
   Globe,
   Lock,
   Network,
-  Radio,
   Server,
   ShieldCheck,
   Zap,
@@ -63,8 +62,6 @@ const CATEGORY_META: Record<
 };
 
 export default function BackendArchitecture() {
-  const fuxaService = BACKEND_SERVICES.find((s) => s.id === 'fuxa-scada');
-
   return (
     <div className="space-y-8 p-6">
       {/* Header */}
@@ -324,76 +321,6 @@ export default function BackendArchitecture() {
           );
         })}
       </div>
-
-      {/* Live SCADA Tag Stream Table */}
-      {fuxaService?.scadaMetrics && (
-        <Card className="overflow-hidden">
-          <CardHeader className="border-border-subtle border-b bg-bg-secondary/40 pb-3">
-            <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-              <div>
-                <CardTitle className="flex items-center gap-2 font-semibold text-base text-text-heading">
-                  <Radio className="h-4 w-4 text-accent-green" />
-                  Industrial SCADA & PLC Tag Registry (OPC-UA / Modbus-TCP)
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  {fuxaService.scadaMetrics.modbusRegisterCount} Modbus registers across{' '}
-                  {fuxaService.scadaMetrics.modbusActiveNodes} active nodes ·{' '}
-                  {fuxaService.scadaMetrics.opcUaPollingRateHz}Hz poll rate ·{' '}
-                  {fuxaService.scadaMetrics.opcUaJitterMs}ms jitter
-                </CardDescription>
-              </div>
-              <Badge
-                variant="outline"
-                className="border-accent-green/30 bg-accent-green/10 font-mono text-[10px] text-accent-green"
-              >
-                0.0% Frame Loss
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="overflow-x-auto p-0">
-            <table className="w-full border-collapse text-left text-xs">
-              <thead>
-                <tr className="border-border-subtle border-b bg-bg-secondary/30 font-mono text-[11px] text-text-muted">
-                  <th className="px-4 py-2.5">Tag ID</th>
-                  <th className="px-4 py-2.5">Equipment</th>
-                  <th className="px-4 py-2.5">Protocol</th>
-                  <th className="px-4 py-2.5">Register / Node</th>
-                  <th className="px-4 py-2.5">Nominal Value</th>
-                  <th className="px-4 py-2.5">Rate</th>
-                  <th className="px-4 py-2.5">Quality</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle">
-                {fuxaService.scadaMetrics.tags.map((tag) => (
-                  <tr key={tag.tagId} className="hover:bg-bg-tertiary/50">
-                    <td className="px-4 py-2 font-mono font-semibold text-accent-blue">
-                      {tag.tagId}
-                    </td>
-                    <td className="px-4 py-2 text-text-heading">{tag.equipment}</td>
-                    <td className="px-4 py-2 font-mono text-text-secondary">
-                      {tag.sourceProtocol}
-                    </td>
-                    <td className="px-4 py-2 font-mono text-text-muted">
-                      {tag.registerAddress ?? tag.nodeId}
-                    </td>
-                    <td className="px-4 py-2 font-mono font-semibold text-text-heading">
-                      {String(tag.baseValue)} {tag.unit ?? ''}
-                    </td>
-                    <td className="px-4 py-2 font-mono text-text-secondary">
-                      {tag.pollingRateHz} Hz
-                    </td>
-                    <td className="px-4 py-2">
-                      <span className="rounded bg-accent-green/10 px-2 py-0.5 font-mono text-[10px] text-accent-green">
-                        {tag.quality}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Authenticated Data & Telemetry Connections */}
       <Card className="p-6">

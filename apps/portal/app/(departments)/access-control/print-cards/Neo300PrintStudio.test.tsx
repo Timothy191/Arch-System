@@ -110,11 +110,27 @@ describe('Neo300PrintStudio Coy Number & Expiry Dates workflow', () => {
         expect.objectContaining({
           coy_number: 'Brak 0043',
           emp_code: 'Brak 0043',
-          qr_code: 'EMP-BRAK-0043',
+          qr_code: 'EMP-OP-DT-77',
         })
       );
       expect(screen.getByTestId('plantcor-card-coy-number')).toHaveTextContent('Brak 0043');
       expect(toast.success).toHaveBeenCalled();
     });
+  });
+
+  it('shows an explicit unavailable state when no real QR credential exists', () => {
+    const employeeWithoutQr = { ...initialEmployees[0]!, qr_code: null };
+
+    render(
+      <Neo300PrintStudio
+        initialPrinter={printer}
+        initialEmployees={[employeeWithoutQr]}
+        initialJobs={jobs}
+        departments={departments}
+      />
+    );
+
+    expect(screen.getByTestId('employee-row-qr-emp-1')).toHaveTextContent('NO QR');
+    expect(screen.queryByText('EMP-OP-DT-77')).not.toBeInTheDocument();
   });
 });

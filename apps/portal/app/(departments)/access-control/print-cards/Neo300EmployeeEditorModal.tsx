@@ -13,12 +13,6 @@ import {
 import { toast } from 'sonner';
 import type { CardStudioDepartment, UpsertEmployeeCardInput } from './actions';
 
-export const DEFAULT_EXPIRY_ONE_YEAR = () => {
-  const d = new Date();
-  d.setFullYear(d.getFullYear() + 1);
-  return d.toISOString().split('T')[0]!;
-};
-
 interface Neo300EmployeeEditorModalProps {
   editorMode: 'create' | 'edit';
   formState: UpsertEmployeeCardInput;
@@ -212,12 +206,10 @@ export function Neo300EmployeeEditorModal({
               value={formState.coy_number ?? formState.emp_code}
               onChange={(e) => {
                 const coyValue = e.target.value;
-                const qrSuffix = coyValue.trim().replace(/\s+/g, '-').toUpperCase();
                 setFormState((prev) => ({
                   ...prev,
                   coy_number: coyValue,
                   emp_code: coyValue,
-                  qr_code: qrSuffix ? `EMP-${qrSuffix}` : prev.qr_code,
                 }));
               }}
               placeholder="e.g. Brak 0043"

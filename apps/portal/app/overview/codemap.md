@@ -9,13 +9,12 @@ Server Components fetch data directly (no client-side fetching), pass props down
 
 ## Design
 
-- Client components ("use client"): AuditReportsSection.tsx, page.tsx, AgenticMonitor.tsx, AuditReportsSection.tsx, BackendArchitecture.tsx, DocumentationMaps.tsx, SystemArchitecture.tsx
+- Client components ("use client"): AuditReportsSection.tsx, page.tsx, AuditReportsSection.tsx, BackendArchitecture.tsx, DocumentationMaps.tsx, SystemArchitecture.tsx
 - Hooks referenced: useEffect, useState, useEdgesState, useNodesState, useCallback, useMemo
 - Exports:
   - `AuditReportsSection.tsx` → AuditReportsSection, default
   - `data.ts` → DEPARTMENTS, TECH_STACK, DATABASE_SCHEMA, BACKEND_SERVICES, BACKEND_CONNECTIONS
   - `page.tsx` → OverviewPage, default
-  - `AgenticMonitor.tsx` → AgenticMonitor, default
   - `BackendArchitecture.tsx` → BackendArchitecture, default
   - `DatabaseSchema.tsx` → DatabaseSchema, default
   - `DepartmentBreakdown.tsx` → DepartmentBreakdown, default
