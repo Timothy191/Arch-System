@@ -1,7 +1,11 @@
 import { randomUUID } from 'node:crypto';
+import { logger } from '@repo/logger/server';
+import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { NextResponse } from 'next/server';
 import { authorizeCronRequest } from '@/lib/api/cron-auth';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
+
+const EXPIRY_WINDOW_HOURS = 48;
 
 export async function GET(req: Request) {
   const unauthorizedResponse = authorizeCronRequest(req);
@@ -11,15 +15,60 @@ export async function GET(req: Request) {
 
   try {
     const jobId = randomUUID();
+    const runTimestamp = new Date().toISOString();
+    const cutoffIso = new Date(Date.now() + EXPIRY_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+
     const [dispatchResult] = await Promise.allSettled([
       triggerTrackedWorkflow(
         jobId,
         '/webhook/contractor-expiry-check',
         {
-          target_hours: 48,
-          run_timestamp: new Date().toISOString(),
+          target_hours: EXPIRY_WINDOW_HOURS,
+          run_timestamp: runTimestamp,
         },
-        { awaitCompletion: true }
+        {
+          awaitCompletion: true,
+          fallback: async () => {
+            const supabase = createServiceRoleClient();
+            const { data: expiringBadges, error } = await supabase
+              .from('badges')
+              .select('id, qr_code, expires_at')
+              .eq('is_active', true)
+              .not('expires_at', 'is', null)
+              .lte('expires_at', cutoffIso);
+
+            if (error) {
+              throw error;
+            }
+
+            const expiringCount = expiringBadges?.length ?? 0;
+            logger.info({
+              event: 'contractor_expiry_fallback_completed',
+              jobId,
+              expiringCount,
+              cutoffIso,
+            });
+
+            if (expiringCount > 0 && process.env.NOVU_API_KEY) {
+              try {
+                const { sendOperationalAlert } = await import('@repo/utils/novu');
+                await sendOperationalAlert('access-control-ops', 'contractor-expiry-alert', {
+                  expiringCount,
+                  cutoffIso,
+                  runTimestamp,
+                });
+              } catch (alertErr) {
+                logger.warn({
+                  event: 'contractor_expiry_alert_failed',
+                  jobId,
+                  error: alertErr instanceof Error ? alertErr.message : String(alertErr),
+                });
+              }
+            }
+
+            return { expiringCount, cutoffIso, runTimestamp };
+          },
+        }
       ),
     ]);
 
@@ -32,8 +81,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Contractor expiry sweep initiated',
+      message: 'Contractor expiry sweep completed',
       jobId,
+      result: dispatchResult.value.result ?? null,
     });
   } catch {
     return NextResponse.json(

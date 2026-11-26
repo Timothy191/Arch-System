@@ -390,3 +390,21 @@ export const perimeterGatesSchema = z.object({
 });
 
 export type PerimeterGateRow = z.infer<typeof perimeterGatesSchema>;
+
+export const gateHeartbeatSchema = z
+  .object({
+    gateId: nonEmptyString.max(GATE_ID_LENGTH, 'Gate ID must be 64 characters or less').optional(),
+    gateLocation: nonEmptyString
+      .max(150, 'Gate location must be 150 characters or less')
+      .optional(),
+    interlockActive: z.boolean().optional(),
+    isMaintenance: z.boolean().optional(),
+    faultMessage: z.string().trim().max(500).nullable().optional(),
+    firmwareVersion: z.string().trim().max(64).optional(),
+    timestamp: z.string().datetime().optional(),
+  })
+  .refine((payload) => Boolean(payload.gateId || payload.gateLocation), {
+    message: 'Either gateId or gateLocation is required',
+  });
+
+export type GateHeartbeatInput = z.infer<typeof gateHeartbeatSchema>;

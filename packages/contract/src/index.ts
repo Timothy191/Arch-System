@@ -25,8 +25,10 @@ export { ValidationError } from './validation';
 export { EmployeeProfileUpdateSchema, PrintRequestSchema } from './schemas/access-card.schema';
 export {
   type GateDenialInput,
+  type GateHeartbeatInput,
   type GatePulseInput,
   gateDenialSchema,
+  gateHeartbeatSchema,
   gatePulseSchema,
   type MusterEventInput,
   type MusterStatusInput,

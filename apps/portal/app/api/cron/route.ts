@@ -29,6 +29,11 @@ export const REGISTERED_VERCEL_CRONS: readonly CronScheduleDescriptor[] = [
     description: 'Daily contractor credential and medical certificate expiration check',
   },
   {
+    path: '/api/cron/visitor-auto-exit',
+    schedule: '*/15 * * * *',
+    description: 'Quarter-hourly auto-exit sweep for overdue Access Control visitors (>=12h)',
+  },
+  {
     path: '/api/cron/preventative-maintenance',
     schedule: '0 2 * * *',
     description: 'Daily plant and mobile equipment preventative maintenance work-order generator',

@@ -250,6 +250,13 @@ CREATE POLICY "Allow admin delete access_logs" ON public.access_logs
   FOR DELETE TO authenticated
   USING ((SELECT public.is_admin()));
 
+CREATE TABLE IF NOT EXISTS public.access_logs_archive (
+  LIKE public.access_logs INCLUDING ALL
+);
+ALTER TABLE public.access_logs_archive
+  ADD COLUMN IF NOT EXISTS archived_week_start DATE NOT NULL DEFAULT '1970-01-05';
+ALTER TABLE public.access_logs_archive ENABLE ROW LEVEL SECURITY;
+
 DROP POLICY IF EXISTS "access_logs_archive_select" ON public.access_logs_archive;
 CREATE POLICY "access_logs_archive_select" ON public.access_logs_archive
   FOR SELECT TO authenticated
@@ -532,11 +539,11 @@ SELECT
   (SELECT id FROM public.departments WHERE name = 'access-control' LIMIT 1)
 FROM (
   VALUES
-    ('GATE-01-NORTH', 'Main North Inbound Boom Barrier', 'Main Gate', 'ZONE-01 (Primary Perimeter)', 'BOOM_BARRIER'),
-    ('GATE-02-SOUTH', 'South Hauling Road Gate', 'South Gate', 'ZONE-02 (Haul Road)', 'BOOM_BARRIER'),
-    ('TURN-01-04-PIT', 'Turnstile Array (Pit Entry)', 'North Entrance', 'ZONE-03 (Underground / Pit Access)', 'TURNSTILE_ARRAY'),
-    ('WEIGH-03-ROM', 'Weighbridge 03 Heavy Access', 'Weighbridge Gate', 'ZONE-04 (Processing & ROM)', 'WEIGHBRIDGE_BOOM'),
-    ('VAULT-05-MAG', 'Explosive Magazine & High-Sec Vault', 'Magazine Gate', 'ZONE-05 (Restricted Security)', 'HIGH_SEC_PORTAL')
+    ('GATE-01-NORTH', 'Main Gate North Turnstile', 'Main Gate North Turnstile', 'ZONE-01 (Primary Perimeter)', 'TURNSTILE_ARRAY'),
+    ('GATE-02-EAST', 'East Pit Boom Gate', 'East Pit Boom Gate', 'ZONE-02 (East Pit Haul Road)', 'BOOM_BARRIER'),
+    ('GATE-03-PLANT', 'Processing Plant Turnstile', 'Processing Plant Turnstile', 'ZONE-03 (Processing Plant)', 'TURNSTILE_ARRAY'),
+    ('GATE-04-WEIGHBRIDGE', 'Weighbridge Inbound Boom', 'Weighbridge Inbound', 'ZONE-04 (Weighbridge & ROM)', 'WEIGHBRIDGE_BOOM'),
+    ('GATE-05-SOUTH', 'South Haul Road Turnstile', 'South Haul Road Turnstile', 'ZONE-05 (South Haul Road)', 'TURNSTILE_ARRAY')
 ) AS g(id, name, gate_location, zone, gate_type)
 ON CONFLICT (id) DO NOTHING;
 
