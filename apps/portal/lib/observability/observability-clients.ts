@@ -38,7 +38,8 @@ const PROMETHEUS_PRESETS = [
   {
     id: 'cache_hit_ratio',
     label: 'Cache Hit Ratio',
-    query: 'portal_cache_hit_ratio',
+    query:
+      '(sum(portal_cache_hits_total) / clamp_min(sum(portal_cache_hits_total) + portal_cache_misses_total, 1)) * 100',
     unit: '%',
   },
   {
@@ -109,13 +110,19 @@ async function queryPrometheusPreset(options: {
   }
 
   const rawValue = probe.payload.data?.result?.[0]?.value?.[1];
-  const numericValue = rawValue !== undefined ? Number(rawValue) : null;
+  if (rawValue === undefined) {
+    return null;
+  }
+  const numericValue = Number(rawValue);
+  if (!Number.isFinite(numericValue)) {
+    return null;
+  }
 
   return {
     id: options.preset.id,
     label: options.preset.label,
     query: options.preset.query,
-    value: Number.isFinite(numericValue) ? numericValue : null,
+    value: numericValue,
     unit: options.preset.unit,
     source: 'live',
   };
@@ -247,11 +254,11 @@ export async function fetchObservabilitySummary(): Promise<ObservabilitySummaryR
     {
       id: 'otel-collector',
       label: 'OTel Collector',
-      mode: !otelEndpoint ? 'fallback' : otelProbe?.isReachable ? 'live' : 'fallback',
+      mode: !otelEndpoint ? 'unconfigured' : otelProbe?.isReachable ? 'live' : 'fallback',
       latencyMs: otelProbe?.latencyMs ?? null,
       endpointConfigured: Boolean(otelEndpoint),
       detail: !otelEndpoint
-        ? 'Using Next.js instrumentation fallback'
+        ? 'OTEL_EXPORTER_OTLP_ENDPOINT not configured — using Next.js instrumentation fallback'
         : otelProbe?.isReachable
           ? 'OTLP receiver active'
           : `Fallback active (${otelProbe?.detail ?? 'unreachable'})`,
@@ -259,11 +266,11 @@ export async function fetchObservabilitySummary(): Promise<ObservabilitySummaryR
     {
       id: 'prometheus',
       label: 'Prometheus',
-      mode: !prometheusUrl ? 'fallback' : promProbe?.isReachable ? 'live' : 'fallback',
+      mode: !prometheusUrl ? 'unconfigured' : promProbe?.isReachable ? 'live' : 'fallback',
       latencyMs: promProbe?.latencyMs ?? null,
       endpointConfigured: Boolean(prometheusUrl),
       detail: !prometheusUrl
-        ? 'Using native /api/metrics snapshot'
+        ? 'PROMETHEUS_URL not configured — using native /api/metrics snapshot'
         : promProbe?.isReachable
           ? 'PromQL engine ready'
           : `Fallback active (${promProbe?.detail ?? 'unreachable'})`,
@@ -271,19 +278,19 @@ export async function fetchObservabilitySummary(): Promise<ObservabilitySummaryR
     grafanaResult?.status ?? {
       id: 'grafana',
       label: 'Grafana',
-      mode: 'fallback',
+      mode: 'unconfigured',
       latencyMs: null,
       endpointConfigured: false,
-      detail: 'Rendering native light-mode GlassCard panels',
+      detail: 'GRAFANA_URL not configured — rendering native light-mode GlassCard panels',
     },
     {
       id: 'woodpecker',
       label: 'Woodpecker CI',
-      mode: !woodpeckerUrl ? 'fallback' : woodpeckerProbe?.isReachable ? 'live' : 'fallback',
+      mode: !woodpeckerUrl ? 'unconfigured' : woodpeckerProbe?.isReachable ? 'live' : 'fallback',
       latencyMs: woodpeckerProbe?.latencyMs ?? null,
       endpointConfigured: Boolean(woodpeckerUrl),
       detail: !woodpeckerUrl
-        ? 'Using GitHub Status / local 28-gate feed'
+        ? 'WOODPECKER_URL not configured — using GitHub Status / local 28-gate feed'
         : woodpeckerProbe?.isReachable
           ? 'Runner online'
           : `Fallback active (${woodpeckerProbe?.detail ?? 'unreachable'})`,
@@ -299,9 +306,9 @@ export async function fetchObservabilitySummary(): Promise<ObservabilitySummaryR
 
   const totalCacheRequests = cacheStats.hits + cacheStats.misses;
   const hitRatioPct =
-    totalCacheRequests > 0 ? Math.round((cacheStats.hits / totalCacheRequests) * 1000) / 10 : 100;
+    totalCacheRequests > 0 ? Math.round((cacheStats.hits / totalCacheRequests) * 1000) / 10 : null;
 
-  const fallbackValues: Record<(typeof PROMETHEUS_PRESETS)[number]['id'], number> = {
+  const fallbackValues: Record<(typeof PROMETHEUS_PRESETS)[number]['id'], number | null> = {
     cache_hits_l1: cacheStats.l1Hits,
     cache_hits_l2: cacheStats.l2Hits,
     cache_misses: cacheStats.misses,

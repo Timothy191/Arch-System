@@ -33,6 +33,7 @@ export async function checkPrometheusHealth(baseUrl: string): Promise<boolean> {
   const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
   try {
     const response = await fetch(`${baseUrl.replace(/\/$/, '')}/-/healthy`, {
+      redirect: 'manual',
       signal: controller.signal,
     });
     return response.ok;
@@ -59,7 +60,10 @@ export async function queryPrometheus(
   try {
     const url = new URL(`${options.baseUrl.replace(/\/$/, '')}/api/v1/query`);
     url.searchParams.set('query', options.metric);
-    const response = await fetch(url.toString(), { signal: controller.signal });
+    const response = await fetch(url.toString(), {
+      redirect: 'manual',
+      signal: controller.signal,
+    });
     if (!response.ok) return { metricValue: null, timestampMs: Date.now() };
     const body = (await response.json()) as {
       data?: { result?: Array<{ value?: [number, string] }> };

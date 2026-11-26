@@ -4,6 +4,21 @@ import { RemoteSupportDesk } from './RemoteSupportDesk';
 
 const mockClaimRemoteSupportSession = jest.fn();
 const mockInitiateTier2ConsentSession = jest.fn();
+const mockEndRemoteSupportSession = jest.fn().mockResolvedValue({ success: true });
+const mockListRemoteSupportAuditEvents = jest.fn().mockResolvedValue({
+  success: true,
+  events: [
+    {
+      id: 'aud-live-1',
+      session_id: '22222222-2222-4222-8222-222222222222',
+      actor_employee_id: 'emp-sup',
+      event_type: 'session_claimed',
+      metadata: {},
+      ip_address: null,
+      created_at: '2026-11-26T07:00:00Z',
+    },
+  ],
+});
 
 jest.mock('sonner', () => ({
   toast: {
@@ -16,7 +31,8 @@ jest.mock('sonner', () => ({
 jest.mock('../actions', () => ({
   claimRemoteSupportSession: (...args: unknown[]) => mockClaimRemoteSupportSession(...args),
   initiateTier2ConsentSession: (...args: unknown[]) => mockInitiateTier2ConsentSession(...args),
-  endRemoteSupportSession: jest.fn().mockResolvedValue({ success: true }),
+  endRemoteSupportSession: (...args: unknown[]) => mockEndRemoteSupportSession(...args),
+  listRemoteSupportAuditEvents: (...args: unknown[]) => mockListRemoteSupportAuditEvents(...args),
   upsertRemoteSupportDevice: jest.fn().mockResolvedValue({ success: true, device: {} }),
   deactivateRemoteSupportDevice: jest.fn().mockResolvedValue({ success: true }),
 }));
@@ -56,7 +72,7 @@ describe('RemoteSupportDesk', () => {
     jest.clearAllMocks();
   });
 
-  it('claims a 6-digit support code and switches between Live Desk, Managed Workstations, and Audit History', async () => {
+  it('claims a 6-digit support code, refreshes Audit History, and never falls back to Tier 1 when a Tier 2 device is deactivated', async () => {
     mockClaimRemoteSupportSession.mockResolvedValue({
       success: true,
       session: {
@@ -87,7 +103,29 @@ describe('RemoteSupportDesk', () => {
         agentEmployeeId="emp-sup"
         agentName="Jane Supervisor"
         userRole="admin"
-        initialSessions={[]}
+        initialSessions={[
+          {
+            id: 'sess-deactivated-t2',
+            session_code: '991122',
+            tier: 'tier2_os_desktop',
+            status: 'active',
+            requester_employee_id: 'emp-1',
+            agent_employee_id: 'emp-sup',
+            device_id: 'dev-missing',
+            department_slug: 'control-room',
+            issue_summary: 'Workstation maintenance',
+            cobrowse_enabled: false,
+            consent_granted_at: new Date().toISOString(),
+            started_at: new Date().toISOString(),
+            ended_at: null,
+            end_reason: null,
+            resolution_notes: null,
+            client_diagnostics: {},
+            expires_at: new Date(Date.now() + 600_000).toISOString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ]}
         initialDevices={[
           {
             id: 'dev-1',
@@ -114,6 +152,10 @@ describe('RemoteSupportDesk', () => {
       />
     );
 
+    // Deactivated Tier 2 workstation renders explicit unavailable state, NOT Tier 1 viewer
+    expect(screen.getByTestId('tier2-device-deactivated-state')).toBeInTheDocument();
+    expect(screen.getByText(/Tier 2 Workstation Unavailable or Deactivated/i)).toBeInTheDocument();
+
     const codeInput = screen.getByLabelText('Enter 6-digit support code');
     fireEvent.change(codeInput, { target: { value: '482917' } });
     fireEvent.click(screen.getByRole('button', { name: /Claim Session/i }));
@@ -127,5 +169,11 @@ describe('RemoteSupportDesk', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Audit History/i }));
     expect(screen.getByText(/Immutable Remote Support Audit Trail/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Refresh audit events/i }));
+    await waitFor(() => {
+      expect(mockListRemoteSupportAuditEvents).toHaveBeenCalledTimes(1);
+      expect(screen.getAllByText('session_claimed').length).toBeGreaterThanOrEqual(1);
+    });
   });
 });

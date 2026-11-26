@@ -29,6 +29,7 @@ export async function checkGrafanaHealth(
   try {
     const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/health`, {
       headers: { Authorization: `Bearer ${apiKey}` },
+      redirect: 'manual',
       signal: controller.signal,
     });
     if (!response.ok) return { isHealthy: false };
@@ -53,6 +54,7 @@ export async function listApprovedDashboards(
     url.searchParams.set('type', 'dash-db');
     const response = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${options.apiKey}` },
+      redirect: 'manual',
       signal: controller.signal,
     });
     if (!response.ok) return [];

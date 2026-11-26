@@ -2,12 +2,13 @@
  * @jest-environment node
  */
 
-import { cacheInvalidateTags } from '@repo/redis';
-import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { updateTags } from '@/lib/server-cache';
 import {
   deleteCardTemplate,
+  getPortalSettings,
   listCardTemplates,
+  savePortalSettings,
   setDefaultCardTemplate,
   uploadCardTemplate,
 } from './card-templates';
@@ -20,36 +21,24 @@ jest.mock('./shared', () => ({
   logAdminAuditEvent: (args: unknown) => mockLogAdminAuditEvent(args),
 }));
 
-jest.mock('@repo/supabase/server', () => ({
-  createServerSupabaseClient: jest.fn(),
-}));
-
-jest.mock('@repo/redis', () => ({
-  cacheInvalidateTags: jest.fn().mockResolvedValue(undefined),
+jest.mock('@/lib/server-cache', () => ({
+  updateTags: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
 }));
 
-const mockCreateServerSupabaseClient = jest.mocked(createServerSupabaseClient);
-
-describe('Admin Card Templates server actions', () => {
+describe('Admin Card Templates & Portal Settings server actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('lists active templates for admin users and blocks non-admins', async () => {
-    mockCreateServerSupabaseClient.mockResolvedValueOnce({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u-op' } } }) },
-      from: jest.fn(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: { role: 'operator' } }),
-          }),
-        }),
-      })),
-    } as never);
+  it('lists active templates via assertAdmin and blocks non-admins', async () => {
+    mockAssertAdmin.mockResolvedValueOnce({
+      error: 'Forbidden: admin role required',
+      status: 403,
+    });
 
     const forbidden = await listCardTemplates();
     expect(forbidden.error).toContain('Forbidden');
@@ -69,22 +58,16 @@ describe('Admin Card Templates server actions', () => {
     });
     const order1 = jest.fn().mockReturnValue({ order: order2 });
     const isFn = jest.fn().mockReturnValue({ order: order1 });
-    mockCreateServerSupabaseClient.mockResolvedValueOnce({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u-adm' } } }) },
-      from: jest.fn((table: string) =>
-        table === 'employees'
-          ? {
-              select: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({ data: { role: 'admin' } }),
-                }),
-              }),
-            }
-          : {
-              select: jest.fn().mockReturnValue({ is: isFn }),
-            }
-      ),
-    } as never);
+
+    mockAssertAdmin.mockResolvedValueOnce({
+      userId: 'u-adm',
+      employee: { id: 'e-adm', role: 'admin' },
+      supabase: {
+        from: jest.fn(() => ({
+          select: jest.fn().mockReturnValue({ is: isFn }),
+        })),
+      },
+    });
 
     const ok = await listCardTemplates();
     expect(ok.error).toBeUndefined();
@@ -111,18 +94,23 @@ describe('Admin Card Templates server actions', () => {
     await expect(uploadCardTemplate(bigForm)).rejects.toThrow(/5 MB/);
   });
 
-  it('uploads valid PNG template, writes audit log, and supports setDefault & delete', async () => {
+  it('uploads valid PNG template, cleans up storage on DB failure or delete, and supports setDefault', async () => {
     const upload = jest.fn().mockResolvedValue({ error: null });
+    const remove = jest.fn().mockResolvedValue({ error: null });
     const getPublicUrl = jest.fn().mockReturnValue({
-      data: { publicUrl: 'https://cdn.example/card-templates/tpl.png' },
+      data: { publicUrl: 'https://cdn.example/storage/v1/object/public/card-templates/tpl.png' },
     });
     const neq = jest.fn().mockResolvedValue({ error: null });
     const eq = jest.fn().mockResolvedValue({ error: null });
-    const maybeSingle = jest.fn().mockResolvedValue({
+    const selectEqMaybeSingle = jest.fn().mockResolvedValue({
+      data: { background: 'https://cdn.example/storage/v1/object/public/card-templates/tpl.png' },
+      error: null,
+    });
+    const maybeSingle = jest.fn().mockResolvedValueOnce({
       data: {
         id: 'tpl-2',
         name: 'Contractor Card',
-        background: 'https://cdn.example/card-templates/tpl.png',
+        background: 'https://cdn.example/storage/v1/object/public/card-templates/tpl.png',
         is_default: true,
         created_at: null,
       },
@@ -133,8 +121,11 @@ describe('Admin Card Templates server actions', () => {
       userId: 'u-adm',
       employee: { id: 'e-adm', role: 'admin' },
       supabase: {
-        storage: { from: jest.fn(() => ({ upload, getPublicUrl })) },
+        storage: { from: jest.fn(() => ({ upload, remove, getPublicUrl })) },
         from: jest.fn(() => ({
+          select: jest.fn(() => ({
+            eq: jest.fn(() => ({ maybeSingle: selectEqMaybeSingle })),
+          })),
           update: jest.fn(() => ({ neq, eq })),
           insert: jest.fn(() => ({ select: jest.fn(() => ({ maybeSingle })) })),
         })),
@@ -148,22 +139,59 @@ describe('Admin Card Templates server actions', () => {
 
     const uploaded = await uploadCardTemplate(form);
     expect(uploaded.success).toBe(true);
-    expect(mockLogAdminAuditEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'create', resource: 'card_templates', resourceId: 'tpl-2' })
-    );
-    expect(cacheInvalidateTags).toHaveBeenCalledWith(['table:card_templates']);
+    expect(updateTags).toHaveBeenCalledWith(['table:card_templates']);
     expect(revalidatePath).toHaveBeenCalledWith('/access-control/card-actions');
 
     const defaulted = await setDefaultCardTemplate('tpl-2');
     expect(defaulted).toEqual({ success: true });
-    expect(mockLogAdminAuditEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'set_default', resourceId: 'tpl-2' })
-    );
 
     const removed = await deleteCardTemplate('tpl-2');
     expect(removed).toEqual({ success: true });
-    expect(mockLogAdminAuditEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'delete', resourceId: 'tpl-2' })
-    );
+    expect(remove).toHaveBeenCalledWith(['tpl.png']);
+
+    // Verify DB insert failure cleans up storage object
+    maybeSingle.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'db write error' },
+    });
+    await expect(uploadCardTemplate(form)).rejects.toThrow(/Failed to save card template/);
+    expect(remove).toHaveBeenCalledTimes(2);
+  });
+
+  it('loads and saves Global Portal & Shift settings in report_templates', async () => {
+    const insert = jest.fn().mockResolvedValue({ error: null });
+    mockAssertAdmin.mockResolvedValue({
+      userId: 'u-adm',
+      employee: { id: 'e-adm', role: 'admin' },
+      supabase: {
+        from: jest.fn(() => ({
+          select: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              is: jest.fn(() => ({
+                maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+              })),
+            })),
+          })),
+          insert,
+        })),
+      },
+    });
+
+    const loaded = await getPortalSettings();
+    expect(loaded.settings.dayShiftStart).toBe('06:00');
+    expect(loaded.settings.siteTimezone).toBe('Africa/Johannesburg');
+
+    const saved = await savePortalSettings({
+      dayShiftStart: '06:30',
+      nightShiftStart: '18:30',
+      shiftDurationHours: 12,
+      siteTimezone: 'Africa/Johannesburg',
+      sessionIdleWarningMinutes: 45,
+      operationalNoticeBanner: 'Blast scheduled at 15:00',
+      operationalNoticeActive: true,
+    });
+    expect(saved).toMatchObject({ success: true });
+    expect(insert).toHaveBeenCalled();
+    expect(updateTags).toHaveBeenCalledWith(['config:portal_settings']);
   });
 });

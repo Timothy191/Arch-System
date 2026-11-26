@@ -8,6 +8,7 @@ import {
   type RemoteSupportSessionsRow,
 } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
+import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { type NextRequest, NextResponse } from 'next/server';
 import {
   encryptTier2LaunchToken,
@@ -128,7 +129,7 @@ async function handleTier2LaunchPost(request: NextRequest): Promise<NextResponse
     );
   }
 
-  await cacheSet(`support:t2:jti:${minted.jti}`, '1', JTI_REDIS_TTL_SECONDS).catch((err) => {
+  await cacheSet(`support:t2:jti:issued:${minted.jti}`, '1', JTI_REDIS_TTL_SECONDS).catch((err) => {
     logger.warn({
       event: 'tier2_jti_redis_store_failed',
       jti: minted.jti,
@@ -136,7 +137,8 @@ async function handleTier2LaunchPost(request: NextRequest): Promise<NextResponse
     });
   });
 
-  await Promise.all([
+  const serviceClient = createServiceRoleClient();
+  const [auditResult, deviceUpdateResult] = await Promise.all([
     supabase.from('remote_support_audit_events').insert({
       session_id: session.id,
       actor_employee_id: principal.employee.id,
@@ -148,11 +150,25 @@ async function handleTier2LaunchPost(request: NextRequest): Promise<NextResponse
         jti: minted.jti,
       } as Json,
     }),
-    supabase
+    serviceClient
       .from('remote_support_devices')
       .update({ last_connected_at: new Date().toISOString() })
       .eq('id', device.id),
   ]);
+
+  if (auditResult.error) {
+    return NextResponse.json(
+      { error: 'Failed to persist mandatory Tier 2 launch audit event' },
+      { status: 500 }
+    );
+  }
+  if (deviceUpdateResult.error) {
+    logger.warn({
+      event: 'tier2_device_last_connected_update_failed',
+      deviceId: device.id,
+      errorMessage: deviceUpdateResult.error.message,
+    });
+  }
 
   logger.info({
     event: 'tier2_launch_token_issued',

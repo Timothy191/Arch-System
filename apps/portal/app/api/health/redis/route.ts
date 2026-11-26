@@ -7,22 +7,61 @@ import {
   type VectorIndexStats,
   vectorIndexStats,
 } from '@repo/redis';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { type NextRequest, NextResponse } from 'next/server';
 
-export async function GET(_req: NextRequest) {
+const HTTP_OK = 200;
+const HTTP_SERVICE_UNAVAILABLE = 503;
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+} as const;
+
+async function isAuthenticatedAdmin(): Promise<boolean> {
+  try {
+    if (typeof getAuthenticatedEmployee !== 'function') {
+      return false;
+    }
+    const principal = await getAuthenticatedEmployee();
+    return principal?.employee?.role === 'admin';
+  } catch {
+    return false;
+  }
+}
+
+export async function GET(_req: NextRequest | Request) {
   const startedAt = Date.now();
-  let degraded = false;
+  let isDegraded = false;
 
   try {
     const redis = await getRedisClient();
     if (!redis?.isOpen) {
-      degraded = true;
+      isDegraded = true;
     } else {
-      // Live probe: a trivial PING round-trip proves the socket is usable.
       await redis.ping();
     }
   } catch {
-    degraded = true;
+    isDegraded = true;
+  }
+
+  const isServerless = typeof isServerlessRedis === 'function' ? isServerlessRedis() : false;
+  const status = isDegraded ? 'degraded' : 'healthy';
+  const mode = isServerless ? 'serverless-rest' : 'tcp';
+  const timestamp = new Date().toISOString();
+  const responseStatus = isDegraded ? HTTP_SERVICE_UNAVAILABLE : HTTP_OK;
+
+  const isAdmin = await isAuthenticatedAdmin();
+  if (!isAdmin) {
+    return NextResponse.json(
+      {
+        status,
+        mode,
+        timestamp,
+      },
+      {
+        status: responseStatus,
+        headers: NO_STORE_HEADERS,
+      }
+    );
   }
 
   let cacheStats = null;
@@ -34,16 +73,14 @@ export async function GET(_req: NextRequest) {
     // Non-fatal in health check
   }
 
-  // Which command families this deployment can actually serve. Streams being
-  // false, for instance, explains a silent loss of realtime telemetry.
   let capabilities = null;
   try {
-    capabilities = await detectCapabilities();
+    if (typeof detectCapabilities === 'function') {
+      capabilities = await detectCapabilities();
+    }
   } catch {
     // Non-fatal in health check
   }
-
-  const serverless = typeof isServerlessRedis === 'function' ? isServerlessRedis() : false;
 
   let vectorSearch: Awaited<ReturnType<typeof searchAvailability>> = {
     available: false,
@@ -66,21 +103,19 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json(
     {
-      status: degraded ? 'degraded' : 'healthy',
+      status,
       engine: capabilities?.redisVersion ? `redis-${capabilities.redisVersion}` : 'redis-7.x',
-      mode: serverless ? 'serverless-rest' : 'tcp',
+      mode,
       latencyMs: Date.now() - startedAt,
       cacheStats,
       capabilities,
       vectorSearch,
       vectorIndexes,
-      timestamp: new Date().toISOString(),
+      timestamp,
     },
     {
-      status: degraded ? 503 : 200,
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      },
+      status: responseStatus,
+      headers: NO_STORE_HEADERS,
     }
   );
 }

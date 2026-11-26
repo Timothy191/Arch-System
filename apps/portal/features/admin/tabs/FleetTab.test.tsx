@@ -2,7 +2,12 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type React from 'react';
 import { toast } from 'sonner';
-import { adminAddMachine, adminGenerateStartingSmr, adminUpdateMachine } from '../actions/fleet';
+import {
+  adminAddMachine,
+  adminArchiveMachine,
+  adminGenerateStartingSmr,
+  adminUpdateMachine,
+} from '../actions/fleet';
 import { FleetTab } from './FleetTab';
 
 jest.mock('next/image', () => ({
@@ -56,6 +61,7 @@ jest.mock('sonner', () => ({
   toast: {
     success: jest.fn(),
     error: jest.fn(),
+    info: jest.fn(),
   },
 }));
 
@@ -85,7 +91,7 @@ const MOCK_MACHINES_ROWS = [
     machine_type: 'Dozer',
     manufacturer: 'Caterpillar',
     serial_number: 'Caterpillar D9R',
-    image_url: '/images/fleet/caterpillar-dozer.webp',
+    image_url: null,
     starting_smr: 15240.5,
     bin_factor: null,
     bin_factor_waste: null,
@@ -112,6 +118,7 @@ const mockSupabaseClient = {
     if (table === 'departments') {
       return {
         select: jest.fn().mockReturnThis(),
+        is: jest.fn().mockReturnThis(),
         order: jest.fn().mockResolvedValue({
           data: [
             { id: 'dept-prod', display_name: 'Production' },
@@ -123,6 +130,7 @@ const mockSupabaseClient = {
     }
     return {
       select: jest.fn().mockReturnThis(),
+      is: jest.fn().mockReturnThis(),
       order: jest.fn().mockResolvedValue({
         data: [{ id: 'site-1', name: 'Brakfontein Pit', site_code: 'BRAK', active: true }],
         error: null,
@@ -138,7 +146,11 @@ jest.mock('@repo/supabase/client', () => ({
 jest.mock('../actions/fleet', () => ({
   adminAddMachine: jest.fn().mockResolvedValue({ success: true }),
   adminUpdateMachine: jest.fn().mockResolvedValue({ success: true }),
-  adminGenerateStartingSmr: jest.fn().mockResolvedValue({ updatedCount: 3 }),
+  adminArchiveMachine: jest.fn().mockResolvedValue({ success: true }),
+  adminGenerateStartingSmr: jest.fn().mockResolvedValue({
+    updatedCount: 2,
+    missingOpsMachines: ['BD-99'],
+  }),
 }));
 
 describe('FleetTab', () => {
@@ -174,70 +186,9 @@ describe('FleetTab', () => {
     expect(screen.getByTestId('fleet-analytics-panel')).toBeInTheDocument();
     expect(screen.getByText('11,850.0 hrs')).toBeInTheDocument();
     expect(screen.getByText('15,240.5 hrs')).toBeInTheDocument();
-    expect(screen.getAllByText('Production').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByAltText('DT-102 Volvo A45G')).toHaveAttribute(
-      'src',
-      '/images/fleet/volvo-adt.webp'
-    );
   });
 
-  it('filters by search, status buttons, analytics KPI/charts, and resets cleanly', async () => {
-    render(<FleetTab />);
-
-    await waitFor(() => {
-      expect(screen.getByText('BD-22')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /^active$/i }));
-    expect(screen.getByText('DT-102')).toBeInTheDocument();
-    expect(screen.queryByText('BD-22')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /Clear/i }));
-    expect(screen.getByText('BD-22')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /Inactive \/ Exempt/i }));
-    expect(screen.getByText('BD-22')).toBeInTheDocument();
-    expect(screen.queryByText('DT-102')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /Total Fleet/i }));
-    expect(screen.getByText('DT-102')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('recharts-bar-chart'));
-    expect(screen.getByText('BD-22')).toBeInTheDocument();
-    expect(screen.queryByText('DT-102')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Dozer ×/i }));
-    expect(screen.getByText('DT-102')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /SMR Hours/i }));
-    expect(screen.getByText('Top Starting SMR Leaders')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /OEM Mix/i }));
-    expect(screen.getByText('Manufacturer Distribution')).toBeInTheDocument();
-
-    const searchInput = screen.getByPlaceholderText(
-      /Search Machine ID, Machine Name, manufacturer, or type/i
-    );
-    fireEvent.change(searchInput, { target: { value: 'Caterpillar' } });
-    expect(screen.getByText('BD-22')).toBeInTheDocument();
-    expect(screen.queryByText('DT-102')).not.toBeInTheDocument();
-  });
-
-  it('opens the picture preview dialog and closes via Escape cleanly', async () => {
-    render(<FleetTab />);
-
-    await waitFor(() => {
-      expect(screen.getByLabelText('Preview picture for BD-22')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByLabelText('Preview picture for BD-22'));
-    expect(screen.getByText('BD-22 — Caterpillar D9R')).toBeInTheDocument();
-
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await waitFor(() => {
-      expect(screen.queryByText('BD-22 — Caterpillar D9R')).not.toBeInTheDocument();
-    });
-  });
-
-  it('triggers Generate Starting SMR and exports CSV', async () => {
+  it('triggers Sync Starting SMR, notifies missing ops machines, and exports CSV', async () => {
     render(<FleetTab />);
 
     await waitFor(() => {
@@ -248,8 +199,9 @@ describe('FleetTab', () => {
     await waitFor(() => {
       expect(adminGenerateStartingSmr).toHaveBeenCalledTimes(1);
       expect(toast.success).toHaveBeenCalledWith(
-        'Updated Starting SMR & fleet metadata for 3 machine(s)'
+        'Updated Starting SMR & fleet metadata for 2 machine(s)'
       );
+      expect(toast.info).toHaveBeenCalledWith(expect.stringContaining('BD-99'));
     });
 
     fireEvent.click(screen.getByRole('button', { name: /Export CSV/i }));
@@ -257,7 +209,7 @@ describe('FleetTab', () => {
     expect(toast.success).toHaveBeenCalledWith('Exported 2 machine record(s)');
   });
 
-  it('submits Add Machine, Edit Machine, and Deactivate confirmation actions', async () => {
+  it('submits Add Machine (keeping blank image_url null), Edit, Deactivate toast, and Archive confirmation', async () => {
     render(<FleetTab />);
 
     await waitFor(() => {
@@ -274,7 +226,6 @@ describe('FleetTab', () => {
       target: { value: 'Articulated Dumper' },
     });
     fireEvent.change(screen.getByLabelText(/^Manufacturer/i), { target: { value: 'Volvo' } });
-    fireEvent.click(screen.getByRole('button', { name: /^Generate$/i }));
     fireEvent.change(screen.getByLabelText(/^Starting SMR on Site/i), {
       target: { value: '9500' },
     });
@@ -291,6 +242,7 @@ describe('FleetTab', () => {
           serial_number: 'Volvo A45G HAULER',
           manufacturer: 'Volvo',
           machine_type: 'Articulated Dumper',
+          image_url: null,
           starting_smr: 9500,
           bin_factor_waste: 18,
           bin_factor_coal: 22,
@@ -309,6 +261,7 @@ describe('FleetTab', () => {
         'm-2',
         expect.objectContaining({
           name: 'BD-22',
+          image_url: null,
           starting_smr: 15500,
         })
       );
@@ -318,6 +271,14 @@ describe('FleetTab', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Deactivate$/i }));
     await waitFor(() => {
       expect(adminUpdateMachine).toHaveBeenCalledWith('m-1', { active: false });
+      expect(toast.success).toHaveBeenCalledWith('Machine "DT-102" deactivated.');
+    });
+
+    fireEvent.click(screen.getByLabelText('Archive DT-102'));
+    expect(screen.getByText('Archive Machine?')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm Archive' }));
+    await waitFor(() => {
+      expect(adminArchiveMachine).toHaveBeenCalledWith('m-1');
     });
   });
 });

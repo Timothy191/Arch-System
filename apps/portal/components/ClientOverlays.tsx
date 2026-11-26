@@ -1,6 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useEffect } from 'react';
+import { recordClientDiagnosticError } from '@/features/remote-support/lib/diagnostics';
 
 // AGENT-TRACE: Client component wrapper for dynamically imported overlays.
 // CookieConsent is intentionally NOT ssr:false — it must be server-rendered into the
@@ -42,6 +44,27 @@ const RemoteSupportSessionOverlay = dynamic(
 );
 
 export function ClientOverlays() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onError = (event: ErrorEvent) => {
+      if (event.message) {
+        recordClientDiagnosticError(event.message);
+      }
+    };
+    const onRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason instanceof Error ? event.reason.message : String(event.reason);
+      if (reason) {
+        recordClientDiagnosticError(reason);
+      }
+    };
+    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onRejection);
+    return () => {
+      window.removeEventListener('error', onError);
+      window.removeEventListener('unhandledrejection', onRejection);
+    };
+  }, []);
+
   return (
     <>
       <ArchCursorWaitIndicator />

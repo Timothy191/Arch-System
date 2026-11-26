@@ -176,6 +176,8 @@ const DOMAIN_MAP = {
     'saveMonthlyMachineSnapshotInputSchema',
   ],
   production_monthly_targets: ['productionMonthlyTargetsSchema'],
+  scada_telemetry_tags: ['scadaTelemetryTagsSchema'],
+  scada_telemetry_readings: ['scadaTelemetryReadingsSchema'],
   system_logs: ['systemLogEntrySchema', 'createSystemLogEntrySchema'],
   quality_verification_runs: ['qualityVerificationRunRowSchema', 'qualityRunEvidenceSchema'],
   agent_work_reports: ['agentWorkReportRowSchema', 'agentVerificationReportSchema'],

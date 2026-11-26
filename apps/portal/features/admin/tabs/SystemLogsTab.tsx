@@ -6,7 +6,7 @@ import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Pagination } from '@repo/ui/Pagination';
 import { CheckCircle2, CircleDot, Download, Search } from 'lucide-react';
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { sanitizeCsvCell } from '@/lib/api/csv-utils';
 import { logError } from '@/lib/errors/error-logger';
@@ -41,8 +41,30 @@ interface LogsResponse {
   error?: string;
 }
 
+interface PatchLogResolutionOptions {
+  ids: string[];
+  isResolved: boolean;
+  isBulk: boolean;
+}
+
+const SEARCH_DEBOUNCE_MS = 300;
+const DEFAULT_PAGE_SIZE = 25;
+const ISO_DATE_PREFIX_LENGTH = 10;
+
 const LEVELS = ['debug', 'info', 'warn', 'error', 'fatal'] as const;
 const SOURCES = ['client', 'server', 'api', 'cron', 'csp', 'integration', 'auth'] as const;
+const DEFAULT_CATEGORIES = [
+  'api',
+  'auth',
+  'circuit-breaker',
+  'database',
+  'general',
+  'request',
+  'runtime',
+  'scada',
+  'security',
+  'telemetry',
+] as const;
 
 const LEVEL_BADGE: Record<SystemLogRow['level'], string> = {
   debug: 'border-zinc-400/20 bg-zinc-400/10 text-zinc-500',
@@ -54,34 +76,44 @@ const LEVEL_BADGE: Record<SystemLogRow['level'], string> = {
 
 export function SystemLogsTab() {
   const [logs, setLogs] = useState<SystemLogRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [observedCategories, setObservedCategories] = useState<readonly string[]>([]);
   const [resolvedFilter, setResolvedFilter] = useState('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(() => new Set());
-  const [bulkBusy, setBulkBusy] = useState(false);
+  const [isBulkBusy, setIsBulkBusy] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+
+  const categoryOptions = useMemo(
+    () => Array.from(new Set([...DEFAULT_CATEGORIES, ...observedCategories])).sort(),
+    [observedCategories]
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setCurrentPage(1);
-    }, 300);
+    }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
   const loadLogs = useCallback(async () => {
-    setLoading(true);
+    setIsLoading(true);
+    setLoadError(null);
     const params = new URLSearchParams({ page: String(currentPage), pageSize: String(pageSize) });
     if (levelFilter !== 'all') params.set('level', levelFilter);
     if (sourceFilter !== 'all') params.set('source', sourceFilter);
+    if (categoryFilter !== 'all') params.set('category', categoryFilter);
     if (resolvedFilter !== 'all') params.set('resolved', resolvedFilter);
     if (debouncedSearch !== '') params.set('search', debouncedSearch);
 
@@ -91,39 +123,56 @@ export function SystemLogsTab() {
       if (!res.ok || !body.success) {
         throw new Error(body.error ?? `HTTP ${res.status}`);
       }
-      setLogs(body.data ?? []);
+      const loadedRows = body.data ?? [];
+      setLogs(loadedRows);
+      if (loadedRows.length > 0) {
+        setObservedCategories((prev) =>
+          Array.from(new Set([...prev, ...loadedRows.map((row) => row.category).filter(Boolean)]))
+        );
+      }
       setSelectedIds(new Set());
       setTotalCount(body.pagination?.totalCount ?? 0);
       setTotalPages(body.pagination?.totalPages ?? 0);
     } catch (error) {
-      logError(error instanceof Error ? error : new Error(String(error)), {
+      const message = error instanceof Error ? error.message : 'Failed to load system logs';
+      logError(error instanceof Error ? error : new Error(message), {
         context: 'SystemLogsTab.loadLogs',
       });
+      setLoadError(message);
+      toast.error(message);
       setLogs([]);
       setSelectedIds(new Set());
       setTotalCount(0);
       setTotalPages(0);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [currentPage, pageSize, levelFilter, sourceFilter, resolvedFilter, debouncedSearch]);
+  }, [
+    currentPage,
+    pageSize,
+    levelFilter,
+    sourceFilter,
+    categoryFilter,
+    resolvedFilter,
+    debouncedSearch,
+  ]);
 
   useEffect(() => {
     void loadLogs();
   }, [loadLogs]);
 
-  const patchLogResolution = async (ids: string[], resolved: boolean, isBulk: boolean) => {
+  const patchLogResolution = async ({ ids, isResolved, isBulk }: PatchLogResolutionOptions) => {
     if (ids.length === 0) return;
-    if (isBulk) setBulkBusy(true);
+    if (isBulk) setIsBulkBusy(true);
     try {
       const res = await fetch('/api/logs', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids, resolved }),
+        body: JSON.stringify({ ids, resolved: isResolved }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       toast.success(
-        resolved
+        isResolved
           ? `Marked ${ids.length} log entry(ies) resolved.`
           : `Reopened ${ids.length} log entry(ies).`
       );
@@ -135,7 +184,7 @@ export function SystemLogsTab() {
       });
       toast.error('Failed to update system log status.');
     } finally {
-      if (isBulk) setBulkBusy(false);
+      if (isBulk) setIsBulkBusy(false);
     }
   };
 
@@ -151,10 +200,10 @@ export function SystemLogsTab() {
     });
   };
 
-  const allOnPageSelected = logs.length > 0 && logs.every((row) => selectedIds.has(row.id));
+  const isAllOnPageSelected = logs.length > 0 && logs.every((row) => selectedIds.has(row.id));
 
   const toggleSelectAll = () => {
-    if (allOnPageSelected) {
+    if (isAllOnPageSelected) {
       setSelectedIds(new Set());
       return;
     }
@@ -198,7 +247,7 @@ export function SystemLogsTab() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `system-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `system-logs-${new Date().toISOString().slice(0, ISO_DATE_PREFIX_LENGTH)}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -254,6 +303,23 @@ export function SystemLogsTab() {
             ))}
           </select>
           <select
+            id="categoryFilter"
+            value={categoryFilter}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="rounded border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
+            aria-label="Filter by category"
+          >
+            <option value="all">All Categories</option>
+            {categoryOptions.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <select
             id="resolvedFilter"
             value={resolvedFilter}
             onChange={(e) => {
@@ -270,7 +336,7 @@ export function SystemLogsTab() {
           <Button
             type="button"
             variant="outline"
-            disabled={loading || logs.length === 0}
+            disabled={isLoading || logs.length === 0}
             onClick={handleExportCsv}
           >
             <Download className="mr-2 h-4 w-4" />
@@ -292,8 +358,14 @@ export function SystemLogsTab() {
               type="button"
               size="sm"
               variant="outline"
-              disabled={bulkBusy}
-              onClick={() => void patchLogResolution(Array.from(selectedIds), true, true)}
+              disabled={isBulkBusy}
+              onClick={() =>
+                void patchLogResolution({
+                  ids: Array.from(selectedIds),
+                  isResolved: true,
+                  isBulk: true,
+                })
+              }
             >
               <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
               Resolve Selected ({selectedIds.size})
@@ -302,8 +374,14 @@ export function SystemLogsTab() {
               type="button"
               size="sm"
               variant="outline"
-              disabled={bulkBusy}
-              onClick={() => void patchLogResolution(Array.from(selectedIds), false, true)}
+              disabled={isBulkBusy}
+              onClick={() =>
+                void patchLogResolution({
+                  ids: Array.from(selectedIds),
+                  isResolved: false,
+                  isBulk: true,
+                })
+              }
             >
               <CircleDot className="mr-1.5 h-3.5 w-3.5" />
               Reopen Selected ({selectedIds.size})
@@ -320,7 +398,7 @@ export function SystemLogsTab() {
                 <th scope="col" className="w-10 px-4 py-3">
                   <input
                     type="checkbox"
-                    checked={allOnPageSelected}
+                    checked={isAllOnPageSelected}
                     onChange={toggleSelectAll}
                     aria-label="Select all logs on page"
                     className="h-4 w-4 rounded border-[var(--border-default)]"
@@ -371,10 +449,28 @@ export function SystemLogsTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-default)]">
-              {loading ? (
+              {isLoading ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading...
+                  </td>
+                </tr>
+              ) : loadError ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-10 text-center">
+                    <div
+                      role="alert"
+                      className="mx-auto flex max-w-md flex-col items-center gap-2 rounded-lg border border-accent-red/30 bg-accent-red/5 px-4 py-3 text-accent-red text-sm"
+                    >
+                      <p>Unable to load system logs: {loadError}</p>
+                      <button
+                        type="button"
+                        onClick={() => void loadLogs()}
+                        className="rounded border border-accent-red/40 px-3 py-1 font-medium text-xs hover:bg-accent-red/10"
+                      >
+                        Retry
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
@@ -425,7 +521,11 @@ export function SystemLogsTab() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            void patchLogResolution([log.id], !log.resolved, false);
+                            void patchLogResolution({
+                              ids: [log.id],
+                              isResolved: !log.resolved,
+                              isBulk: false,
+                            });
                           }}
                         >
                           {log.resolved ? (
@@ -480,7 +580,7 @@ export function SystemLogsTab() {
         </div>
       </GlassCard>
 
-      {!loading && totalCount > 0 && (
+      {!isLoading && totalCount > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

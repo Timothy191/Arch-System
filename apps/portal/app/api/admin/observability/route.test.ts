@@ -4,6 +4,7 @@
 
 import { collectRedisHealthDiagnostics, getCacheStats } from '@repo/redis';
 import { getAuthenticatedEmployee } from '@repo/supabase';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 import { resetAlertEvaluatorState } from '@/lib/observability/alert-evaluator';
 import { clearObservabilityMetrics, recordJobExecution } from '@/lib/observability/simple-metrics';
 import { resetUptimeEngineState } from '@/lib/observability/uptime-engine';
@@ -13,12 +14,17 @@ jest.mock('@repo/supabase', () => ({
   getAuthenticatedEmployee: jest.fn(),
 }));
 
+jest.mock('@repo/supabase/server', () => ({
+  createServerSupabaseClient: jest.fn(),
+}));
+
 jest.mock('@repo/redis', () => ({
   getCacheStats: jest.fn(),
   collectRedisHealthDiagnostics: jest.fn(),
 }));
 
 const mockGetAuthenticatedEmployee = jest.mocked(getAuthenticatedEmployee);
+const mockCreateServerSupabaseClient = jest.mocked(createServerSupabaseClient);
 const mockGetCacheStats = jest.mocked(getCacheStats);
 const mockCollectRedisHealthDiagnostics = jest.mocked(collectRedisHealthDiagnostics);
 
@@ -38,7 +44,25 @@ const MOCK_JOB_DURATION_MS = 145;
 const EXPECTED_UPTIME_TARGETS = 4;
 const EXPECTED_ALERT_COUNT = 4;
 const EXPECTED_GOLDEN_SIGNAL_COUNT = 4;
-const EXPECTED_FULL_SLA_PCT = 100;
+
+function mockSloMetricsTable(rows: unknown[]) {
+  const promise = Promise.resolve({ data: rows, error: null });
+  const builder = {
+    select: jest.fn().mockReturnThis(),
+    in: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+  };
+  Object.assign(builder, {
+    then: promise.then.bind(promise),
+    catch: promise.catch.bind(promise),
+    finally: promise.finally.bind(promise),
+  });
+
+  mockCreateServerSupabaseClient.mockResolvedValue({
+    from: jest.fn(() => builder),
+  } as never);
+}
 
 describe('Given GET /api/admin/observability', () => {
   beforeEach(() => {
@@ -46,6 +70,7 @@ describe('Given GET /api/admin/observability', () => {
     resetUptimeEngineState();
     resetAlertEvaluatorState();
     clearObservabilityMetrics();
+    mockSloMetricsTable([]);
   });
 
   it('When the caller is unauthenticated, Then it returns 401 Unauthorized', async () => {
@@ -58,7 +83,7 @@ describe('Given GET /api/admin/observability', () => {
     expect(payload).toEqual({ error: 'Unauthorized' });
   });
 
-  it('When the caller is authenticated, Then it returns 200 with uptime, alerts, redis, runtime, workflows, and Server-Timing header', async () => {
+  it('When persisted slo_metrics rows exist, Then it populates real SLO history without fabricating passive heartbeats for unrecorded targets', async () => {
     mockGetAuthenticatedEmployee.mockResolvedValueOnce({
       id: 'emp-admin-01',
       role: 'admin',
@@ -98,6 +123,23 @@ describe('Given GET /api/admin/observability', () => {
       slowlogCount: 0,
     });
 
+    mockSloMetricsTable([
+      {
+        slo_name: 'uptime:redis',
+        actual_value: 99.95,
+        status: 'success',
+        measurement_time: '2026-11-26T06:00:00.000Z',
+        metadata: { currentStatus: 'UP', p95LatencyMs: 9 },
+      },
+      {
+        slo_name: 'uptime:supabase',
+        actual_value: 99.85,
+        status: 'success',
+        measurement_time: '2026-11-26T06:00:00.000Z',
+        metadata: { currentStatus: 'UP', p95LatencyMs: 28 },
+      },
+    ]);
+
     recordJobExecution('shift-closeout-sync', MOCK_JOB_DURATION_MS, true);
 
     const response = await GET();
@@ -105,9 +147,14 @@ describe('Given GET /api/admin/observability', () => {
 
     expect(response.status).toBe(HTTP_OK);
     expect(response.headers.get('Server-Timing')).toContain('cache;dur=');
-    expect(payload.overallSla24hPct).toBe(EXPECTED_FULL_SLA_PCT);
+    expect(payload.overallSla24hPct).toBe(99.9);
     expect(payload.uptime).toHaveLength(EXPECTED_UPTIME_TARGETS);
-    expect(payload.uptimeByTarget.redis.targetId).toBe('redis');
+    expect(payload.uptimeByTarget.redis.sla24hPct).toBe(99.95);
+    expect(payload.uptimeByTarget.supabase.sla24hPct).toBe(99.85);
+    // fuxa_scada had no persisted probes — must NOT be fabricated with passive ELU latency
+    expect(payload.uptimeByTarget.fuxa_scada.sampleCount).toBe(0);
+    expect(payload.uptimeByTarget.fuxa_scada.sla24hPct).toBeNull();
+    expect(payload.uptimeByTarget.fuxa_scada.statusLabel).toBe('No samples yet');
     expect(payload.goldenSignals).toHaveLength(EXPECTED_GOLDEN_SIGNAL_COUNT);
     expect(payload.alerts).toHaveLength(EXPECTED_ALERT_COUNT);
     expect(payload.redis.stats.hits).toBe(MOCK_HITS);
@@ -121,6 +168,42 @@ describe('Given GET /api/admin/observability', () => {
         lastDurationMs: MOCK_JOB_DURATION_MS,
       },
     ]);
+  });
+
+  it('When sample counts are 0, Then it returns null SLA and No samples yet instead of fake 100%', async () => {
+    mockGetAuthenticatedEmployee.mockResolvedValueOnce({
+      id: 'emp-admin-zero',
+      role: 'admin',
+      departmentId: null,
+      accessibleDepartments: [],
+    } as unknown as Awaited<ReturnType<typeof getAuthenticatedEmployee>>);
+
+    mockGetCacheStats.mockResolvedValueOnce({
+      hits: 0,
+      misses: 0,
+      l1Hits: 0,
+      l2Hits: 0,
+      redisErrors: 0,
+      avgLatencyMs: 0,
+      p95LatencyMs: 0,
+      xFetchTriggers: 0,
+      l1Evictions: 0,
+      l2RoundTrips: 0,
+      privilegeVersionChanges: 0,
+      avgWriteThroughDelayMs: 0,
+    });
+    mockCollectRedisHealthDiagnostics.mockResolvedValueOnce(null);
+
+    const response = await GET();
+    const payload = await response.json();
+
+    expect(response.status).toBe(HTTP_OK);
+    expect(payload.overallSla24hPct).toBeNull();
+    expect(payload.uptimeStatus).toBe('No samples yet');
+    const trafficSignal = payload.goldenSignals.find(
+      (item: { id: string }) => item.id === 'traffic'
+    );
+    expect(trafficSignal.primaryValue).toBe('No samples yet');
   });
 
   it('When the caller is authenticated without admin role, Then it returns 403 Forbidden', async () => {

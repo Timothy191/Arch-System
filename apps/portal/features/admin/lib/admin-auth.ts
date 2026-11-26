@@ -26,11 +26,10 @@ export const resolveRolesAccess = cache(
       return { status: 'unauthenticated', role: null };
     }
 
-    const { data: employee } = await supabase
-      .from('employees')
-      .select('role')
-      .eq('auth_id', user.id)
-      .single();
+    const employeeQuery = supabase.from('employees').select('role').eq('auth_id', user.id);
+    const activeEmployeeQuery =
+      typeof employeeQuery.is === 'function' ? employeeQuery.is('deleted_at', null) : employeeQuery;
+    const { data: employee } = await activeEmployeeQuery.single();
 
     const employeeRole = typeof employee?.role === 'string' ? employee.role : null;
     if (!employeeRole || !allowedRoles.includes(employeeRole)) {

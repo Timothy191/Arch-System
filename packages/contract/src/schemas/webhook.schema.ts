@@ -1,6 +1,20 @@
 import { z } from 'zod';
 import { uuidSchema } from './common.schema';
 
+export const WEBHOOK_EVENT_TYPES = [
+  'daily_log.created',
+  'daily_log.updated',
+  'breakdown.created',
+  'breakdown.resolved',
+  'shift.closeout',
+  'access_log.denied',
+  'scada_anomaly.detected',
+  'fleet_maintenance.due',
+] as const;
+
+export const webhookEventTypeSchema = z.enum(WEBHOOK_EVENT_TYPES);
+export type WebhookEventType = z.infer<typeof webhookEventTypeSchema>;
+
 export const createWebhookSchema = z.object({
   url: z.string().url('Must be a valid URL').max(2048, 'URL too long'),
   description: z.string().max(500).optional(),

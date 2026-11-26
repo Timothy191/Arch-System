@@ -24,6 +24,26 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
+const SKELETON_COUNT = 4;
+const FULL_PERCENT = 100;
+const RATIO_ROUNDING_SCALE = 1000;
+const TENTHS_DIVISOR = 10;
+
+interface PersistedSloTargetSummary {
+  readonly targetId: string;
+  readonly label: string;
+  readonly sampleCount: number;
+  readonly statusLabel: string;
+  readonly p95LatencyMs: number | null;
+  readonly sla24hPct: number | null;
+}
+
+interface AdminObservabilitySloPayload {
+  readonly overallSla24hPct: number | null;
+  readonly uptimeStatus?: string;
+  readonly uptime?: readonly PersistedSloTargetSummary[];
+}
+
 const MODE_BADGE_MAP: Record<ServiceConnectionMode, { label: string; className: string }> = {
   live: {
     label: 'Live Cluster',
@@ -55,7 +75,16 @@ async function fetchJson<T>(url: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-function ServiceStatusCard({ service }: { service: ObservabilityServiceStatus }) {
+async function fetchOptionalSloHistory(): Promise<AdminObservabilitySloPayload> {
+  const response = await fetch('/api/admin/observability', { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`Observability telemetry returned HTTP ${response.status}`);
+  }
+  const payload = (await response.json()) as AdminObservabilitySloPayload;
+  return payload;
+}
+
+function ServiceStatusCard({ service }: { readonly service: ObservabilityServiceStatus }) {
   const badge = MODE_BADGE_MAP[service.mode];
   return (
     <GlassCard className="p-4">
@@ -92,27 +121,36 @@ export function ObservabilityConsole() {
     queryFn: () => fetchJson<ObservabilityCiResponse>('/api/observability/ci'),
   });
 
+  const sloQuery = useQuery({
+    queryKey: ['observability', 'slo-history'],
+    queryFn: fetchOptionalSloHistory,
+  });
+
   const summary = summaryQuery.data;
   const ciData = ciQuery.data;
-  const isRefreshing = summaryQuery.isFetching || ciQuery.isFetching;
+  const sloData = sloQuery.data;
+  const isRefreshing = summaryQuery.isFetching || ciQuery.isFetching || sloQuery.isFetching;
   const activeEmbedUrl = selectedEmbedUrl ?? summary?.dashboards[0]?.embedUrl ?? null;
 
   const totalCacheRequests =
     (summary?.cacheSnapshot.hits ?? 0) + (summary?.cacheSnapshot.misses ?? 0);
   const cacheHitRatePct =
     totalCacheRequests > 0
-      ? Math.round(((summary?.cacheSnapshot.hits ?? 0) / totalCacheRequests) * 1000) / 10
-      : 100;
+      ? Math.round(
+          ((summary?.cacheSnapshot.hits ?? 0) / totalCacheRequests) * RATIO_ROUNDING_SCALE
+        ) / TENTHS_DIVISOR
+      : null;
   const l1SharePct =
     (summary?.cacheSnapshot.hits ?? 0) > 0
       ? Math.round(
-          ((summary?.cacheSnapshot.l1Hits ?? 0) / (summary?.cacheSnapshot.hits ?? 1)) * 100
+          ((summary?.cacheSnapshot.l1Hits ?? 0) / (summary?.cacheSnapshot.hits ?? 1)) * FULL_PERCENT
         )
-      : 0;
+      : null;
 
   const handleRefresh = () => {
     void summaryQuery.refetch();
     void ciQuery.refetch();
+    void sloQuery.refetch();
   };
 
   return (
@@ -134,6 +172,14 @@ export function ObservabilityConsole() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {sloData && (
+              <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 font-mono text-[11px] text-zinc-700">
+                24h SLO:{' '}
+                {sloData.overallSla24hPct !== null
+                  ? `${sloData.overallSla24hPct}%`
+                  : 'No samples yet'}
+              </span>
+            )}
             {summary?.generatedAt && (
               <span className="font-mono text-[11px] text-[var(--text-muted)]">
                 Synced {new Date(summary.generatedAt).toLocaleTimeString('en-ZA')}
@@ -152,14 +198,21 @@ export function ObservabilityConsole() {
         </div>
       </GlassCard>
 
-      {summaryQuery.isError && (
-        <GlassCard className="border-rose-200 bg-rose-50/70 p-4">
+      {(summaryQuery.isError || ciQuery.isError || sloQuery.isError) && (
+        <GlassCard role="alert" className="border-rose-200 bg-rose-50/70 p-4">
           <div className="flex items-center justify-between gap-3 text-rose-700 text-xs">
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 shrink-0" />
               <span>
-                Unable to load observability summary. Check session permissions or retry telemetry
-                sync.
+                Unable to load{' '}
+                {[
+                  summaryQuery.isError ? 'observability summary' : null,
+                  ciQuery.isError ? 'CI pipeline status' : null,
+                  sloQuery.isError ? 'SLO history' : null,
+                ]
+                  .filter(Boolean)
+                  .join(', ')}
+                . Check session permissions or retry telemetry sync.
               </span>
             </div>
             <button
@@ -175,7 +228,7 @@ export function ObservabilityConsole() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {summaryQuery.isLoading
-          ? Array.from({ length: 4 }).map((_, idx) => (
+          ? Array.from({ length: SKELETON_COUNT }).map((_, idx) => (
               <GlassCard key={`obs-skeleton-${idx}`} className="animate-pulse p-4">
                 <div className="h-4 w-28 rounded bg-zinc-200/80" />
                 <div className="mt-3 h-3 w-full rounded bg-zinc-100" />
@@ -186,6 +239,45 @@ export function ObservabilityConsole() {
               <ServiceStatusCard key={service.id} service={service} />
             ))}
       </div>
+
+      {sloData?.uptime && (
+        <GlassCard className="p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-semibold text-sm text-zinc-900">
+              Persisted Service Uptime &amp; SLO History (public.slo_metrics)
+            </h2>
+            <span className="font-mono text-xs text-zinc-600">
+              Overall 24h SLA:{' '}
+              {sloData.overallSla24hPct !== null
+                ? `${sloData.overallSla24hPct}%`
+                : 'No samples yet'}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {sloData.uptime.map((target) => (
+              <div
+                key={target.targetId}
+                className="rounded-xl border border-zinc-200/80 bg-white/80 p-3 text-xs"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-zinc-800">{target.label}</span>
+                  <span className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] text-zinc-700">
+                    {target.statusLabel}
+                  </span>
+                </div>
+                <p className="mt-1.5 font-mono font-semibold text-base text-zinc-900">
+                  {target.sla24hPct !== null ? `${target.sla24hPct}%` : 'No samples yet'}
+                </p>
+                <p className="mt-1 font-mono text-[11px] text-zinc-500">
+                  {target.sampleCount > 0
+                    ? `${target.sampleCount} samples · p95 ${target.p95LatencyMs ?? 0}ms`
+                    : '0 samples recorded'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      )}
 
       <Tabs defaultValue="golden-signals" className="w-full">
         <TabsList className="grid w-full max-w-xl grid-cols-3 bg-white/80">
@@ -218,8 +310,10 @@ export function ObservabilityConsole() {
                     </span>
                   </div>
                   <div className="mt-2 font-mono font-semibold text-2xl text-zinc-900">
-                    {metric.value !== null ? metric.value : '—'}{' '}
-                    <span className="font-normal text-xs text-zinc-500">{metric.unit}</span>
+                    {metric.value !== null ? metric.value : 'No samples yet'}{' '}
+                    {metric.value !== null && (
+                      <span className="font-normal text-xs text-zinc-500">{metric.unit}</span>
+                    )}
                   </div>
                   <p className="mt-2 truncate font-mono text-[11px] text-zinc-500">
                     {metric.query}
@@ -282,12 +376,14 @@ export function ObservabilityConsole() {
                         Cache Hit Efficiency
                       </p>
                       <p className="mt-1 font-mono font-semibold text-2xl text-[var(--text-heading)]">
-                        {cacheHitRatePct}%
+                        {cacheHitRatePct !== null ? `${cacheHitRatePct}%` : 'No samples yet'}
                       </p>
                       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
                         <div
                           className="h-full rounded-full bg-emerald-500 transition-all"
-                          style={{ width: `${Math.min(100, cacheHitRatePct)}%` }}
+                          style={{
+                            width: `${cacheHitRatePct !== null ? Math.min(FULL_PERCENT, cacheHitRatePct) : 0}%`,
+                          }}
                         />
                       </div>
                       <p className="mt-2 text-[11px] text-[var(--text-secondary)]">
@@ -300,12 +396,12 @@ export function ObservabilityConsole() {
                         L1 / L2 Cache Tier Split
                       </p>
                       <p className="mt-1 font-mono font-semibold text-2xl text-[var(--text-heading)]">
-                        {l1SharePct}% L1
+                        {l1SharePct !== null ? `${l1SharePct}% L1` : 'No samples yet'}
                       </p>
                       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-indigo-100">
                         <div
                           className="h-full rounded-full bg-indigo-500 transition-all"
-                          style={{ width: `${l1SharePct}%` }}
+                          style={{ width: `${l1SharePct ?? 0}%` }}
                         />
                       </div>
                       <p className="mt-2 text-[11px] text-[var(--text-secondary)]">
@@ -319,7 +415,9 @@ export function ObservabilityConsole() {
                         Cache Latency Profile
                       </p>
                       <p className="mt-1 font-mono font-semibold text-2xl text-[var(--text-heading)]">
-                        {summary.cacheSnapshot.p95LatencyMs.toFixed(1)} ms
+                        {totalCacheRequests > 0
+                          ? `${summary.cacheSnapshot.p95LatencyMs.toFixed(1)} ms`
+                          : 'No samples yet'}
                       </p>
                       <p className="mt-2 text-[11px] text-[var(--text-secondary)]">
                         Avg: {summary.cacheSnapshot.avgLatencyMs.toFixed(1)} ms · p95:{' '}
@@ -358,8 +456,19 @@ export function ObservabilityConsole() {
                       <Clock className="h-4 w-4 text-amber-600" />
                     )}
                     <div>
-                      <p className="font-medium text-zinc-900">{pipeline.message}</p>
-                      <p className="font-mono text-[11px] text-zinc-500">
+                      {pipeline.url ? (
+                        <a
+                          href={pipeline.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-medium text-[var(--text-heading)] underline-offset-2 hover:text-accent-blue hover:underline"
+                        >
+                          {pipeline.message}
+                        </a>
+                      ) : (
+                        <p className="font-medium text-[var(--text-heading)]">{pipeline.message}</p>
+                      )}
+                      <p className="font-mono text-[11px] text-[var(--text-muted)]">
                         {pipeline.branch} · {pipeline.commitSha} · {pipeline.source}
                       </p>
                     </div>

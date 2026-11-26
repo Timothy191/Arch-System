@@ -196,33 +196,6 @@ export function resolveDefaultMachineImage(options: {
   return '/images/fleet/volvo-adt.webp';
 }
 
-const BASELINE_SMR_BY_TYPE: readonly (readonly [string, number])[] = [
-  ['dozer', 14500],
-  ['excavator', 12800],
-  ['dump', 11400],
-  ['drill', 9200],
-  ['loader', 8600],
-  ['grader', 7900],
-  ['crusher', 6400],
-  ['water', 5100],
-  ['compactor', 3500],
-];
-
-export function estimateBaselineStartingSmr(options: {
-  readonly machineType: string;
-  readonly machineId: string;
-}): number {
-  const typeLower = options.machineType.toLowerCase();
-  const baseMatch = BASELINE_SMR_BY_TYPE.find(([token]) => typeLower.includes(token));
-  const baseHours = baseMatch ? baseMatch[1] : 4200;
-
-  let hash = 0;
-  for (let index = 0; index < options.machineId.length; index += 1) {
-    hash = (hash * 31 + options.machineId.charCodeAt(index)) % 1500;
-  }
-  return Number((baseHours + hash).toFixed(1));
-}
-
 export interface FleetCategoryDatum {
   readonly label: string;
   readonly count: number;

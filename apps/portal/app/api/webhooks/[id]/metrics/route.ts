@@ -1,3 +1,4 @@
+import { uuidSchema } from '@repo/contract/schemas/common.schema';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
@@ -9,16 +10,26 @@ async function handleMetrics(
 ) {
   const { id } = await params;
   const principal = await getAuthenticatedEmployee();
-  if (!principal?.employee) {
+  if (!principal) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
+  if (!principal.employee) {
+    return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
+  }
   const { employee } = principal;
+  if (employee.role !== 'admin' && employee.role !== 'supervisor') {
+    return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+  }
+  if (!uuidSchema.safeParse(id).success) {
+    return NextResponse.json({ success: false, error: 'Invalid webhook ID' }, { status: 400 });
+  }
   const supabase = await createServerSupabaseClient();
 
   const { data: webhook } = await supabase
     .from('webhook_endpoints')
     .select('department_id')
     .eq('id', id)
+    .is('deleted_at', null)
     .single();
 
   if (!webhook) {
@@ -33,12 +44,16 @@ async function handleMetrics(
     return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
   }
 
-  const { data: logs } = await supabase
+  const { data: logs, error: logsError } = await supabase
     .from('webhook_delivery_logs')
     .select('success, created_at, retry_count')
     .eq('webhook_endpoint_id', id)
     .order('created_at', { ascending: false })
     .limit(100);
+
+  if (logsError) {
+    return NextResponse.json({ success: false, error: 'Database query failed' }, { status: 500 });
+  }
 
   const deliveryLogs = logs ?? [];
   const total = deliveryLogs.length;

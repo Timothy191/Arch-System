@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 import { getCloudflareClient } from '@/lib/cloudflare/cloudflare-client';
 
 const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN = 403;
 const HTTP_TOO_MANY_REQUESTS = 429;
 const HTTP_OK = 200;
 const RATE_LIMIT_MAX = 30;
@@ -22,7 +23,7 @@ const cloudflareSummaryLimiter = new RateLimiter({
 /**
  * GET /api/cloudflare/summary
  *
- * Read-only aggregate for the Cloudflare Infrastructure & Edge Security Centre.
+ * Admin-only read-only aggregate for the Cloudflare Infrastructure & Edge Security Centre.
  * Every section carries its own connection mode so the UI can render honest
  * state ("Not connected" / "Insufficient permissions" / "Metrics unavailable")
  * without fabricating telemetry.
@@ -33,6 +34,10 @@ export async function GET() {
 
   if (!principal?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_UNAUTHORIZED });
+  }
+
+  if (principal.employee?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: HTTP_FORBIDDEN });
   }
 
   const { allowed } = await cloudflareSummaryLimiter.check(principal.user.id);

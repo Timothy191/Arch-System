@@ -28,10 +28,19 @@ import {
   ValidationError,
 } from '@repo/errors';
 import { logger } from '@repo/logger/server';
-import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
+import {
+  FixedWindowStrategy,
+  type IStore,
+  MemoryStore,
+  RateLimiter,
+  RedisStore,
+  type SimpleRedisClient,
+} from '@repo/rate-limiter';
+import { getRedisClient } from '@repo/redis';
 import {
   getAuthenticatedEmployee,
   type Json,
+  type RemoteSupportAuditEventsRow,
   type RemoteSupportDevicesRow,
   type RemoteSupportSessionsRow,
 } from '@repo/supabase';
@@ -46,9 +55,64 @@ const MAX_CODE_EXCLUSIVE = 1_000_000;
 const MAX_CODE_GENERATION_ATTEMPTS = 5;
 const CLAIM_MAX_FAILED_ATTEMPTS = 5;
 const CLAIM_LOCKOUT_WINDOW_MS = 5 * 60_000;
+const CLAIM_LOCKOUT_TTL_SECONDS = Math.ceil(CLAIM_LOCKOUT_WINDOW_MS / 1000);
+const CLAIM_LOCKOUT_KEY_PREFIX = 'ratelimit:support:claim-lockout:';
+const MAX_AUDIT_EVENTS_FETCH = 100;
+
+interface ResilientSupportStore extends IStore {
+  delete(key: string): Promise<void>;
+}
+
+function createResilientRedisStore(): ResilientSupportStore {
+  const fallback = new MemoryStore();
+
+  async function resolveStore(): Promise<IStore> {
+    const isUnmockedTestEnv =
+      process.env.NODE_ENV === 'test' && !('mock' in (getRedisClient as object));
+    if (isUnmockedTestEnv) {
+      return fallback;
+    }
+    try {
+      const redisClient = await getRedisClient();
+      return new RedisStore(redisClient as unknown as SimpleRedisClient);
+    } catch {
+      return fallback;
+    }
+  }
+
+  return {
+    async get(key: string): Promise<string | null> {
+      const activeStore = await resolveStore();
+      try {
+        return await activeStore.get(key);
+      } catch {
+        return fallback.get(key);
+      }
+    },
+    async set(key: string, value: string, ttlSeconds: number): Promise<void> {
+      const safeTtl = Math.max(1, ttlSeconds);
+      const activeStore = await resolveStore();
+      try {
+        await activeStore.set(key, value, safeTtl);
+      } catch {
+        await fallback.set(key, value, safeTtl);
+      }
+    },
+    async delete(key: string): Promise<void> {
+      const activeStore = await resolveStore();
+      try {
+        await activeStore.delete?.(key);
+      } catch {
+        await fallback.delete(key);
+      }
+    },
+  };
+}
+
+const sharedSupportStore = createResilientRedisStore();
 
 const createSessionLimiter = new RateLimiter({
-  store: new MemoryStore(),
+  store: sharedSupportStore,
   strategy: new FixedWindowStrategy(),
   limit: 5,
   windowMs: 60_000,
@@ -56,7 +120,7 @@ const createSessionLimiter = new RateLimiter({
 });
 
 const claimSessionLimiter = new RateLimiter({
-  store: new MemoryStore(),
+  store: sharedSupportStore,
   strategy: new FixedWindowStrategy(),
   limit: 10,
   windowMs: 60_000,
@@ -64,14 +128,12 @@ const claimSessionLimiter = new RateLimiter({
 });
 
 const mutationLimiter = new RateLimiter({
-  store: new MemoryStore(),
+  store: sharedSupportStore,
   strategy: new FixedWindowStrategy(),
   limit: 30,
   windowMs: 60_000,
   keyPrefix: 'ratelimit:support:mutate:',
 });
-
-const failedClaimAttempts = new Map<string, { count: number; resetAt: number }>();
 
 type PortalSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
@@ -81,6 +143,11 @@ interface AuditWriteOptions {
   readonly actorEmployeeId: string;
   readonly eventType: RemoteSupportAuditEventType;
   readonly metadata?: Record<string, unknown>;
+}
+
+interface ClaimAttemptState {
+  readonly count: number;
+  readonly resetAt: number;
 }
 
 function assertStaffRole(role: string): void {
@@ -95,28 +162,56 @@ function assertAdminRole(role: string): void {
   }
 }
 
-function isClaimLockedOut(employeeId: string): boolean {
-  const entry = failedClaimAttempts.get(employeeId);
-  if (!entry) return false;
-  if (Date.now() > entry.resetAt) {
-    failedClaimAttempts.delete(employeeId);
+async function isClaimLockedOut(employeeId: string): Promise<boolean> {
+  const key = `${CLAIM_LOCKOUT_KEY_PREFIX}${employeeId}`;
+  const raw = await sharedSupportStore.get(key);
+  if (!raw) return false;
+  try {
+    const entry = JSON.parse(raw) as ClaimAttemptState;
+    if (Date.now() > entry.resetAt) {
+      await sharedSupportStore.delete(key);
+      return false;
+    }
+    return entry.count >= CLAIM_MAX_FAILED_ATTEMPTS;
+  } catch {
+    await sharedSupportStore.delete(key);
     return false;
   }
-  return entry.count >= CLAIM_MAX_FAILED_ATTEMPTS;
 }
 
-function recordFailedClaim(employeeId: string): void {
+async function recordFailedClaim(employeeId: string): Promise<void> {
+  const key = `${CLAIM_LOCKOUT_KEY_PREFIX}${employeeId}`;
   const now = Date.now();
-  const current = failedClaimAttempts.get(employeeId);
-  if (!current || now > current.resetAt) {
-    failedClaimAttempts.set(employeeId, { count: 1, resetAt: now + CLAIM_LOCKOUT_WINDOW_MS });
-    return;
+  const raw = await sharedSupportStore.get(key);
+
+  let nextState: ClaimAttemptState = {
+    count: 1,
+    resetAt: now + CLAIM_LOCKOUT_WINDOW_MS,
+  };
+
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as ClaimAttemptState;
+      if (now <= parsed.resetAt) {
+        nextState = {
+          count: parsed.count + 1,
+          resetAt: parsed.resetAt,
+        };
+      }
+    } catch {
+      // Reset malformed lockout payload
+    }
   }
-  failedClaimAttempts.set(employeeId, { count: current.count + 1, resetAt: current.resetAt });
+
+  const remainingSeconds = Math.max(
+    1,
+    Math.min(CLAIM_LOCKOUT_TTL_SECONDS, Math.ceil((nextState.resetAt - now) / 1000))
+  );
+  await sharedSupportStore.set(key, JSON.stringify(nextState), remainingSeconds);
 }
 
-function clearFailedClaims(employeeId: string): void {
-  failedClaimAttempts.delete(employeeId);
+async function clearFailedClaims(employeeId: string): Promise<void> {
+  await sharedSupportStore.delete(`${CLAIM_LOCKOUT_KEY_PREFIX}${employeeId}`);
 }
 
 async function generateUniqueSixDigitCode(supabase: PortalSupabaseClient): Promise<string> {
@@ -161,6 +256,36 @@ async function writeSupportAuditEvent({
 
 async function invalidateSupportCaches(): Promise<void> {
   await updateTags([CACHE_TAGS.REMOTE_SUPPORT, CACHE_TAGS.TABLE_REMOTE_SUPPORT_SESSIONS]);
+}
+
+/**
+ * Fetch the latest immutable remote support audit trail events for manual refresh.
+ */
+export async function listRemoteSupportAuditEvents(): Promise<{
+  readonly success: true;
+  readonly events: readonly RemoteSupportAuditEventsRow[];
+}> {
+  const supabase = await createServerSupabaseClient();
+  const principal = await getAuthenticatedEmployee(supabase);
+  if (!principal?.employee) {
+    throw new AuthError('Unauthorized');
+  }
+  assertStaffRole(principal.employee.role);
+
+  const { data, error } = await supabase
+    .from('remote_support_audit_events')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(MAX_AUDIT_EVENTS_FETCH);
+
+  if (error) {
+    throw new DatabaseError('Failed to refresh remote support audit events', { cause: error });
+  }
+
+  return {
+    success: true as const,
+    events: (data ?? []) as RemoteSupportAuditEventsRow[],
+  };
 }
 
 /**
@@ -250,7 +375,7 @@ export async function claimRemoteSupportSession(rawInput: ClaimRemoteSupportSess
     throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid claim request');
   }
 
-  if (isClaimLockedOut(employee.id)) {
+  if (await isClaimLockedOut(employee.id)) {
     throw new RateLimitError('Too many failed support code attempts. Wait 5 minutes.');
   }
 
@@ -270,7 +395,7 @@ export async function claimRemoteSupportSession(rawInput: ClaimRemoteSupportSess
   }
   if (!existingRow) {
     if (parsed.data.sessionCode) {
-      recordFailedClaim(employee.id);
+      await recordFailedClaim(employee.id);
     }
     throw new NotFoundError('Remote support session not found');
   }
@@ -283,7 +408,7 @@ export async function claimRemoteSupportSession(rawInput: ClaimRemoteSupportSess
     throw new ConflictError('Support session has already been claimed or closed');
   }
 
-  clearFailedClaims(employee.id);
+  await clearFailedClaims(employee.id);
 
   const nextStatus = session.status === 'pending' ? 'consent_requested' : session.status;
   const { data: updatedRow, error: updateError } = await supabase
@@ -366,6 +491,9 @@ export async function respondToRemoteSupportConsent(rawInput: RespondRemoteSuppo
   const session = existingRow as RemoteSupportSessionsRow;
   if (session.requester_employee_id !== employee.id) {
     throw new ForbiddenError('Only the session requester may grant or reject consent');
+  }
+  if (session.agent_employee_id === employee.id) {
+    throw new ForbiddenError('Support engineer cannot approve their own consent request');
   }
 
   const nowIso = new Date().toISOString();
@@ -522,6 +650,7 @@ export async function endRemoteSupportSession(rawInput: EndRemoteSupportSessionI
   const isParticipant =
     session.requester_employee_id === employee.id ||
     session.agent_employee_id === employee.id ||
+    SUPPORT_AGENT_ROLES.has(employee.role) ||
     employee.role === ADMIN_ROLE;
 
   if (!isParticipant) {
@@ -615,8 +744,20 @@ export async function initiateTier2ConsentSession(rawInput: InitiateTier2Consent
     }
   }
 
-  const targetEmployeeId =
-    parsed.data.targetEmployeeId ?? device.assigned_employee_id ?? employee.id;
+  const resolvedTargetEmployeeId =
+    parsed.data.targetEmployeeId ??
+    device.assigned_employee_id ??
+    (device.require_user_consent ? null : employee.id);
+
+  if (!resolvedTargetEmployeeId) {
+    throw new ValidationError(
+      'Workstation has no assigned user. Select a target employee before requesting Tier 2 consent.'
+    );
+  }
+  if (device.require_user_consent && resolvedTargetEmployeeId === employee.id) {
+    throw new ForbiddenError('Cannot initiate Tier 2 consent request targeting your own account');
+  }
+  const targetEmployeeId = resolvedTargetEmployeeId;
   const sessionCode = await generateUniqueSixDigitCode(supabase);
   const nowIso = new Date().toISOString();
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();

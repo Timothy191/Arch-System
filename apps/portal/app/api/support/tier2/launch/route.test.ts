@@ -13,6 +13,17 @@ jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: () => mockCreateServerSupabaseClient(),
 }));
 
+const mockServiceUpdateEq = jest.fn().mockResolvedValue({ error: null });
+const mockServiceUpdate = jest.fn().mockReturnValue({ eq: mockServiceUpdateEq });
+
+jest.mock('@repo/supabase/service-role', () => ({
+  createServiceRoleClient: () => ({
+    from: jest.fn(() => ({
+      update: mockServiceUpdate,
+    })),
+  }),
+}));
+
 jest.mock('@repo/supabase', () => ({
   getAuthenticatedEmployee: (...args: unknown[]) => mockGetAuthenticatedEmployee(...args),
 }));

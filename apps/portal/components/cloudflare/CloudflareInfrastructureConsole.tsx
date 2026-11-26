@@ -341,9 +341,12 @@ export function CloudflareInfrastructureConsole() {
                   {summary.tunnel.tunnels.map((tunnel) => (
                     <div key={tunnel.id} className="flex items-center justify-between py-2 text-xs">
                       <div>
-                        <p className="font-medium text-zinc-900">{tunnel.name}</p>
-                        <p className="font-mono text-[11px] text-zinc-500">
-                          {tunnel.id} · {tunnel.routes.length} route(s)
+                        <p className="font-medium text-[var(--text-heading)]">{tunnel.name}</p>
+                        <p className="font-mono text-[11px] text-[var(--text-muted)]">
+                          {tunnel.id} ·{' '}
+                          {tunnel.routes === null
+                            ? 'Routes: Not queried'
+                            : `${tunnel.routes.length} route(s)`}
                         </p>
                       </div>
                       <span
@@ -425,9 +428,10 @@ export function CloudflareInfrastructureConsole() {
                   {summary.queues.queues.map((queue) => (
                     <div key={queue.id} className="flex items-center justify-between py-2 text-xs">
                       <div>
-                        <p className="font-medium text-zinc-900">{queue.name}</p>
-                        <p className="font-mono text-[11px] text-zinc-500">
-                          DLQ attached: {queue.hasDlq ? 'yes' : 'no'}
+                        <p className="font-medium text-[var(--text-heading)]">{queue.name}</p>
+                        <p className="font-mono text-[11px] text-[var(--text-muted)]">
+                          DLQ attached:{' '}
+                          {queue.hasDlq === null ? 'Not queried' : queue.hasDlq ? 'yes' : 'no'}
                         </p>
                       </div>
                       <div className="text-right font-mono text-[11px] text-zinc-500">

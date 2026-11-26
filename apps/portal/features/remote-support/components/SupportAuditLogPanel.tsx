@@ -1,16 +1,22 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Download, History, Search } from 'lucide-react';
+import { Download, History, RefreshCw, Search } from 'lucide-react';
 import { useState } from 'react';
 import { sanitizeCsvCell } from '@/lib/api/csv-utils';
 import type { SupportAuditEventView } from '../types/remote-support-ui';
 
 export interface SupportAuditLogPanelProps {
   readonly events: readonly SupportAuditEventView[];
+  readonly isRefreshing?: boolean;
+  readonly onRefresh?: () => void;
 }
 
-export function SupportAuditLogPanel({ events }: SupportAuditLogPanelProps) {
+export function SupportAuditLogPanel({
+  events,
+  isRefreshing = false,
+  onRefresh,
+}: SupportAuditLogPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [eventFilter, setEventFilter] = useState('all');
 
@@ -74,17 +80,19 @@ export function SupportAuditLogPanel({ events }: SupportAuditLogPanelProps) {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Filter by session or event…"
-              className="h-8 rounded-lg border border-black/10 bg-white pr-3 pl-8 text-xs"
+              className="h-8 rounded-lg border border-black/10 bg-[var(--bg-primary)] pr-3 pl-8 text-xs"
             />
           </div>
 
           <select
             value={eventFilter}
             onChange={(e) => setEventFilter(e.target.value)}
-            className="h-8 rounded-lg border border-black/10 bg-white px-2 text-xs"
+            className="h-8 rounded-lg border border-black/10 bg-[var(--bg-primary)] px-2 text-xs"
           >
             <option value="all">All Events</option>
             <option value="session_created">session_created</option>
+            <option value="session_claimed">session_claimed</option>
+            <option value="consent_requested">consent_requested</option>
             <option value="consent_granted">consent_granted</option>
             <option value="consent_rejected">consent_rejected</option>
             <option value="cobrowse_granted">cobrowse_granted</option>
@@ -92,6 +100,19 @@ export function SupportAuditLogPanel({ events }: SupportAuditLogPanelProps) {
             <option value="session_revoked">session_revoked</option>
             <option value="session_ended">session_ended</option>
           </select>
+
+          {onRefresh && (
+            <button
+              type="button"
+              disabled={isRefreshing}
+              onClick={onRefresh}
+              aria-label="Refresh audit events"
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-black/10 bg-[var(--bg-primary)] px-3 text-xs disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? 'Refreshing…' : 'Refresh'}</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -104,7 +125,7 @@ export function SupportAuditLogPanel({ events }: SupportAuditLogPanelProps) {
         </div>
       </div>
 
-      <div className="max-h-[420px] overflow-auto rounded-xl border border-black/[0.07] bg-white/80">
+      <div className="max-h-[420px] overflow-auto rounded-xl border border-black/[0.07] bg-[var(--bg-primary)]/80">
         <table className="w-full text-left text-xs">
           <thead className="border-black/[0.06] border-b bg-black/[0.02] font-mono text-[10px] text-[var(--text-muted)] uppercase">
             <tr>

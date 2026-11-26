@@ -48,7 +48,9 @@ function buildMock(
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({ data: existingWebhook }),
+              is: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({ data: existingWebhook }),
+              }),
             }),
           }),
         };
@@ -72,7 +74,7 @@ function buildMock(
   return mock;
 }
 
-const params = Promise.resolve({ id: 'wh-1' });
+const params = Promise.resolve({ id: '11111111-1111-4111-a111-111111111111' });
 
 describe('GET /api/webhooks/[id]/logs', () => {
   beforeEach(() => jest.clearAllMocks());

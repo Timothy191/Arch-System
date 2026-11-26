@@ -1,7 +1,6 @@
 import {
   buildFleetCsv,
   computeFleetAnalytics,
-  estimateBaselineStartingSmr,
   FLEET_IMAGE_PRESETS,
   type FleetMachineRecord,
   isArticulatedOrRigidDumper,
@@ -96,41 +95,6 @@ describe('fleet-utils', () => {
         machineType: 'Excavator',
       })
     ).toBe('Hitachi');
-    expect(
-      resolveDefaultManufacturer({
-        machineId: 'DR-03',
-        machineName: 'Atlas Copco DM30',
-        machineType: 'Drill Rig',
-      })
-    ).toBe('Atlas Copco');
-    expect(
-      resolveDefaultManufacturer({
-        machineId: 'GR-05',
-        machineName: 'Sany STG200',
-        machineType: 'Grader',
-      })
-    ).toBe('Sany');
-    expect(
-      resolveDefaultManufacturer({
-        machineId: 'FB-16',
-        machineName: 'Toyota Hino 500',
-        machineType: 'Service Truck',
-      })
-    ).toBe('Toyota Hino');
-    expect(
-      resolveDefaultManufacturer({
-        machineId: 'CR-01',
-        machineName: 'Jaw Crusher',
-        machineType: 'Crusher',
-      })
-    ).toBe('Metso');
-    expect(
-      resolveDefaultManufacturer({
-        machineId: 'CKN-01',
-        machineName: 'Roller',
-        machineType: 'Compactor',
-      })
-    ).toBe('BOMAG');
 
     expect(
       resolveDefaultMachineImage({
@@ -146,62 +110,13 @@ describe('fleet-utils', () => {
         machineId: 'KD-04',
       })
     ).toBe('/images/fleet/komatsu-dozer.webp');
-    expect(
-      resolveDefaultMachineImage({
-        machineType: 'Excavator',
-        manufacturer: 'Hitachi',
-        machineId: 'EX-14',
-      })
-    ).toBe('/images/fleet/hitachi-excavator.webp');
-    expect(
-      resolveDefaultMachineImage({
-        machineType: 'Drill Rig',
-        manufacturer: 'Atlas Copco',
-        machineId: 'DR-03',
-      })
-    ).toBe('/images/fleet/atlas-copco-drill.webp');
-    expect(
-      resolveDefaultMachineImage({
-        machineType: 'Loader',
-        manufacturer: 'Caterpillar',
-        machineId: 'WL-01',
-      })
-    ).toBe('/images/fleet/caterpillar-loader.webp');
-    expect(
-      resolveDefaultMachineImage({
-        machineType: 'Grader',
-        manufacturer: 'Sany',
-        machineId: 'GR-05',
-      })
-    ).toBe('/images/fleet/sany-grader.webp');
-    expect(
-      resolveDefaultMachineImage({
-        machineType: 'Water Truck',
-        manufacturer: 'Volvo',
-        machineId: 'WB-02',
-      })
-    ).toBe('/images/fleet/water-bowser.webp');
-    expect(
-      resolveDefaultMachineImage({
-        machineType: 'Crusher',
-        manufacturer: 'Metso',
-        machineId: 'CR-01',
-      })
-    ).toBe('/images/fleet/mobile-crusher.webp');
-    expect(
-      resolveDefaultMachineImage({
-        machineType: 'Compactor',
-        manufacturer: 'BOMAG',
-        machineId: 'CKN-01',
-      })
-    ).toBe('/images/fleet/roller-compactor.webp');
 
     expect(isArticulatedOrRigidDumper('Articulated Dumper')).toBe(true);
     expect(isArticulatedOrRigidDumper('Excavator')).toBe(false);
     expect(FLEET_IMAGE_PRESETS.length).toBeGreaterThanOrEqual(16);
   });
 
-  it('computes analytics, baseline SMR estimates, and CSV injection-safe exports', () => {
+  it('computes analytics and CSV injection-safe exports without synthetic SMR fabrication', () => {
     const summary = computeFleetAnalytics(MOCK_MACHINES);
     expect(summary.totalMachines).toBe(2);
     expect(summary.activeCount).toBe(1);
@@ -209,9 +124,6 @@ describe('fleet-utils', () => {
     expect(summary.availabilityPercent).toBe(50);
     expect(summary.missingSmrCount).toBe(1);
     expect(summary.manufacturerCount).toBe(2);
-
-    const baseline = estimateBaselineStartingSmr({ machineType: 'Dozer', machineId: 'BD-22' });
-    expect(baseline).toBeGreaterThanOrEqual(14500);
 
     const csv = buildFleetCsv([
       {

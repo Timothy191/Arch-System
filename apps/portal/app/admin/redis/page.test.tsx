@@ -1,11 +1,14 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import RedisManagerPage from './page';
+import RedisManagerPage from './RedisManagerClient';
 
-function createJsonResponse(body: unknown, ok = true, status = 200): Response {
+function createJsonResponse(
+  body: unknown,
+  options?: { readonly ok?: boolean; readonly status?: number }
+): Response {
   return {
-    ok,
-    status,
+    ok: options?.ok ?? true,
+    status: options?.status ?? 200,
     json: async () => body,
   } as Response;
 }
@@ -24,22 +27,30 @@ describe('RedisManagerPage (/admin/redis)', () => {
     jest.restoreAllMocks();
   });
 
-  it('fetches Redis observability & health metrics, supports key filtering/selection, and renders inline notices without alert', async () => {
-    const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
+  it('maps real RedisHealthDiagnostics, avoids duplicate fetchStats on key selection, and deletes non-protected keys with confirmation', async () => {
+    const fetchMock = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
-      if (url.includes('/api/admin/observability')) {
-        if (url.includes('/api/admin/redis/inspect')) {
+      if (url.includes('/api/admin/redis/inspect')) {
+        if (init?.method === 'DELETE') {
           return createJsonResponse({
-            connected: true,
-            keys: ['shift_001_cache', 'telemetry_dump_r1'],
-            inspected: {
-              key: 'telemetry_dump_r1',
-              type: 'string',
-              ttlSeconds: 3600,
-              value: { pitSection: 'Brakfontein Extension 3' },
-            },
+            success: true,
+            key: 'telemetry_dump_r1',
+            deleted: true,
+            deletedCount: 1,
           });
         }
+        return createJsonResponse({
+          connected: true,
+          keys: ['shift_001_cache', 'telemetry_dump_r1'],
+          inspected: {
+            key: 'telemetry_dump_r1',
+            type: 'hash',
+            ttlSeconds: 3600,
+            value: { pitSection: 'Brakfontein Extension 3' },
+          },
+        });
+      }
+      if (url.includes('/api/admin/observability')) {
         return createJsonResponse({
           timestamp: '2026-11-19T14:30:00.000Z',
           overallSla24hPct: 99.95,
@@ -73,27 +84,24 @@ describe('RedisManagerPage (/admin/redis)', () => {
               totalKeys: 12450,
             },
             diagnostics: {
-              connected: true,
-              status: 'healthy',
-              memoryUsedMb: 32.5,
+              usedMemoryBytes: 34_078_720,
+              maxmemoryBytes: 67_108_864,
+              memFragmentationRatio: 1.08,
+              maxmemoryPolicy: 'allkeys-lru',
+              evictedKeysTotal: 7,
+              keyspaceHitsTotal: 900,
+              keyspaceMissesTotal: 100,
+              hitRateRatio: 0.9,
+              replicationRole: 'master',
+              connectedSlaves: 1,
+              slowlogCount: 3,
             },
-          },
-        });
-      }
-      if (url.includes('/api/admin/redis/inspect')) {
-        return createJsonResponse({
-          connected: true,
-          keys: ['shift_001_cache', 'telemetry_dump_r1'],
-          inspected: {
-            key: 'telemetry_dump_r1',
-            type: 'string',
-            ttlSeconds: 3600,
-            value: { pitSection: 'Brakfontein Extension 3' },
           },
         });
       }
       return createJsonResponse({
         mode: 'tcp',
+        engine: 'redis-7.4.1',
         vectorSearch: { available: true },
         vectorIndexes: [
           {
@@ -114,17 +122,21 @@ describe('RedisManagerPage (/admin/redis)', () => {
       expect(screen.getByText('12,450')).toBeInTheDocument();
     });
 
+    expect(screen.queryByText(/Invalid Date/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/L1_EVICTIONS/i)).not.toBeInTheDocument();
     expect(screen.getByText('24h SLA: 99.97%')).toBeInTheDocument();
     expect(screen.getAllByText('890').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText('allkeys-lru')).toBeInTheDocument();
+    expect(screen.getByText('1.08x')).toBeInTheDocument();
+    expect(screen.getByText('master')).toBeInTheDocument();
     expect(screen.getByText('ACTIVE')).toBeInTheDocument();
     expect(screen.getByText('idx:mining_docs')).toBeInTheDocument();
     expect(screen.getByText('FIRING')).toBeInTheDocument();
     expect(screen.getByText('PENDING')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.getByRole('list')).toBeInTheDocument();
-    });
+    const observabilityCallsBeforeSelect = fetchMock.mock.calls.filter(([reqUrl]) =>
+      String(reqUrl).includes('/api/admin/observability')
+    ).length;
 
     const searchInput = screen.getByPlaceholderText('Search keys (*:pattern)');
     fireEvent.change(searchInput, { target: { value: 'telemetry' } });
@@ -137,31 +149,50 @@ describe('RedisManagerPage (/admin/redis)', () => {
       expect(screen.getByText(/Brakfontein Extension 3/i)).toBeInTheDocument();
     });
 
-    const initialCallCount = fetchMock.mock.calls.length;
-    fireEvent.click(screen.getByRole('button', { name: /Inspect/i }));
+    // Selecting a key must NOT re-trigger fetchStats (/api/admin/observability)
+    const observabilityCallsAfterSelect = fetchMock.mock.calls.filter(([reqUrl]) =>
+      String(reqUrl).includes('/api/admin/observability')
+    ).length;
+    expect(observabilityCallsAfterSelect).toBe(observabilityCallsBeforeSelect);
 
+    const callsBeforeInspect = fetchMock.mock.calls.length;
+    fireEvent.click(screen.getByRole('button', { name: /Inspect/i }));
     await waitFor(() => {
-      expect(fetchMock.mock.calls.length).toBeGreaterThan(initialCallCount);
+      expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBeforeInspect);
     });
     expect(screen.getByRole('status')).toHaveTextContent(
       'Inspected live Redis key "telemetry_dump_r1" and refreshed cluster telemetry.'
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /Delete/i }));
-    expect(screen.getByRole('status')).toHaveTextContent('RedisInsight (:5540)');
+    // Delete flow opens confirmation dialog and executes DELETE /api/admin/redis/inspect
+    fireEvent.click(screen.getByRole('button', { name: /^Delete$/i }));
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('Confirm Redis key deletion');
     expect(alertSpy).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /Confirm Delete/i }));
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Deleted Redis key "telemetry_dump_r1" and recorded admin audit log.'
+      );
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /Dismiss/i }));
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
-  it('handles Refresh Cluster and falls back cleanly when endpoints fail', async () => {
-    const fetchMock = jest.fn(async () => createJsonResponse({ error: 'Offline' }, false, 503));
+  it('displays honest Not reported / No samples yet states when Upstash REST omits INFO diagnostics or endpoints fail', async () => {
+    const fetchMock = jest.fn(async () =>
+      createJsonResponse({ error: 'Offline' }, { ok: false, status: 503 })
+    );
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     render(<RedisManagerPage />);
 
     const refreshButton = await screen.findByRole('button', { name: /Refresh Cluster/i });
+    expect(screen.queryByText(/Invalid Date/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('48.6 MB')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Not reported').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/No samples yet/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/FALLBACK: pgvector/i)).toBeInTheDocument();
 
     fireEvent.click(refreshButton);

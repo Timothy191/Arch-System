@@ -63,6 +63,18 @@ export function RemoteSupportSessionOverlay() {
   const [copiedCode, setCopiedCode] = useState(false);
   const [pointerPos, setPointerPos] = useState<{ x: number; y: number } | null>(null);
   const [strokes, setStrokes] = useState<readonly AnnotationStroke[]>([]);
+  const [chatMessages, setChatMessages] = useState<
+    readonly {
+      id: string;
+      senderName: string;
+      senderRole: 'requester' | 'agent';
+      text: string;
+      sentAt: string;
+    }[]
+  >([]);
+  const [chatInput, setChatInput] = useState('');
+  const [showChat, setShowChat] = useState(false);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   const supabaseClient = useMemo(() => {
     if (typeof window === 'undefined') return null;
@@ -120,6 +132,14 @@ export function RemoteSupportSessionOverlay() {
           cobrowsePendingRequest: true,
           agentName: message.agentName,
         });
+        return;
+      }
+      if (message.type === 'chat_message') {
+        setChatMessages((prev) => [...prev.slice(-49), message]);
+        if (message.senderRole === 'agent' && !showChat) {
+          setUnreadChatCount((c) => c + 1);
+          toast.info(`${message.senderName}: ${message.text}`);
+        }
         return;
       }
       if (message.type === 'cobrowse_action') {
@@ -303,6 +323,8 @@ export function RemoteSupportSessionOverlay() {
       });
       clearActiveSession();
       toast.info('Remote support request declined');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to record consent decline');
     } finally {
       setIsBusy(false);
     }
@@ -321,9 +343,31 @@ export function RemoteSupportSessionOverlay() {
       });
       peer.sendDataMessage({ type: 'cobrowse_decision', enabled });
       toast.info(enabled ? 'Portal control enabled' : 'Portal control revoked');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to update portal control consent');
     } finally {
       setIsBusy(false);
     }
+  };
+
+  const handleSendChatReply = (event: React.FormEvent) => {
+    event.preventDefault();
+    const trimmed = chatInput.trim();
+    if (!trimmed) return;
+    const item = {
+      id: `msg-${Date.now()}`,
+      senderName: 'Employee',
+      senderRole: 'requester' as const,
+      text: trimmed,
+      sentAt: new Date().toISOString(),
+    };
+    const sent = peer.sendDataMessage({ type: 'chat_message', ...item });
+    if (!sent) {
+      toast.error('Support chat channel is not connected yet');
+      return;
+    }
+    setChatMessages((prev) => [...prev.slice(-49), item]);
+    setChatInput('');
   };
 
   return (
@@ -527,6 +571,19 @@ export function RemoteSupportSessionOverlay() {
               </button>
             )}
 
+            {activeSession.tier === 'tier1_browser' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowChat((prev) => !prev);
+                  setUnreadChatCount(0);
+                }}
+                className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-black/[0.04] px-2.5 py-0.5 font-medium text-[var(--text-heading)] text-xs hover:bg-black/[0.08]"
+              >
+                Chat{unreadChatCount > 0 ? ` (${unreadChatCount})` : ''}
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => {
@@ -539,6 +596,57 @@ export function RemoteSupportSessionOverlay() {
               End (Shift+Esc)
             </button>
           </div>
+          {showChat && activeSession.tier === 'tier1_browser' && (
+            <GlassCard variant="window" className="mt-2 w-80 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="font-semibold text-[var(--text-heading)] text-xs">
+                  Support Chat
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowChat(false)}
+                  className="text-[var(--text-muted)] text-xs hover:text-[var(--text-heading)]"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="mb-2 max-h-40 space-y-1.5 overflow-y-auto text-xs">
+                {chatMessages.length === 0 ? (
+                  <p className="text-[var(--text-muted)]">No messages yet.</p>
+                ) : (
+                  chatMessages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={cn(
+                        'rounded-lg px-2 py-1',
+                        msg.senderRole === 'requester'
+                          ? 'ml-4 bg-[var(--accent-blue)]/10 text-[var(--text-heading)]'
+                          : 'mr-4 bg-black/[0.04] text-[var(--text-heading)]'
+                      )}
+                    >
+                      <span className="font-semibold">{msg.senderName}: </span>
+                      <span>{msg.text}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+              <form onSubmit={handleSendChatReply} className="flex gap-1.5">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Reply to support..."
+                  className="h-8 flex-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 text-[var(--text-heading)] text-xs"
+                />
+                <button
+                  type="submit"
+                  className="h-8 rounded-md bg-[var(--accent-blue)] px-2.5 font-medium text-white text-xs"
+                >
+                  Send
+                </button>
+              </form>
+            </GlassCard>
+          )}
         </div>
       )}
     </div>

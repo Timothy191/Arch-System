@@ -6,49 +6,93 @@ import { Button } from '@repo/ui/components/ui/button';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Pagination } from '@repo/ui/Pagination';
-import { ChevronDown, ChevronRight, Download, Search } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronRight, Download, Search } from 'lucide-react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { sanitizeCsvCell } from '@/lib/api/csv-utils';
 import { logError } from '@/lib/errors/error-logger';
 import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
 
-interface AuditLog {
+const SEARCH_DEBOUNCE_MS = 300;
+const DEFAULT_PAGE_SIZE = 20;
+const FILTER_OPTIONS_SAMPLE_LIMIT = 500;
+const ISO_DATE_PREFIX_LENGTH = 10;
+const DEFAULT_AUDIT_ACTIONS: readonly string[] = ['delete', 'insert', 'update'];
+
+const ACTION_BADGE_CLASSES: Readonly<Record<string, string>> = {
+  insert: 'border-emerald-600/30 bg-emerald-50 text-emerald-700',
+  update: 'border-accent-blue/20 bg-accent-blue/10 text-accent-blue',
+  delete: 'border-accent-red/20 bg-accent-red/10 text-accent-red',
+};
+
+export interface AuditLog {
   id: string;
   table_name: string;
   action: string;
-  user_id: string | null;
-  old_values: Record<string, unknown>;
-  new_values: Record<string, unknown>;
+  record_id?: string | null;
+  performed_by: string | null;
+  old_data: Record<string, unknown> | null;
+  new_data: Record<string, unknown> | null;
   created_at: string;
   employees?: {
     full_name: string;
-  };
+  } | null;
+}
+
+interface AuditLogQueryFilters {
+  page: number;
+  size: number;
+  search: string;
+  action: string;
+  table: string;
 }
 
 export function AuditLogsTab() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadErrorMessage, setLoadErrorMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
   const [tableFilter, setTableFilter] = useState('all');
   const [tables, setTables] = useState<string[]>([]);
-  const [actions, setActions] = useState<string[]>([]);
+  const [actions, setActions] = useState<string[]>([...DEFAULT_AUDIT_ACTIONS]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalCount, setTotalCount] = useState(0);
 
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
 
   useEffect(() => {
     const loadFilters = async () => {
-      const { data } = await supabase.from('audit_logs').select('table_name, action');
-      if (data) {
-        const uniqueTables = Array.from(new Set(data.map((d) => d.table_name)));
-        const uniqueActions = Array.from(new Set(data.map((d) => d.action)));
+      const baseQuery = supabase
+        .from('audit_logs')
+        .select('table_name, action')
+        .order('created_at', { ascending: false });
+      const boundedQuery =
+        typeof baseQuery.limit === 'function'
+          ? baseQuery.limit(FILTER_OPTIONS_SAMPLE_LIMIT)
+          : baseQuery.range(0, FILTER_OPTIONS_SAMPLE_LIMIT - 1);
+
+      const { data: sampleRows, error } = await boundedQuery;
+      if (error) {
+        logError(new Error(error.message), { context: 'AuditLogsTab.loadFilters' });
+        setLoadErrorMessage(error.message || 'Failed to load audit filter options.');
+        return;
+      }
+
+      if (sampleRows) {
+        const uniqueTables = Array.from(
+          new Set(sampleRows.map((row) => row.table_name).filter(Boolean))
+        );
+        const uniqueActions = Array.from(
+          new Set([
+            ...DEFAULT_AUDIT_ACTIONS,
+            ...sampleRows.map((row) => row.action).filter(Boolean),
+          ])
+        );
         setTables(uniqueTables.sort());
         setActions(uniqueActions.sort());
       }
@@ -60,13 +104,14 @@ export function AuditLogsTab() {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setCurrentPage(1);
-    }, 300);
+    }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
   const loadLogs = useCallback(
-    async (page: number, size: number, search: string, action: string, table: string) => {
-      setLoading(true);
+    async ({ page, size, search, action, table }: AuditLogQueryFilters) => {
+      setIsLoading(true);
+      setLoadErrorMessage(null);
 
       let query = supabase.from('audit_logs').select('*, employees(full_name)', { count: 'exact' });
 
@@ -85,33 +130,54 @@ export function AuditLogsTab() {
         }
       }
 
-      query = query.order('created_at', { ascending: false });
+      const fromOffset = (page - 1) * size;
+      const toOffset = fromOffset + size - 1;
+      query = query.order('created_at', { ascending: false }).range(fromOffset, toOffset);
 
-      const from = (page - 1) * size;
-      const to = from + size - 1;
-      query = query.range(from, to);
-
-      const { data, count, error } = await query;
+      const { data: auditRows, count, error } = await query;
 
       if (error) {
-        logError(new Error(error.message), { context: 'AuditLogsTab.loadLogs' });
-      } else {
-        if (data) setLogs(data);
-        if (count !== null) setTotalCount(count);
+        const message = error.message || 'Failed to load audit logs.';
+        logError(new Error(message), { context: 'AuditLogsTab.loadLogs' });
+        setLoadErrorMessage(message);
+        setLogs([]);
+        setTotalCount(0);
+        toast.error('Failed to load audit logs.');
+        setIsLoading(false);
+        return;
       }
-      setLoading(false);
+
+      setLogs((auditRows as AuditLog[] | null) ?? []);
+      if (count !== null) {
+        setTotalCount(count);
+      }
+      setIsLoading(false);
     },
     [supabase]
   );
 
   useEffect(() => {
-    void loadLogs(currentPage, pageSize, debouncedSearch, actionFilter, tableFilter);
+    void loadLogs({
+      page: currentPage,
+      size: pageSize,
+      search: debouncedSearch,
+      action: actionFilter,
+      table: tableFilter,
+    });
   }, [currentPage, pageSize, debouncedSearch, actionFilter, tableFilter, loadLogs]);
 
   const handleExportCsv = () => {
     if (logs.length === 0) return;
 
-    const headerRow = ['Timestamp', 'User', 'Action', 'Table', 'Old Values', 'New Values']
+    const headerRow = [
+      'Timestamp',
+      'User',
+      'Performed By',
+      'Action',
+      'Table',
+      'Old Data',
+      'New Data',
+    ]
       .map(sanitizeCsvCell)
       .join(',');
 
@@ -119,10 +185,11 @@ export function AuditLogsTab() {
       [
         new Date(log.created_at).toISOString(),
         log.employees?.full_name || 'System',
+        log.performed_by ?? '',
         log.action,
         log.table_name,
-        JSON.stringify(log.old_values ?? {}),
-        JSON.stringify(log.new_values ?? {}),
+        JSON.stringify(log.old_data ?? {}),
+        JSON.stringify(log.new_data ?? {}),
       ]
         .map(sanitizeCsvCell)
         .join(',')
@@ -133,7 +200,7 @@ export function AuditLogsTab() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `audit-logs-${new Date().toISOString().slice(0, ISO_DATE_PREFIX_LENGTH)}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -193,7 +260,7 @@ export function AuditLogsTab() {
           <Button
             type="button"
             variant="outline"
-            disabled={loading || logs.length === 0}
+            disabled={isLoading || logs.length === 0}
             onClick={handleExportCsv}
           >
             <Download className="mr-2 h-4 w-4" />
@@ -201,6 +268,16 @@ export function AuditLogsTab() {
           </Button>
         </div>
       </div>
+
+      {loadErrorMessage && (
+        <div
+          role="alert"
+          className="flex items-center gap-2 rounded-lg border border-accent-red/30 bg-accent-red/10 px-4 py-3 text-accent-red text-sm"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{loadErrorMessage}</span>
+        </div>
+      )}
 
       <GlassCard className="overflow-hidden p-0">
         <div className="overflow-x-auto">
@@ -240,7 +317,7 @@ export function AuditLogsTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-default)]">
-              {loading ? (
+              {isLoading ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading...
@@ -255,6 +332,10 @@ export function AuditLogsTab() {
               ) : (
                 logs.map((log) => {
                   const isExpanded = expandedId === log.id;
+                  const badgeClass = ACTION_BADGE_CLASSES[log.action.toLowerCase()] ?? '';
+                  const actorLabel = log.employees?.full_name || log.performed_by || 'System';
+                  const changeSummary = JSON.stringify(log.new_data ?? log.old_data ?? {});
+
                   return (
                     <Fragment key={log.id}>
                       <tr
@@ -272,21 +353,10 @@ export function AuditLogsTab() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
-                          {log.employees?.full_name || 'System'}
+                          {actorLabel}
                         </td>
                         <td className="px-6 py-4">
-                          <Badge
-                            variant="outline"
-                            className={
-                              log.action === 'INSERT'
-                                ? 'border-emerald-600/30 bg-emerald-50 text-emerald-700'
-                                : log.action === 'UPDATE'
-                                  ? 'border-accent-blue/20 bg-accent-blue/10 text-accent-blue'
-                                  : log.action === 'DELETE'
-                                    ? 'border-accent-red/20 bg-accent-red/10 text-accent-red'
-                                    : ''
-                            }
-                          >
+                          <Badge variant="outline" className={badgeClass}>
                             {log.action}
                           </Badge>
                         </td>
@@ -294,7 +364,7 @@ export function AuditLogsTab() {
                           {log.table_name}
                         </td>
                         <td className="max-w-xs truncate px-6 py-4 text-[var(--text-muted)] text-sm">
-                          {JSON.stringify(log.new_values || log.old_values)}
+                          {changeSummary}
                         </td>
                       </tr>
                       {isExpanded && (
@@ -306,18 +376,18 @@ export function AuditLogsTab() {
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                               <div>
                                 <p className="mb-1 font-medium text-[var(--text-muted)] text-xs uppercase">
-                                  Old Values
+                                  Old Data
                                 </p>
                                 <pre className="max-h-56 overflow-auto rounded bg-[var(--bg-secondary)] p-3 font-mono text-[var(--text-muted)] text-xs">
-                                  {JSON.stringify(log.old_values ?? {}, null, 2)}
+                                  {JSON.stringify(log.old_data ?? {}, null, 2)}
                                 </pre>
                               </div>
                               <div>
                                 <p className="mb-1 font-medium text-[var(--text-muted)] text-xs uppercase">
-                                  New Values
+                                  New Data
                                 </p>
                                 <pre className="max-h-56 overflow-auto rounded bg-[var(--bg-secondary)] p-3 font-mono text-[var(--text-heading)] text-xs">
-                                  {JSON.stringify(log.new_values ?? {}, null, 2)}
+                                  {JSON.stringify(log.new_data ?? {}, null, 2)}
                                 </pre>
                               </div>
                             </div>
@@ -333,7 +403,7 @@ export function AuditLogsTab() {
         </div>
       </GlassCard>
 
-      {!loading && totalCount > 0 && (
+      {!isLoading && totalCount > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

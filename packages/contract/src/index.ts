@@ -46,6 +46,8 @@ export {
   visitorPassRequestSchema,
 } from './schemas/access-control.schema';
 export {
+  ADMIN_EMPLOYEE_ROLES,
+  ADMIN_MACHINE_TYPES,
   type AdminAddDepartmentInput,
   type AdminAddMachineInput,
   type AdminArchiveDepartmentInput,
@@ -53,11 +55,13 @@ export {
   type AdminCardTemplateIdInput,
   type AdminCardTemplateUploadInput,
   type AdminDeleteEmployeeInput,
+  type AdminMachineType,
   type AdminMineralRegistry,
   type AdminOperationalTargets,
   type AdminPortalSettings,
   type AdminUpdateDepartmentInput,
   type AdminUpdateMachineInput,
+  type AiMetricsQueryInput,
   adminAddDepartmentSchema,
   adminAddMachineSchema,
   adminAddMineBlockSchema,
@@ -71,6 +75,7 @@ export {
   adminDataQuerySchema,
   adminDataUpdateSchema,
   adminDeleteEmployeeSchema,
+  adminMachineTypeSchema,
   adminMineralRegistrySchema,
   adminOperationalTargetsSchema,
   adminPortalSettingsSchema,
@@ -78,14 +83,17 @@ export {
   adminUpdateMachineSchema,
   adminUpdateMineBlockSchema,
   adminUpdateSiteSchema,
+  aiMetricsQuerySchema,
   type DepartmentPermission,
   type DepartmentPermissionsMap,
   departmentPermissionSchema,
   departmentPermissionsMapSchema,
   type EmployeeGender,
   type EmployeeRecordType,
+  type EmployeeRole,
   employeeGenderSchema,
   employeeRecordTypeSchema,
+  employeeRoleSchema,
   type OperationalTargetWindow,
   operationalTargetWindowSchema,
   type UpsertAdminEmployeeSchemaInput,
@@ -317,7 +325,13 @@ export {
   tireSchema,
   tireStatusSchema,
 } from './schemas/tire-management.schema';
-export { createWebhookSchema, updateWebhookSchema } from './schemas/webhook.schema';
+export {
+  createWebhookSchema,
+  updateWebhookSchema,
+  WEBHOOK_EVENT_TYPES,
+  type WebhookEventType,
+  webhookEventTypeSchema,
+} from './schemas/webhook.schema';
 
 // ---------------------------------------------------------------------------
 // Derived types (inferred from schemas)
@@ -425,6 +439,7 @@ export type {
 } from './schemas/offline-mutations.schema';
 export * from './schemas/quality-intelligence.schema';
 export * from './schemas/result.schema';
+export * from './schemas/scada-telemetry.schema';
 export * from './schemas/search.schema';
 export * from './schemas/spatial-telemetry.schema';
 export * from './schemas/system-health.schema';

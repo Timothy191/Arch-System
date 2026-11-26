@@ -59,6 +59,7 @@ async function handleManifest(): Promise<NextResponse> {
   const envRefs: string[] = [];
 
   for (const { managed, installation, catalog, slug } of active) {
+    if (catalog.kind && catalog.kind !== 'mcp') continue;
     if (!catalog.server_url) continue;
 
     const envRef = envVarName(slug);

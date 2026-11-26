@@ -13,6 +13,9 @@ import { toast } from 'sonner';
 import { adminSaveOperationalTargets, getOperationalTargets } from '../actions/targets';
 
 export const OPERATIONAL_TARGETS_STORAGE_KEY = 'arch_operational_targets_v1';
+const MIN_TARGET_VALUE = 1;
+const DAILY_SHIFT_MULTIPLIER = 2;
+const MONTHLY_SHIFT_MULTIPLIER = 60;
 
 export const DEFAULT_OPERATIONAL_TARGETS_CLIENT: AdminOperationalTargets = {
   shift: {
@@ -97,19 +100,8 @@ export function TargetsTab() {
             window.localStorage.setItem(OPERATIONAL_TARGETS_STORAGE_KEY, JSON.stringify(remote));
           }
         }
-      } catch {
-        if (typeof window !== 'undefined') {
-          const cached = window.localStorage.getItem(OPERATIONAL_TARGETS_STORAGE_KEY);
-          if (cached) {
-            try {
-              const parsed = JSON.parse(cached) as AdminOperationalTargets;
-              setTargets(parsed);
-              setSavedTargets(parsed);
-            } catch {
-              // ignore malformed local cache
-            }
-          }
-        }
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Failed to load operational targets.');
       } finally {
         setLoading(false);
       }
@@ -124,7 +116,10 @@ export function TargetsTab() {
     field: keyof OperationalTargetWindow,
     rawValue: string
   ) => {
-    const numeric = Math.max(0, Number(rawValue) || 0);
+    const parsedNumber = Number(rawValue);
+    const numeric = Number.isFinite(parsedNumber)
+      ? Math.max(MIN_TARGET_VALUE, parsedNumber)
+      : MIN_TARGET_VALUE;
     setTargets((prev) => ({
       ...prev,
       [horizon]: {
@@ -139,18 +134,18 @@ export function TargetsTab() {
     const scaled: AdminOperationalTargets = {
       shift: { ...s },
       daily: {
-        loadsTarget: s.loadsTarget * 2,
-        coalTonnesTarget: s.coalTonnesTarget * 2,
-        wasteTonnesTarget: s.wasteTonnesTarget * 2,
-        volumeBcmTarget: s.volumeBcmTarget * 2,
-        smrHoursTarget: s.smrHoursTarget * 2,
+        loadsTarget: s.loadsTarget * DAILY_SHIFT_MULTIPLIER,
+        coalTonnesTarget: s.coalTonnesTarget * DAILY_SHIFT_MULTIPLIER,
+        wasteTonnesTarget: s.wasteTonnesTarget * DAILY_SHIFT_MULTIPLIER,
+        volumeBcmTarget: s.volumeBcmTarget * DAILY_SHIFT_MULTIPLIER,
+        smrHoursTarget: s.smrHoursTarget * DAILY_SHIFT_MULTIPLIER,
       },
       monthly: {
-        loadsTarget: s.loadsTarget * 60,
-        coalTonnesTarget: s.coalTonnesTarget * 60,
-        wasteTonnesTarget: s.wasteTonnesTarget * 60,
-        volumeBcmTarget: s.volumeBcmTarget * 60,
-        smrHoursTarget: s.smrHoursTarget * 60,
+        loadsTarget: s.loadsTarget * MONTHLY_SHIFT_MULTIPLIER,
+        coalTonnesTarget: s.coalTonnesTarget * MONTHLY_SHIFT_MULTIPLIER,
+        wasteTonnesTarget: s.wasteTonnesTarget * MONTHLY_SHIFT_MULTIPLIER,
+        volumeBcmTarget: s.volumeBcmTarget * MONTHLY_SHIFT_MULTIPLIER,
+        smrHoursTarget: s.smrHoursTarget * MONTHLY_SHIFT_MULTIPLIER,
       },
     };
     setTargets(scaled);
@@ -221,7 +216,7 @@ export function TargetsTab() {
               Operational Targets (Shift · Daily · Monthly)
             </h2>
             {isDirty && (
-              <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 font-medium text-[11px] text-amber-800">
+              <span className="rounded-full border border-accent-amber/35 bg-accent-amber/10 px-2.5 py-0.5 font-medium text-[11px] text-accent-amber">
                 Unsaved changes
               </span>
             )}
@@ -317,7 +312,7 @@ export function TargetsTab() {
                       <Input
                         id={`${horizon.key}-${field.key}`}
                         type="number"
-                        min={1}
+                        min={MIN_TARGET_VALUE}
                         value={windowValues[field.key]}
                         onChange={(e) => handleFieldChange(horizon.key, field.key, e.target.value)}
                         className="border-[var(--border-default)] bg-[var(--bg-primary)] font-bold font-mono text-[var(--text-heading)] text-xs"

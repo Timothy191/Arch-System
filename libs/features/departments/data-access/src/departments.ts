@@ -34,8 +34,7 @@ export const DEPARTMENTS: Department[] = [
     type: 'standard',
     status: 'active',
     gridSpan: 'md:col-span-1 xl:col-span-1',
-    stats: { label: 'Admin Tools', value: '12 Modules' },
-    trend: [240, 242, 243, 245, 246, 247, 248, 249],
+    stats: { label: 'Active Users', value: '—' },
     actions: [
       { label: 'Sites', href: '/admin?tab=sites' },
       { label: 'Fleet', href: '/admin?tab=fleet' },

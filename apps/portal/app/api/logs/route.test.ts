@@ -20,6 +20,9 @@ jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
+const { withRateLimit } = jest.requireMock('@/lib/api/rate-limit-middleware') as {
+  withRateLimit: jest.Mock;
+};
 const { recordSystemLog } = jest.requireMock('@/lib/logging/system-logs') as {
   recordSystemLog: jest.Mock;
 };
@@ -35,10 +38,10 @@ const ADMIN_PRINCIPAL = {
   employee: { id: 'emp-1', role: 'admin', department_id: 'dept-1' },
 };
 
-function postRequest(body: unknown): Request {
+function postRequest(body: unknown, extraHeaders: Record<string, string> = {}): Request {
   return new Request('http://localhost/api/logs', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...extraHeaders },
     body: JSON.stringify(body),
   });
 }
@@ -74,6 +77,7 @@ describe('POST /api/logs', () => {
     );
 
     expect(res.status).toBe(201);
+    expect(withRateLimit).toHaveBeenCalledTimes(1);
     expect(recordSystemLog).toHaveBeenCalledWith(
       expect.objectContaining({
         level: 'error',
@@ -83,6 +87,18 @@ describe('POST /api/logs', () => {
         ipAddress: '203.0.113.10',
       })
     );
+  });
+
+  it('rejects oversized bodies via withBodyLimit with 413', async () => {
+    const res = await POST(
+      postRequest(
+        { level: 'error', source: 'client', message: 'huge payload' },
+        { 'content-length': '200000' }
+      ) as never
+    );
+
+    expect(res.status).toBe(413);
+    expect(recordSystemLog).not.toHaveBeenCalled();
   });
 
   it('rejects invalid payloads with 400', async () => {
@@ -160,9 +176,10 @@ describe('GET /api/logs', () => {
     jest.clearAllMocks();
   });
 
-  it('returns 401 for unauthenticated users', async () => {
+  it('wraps GET with rate limiting and returns 401 for unauthenticated users', async () => {
     getAuthenticatedEmployee.mockResolvedValue(null);
     const res = await GET(getRequest() as never);
+    expect(withRateLimit).toHaveBeenCalledTimes(1);
     expect(res.status).toBe(401);
   });
 
@@ -175,24 +192,27 @@ describe('GET /api/logs', () => {
     expect(res.status).toBe(403);
   });
 
-  it('returns paginated logs for admins', async () => {
+  it('returns paginated logs for admins and supports category filter', async () => {
     getAuthenticatedEmployee.mockResolvedValue(ADMIN_PRINCIPAL);
-    mockSupabase({
-      data: [{ id: 'log-1', message: 'boom', level: 'error' }],
+    const builder = mockSupabase({
+      data: [{ id: 'log-1', message: 'boom', level: 'error', category: 'telemetry' }],
       count: 1,
       error: null,
     });
 
-    const res = await GET(getRequest('?level=error&page=1&pageSize=10') as never);
+    const res = await GET(
+      getRequest('?level=error&category=telemetry&page=1&pageSize=10') as never
+    );
     const body = await res.json();
 
     expect(res.status).toBe(200);
+    expect(builder.eq).toHaveBeenCalledWith('category', 'telemetry');
     expect(body.success).toBe(true);
     expect(body.data).toHaveLength(1);
     expect(body.pagination.totalCount).toBe(1);
   });
 
-  it('searches across trace_id and request_id when search query is supplied', async () => {
+  it('sanitizes search filter via sanitizePostgrestFilterValue against PostgREST injection', async () => {
     getAuthenticatedEmployee.mockResolvedValue(ADMIN_PRINCIPAL);
     const builder = mockSupabase({
       data: [],
@@ -200,13 +220,14 @@ describe('GET /api/logs', () => {
       error: null,
     });
 
-    const res = await GET(
-      getRequest('?search=68c830d6e21ff5b0747afc0a817e9c61&page=1&pageSize=10') as never
-    );
+    const res = await GET(getRequest('?search=test,id.eq.1()%25*&page=1&pageSize=10') as never);
 
     expect(res.status).toBe(200);
     expect(builder.or).toHaveBeenCalledWith(
-      expect.stringContaining('trace_id.ilike.%68c830d6e21ff5b0747afc0a817e9c61%')
+      'message.ilike.%testiddeq1%,category.ilike.%testiddeq1%,trace_id.ilike.%testiddeq1%,request_id.ilike.%testiddeq1%'.replace(
+        /testiddeq1/g,
+        'testideq1'
+      )
     );
   });
 });
@@ -216,12 +237,13 @@ describe('PATCH /api/logs', () => {
     jest.clearAllMocks();
   });
 
-  it('returns 403 for non-admin users', async () => {
+  it('wraps PATCH with rate limiting and returns 403 for non-admin users', async () => {
     getAuthenticatedEmployee.mockResolvedValue({
       user: { id: 'auth-2' },
       employee: { id: 'emp-2', role: 'operator' },
     });
     const res = await PATCH(patchRequest({ ids: ['x'], resolved: true }) as never);
+    expect(withRateLimit).toHaveBeenCalledTimes(1);
     expect(res.status).toBe(403);
   });
 

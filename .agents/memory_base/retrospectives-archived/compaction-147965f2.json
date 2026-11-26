@@ -1,0 +1,35 @@
+{
+  "id": "compaction-147965f2",
+  "timestamp": "2026-11-26T05:13:50.445Z",
+  "taskTag": "compaction-standard-147965f2",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/admin/redis/inspect/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/admin/redis/inspect/route.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/redis/RedisVisualPanels.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/redis/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/redis/page.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/ai/metrics/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/ai/metrics/route.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/AIMetricsDashboard.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/admin/observability/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/admin/observability/route.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/observability/observability-clients.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/observability/ObservabilityConsole.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/observability/ObservabilityConsole.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/libs/features/departments/data-access/src/department-live-metrics.ts\"",
+    "\"/home/tim/Fork/Arch-System/libs/features/departments/data-access/src/departments.test.ts\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (421 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 330169,
+    "cacheHitRatio": 0.8878,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

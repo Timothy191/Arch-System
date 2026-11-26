@@ -68,4 +68,35 @@ describe('checkInstallationHealth', () => {
       last_error: 'Upstream unreachable',
     });
   });
+
+  it('probes SSRF-guarded action and Prometheus adapters without calling MCP listTools', async () => {
+    getInstallation.mockResolvedValue({
+      id: 'inst-prom',
+      catalog_id: 'prometheus',
+      status: 'active',
+      tools_synced_at: new Date().toISOString(),
+    });
+    toManagedInstallation.mockResolvedValue({
+      id: 'inst-prom',
+      kind: 'action',
+      serverUrl: 'https://prometheus.plantcor.example',
+      authType: 'none',
+      credentialCiphertext: null,
+      capabilities: { adapter: 'prometheus' },
+      config: {},
+    });
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+    } as Response);
+
+    const res = await checkInstallationHealth('inst-prom');
+    expect(res.status).toBe('healthy');
+    expect(mcpClientManager.listTools).not.toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://prometheus.plantcor.example/-/healthy',
+      expect.any(Object)
+    );
+    fetchSpy.mockRestore();
+  });
 });

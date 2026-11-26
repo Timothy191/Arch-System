@@ -98,6 +98,7 @@ export const EMPTY_FORM = {
   name: '',
   server_url: '',
   auth_type: 'bearer' as AuthType,
+  api_key_header: '',
   scope: 'global' as 'global' | 'department',
   department_id: '',
   secret: '',
@@ -203,6 +204,15 @@ interface IntegrationWebhookLogsPanelProps {
   testArgs: string;
   setTestArgs: (nextArgs: string) => void;
   testResult: string | null;
+  editServerUrl: string;
+  setEditServerUrl: (nextUrl: string) => void;
+  rotateSecretValue: string;
+  setRotateSecretValue: (nextSecret: string) => void;
+  rotateSecretKind: 'bearer' | 'api_key' | 'custom_header';
+  setRotateSecretKind: (nextKind: 'bearer' | 'api_key' | 'custom_header') => void;
+  editAllowlist: string;
+  setEditAllowlist: (nextAllowlist: string) => void;
+  onSaveConnectionAndSecret: (installation: Installation) => void;
   expandedRulesForm: IntegrationRulesFormState;
   setExpandedRulesForm: (next: IntegrationRulesFormState) => void;
   onSaveRules: (installation: Installation) => void;
@@ -231,6 +241,15 @@ export function IntegrationWebhookLogsPanel({
   testArgs,
   setTestArgs,
   testResult,
+  editServerUrl,
+  setEditServerUrl,
+  rotateSecretValue,
+  setRotateSecretValue,
+  rotateSecretKind,
+  setRotateSecretKind,
+  editAllowlist,
+  setEditAllowlist,
+  onSaveConnectionAndSecret,
   expandedRulesForm,
   setExpandedRulesForm,
   onSaveRules,
@@ -533,6 +552,80 @@ export function IntegrationWebhookLogsPanel({
                         </div>
                       </div>
 
+                      <div className="mt-4 space-y-2 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/45 p-4">
+                        <p className="flex items-center gap-1.5 font-semibold text-[var(--text-heading)] text-xs uppercase tracking-wider">
+                          <KeyRound className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+                          Endpoint, Allowlist &amp; Credential Rotation
+                        </p>
+                        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+                          <Input
+                            aria-label="Connector Server URL"
+                            placeholder="https://mcp.example.com/mcp"
+                            value={editServerUrl}
+                            onChange={(e) => setEditServerUrl(e.target.value)}
+                            className="h-8 text-xs"
+                          />
+                          <Input
+                            type="password"
+                            aria-label="New Credential Secret"
+                            placeholder="Rotate API key / Bearer token (leave blank to keep)"
+                            value={rotateSecretValue}
+                            onChange={(e) => setRotateSecretValue(e.target.value)}
+                            className="h-8 text-xs"
+                          />
+                          <select
+                            aria-label="Credential Secret Kind"
+                            value={rotateSecretKind}
+                            onChange={(e) =>
+                              setRotateSecretKind(
+                                e.target.value as 'bearer' | 'api_key' | 'custom_header'
+                              )
+                            }
+                            className="h-8 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2.5 text-[var(--text-heading)] text-xs"
+                          >
+                            <option value="bearer">Bearer Token</option>
+                            <option value="api_key">API Key Header</option>
+                            <option value="custom_header">Custom Header</option>
+                          </select>
+                          {(rotateSecretKind === 'api_key' ||
+                            rotateSecretKind === 'custom_header') && (
+                            <Input
+                              aria-label="Rotation Custom Header Name"
+                              placeholder="Header Name (e.g. X-Api-Key)"
+                              defaultValue={
+                                typeof installation.config?.api_key_header === 'string'
+                                  ? installation.config.api_key_header
+                                  : ''
+                              }
+                              onChange={(e) => {
+                                installation.config = {
+                                  ...(installation.config ?? {}),
+                                  api_key_header: e.target.value,
+                                };
+                              }}
+                              className="h-8 w-44 text-xs"
+                            />
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Input
+                            aria-label="Installation Tool Allowlist"
+                            placeholder="Tool allowlist (comma-separated)"
+                            value={editAllowlist}
+                            onChange={(e) => setEditAllowlist(e.target.value)}
+                            className="h-8 flex-1 text-xs"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            disabled={busyId === installation.id}
+                            onClick={() => onSaveConnectionAndSecret(installation)}
+                          >
+                            Save Endpoint &amp; Rotate Secret
+                          </Button>
+                        </div>
+                      </div>
+
                       <div className="mt-4">
                         <IntegrationRulesFields
                           idPrefix={`installed-${installation.id}`}
@@ -540,6 +633,7 @@ export function IntegrationWebhookLogsPanel({
                           onChange={setExpandedRulesForm}
                           onSave={() => onSaveRules(installation)}
                           saving={busyId === installation.id}
+                          defaultEndpointHost={catalogEntry?.server_url ?? ''}
                         />
                       </div>
                     </m.div>

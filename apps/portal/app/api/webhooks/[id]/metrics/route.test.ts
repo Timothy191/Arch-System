@@ -43,7 +43,9 @@ describe('GET /api/webhooks/[id]/metrics', () => {
           return {
             select: jest.fn().mockReturnValue({
               eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({ data: { department_id: 'dept-1' } }),
+                is: jest.fn().mockReturnValue({
+                  single: jest.fn().mockResolvedValue({ data: { department_id: 'dept-1' } }),
+                }),
               }),
             }),
           };
@@ -61,8 +63,12 @@ describe('GET /api/webhooks/[id]/metrics', () => {
     };
     createServerSupabaseClient.mockResolvedValue(mock);
 
-    const req = new NextRequest('http://localhost/api/webhooks/wh-1/metrics');
-    const res = await GET(req, { params: Promise.resolve({ id: 'wh-1' }) });
+    const req = new NextRequest(
+      'http://localhost/api/webhooks/11111111-1111-4111-a111-111111111111/metrics'
+    );
+    const res = await GET(req, {
+      params: Promise.resolve({ id: '11111111-1111-4111-a111-111111111111' }),
+    });
     const json = await res.json();
 
     expect(res.status).toBe(200);

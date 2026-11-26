@@ -4,7 +4,9 @@ import type React from 'react';
 import { externalContentIndexing } from '../../../actions/external-content-indexing';
 import {
   deleteCardTemplate,
+  getPortalSettings,
   listCardTemplates,
+  savePortalSettings,
   setDefaultCardTemplate,
   uploadCardTemplate,
 } from '../actions/card-templates';
@@ -46,6 +48,8 @@ jest.mock('../actions/card-templates', () => ({
   uploadCardTemplate: jest.fn(),
   setDefaultCardTemplate: jest.fn(),
   deleteCardTemplate: jest.fn(),
+  getPortalSettings: jest.fn(),
+  savePortalSettings: jest.fn(),
 }));
 
 jest.mock('../../../actions/external-content-indexing', () => ({
@@ -58,13 +62,14 @@ describe('Admin Minerals, Targets, Settings & ExternalContent Tabs', () => {
     window.localStorage.clear();
   });
 
-  it('MineralsTab adds a mineral and rolls back optimistic state if save fails', async () => {
+  it('MineralsTab adds, renames inline, and rolls back optimistic state if save fails', async () => {
     jest.mocked(getMineralRegistry).mockResolvedValueOnce({
       waste: ['Dyke', 'Overburden'],
       coal: ['2#Lower', '4#Upper'],
     });
     jest
       .mocked(adminSaveMineralRegistry)
+      .mockResolvedValueOnce({ success: true })
       .mockResolvedValueOnce({ success: true })
       .mockResolvedValueOnce({ error: 'Database offline' });
 
@@ -86,15 +91,28 @@ describe('Admin Minerals, Targets, Settings & ExternalContent Tabs', () => {
     });
     expect(screen.getByText('Mudstone')).toBeInTheDocument();
 
-    // Now remove fails -> state rolls back cleanly and Mudstone remains rendered
-    fireEvent.click(screen.getByTitle('Remove Mudstone'));
-    await waitFor(() => {
-      expect(adminSaveMineralRegistry).toHaveBeenCalledTimes(2);
+    // Inline rename
+    fireEvent.click(screen.getByLabelText('Rename Mudstone'));
+    fireEvent.change(screen.getByLabelText('Rename Mudstone'), {
+      target: { value: 'Shale Mudstone' },
     });
-    expect(screen.getByText('Mudstone')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Save rename for Mudstone'));
+    await waitFor(() => {
+      expect(adminSaveMineralRegistry).toHaveBeenCalledWith({
+        waste: ['Dyke', 'Overburden', 'Shale Mudstone'],
+        coal: ['2#Lower', '4#Upper'],
+      });
+    });
+
+    // Now remove fails -> state rolls back cleanly and Shale Mudstone remains rendered
+    fireEvent.click(screen.getByTitle('Remove Shale Mudstone'));
+    await waitFor(() => {
+      expect(adminSaveMineralRegistry).toHaveBeenCalledTimes(3);
+    });
+    expect(screen.getByText('Shale Mudstone')).toBeInTheDocument();
   });
 
-  it('TargetsTab tracks dirty state, auto-scales from shift, and persists localStorage only after save', async () => {
+  it('TargetsTab clamps min={1}, tracks dirty state, auto-scales from shift, and persists localStorage after save', async () => {
     const initial = {
       shift: {
         loadsTarget: 150,
@@ -127,6 +145,9 @@ describe('Admin Minerals, Targets, Settings & ExternalContent Tabs', () => {
     });
 
     const shiftLoadsInput = screen.getAllByLabelText('Loaded Haulage Loads')[0]!;
+    fireEvent.change(shiftLoadsInput, { target: { value: '0' } });
+    expect(shiftLoadsInput).toHaveValue(1);
+
     fireEvent.change(shiftLoadsInput, { target: { value: '200' } });
     expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
 
@@ -148,7 +169,30 @@ describe('Admin Minerals, Targets, Settings & ExternalContent Tabs', () => {
     expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument();
   });
 
-  it('SettingsTab displays installed templates, sets default, deletes via dialog, and uploads', async () => {
+  it('SettingsTab edits Global Portal & Shift settings, displays templates, sets default, and deletes via dialog', async () => {
+    jest.mocked(getPortalSettings).mockResolvedValue({
+      settings: {
+        dayShiftStart: '06:00',
+        nightShiftStart: '18:00',
+        shiftDurationHours: 12,
+        siteTimezone: 'Africa/Johannesburg',
+        sessionIdleWarningMinutes: 30,
+        operationalNoticeBanner: '',
+        operationalNoticeActive: false,
+      },
+    });
+    jest.mocked(savePortalSettings).mockResolvedValue({
+      success: true,
+      settings: {
+        dayShiftStart: '06:00',
+        nightShiftStart: '18:00',
+        shiftDurationHours: 12,
+        siteTimezone: 'Africa/Johannesburg',
+        sessionIdleWarningMinutes: 45,
+        operationalNoticeBanner: 'Blast notice',
+        operationalNoticeActive: true,
+      },
+    });
     jest.mocked(listCardTemplates).mockResolvedValue({
       templates: [
         {
@@ -174,6 +218,16 @@ describe('Admin Minerals, Targets, Settings & ExternalContent Tabs', () => {
     render(<SettingsTab />);
     await waitFor(() => {
       expect(screen.getByText('Operator Standard')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText(/^Operational Notice Banner$/i), {
+      target: { value: 'Blast notice' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Save Portal Settings/i }));
+    await waitFor(() => {
+      expect(savePortalSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ operationalNoticeBanner: 'Blast notice' })
+      );
     });
 
     expect(screen.getByText('Default')).toBeInTheDocument();

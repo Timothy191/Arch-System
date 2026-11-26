@@ -12,6 +12,7 @@ import { getCurrentShift, getOperationalToday } from '@repo/utils';
 import { ArrowUpRight, BarChart3, Calendar, Clock, Target, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+import { getActivePortalSettings } from '@/features/admin/actions/card-templates';
 import { getOperationalTargets } from '~/features/admin/actions/targets';
 import {
   DEFAULT_OPERATIONAL_TARGETS_CLIENT,
@@ -118,7 +119,10 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
         }
       }
 
-      const remoteTargets = await getOperationalTargets();
+      const [remoteTargets, portalSettings] = await Promise.all([
+        getOperationalTargets(),
+        getActivePortalSettings().catch(() => null),
+      ]);
       if (remoteTargets) {
         resolvedTargets = remoteTargets;
         setTargets(remoteTargets);
@@ -126,8 +130,9 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
 
       try {
         const supabase = createBrowserSupabaseClient();
-        const today = getOperationalToday('Africa/Johannesburg');
-        const currentShift = getCurrentShift();
+        const activeTimezone = portalSettings?.siteTimezone || 'Africa/Johannesburg';
+        const today = getOperationalToday(activeTimezone);
+        const currentShift = getCurrentShift(new Date(), activeTimezone);
         const monthStart = `${today.slice(0, 7)}-01`;
 
         const [machinesRes, monthLoadsRes, monthOpsRes] = await Promise.all([

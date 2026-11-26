@@ -6,6 +6,7 @@ import { fetchClient } from '@repo/utils/client';
 import { useQuery } from '@tanstack/react-query';
 import {
   Activity,
+  AlertTriangle,
   Bot,
   Bug,
   CheckCircle2,
@@ -21,6 +22,31 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import type { BuildTelemetrySummary } from '@/lib/ai-metrics-types';
+
+const AUTO_POLL_INTERVAL_MS = 30_000;
+const SKELETON_CARD_COUNT = 4;
+const TOKENS_PER_MILLION = 1_000_000;
+const TOKENS_PER_THOUSAND = 1_000;
+const FULL_PERCENT = 100;
+const TENTHS_ROUNDING = 10;
+const CENTS_PER_DOLLAR = 100;
+const DEFAULT_USD_TO_ZAR = 18.52;
+const MIN_BAR_WIDTH_PCT = 4;
+const RECENT_FEED_DISPLAY_LIMIT = 10;
+
+interface RuntimeSubsystem {
+  readonly name: string;
+  readonly status: 'healthy' | 'degraded' | 'unhealthy';
+  readonly latencyMs: number | null;
+  readonly detail: string;
+}
+
+interface RuntimeSystemHealth {
+  readonly status: 'healthy' | 'degraded' | 'unhealthy';
+  readonly healthScore?: number;
+  readonly uptimePct?: number;
+  readonly subsystems: readonly RuntimeSubsystem[];
+}
 
 interface AIMetrics {
   totalTokens: number;
@@ -50,8 +76,27 @@ interface AIMetrics {
     latency: number;
     status: string;
   }>;
+  pagination?: {
+    limit: number;
+    offset: number;
+    returnedRows: number;
+    totalCount: number | null;
+    hasMore: boolean;
+  };
+  systemHealth?: RuntimeSystemHealth;
+  dbError?: string | null;
   buildTelemetry?: BuildTelemetrySummary;
 }
+
+type MetricsScope = 'session' | '24h' | '7d' | '30d' | 'all-time';
+
+const SCOPE_LABELS: Record<MetricsScope, string> = {
+  session: 'Today (Session)',
+  '24h': 'Last 24 Hours',
+  '7d': 'Last 7 Days',
+  '30d': 'Last 30 Days',
+  'all-time': 'All-Time',
+};
 
 function formatRand(amount: number): string {
   return `R ${amount.toLocaleString('en-ZA', {
@@ -61,11 +106,16 @@ function formatRand(amount: number): string {
 }
 
 export default function AIMetricsDashboard() {
-  const [scope, setScope] = useState<'session' | '24h' | '7d' | '30d' | 'all-time'>('all-time');
+  const [scope, setScope] = useState<MetricsScope>('all-time');
   const [refreshing, setRefreshing] = useState(false);
   const [autoPoll, setAutoPoll] = useState(false);
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const {
+    data: metricsData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['ai-metrics', scope],
     queryFn: async () => {
       const json = await fetchClient.get<{ success: boolean; error?: string; metrics: AIMetrics }>(
@@ -74,7 +124,7 @@ export default function AIMetricsDashboard() {
       if (!json.success) throw new Error(json.error || 'Failed to fetch AI metrics');
       return json.metrics;
     },
-    refetchInterval: autoPoll ? 30_000 : false,
+    refetchInterval: autoPoll ? AUTO_POLL_INTERVAL_MS : false,
   });
 
   const handleRefresh = () => {
@@ -86,15 +136,18 @@ export default function AIMetricsDashboard() {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+          {Array.from({ length: SKELETON_CARD_COUNT }).map((_, idx) => (
+            <div
+              key={`ai-metrics-skeleton-${idx}`}
+              className="h-32 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]"
+            />
           ))}
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error || !metricsData) {
     return (
       <GlassCard accent="red">
         <p className="font-medium text-accent-red">Failed to load AI metrics</p>
@@ -112,8 +165,11 @@ export default function AIMetricsDashboard() {
     );
   }
 
-  const metrics = data as AIMetrics;
+  const metrics = metricsData;
   const bt = metrics.buildTelemetry;
+  const exchangeRateZAR = bt?.exchangeRateZAR ?? DEFAULT_USD_TO_ZAR;
+  const resolvedHealth: RuntimeSystemHealth | undefined = metrics.systemHealth ?? bt?.systemHealth;
+  const healthStatus = resolvedHealth?.status ?? 'healthy';
 
   const displayCostZAR =
     metrics.totalCostZAR > 0 ? metrics.totalCostZAR : (bt?.claudeCodeCost.totalCostZAR ?? 0);
@@ -126,12 +182,22 @@ export default function AIMetricsDashboard() {
     metrics.totalCompletionTokens > 0
       ? metrics.totalCompletionTokens
       : (bt?.totalOutputTokens ?? 0);
-  const displayCacheHitPct =
-    metrics.cacheHitRatio > 0 ? metrics.cacheHitRatio : (bt?.avgUsage.cacheHitRatePct ?? 84.0);
-  const displayCacheMissPct = Math.round((100 - displayCacheHitPct) * 10) / 10;
+
+  const hasPromptSamples = metrics.totalPromptTokens > 0 || Boolean(bt);
+  const displayCacheHitPct = hasPromptSamples
+    ? metrics.totalPromptTokens > 0
+      ? metrics.cacheHitRatio
+      : (bt?.avgUsage.cacheHitRatePct ?? 0)
+    : null;
+  const displayCacheMissPct =
+    displayCacheHitPct !== null
+      ? Math.round((FULL_PERCENT - displayCacheHitPct) * TENTHS_ROUNDING) / TENTHS_ROUNDING
+      : null;
+
   const displayAvgLatency =
-    metrics.avgLatency > 0 ? metrics.avgLatency : (bt?.avgUsage.avgLatencyMs ?? 1840);
-  const healthStatus = bt?.systemHealth.status ?? 'healthy';
+    metrics.totalRequests > 0 ? metrics.avgLatency : (bt?.avgUsage.avgLatencyMs ?? null);
+
+  const isZeroScopeState = metrics.totalRequests === 0 && !bt;
 
   return (
     <div className="space-y-6">
@@ -149,16 +215,25 @@ export default function AIMetricsDashboard() {
                   className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-semibold text-xs ${
                     healthStatus === 'healthy'
                       ? 'border-accent-green/30 bg-accent-green/15 text-accent-green'
-                      : 'border-accent-amber/30 bg-accent-amber/15 text-accent-amber'
+                      : healthStatus === 'degraded'
+                        ? 'border-accent-amber/30 bg-accent-amber/15 text-accent-amber'
+                        : 'border-accent-red/30 bg-accent-red/15 text-accent-red'
                   }`}
                 >
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  AI System {healthStatus.toUpperCase()} ({bt?.systemHealth.healthScore ?? 99.4}%)
+                  {healthStatus === 'healthy' ? (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  ) : (
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                  )}
+                  AI System {healthStatus.toUpperCase()}
+                  {typeof resolvedHealth?.healthScore === 'number'
+                    ? ` (${resolvedHealth.healthScore}%)`
+                    : ''}
                 </span>
               </div>
               <p className="mt-1 text-[var(--text-secondary)] text-sm">
-                Full-lifecycle coding agent token ledger, Claude Code ZAR cost valuation (R{' '}
-                {bt?.exchangeRateZAR ?? 18.52}/USD), cache efficiency &amp; engineering velocity
+                Live AI token usage ledger from Supabase (R {exchangeRateZAR}/USD), prompt cache
+                efficiency &amp; runtime request telemetry
               </p>
               {bt && (
                 <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[11px] text-[var(--text-secondary)]">
@@ -181,18 +256,18 @@ export default function AIMetricsDashboard() {
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 rounded-lg bg-[var(--bg-tertiary)] p-1">
-              {(['session', '24h', '7d', '30d', 'all-time'] as const).map((s) => (
+              {(['session', '24h', '7d', '30d', 'all-time'] as const).map((scopeItem) => (
                 <button
                   type="button"
-                  key={s}
-                  onClick={() => setScope(s)}
+                  key={scopeItem}
+                  onClick={() => setScope(scopeItem)}
                   className={`rounded-md px-3 py-1.5 font-medium text-xs transition-all ${
-                    scope === s
+                    scope === scopeItem
                       ? 'bg-[var(--accent-blue)] text-white shadow-sm'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
                   }`}
                 >
-                  {s === 'all-time' ? 'All-Time' : s.toUpperCase()}
+                  {scopeItem === 'all-time' ? 'All-Time' : scopeItem.toUpperCase()}
                 </button>
               ))}
             </div>
@@ -223,12 +298,37 @@ export default function AIMetricsDashboard() {
         </div>
       </GlassCard>
 
-      {/* Top Executive KPI Cards (ZAR Cost, Total Build Tokens, Bugs Resolved, Cache & Latency) */}
+      {metrics.dbError && (
+        <GlassCard accent="alert">
+          <div className="flex items-center gap-2.5 text-accent-amber text-xs">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>
+              Supabase telemetry query degraded:{' '}
+              <code className="font-mono">{metrics.dbError}</code>
+            </span>
+          </div>
+        </GlassCard>
+      )}
+
+      {isZeroScopeState && (
+        <GlassCard className="p-5" data-testid="ai-metrics-empty-scope">
+          <p className="font-semibold text-[var(--text-heading)] text-sm">
+            No AI token usage recorded in {SCOPE_LABELS[scope]}
+          </p>
+          <p className="mt-1 text-[var(--text-secondary)] text-xs">
+            0 rows matched in <code className="font-mono">public.ai_token_usage</code> for the
+            selected window. Metrics below show real zeroed counters rather than synthetic
+            estimates.
+          </p>
+        </GlassCard>
+      )}
+
+      {/* Top KPI Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <GlassCard hover accent="green">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
-              Claude Code Cost (ZAR)
+              AI Token Cost (ZAR)
             </span>
             <div className="rounded-lg bg-accent-green/10 p-2 text-accent-green">
               <Coins className="h-4 w-4" />
@@ -239,11 +339,19 @@ export default function AIMetricsDashboard() {
               {formatRand(displayCostZAR)}
             </div>
             <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
-              USD ${displayCostUSD.toFixed(2)} • Saved{' '}
-              <span className="font-semibold text-accent-green">
-                {formatRand(bt?.claudeCodeCost.cacheSavingsZAR ?? 5008.73)}
-              </span>{' '}
-              via caching
+              USD ${displayCostUSD.toFixed(2)}
+              {bt ? (
+                <>
+                  {' '}
+                  • Saved{' '}
+                  <span className="font-semibold text-accent-green">
+                    {formatRand(bt.claudeCodeCost.cacheSavingsZAR)}
+                  </span>{' '}
+                  via caching
+                </>
+              ) : (
+                ` • ${Math.round(metrics.tokensSaved).toLocaleString('en-US')} tokens saved`
+              )}
             </p>
           </div>
         </GlassCard>
@@ -251,7 +359,7 @@ export default function AIMetricsDashboard() {
         <GlassCard hover accent="blue">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
-              Total System Build Tokens
+              Total Tokens ({scope === 'all-time' ? 'All-Time' : scope.toUpperCase()})
             </span>
             <div className="rounded-lg bg-[var(--accent-blue)]/10 p-2 text-[var(--accent-blue)]">
               <Bot className="h-4 w-4" />
@@ -259,11 +367,16 @@ export default function AIMetricsDashboard() {
           </div>
           <div className="mt-3">
             <div className="font-bold font-mono text-2xl text-[var(--text-heading)]">
-              {(displayTotalTokens / 1_000_000).toFixed(2)}M
+              {displayTotalTokens >= TOKENS_PER_MILLION
+                ? `${(displayTotalTokens / TOKENS_PER_MILLION).toFixed(2)}M`
+                : displayTotalTokens.toLocaleString('en-US')}
             </div>
             <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
-              {(displayInputTokens / 1_000_000).toFixed(2)}M in •{' '}
-              {(displayOutputTokens / 1_000_000).toFixed(2)}M out • {bt?.totalTurns ?? 3598} turns
+              {displayInputTokens.toLocaleString('en-US')} in •{' '}
+              {displayOutputTokens.toLocaleString('en-US')} out •{' '}
+              {bt
+                ? `${bt.totalTurns.toLocaleString('en-US')} turns`
+                : `${metrics.totalRequests.toLocaleString('en-US')} requests`}
             </p>
           </div>
         </GlassCard>
@@ -271,7 +384,7 @@ export default function AIMetricsDashboard() {
         <GlassCard hover accent="none">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
-              Bugs Resolved & Velocity
+              {bt ? 'Bugs Resolved & Velocity' : 'Recorded Requests'}
             </span>
             <div className="rounded-lg bg-accent-green/10 p-2 text-accent-green">
               <Bug className="h-4 w-4" />
@@ -279,11 +392,17 @@ export default function AIMetricsDashboard() {
           </div>
           <div className="mt-3">
             <div className="font-bold font-mono text-2xl text-[var(--text-heading)]">
-              {bt?.engineeringVelocity.bugsResolved ?? 89} Bugs Fixed
+              {bt
+                ? `${bt.engineeringVelocity.bugsResolved} Bugs Fixed`
+                : `${metrics.totalRequests.toLocaleString('en-US')} Requests`}
             </div>
             <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
-              {bt?.engineeringVelocity.totalCommits ?? 241} commits •{' '}
-              {formatRand(bt?.claudeCodeCost.costPerBugResolvedZAR ?? 94.46)}/bug
+              {bt
+                ? `${bt.engineeringVelocity.totalCommits} commits • ${formatRand(bt.claudeCodeCost.costPerBugResolvedZAR)}/bug`
+                : metrics.pagination?.totalCount !== null &&
+                    metrics.pagination?.totalCount !== undefined
+                  ? `Showing ${metrics.pagination.returnedRows} of ${metrics.pagination.totalCount} row(s)`
+                  : `${metrics.byModel.length} active model(s)`}
             </p>
           </div>
         </GlassCard>
@@ -291,7 +410,7 @@ export default function AIMetricsDashboard() {
         <GlassCard hover accent="none">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
-              Cache Hit & Turn Latency
+              Cache Hit &amp; Turn Latency
             </span>
             <div className="rounded-lg bg-accent-amber/10 p-2 text-accent-amber">
               <Zap className="h-4 w-4" />
@@ -299,20 +418,28 @@ export default function AIMetricsDashboard() {
           </div>
           <div className="mt-3">
             <div className="font-bold font-mono text-2xl text-[var(--accent-blue)]">
-              {displayCacheHitPct}% Hit{' '}
-              <span className="font-normal text-[var(--text-secondary)] text-sm">
-                / {displayCacheMissPct}% Miss
-              </span>
+              {displayCacheHitPct !== null && displayCacheMissPct !== null ? (
+                <>
+                  {displayCacheHitPct}% Hit{' '}
+                  <span className="font-normal text-[var(--text-secondary)] text-sm">
+                    / {displayCacheMissPct}% Miss
+                  </span>
+                </>
+              ) : (
+                'No samples yet'
+              )}
             </div>
             <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
-              Avg {displayAvgLatency}ms • p95 {bt?.avgUsage.p95LatencyMs ?? 3420}ms •{' '}
-              {bt?.avgUsage.tokensPerSecond ?? 78.4} tok/s
+              {displayAvgLatency !== null ? `Avg ${displayAvgLatency}ms` : 'Avg N/A'}
+              {bt
+                ? ` • p95 ${bt.avgUsage.p95LatencyMs}ms • ${bt.avgUsage.tokensPerSecond} tok/s`
+                : ''}
             </p>
           </div>
         </GlassCard>
       </div>
 
-      {/* Average Usage Breakdown & Claude Code Rate Card */}
+      {/* Average Usage Breakdown & Rate Card when buildTelemetry is provided */}
       {bt && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <GlassCard>
@@ -320,7 +447,7 @@ export default function AIMetricsDashboard() {
               <div className="flex items-center gap-2">
                 <Cpu className="h-5 w-5 text-[var(--accent-blue)]" />
                 <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-                  Average Per-Turn Usage & Cache Telemetry
+                  Average Per-Turn Usage &amp; Cache Telemetry
                 </h3>
               </div>
               <span className="font-mono text-[var(--text-secondary)] text-xs">
@@ -350,14 +477,16 @@ export default function AIMetricsDashboard() {
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 p-3">
                 <div className="text-[11px] text-[var(--text-secondary)]">Prompt Cache Hit</div>
                 <div className="mt-1 font-bold font-mono text-accent-green text-base">
-                  {bt.avgUsage.cacheHitRatePct}% ({(bt.cacheReadTokens / 1_000_000).toFixed(1)}M)
+                  {bt.avgUsage.cacheHitRatePct}% (
+                  {(bt.cacheReadTokens / TOKENS_PER_MILLION).toFixed(1)}M)
                 </div>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 p-3">
                 <div className="text-[11px] text-[var(--text-secondary)]">Cache Miss / Write</div>
                 <div className="mt-1 font-bold font-mono text-accent-amber text-base">
                   {bt.avgUsage.cacheMissRatePct}% (
-                  {((bt.uncachedInputTokens + bt.cacheWriteTokens) / 1_000_000).toFixed(1)}M)
+                  {((bt.uncachedInputTokens + bt.cacheWriteTokens) / TOKENS_PER_MILLION).toFixed(1)}
+                  M)
                 </div>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 p-3">
@@ -432,22 +561,25 @@ export default function AIMetricsDashboard() {
       )}
 
       {/* AI & Data Infrastructure Health Status */}
-      {bt && (
+      {resolvedHealth && (
         <GlassCard>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-accent-green" />
               <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-                AI System & Persistence Health Status
+                AI System &amp; Persistence Health Status
               </h3>
             </div>
-            <span className="font-mono font-semibold text-accent-green text-xs">
-              Uptime {bt.systemHealth.uptimePct}% • Health Score {bt.systemHealth.healthScore}%
-            </span>
+            {typeof resolvedHealth.uptimePct === 'number' &&
+              typeof resolvedHealth.healthScore === 'number' && (
+                <span className="font-mono font-semibold text-accent-green text-xs">
+                  Uptime {resolvedHealth.uptimePct}% • Health Score {resolvedHealth.healthScore}%
+                </span>
+              )}
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-            {bt.systemHealth.subsystems.map((sub) => (
+            {resolvedHealth.subsystems.map((sub) => (
               <div
                 key={sub.name}
                 className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/50 p-3.5"
@@ -458,14 +590,20 @@ export default function AIMetricsDashboard() {
                   </span>
                   <span
                     className={`h-2.5 w-2.5 rounded-full ${
-                      sub.status === 'healthy' ? 'bg-accent-green' : 'bg-accent-amber'
+                      sub.status === 'healthy'
+                        ? 'bg-accent-green'
+                        : sub.status === 'degraded'
+                          ? 'bg-accent-amber'
+                          : 'bg-accent-red'
                     }`}
                   />
                 </div>
                 <p className="mt-1.5 text-[11px] text-[var(--text-secondary)]">{sub.detail}</p>
                 <div className="mt-2 flex items-center justify-between font-mono text-[10px] text-[var(--text-secondary)]">
                   <span>Status: {sub.status.toUpperCase()}</span>
-                  <span>Latency: {sub.latencyMs}ms</span>
+                  <span>
+                    Latency: {sub.latencyMs !== null ? `${sub.latencyMs}ms` : 'Not reported'}
+                  </span>
                 </div>
               </div>
             ))}
@@ -503,7 +641,9 @@ export default function AIMetricsDashboard() {
             <div className="space-y-3">
               {bt.agentFleetBreakdown.map((agent) => {
                 const cacheRatio =
-                  agent.tokens > 0 ? Math.round((agent.cachedTokens / agent.tokens) * 100) : 0;
+                  agent.tokens > 0
+                    ? Math.round((agent.cachedTokens / agent.tokens) * FULL_PERCENT)
+                    : 0;
                 return (
                   <div
                     key={agent.agent}
@@ -526,18 +666,20 @@ export default function AIMetricsDashboard() {
                       </div>
                     </div>
 
-                    {/* Visual Share Progress Bar */}
                     <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-200/80">
                       <div
                         className="h-full rounded-full bg-[var(--accent-blue)] transition-all duration-500"
-                        style={{ width: `${Math.min(100, Math.max(4, agent.sharePct))}%` }}
+                        style={{
+                          width: `${Math.min(FULL_PERCENT, Math.max(MIN_BAR_WIDTH_PCT, agent.sharePct))}%`,
+                        }}
                       />
                     </div>
 
                     <div className="mt-2.5 grid grid-cols-3 gap-2 border-[var(--border-subtle)] border-t pt-2 font-mono text-[10px] text-[var(--text-secondary)]">
-                      <span>{(agent.tokens / 1_000_000).toFixed(2)}M total</span>
+                      <span>{(agent.tokens / TOKENS_PER_MILLION).toFixed(2)}M total</span>
                       <span className="text-center text-accent-green">
-                        {(agent.cachedTokens / 1_000_000).toFixed(2)}M cached ({cacheRatio}%)
+                        {(agent.cachedTokens / TOKENS_PER_MILLION).toFixed(2)}M cached ({cacheRatio}
+                        %)
                       </span>
                       <span className="text-right">Avg {agent.avgLatencyMs}ms</span>
                     </div>
@@ -551,7 +693,7 @@ export default function AIMetricsDashboard() {
             <div className="mb-4 flex items-center gap-2">
               <Layers className="h-5 w-5 text-[var(--accent-blue)]" />
               <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-                System Build Phase & Engineering Output Ledger
+                System Build Phase &amp; Engineering Output Ledger
               </h3>
             </div>
             <div className="space-y-3">
@@ -569,7 +711,7 @@ export default function AIMetricsDashboard() {
                     </div>
                   </div>
                   <div className="mt-2 flex items-center justify-between font-mono text-[11px] text-[var(--text-secondary)]">
-                    <span>{(phase.tokens / 1_000_000).toFixed(2)}M tokens</span>
+                    <span>{(phase.tokens / TOKENS_PER_MILLION).toFixed(2)}M tokens</span>
                     <span className="inline-flex items-center gap-1">
                       <GitCommit className="h-3 w-3" /> {phase.commits} commits
                     </span>
@@ -617,8 +759,7 @@ export default function AIMetricsDashboard() {
         {metrics.byModel.length === 0 ? (
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/30 p-5 text-center">
             <p className="font-medium text-[var(--text-secondary)] text-xs">
-              No live portal user AI invocations in this window — displaying cumulative system build
-              telemetry above.
+              No live portal user AI invocations in this window.
             </p>
           </div>
         ) : (
@@ -639,7 +780,7 @@ export default function AIMetricsDashboard() {
                   </div>
                   <div className="text-right">
                     <div className="font-bold font-mono text-accent-green text-xs">
-                      R {((model.cost / 100) * 18.52).toFixed(2)}
+                      R {((model.cost / CENTS_PER_DOLLAR) * exchangeRateZAR).toFixed(2)}
                     </div>
                     <div className="font-mono text-[10px] text-[var(--text-secondary)]">
                       {model.percentage}% share
@@ -648,10 +789,10 @@ export default function AIMetricsDashboard() {
                 </div>
                 <div className="mt-3 flex items-center justify-between border-[var(--border-subtle)] border-t pt-2.5 font-mono text-[10px]">
                   <span className="text-[var(--text-secondary)]">
-                    {(model.tokens / 1_000_000).toFixed(3)}M tokens
+                    {(model.tokens / TOKENS_PER_MILLION).toFixed(3)}M tokens
                   </span>
                   <span className="text-[var(--text-secondary)]">
-                    {(model.cachedTokens / 1_000).toFixed(1)}K cached
+                    {(model.cachedTokens / TOKENS_PER_THOUSAND).toFixed(1)}K cached
                   </span>
                 </div>
               </div>
@@ -670,7 +811,7 @@ export default function AIMetricsDashboard() {
             </h3>
           </div>
           <div className="space-y-2">
-            {metrics.recentUsage.slice(0, 10).map((usage) => (
+            {metrics.recentUsage.slice(0, RECENT_FEED_DISPLAY_LIMIT).map((usage) => (
               <div
                 key={usage.id}
                 className="flex items-center justify-between rounded-lg bg-[var(--bg-tertiary)]/30 p-3"
@@ -684,17 +825,19 @@ export default function AIMetricsDashboard() {
                   <div>
                     <p className="font-mono text-[var(--text-heading)] text-xs">{usage.model}</p>
                     <p className="text-[10px] text-[var(--text-secondary)]">
-                      {new Date(usage.timestamp).toLocaleString('en-ZA')}
+                      {usage.timestamp
+                        ? new Date(usage.timestamp).toLocaleString('en-ZA')
+                        : 'Timestamp unavailable'}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 font-mono text-xs">
                   <span className="text-[var(--text-secondary)]">
-                    {(usage.tokens / 1_000).toFixed(1)}K tokens
+                    {(usage.tokens / TOKENS_PER_THOUSAND).toFixed(1)}K tokens
                   </span>
                   <span className="text-[var(--text-secondary)]">{usage.latency}ms</span>
                   <span className="text-accent-green">
-                    R {((usage.costCents / 100) * 18.52).toFixed(3)}
+                    R {((usage.costCents / CENTS_PER_DOLLAR) * exchangeRateZAR).toFixed(3)}
                   </span>
                 </div>
               </div>

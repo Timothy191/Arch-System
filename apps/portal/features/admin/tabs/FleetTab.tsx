@@ -1,22 +1,34 @@
 'use client';
 
+import { ADMIN_MACHINE_TYPES } from '@repo/contract';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@repo/ui/components/ui/dialog';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Download, Edit2, Plus, Power, Search, Sparkles, X } from 'lucide-react';
+import { Download, Edit2, Plus, Power, Search, Sparkles, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
-import { adminAddMachine, adminGenerateStartingSmr, adminUpdateMachine } from '../actions/fleet';
+import {
+  adminAddMachine,
+  adminArchiveMachine,
+  adminGenerateStartingSmr,
+  adminUpdateMachine,
+} from '../actions/fleet';
 import { FleetAnalyticsPanel } from './FleetAnalyticsPanel';
 import {
   buildFleetCsv,
   computeFleetAnalytics,
-  estimateBaselineStartingSmr,
   FLEET_IMAGE_PRESETS,
   type FleetMachineRecord,
   isArticulatedOrRigidDumper,
@@ -48,20 +60,7 @@ const TABLE_HEADER_CELL_CLASS =
   'px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider';
 const FORM_LABEL_CLASS = 'mb-2 block font-medium text-[var(--text-body)] text-sm';
 
-const MACHINE_TYPE_OPTIONS = [
-  'Articulated Dumper',
-  'Rigid Dumper',
-  'Dump Truck',
-  'Excavator',
-  'Dozer',
-  'Drill Rig',
-  'Grader',
-  'Loader',
-  'Crusher',
-  'Compactor',
-  'Water Truck',
-  'Other',
-] as const;
+const MACHINE_TYPE_OPTIONS = ADMIN_MACHINE_TYPES;
 
 export function FleetTab() {
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
@@ -84,20 +83,33 @@ export function FleetTab() {
   const [filterSite, setFilterSite] = useState('');
   const [sortBy, setSortBy] = useState<FleetSortOption>('id-asc');
   const [pendingToggle, setPendingToggle] = useState<Machine | null>(null);
+  const [pendingArchive, setPendingArchive] = useState<Machine | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const [{ data: machineData }, { data: deptData }, { data: siteData }] = await Promise.all([
+    const [machineRes, deptRes, siteRes] = await Promise.all([
       supabase
         .from('machines')
         .select('*, department:departments(display_name), site:sites(name, site_code)')
         .is('deleted_at', null)
         .order('name'),
-      supabase.from('departments').select('id, display_name').order('display_name'),
-      supabase.from('sites').select('id, name, site_code, active').order('name'),
+      supabase
+        .from('departments')
+        .select('id, display_name')
+        .is('deleted_at', null)
+        .order('display_name'),
+      supabase
+        .from('sites')
+        .select('id, name, site_code, active')
+        .is('deleted_at', null)
+        .order('name'),
     ]);
-    if (machineData) {
-      const normalized = machineData.map((machine) => ({
+
+    if (machineRes.error) {
+      logError(new Error(machineRes.error.message), { context: 'fleet_load_machines' });
+      toast.error('Failed to load fleet machines.');
+    } else if (machineRes.data) {
+      const normalized = machineRes.data.map((machine) => ({
         ...machine,
         department: Array.isArray(machine.department)
           ? (machine.department[0] ?? null)
@@ -106,13 +118,14 @@ export function FleetTab() {
       })) as Machine[];
       setMachines(normalized);
     }
-    if (deptData) setDepartments(deptData);
-    if (siteData) setSites(siteData);
+
+    if (deptRes.data) setDepartments(deptRes.data);
+    if (siteRes.data) setSites(siteRes.data);
     setLoading(false);
   }, [supabase]);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
   const analytics = useMemo(() => computeFleetAnalytics(machines), [machines]);
@@ -225,11 +238,26 @@ export function FleetTab() {
       logError(new Error(result.error), { context: 'fleet_generate_starting_smr' });
       toast.error(result.error);
     } else {
-      toast.success(
-        result.updatedCount && result.updatedCount > 0
-          ? `Updated Starting SMR & fleet metadata for ${result.updatedCount} machine(s)`
-          : 'All fleet Starting SMR hours, manufacturers, and Production assignments are up to date'
-      );
+      if (result.updatedCount && result.updatedCount > 0) {
+        toast.success(
+          `Updated Starting SMR & fleet metadata for ${result.updatedCount} machine(s)`
+        );
+      } else if (!result.missingOpsMachines?.length) {
+        toast.success(
+          'All fleet Starting SMR hours, manufacturers, and Production assignments are up to date'
+        );
+      }
+
+      if (result.missingOpsMachines && result.missingOpsMachines.length > 0) {
+        const previewList = result.missingOpsMachines.slice(0, 5).join(', ');
+        const suffix =
+          result.missingOpsMachines.length > 5
+            ? ` (+${result.missingOpsMachines.length - 5} more)`
+            : '';
+        toast.info(
+          `${result.missingOpsMachines.length} machine(s) have no logged machine_operations history (${previewList}${suffix}) — enter Starting SMR manually.`
+        );
+      }
       await loadData();
     }
     setGeneratingSmr(false);
@@ -264,15 +292,36 @@ export function FleetTab() {
   const handleConfirmToggle = async () => {
     if (!pendingToggle) return;
     setSaving(true);
+    const targetName = pendingToggle.name;
+    const nextActive = !pendingToggle.active;
     const result = await adminUpdateMachine(pendingToggle.id, {
-      active: !pendingToggle.active,
+      active: nextActive,
     });
     if (result.error) {
       logError(new Error(result.error), { context: 'fleet_toggle_active' });
+      toast.error(result.error);
+    } else {
+      toast.success(`Machine "${targetName}" ${nextActive ? 'activated' : 'deactivated'}.`);
     }
     setPendingToggle(null);
     setSaving(false);
     await loadData();
+  };
+
+  const handleConfirmArchive = async () => {
+    if (!pendingArchive) return;
+    setSaving(true);
+    const targetName = pendingArchive.name;
+    const result = await adminArchiveMachine(pendingArchive.id);
+    if (result.error) {
+      logError(new Error(result.error), { context: 'fleet_archive_machine' });
+      toast.error(result.error);
+    } else {
+      toast.success(`Archived machine "${targetName}".`);
+      setPendingArchive(null);
+      await loadData();
+    }
+    setSaving(false);
   };
 
   const handleSave = async (formPayload: {
@@ -349,7 +398,7 @@ export function FleetTab() {
             className="border-accent-gold/50 text-[var(--text-heading)] hover:bg-accent-gold/10"
           >
             <Sparkles className="mr-1.5 h-4 w-4 text-accent-gold" aria-hidden="true" />
-            {generatingSmr ? 'Generating SMR…' : 'Generate Starting SMR'}
+            {generatingSmr ? 'Syncing SMR…' : 'Sync Starting SMR'}
           </Button>
           <Button
             type="button"
@@ -703,6 +752,17 @@ export function FleetTab() {
                           >
                             <Power className="h-4 w-4" aria-hidden="true" />
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={saving}
+                            aria-label={`Archive ${identity.machineId}`}
+                            className="text-accent-red hover:text-accent-red/80"
+                            onClick={() => setPendingArchive(machine)}
+                            title="Archive machine"
+                          >
+                            <Trash2 className="h-4 w-4" aria-hidden="true" />
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -724,6 +784,7 @@ export function FleetTab() {
             <DialogTitle>{editingMachine ? 'Edit Machine' : 'Add Machine'}</DialogTitle>
           </DialogHeader>
           <MachineForm
+            supabase={supabase}
             machine={editingMachine}
             departments={departments}
             defaultDepartmentId={productionDepartmentId}
@@ -790,6 +851,35 @@ export function FleetTab() {
               {saving ? 'Saving…' : pendingToggle?.active ? 'Deactivate' : 'Activate'}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm archive dialog */}
+      <Dialog
+        open={Boolean(pendingArchive)}
+        onOpenChange={(open) => !open && setPendingArchive(null)}
+      >
+        <DialogContent className="max-w-sm border-[var(--border-default)] bg-[var(--bg-primary)]">
+          <DialogHeader>
+            <DialogTitle>Archive Machine?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to archive &ldquo;{pendingArchive?.name}&rdquo;? Historical
+              shift operations remain intact, and the machine will be hidden from the active fleet
+              registry.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingArchive(null)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={saving}
+              onClick={() => void handleConfirmArchive()}
+            >
+              {saving ? 'Archiving…' : 'Confirm Archive'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
@@ -865,6 +955,7 @@ function MachinePreviewDialogContent({
 }
 
 function MachineForm({
+  supabase,
   machine,
   departments,
   defaultDepartmentId,
@@ -874,6 +965,7 @@ function MachineForm({
   onSubmit,
   onCancel,
 }: {
+  supabase: ReturnType<typeof createBrowserSupabaseClient>;
   machine: Machine | null;
   departments: Department[];
   defaultDepartmentId: string;
@@ -913,19 +1005,11 @@ function MachineForm({
         })
       : ''
   );
-  const [imageUrl, setImageUrl] = useState(
-    machine
-      ? resolveDefaultMachineImage({
-          machineType: machine.machine_type,
-          manufacturer: machine.manufacturer,
-          machineId: initialIdentity.machineId,
-          imageUrl: machine.image_url,
-        })
-      : ''
-  );
+  const [imageUrl, setImageUrl] = useState(machine?.image_url || '');
   const [startingSmr, setStartingSmr] = useState(
     machine?.starting_smr != null ? machine.starting_smr.toString() : ''
   );
+  const [lookingUpSmr, setLookingUpSmr] = useState(false);
   const [binFactorWaste, setBinFactorWaste] = useState(
     (machine?.bin_factor_waste ?? machine?.bin_factor)?.toString() || ''
   );
@@ -946,6 +1030,48 @@ function MachineForm({
     imageUrl,
   });
 
+  const handleLookupHistoricalSmr = async () => {
+    if (!machine?.id) {
+      toast.info(
+        'New machines have no logged operations yet — enter actual Starting SMR from the site hour meter.'
+      );
+      return;
+    }
+
+    setLookingUpSmr(true);
+    try {
+      const { data: ops, error: opsErr } = await supabase
+        .from('machine_operations')
+        .select('start_smu, end_smu')
+        .eq('machine_id', machine.id)
+        .order('shift_date', { ascending: true })
+        .limit(10);
+
+      if (opsErr) {
+        toast.error('Failed to query machine operations history.');
+        return;
+      }
+
+      const firstValid = (ops ?? []).find(
+        (op: { start_smu?: number | null; end_smu?: number | null }) =>
+          Number(op.start_smu || op.end_smu || 0) > 0
+      );
+      const derived = firstValid ? Number(firstValid.start_smu || firstValid.end_smu || 0) : 0;
+
+      if (derived > 0) {
+        const rounded = (Math.round(derived * 10) / 10).toString();
+        setStartingSmr(rounded);
+        toast.success(`Loaded earliest logged SMR (${rounded} hrs) from machine operations.`);
+      } else {
+        toast.info(
+          `No logged operations found for ${initialIdentity.machineId} — enter actual Starting SMR manually.`
+        );
+      }
+    } finally {
+      setLookingUpSmr(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
@@ -953,7 +1079,7 @@ function MachineForm({
       machine_name: machineName,
       machine_type: machineType,
       manufacturer,
-      image_url: resolvedPreviewUrl,
+      image_url: imageUrl.trim(),
       starting_smr: startingSmr,
       bin_factor_waste: isDumperType ? binFactorWaste : '',
       bin_factor_coal: isDumperType ? binFactorCoal : '',
@@ -1052,22 +1178,16 @@ function MachineForm({
             className="border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono"
             required
           />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              setStartingSmr(
-                String(
-                  estimateBaselineStartingSmr({
-                    machineType: machineType || 'Dump Truck',
-                    machineId: machineId || 'UNIT-01',
-                  })
-                )
-              )
-            }
-          >
-            Generate
-          </Button>
+          {machine?.id && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={lookingUpSmr}
+              onClick={() => void handleLookupHistoricalSmr()}
+            >
+              {lookingUpSmr ? 'Checking…' : 'From Ops Log'}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -1102,7 +1222,7 @@ function MachineForm({
               aria-label="Machine picture URL"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="/images/fleet/volvo-adt.webp"
+              placeholder="Leave blank to auto-match OEM preview"
               className="h-8 border-[var(--border-default)] bg-[var(--bg-primary)] font-mono text-xs"
             />
           </div>
@@ -1225,7 +1345,7 @@ function MachineForm({
           id="report_exempt"
           checked={reportExempt}
           onChange={(e) => setReportExempt(e.target.checked)}
-          className="h-4 w-4 accent-amber-400"
+          className="h-4 w-4 accent-[var(--accent-amber)]"
         />
         <div>
           <label

@@ -57,6 +57,7 @@ export function AdminTabs({ defaultValue, value, onValueChange, children }: Admi
             <TabsTrigger
               key={tab.value}
               value={tab.value}
+              title={tab.description}
               className="data-[state=active]:bg-[var(--bg-primary)] data-[state=active]:text-[var(--text-heading)]"
             >
               <Icon className="mr-2 h-4 w-4" />

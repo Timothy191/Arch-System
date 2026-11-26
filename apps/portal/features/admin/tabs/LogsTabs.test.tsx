@@ -22,13 +22,23 @@ jest.mock('sonner', () => ({
 
 const mockCreateBrowserSupabase = jest.mocked(createBrowserSupabaseClient);
 
-function buildAuditQuery(rows: unknown[], count = rows.length) {
-  const promise = Promise.resolve({ data: rows, count, error: null });
-  const chain: Record<string, unknown> = {
+function buildAuditQuery(
+  rows: unknown[],
+  options: { count?: number; error?: { message: string } | null } = {}
+) {
+  const count = options.count ?? rows.length;
+  const error = options.error ?? null;
+  const promise = Promise.resolve({
+    data: error ? null : rows,
+    count: error ? null : count,
+    error,
+  });
+  const chain: Record<string, jest.Mock | unknown> = {
     select: jest.fn().mockReturnThis(),
     eq: jest.fn().mockReturnThis(),
     or: jest.fn().mockReturnThis(),
     order: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
     range: jest.fn().mockReturnThis(),
     then: promise.then.bind(promise),
     catch: promise.catch.bind(promise),
@@ -53,20 +63,20 @@ describe('Admin Logs Tabs (AuditLogsTab & SystemLogsTab)', () => {
     URL.revokeObjectURL = originalRevokeObjectUrl;
   });
 
-  it('AuditLogsTab sanitizes search filters, expands JSON diff, and exports CSV without re-fetch loops', async () => {
+  it('AuditLogsTab bounds filter query, uses old_data/new_data/performed_by, expands diff, and exports CSV', async () => {
     const sampleAuditRows = [
       {
         id: 'aud-1',
         table_name: 'badges',
-        action: 'UPDATE',
-        user_id: 'u-1',
-        old_values: { active: true },
-        new_values: { active: false, qr_code: 'QR-001' },
+        action: 'update',
+        performed_by: 'emp-99',
+        old_data: { active: true },
+        new_data: { active: false, qr_code: 'QR-001' },
         created_at: '2026-11-19T08:30:00Z',
         employees: { full_name: 'T. Mokoena' },
       },
     ];
-    const queryChain = buildAuditQuery(sampleAuditRows, 1);
+    const queryChain = buildAuditQuery(sampleAuditRows, { count: 1 });
 
     mockCreateBrowserSupabase.mockReturnValue({
       from: jest.fn(() => queryChain),
@@ -77,17 +87,17 @@ describe('Admin Logs Tabs (AuditLogsTab & SystemLogsTab)', () => {
     await waitFor(() => {
       expect(screen.getByText('T. Mokoena')).toBeInTheDocument();
     });
-    expect(screen.getAllByText('UPDATE').length).toBeGreaterThan(0);
+    expect(queryChain.limit).toHaveBeenCalledWith(500);
+    expect(screen.getAllByText('update').length).toBeGreaterThan(0);
     expect(screen.getAllByText('badges').length).toBeGreaterThan(0);
+    expect(screen.getByText(/QR-001/)).toBeInTheDocument();
     expect(mockCreateBrowserSupabase).toHaveBeenCalledTimes(1);
 
-    // Click row to expand Old Values / New Values JSON diff
     fireEvent.click(screen.getByText('T. Mokoena'));
     expect(screen.getByTestId('audit-diff-aud-1')).toBeInTheDocument();
-    expect(screen.getByText('Old Values')).toBeInTheDocument();
-    expect(screen.getByText('New Values')).toBeInTheDocument();
+    expect(screen.getByText('Old Data')).toBeInTheDocument();
+    expect(screen.getByText('New Data')).toBeInTheDocument();
 
-    // Wire Export button -> creates CSV blob
     const anchorClickSpy = jest
       .spyOn(HTMLAnchorElement.prototype, 'click')
       .mockImplementation(() => {});
@@ -107,7 +117,22 @@ describe('Admin Logs Tabs (AuditLogsTab & SystemLogsTab)', () => {
     });
   });
 
-  it('SystemLogsTab loads logs, expands traces, supports bulk resolve & CSV export', async () => {
+  it('AuditLogsTab surfaces query errors cleanly via alert banner', async () => {
+    const failingChain = buildAuditQuery([], {
+      error: { message: 'RLS policy denied audit_logs query' },
+    });
+    mockCreateBrowserSupabase.mockReturnValue({
+      from: jest.fn(() => failingChain),
+    } as never);
+
+    render(<AuditLogsTab />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('RLS policy denied audit_logs query');
+    });
+  });
+
+  it('SystemLogsTab loads logs, filters by category, expands traces, and supports bulk resolve & CSV export', async () => {
     const fetchMock = jest.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === 'PATCH') {
         return { ok: true, json: async () => ({ success: true }) } as Response;
@@ -147,11 +172,18 @@ describe('Admin Logs Tabs (AuditLogsTab & SystemLogsTab)', () => {
       expect(screen.getByText('SCADA socket reconnecting')).toBeInTheDocument();
     });
 
+    const categorySelect = screen.getByLabelText('Filter by category');
+    fireEvent.change(categorySelect, { target: { value: 'telemetry' } });
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('category=telemetry'));
+      expect(screen.getByText('SCADA socket reconnecting')).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByText('SCADA socket reconnecting'));
     expect(screen.getByText(/Trace ID: trace-123/i)).toBeInTheDocument();
     expect(screen.getByText(/Request ID: req-456/i)).toBeInTheDocument();
 
-    // Select row -> bulk toolbar appears -> bulk Resolve Selected
     fireEvent.click(screen.getByLabelText('Select log sys-1'));
     expect(screen.getByTestId('system-logs-bulk-toolbar')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Resolve Selected \(1\)/i }));

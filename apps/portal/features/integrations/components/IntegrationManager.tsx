@@ -57,6 +57,12 @@ export function IntegrationManager() {
   const [testTool, setTestTool] = useState('');
   const [testArgs, setTestArgs] = useState('{}');
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [editServerUrl, setEditServerUrl] = useState('');
+  const [rotateSecretValue, setRotateSecretValue] = useState('');
+  const [rotateSecretKind, setRotateSecretKind] = useState<'bearer' | 'api_key' | 'custom_header'>(
+    'bearer'
+  );
+  const [editAllowlist, setEditAllowlist] = useState('');
   const [catalogFilter, setCatalogFilter] = useState<CatalogFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
@@ -198,6 +204,7 @@ export function IntegrationManager() {
           : {}),
         config: {
           risk_class: form.risk_class,
+          ...(form.api_key_header.trim() ? { api_key_header: form.api_key_header.trim() } : {}),
           rules: buildRulesPayloadFromForm(installRulesForm),
         },
         ...(form.secret
@@ -390,8 +397,19 @@ export function IntegrationManager() {
       setExpandedId(null);
       return;
     }
+    const catalogEntry = catalog.find((c) => c.id === installation.catalog_id);
     setExpandedId(installation.id);
     setExpandedRulesForm(rulesFormFromConfig(installation.config));
+    setEditServerUrl(catalogEntry?.server_url ?? '');
+    setRotateSecretValue('');
+    setRotateSecretKind(
+      catalogEntry?.auth_type === 'api_key'
+        ? 'api_key'
+        : catalogEntry?.auth_type === 'custom_header'
+          ? 'custom_header'
+          : 'bearer'
+    );
+    setEditAllowlist((installation.tool_allowlist ?? []).join(', '));
     setTestTool('');
     setTestArgs('{}');
     setTestResult(null);
@@ -405,6 +423,43 @@ export function IntegrationManager() {
     } catch {
       setAuditLogs([]);
       setCircuitBreakerFailures(0);
+    }
+  };
+
+  const saveConnectionAndSecret = async (installation: Installation) => {
+    setBusyId(installation.id);
+    try {
+      const catalogEntry = catalog.find((c) => c.id === installation.catalog_id);
+      const trimmedUrl = editServerUrl.trim();
+      const trimmedSecret = rotateSecretValue.trim();
+      const parsedAllowlist = editAllowlist
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const patchPayload: Record<string, unknown> = {
+        tool_allowlist: parsedAllowlist,
+      };
+      if (trimmedUrl && trimmedUrl !== (catalogEntry?.server_url ?? '')) {
+        patchPayload.server_url = trimmedUrl;
+      }
+      if (trimmedSecret.length > 0) {
+        patchPayload.secret = trimmedSecret;
+        patchPayload.secret_kind = rotateSecretKind;
+      }
+
+      await fetchClient.patch(`/api/integrations/${installation.id}`, patchPayload);
+      setRotateSecretValue('');
+      toast.success(
+        trimmedSecret.length > 0
+          ? 'Credential rotated and installation updated'
+          : 'Installation endpoint & allowlist updated'
+      );
+      void fetchIntegrations();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update installation');
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -489,7 +544,7 @@ export function IntegrationManager() {
                 rows={4}
                 value={importManifestJson}
                 onChange={(e) => setImportManifestJson(e.target.value)}
-                placeholder='{"catalog_id":"ts-ast-lsp","scope":"global","config":{"risk_class":"read","rules":{"rate_limit_per_min":120}}}'
+                placeholder='{"catalog_id":"sentry","scope":"global","config":{"risk_class":"read","rules":{"rate_limit_per_min":60}}}'
                 className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] p-2 font-mono text-[var(--text-heading)] text-xs"
               />
               <div className="flex items-center gap-2">
@@ -542,9 +597,7 @@ export function IntegrationManager() {
                     onChange={(e) => setCustomKind(e.target.value as IntegrationKind)}
                   >
                     <option value="mcp">MCP Server (Streamable-HTTP)</option>
-                    <option value="lsp">LSP Server (Language / Schema Intelligence)</option>
-                    <option value="action">Action Bridge (HTTP Webhook)</option>
-                    <option value="native">Native Plugin (In-Process)</option>
+                    <option value="action">Action Bridge (SSRF-Guarded Webhook)</option>
                   </select>
                   <Input
                     placeholder="Server URL (MCP / LSP / Action endpoint)"
@@ -687,6 +740,15 @@ export function IntegrationManager() {
         testArgs={testArgs}
         setTestArgs={setTestArgs}
         testResult={testResult}
+        editServerUrl={editServerUrl}
+        setEditServerUrl={setEditServerUrl}
+        rotateSecretValue={rotateSecretValue}
+        setRotateSecretValue={setRotateSecretValue}
+        rotateSecretKind={rotateSecretKind}
+        setRotateSecretKind={setRotateSecretKind}
+        editAllowlist={editAllowlist}
+        setEditAllowlist={setEditAllowlist}
+        onSaveConnectionAndSecret={saveConnectionAndSecret}
         expandedRulesForm={expandedRulesForm}
         setExpandedRulesForm={setExpandedRulesForm}
         onSaveRules={saveRules}

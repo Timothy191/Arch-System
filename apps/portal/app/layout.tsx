@@ -13,6 +13,7 @@ import { Suspense } from 'react';
 import { SkipLinks } from '@/components/accessibility/SkipLinks';
 import { ClientOverlays } from '@/components/ClientOverlays';
 import { MenuIdentity, MenuIdentitySkeleton } from '@/components/nav/MenuIdentity';
+import { PortalRuntimeSettingsBanner } from '@/components/PortalRuntimeSettingsBanner';
 import { RouteAnnouncer } from '@/components/RouteAnnouncer';
 import { SpeculationRules } from '@/components/SpeculationRules';
 import { SystemTrayPill } from '@/components/system/SystemTray';
@@ -235,6 +236,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               {/* Content wrapper with main landmark (WCAG 1.3.1) */}
               <div className="relative mx-auto max-w-[1920px] shadow-window">
                 <main id="main-content" aria-label="Main content" className="relative pt-16 pb-16">
+                  <Suspense fallback={null}>
+                    <PortalRuntimeSettingsBanner />
+                  </Suspense>
                   <SplitWindowLayout>{children}</SplitWindowLayout>
                 </main>
 

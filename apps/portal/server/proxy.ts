@@ -435,11 +435,17 @@ async function resolveEmployeeSession({
   }
 
   if (!employee?.id) {
-    const { data: employeeRow } = await client.supabase
+    let empQuery = client.supabase
       .from('employees')
       .select('id, role, department_id, accessible_departments')
-      .eq('auth_id', userId)
-      .single();
+      .eq('auth_id', userId);
+    if (typeof (empQuery as unknown as { is?: unknown }).is === 'function') {
+      empQuery = (empQuery as unknown as { is: (col: string, val: null) => typeof empQuery }).is(
+        'deleted_at',
+        null
+      );
+    }
+    const { data: employeeRow } = await empQuery.single();
     employee = (employeeRow as EmployeeRecord | null) ?? null;
     if (employee) {
       await writeSession({ userId, employee }).catch(() => undefined);

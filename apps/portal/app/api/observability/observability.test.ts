@@ -52,7 +52,11 @@ describe('Native Observability & CI BFF Clients', () => {
 
     expect(parsed.success).toBe(true);
     expect(summary.services).toHaveLength(4);
-    expect(summary.services.every((service) => service.mode === 'fallback')).toBe(true);
+    expect(
+      summary.services.every(
+        (service) => service.mode === 'unconfigured' || service.mode === 'fallback'
+      )
+    ).toBe(true);
     expect(summary.cacheSnapshot.l1Hits).toBe(30);
     expect(summary.metrics.find((m) => m.id === 'cache_hits_l1')?.value).toBe(30);
   });

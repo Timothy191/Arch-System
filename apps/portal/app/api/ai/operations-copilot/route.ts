@@ -2,8 +2,13 @@ import { type CopilotGroundingContext, executeOperationsCopilot } from '@repo/in
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { connection, NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { searchShiftIntelligence, searchSimilarBreakdowns } from '@/lib/ai/mining-rag';
+import {
+  searchExternalDocuments,
+  searchShiftIntelligence,
+  searchSimilarBreakdowns,
+} from '@/lib/ai/mining-rag';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
+import { listEmployeeTools } from '@/lib/integrations/tool-bridge';
 
 const requestSchema = z.object({
   question: z.string().trim().min(3).max(4_000),
@@ -60,12 +65,16 @@ async function callProvider(options: {
 async function gatherGroundingContext(
   question: string,
   userId: string,
+  departmentId: string,
   dashboardContext: Record<string, unknown> | undefined
 ): Promise<CopilotGroundingContext> {
-  const [breakdownResult, shiftNoteResult] = await Promise.allSettled([
-    searchSimilarBreakdowns(question, userId, RAG_RESULT_LIMIT),
-    searchShiftIntelligence(question, userId, RAG_RESULT_LIMIT),
-  ]);
+  const [breakdownResult, shiftNoteResult, externalDocResult, toolsResult] =
+    await Promise.allSettled([
+      searchSimilarBreakdowns(question, userId, RAG_RESULT_LIMIT),
+      searchShiftIntelligence(question, userId, RAG_RESULT_LIMIT),
+      searchExternalDocuments(question, userId, RAG_RESULT_LIMIT),
+      listEmployeeTools(departmentId),
+    ]);
 
   const breakdownMatches =
     breakdownResult.status === 'fulfilled'
@@ -89,9 +98,33 @@ async function gatherGroundingContext(
         }))
       : [];
 
+  const externalDocuments =
+    externalDocResult.status === 'fulfilled'
+      ? externalDocResult.value.map((doc) => ({
+          id: doc.id,
+          title: doc.title,
+          source: doc.source,
+          content: doc.content.slice(0, 600),
+          score: doc.score,
+        }))
+      : [];
+
+  const availableIntegrationTools =
+    toolsResult.status === 'fulfilled'
+      ? toolsResult.value.slice(0, 15).map((tool) => ({
+          qualifiedName: tool.qualifiedName,
+          description: tool.description,
+          riskClass: tool.riskClass,
+        }))
+      : [];
+
   return {
     question,
-    dashboardContext,
+    dashboardContext: {
+      ...(dashboardContext ?? {}),
+      ...(externalDocuments.length > 0 ? { externalDocuments } : {}),
+      ...(availableIntegrationTools.length > 0 ? { availableIntegrationTools } : {}),
+    },
     breakdownMatches,
     shiftNoteMatches,
     fleetPredictions: [],
@@ -109,7 +142,12 @@ async function handlePost(request: NextRequest): Promise<NextResponse> {
   }
 
   const { question, context } = parsed.data;
-  const grounding = await gatherGroundingContext(question, principal.user.id, context);
+  const grounding = await gatherGroundingContext(
+    question,
+    principal.user.id,
+    principal.employee?.department_id ?? '',
+    context
+  );
 
   const groqKey = process.env.GROQ_API_KEY;
   const openRouterKey = process.env.OPENROUTER_API_KEY;

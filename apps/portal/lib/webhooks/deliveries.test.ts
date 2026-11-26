@@ -13,7 +13,7 @@ jest.mock('@/lib/errors/error-logger', () => ({
 
 const { createServiceRoleClient } = jest.requireMock('@repo/supabase/service-role');
 
-function buildClient() {
+function buildClient(endpointUrl = 'https://example.com/hook') {
   const update = jest.fn().mockReturnValue({
     eq: jest.fn().mockResolvedValue({ error: null }),
   });
@@ -23,8 +23,10 @@ function buildClient() {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({
-                data: { id: 'wh-1', url: 'https://example.com/hook', secret: 'secret' },
+              is: jest.fn().mockReturnValue({
+                maybeSingle: jest.fn().mockResolvedValue({
+                  data: { id: 'wh-1', url: endpointUrl, secret: 'secret' },
+                }),
               }),
             }),
           }),
@@ -95,6 +97,24 @@ describe('deliverQueuedWebhooks', () => {
     expect(summary).toEqual({ processed: 1, succeeded: 0, failed: 1 });
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ success: false, retry_count: 1, response_status: 500 })
+    );
+    fetchMock.mockRestore();
+  });
+
+  it('blocks SSRF against private/internal URLs before issuing fetch', async () => {
+    const { update } = buildClient('http://127.0.0.1:8080/internal-hook');
+    const fetchMock = jest.spyOn(global, 'fetch');
+
+    const summary = await deliverQueuedWebhooks();
+
+    expect(summary).toEqual({ processed: 1, succeeded: 0, failed: 1 });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        retry_count: 1,
+        error_message: expect.stringContaining('disallowed host'),
+      })
     );
     fetchMock.mockRestore();
   });

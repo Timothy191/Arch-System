@@ -17,10 +17,13 @@ function createWrapper() {
   };
 }
 
-function createJsonResponse(body: unknown, ok = true, status = 200): Response {
+function createJsonResponse(
+  body: unknown,
+  options?: { readonly ok?: boolean; readonly status?: number }
+): Response {
   return {
-    ok,
-    status,
+    ok: options?.ok ?? true,
+    status: options?.status ?? 200,
     json: async () => body,
   } as Response;
 }
@@ -146,12 +149,27 @@ describe('ObservabilityConsole', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders services, golden signals, Grafana dashboard iframe, CI pipelines, and refreshes telemetry', async () => {
+  it('renders services, persisted slo_metrics history, golden signals, Grafana iframe, and CI pipelines', async () => {
     let fetchCycle = 0;
     const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes('/api/observability/summary')) {
         return createJsonResponse(buildSummaryResponse(fetchCycle === 0));
+      }
+      if (url.includes('/api/admin/observability')) {
+        return createJsonResponse({
+          overallSla24hPct: fetchCycle === 0 ? 99.92 : null,
+          uptime: [
+            {
+              targetId: 'supabase',
+              label: 'Supabase Cloud (Postgres & Auth)',
+              sampleCount: fetchCycle === 0 ? 12 : 0,
+              statusLabel: fetchCycle === 0 ? 'UP' : 'No samples yet',
+              p95LatencyMs: fetchCycle === 0 ? 22 : null,
+              sla24hPct: fetchCycle === 0 ? 99.92 : null,
+            },
+          ],
+        });
       }
       return createJsonResponse(buildCiResponse(fetchCycle === 0));
     });
@@ -170,6 +188,7 @@ describe('ObservabilityConsole', () => {
     expect(screen.getByText('14 ms')).toBeInTheDocument();
     expect(screen.getByText('420')).toBeInTheDocument();
     expect(screen.getByText('arch_cache_l1_hits_total')).toBeInTheDocument();
+    expect(screen.getByText('99.92%')).toBeInTheDocument();
 
     const grafanaTab = screen.getByRole('tab', { name: /Grafana Native Layer/i });
     fireEvent.mouseDown(grafanaTab);
@@ -205,6 +224,7 @@ describe('ObservabilityConsole', () => {
       expect(screen.getByText(/No pipeline runs reported yet/i)).toBeInTheDocument();
     });
     expect(screen.getByText('GitHub Commit Status Feed')).toBeInTheDocument();
+    expect(screen.getAllByText(/No samples yet/i).length).toBeGreaterThan(0);
 
     fireEvent.mouseDown(grafanaTab);
     fireEvent.click(grafanaTab);

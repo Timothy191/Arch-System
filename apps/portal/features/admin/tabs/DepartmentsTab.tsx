@@ -3,6 +3,14 @@
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@repo/ui/components/ui/dialog';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
@@ -10,6 +18,7 @@ import {
   Building2,
   ChevronDown,
   ClipboardList,
+  Edit2,
   ExternalLink,
   Layers,
   MapPin,
@@ -22,7 +31,12 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { adminAddDepartment, adminArchiveDepartment } from '../actions/departments';
+import { toast } from 'sonner';
+import {
+  adminAddDepartment,
+  adminArchiveDepartment,
+  adminUpdateDepartment,
+} from '../actions/departments';
 import {
   buildDepartmentMetrics,
   computeDepartmentsOverview,
@@ -37,18 +51,35 @@ import {
   type SiteRecord,
 } from './departments-utils';
 
-export const DEFAULT_ADMIN_AREAS = ['Office', 'Plant', 'Pit Area', 'All Areas'] as const;
-
 const HEADER_KPI_CARD_CLASS =
   'rounded-xl border border-accent-gold/25 bg-[var(--bg-secondary)] px-4 py-3';
 const DETAIL_METRIC_CARD_CLASS =
-  'rounded-xl border border-[var(--border-default)] bg-white/85 px-3.5 py-2.5 shadow-2xs';
+  'rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)]/85 px-3.5 py-2.5 shadow-2xs';
 const QUICK_LINK_PILL_CLASS =
-  'inline-flex items-center gap-1 rounded-full border border-accent-gold/40 bg-white px-2.5 py-1 font-medium text-[11px] text-[var(--text-heading)] transition-colors hover:border-accent-gold hover:bg-accent-gold/10';
+  'inline-flex items-center gap-1 rounded-full border border-accent-gold/40 bg-[var(--bg-primary)] px-2.5 py-1 font-medium text-[11px] text-[var(--text-heading)] transition-colors hover:border-accent-gold hover:bg-accent-gold/10';
+const RECENT_LOGS_PREVIEW_LIMIT = 250;
 
-export function getSavedAdminAreas(): string[] {
-  return [...DEFAULT_ADMIN_AREAS];
-}
+const DEPARTMENT_COLOR_OPTIONS = [
+  'slate',
+  'emerald',
+  'amber',
+  'blue',
+  'gold',
+  'teal',
+  'indigo',
+] as const;
+
+const DEPARTMENT_ICON_OPTIONS = [
+  'Building2',
+  'Truck',
+  'ShieldCheck',
+  'Factory',
+  'Wrench',
+  'Database',
+  'ClipboardList',
+  'CreditCard',
+  'Layers',
+] as const;
 
 function formatCreatedDate(isoTimestamp?: string | null): string {
   if (!isoTimestamp) return 'System Core';
@@ -67,17 +98,37 @@ export function DepartmentsTab() {
   const [machines, setMachines] = useState<DepartmentMachineRecord[]>([]);
   const [breakdowns, setBreakdowns] = useState<DepartmentBreakdownRecord[]>([]);
   const [dailyLogs, setDailyLogs] = useState<DepartmentDailyLogRecord[]>([]);
+  const [exactTotalShiftLogs, setExactTotalShiftLogs] = useState<number | undefined>(undefined);
+  const [exactLogsByDept, setExactLogsByDept] = useState<Readonly<Record<string, number>>>({});
 
-  const [newArea, setNewArea] = useState('');
+  const [newDepartmentName, setNewDepartmentName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const [editingDept, setEditingDept] = useState<DepartmentRecord | null>(null);
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editColor, setEditColor] = useState('slate');
+  const [editIcon, setEditIcon] = useState('Building2');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  const [pendingArchive, setPendingArchive] = useState<DepartmentRecord | null>(null);
+  const [isArchiving, setIsArchiving] = useState(false);
+
   const loadDepartmentsData = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
+      const logsHeadQuery = supabase
+        .from('daily_logs')
+        .select('id', { count: 'exact', head: true });
+      const logsHeadPromise =
+        logsHeadQuery && typeof (logsHeadQuery as PromiseLike<unknown>).then === 'function'
+          ? logsHeadQuery
+          : Promise.resolve({ count: null, error: null });
+
       const [
         deptRes,
         sitesRes,
@@ -87,6 +138,7 @@ export function DepartmentsTab() {
         machinesRes,
         breakdownsRes,
         logsRes,
+        logsCountRes,
       ] = await Promise.all([
         supabase
           .from('departments')
@@ -123,15 +175,27 @@ export function DepartmentsTab() {
           .from('daily_logs')
           .select('id, department_id, log_date, shift')
           .order('log_date', { ascending: false })
-          .limit(250),
+          .limit(RECENT_LOGS_PREVIEW_LIMIT),
+        logsHeadPromise,
       ]);
 
-      if (deptRes.error) {
-        setErrorMessage(deptRes.error.message);
+      const firstError =
+        deptRes.error ??
+        sitesRes?.error ??
+        blocksRes?.error ??
+        employeesRes?.error ??
+        accessRes?.error ??
+        machinesRes?.error ??
+        breakdownsRes?.error ??
+        logsRes?.error;
+
+      if (firstError) {
+        setErrorMessage(firstError.message);
         return;
       }
 
-      setDepartments((deptRes.data as DepartmentRecord[] | null) ?? []);
+      const loadedDepartments = (deptRes.data as DepartmentRecord[] | null) ?? [];
+      setDepartments(loadedDepartments);
       setSites((sitesRes?.data as SiteRecord[] | null) ?? []);
       setMineBlocks((blocksRes?.data as MineBlockRecord[] | null) ?? []);
       setEmployees((employeesRes?.data as DepartmentEmployeeRecord[] | null) ?? []);
@@ -139,6 +203,41 @@ export function DepartmentsTab() {
       setMachines((machinesRes?.data as DepartmentMachineRecord[] | null) ?? []);
       setBreakdowns((breakdownsRes?.data as DepartmentBreakdownRecord[] | null) ?? []);
       setDailyLogs((logsRes?.data as DepartmentDailyLogRecord[] | null) ?? []);
+
+      if (
+        logsCountRes &&
+        'count' in logsCountRes &&
+        typeof logsCountRes.count === 'number' &&
+        !logsCountRes.error
+      ) {
+        setExactTotalShiftLogs(logsCountRes.count);
+      } else {
+        setExactTotalShiftLogs(undefined);
+      }
+
+      // Query exact per-department shift log head counts when supported
+      const perDeptCounts: Record<string, number> = {};
+      await Promise.all(
+        loadedDepartments.map(async (dept) => {
+          const baseSelect = supabase
+            .from('daily_logs')
+            .select('id', { count: 'exact', head: true });
+          if (baseSelect && typeof (baseSelect as { eq?: unknown }).eq === 'function') {
+            const res = await (
+              baseSelect as unknown as {
+                eq: (
+                  col: string,
+                  val: string
+                ) => Promise<{ count: number | null; error: { message: string } | null }>;
+              }
+            ).eq('department_id', dept.id);
+            if (!res.error && typeof res.count === 'number') {
+              perDeptCounts[dept.id] = res.count;
+            }
+          }
+        })
+      );
+      setExactLogsByDept(perDeptCounts);
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed to load departments');
     } finally {
@@ -160,8 +259,18 @@ export function DepartmentsTab() {
         machines,
         breakdowns,
         dailyLogs,
+        exactTotalShiftLogs,
       }),
-    [departments, sites, mineBlocks, employees, machines, breakdowns, dailyLogs]
+    [
+      departments,
+      sites,
+      mineBlocks,
+      employees,
+      machines,
+      breakdowns,
+      dailyLogs,
+      exactTotalShiftLogs,
+    ]
   );
 
   const metricsByDeptId = useMemo(() => {
@@ -178,11 +287,22 @@ export function DepartmentsTab() {
           machines,
           breakdowns,
           dailyLogs,
+          exactShiftLogsCount: exactLogsByDept[department.id],
         })
       );
     }
     return map;
-  }, [departments, sites, mineBlocks, employees, accessGrants, machines, breakdowns, dailyLogs]);
+  }, [
+    departments,
+    sites,
+    mineBlocks,
+    employees,
+    accessGrants,
+    machines,
+    breakdowns,
+    dailyLogs,
+    exactLogsByDept,
+  ]);
 
   const filteredDepartments = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -223,9 +343,9 @@ export function DepartmentsTab() {
     setExpandedIds(new Set(filteredDepartments.map((dept) => dept.id)));
   };
 
-  const handleAddArea = async (e: React.FormEvent) => {
+  const handleAddDepartment = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = newArea.trim();
+    const trimmed = newDepartmentName.trim();
     if (!trimmed) return;
 
     const slug = trimmed
@@ -239,7 +359,7 @@ export function DepartmentsTab() {
           d.name.toLowerCase() === slug || d.display_name?.toLowerCase() === trimmed.toLowerCase()
       )
     ) {
-      setNewArea('');
+      setErrorMessage(`Department "${trimmed}" is already active.`);
       return;
     }
 
@@ -253,32 +373,88 @@ export function DepartmentsTab() {
 
       if ('department' in result && result.department) {
         const created = result.department as DepartmentRecord;
-        setDepartments((prev) => [...prev, created]);
+        setDepartments((prev) => {
+          const filtered = prev.filter((item) => item.id !== created.id);
+          return [...filtered, created];
+        });
         setExpandedIds((prev) => new Set([...prev, created.id]));
+        toast.success(
+          'reactivated' in result && result.reactivated
+            ? `Reactivated department "${created.display_name || created.name}"`
+            : `Added department "${created.display_name || created.name}"`
+        );
       }
-      setNewArea('');
+      setNewDepartmentName('');
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed to create department');
     }
   };
 
-  const handleRemoveArea = async (deptId: string) => {
+  const openEditDialog = (dept: DepartmentRecord) => {
+    setEditingDept(dept);
+    setEditDisplayName(dept.display_name || dept.name);
+    setEditDescription(dept.description ?? '');
+    setEditColor(dept.color || 'slate');
+    setEditIcon(dept.icon || 'Building2');
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDept) return;
+    setIsSavingEdit(true);
     setErrorMessage(null);
     try {
-      const result = await adminArchiveDepartment(deptId);
+      const result = await adminUpdateDepartment({
+        id: editingDept.id,
+        display_name: editDisplayName.trim(),
+        description: editDescription.trim() || null,
+        color: editColor,
+        icon: editIcon,
+      });
+
       if ('error' in result && result.error) {
         setErrorMessage(result.error);
         return;
       }
 
-      setDepartments((prev) => prev.filter((dept) => dept.id !== deptId));
+      if ('department' in result && result.department) {
+        const updated = result.department as DepartmentRecord;
+        setDepartments((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+        toast.success(`Updated "${updated.display_name || updated.name}"`);
+        setEditingDept(null);
+      }
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to update department');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleConfirmArchive = async () => {
+    if (!pendingArchive) return;
+    setIsArchiving(true);
+    setErrorMessage(null);
+    try {
+      const result = await adminArchiveDepartment(pendingArchive.id);
+      if ('error' in result && result.error) {
+        setErrorMessage(result.error);
+        return;
+      }
+
+      const archivedId = pendingArchive.id;
+      const archivedLabel = pendingArchive.display_name || pendingArchive.name;
+      setDepartments((prev) => prev.filter((dept) => dept.id !== archivedId));
       setExpandedIds((prev) => {
         const next = new Set(prev);
-        next.delete(deptId);
+        next.delete(archivedId);
         return next;
       });
+      setPendingArchive(null);
+      toast.success(`Archived "${archivedLabel}"`);
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed to archive department');
+    } finally {
+      setIsArchiving(false);
     }
   };
 
@@ -313,11 +489,11 @@ export function DepartmentsTab() {
             </div>
           </div>
 
-          <form onSubmit={handleAddArea} className="flex w-full items-center gap-2 lg:w-auto">
+          <form onSubmit={handleAddDepartment} className="flex w-full items-center gap-2 lg:w-auto">
             <Input
-              placeholder="Add new area..."
-              value={newArea}
-              onChange={(e) => setNewArea(e.target.value)}
+              placeholder="Add department..."
+              value={newDepartmentName}
+              onChange={(e) => setNewDepartmentName(e.target.value)}
               className="w-full border-[var(--border-default)] bg-[var(--bg-secondary)] lg:w-64"
             />
             <Button
@@ -325,7 +501,7 @@ export function DepartmentsTab() {
               className="shrink-0 bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
             >
               <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-              Add Area
+              Add Department
             </Button>
           </form>
         </div>
@@ -335,7 +511,7 @@ export function DepartmentsTab() {
           <div className={HEADER_KPI_CARD_CLASS}>
             <div className="flex items-center justify-between">
               <span className="font-medium text-[var(--text-muted)] text-xs">
-                Departments &amp; Zones
+                Active Departments
               </span>
               <Layers className="h-4 w-4 text-accent-gold" aria-hidden="true" />
             </div>
@@ -344,7 +520,7 @@ export function DepartmentsTab() {
                 {overview.totalDepartments}
               </span>
               <span className="font-mono text-[11px] text-accent-gold">
-                {DEFAULT_ADMIN_AREAS.length} core zones
+                {overview.totalShiftLogs.toLocaleString('en-US')} shift logs
               </span>
             </div>
           </div>
@@ -439,7 +615,7 @@ export function DepartmentsTab() {
       </GlassCard>
 
       {errorMessage && (
-        <div className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-rose-700 text-xs">
+        <div className="rounded-lg border border-accent-red/25 bg-accent-red/10 px-4 py-2 text-accent-red text-xs">
           {errorMessage}
         </div>
       )}
@@ -453,11 +629,11 @@ export function DepartmentsTab() {
         ) : filteredDepartments.length === 0 ? (
           <div className="px-6 py-12 text-center text-[var(--text-muted)]">
             {departments.length === 0
-              ? 'No departments or areas found.'
+              ? 'No departments found.'
               : 'No departments match the current search.'}
           </div>
         ) : (
-          <ul className="divide-y divide-[var(--border-default)]" aria-label="Areas list">
+          <ul className="divide-y divide-[var(--border-default)]" aria-label="Departments list">
             {filteredDepartments.map((dept) => {
               const label = dept.display_name || dept.name;
               const isExpanded = expandedIds.has(dept.id);
@@ -519,16 +695,27 @@ export function DepartmentsTab() {
                       )}
                     </button>
 
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      aria-label={`Remove ${label}`}
-                      className="shrink-0 text-accent-red hover:text-accent-red/80"
-                      onClick={() => void handleRemoveArea(dept.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        aria-label={`Edit ${label}`}
+                        onClick={() => openEditDialog(dept)}
+                      >
+                        <Edit2 className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        aria-label={`Archive ${label}`}
+                        className="shrink-0 text-accent-red hover:text-accent-red/80"
+                        onClick={() => setPendingArchive(dept)}
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Expanded Full Site Details & Metrics Dropdown Panel */}
@@ -611,7 +798,7 @@ export function DepartmentsTab() {
                             <ClipboardList className="h-3.5 w-3.5 text-accent-gold" />
                           </div>
                           <div className="mt-1 font-semibold text-[var(--text-heading)] text-base tabular-nums">
-                            {metrics.recentShiftLogsCount} Recent Logs
+                            {metrics.recentShiftLogsCount.toLocaleString('en-US')} Shift Logs
                           </div>
                           <div className="mt-0.5 font-mono text-[11px] text-[var(--text-muted)]">
                             Latest: {metrics.latestLogDate ?? 'No shift logs yet'}
@@ -619,7 +806,7 @@ export function DepartmentsTab() {
                         </div>
                       </div>
 
-                      {/* Full Site Details & Mine Blocks Breakdown */}
+                      {/* Full Site Details & Mine Blocks Coverage */}
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <h3 className="font-semibold text-[var(--text-heading)] text-xs uppercase tracking-wider">
@@ -627,7 +814,7 @@ export function DepartmentsTab() {
                           </h3>
                           <Badge
                             variant="outline"
-                            className="border-accent-gold/40 bg-white font-mono text-[10.5px] text-accent-gold"
+                            className="border-accent-gold/40 bg-[var(--bg-primary)] font-mono text-[10.5px] text-accent-gold"
                           >
                             {metrics.siteCoverageMode === 'direct'
                               ? 'Direct Machine / Event Assignment'
@@ -636,7 +823,7 @@ export function DepartmentsTab() {
                         </div>
 
                         {metrics.sites.length === 0 ? (
-                          <div className="rounded-xl border border-[var(--border-default)] bg-white/80 px-4 py-3 text-[var(--text-muted)] text-xs">
+                          <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)]/80 px-4 py-3 text-[var(--text-muted)] text-xs">
                             No active sites configured yet — configure under Sites &amp; Blocks.
                           </div>
                         ) : (
@@ -644,7 +831,7 @@ export function DepartmentsTab() {
                             {metrics.sites.map((siteDetail) => (
                               <div
                                 key={siteDetail.site.id}
-                                className="rounded-xl border border-accent-gold/30 bg-white/90 p-3 shadow-2xs"
+                                className="rounded-xl border border-accent-gold/30 bg-[var(--bg-primary)]/90 p-3 shadow-2xs"
                               >
                                 <div className="flex items-center justify-between gap-2">
                                   <span className="font-mono font-semibold text-accent-gold text-xs">
@@ -692,7 +879,7 @@ export function DepartmentsTab() {
                           {metrics.samplePersonnel.map((person) => (
                             <span
                               key={person.id}
-                              className="rounded-full border border-[var(--border-default)] bg-white px-2.5 py-0.5 text-[11px] text-[var(--text-heading)]"
+                              className="rounded-full border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-0.5 text-[11px] text-[var(--text-heading)]"
                             >
                               {person.fullName} ·{' '}
                               <span className="text-[var(--text-muted)]">{person.roleLabel}</span>
@@ -715,6 +902,157 @@ export function DepartmentsTab() {
           </span>
         </div>
       </GlassCard>
+
+      {/* Edit Department Dialog */}
+      <Dialog open={Boolean(editingDept)} onOpenChange={(open) => !open && setEditingDept(null)}>
+        <DialogContent className="max-w-md border-[var(--border-default)] bg-[var(--bg-primary)]">
+          <DialogHeader>
+            <DialogTitle>Edit Department</DialogTitle>
+            <DialogDescription>
+              Update display name, operational summary, theme accent, and icon for{' '}
+              <span className="font-mono">{editingDept?.name}</span>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveEdit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="dept-edit-display-name"
+                className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+              >
+                Display Name
+              </label>
+              <Input
+                id="dept-edit-display-name"
+                required
+                value={editDisplayName}
+                onChange={(e) => setEditDisplayName(e.target.value)}
+                className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="dept-edit-description"
+                className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+              >
+                Description
+              </label>
+              <textarea
+                id="dept-edit-description"
+                rows={3}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Describe division responsibilities..."
+                className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-xs"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  htmlFor="dept-edit-color"
+                  className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+                >
+                  Color Token
+                </label>
+                <select
+                  id="dept-edit-color"
+                  value={editColor}
+                  onChange={(e) => setEditColor(e.target.value)}
+                  className="h-9 w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2.5 text-[var(--text-heading)] text-xs"
+                >
+                  {DEPARTMENT_COLOR_OPTIONS.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                  {!DEPARTMENT_COLOR_OPTIONS.includes(
+                    editColor as (typeof DEPARTMENT_COLOR_OPTIONS)[number]
+                  ) && <option value={editColor}>{editColor}</option>}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="dept-edit-icon"
+                  className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+                >
+                  Icon
+                </label>
+                <select
+                  id="dept-edit-icon"
+                  value={editIcon}
+                  onChange={(e) => setEditIcon(e.target.value)}
+                  className="h-9 w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2.5 text-[var(--text-heading)] text-xs"
+                >
+                  {DEPARTMENT_ICON_OPTIONS.map((iconName) => (
+                    <option key={iconName} value={iconName}>
+                      {iconName}
+                    </option>
+                  ))}
+                  {!DEPARTMENT_ICON_OPTIONS.includes(
+                    editIcon as (typeof DEPARTMENT_ICON_OPTIONS)[number]
+                  ) && <option value={editIcon}>{editIcon}</option>}
+                </select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSavingEdit}
+                onClick={() => setEditingDept(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSavingEdit || !editDisplayName.trim()}
+                className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
+              >
+                {isSavingEdit ? 'Saving...' : 'Save Department'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Department Confirmation Dialog */}
+      <Dialog
+        open={Boolean(pendingArchive)}
+        onOpenChange={(open) => !open && setPendingArchive(null)}
+      >
+        <DialogContent className="max-w-md border-[var(--border-default)] bg-[var(--bg-primary)]">
+          <DialogHeader>
+            <DialogTitle>Archive Department</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to archive &ldquo;
+              {pendingArchive?.display_name || pendingArchive?.name}&rdquo;? Historical shift logs
+              remain preserved and re-creating the same name will cleanly reactivate it.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isArchiving}
+              onClick={() => setPendingArchive(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isArchiving}
+              onClick={() => void handleConfirmArchive()}
+            >
+              {isArchiving ? 'Archiving...' : 'Confirm Archive'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

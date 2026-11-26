@@ -3,6 +3,7 @@ interface JobMetricEntry {
   count: number;
   errors: number;
   totalDurationMs: number;
+  lastDurationMs: number;
 }
 
 interface DbMetricEntry {
@@ -24,12 +25,14 @@ export function recordJobExecution(jobId: string, durationMs: number, success: b
     count: 0,
     errors: 0,
     totalDurationMs: 0,
+    lastDurationMs: 0,
   };
   entry.count++;
   if (!success) {
     entry.errors++;
   }
   entry.totalDurationMs += durationMs;
+  entry.lastDurationMs = durationMs;
   jobMetrics.set(jobId, entry);
 }
 

@@ -5,6 +5,7 @@ import { logError } from '@/lib/errors/error-logger';
 import { encryptSecret } from './crypto';
 import { type ManagedInstallation, mcpClientManager } from './mcp-client-manager';
 import { assertSafeUrl } from './ssrf-guard';
+
 /**
  * Registry service for the integration platform.
  *
@@ -44,11 +45,12 @@ export interface CatalogRecord {
     domains?: string[];
     transport?: string;
     federated_service?: string;
+    adapter?: 'grafana' | 'prometheus';
     [key: string]: unknown;
   } | null;
 }
 
-const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
+export const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
   {
     id: 'sentry',
     name: 'Sentry Error & Performance MCP',
@@ -70,7 +72,7 @@ const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
     id: 'supabase-mcp',
     name: 'Supabase Database, RLS & Edge Inspector',
     description:
-      'Official Supabase MCP server for live schema introspection, RLS policy auditing across all 8 departments, PostgREST diagnostics, and migration drift verification.',
+      'Official Supabase MCP server for live schema introspection, RLS policy auditing across all departments, PostgREST diagnostics, and migration drift verification.',
     author: 'Supabase',
     icon_url: null,
     kind: 'mcp',
@@ -254,15 +256,15 @@ const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
     },
   },
   {
-    id: 'firecrawl-lan-mcp',
-    name: 'Firecrawl LAN OEM & DMRE Regulatory Scraper',
+    id: 'firecrawl-mcp',
+    name: 'Firecrawl Cloud OEM & Regulatory Scraper',
     description:
-      'High-speed unauthenticated LAN Firecrawl MCP bridge for Epiroc Pit Viper 351 / Caterpillar parts manuals and DMRE Mine Health & Safety regulatory extraction.',
-    author: 'Plantcor LAN Infrastructure',
+      'Authenticated Firecrawl Streamable-HTTP MCP connector for OEM parts manuals and regulatory document extraction.',
+    author: 'Firecrawl',
     icon_url: null,
     kind: 'mcp',
-    server_url: 'http://192.168.0.215:3002/mcp',
-    auth_type: 'none',
+    server_url: 'https://mcp.firecrawl.dev/mcp',
+    auth_type: 'bearer',
     verified: true,
     docs_url: 'https://docs.firecrawl.dev/mcp',
     capabilities: {
@@ -271,215 +273,10 @@ const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
     },
   },
   {
-    id: 'nestjs-scada-proxy',
-    name: 'NestJS Modbus TCP & SCADA Telemetry Proxy',
-    description:
-      'Federated action bridge to arch-system-nest-proxy for polling live Pit Viper 351 drill rig and excavator PLC registers (RPM, pull-down pressure, air pressure, penetration rate).',
-    author: 'Plantcor Mining Engineering',
-    icon_url: null,
-    kind: 'action',
-    server_url: 'https://arch-system-nest-proxy.vercel.app/api/mcp',
-    auth_type: 'bearer',
-    verified: true,
-    docs_url: '/drilling/drilling-operations',
-    capabilities: {
-      domains: ['modbus-tcp', 'pit-viper-351', 'plc-registers', 'scada-ingest'],
-      federated_service: 'arch-system-nest-proxy',
-    },
-  },
-  {
-    id: 'n8n-workflow-engine',
-    name: 'n8n Autonomous Shift & Escalation Workflows',
-    description:
-      'Federated action bridge to n8n-vercel for automated shift-closeout PDF distribution, overdue breakdown escalation webhooks, and threshold alerts.',
-    author: 'Plantcor Automation',
-    icon_url: null,
-    kind: 'action',
-    server_url: 'https://n8n-vercel-arch.vercel.app/mcp',
-    auth_type: 'api_key',
-    verified: true,
-    docs_url: '/admin/workflows',
-    capabilities: {
-      domains: ['workflow-triggers', 'shift-pdf-dispatch', 'breakdown-escalation'],
-      federated_service: 'n8n-vercel',
-    },
-  },
-  {
-    id: 'whatsapp-shift-dispatch',
-    name: 'WhatsApp Operations & Muster Dispatch Bridge',
-    description:
-      'Action bridge connecting the Portal WhatsApp Split-Screen workspace to broadcast shift compilation summaries, emergency muster roll-calls, and breakdown job cards.',
-    author: 'Plantcor Control Room',
-    icon_url: null,
-    kind: 'action',
-    server_url: 'https://arch-system-kappap.vercel.app/api/webhooks',
-    auth_type: 'bearer',
-    verified: true,
-    docs_url: '/control-room/shift-compilation',
-    capabilities: {
-      domains: ['whatsapp-dispatch', 'muster-alerts', 'shift-handover'],
-      transport: 'webhook-action',
-    },
-  },
-  {
-    id: 'rust-telemetry-engine',
-    name: 'Rust High-Frequency Telemetry Engine',
-    description:
-      'First-party native ArchPlugin for sub-millisecond haul-truck and drill rig telemetry ingestion.',
-    author: 'Plantcor Mining Engineering',
-    icon_url: null,
-    kind: 'native',
-    server_url: null,
-    auth_type: 'none',
-    verified: true,
-    docs_url: '/docs/api',
-    capabilities: {
-      domains: ['telemetry-ingest', 'sub-ms-pipeline', 'rust-ffi'],
-      hooks: ['onLogCreated', 'onBreakdownAdded'],
-      widgets: true,
-    },
-  },
-  {
-    id: 'langfuse-openrouter-ai',
-    name: 'Langfuse & OpenRouter AI FinOps Telemetry',
-    description:
-      'First-party @repo/agents native integration for LLM trace observability, prompt cache hit-rate tracking, and ZAR cost attribution with multi-model fallback routing.',
-    author: 'Plantcor AI Platform',
-    icon_url: null,
-    kind: 'native',
-    server_url: null,
-    auth_type: 'api_key',
-    verified: true,
-    docs_url: '/admin/ai-metrics',
-    capabilities: {
-      domains: ['llm-tracing', 'zar-cost-attribution', 'prompt-cache', 'model-routing'],
-      widgets: true,
-    },
-  },
-  {
-    id: 'c66-cr80-hardware-bridge',
-    name: 'C66 Key Cabinet & CR80 Badge Printer Bridge',
-    description:
-      'First-party Access Control hardware bridge for 2-step QR + RFID C66 key-cabinet interlock release and dual-sided 300 DPI CR80 PVC badge printing.',
-    author: 'Plantcor Access Control',
-    icon_url: null,
-    kind: 'native',
-    server_url: null,
-    auth_type: 'none',
-    verified: true,
-    docs_url: '/access-control/print-cards',
-    capabilities: {
-      domains: ['c66-key-interlock', 'cr80-300dpi-print', 'rfid-qr-verify'],
-      hardware: true,
-    },
-  },
-  {
-    id: 'fleet-smr-reconciler',
-    name: 'Automated SMR Meter & Bin-Factor Reconciler',
-    description:
-      'Native reconciliation plugin validating closing vs. opening SMR machine hours across shift rollovers and auditing haul-truck bin factors against weighbridge tonnages.',
-    author: 'Plantcor Production & Control Room',
-    icon_url: null,
-    kind: 'native',
-    server_url: null,
-    auth_type: 'none',
-    verified: true,
-    docs_url: '/control-room/reports',
-    capabilities: {
-      domains: ['smr-meter-sync', 'bin-factor-audit', 'shift-rollover'],
-      hooks: ['onShiftCloseout', 'onHourlyLoadLogged'],
-    },
-  },
-  {
-    id: 'ts-ast-lsp',
-    name: 'TypeScript, Biome & AST-Grep Language Server',
-    description:
-      'In-workspace Language Server Protocol (LSP) connector providing go-to-definition, symbol references, type diagnostics, and policy-compiler boundary checks.',
-    author: 'Arch Systems DevTools',
-    icon_url: null,
-    kind: 'lsp',
-    server_url: 'https://lsp.arch-system.internal/ts-ast',
-    auth_type: 'none',
-    verified: true,
-    docs_url: '/overview',
-    capabilities: {
-      domains: ['lsp', 'typescript', 'ast-grep', 'policy-boundaries'],
-      transport: 'jsonrpc-lsp',
-    },
-  },
-  {
-    id: 'postgres-sqls-lsp',
-    name: 'PostgreSQL, Kysely & RLS InitPlan LSP',
-    description:
-      'Database Language Server validating SQL queries against the 102-table @repo/database schema, linting RLS InitPlan policies, and providing Kysely type completions.',
-    author: 'Plantcor Database Engineering',
-    icon_url: null,
-    kind: 'lsp',
-    server_url: 'https://lsp.arch-system.internal/postgres-sqls',
-    auth_type: 'none',
-    verified: true,
-    docs_url: '/admin',
-    capabilities: {
-      domains: ['lsp', 'postgresql', 'rls-initplan', 'kysely-schema'],
-      transport: 'jsonrpc-lsp',
-    },
-  },
-  {
-    id: 'plc-iec61131-lsp',
-    name: 'IEC 61131-3 Structured Text & PLC Register LSP',
-    description:
-      'Industrial automation Language Server for Siemens S7, Allen-Bradley, and Pit Viper 351 PLC Structured Text syntax checking and Modbus register tag verification.',
-    author: 'Plantcor Automation & SCADA',
-    icon_url: null,
-    kind: 'lsp',
-    server_url: 'https://lsp.arch-system.internal/iec61131',
-    auth_type: 'none',
-    verified: true,
-    docs_url: '/drilling/drilling-operations',
-    capabilities: {
-      domains: ['lsp', 'iec-61131-3', 'modbus-registers', 'plc-ladder'],
-      transport: 'jsonrpc-lsp',
-    },
-  },
-  {
-    id: 'promql-lsp',
-    name: 'PromQL & LogQL Telemetry Query LSP',
-    description:
-      'Observability query Language Server providing metric autocomplete, label-matcher validation, and alert-expression linting for Control Room dashboards.',
-    author: 'Grafana / Prometheus',
-    icon_url: null,
-    kind: 'lsp',
-    server_url: 'https://lsp.arch-system.internal/promql',
-    auth_type: 'none',
-    verified: true,
-    docs_url: '/control-room',
-    capabilities: {
-      domains: ['lsp', 'promql', 'logql', 'alert-expressions'],
-      transport: 'jsonrpc-lsp',
-    },
-  },
-  {
-    id: 'opcua-pi-historian',
-    name: 'OPC-UA & AVEVA PI System Historian Bridge',
-    description:
-      'Industrial process historian MCP connector streaming wash-plant dense medium cyclone SG (cycloneRd), magnetite recovery, and primary crusher power draw.',
-    author: 'Plantcor Process Engineering',
-    icon_url: null,
-    kind: 'mcp',
-    server_url: 'https://pi-bridge.plantcor.internal/mcp',
-    auth_type: 'bearer',
-    verified: true,
-    docs_url: '/plant-processing/hourly-sheet',
-    capabilities: {
-      domains: ['opc-ua', 'pi-historian', 'cyclone-density', 'wash-plant'],
-      transport: 'streamable-http',
-    },
-  },
-  {
     id: 'microsoft-sharepoint',
     name: 'Microsoft SharePoint Online & Graph Data',
     description:
-      'Microsoft 365 SharePoint connector for document libraries, lists, and site content via Microsoft Graph, plus deep links into SharePoint Online that reuse the browser Microsoft 365 session.',
+      'Microsoft 365 SharePoint connector for document libraries, lists, and site content via Microsoft Graph.',
     author: 'Microsoft / Plantcor IT',
     icon_url: null,
     kind: 'mcp',
@@ -493,54 +290,56 @@ const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
     },
   },
   {
-    id: 'sap-pm-erp',
-    name: 'SAP S/4HANA Plant Maintenance & Spares ERP',
+    id: 'nestjs-scada-proxy',
+    name: 'NestJS Modbus TCP & SCADA Telemetry Proxy',
     description:
-      'Enterprise ERP action bridge for automated engineering breakdown work-order creation, artisan job-card dispatch, and critical spares reservation.',
-    author: 'SAP / Plantcor ERP',
+      'Federated SSRF-guarded action bridge to arch-system-nest-proxy for polling Pit Viper 351 drill rig and excavator PLC registers.',
+    author: 'Plantcor Mining Engineering',
     icon_url: null,
     kind: 'action',
-    server_url: 'https://sap-gateway.plantcor.internal/api/pm',
-    auth_type: 'api_key',
-    verified: true,
-    docs_url: '/engineering',
-    capabilities: {
-      domains: ['sap-pm', 'work-orders', 'spares-inventory', 'cost-centers'],
-      federated_service: 'sap-s4hana-pm',
-    },
-  },
-  {
-    id: 'weighbridge-tcp',
-    name: 'Avery Berkel & Loadrite Weighbridge Bridge',
-    description:
-      'Native plant & logistics connector capturing real-time ROM and washed-coal haul-truck gross/tare weighbridge tickets and reconciling bin factors.',
-    author: 'Plantcor Logistics & Dispatch',
-    icon_url: null,
-    kind: 'native',
-    server_url: null,
-    auth_type: 'none',
-    verified: true,
-    docs_url: '/production',
-    capabilities: {
-      domains: ['weighbridge', 'rom-tonnage', 'product-coal', 'bin-factor'],
-      hooks: ['onWeighbridgeTicketLogged'],
-    },
-  },
-  {
-    id: 'leica-jigsaw-fms',
-    name: 'Leica Jigsaw & MineSight Fleet Management',
-    description:
-      'High-precision GNSS fleet management MCP server for shovel-truck cycle times, bench elevation coordinates, and drill blast-pattern hole collar sync.',
-    author: 'Hexagon Mining / Leica',
-    icon_url: null,
-    kind: 'mcp',
-    server_url: 'https://fms.plantcor.internal/mcp',
+    server_url: 'https://arch-system-nest-proxy.vercel.app/api/mcp',
     auth_type: 'bearer',
     verified: true,
-    docs_url: '/production',
+    docs_url: '/drilling/drilling-operations',
     capabilities: {
-      domains: ['fleet-dispatch', 'gps-bench', 'cycle-times', 'blast-collars'],
-      transport: 'streamable-http',
+      domains: ['modbus-tcp', 'pit-viper-351', 'plc-registers', 'scada-ingest'],
+      federated_service: 'arch-system-nest-proxy',
+      transport: 'webhook-action',
+    },
+  },
+  {
+    id: 'n8n-workflow-engine',
+    name: 'n8n Autonomous Shift & Escalation Workflows',
+    description:
+      'Federated SSRF-guarded action bridge to n8n-vercel for automated shift-closeout PDF distribution and overdue breakdown escalation webhooks.',
+    author: 'Plantcor Automation',
+    icon_url: null,
+    kind: 'action',
+    server_url: 'https://n8n-vercel-arch.vercel.app/mcp',
+    auth_type: 'api_key',
+    verified: true,
+    docs_url: '/admin/workflows',
+    capabilities: {
+      domains: ['workflow-triggers', 'shift-pdf-dispatch', 'breakdown-escalation'],
+      federated_service: 'n8n-vercel',
+      transport: 'webhook-action',
+    },
+  },
+  {
+    id: 'whatsapp-shift-dispatch',
+    name: 'WhatsApp Operations & Muster Dispatch Bridge',
+    description:
+      'SSRF-guarded action bridge broadcasting shift compilation summaries, emergency muster roll-calls, and breakdown job cards.',
+    author: 'Plantcor Control Room',
+    icon_url: null,
+    kind: 'action',
+    server_url: 'https://arch-system-kappap.vercel.app/api/webhooks',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: '/control-room/shift-compilation',
+    capabilities: {
+      domains: ['whatsapp-dispatch', 'muster-alerts', 'shift-handover'],
+      transport: 'webhook-action',
     },
   },
 ];
@@ -560,47 +359,66 @@ function parseAllowlist(value: unknown): string[] {
     : [];
 }
 
-function buildBuiltInToolsForKind(kind: string, catalogId: string): IntegrationToolDescriptor[] {
-  if (kind === 'lsp') {
+function isExecutableKind(kind: string): kind is 'mcp' | 'action' {
+  return kind === 'mcp' || kind === 'action';
+}
+
+export function buildActionToolsForCatalog(
+  catalogId: string,
+  capabilities?: Record<string, unknown> | null
+): IntegrationToolDescriptor[] {
+  const adapter = capabilities?.adapter;
+  if (adapter === 'grafana' || catalogId === 'grafana') {
     return [
       {
-        name: 'lsp_hover_symbol',
-        description: `Inspect type signature and documentation via ${catalogId}`,
+        name: 'list_approved_dashboards',
+        description: `List approved read-only Grafana dashboards from ${catalogId}`,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            folderUid: { type: 'string' },
+          },
+        },
       },
-      {
-        name: 'lsp_goto_definition',
-        description: `Resolve symbol definition and AST location via ${catalogId}`,
-      },
-      {
-        name: 'lsp_diagnostics',
-        description: `Run static syntax, type, and policy diagnostics via ${catalogId}`,
-      },
-      {
-        name: 'lsp_completions',
-        description: `Provide context-aware code/schema autocomplete items via ${catalogId}`,
-      },
-    ];
-  }
-  if (kind === 'action') {
-    return [
       {
         name: 'dispatch_action_webhook',
-        description: `Trigger authenticated action payload on ${catalogId}`,
-      },
-      {
-        name: 'verify_action_status',
-        description: `Check remote execution status for ${catalogId}`,
+        description: `Send an authenticated JSON webhook payload to ${catalogId}`,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            payload: { type: 'object' },
+          },
+        },
       },
     ];
   }
+
+  if (adapter === 'prometheus' || catalogId === 'prometheus') {
+    return [
+      {
+        name: 'query_prometheus_metric',
+        description: `Query an allowlisted Prometheus metric from ${catalogId}`,
+        inputSchema: {
+          type: 'object',
+          required: ['metric'],
+          properties: {
+            metric: { type: 'string' },
+          },
+        },
+      },
+    ];
+  }
+
   return [
     {
-      name: 'execute_native_hook',
-      description: `Invoke in-process native plugin ${catalogId}`,
-    },
-    {
-      name: 'inspect_native_metrics',
-      description: `Read real-time native telemetry counters for ${catalogId}`,
+      name: 'dispatch_action_webhook',
+      description: `Send an authenticated JSON webhook payload to ${catalogId}`,
+      inputSchema: {
+        type: 'object',
+        properties: {
+          payload: { type: 'object' },
+        },
+      },
     },
   ];
 }
@@ -619,6 +437,14 @@ export async function listCatalog(): Promise<CatalogRecord[]> {
     byId.set(curated.id, curated);
   }
   for (const row of dbRows) {
+    if (isExecutableKind(row.kind)) {
+      if (!row.server_url) continue;
+      try {
+        assertSafeUrl(row.server_url);
+      } catch {
+        continue;
+      }
+    }
     const fallback = byId.get(row.id);
     byId.set(row.id, {
       ...fallback,
@@ -679,10 +505,11 @@ export async function installIntegration(
   if (input.catalog_entry?.server_url) {
     assertSafeUrl(input.catalog_entry.server_url);
   }
+
   const supabase = createServiceRoleClient();
   const { data: catalogEntry } = await supabase
     .from('integration_catalog')
-    .select('id, kind, server_url, auth_type')
+    .select('id, kind, server_url, auth_type, capabilities')
     .eq('id', input.catalog_id)
     .single();
 
@@ -702,6 +529,32 @@ export async function installIntegration(
           verified: curatedEntry.verified,
         }
       : undefined);
+
+  const candidateKind = catalogEntry?.kind ?? inlineEntry?.kind;
+  const candidateServerUrl = catalogEntry?.server_url ?? inlineEntry?.server_url ?? null;
+
+  if (!candidateKind && !catalogEntry && !inlineEntry) {
+    throw new NotFoundError(`Catalog entry "${input.catalog_id}" not found`, {
+      resource: 'integration_catalog',
+    });
+  }
+
+  if (!candidateKind || !isExecutableKind(candidateKind)) {
+    throw new APIError(
+      `Connector kind "${candidateKind ?? 'unknown'}" is not executable; only "mcp" and "action" connectors are supported`,
+      { statusCode: 400, context: { catalogId: input.catalog_id } }
+    );
+  }
+
+  if (!candidateServerUrl) {
+    throw new APIError(`Connector "${input.catalog_id}" requires a valid server_url`, {
+      statusCode: 400,
+      context: { catalogId: input.catalog_id },
+    });
+  }
+
+  // Always enforce SSRF guard on both inline and curated/persisted server URLs
+  assertSafeUrl(candidateServerUrl);
 
   if (!catalogEntry) {
     if (!inlineEntry) {
@@ -729,11 +582,13 @@ export async function installIntegration(
     }
   }
 
-  const effective = catalogEntry ?? {
-    kind: inlineEntry!.kind,
-    server_url: inlineEntry!.server_url ?? null,
-    auth_type: inlineEntry!.auth_type,
-  };
+  const effectiveCapabilities =
+    (catalogEntry as { capabilities?: Record<string, unknown> | null } | null)?.capabilities ??
+    curatedEntry?.capabilities ??
+    null;
+
+  const explicitAllowlist =
+    input.tool_allowlist && input.tool_allowlist.length > 0 ? input.tool_allowlist : null;
 
   const { data: installation, error } = await supabase
     .from('integration_installations')
@@ -743,7 +598,7 @@ export async function installIntegration(
       department_id: input.scope === 'department' ? (input.department_id ?? null) : null,
       status: 'pending',
       config: input.config ?? {},
-      tool_allowlist: input.tool_allowlist ?? [],
+      tool_allowlist: explicitAllowlist ?? [],
       installed_by: installedBy,
     })
     .select(INSTALLATION_SELECT)
@@ -755,11 +610,14 @@ export async function installIntegration(
   }
 
   if (input.secret) {
-    const { error: credentialError } = await supabase.from('integration_credentials').insert({
-      installation_id: installation.id,
-      kind: input.secret_kind ?? 'bearer',
-      ciphertext: encryptSecret(input.secret),
-    });
+    const { error: credentialError } = await supabase.from('integration_credentials').upsert(
+      {
+        installation_id: installation.id,
+        kind: input.secret_kind ?? 'bearer',
+        ciphertext: encryptSecret(input.secret),
+      },
+      { onConflict: 'installation_id,kind' }
+    );
     if (credentialError) {
       await supabase.from('integration_installations').delete().eq('id', installation.id);
       throw new DatabaseError('Failed to store credential', {
@@ -768,20 +626,24 @@ export async function installIntegration(
     }
   }
 
-  // Probe immediately so admins see real status instead of a hopeful 'pending'.
-  if (effective.kind === 'mcp') {
+  // Probe/sync immediately so admins see real status and executable tools.
+  if (candidateKind === 'mcp') {
     try {
       await refreshTools(installation.id);
-    } catch (error) {
-      logError(error, { context: 'integration_install_probe', installationId: installation.id });
+    } catch (probeError) {
+      logError(probeError, {
+        context: 'integration_install_probe',
+        installationId: installation.id,
+      });
     }
   } else {
-    const builtInTools = buildBuiltInToolsForKind(effective.kind, input.catalog_id);
+    const actionTools = buildActionToolsForCatalog(input.catalog_id, effectiveCapabilities);
     await supabase
       .from('integration_installations')
       .update({
         status: 'active',
-        tool_cache: { tools: builtInTools },
+        tool_cache: { tools: actionTools },
+        tool_allowlist: explicitAllowlist ?? actionTools.map((tool) => tool.name),
         tools_synced_at: new Date().toISOString(),
       })
       .eq('id', installation.id);
@@ -859,11 +721,22 @@ export async function updateInstallation(
   }
 
   if (patch.secret) {
-    const { error } = await supabase.from('integration_credentials').upsert({
-      installation_id: id,
-      kind: patch.secret_kind ?? 'bearer',
-      ciphertext: encryptSecret(patch.secret),
-    });
+    const targetKind = patch.secret_kind ?? 'bearer';
+    await supabase
+      .from('integration_credentials')
+      .delete()
+      .eq('installation_id', id)
+      .neq('kind', targetKind);
+
+    const { error } = await supabase.from('integration_credentials').upsert(
+      {
+        installation_id: id,
+        kind: targetKind,
+        ciphertext: encryptSecret(patch.secret),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'installation_id,kind' }
+    );
     if (error) {
       throw new DatabaseError('Failed to update credential', {
         context: { error: error.message },
@@ -886,7 +759,7 @@ export async function deleteInstallation(id: string): Promise<void> {
   await mcpClientManager.disconnect(id);
 }
 
-/** Runs MCP tools/list and persists the result into tool_cache. */
+/** Runs tool discovery (MCP tools/list or SSRF-guarded action descriptor sync) and persists into tool_cache. */
 export async function refreshTools(id: string): Promise<IntegrationToolDescriptor[]> {
   const supabase = createServiceRoleClient();
   const installation = await getInstallation(id);
@@ -899,12 +772,43 @@ export async function refreshTools(id: string): Promise<IntegrationToolDescripto
   }
 
   const managed = await toManagedInstallation(installation);
-  try {
-    const tools = await mcpClientManager.listTools(managed);
+
+  if (managed.kind === 'action') {
+    assertSafeUrl(managed.serverUrl);
+    const tools = buildActionToolsForCatalog(installation.catalog_id, managed.capabilities);
+    const nextAllowlist =
+      installation.tool_allowlist.length > 0
+        ? installation.tool_allowlist
+        : tools.map((tool) => tool.name);
     const { error } = await supabase
       .from('integration_installations')
       .update({
         tool_cache: { tools },
+        tool_allowlist: nextAllowlist,
+        tools_synced_at: new Date().toISOString(),
+        status: 'active',
+        last_error: null,
+      })
+      .eq('id', id);
+    if (error) {
+      throw new DatabaseError('Failed to persist action tool cache', {
+        context: { error: error.message },
+      });
+    }
+    return tools;
+  }
+
+  try {
+    const tools = await mcpClientManager.listTools(managed);
+    const nextAllowlist =
+      installation.tool_allowlist.length > 0
+        ? installation.tool_allowlist
+        : tools.map((tool) => tool.name);
+    const { error } = await supabase
+      .from('integration_installations')
+      .update({
+        tool_cache: { tools },
+        tool_allowlist: nextAllowlist,
         tools_synced_at: new Date().toISOString(),
         status: 'active',
         last_error: null,
@@ -926,23 +830,28 @@ export async function refreshTools(id: string): Promise<IntegrationToolDescripto
   }
 }
 
-/** Builds the managed shape (with decrypted credential) for the MCP client manager. */
+/** Builds the managed shape (with encrypted credential) for MCP and SSRF-guarded Action connectors. */
 export async function toManagedInstallation(
   installation: InstallationRecord
 ): Promise<ManagedInstallation> {
   const supabase = createServiceRoleClient();
-  const { data: catalog } = await supabase
+  const { data: dbCatalog } = await supabase
     .from('integration_catalog')
-    .select('kind, server_url, auth_type')
+    .select('kind, server_url, auth_type, capabilities')
     .eq('id', installation.catalog_id)
     .single();
 
-  if (catalog?.kind !== 'mcp' || !catalog.server_url) {
-    throw new APIError(`Installation ${installation.id} is not an MCP connector`, {
+  const curated = CURATED_INTEGRATION_CATALOG.find((item) => item.id === installation.catalog_id);
+  const catalog = dbCatalog ?? curated;
+
+  if (!catalog || !isExecutableKind(catalog.kind) || !catalog.server_url) {
+    throw new APIError(`Installation ${installation.id} is not an executable HTTP/MCP connector`, {
       statusCode: 400,
       context: { installationId: installation.id },
     });
   }
+
+  assertSafeUrl(catalog.server_url);
 
   let credentialCiphertext: string | null = null;
   if (catalog.auth_type !== 'none') {
@@ -950,7 +859,9 @@ export async function toManagedInstallation(
       .from('integration_credentials')
       .select('ciphertext')
       .eq('installation_id', installation.id)
-      .single();
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
     credentialCiphertext = credential?.ciphertext ?? null;
     if (!credentialCiphertext) {
       throw new APIError(
@@ -962,9 +873,12 @@ export async function toManagedInstallation(
 
   return {
     id: installation.id,
+    kind: catalog.kind,
     serverUrl: catalog.server_url,
     authType: catalog.auth_type as ManagedInstallation['authType'],
     credentialCiphertext,
+    capabilities:
+      (catalog as { capabilities?: Record<string, unknown> | null }).capabilities ?? null,
     config: installation.config,
   };
 }
@@ -976,7 +890,7 @@ export interface ActiveIntegration {
   managed: ManagedInstallation;
 }
 
-/** Active MCP installations eligible for tool invocation. */
+/** Active executable installations (MCP Streamable-HTTP & SSRF-guarded Action bridges). */
 export async function listActiveMcpIntegrations(
   departmentId?: string
 ): Promise<ActiveIntegration[]> {
@@ -1002,7 +916,7 @@ export async function listActiveMcpIntegrations(
       tool_allowlist: parseAllowlist((raw as Record<string, unknown>).tool_allowlist),
     };
     const catalog = catalogById.get(installation.catalog_id);
-    if (catalog?.kind !== 'mcp') continue;
+    if (!catalog || !isExecutableKind(catalog.kind)) continue;
     // Global installs apply everywhere; department installs apply to that department.
     if (
       installation.scope === 'department' &&
@@ -1023,13 +937,6 @@ export async function listActiveMcpIntegrations(
     }
   }
   return active;
-}
-
-interface _IntegrationToolIndexEntry {
-  installationId: string;
-  toolName: string;
-  qualifiedName: string;
-  descriptor: IntegrationToolDescriptor;
 }
 
 interface AuditEntry {

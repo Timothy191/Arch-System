@@ -1,7 +1,9 @@
 import { createLogger } from '@repo/logger';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { withBodyLimit } from '@/lib/api/body-limit';
 import { authorizeCronRequest } from '@/lib/api/cron-auth';
+import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { verifyVercelSignature } from '@/lib/api/vercel-signature';
 import { dispatchIntegrationEventTriggers } from '@/lib/integrations/tool-bridge';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
@@ -12,6 +14,7 @@ const HTTP_STATUS_OK = 200;
 const HTTP_STATUS_BAD_REQUEST = 400;
 const HTTP_STATUS_UNAUTHORIZED = 401;
 const MAX_RECENT_WEBHOOK_EVENTS = 50;
+const MAX_VERCEL_WEBHOOK_BODY_BYTES = 524_288;
 
 export const VERCEL_WEBHOOK_EVENT_TYPES = [
   // Deployment Events
@@ -178,7 +181,7 @@ export function clearRecentVercelWebhookEventsForTest(): void {
   recentWebhookEvents.length = 0;
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+async function handleVercelPost(req: NextRequest): Promise<NextResponse> {
   const rawBody = await req.text();
   const signatureHeader = req.headers.get('x-vercel-signature');
   const secret = resolveWebhookSecret();
@@ -280,7 +283,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   );
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  return withRateLimit(req, () =>
+    withBodyLimit(req, () => handleVercelPost(req), { maxSize: MAX_VERCEL_WEBHOOK_BODY_BYTES })
+  );
+}
+
+async function handleVercelGet(req: NextRequest): Promise<NextResponse> {
   const authError = authorizeCronRequest(req);
   if (authError) {
     return authError;
@@ -300,4 +309,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     },
     { status: HTTP_STATUS_OK }
   );
+}
+
+export async function GET(req: NextRequest): Promise<NextResponse> {
+  return withRateLimit(req, () => handleVercelGet(req));
 }

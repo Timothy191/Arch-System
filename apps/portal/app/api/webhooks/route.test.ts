@@ -15,6 +15,8 @@ jest.mock('next/cache', () => ({
 
 const { createServerSupabaseClient } = jest.requireMock('@repo/supabase/server');
 
+process.env.INTEGRATION_ENCRYPTION_KEY = 'test-integration-key-32-chars-min!';
+
 function buildMock(
   overrides: {
     user?: unknown;
@@ -48,16 +50,27 @@ function buildMock(
           }),
         };
       }
+      const queryResult = Promise.resolve({
+        data: overrides.webhooks ?? [],
+        error: overrides.dbError ?? null,
+      });
+      const isChain = Object.assign(queryResult, {
+        eq: jest.fn().mockResolvedValue({
+          data: overrides.webhooks ?? [],
+          error: overrides.dbError ?? null,
+        }),
+        in: jest.fn().mockResolvedValue({
+          data: overrides.webhooks ?? [],
+          error: overrides.dbError ?? null,
+        }),
+        or: jest.fn().mockResolvedValue({
+          data: overrides.webhooks ?? [],
+          error: overrides.dbError ?? null,
+        }),
+      });
       return {
         select: jest.fn().mockReturnValue({
-          is: jest.fn().mockReturnValue({
-            or: jest.fn().mockResolvedValue({
-              data: overrides.webhooks ?? [],
-              error: overrides.dbError ?? null,
-            }),
-            // admin path (no .or())
-            then: undefined,
-          }),
+          is: jest.fn().mockReturnValue(isChain),
           eq: jest.fn().mockReturnValue({
             single: jest.fn().mockResolvedValue({ data: null }),
           }),
@@ -116,7 +129,7 @@ describe('GET /api/webhooks', () => {
     const res = await GET(mockReq);
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json.webhooks).toEqual(webhookList);
+    expect(json.webhooks).toEqual([{ id: 'w1', url: 'https://example.com', has_secret: false }]);
   });
 
   it('returns 500 on db error', async () => {
@@ -271,6 +284,40 @@ describe('POST /api/webhooks', () => {
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.webhook).toBeDefined();
+  });
+
+  it('rejects SSRF URLs targeting loopback, private, or .internal hosts with 400', async () => {
+    buildMock();
+    const req = makeRequest({
+      url: 'http://127.0.0.1:8080/webhook',
+      event_types: ['breakdown.created'],
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error.message).toContain('disallowed host');
+  });
+
+  it('persists optional secret and active fields on creation', async () => {
+    const mock = buildMock();
+    const req = makeRequest({
+      url: 'https://hooks.plantcor.example/events',
+      event_types: ['breakdown.created'],
+      secret: 'hmac-secret-at-least-16-chars',
+      active: false,
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+    const webhookTableCalls = mock.from.mock.results
+      .map((r, idx) => ({ table: mock.from.mock.calls[idx]?.[0], value: r.value }))
+      .find((entry) => entry.table === 'webhook_endpoints');
+    expect(webhookTableCalls?.value.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://hooks.plantcor.example/events',
+        secret: expect.stringMatching(/^enc:v1:/),
+        active: false,
+      })
+    );
   });
 
   it('returns 500 when insert fails', async () => {

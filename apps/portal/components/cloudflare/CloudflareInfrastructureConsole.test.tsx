@@ -355,6 +355,33 @@ describe('CloudflareInfrastructureConsole', () => {
     });
   });
 
+  it('does not inflate live count when AI Gateway is opt-in disabled (mode unconfigured)', async () => {
+    const summaryWithDisabledAiGateway: CloudflareSummaryResponse = {
+      ...buildLiveSummary(),
+      aiGateway: {
+        mode: 'unconfigured',
+        tokenConfigured: true,
+        featureEnabled: false,
+        providers: [],
+        requestCount24h: null,
+        avgLatencyMs: null,
+        errorRatePercent: null,
+        costReportingAvailable: false,
+        lastSyncedAt: null,
+      },
+    };
+    globalThis.fetch = jest.fn(async () =>
+      createJsonResponse(summaryWithDisabledAiGateway)
+    ) as unknown as typeof fetch;
+
+    render(<CloudflareInfrastructureConsole />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Stable · 8\/9 live/i)).toBeInTheDocument();
+    });
+    expect(screen.getByText('No (opt-in)')).toBeInTheDocument();
+  });
+
   it('renders an error alert card when /api/cloudflare/summary fails', async () => {
     globalThis.fetch = jest.fn(async () =>
       createJsonResponse({ error: 'Upstream timeout' }, false, 502)

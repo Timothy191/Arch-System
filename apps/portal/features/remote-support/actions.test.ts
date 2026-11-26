@@ -7,6 +7,7 @@ import {
   createRemoteSupportSession,
   endRemoteSupportSession,
   initiateTier2ConsentSession,
+  listRemoteSupportAuditEvents,
   respondToRemoteSupportConsent,
   updateCobrowseConsent,
   upsertRemoteSupportDevice,
@@ -15,6 +16,22 @@ import {
 const mockCreateServerSupabaseClient = jest.fn();
 const mockGetAuthenticatedEmployee = jest.fn();
 const mockUpdateTags = jest.fn().mockResolvedValue(undefined);
+const redisKv = new Map<string, string>();
+const mockRedisClient = {
+  get: jest.fn(async (key: string) => redisKv.get(key) ?? null),
+  set: jest.fn(async (key: string, val: string) => {
+    redisKv.set(key, val);
+    return 'OK';
+  }),
+  del: jest.fn(async (key: string) => {
+    redisKv.delete(key);
+    return 1;
+  }),
+};
+
+jest.mock('@repo/redis', () => ({
+  getRedisClient: jest.fn(async () => mockRedisClient),
+}));
 
 jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: () => mockCreateServerSupabaseClient(),
@@ -55,7 +72,17 @@ function buildSupabaseStub(options: {
     auditInsert,
     from: jest.fn((table: string) => {
       if (table === 'remote_support_audit_events') {
-        return { insert: auditInsert };
+        return {
+          insert: auditInsert,
+          select: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue({
+                data: [{ id: 'aud-1', event_type: 'session_created' }],
+                error: null,
+              }),
+            }),
+          }),
+        };
       }
 
       if (table === 'remote_support_devices') {
@@ -146,6 +173,7 @@ function buildSupabaseStub(options: {
 describe('remote-support Server Actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    redisKv.clear();
   });
 
   it('rejects unauthenticated callers', async () => {
@@ -321,5 +349,9 @@ describe('remote-support Server Actions', () => {
       issueSummary: 'Need OS printer service restart',
     });
     expect(t2.session.tier).toBe('tier2_os_desktop');
+
+    const refreshed = await listRemoteSupportAuditEvents();
+    expect(refreshed.events).toHaveLength(1);
+    expect(mockRedisClient.set).toHaveBeenCalled();
   });
 });

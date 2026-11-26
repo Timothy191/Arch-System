@@ -47,25 +47,27 @@ export interface OptionalActionResult<T> {
 }
 
 /**
- * Returns the resolved base URL for the n8n automation engine.
+ * Returns the resolved base URL for the n8n automation engine,
+ * or an empty string when `N8N_URL` / `NEXT_PUBLIC_N8N_URL` is not configured.
  */
 export function getN8nBaseUrl(overrideUrl?: string): string {
   if (overrideUrl && overrideUrl.trim().length > 0) {
-    return overrideUrl.replace(/\/+$/, '');
+    return overrideUrl.trim().replace(/\/+$/, '');
   }
 
-  const envUrl =
-    process.env.N8N_URL || process.env.NEXT_PUBLIC_N8N_URL || 'http://192.168.1.79:5678';
+  const envUrl = process.env.N8N_URL || process.env.NEXT_PUBLIC_N8N_URL;
+  if (!envUrl || envUrl.trim().length === 0) {
+    return '';
+  }
 
-  return envUrl.replace(/\/+$/, '');
+  return envUrl.trim().replace(/\/+$/, '');
 }
 
 /**
  * Checks if an n8n endpoint URL or environment configuration is present.
  */
 export function isN8nConfigured(): boolean {
-  const url = process.env.N8N_URL || process.env.NEXT_PUBLIC_N8N_URL;
-  return typeof url === 'string' && url.trim().length > 0;
+  return getN8nBaseUrl().length > 0;
 }
 
 /**
@@ -75,6 +77,16 @@ export function isN8nConfigured(): boolean {
 export async function checkN8nHealth(options: N8nHealthOptions = {}): Promise<N8nHealthResult> {
   const startTime = Date.now();
   const url = getN8nBaseUrl(options.url);
+  if (!url) {
+    return {
+      status: 'unavailable',
+      optional: true,
+      latencyMs: 0,
+      url: '',
+      statusCode: null,
+      error: 'N8N_URL is not configured',
+    };
+  }
   const healthEndpoint = `${url}/healthz`;
   const timeoutMs = options.timeoutMs ?? 2500;
 
@@ -138,12 +150,47 @@ export async function triggerN8nWorkflow<TPayload, TResponse = unknown>(
   const baseUrl = getN8nBaseUrl(options.baseUrl);
   const timeoutMs = options.timeoutMs ?? 3000;
   const apiKey = options.apiKey || process.env.N8N_API_KEY;
+  const isAbsoluteTarget =
+    endpointOrWebhookPath.startsWith('http://') || endpointOrWebhookPath.startsWith('https://');
+
+  if (!isAbsoluteTarget && !baseUrl) {
+    const unconfiguredMsg = 'N8N_URL is not configured';
+    if (options.fallback) {
+      try {
+        const fallbackData = await options.fallback();
+        return {
+          success: true,
+          executed: false,
+          skipped: true,
+          source: 'fallback',
+          data: fallbackData,
+          error: unconfiguredMsg,
+        };
+      } catch (fallbackErr: unknown) {
+        const fallbackMsg =
+          fallbackErr instanceof Error ? fallbackErr.message : 'Fallback handler threw an error';
+        return {
+          success: false,
+          executed: false,
+          skipped: true,
+          source: 'fallback',
+          error: `${unconfiguredMsg}; Fallback failed: ${fallbackMsg}`,
+        };
+      }
+    }
+    return {
+      success: false,
+      executed: false,
+      skipped: true,
+      source: 'none',
+      error: unconfiguredMsg,
+    };
+  }
 
   // Construct target URL
-  const targetUrl =
-    endpointOrWebhookPath.startsWith('http://') || endpointOrWebhookPath.startsWith('https://')
-      ? endpointOrWebhookPath
-      : `${baseUrl}/${endpointOrWebhookPath.replace(/^\/+/, '')}`;
+  const targetUrl = isAbsoluteTarget
+    ? endpointOrWebhookPath
+    : `${baseUrl}/${endpointOrWebhookPath.replace(/^\/+/, '')}`;
 
   try {
     const controller = new AbortController();

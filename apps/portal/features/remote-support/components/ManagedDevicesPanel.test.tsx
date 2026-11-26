@@ -41,19 +41,28 @@ describe('ManagedDevicesPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('allows admin to add, search, connect, and deactivate a managed workstation', async () => {
+  it('allows admin to add, edit via modal, search, connect, and deactivate a managed workstation', async () => {
     const onDevicesChanged = jest.fn();
     const onConnectDevice = jest.fn();
 
-    mockUpsertRemoteSupportDevice.mockResolvedValue({
-      success: true,
-      device: {
-        ...INITIAL_DEVICES[0],
-        id: 'dev-2',
-        hostname: 'LAB-PC-02',
-        display_name: 'Lab PC 2',
-      },
-    });
+    mockUpsertRemoteSupportDevice
+      .mockResolvedValueOnce({
+        success: true,
+        device: {
+          ...INITIAL_DEVICES[0],
+          id: 'dev-2',
+          hostname: 'LAB-PC-02',
+          display_name: 'Lab PC 2',
+        },
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        device: {
+          ...INITIAL_DEVICES[0],
+          display_name: 'Control Room Primary',
+          network_host: '10.20.4.99',
+        },
+      });
     mockDeactivateRemoteSupportDevice.mockResolvedValue({ success: true });
 
     render(
@@ -90,6 +99,27 @@ describe('ManagedDevicesPanel', () => {
         })
       );
       expect(onDevicesChanged).toHaveBeenCalled();
+    });
+
+    // Edit existing workstation via modal
+    fireEvent.click(screen.getByRole('button', { name: 'Edit CR-OP-01' }));
+    expect(screen.getByText('Edit Managed Workstation')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Display Name'), {
+      target: { value: 'Control Room Primary' },
+    });
+    fireEvent.change(screen.getByLabelText('Internal Host / IP'), {
+      target: { value: '10.20.4.99' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Workstation' }));
+
+    await waitFor(() => {
+      expect(mockUpsertRemoteSupportDevice).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'dev-1',
+          displayName: 'Control Room Primary',
+          networkHost: '10.20.4.99',
+        })
+      );
     });
 
     fireEvent.click(screen.getByRole('button', { name: /Deactivate CR-OP-01/i }));

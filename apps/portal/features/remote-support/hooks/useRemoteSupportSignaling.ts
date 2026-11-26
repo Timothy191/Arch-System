@@ -60,7 +60,7 @@ export function useRemoteSupportSignaling({
 
     const channelName = `support:session:${sessionId}`;
     const channel = supabaseClient.channel(channelName, {
-      config: { broadcast: { self: false } },
+      config: { private: true, broadcast: { self: false } },
     }) as unknown as BroadcastChannelHandle;
 
     channelRef.current = channel;

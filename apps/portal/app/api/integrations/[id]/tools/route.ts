@@ -28,10 +28,12 @@
  *         description: MCP server unreachable
  */
 
+import { integrationIdParamSchema } from '@repo/contract/schemas/integration.schema';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { type NextRequest, NextResponse } from 'next/server';
 import { applyCors } from '@/lib/api/cors';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
+import { isAppError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
 import { refreshTools } from '@/lib/integrations/service';
 
@@ -52,8 +54,15 @@ async function handleRefresh(
     );
   }
 
-  const { id } = await params;
-  const tools = await refreshTools(id);
+  const rawParams = await params;
+  const parsedId = integrationIdParamSchema.safeParse(rawParams);
+  if (!parsedId.success) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Invalid integration ID', code: 'VALIDATION_ERROR' } },
+      { status: 400 }
+    );
+  }
+  const tools = await refreshTools(parsedId.data.id);
   return NextResponse.json({ tools });
 }
 
@@ -63,7 +72,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     return applyCors(request, response);
   } catch (error) {
     await logError(error, { context: 'integrations_tools_route' });
-    const status = error instanceof Error && error.message.includes('disabled') ? 409 : 502;
+    const status = isAppError(error)
+      ? error.statusCode
+      : error instanceof Error && error.message.includes('disabled')
+        ? 409
+        : 502;
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Tool discovery failed' },
       { status }

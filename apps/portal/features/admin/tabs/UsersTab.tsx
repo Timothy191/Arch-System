@@ -2,21 +2,40 @@
 
 import type { DepartmentPermission, EmployeeGender, EmployeeRecordType } from '@repo/contract';
 import { Button } from '@repo/ui/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@repo/ui/components/ui/dialog';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Camera, Edit2, QrCode, RefreshCw, Search, Trash2, Upload, UserPlus } from 'lucide-react';
+import {
+  Camera,
+  Edit2,
+  Loader2,
+  QrCode,
+  RefreshCw,
+  Search,
+  Trash2,
+  Upload,
+  UserPlus,
+} from 'lucide-react';
 import Image from 'next/image';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
 import {
   type AdminDepartmentOption,
   type AdminEmployeeRecord,
+  type AdminSiteOption,
+  deactivateEmployeeAdmin,
   getUsersAdminData,
+  uploadEmployeePhoto,
   upsertEmployeeAdmin,
 } from './actions';
-import { DEFAULT_ADMIN_AREAS, getSavedAdminAreas } from './DepartmentsTab';
 import {
   AccountTypeSelectorBox,
   EmployeeAccessPermissionsSection,
@@ -31,6 +50,7 @@ const MONO_INPUT_CLASS =
   'w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)]';
 const TABLE_HEADER_CELL_CLASS =
   'px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider';
+const MAX_CLIENT_PHOTO_BYTES = 2 * 1024 * 1024;
 
 const GENDER_OPTIONS: ReadonlyArray<{ readonly value: EmployeeGender; readonly label: string }> = [
   { value: 'male', label: 'Male' },
@@ -40,6 +60,7 @@ const GENDER_OPTIONS: ReadonlyArray<{ readonly value: EmployeeGender; readonly l
 
 interface EmployeeFormPayload {
   record_type: EmployeeRecordType;
+  email: string;
   names: string;
   surname: string;
   full_name: string;
@@ -53,6 +74,7 @@ interface EmployeeFormPayload {
   coy_number: string;
   qr_code: string;
   photo_url: string;
+  photo_storage_path: string | null;
   role: string;
   department_id: string | null;
   accessible_departments: string[];
@@ -89,16 +111,20 @@ function buildInitialPermissions(employee: Employee | null): Record<string, Depa
 export function UsersTab() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<AdminDepartmentOption[]>([]);
+  const [sites, setSites] = useState<AdminSiteOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [pendingDeactivate, setPendingDeactivate] = useState<Employee | null>(null);
+  const [isDeactivating, setIsDeactivating] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
       const data = await getUsersAdminData();
       setEmployees(data.employees);
       setDepartments(data.departments);
+      setSites(data.sites ?? []);
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to load employee records');
       logError(error, { context: 'users_tab_load_data' });
@@ -109,7 +135,7 @@ export function UsersTab() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
   const handleEdit = (employee: Employee) => {
@@ -136,6 +162,29 @@ export function UsersTab() {
     setShowEditDialog(false);
     setEditingEmployee(null);
     await loadData();
+  };
+
+  const handleConfirmDeactivate = async () => {
+    if (!pendingDeactivate) return;
+    setIsDeactivating(true);
+    try {
+      const result = await deactivateEmployeeAdmin(pendingDeactivate.id);
+      if (!result.success) {
+        const message = result.error || 'Failed to deactivate employee';
+        logError(new Error(message), { context: 'users_tab_deactivate_employee' });
+        toast.error(message);
+        return;
+      }
+      toast.success(`Deactivated ${pendingDeactivate.full_name}`);
+      setPendingDeactivate(null);
+      await loadData();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to deactivate employee';
+      logError(new Error(message), { context: 'users_tab_deactivate_employee' });
+      toast.error(message);
+    } finally {
+      setIsDeactivating(false);
+    }
   };
 
   const query = searchTerm.trim().toLowerCase();
@@ -313,8 +362,9 @@ export function UsersTab() {
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => setPendingDeactivate(emp)}
                             className="text-accent-red hover:text-accent-red/80"
-                            aria-label={`Delete ${emp.full_name}`}
+                            aria-label={`Deactivate ${emp.full_name}`}
                           >
                             <Trash2 className="h-4 w-4" aria-hidden="true" />
                           </Button>
@@ -340,12 +390,47 @@ export function UsersTab() {
           <EditEmployeeForm
             employee={editingEmployee}
             departments={departments}
+            sites={sites}
             onSubmit={handleUpdate}
             onCancel={() => {
               setShowEditDialog(false);
               setEditingEmployee(null);
             }}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(pendingDeactivate)}
+        onOpenChange={(open) => !open && setPendingDeactivate(null)}
+      >
+        <DialogContent className="max-w-md border-[var(--border-default)] bg-[var(--bg-primary)]">
+          <DialogHeader>
+            <DialogTitle>Deactivate Employee</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to deactivate &ldquo;{pendingDeactivate?.full_name}&rdquo;? This
+              revokes active portal sessions, marks HR personnel status inactive, and disables
+              issued access badges.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isDeactivating}
+              onClick={() => setPendingDeactivate(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isDeactivating}
+              onClick={() => void handleConfirmDeactivate()}
+            >
+              {isDeactivating ? 'Deactivating...' : 'Confirm Deactivate'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
@@ -399,11 +484,13 @@ function EmployeeQrAvatar({ qrCode }: { qrCode: string }) {
 function EditEmployeeForm({
   employee,
   departments,
+  sites,
   onSubmit,
   onCancel,
 }: {
   employee: Employee | null;
-  departments: { id: string; display_name: string }[];
+  departments: readonly AdminDepartmentOption[];
+  sites: readonly AdminSiteOption[];
   onSubmit: (_data: EmployeeFormPayload) => void;
   onCancel: () => void;
 }) {
@@ -417,6 +504,7 @@ function EditEmployeeForm({
       : 'employee');
 
   const [recordType, setRecordType] = useState<EmployeeRecordType>(defaultRecordType);
+  const [email, setEmail] = useState(employee?.email ?? '');
   const [names, setNames] = useState(defaultNames);
   const [surname, setSurname] = useState(defaultSurname);
   const [fullName, setFullName] = useState(employee?.full_name || '');
@@ -436,6 +524,10 @@ function EditEmployeeForm({
   const [coyNumber, setCoyNumber] = useState(employee?.employee_code || '');
   const [qrCode, setQrCode] = useState(employee?.qr_code_data || '');
   const [photoUrl, setPhotoUrl] = useState(employee?.photo_url || '');
+  const [photoStoragePath, setPhotoStoragePath] = useState<string | null>(
+    employee?.photo_storage_path ?? null
+  );
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [role, setRole] = useState(employee?.role || 'operator');
   const [departmentId, setDepartmentId] = useState(employee?.department_id || '');
   const [accessibleDepts, setAccessibleDepts] = useState<string[]>(
@@ -444,11 +536,22 @@ function EditEmployeeForm({
   const [departmentPermissions, setDepartmentPermissions] = useState<
     Record<string, DepartmentPermission>
   >(() => buildInitialPermissions(employee));
-  const [availableAreas, setAvailableAreas] = useState<string[]>([...DEFAULT_ADMIN_AREAS]);
 
-  useEffect(() => {
-    setAvailableAreas(getSavedAdminAreas());
-  }, []);
+  const availableAreas = useMemo(() => {
+    const namesSet = new Set<string>();
+    for (const site of sites) {
+      if (site.name.trim()) namesSet.add(site.name.trim());
+    }
+    for (const dept of departments) {
+      if (dept.display_name.trim()) namesSet.add(dept.display_name.trim());
+    }
+    if (area.trim()) {
+      namesSet.add(area.trim());
+    }
+    return Array.from(namesSet).sort((a, b) => a.localeCompare(b));
+  }, [area, departments, sites]);
+
+  const requiresInviteEmail = recordType === 'user' && !employee?.auth_id;
 
   const handleNamesChange = (nextNames: string) => {
     setNames(nextNames);
@@ -476,23 +579,35 @@ function EditEmployeeForm({
     setQrCode(`QR-${prefix}-${suffix}`);
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > MAX_CLIENT_PHOTO_BYTES) {
       toast.error('Image size must be less than 2 MB');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        setPhotoUrl(reader.result);
-        toast.success('Employee photo loaded');
+    setIsUploadingPhoto(true);
+    try {
+      const uploadForm = new FormData();
+      uploadForm.set('photo', file);
+      if (coyNumber.trim()) {
+        uploadForm.set('coy_number', coyNumber.trim());
       }
-    };
-    reader.readAsDataURL(file);
+      const res = await uploadEmployeePhoto(uploadForm);
+      if (!res.success || !res.storagePath) {
+        toast.error(res.error || 'Failed to upload employee photo');
+        return;
+      }
+      setPhotoStoragePath(res.storagePath);
+      setPhotoUrl(res.previewUrl || res.storagePath);
+      toast.success('Employee photo uploaded to secure storage');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to upload employee photo');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
   const toggleAccessibleDept = (deptId: string) => {
@@ -563,9 +678,14 @@ function EditEmployeeForm({
 
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
+    if (requiresInviteEmail && !email.trim()) {
+      toast.error('Email address is required to invite a portal login user');
+      return;
+    }
     const combinedFullName = fullName.trim() || `${names.trim()} ${surname.trim()}`.trim();
     onSubmit({
       record_type: recordType,
+      email: email.trim(),
       names,
       surname,
       full_name: combinedFullName,
@@ -579,6 +699,7 @@ function EditEmployeeForm({
       coy_number: coyNumber,
       qr_code: qrCode,
       photo_url: photoUrl,
+      photo_storage_path: photoStoragePath,
       role,
       department_id: departmentId || null,
       accessible_departments: accessibleDepts,
@@ -589,6 +710,28 @@ function EditEmployeeForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <AccountTypeSelectorBox recordType={recordType} onChange={setRecordType} />
+
+      {recordType === 'user' && (
+        <div>
+          <label htmlFor="email" className={LABEL_CLASS}>
+            Email Address {requiresInviteEmail && <span className="text-accent-red">*</span>}
+          </label>
+          <input
+            id="email"
+            type="email"
+            required={requiresInviteEmail}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={INPUT_CLASS}
+            placeholder="operator@plantcor.co.za"
+          />
+          {requiresInviteEmail && (
+            <p className="mt-1 text-[var(--text-muted)] text-xs">
+              Sends a Supabase Auth invitation so this user receives their own login identity.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
@@ -797,7 +940,10 @@ function EditEmployeeForm({
         </label>
         <div className="flex items-center gap-3">
           <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)]">
-            {photoUrl ? (
+            {photoUrl &&
+            (photoUrl.startsWith('http://') ||
+              photoUrl.startsWith('https://') ||
+              photoUrl.startsWith('/')) ? (
               <Image
                 src={photoUrl}
                 alt="Employee photo preview"
@@ -811,15 +957,28 @@ function EditEmployeeForm({
             )}
           </div>
           <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-medium text-[var(--text-heading)] text-sm transition-colors hover:bg-[var(--bg-tertiary)]">
-            <Upload className="h-4 w-4 text-[var(--accent-blue)]" />
-            <span>Upload Photo</span>
-            <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+            {isUploadingPhoto ? (
+              <Loader2 className="h-4 w-4 animate-spin text-[var(--accent-blue)]" />
+            ) : (
+              <Upload className="h-4 w-4 text-[var(--accent-blue)]" />
+            )}
+            <span>{isUploadingPhoto ? 'Uploading...' : 'Upload Photo'}</span>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              disabled={isUploadingPhoto}
+              onChange={(event) => void handlePhotoUpload(event)}
+              className="hidden"
+            />
           </label>
           <input
             id="photo"
             type="text"
             value={photoUrl}
-            onChange={(e) => setPhotoUrl(e.target.value)}
+            onChange={(e) => {
+              setPhotoUrl(e.target.value);
+              setPhotoStoragePath(null);
+            }}
             className="flex-1 rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
             placeholder="Or paste photo URL..."
           />
@@ -839,8 +998,12 @@ function EditEmployeeForm({
           >
             <option value="operator">Operator</option>
             <option value="supervisor">Supervisor</option>
-            <option value="admin">Admin</option>
             <option value="control_room_operator">Control Room Operator</option>
+            <option value="access_control">Access Control</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="viewer">Viewer</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
           </select>
         </div>
 
@@ -881,6 +1044,7 @@ function EditEmployeeForm({
         </Button>
         <Button
           type="submit"
+          disabled={isUploadingPhoto}
           className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
         >
           {employee ? 'Save Changes' : recordType === 'user' ? 'Add User' : 'Add Employee'}

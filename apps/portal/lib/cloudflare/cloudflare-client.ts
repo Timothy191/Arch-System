@@ -501,7 +501,7 @@ export class CloudflareApiClient {
       id: tunnel.id,
       name: tunnel.name,
       status: TUNNEL_STATUS_MAP[tunnel.status] ?? 'inactive',
-      routes: [],
+      routes: null,
       lastSeenAt: toIsoOrNull(tunnel.connections?.[0]?.opened_at),
       originHealthy: Array.isArray(tunnel.connections) && tunnel.connections.length > 0,
     }));
@@ -557,7 +557,7 @@ export class CloudflareApiClient {
           id: queueId,
           name: queue.queue_name ?? queue.name ?? queueId,
           pendingMessages: null,
-          hasDlq: false,
+          hasDlq: null,
           consumerHealthy:
             typeof queue.consumers_total_count === 'number'
               ? queue.consumers_total_count > 0
@@ -603,9 +603,7 @@ export class CloudflareApiClient {
       widgetResult.mode === 'live'
         ? 'live'
         : widgetResult.mode === 'insufficient'
-          ? envSiteKeyConfigured && secretKeyConfigured
-            ? 'live'
-            : 'insufficient'
+          ? 'insufficient'
           : widgetResult.mode;
 
     return {
@@ -641,7 +639,7 @@ export class CloudflareApiClient {
 
     if (!featureEnabled) {
       return {
-        mode: 'live',
+        mode: 'unconfigured',
         tokenConfigured: true,
         featureEnabled: false,
         providers: [],
@@ -649,7 +647,7 @@ export class CloudflareApiClient {
         avgLatencyMs: null,
         errorRatePercent: null,
         costReportingAvailable: false,
-        lastSyncedAt: new Date().toISOString(),
+        lastSyncedAt: null,
       };
     }
 

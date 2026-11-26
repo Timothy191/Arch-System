@@ -244,6 +244,10 @@ export const webrtcSignalEnvelopeSchema = z.discriminatedUnion('type', [
     senderId: z.string().min(1),
     reason: z.string().max(200).optional(),
   }),
+  z.object({
+    type: z.literal('viewer_ready'),
+    senderId: z.string().min(1),
+  }),
 ]);
 export type WebRtcSignalEnvelope = z.infer<typeof webrtcSignalEnvelopeSchema>;
 

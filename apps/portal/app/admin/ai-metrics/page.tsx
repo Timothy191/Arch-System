@@ -1,6 +1,10 @@
+import { createServerSupabaseClient } from '@repo/supabase/server';
 import dynamic from 'next/dynamic';
+import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { resolveRolesAccess } from '~/features/admin/lib/admin-auth';
 
 const AIMetricsDashboard = dynamic(
   () => import('@/components/AIMetricsDashboard').then((m) => m.default),
@@ -17,7 +21,12 @@ const AIMetricsDashboard = dynamic(
   }
 );
 
-export default function AIMetricsPage() {
+export default async function AIMetricsPage() {
+  await connection();
+  const access = await resolveRolesAccess(['admin'], createServerSupabaseClient);
+  if (access.status === 'unauthenticated') redirect('/login');
+  if (access.status === 'forbidden') redirect('/');
+
   return (
     <div className="mx-auto w-full max-w-7xl p-4 lg:p-6">
       <ErrorBoundary context="AI Metrics Dashboard">

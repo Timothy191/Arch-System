@@ -89,13 +89,15 @@ export const cloudflareTunnelSchema = z.object({
   name: z.string().min(1),
   /** `active` | `inactive` | `pending` as reported by the API. */
   status: z.enum(['active', 'inactive', 'pending']),
-  /** Hostname -> origin service mappings declared in the tunnel config. */
-  routes: z.array(
-    z.object({
-      hostname: z.string().min(1),
-      service: z.string().min(1),
-    })
-  ),
+  /** Hostname -> origin service mappings declared in the tunnel config, or null when unqueried. */
+  routes: z
+    .array(
+      z.object({
+        hostname: z.string().min(1),
+        service: z.string().min(1),
+      })
+    )
+    .nullable(),
   /** Last time the tunnel was seen connected, when known. */
   lastSeenAt: z.string().datetime().nullable(),
   /** Origin health as reported by the API (unknown until live). */
@@ -143,8 +145,8 @@ export const cloudflareQueueSchema = z.object({
   name: z.string().min(1),
   /** Approximate pending/backlog message count, when supported. */
   pendingMessages: z.number().int().nonnegative().nullable(),
-  /** Whether a dead-letter queue is attached. */
-  hasDlq: z.boolean(),
+  /** Whether a dead-letter queue is attached, or null when unqueried. */
+  hasDlq: z.boolean().nullable(),
   /** Consumer connection health, when reported. */
   consumerHealthy: z.boolean().nullable(),
   /** Approximate messages in the DLQ. */

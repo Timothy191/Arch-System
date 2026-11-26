@@ -171,6 +171,7 @@ export function buildDepartmentMetrics(options: {
   readonly machines: readonly DepartmentMachineRecord[];
   readonly breakdowns: readonly DepartmentBreakdownRecord[];
   readonly dailyLogs: readonly DepartmentDailyLogRecord[];
+  readonly exactShiftLogsCount?: number;
 }): DepartmentMetrics {
   const {
     department,
@@ -181,6 +182,7 @@ export function buildDepartmentMetrics(options: {
     machines,
     breakdowns,
     dailyLogs,
+    exactShiftLogsCount,
   } = options;
 
   const slug = department.name.trim();
@@ -278,7 +280,7 @@ export function buildDepartmentMetrics(options: {
     totalStartingSmr,
     openBreakdowns,
     totalBreakdownDelayHours,
-    recentShiftLogsCount: deptLogs.length,
+    recentShiftLogsCount: exactShiftLogsCount ?? deptLogs.length,
     latestLogDate,
     siteCoverageMode: hasDirectSiteCoverage ? 'direct' : 'cross-site',
     sites: siteDetails,
@@ -293,8 +295,18 @@ export function computeDepartmentsOverview(options: {
   readonly machines: readonly DepartmentMachineRecord[];
   readonly breakdowns: readonly DepartmentBreakdownRecord[];
   readonly dailyLogs: readonly DepartmentDailyLogRecord[];
+  readonly exactTotalShiftLogs?: number;
 }): DepartmentsOverview {
-  const { departments, sites, mineBlocks, employees, machines, breakdowns, dailyLogs } = options;
+  const {
+    departments,
+    sites,
+    mineBlocks,
+    employees,
+    machines,
+    breakdowns,
+    dailyLogs,
+    exactTotalShiftLogs,
+  } = options;
 
   return {
     totalDepartments: departments.length,
@@ -307,6 +319,6 @@ export function computeDepartmentsOverview(options: {
     activeMachines: machines.filter((machine) => machine.active).length,
     openBreakdowns: breakdowns.filter((bd) => bd.status === 'open' || bd.status === 'in_progress')
       .length,
-    totalShiftLogs: dailyLogs.length,
+    totalShiftLogs: exactTotalShiftLogs ?? dailyLogs.length,
   };
 }

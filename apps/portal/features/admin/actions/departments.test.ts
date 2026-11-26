@@ -2,9 +2,9 @@
  * @jest-environment node
  */
 
-import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
-import { adminAddDepartment, adminArchiveDepartment } from './departments';
+import { updateTags } from '@/lib/server-cache';
+import { adminAddDepartment, adminArchiveDepartment, adminUpdateDepartment } from './departments';
 
 const mockAssertAdmin = jest.fn();
 const mockLogAdminAuditEvent = jest.fn();
@@ -14,8 +14,8 @@ jest.mock('./shared', () => ({
   logAdminAuditEvent: (args: unknown) => mockLogAdminAuditEvent(args),
 }));
 
-jest.mock('@repo/redis', () => ({
-  cacheInvalidateTags: jest.fn().mockResolvedValue(undefined),
+jest.mock('@/lib/server-cache', () => ({
+  updateTags: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('next/cache', () => ({
@@ -53,10 +53,15 @@ describe('Admin Departments server actions', () => {
     const insert = jest.fn().mockReturnValue({
       select: jest.fn().mockReturnValue({ single }),
     });
+    const selectExisting = jest.fn().mockReturnValue({
+      eq: jest.fn().mockReturnValue({
+        maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+      }),
+    });
     mockAssertAdmin.mockResolvedValue({
       userId: 'admin-u1',
       employee: { id: 'emp-1', role: 'admin' },
-      supabase: { from: jest.fn(() => ({ insert })) },
+      supabase: { from: jest.fn(() => ({ select: selectExisting, insert })) },
     });
 
     const invalid = await adminAddDepartment({ display_name: '   ' });
@@ -79,8 +84,83 @@ describe('Admin Departments server actions', () => {
         resourceId: 'dept-geo',
       })
     );
-    expect(cacheInvalidateTags).toHaveBeenCalledWith(['table:departments']);
+    expect(updateTags).toHaveBeenCalledWith(['table:departments']);
     expect(revalidatePath).toHaveBeenCalledWith('/admin');
+  });
+
+  it('reactivates a soft-deleted department slug cleanly on re-create and supports adminUpdateDepartment', async () => {
+    const reactivatedRow = {
+      id: 'dept-geo',
+      name: 'geology-survey',
+      display_name: 'Geology & Survey',
+      description: 'Restored division',
+      color: 'emerald',
+      icon: 'Layers',
+      created_at: '2026-11-24T08:00:00Z',
+    };
+    const updateSelectSingle = jest.fn().mockResolvedValue({ data: reactivatedRow, error: null });
+
+    mockAssertAdmin.mockResolvedValueOnce({
+      userId: 'admin-u1',
+      employee: { id: 'emp-1', role: 'admin' },
+      supabase: {
+        from: jest.fn(() => ({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              maybeSingle: jest.fn().mockResolvedValue({
+                data: {
+                  id: 'dept-geo',
+                  name: 'geology-survey',
+                  display_name: 'Geology',
+                  deleted_at: '2026-11-20T00:00:00Z',
+                },
+                error: null,
+              }),
+            }),
+          }),
+          update: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              select: jest.fn().mockReturnValue({ single: updateSelectSingle }),
+            }),
+          }),
+        })),
+      },
+    });
+
+    const reactivated = await adminAddDepartment({ display_name: 'Geology & Survey' });
+    expect(reactivated).toMatchObject({
+      success: true,
+      reactivated: true,
+      department: expect.objectContaining({ id: 'dept-geo' }),
+    });
+
+    mockAssertAdmin.mockResolvedValueOnce({
+      userId: 'admin-u1',
+      employee: { id: 'emp-1', role: 'admin' },
+      supabase: {
+        from: jest.fn(() => ({
+          update: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              is: jest.fn().mockReturnValue({
+                select: jest.fn().mockReturnValue({ single: updateSelectSingle }),
+              }),
+            }),
+          }),
+        })),
+      },
+    });
+
+    const updated = await adminUpdateDepartment({
+      id: 'dept-geo',
+      display_name: 'Geology & Survey',
+      description: 'Restored division',
+      color: 'emerald',
+      icon: 'Layers',
+    });
+    expect(updated).toMatchObject({
+      success: true,
+      department: expect.objectContaining({ color: 'emerald' }),
+    });
   });
 
   it('archives a department via soft-delete with audit logging', async () => {
@@ -103,6 +183,6 @@ describe('Admin Departments server actions', () => {
         resourceId: 'dept-geo',
       })
     );
-    expect(cacheInvalidateTags).toHaveBeenCalledWith(['table:departments']);
+    expect(updateTags).toHaveBeenCalledWith(['table:departments']);
   });
 });

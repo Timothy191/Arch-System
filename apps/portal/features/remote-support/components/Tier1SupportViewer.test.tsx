@@ -5,6 +5,7 @@ import { Tier1SupportViewer } from './Tier1SupportViewer';
 const mockEndRemoteSupportSession = jest.fn().mockResolvedValue({ success: true });
 const mockSendDataMessage = jest.fn().mockReturnValue(true);
 const mockDisconnect = jest.fn().mockResolvedValue(undefined);
+let mockPeerPhase: 'idle' | 'connected' = 'connected';
 
 jest.mock('sonner', () => ({
   toast: { success: jest.fn(), info: jest.fn(), error: jest.fn() },
@@ -16,7 +17,7 @@ jest.mock('../actions', () => ({
 
 jest.mock('../hooks/useWebRtcPeer', () => ({
   useWebRtcPeer: () => ({
-    peerState: { phase: 'connected' },
+    peerState: { phase: mockPeerPhase },
     signalingStatus: 'SUBSCRIBED',
     remoteStream: null,
     localStream: null,
@@ -59,6 +60,29 @@ const SESSION = {
 describe('Tier1SupportViewer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPeerPhase = 'connected';
+  });
+
+  it('guards pointer clicks until WebRTC peer is connected', () => {
+    mockPeerPhase = 'idle';
+    render(
+      <Tier1SupportViewer
+        session={SESSION}
+        agentEmployeeId="emp-sup"
+        agentName="Jane Supervisor"
+        managedDevices={[]}
+        onSessionClosed={jest.fn()}
+        onEscalateTier2={jest.fn()}
+      />
+    );
+
+    const stage = screen.getByText(/Connecting encrypted WebRTC stream/i).parentElement!;
+    Object.defineProperty(stage, 'getBoundingClientRect', {
+      value: () => ({ left: 0, top: 0, width: 800, height: 600 }),
+    });
+
+    fireEvent.mouseDown(stage, { clientX: 200, clientY: 150 });
+    expect(mockSendDataMessage).not.toHaveBeenCalled();
   });
 
   it('supports annotations, co-browse request, diagnostics/chat drawer, and closing with resolution notes', async () => {

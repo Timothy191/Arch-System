@@ -1,5 +1,7 @@
 'use server';
 
+import fs from 'node:fs';
+import path from 'node:path';
 import { logger } from '@repo/logger/server';
 import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
 import { cacheInvalidateTags } from '@repo/redis';
@@ -11,9 +13,11 @@ import {
   fetchAndIndexUrl,
   indexLocalDocs,
 } from '@/lib/ai/external-content-indexer';
+import { assertSafeResolvedUrl } from '@/lib/integrations/ssrf-guard';
 
 const INDEXING_RATE_LIMIT_MAX = 10;
 const INDEXING_RATE_LIMIT_WINDOW_MS = 60_000;
+const GITHUB_SLUG_PATTERN = /^[A-Za-z0-9_.-]{1,100}$/;
 
 const externalIndexingLimiter = new RateLimiter({
   store: new MemoryStore(),
@@ -23,27 +27,27 @@ const externalIndexingLimiter = new RateLimiter({
   keyPrefix: 'ratelimit:external_content_index:',
 });
 
-const PRIVATE_OR_LOOPBACK_HOST_PATTERN =
-  /^(localhost|0\.0\.0\.0|::1|\[::1\]|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[0-1])\.)/i;
-
-function isSafeExternalHttpUrl(
+async function isSafeExternalHttpUrl(
   rawUrl: string
-): { ok: true; url: string } | { ok: false; error: string } {
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  let parsed: URL;
   try {
-    const parsed = new URL(rawUrl.trim());
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      return { ok: false, error: 'Only http:// and https:// URLs are permitted' };
-    }
-    if (
-      PRIVATE_OR_LOOPBACK_HOST_PATTERN.test(parsed.hostname) ||
-      parsed.hostname.endsWith('.local')
-    ) {
-      return { ok: false, error: 'Private, loopback, and metadata hostnames are not permitted' };
-    }
-    return { ok: true, url: parsed.toString() };
+    parsed = new URL(rawUrl.trim());
   } catch {
     return { ok: false, error: 'Invalid external URL format' };
   }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return { ok: false, error: 'Only http:// and https:// URLs are permitted' };
+  }
+  try {
+    await assertSafeResolvedUrl(parsed.toString());
+  } catch {
+    return {
+      ok: false,
+      error: 'Private, loopback, internal, and metadata hostnames are not permitted',
+    };
+  }
+  return { ok: true, url: parsed.toString() };
 }
 
 function validateLocalDocsPath(rawPath: string): string | null {
@@ -54,6 +58,20 @@ function validateLocalDocsPath(rawPath: string): string | null {
   if (!trimmed) return 'dirPath required for local docs indexing';
   if (trimmed.includes('\0') || trimmed.split(/[/\\]/).includes('..')) {
     return 'Path traversal segments are not permitted in dirPath';
+  }
+  const docsRoot = path.resolve(process.cwd(), 'docs');
+  const resolvedTarget = path.resolve(process.cwd(), trimmed);
+  if (resolvedTarget !== docsRoot && !resolvedTarget.startsWith(`${docsRoot}${path.sep}`)) {
+    return 'Local docs indexing is restricted to paths under the workspace docs/ directory';
+  }
+  try {
+    const realRoot = fs.realpathSync(docsRoot);
+    const realTarget = fs.realpathSync(resolvedTarget);
+    if (realTarget !== realRoot && !realTarget.startsWith(`${realRoot}${path.sep}`)) {
+      return 'Resolved path escapes the workspace docs/ allowlist';
+    }
+  } catch {
+    return 'Target directory under docs/ does not exist';
   }
   return null;
 }
@@ -112,27 +130,43 @@ export async function externalContentIndexing(input: {
         if (!parsed.data.sourceId?.trim()) {
           return { success: false, errors: ['sourceId required for URL indexing'] };
         }
-        const checkedUrl = isSafeExternalHttpUrl(parsed.data.sourceId);
+        const checkedUrl = await isSafeExternalHttpUrl(parsed.data.sourceId);
         if (!checkedUrl.ok) {
           return { success: false, errors: [checkedUrl.error] };
         }
         result = await fetchAndIndexUrl(checkedUrl.url, user.id);
         break;
       }
-      case 'github':
-        if (!parsed.data.owner?.trim() || !parsed.data.repo?.trim()) {
+      case 'github': {
+        const cleanOwner = parsed.data.owner?.trim() ?? '';
+        const cleanRepo = parsed.data.repo?.trim() ?? '';
+        if (!cleanOwner || !cleanRepo) {
           return {
             success: false,
             errors: ['owner and repo required for GitHub indexing'],
           };
         }
+        if (
+          !GITHUB_SLUG_PATTERN.test(cleanOwner) ||
+          !GITHUB_SLUG_PATTERN.test(cleanRepo) ||
+          cleanOwner === '.' ||
+          cleanOwner === '..' ||
+          cleanRepo === '.' ||
+          cleanRepo === '..'
+        ) {
+          return {
+            success: false,
+            errors: ['Invalid GitHub owner or repository slug'],
+          };
+        }
         result = await fetchAndIndexGitHubRepo(
-          parsed.data.owner.trim(),
-          parsed.data.repo.trim(),
+          cleanOwner,
+          cleanRepo,
           parsed.data.path?.trim() ?? '',
           user.id
         );
         break;
+      }
       case 'local-docs': {
         const pathError = validateLocalDocsPath(parsed.data.dirPath ?? '');
         if (pathError) {

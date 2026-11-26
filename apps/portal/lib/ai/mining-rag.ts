@@ -2,7 +2,12 @@ import { searchAvailability, searchVectors, upsertVector } from '@repo/redis/sea
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { logError } from '@/lib/errors/error-logger';
 import { generateEmbedding } from './embeddings';
-import { cosineDistanceToScore, ensureIndexOnce, MINING_VECTOR_SPEC } from './vector-indexes';
+import {
+  cosineDistanceToScore,
+  DOCUMENTS_VECTOR_SPEC,
+  ensureIndexOnce,
+  MINING_VECTOR_SPEC,
+} from './vector-indexes';
 
 export interface BreakdownVectorItem {
   id: string;
@@ -573,4 +578,75 @@ export async function searchOperationalGraphRag(
   ]);
 
   return buildOperationalGraphContext(seedBreakdowns, relatedShiftNotes);
+}
+
+export interface ExternalDocumentMatch {
+  id: string;
+  title: string;
+  source: string;
+  content: string;
+  score: number;
+}
+
+/**
+ * Search tenant-wide external documentation & manuals indexed via Admin -> External Content
+ * using RediSearch (`arch:vector:documents`) with PostgreSQL pgvector RPC fallback.
+ */
+export async function searchExternalDocuments(
+  query: string,
+  userId: string,
+  matchCount = 4
+): Promise<ExternalDocumentMatch[]> {
+  if (!query || query.trim() === '') return [];
+
+  try {
+    const vector = await generateEmbedding(query, userId);
+
+    try {
+      const availability = await searchAvailability();
+      if (availability.available) {
+        const matches = await searchVectors({
+          spec: DOCUMENTS_VECTOR_SPEC,
+          vector: new Float32Array(vector),
+          k: matchCount,
+          filter: '@session_id:external_content',
+          returns: ['title', 'source', 'source_id', 'content'],
+        });
+        if (matches.length > 0) {
+          return matches.map((m) => ({
+            id: m.id,
+            title: String(m.fields.title ?? m.fields.source_id ?? 'External Document'),
+            source: String(m.fields.source ?? 'external_content'),
+            content: String(m.fields.content ?? ''),
+            score: cosineDistanceToScore(m.score),
+          }));
+        }
+      }
+    } catch {
+      // Fall through to PostgreSQL pgvector RPC fallback
+    }
+
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase.rpc('match_external_content_documents', {
+      query_embedding: JSON.stringify(vector),
+      match_threshold: 0.45,
+      match_count: matchCount,
+    });
+    if (error || !Array.isArray(data)) return [];
+    return (data as Array<Record<string, unknown>>).map((row) => {
+      const meta = (row.metadata as Record<string, unknown> | undefined) ?? {};
+      return {
+        id: String(row.id ?? ''),
+        title: String(meta.title ?? meta.source_id ?? 'External Document'),
+        source: String(meta.source ?? 'external_content'),
+        content: String(row.content ?? ''),
+        score: Number(row.similarity ?? 0),
+      };
+    });
+  } catch (err) {
+    logError(err instanceof Error ? err : new Error(String(err)), {
+      context: 'search_external_documents_failed',
+    });
+    return [];
+  }
 }

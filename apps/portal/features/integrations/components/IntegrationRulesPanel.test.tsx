@@ -143,5 +143,20 @@ describe('IntegrationRulesPanel (4-Pillar Policy & Governance Rules UI)', () => 
     expect(denyResult.sanitizedPayload.password).toBe('[REDACTED]');
     expect(denyResult.reasons.some((r) => r.includes('not in allowed_roles'))).toBe(true);
     expect(denyResult.reasons.some((r) => r.includes('blocked by blocked_arg_keys'))).toBe(true);
+
+    // Verify exact hostname match (no wildcard subdomain mismatch vs runtime assertAccessAndEgressRules)
+    const egressForm = {
+      ...DEFAULT_RULES_FORM_STATE,
+      egressDomainAllowlist: 'mcp.sentry.dev',
+    };
+    const subdomainAttempt = simulateIntegrationRulesDryRun(egressForm, {
+      role: 'admin',
+      hourOfDay: 10,
+      isApproved: true,
+      endpointHost: 'evil.mcp.sentry.dev',
+      eventName: '',
+      samplePayloadJson: '{}',
+    });
+    expect(subdomainAttempt.verdict).toBe('DENY');
   });
 });

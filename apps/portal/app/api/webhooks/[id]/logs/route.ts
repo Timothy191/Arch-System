@@ -58,6 +58,7 @@
  *         description: Internal server error
  */
 
+import { uuidSchema } from '@repo/contract/schemas/common.schema';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
@@ -81,6 +82,18 @@ async function handleGetLogs(
     );
   }
   const { employee } = principal;
+  if (employee.role !== 'admin' && employee.role !== 'supervisor') {
+    return NextResponse.json(
+      { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+      { status: 403 }
+    );
+  }
+  if (!uuidSchema.safeParse(id).success) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Invalid webhook ID', code: 'VALIDATION_ERROR' } },
+      { status: 400 }
+    );
+  }
 
   const supabase = await createServerSupabaseClient();
 
@@ -89,6 +102,7 @@ async function handleGetLogs(
     .from('webhook_endpoints')
     .select('*')
     .eq('id', id)
+    .is('deleted_at', null)
     .single();
 
   if (!existingWebhook) {
@@ -111,10 +125,12 @@ async function handleGetLogs(
     }
   }
 
-  // Get delivery logs
+  // Get delivery logs (project safe columns; omit raw upstream response_body to prevent Read-SSRF leakage)
   const { data: logs, error } = await supabase
     .from('webhook_delivery_logs')
-    .select('*')
+    .select(
+      'id, webhook_endpoint_id, event_type, payload, response_status, delivered_at, retry_count, success, error_message, created_at'
+    )
     .eq('webhook_endpoint_id', id)
     .order('created_at', { ascending: false })
     .limit(50);

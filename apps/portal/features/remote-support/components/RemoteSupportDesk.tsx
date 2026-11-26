@@ -1,14 +1,28 @@
 'use client';
 
 import { useSupabaseRealtime } from '@repo/shared/hooks';
-import type { RemoteSupportSessionsRow } from '@repo/supabase';
+import type { RemoteSupportAuditEventsRow, RemoteSupportSessionsRow } from '@repo/supabase';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { cn } from '@repo/ui/lib/utils';
-import { Headphones, History, KeyRound, Laptop, MonitorUp, ShieldCheck } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import {
+  Headphones,
+  History,
+  KeyRound,
+  Laptop,
+  MonitorOff,
+  MonitorUp,
+  PhoneOff,
+  ShieldCheck,
+} from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { claimRemoteSupportSession, initiateTier2ConsentSession } from '../actions';
+import {
+  claimRemoteSupportSession,
+  endRemoteSupportSession,
+  initiateTier2ConsentSession,
+  listRemoteSupportAuditEvents,
+} from '../actions';
 import type {
   SupportAuditEventView,
   SupportDeviceView,
@@ -43,6 +57,9 @@ export function RemoteSupportDesk({
   const [activeTab, setActiveTab] = useState<DeskTab>('live');
   const [sessions, setSessions] = useState<readonly SupportSessionView[]>(initialSessions);
   const [devices, setDevices] = useState<readonly SupportDeviceView[]>(initialDevices);
+  const [auditEvents, setAuditEvents] =
+    useState<readonly SupportAuditEventView[]>(initialAuditEvents);
+  const [refreshingAudit, setRefreshingAudit] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     initialSessions[0]?.id ?? null
   );
@@ -74,6 +91,36 @@ export function RemoteSupportDesk({
       });
     },
   });
+
+  useSupabaseRealtime<RemoteSupportAuditEventsRow>({
+    supabaseClient,
+    table: 'remote_support_audit_events',
+    enabled: Boolean(supabaseClient && schemaReady),
+    onChange: (payload) => {
+      const record = payload.new;
+      if (!record?.id) return;
+      setAuditEvents((prev) => {
+        const exists = prev.some((item) => item.id === record.id);
+        if (exists) {
+          return prev.map((item) => (item.id === record.id ? { ...item, ...record } : item));
+        }
+        return [record, ...prev];
+      });
+    },
+  });
+
+  const handleRefreshAuditEvents = useCallback(async () => {
+    setRefreshingAudit(true);
+    try {
+      const res = await listRemoteSupportAuditEvents();
+      setAuditEvents(res.events);
+      toast.success('Audit trail refreshed');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Unable to refresh audit trail');
+    } finally {
+      setRefreshingAudit(false);
+    }
+  }, []);
 
   const openSessions = sessions.filter(
     (s) =>
@@ -152,15 +199,24 @@ export function RemoteSupportDesk({
     }
   };
 
+  const handleCloseDeactivatedTier2Session = async (session: SupportSessionView) => {
+    await endRemoteSupportSession({
+      sessionId: session.id,
+      endReason: 'Target Tier 2 workstation deactivated',
+    }).catch(() => undefined);
+    setSessions((prev) => prev.filter((item) => item.id !== session.id));
+    toast.info('Closed session for deactivated workstation');
+  };
+
   const selectedTier2Device =
     selectedSession?.tier === 'tier2_os_desktop'
-      ? (devices.find((d) => d.id === selectedSession.device_id) ?? null)
+      ? (devices.find((d) => d.id === selectedSession.device_id && d.is_active) ?? null)
       : null;
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 p-lg">
       {!schemaReady && (
-        <GlassCard className="border-amber-500/35 bg-amber-500/10 p-4 text-amber-900 text-xs">
+        <GlassCard className="border-accent-amber/35 bg-accent-amber/10 p-4 text-[var(--text-heading)] text-xs">
           Remote Support database tables (`remote_support_sessions`, `remote_support_devices`,
           `remote_support_audit_events`) are pending migration `230_remote_support_system.sql` on
           the target Supabase instance.
@@ -194,7 +250,7 @@ export function RemoteSupportDesk({
               onChange={(e) => setClaimCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="6-digit code"
               aria-label="Enter 6-digit support code"
-              className="h-9 w-36 rounded-lg border border-black/10 bg-white pr-3 pl-8 font-mono text-xs tracking-widest"
+              className="h-9 w-36 rounded-lg border border-black/10 bg-[var(--bg-primary)] pr-3 pl-8 font-mono text-xs tracking-widest"
             />
           </div>
           <button
@@ -216,7 +272,7 @@ export function RemoteSupportDesk({
             'inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 font-medium text-xs',
             activeTab === 'live'
               ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)]/12 text-[var(--accent-blue)]'
-              : 'border-black/10 bg-white/80 text-[var(--text-secondary)]'
+              : 'border-black/10 bg-[var(--bg-primary)]/80 text-[var(--text-secondary)]'
           )}
         >
           <MonitorUp className="h-3.5 w-3.5" />
@@ -230,7 +286,7 @@ export function RemoteSupportDesk({
             'inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 font-medium text-xs',
             activeTab === 'devices'
               ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)]/12 text-[var(--accent-blue)]'
-              : 'border-black/10 bg-white/80 text-[var(--text-secondary)]'
+              : 'border-black/10 bg-[var(--bg-primary)]/80 text-[var(--text-secondary)]'
           )}
         >
           <Laptop className="h-3.5 w-3.5" />
@@ -244,11 +300,11 @@ export function RemoteSupportDesk({
             'inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 font-medium text-xs',
             activeTab === 'audit'
               ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)]/12 text-[var(--accent-blue)]'
-              : 'border-black/10 bg-white/80 text-[var(--text-secondary)]'
+              : 'border-black/10 bg-[var(--bg-primary)]/80 text-[var(--text-secondary)]'
           )}
         >
           <History className="h-3.5 w-3.5" />
-          <span>Audit History ({initialAuditEvents.length})</span>
+          <span>Audit History ({auditEvents.length})</span>
         </button>
       </div>
 
@@ -281,7 +337,7 @@ export function RemoteSupportDesk({
                       'flex flex-col gap-1.5 rounded-xl border p-3 transition-colors',
                       isSelected
                         ? 'border-[var(--accent-blue)]/45 bg-[var(--accent-blue)]/8'
-                        : 'border-black/[0.07] bg-white/75'
+                        : 'border-black/[0.07] bg-[var(--bg-primary)]/75'
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -318,7 +374,7 @@ export function RemoteSupportDesk({
                         <button
                           type="button"
                           onClick={() => setSelectedSessionId(session.id)}
-                          className="h-6 rounded-md border border-black/10 bg-white px-2.5 text-[11px]"
+                          className="h-6 rounded-md border border-black/10 bg-[var(--bg-primary)] px-2.5 text-[11px]"
                         >
                           Open Stage
                         </button>
@@ -336,14 +392,43 @@ export function RemoteSupportDesk({
               <GlassCard className="flex min-h-[420px] items-center justify-center p-6 text-center text-[var(--text-muted)] text-xs">
                 Select or claim a remote support session to launch the viewer.
               </GlassCard>
-            ) : selectedSession.tier === 'tier2_os_desktop' && selectedTier2Device ? (
-              <Tier2DesktopViewer
-                session={selectedSession}
-                device={selectedTier2Device}
-                onSessionClosed={() =>
-                  setSessions((prev) => prev.filter((item) => item.id !== selectedSession.id))
-                }
-              />
+            ) : selectedSession.tier === 'tier2_os_desktop' ? (
+              selectedTier2Device ? (
+                <Tier2DesktopViewer
+                  session={selectedSession}
+                  device={selectedTier2Device}
+                  onSessionClosed={() =>
+                    setSessions((prev) => prev.filter((item) => item.id !== selectedSession.id))
+                  }
+                />
+              ) : (
+                <GlassCard
+                  data-testid="tier2-device-deactivated-state"
+                  className="flex min-h-[420px] flex-col items-center justify-center gap-3 p-6 text-center"
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--accent-red)]/12 text-[var(--accent-red)]">
+                    <MonitorOff className="h-5 w-5" />
+                  </span>
+                  <div className="max-w-md space-y-1">
+                    <h3 className="font-semibold text-[var(--text-heading)] text-sm">
+                      Tier 2 Workstation Unavailable or Deactivated
+                    </h3>
+                    <p className="text-[var(--text-muted)] text-xs">
+                      The managed workstation bound to session #{selectedSession.session_code} was
+                      deactivated or removed. Tier 2 OS desktop sessions cannot fall back to browser
+                      screen sharing.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void handleCloseDeactivatedTier2Session(selectedSession)}
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[var(--accent-red)] px-3.5 font-semibold text-white text-xs"
+                  >
+                    <PhoneOff className="h-3.5 w-3.5" />
+                    <span>Close Session</span>
+                  </button>
+                </GlassCard>
+              )
             ) : (
               <Tier1SupportViewer
                 session={selectedSession}
@@ -369,7 +454,13 @@ export function RemoteSupportDesk({
         />
       )}
 
-      {activeTab === 'audit' && <SupportAuditLogPanel events={initialAuditEvents} />}
+      {activeTab === 'audit' && (
+        <SupportAuditLogPanel
+          events={auditEvents}
+          isRefreshing={refreshingAudit}
+          onRefresh={() => void handleRefreshAuditEvents()}
+        />
+      )}
     </div>
   );
 }

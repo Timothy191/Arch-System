@@ -81,3 +81,16 @@ export function decryptSecret(ciphertext: string): string {
   taintSecretString(decrypted, 'Do not pass decrypted integration secret to a Client Component.');
   return decrypted;
 }
+
+const WEBHOOK_SECRET_PREFIX = 'enc:v1:';
+
+export function encryptWebhookSecret(plaintext: string): string {
+  return `${WEBHOOK_SECRET_PREFIX}${encryptSecret(plaintext)}`;
+}
+
+export function decryptWebhookSecret(stored: string): string {
+  if (!stored.startsWith(WEBHOOK_SECRET_PREFIX)) {
+    return stored;
+  }
+  return decryptSecret(stored.slice(WEBHOOK_SECRET_PREFIX.length));
+}

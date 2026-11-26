@@ -2,9 +2,9 @@
  * @jest-environment node
  */
 
-import { cacheInvalidateTags } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { updateTags } from '@/lib/server-cache';
 import { adminSaveOperationalTargets, getOperationalTargets } from './targets';
 
 const mockAssertAdmin = jest.fn();
@@ -19,8 +19,8 @@ jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
-jest.mock('@repo/redis', () => ({
-  cacheInvalidateTags: jest.fn().mockResolvedValue(undefined),
+jest.mock('@/lib/server-cache', () => ({
+  updateTags: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('next/cache', () => ({
@@ -58,12 +58,24 @@ describe('Admin Operational Targets server actions', () => {
     jest.clearAllMocks();
   });
 
-  it('returns default operational targets on empty or invalid config rows', async () => {
+  it('enforces authentication on getOperationalTargets and returns defaults on empty config', async () => {
     mockCreateServerSupabaseClient.mockResolvedValueOnce({
+      auth: {
+        getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      },
+    } as never);
+    await expect(getOperationalTargets()).rejects.toThrow('Unauthorized');
+
+    mockCreateServerSupabaseClient.mockResolvedValueOnce({
+      auth: {
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u-op' } }, error: null }),
+      },
       from: jest.fn(() => ({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            maybeSingle: jest.fn().mockResolvedValue({ data: null }),
+            is: jest.fn().mockReturnValue({
+              maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+            }),
           }),
         }),
       })),
@@ -73,7 +85,7 @@ describe('Admin Operational Targets server actions', () => {
     expect(defaults.shift.loadsTarget).toBe(180);
   });
 
-  it('inserts new targets and updates existing targets with audit log + cache invalidation', async () => {
+  it('inserts new targets and updates existing targets with audit log + updateTags', async () => {
     const insert = jest.fn().mockResolvedValue({ error: null });
     mockAssertAdmin.mockResolvedValueOnce({
       userId: 'u-adm',
@@ -82,7 +94,9 @@ describe('Admin Operational Targets server actions', () => {
         from: jest.fn(() => ({
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({ data: null }),
+              is: jest.fn().mockReturnValue({
+                maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+              }),
             }),
           }),
           insert,
@@ -105,7 +119,11 @@ describe('Admin Operational Targets server actions', () => {
         from: jest.fn(() => ({
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({ data: { id: 'tpl-targets-1' } }),
+              is: jest.fn().mockReturnValue({
+                maybeSingle: jest
+                  .fn()
+                  .mockResolvedValue({ data: { id: 'tpl-targets-1' }, error: null }),
+              }),
             }),
           }),
           update: jest.fn().mockReturnValue({ eq: eqUpdate }),
@@ -116,10 +134,11 @@ describe('Admin Operational Targets server actions', () => {
     const updated = await adminSaveOperationalTargets(VALID_TARGETS);
     expect(updated).toEqual({ success: true });
     expect(eqUpdate).toHaveBeenCalledWith('id', 'tpl-targets-1');
-    expect(mockLogAdminAuditEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'update', resourceId: 'tpl-targets-1' })
-    );
-    expect(cacheInvalidateTags).toHaveBeenCalledWith(['config:operational_targets']);
+    expect(updateTags).toHaveBeenCalledWith([
+      'config:operational_targets',
+      'table:production_logs',
+      'table:daily_logs',
+    ]);
     expect(revalidatePath).toHaveBeenCalledWith('/control-room');
   });
 

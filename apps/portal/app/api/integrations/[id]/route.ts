@@ -75,6 +75,7 @@
 import { updateInstallationSchema } from '@repo/contract/schemas/integration.schema';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { type NextRequest, NextResponse } from 'next/server';
+import { withBodyLimit } from '@/lib/api/body-limit';
 import { applyCors } from '@/lib/api/cors';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { validateBody } from '@/lib/api/response';
@@ -182,7 +183,9 @@ async function handlePatch(request: NextRequest, { params }: { params: Promise<{
 }
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const response = await withRateLimit(request, () => handlePatch(request, context));
+  const response = await withRateLimit(request, () =>
+    withBodyLimit(request, () => handlePatch(request, context), { maxSize: 262_144 })
+  );
   return applyCors(request, response);
 }
 

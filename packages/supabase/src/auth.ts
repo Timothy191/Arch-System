@@ -12,6 +12,7 @@ export interface EmployeeSummary {
   role: string;
   department_id: string;
   accessible_departments: string[];
+  writable_departments?: string[];
 }
 
 export interface AuthenticatedPrincipal {
@@ -100,14 +101,63 @@ export async function getAuthenticatedEmployee(
   // Older cache entries (written before `id` was included) lack the `id`
   // field. Treat as a miss so audit-log writes always have a valid id.
   if (!employee?.id) {
-    const { data: row } = await client
+    let empQuery = client
       .from('employees')
       .select('id, role, department_id, accessible_departments')
-      .eq('auth_id', user.id)
-      .single();
-    employee = (row as EmployeeSummary | null) ?? null;
-    if (employee) {
+      .eq('auth_id', user.id);
+    if (typeof (empQuery as unknown as { is?: unknown }).is === 'function') {
+      empQuery = (empQuery as unknown as { is: (col: string, val: null) => typeof empQuery }).is(
+        'deleted_at',
+        null
+      );
+    }
+    const { data: row } = await empQuery.single();
+    const baseEmployee = (row as EmployeeSummary | null) ?? null;
+    if (baseEmployee) {
+      let writableDepartments: string[] = [];
+      if (baseEmployee.role === 'admin') {
+        writableDepartments = [...(baseEmployee.accessible_departments ?? [])];
+      } else {
+        const writableSet = new Set<string>();
+        if (baseEmployee.department_id && baseEmployee.role !== 'viewer') {
+          writableSet.add(baseEmployee.department_id);
+        }
+        try {
+          const { data: accessRows } = await client
+            .from('employee_department_access')
+            .select('department_id, access_level, expires_at')
+            .eq('employee_id', baseEmployee.id);
+          if (Array.isArray(accessRows)) {
+            const nowMs = Date.now();
+            for (const accessRow of accessRows) {
+              const typed = accessRow as {
+                department_id?: string | null;
+                access_level?: string | null;
+                expires_at?: string | null;
+              };
+              const isExpired = typed.expires_at ? Date.parse(typed.expires_at) <= nowMs : false;
+              if (
+                !isExpired &&
+                typed.department_id &&
+                typed.access_level &&
+                ['operate', 'supervise', 'manage'].includes(typed.access_level)
+              ) {
+                writableSet.add(typed.department_id);
+              }
+            }
+          }
+        } catch {
+          // Best-effort: fall back to home department when access matrix table is unavailable in unit mocks
+        }
+        writableDepartments = Array.from(writableSet);
+      }
+      employee = {
+        ...baseEmployee,
+        writable_departments: writableDepartments,
+      };
       await writeSession({ userId: user.id, employee }).catch(() => undefined);
+    } else {
+      employee = null;
     }
   } else {
     // Actively used sessions slide forward instead of expiring mid-shift.

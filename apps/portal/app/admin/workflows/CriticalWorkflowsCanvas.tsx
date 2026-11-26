@@ -1,5 +1,16 @@
 'use client';
 
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { Button } from '@repo/ui/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@repo/ui/components/ui/dialog';
+import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
   BellRing,
@@ -13,6 +24,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+
+const MIN_SECRET_LENGTH = 16;
+
+interface DepartmentOption {
+  readonly id: string;
+  readonly name: string;
+  readonly display_name?: string | null;
+}
 
 type CriticalityLevel = 'CRITICAL' | 'HIGH';
 type TriggerKind = 'Webhook POST' | 'Supabase CDC' | 'Cron Schedule';
@@ -127,8 +146,8 @@ const CRITICAL_WORKFLOWS: readonly CriticalWorkflowSpec[] = [
     name: 'SCADA Telemetry Anomaly Escalation',
     criticality: 'CRITICAL',
     triggerKind: 'Supabase CDC',
-    webhookPath: '/api/webhooks (breakdown.*)',
-    eventTypes: ['breakdown.created', 'breakdown.updated'],
+    webhookPath: '/api/webhooks (scada_anomaly.detected)',
+    eventTypes: ['scada_anomaly.detected'],
     scheduleOrEvent: 'Realtime CDC: scada_telemetry',
     description:
       'Detects crusher amperage spikes, belt trips, or abnormal vibration via TelemetryAnomalyEngine and escalates to Control Room.',
@@ -245,8 +264,8 @@ const CRITICAL_WORKFLOWS: readonly CriticalWorkflowSpec[] = [
     name: 'Fleet & Drill Rig Maintenance Trigger',
     criticality: 'HIGH',
     triggerKind: 'Cron Schedule',
-    webhookPath: '/api/webhooks (breakdown.completed)',
-    eventTypes: ['breakdown.created', 'breakdown.completed'],
+    webhookPath: '/api/webhooks (fleet_maintenance.due)',
+    eventTypes: ['fleet_maintenance.due'],
     scheduleOrEvent: 'Every 30 min • Engine Hours',
     description:
       'Monitors drill rig & haul truck engine hours and PredictiveMaintenanceEngine scores to schedule service intervals.',
@@ -299,8 +318,8 @@ const CRITICAL_WORKFLOWS: readonly CriticalWorkflowSpec[] = [
     name: 'Access Control & Safety Gate Alert',
     criticality: 'CRITICAL',
     triggerKind: 'Supabase CDC',
-    webhookPath: '/api/webhooks (daily_log.created)',
-    eventTypes: ['daily_log.created'],
+    webhookPath: '/api/webhooks (access_log.denied)',
+    eventTypes: ['access_log.denied'],
     scheduleOrEvent: 'Realtime CDC: access_logs',
     description:
       'Immediately flags expired permits, failed breathalyzer checks, or unauthorized zone entry to Security & HSE.',
@@ -416,6 +435,32 @@ function renderNodeIcon(kind: FlowNode['kind']) {
   return <BellRing className="h-3.5 w-3.5 text-emerald-600" />;
 }
 
+function validateHttpsTargetUrl(rawUrl: string): string | null {
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return 'Target HTTPS URL is required.';
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    return 'Enter a valid HTTPS URL.';
+  }
+  if (parsed.protocol !== 'https:') {
+    return 'Workflow trigger target URL must use https://.';
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (
+    /^localhost$/i.test(host) ||
+    /^127\./.test(host) ||
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /\.internal$/i.test(host) ||
+    /\.local$/i.test(host)
+  ) {
+    return 'Target URL is disallowed by SSRF policy: disallowed host';
+  }
+  return null;
+}
+
 export function CriticalWorkflowsCanvas() {
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>(
     CRITICAL_WORKFLOWS[0]?.id ?? 'shift-closeout-sync'
@@ -424,6 +469,12 @@ export function CriticalWorkflowsCanvas() {
   const [registeredWebhooks, setRegisteredWebhooks] = useState<readonly RegisteredWebhookSummary[]>(
     []
   );
+  const [departments, setDepartments] = useState<readonly DepartmentOption[]>([]);
+  const [dialogWorkflow, setDialogWorkflow] = useState<CriticalWorkflowSpec | null>(null);
+  const [targetUrl, setTargetUrl] = useState('');
+  const [departmentId, setDepartmentId] = useState('');
+  const [hmacSecret, setHmacSecret] = useState('');
+  const [dialogError, setDialogError] = useState<string | null>(null);
   const [provisioningId, setProvisioningId] = useState<string | null>(null);
   const [provisionFeedback, setProvisionFeedback] = useState<string | null>(null);
 
@@ -440,36 +491,99 @@ export function CriticalWorkflowsCanvas() {
     }
   }, []);
 
+  const loadDepartments = useCallback(async () => {
+    try {
+      const supabase = createBrowserSupabaseClient();
+      const { data } = await supabase
+        .from('departments')
+        .select('id, name, display_name')
+        .is('deleted_at', null)
+        .order('display_name');
+      const rows = (data as DepartmentOption[] | null) ?? [];
+      setDepartments(rows);
+      if (rows[0]?.id) {
+        setDepartmentId((prev) => prev || rows[0]!.id);
+      }
+    } catch {
+      // Keep blueprint view functional when Supabase browser client is unavailable in tests
+    }
+  }, []);
+
   useEffect(() => {
     void loadRegisteredWebhooks();
-  }, [loadRegisteredWebhooks]);
+    void loadDepartments();
+  }, [loadRegisteredWebhooks, loadDepartments]);
 
   const isWorkflowConfigured = (wf: CriticalWorkflowSpec): boolean =>
     registeredWebhooks.some(
       (wh) => wh.active && wf.eventTypes.some((eventType) => wh.event_types?.includes(eventType))
     );
 
-  const handleProvisionWorkflow = async (wf: CriticalWorkflowSpec) => {
-    setProvisioningId(wf.id);
+  const openProvisionDialog = (wf: CriticalWorkflowSpec) => {
+    setDialogWorkflow(wf);
+    setTargetUrl('');
+    setHmacSecret('');
+    setDialogError(null);
+    if (!departmentId && departments[0]?.id) {
+      setDepartmentId(departments[0].id);
+    }
+  };
+
+  const handleConfirmProvision = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dialogWorkflow) return;
+
+    if (!departmentId.trim()) {
+      setDialogError('Select a department for this workflow trigger.');
+      return;
+    }
+
+    const urlValidationError = validateHttpsTargetUrl(targetUrl);
+    if (urlValidationError) {
+      setDialogError(urlValidationError);
+      return;
+    }
+
+    const trimmedSecret = hmacSecret.trim();
+    if (trimmedSecret.length > 0 && trimmedSecret.length < MIN_SECRET_LENGTH) {
+      setDialogError(`HMAC signing secret must be at least ${MIN_SECRET_LENGTH} characters.`);
+      return;
+    }
+
+    setProvisioningId(dialogWorkflow.id);
+    setDialogError(null);
     setProvisionFeedback(null);
     try {
       const response = await fetch('/api/webhooks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: `https://n8n.arch-system.internal/webhook/${wf.id}`,
-          description: `${wf.name} (${wf.criticality})`,
-          event_types: wf.eventTypes,
+          url: targetUrl.trim(),
+          department_id: departmentId.trim(),
+          description: `${dialogWorkflow.name} (${dialogWorkflow.criticality})`,
+          event_types: dialogWorkflow.eventTypes,
+          active: true,
+          ...(trimmedSecret.length > 0 ? { secret: trimmedSecret } : {}),
         }),
       });
       if (response.ok) {
         await loadRegisteredWebhooks();
-        setProvisionFeedback(`Configured webhook trigger for "${wf.name}".`);
+        setProvisionFeedback(`Configured webhook trigger for "${dialogWorkflow.name}".`);
+        setDialogWorkflow(null);
       } else {
-        setProvisionFeedback(`Open Admin -> Webhooks to set a custom target URL for "${wf.name}".`);
+        const errBody = (await response.json().catch(() => null)) as {
+          error?: { message?: string } | string;
+        } | null;
+        const errMsg =
+          typeof errBody?.error === 'string'
+            ? errBody.error
+            : (errBody?.error?.message ?? 'Failed to provision webhook trigger.');
+        setDialogError(errMsg);
       }
-    } catch {
-      setProvisionFeedback(`Open Admin -> Webhooks to set a custom target URL for "${wf.name}".`);
+    } catch (error) {
+      setDialogError(
+        error instanceof Error ? error.message : 'Failed to provision webhook trigger.'
+      );
     } finally {
       setProvisioningId(null);
     }
@@ -589,9 +703,7 @@ export function CriticalWorkflowsCanvas() {
               <button
                 type="button"
                 disabled={provisioningId === activeWorkflow.id}
-                onClick={() => {
-                  void handleProvisionWorkflow(activeWorkflow);
-                }}
+                onClick={() => openProvisionDialog(activeWorkflow)}
                 className="rounded-md border border-indigo-300 bg-indigo-600 px-2.5 py-1 font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
               >
                 {provisioningId === activeWorkflow.id ? 'Provisioning...' : 'Provision Trigger'}
@@ -612,7 +724,7 @@ export function CriticalWorkflowsCanvas() {
         <div
           className="relative overflow-x-auto rounded-xl border border-zinc-200 bg-zinc-50/70 p-3"
           style={{
-            backgroundImage: 'radial-gradient(rgba(113,113,122,0.18) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(var(--border-default) 1px, transparent 1px)',
             backgroundSize: '18px 18px',
           }}
         >
@@ -633,7 +745,7 @@ export function CriticalWorkflowsCanvas() {
                   markerHeight="6"
                   orient="auto-start-reverse"
                 >
-                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent-blue)" />
                 </marker>
               </defs>
               {activeWorkflow.edges.map((edge) => {
@@ -651,7 +763,7 @@ export function CriticalWorkflowsCanvas() {
                     <path
                       d={pathD}
                       fill="none"
-                      stroke="#6366f1"
+                      stroke="var(--accent-blue)"
                       strokeWidth={2}
                       strokeOpacity={0.65}
                       markerEnd="url(#n8n-arrow)"
@@ -700,7 +812,7 @@ export function CriticalWorkflowsCanvas() {
                     <span className="truncate font-mono text-[10px] text-zinc-600">
                       {node.subtitle}
                     </span>
-                    <span className={`rounded px-1 py-0.2 font-mono text-[8px] ${style.badge}`}>
+                    <span className={`rounded px-1 py-0.5 font-mono text-[8px] ${style.badge}`}>
                       {style.label}
                     </span>
                   </div>
@@ -726,6 +838,97 @@ export function CriticalWorkflowsCanvas() {
           </div>
         )}
       </GlassCard>
+
+      <Dialog
+        open={Boolean(dialogWorkflow)}
+        onOpenChange={(open) => !open && setDialogWorkflow(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Provision Webhook Trigger</DialogTitle>
+            <DialogDescription>
+              Configure a real department and verified HTTPS target endpoint for{' '}
+              {dialogWorkflow?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => void handleConfirmProvision(e)} className="space-y-4">
+            <div>
+              <label
+                htmlFor="provision-department"
+                className="mb-1.5 block font-medium text-xs text-zinc-700"
+              >
+                Target Department
+              </label>
+              <select
+                id="provision-department"
+                aria-label="Workflow Trigger Department"
+                value={departmentId}
+                onChange={(e) => setDepartmentId(e.target.value)}
+                required
+                className="h-9 w-full rounded-md border border-zinc-300 bg-white px-3 text-xs text-zinc-900"
+              >
+                <option value="">Select department…</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.display_name || dept.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="provision-target-url"
+                className="mb-1.5 block font-medium text-xs text-zinc-700"
+              >
+                HTTPS Target Webhook URL
+              </label>
+              <Input
+                id="provision-target-url"
+                type="url"
+                placeholder="https://n8n.example.com/webhook/shift-closeout"
+                value={targetUrl}
+                onChange={(e) => setTargetUrl(e.target.value)}
+                required
+                className="text-xs"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="provision-hmac-secret"
+                className="mb-1.5 block font-medium text-xs text-zinc-700"
+              >
+                HMAC Signing Secret (Optional, min 16 chars)
+              </label>
+              <Input
+                id="provision-hmac-secret"
+                type="password"
+                minLength={MIN_SECRET_LENGTH}
+                placeholder="Optional X-Webhook-Signature secret"
+                value={hmacSecret}
+                onChange={(e) => setHmacSecret(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+
+            {dialogError && (
+              <p role="alert" className="font-medium text-rose-700 text-xs">
+                {dialogError}
+              </p>
+            )}
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setDialogWorkflow(null)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={Boolean(provisioningId)}>
+                {provisioningId ? 'Provisioning…' : 'Create Webhook Trigger'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

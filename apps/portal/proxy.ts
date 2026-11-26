@@ -30,10 +30,17 @@ export async function proxy(request: NextRequest) {
   const response = await handleProxy(request);
 
   let gatewayConnectOrigin = '';
-  const rawGatewayUrl = process.env.NEXT_PUBLIC_REMOTE_DESKTOP_GATEWAY_URL;
+  const rawGatewayUrl =
+    process.env.REMOTE_DESKTOP_GATEWAY_URL ?? process.env.NEXT_PUBLIC_REMOTE_DESKTOP_GATEWAY_URL;
   if (rawGatewayUrl) {
     try {
-      gatewayConnectOrigin = ` ${new URL(rawGatewayUrl).origin}`;
+      const parsedGateway = new URL(rawGatewayUrl);
+      const httpOrigin = parsedGateway.origin;
+      const wsProtocol =
+        parsedGateway.protocol === 'https:' || parsedGateway.protocol === 'wss:' ? 'wss:' : 'ws:';
+      const wsOrigin = `${wsProtocol}//${parsedGateway.host}`;
+      gatewayConnectOrigin =
+        httpOrigin === wsOrigin ? ` ${wsOrigin}` : ` ${httpOrigin} ${wsOrigin}`;
     } catch {
       gatewayConnectOrigin = '';
     }

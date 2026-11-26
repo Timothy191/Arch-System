@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* cspell:ignore ORARY Rels matview */
 
 /**
  * Migration Drift & Structural Linter
@@ -99,7 +100,8 @@ const POLICY_ON_RE =
 const REFERENCES_RE = /\bREFERENCES\s+(?:public\.)?([A-Za-z_][A-Za-z0-9_]*)\s*[(,]/i;
 const CONCURRENTLY_RE = /REFRESH\s+MATERIALIZED\s+VIEW\s+CONCURRENTLY/i;
 const BARE_CONCURRENTLY_RE = /^\s*REFRESH\s+MATERIALIZED\s+VIEW\s+CONCURRENTLY/i;
-const TO_REGCLASS_RE = /to_regclass\(['"](?:public\.)?([A-Za-z_][A-Za-z0-9_]*)['"]\)/gi;
+const TO_REGCLASS_RE =
+  /to_regclass\(['"](?:public\.)?([A-Za-z_][A-Za-z0-9_]*)(?:\.[A-Za-z_][A-Za-z0-9_]*)?['"]\)/gi;
 
 function isExternalOrRuntime(rel) {
   return EXTERNAL_SCHEME_RE.test(rel) || RUNTIME_PARTITION_RE.test(rel);

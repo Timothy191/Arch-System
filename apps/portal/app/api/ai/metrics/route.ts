@@ -1,319 +1,240 @@
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
+import { aiMetricsQuerySchema } from '@repo/contract';
+import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
 import { getCacheStats } from '@repo/redis';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
-import { DEFAULT_VIBEMON_VERSION, resolveVibemonKeyMode } from '@repo/utils/vibemon';
 import { NextResponse } from 'next/server';
 import type { BuildTelemetrySummary } from '@/lib/ai-metrics-types';
 import { logError } from '@/lib/errors/error-logger';
 
+const aiMetricsLimiter = new RateLimiter({
+  store: new MemoryStore(),
+  strategy: new FixedWindowStrategy(),
+  limit: 60,
+  windowMs: 60_000,
+  keyPrefix: 'ratelimit:ai_metrics:',
+});
+
 export type { BuildTelemetrySummary };
 
+const HTTP_OK = 200;
+const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN = 403;
+const HTTP_INTERNAL_ERROR = 500;
 const USD_TO_ZAR = 18.52;
-const CLAUDE_CODE_RATES_USD_PER_MTOK = {
-  inputUncached: 3.0,
-  cacheWrite: 3.75,
-  cacheRead: 0.3,
-  output: 15.0,
-};
+const CENTS_PER_DOLLAR = 100;
+const PERCENT_SCALE = 100;
+const TENTHS_ROUNDING = 10;
+const CACHE_TOKEN_SAVINGS_FACTOR = 0.75;
+const DEFAULT_USAGE_LIMIT = 500;
+const MAX_USAGE_LIMIT = 1000;
+const MAX_RECENT_USAGE_ROWS = 20;
+const HOURS_24 = 24;
+const DAYS_7 = 7;
+const DAYS_30 = 30;
+const ALLOWED_SCOPES = new Set(['session', '24h', '7d', '30d', 'all-time']);
 
-function resolveVibemonSubsystemDetail(): string {
-  try {
-    const vibemonDir = path.join(os.homedir(), '.vibemon');
-    const versionPath = path.join(vibemonDir, 'version');
-    const keyPath = path.join(vibemonDir, 'api-key');
-    const version = fs.existsSync(/*turbopackIgnore: true*/ versionPath)
-      ? fs.readFileSync(/*turbopackIgnore: true*/ versionPath, 'utf-8').trim() ||
-        DEFAULT_VIBEMON_VERSION
-      : DEFAULT_VIBEMON_VERSION;
-    const diskKey = fs.existsSync(/*turbopackIgnore: true*/ keyPath)
-      ? fs.readFileSync(/*turbopackIgnore: true*/ keyPath, 'utf-8').trim()
-      : undefined;
-    const keyMode = resolveVibemonKeyMode(process.env.VIBEMON_API_KEY ?? diskKey);
-    const localSinkPaths = [
-      path.join(process.cwd(), '.vibemon', 'events.jsonl'),
-      path.resolve(process.cwd(), '..', '..', '.vibemon', 'events.jsonl'),
-    ];
-    let localEvents = 0;
-    for (const sinkPath of localSinkPaths) {
-      if (fs.existsSync(/*turbopackIgnore: true*/ sinkPath)) {
-        localEvents = fs
-          .readFileSync(/*turbopackIgnore: true*/ sinkPath, 'utf-8')
-          .split(/\r?\n/)
-          .filter((line) => line.trim().length > 0).length;
-        break;
-      }
-    }
-    return `v${version} (${keyMode}) • ${localEvents} local ledger events • MCP wired`;
-  } catch {
-    return `v${DEFAULT_VIBEMON_VERSION} • multi-agent lifecycle hooks active`;
-  }
+export interface RuntimeRedisCacheStats {
+  readonly hits: number;
+  readonly misses: number;
+  readonly l1Hits: number;
+  readonly l2Hits: number;
+  readonly xFetchTriggers: number;
+  readonly redisErrors: number;
+  readonly hitRatePct: number | null;
+  readonly missRatePct: number | null;
+  readonly avgLatencyMs: number | null;
+  readonly p95LatencyMs: number | null;
 }
 
-function resolveTokenUsagePath(): string | null {
-  const candidates = [
-    path.join(process.cwd(), '.agents', 'memory_base', 'token-usage.json'),
-    path.resolve(process.cwd(), '..', '..', '.agents', 'memory_base', 'token-usage.json'),
-  ];
-  for (const candidate of candidates) {
-    if (fs.existsSync(/*turbopackIgnore: true*/ candidate)) {
-      return candidate;
-    }
-  }
-  return null;
+export interface RuntimeSubsystemHealth {
+  readonly name: string;
+  readonly status: 'healthy' | 'degraded' | 'unhealthy';
+  readonly latencyMs: number | null;
+  readonly detail: string;
 }
 
-function loadBuildTelemetryBase(): Omit<BuildTelemetrySummary, 'redisCacheStats' | 'systemHealth'> {
-  const filePath = resolveTokenUsagePath();
-  if (filePath) {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ filePath, 'utf-8'));
-      if (parsed && typeof parsed.totalTokens === 'number' && parsed.claudeCodeCost) {
-        return parsed;
-      }
-    } catch {
-      // Fall through to verified baseline
-    }
-  }
-
-  // Verified baseline from tools/scripts/token-tracker.cjs --budget-check
-  const totalInputTokens = 89589000;
-  const totalOutputTokens = 24238867;
-  const totalTokens = totalInputTokens + totalOutputTokens;
-  const cacheReadTokens = 75254760;
-  const cacheWriteTokens = 7167120;
-  const uncachedInputTokens = 7167120;
-  const totalCostUSD = 411.38;
-  const totalCostZAR = 7618.76;
-
-  return {
-    lastUpdated: new Date().toISOString(),
-    exchangeRateZAR: USD_TO_ZAR,
-    claudeCodeRatesUSDPerMTok: CLAUDE_CODE_RATES_USD_PER_MTOK,
-    totalTokens,
-    totalInputTokens,
-    totalOutputTokens,
-    cacheReadTokens,
-    cacheWriteTokens,
-    uncachedInputTokens,
-    totalSessions: 251,
-    totalTurns: 3830,
-    avgUsage: {
-      avgInputTokensPerTurn: 23818,
-      avgOutputTokensPerTurn: 5903,
-      avgTotalTokensPerTurn: 29721,
-      cacheHitRatePct: 84.0,
-      cacheMissRatePct: 16.0,
-      avgLatencyMs: 1840,
-      p95LatencyMs: 3420,
-      tokensPerSecond: 78.4,
-    },
-    claudeCodeCost: {
-      totalCostUSD,
-      totalCostZAR,
-      uncachedBaselineUSD: 617.07,
-      uncachedBaselineZAR: 11428.14,
-      cacheSavingsUSD: 205.69,
-      cacheSavingsZAR: 3809.38,
-      costPerBugResolvedZAR: 53.65,
-      costPerCommitZAR: 44.3,
-      breakdownZAR: {
-        uncachedInputZAR: 398.2,
-        cacheWriteZAR: 497.76,
-        cacheReadZAR: 418.12,
-        outputZAR: 6304.68,
-      },
-    },
-    engineeringVelocity: {
-      totalCommits: 172,
-      fixCommits: 43,
-      featCommits: 52,
-      refactorCommits: 77,
-      filesTouched: 5778,
-      linesInserted: 528743,
-      linesDeleted: 164960,
-      sqlMigrations: 176,
-      retrospectivesCount: 18,
-      tracerMilestones: 79,
-      bugsResolved: 142,
-      activeRulesTokens: 32720,
-      activeSkillsTokens: 18539,
-    },
-    agentFleetBreakdown: [
-      {
-        agent: 'Claude Code (Sonnet 4 / 3.7 Architect)',
-        role: 'Primary Full-Stack & Database Engineering',
-        sharePct: 54.0,
-        tokens: Math.round(totalTokens * 0.54),
-        inputTokens: Math.round(totalInputTokens * 0.54),
-        outputTokens: Math.round(totalOutputTokens * 0.54),
-        cachedTokens: Math.round(cacheReadTokens * 0.56),
-        avgLatencyMs: 1920,
-        costZAR: Math.round(totalCostZAR * 0.54 * 100) / 100,
-        bugsResolved: 49,
-      },
-      {
-        agent: 'Antigravity Kernel (Gemini 2.5 Pro)',
-        role: 'Autonomous Verification, Audit & Orchestration',
-        sharePct: 26.0,
-        tokens: Math.round(totalTokens * 0.26),
-        inputTokens: Math.round(totalInputTokens * 0.26),
-        outputTokens: Math.round(totalOutputTokens * 0.26),
-        cachedTokens: Math.round(cacheReadTokens * 0.26),
-        avgLatencyMs: 1680,
-        costZAR: Math.round(totalCostZAR * 0.26 * 100) / 100,
-        bugsResolved: 24,
-      },
-      {
-        agent: 'Claude Code Subagents (Reviewer / Security / Test)',
-        role: 'Adversarial Code Review, RLS & Jest/Playwright Verification',
-        sharePct: 14.0,
-        tokens: Math.round(totalTokens * 0.14),
-        inputTokens: Math.round(totalInputTokens * 0.14),
-        outputTokens: Math.round(totalOutputTokens * 0.14),
-        cachedTokens: Math.round(cacheReadTokens * 0.13),
-        avgLatencyMs: 1490,
-        costZAR: Math.round(totalCostZAR * 0.14 * 100) / 100,
-        bugsResolved: 12,
-      },
-      {
-        agent: 'Scout & Codemap Indexer (Fast AST / GraphRAG)',
-        role: 'Structural Code Discovery & Context Leasing',
-        sharePct: 6.0,
-        tokens: Math.round(totalTokens * 0.06),
-        inputTokens: Math.round(totalInputTokens * 0.06),
-        outputTokens: Math.round(totalOutputTokens * 0.06),
-        cachedTokens: Math.round(cacheReadTokens * 0.05),
-        avgLatencyMs: 640,
-        costZAR: Math.round(totalCostZAR * 0.06 * 100) / 100,
-        bugsResolved: 4,
-      },
-    ],
-    phaseBreakdown: [
-      {
-        phase: 'Core Portal, Next.js 16 App Router & Auth/RLS',
-        tokens: Math.round(totalTokens * 0.31),
-        costZAR: Math.round(totalCostZAR * 0.31 * 100) / 100,
-        commits: 75,
-        bugsResolved: 28,
-      },
-      {
-        phase: 'Department Modules (Drilling, Control Room, Excavators, Mustering)',
-        tokens: Math.round(totalTokens * 0.29),
-        costZAR: Math.round(totalCostZAR * 0.29 * 100) / 100,
-        commits: 70,
-        bugsResolved: 25,
-      },
-      {
-        phase: 'Database Schema (176 Migrations), Supabase & Hybrid L1/L2 Redis',
-        tokens: Math.round(totalTokens * 0.22),
-        costZAR: Math.round(totalCostZAR * 0.22 * 100) / 100,
-        commits: 53,
-        bugsResolved: 20,
-      },
-      {
-        phase: 'AI Orchestration, MCP Integrations, Guardrails & E2E/Unit Suites',
-        tokens: Math.round(totalTokens * 0.18),
-        costZAR: Math.round(totalCostZAR * 0.18 * 100) / 100,
-        commits: 43,
-        bugsResolved: 16,
-      },
-    ],
-  };
+export interface RuntimeSystemHealth {
+  readonly status: 'healthy' | 'degraded' | 'unhealthy';
+  readonly subsystems: readonly RuntimeSubsystemHealth[];
 }
 
-async function buildExecutiveTelemetry(dbHealthy: boolean): Promise<BuildTelemetrySummary> {
-  const base = loadBuildTelemetryBase();
-  let cacheSnapshot = {
-    hits: 0,
-    misses: 0,
-    l1Hits: 0,
-    l2Hits: 0,
-    xFetchTriggers: 0,
-    redisErrors: 0,
-    avgLatencyMs: 0.42,
-    p95LatencyMs: 1.85,
-  };
+export interface AIMetricsPagination {
+  readonly limit: number;
+  readonly offset: number;
+  readonly returnedRows: number;
+  readonly totalCount: number | null;
+  readonly hasMore: boolean;
+}
+
+interface CollectTelemetryHealthInput {
+  readonly dbStatus: 'healthy' | 'degraded' | 'unhealthy';
+  readonly dbLatencyMs: number;
+  readonly dbDetail: string;
+}
+
+async function collectLiveRuntimeHealth(
+  input: CollectTelemetryHealthInput
+): Promise<{ redisCacheStats: RuntimeRedisCacheStats; systemHealth: RuntimeSystemHealth }> {
+  let hits = 0;
+  let misses = 0;
+  let l1Hits = 0;
+  let l2Hits = 0;
+  let xFetchTriggers = 0;
+  let redisErrors = 0;
+  let avgLatencyMs: number | null = null;
+  let p95LatencyMs: number | null = null;
+  let redisReachable = false;
+
   try {
     const liveStats = await getCacheStats();
     if (liveStats) {
-      cacheSnapshot = {
-        hits: liveStats.hits ?? 0,
-        misses: liveStats.misses ?? 0,
-        l1Hits: liveStats.l1Hits ?? 0,
-        l2Hits: liveStats.l2Hits ?? 0,
-        xFetchTriggers: liveStats.xFetchTriggers ?? 0,
-        redisErrors: liveStats.redisErrors ?? 0,
-        avgLatencyMs: liveStats.avgLatencyMs || 0.42,
-        p95LatencyMs: liveStats.p95LatencyMs || 1.85,
-      };
+      redisReachable = true;
+      hits = liveStats.hits ?? 0;
+      misses = liveStats.misses ?? 0;
+      l1Hits = liveStats.l1Hits ?? 0;
+      l2Hits = liveStats.l2Hits ?? 0;
+      xFetchTriggers = liveStats.xFetchTriggers ?? 0;
+      redisErrors = liveStats.redisErrors ?? 0;
+      avgLatencyMs = typeof liveStats.avgLatencyMs === 'number' ? liveStats.avgLatencyMs : null;
+      p95LatencyMs = typeof liveStats.p95LatencyMs === 'number' ? liveStats.p95LatencyMs : null;
     }
   } catch {
-    // Keep default snapshot when mocked in isolated unit tests
+    redisReachable = false;
   }
 
-  const totalCacheOps = cacheSnapshot.hits + cacheSnapshot.misses;
+  const totalCacheOps = hits + misses;
   const hitRatePct =
     totalCacheOps > 0
-      ? Math.round((cacheSnapshot.hits / totalCacheOps) * 1000) / 10
-      : base.avgUsage.cacheHitRatePct;
-  const missRatePct = Math.round((100 - hitRatePct) * 10) / 10;
+      ? Math.round((hits / totalCacheOps) * PERCENT_SCALE * TENTHS_ROUNDING) / TENTHS_ROUNDING
+      : null;
+  const missRatePct =
+    hitRatePct !== null
+      ? Math.round((PERCENT_SCALE - hitRatePct) * TENTHS_ROUNDING) / TENTHS_ROUNDING
+      : null;
 
-  const redisHealthy = dbHealthy || cacheSnapshot.redisErrors <= 5 || cacheSnapshot.hits > 0;
+  const redisStatus: 'healthy' | 'degraded' =
+    redisReachable && redisErrors === 0 ? 'healthy' : 'degraded';
+
   const overallStatus: 'healthy' | 'degraded' | 'unhealthy' =
-    dbHealthy && redisHealthy ? 'healthy' : dbHealthy || redisHealthy ? 'degraded' : 'unhealthy';
+    input.dbStatus === 'unhealthy'
+      ? 'unhealthy'
+      : input.dbStatus === 'degraded' || redisStatus === 'degraded'
+        ? 'degraded'
+        : 'healthy';
 
   return {
-    ...base,
     redisCacheStats: {
-      ...cacheSnapshot,
+      hits,
+      misses,
+      l1Hits,
+      l2Hits,
+      xFetchTriggers,
+      redisErrors,
       hitRatePct,
       missRatePct,
+      avgLatencyMs,
+      p95LatencyMs,
     },
     systemHealth: {
       status: overallStatus,
-      healthScore: overallStatus === 'healthy' ? 99.4 : 91.2,
-      uptimePct: 99.95,
       subsystems: [
         {
-          name: 'Claude Code & Multi-Agent Orchestrator',
-          status: 'healthy',
-          latencyMs: base.avgUsage.avgLatencyMs,
-          detail: `${base.avgUsage.cacheHitRatePct}% prompt cache hit • ${base.avgUsage.tokensPerSecond} tok/s`,
+          name: 'Supabase PostgreSQL (ai_token_usage)',
+          status: input.dbStatus,
+          latencyMs: input.dbLatencyMs,
+          detail: input.dbDetail,
         },
         {
-          name: 'Hybrid L1/L2 Redis 7.x Cache + XFetch',
-          status: redisHealthy ? 'healthy' : 'degraded',
-          latencyMs: cacheSnapshot.avgLatencyMs,
-          detail: `L1 sub-ms + L2 Redis 7.x • p95 ${cacheSnapshot.p95LatencyMs}ms • Supabase fallback active`,
-        },
-        {
-          name: 'Supabase PostgreSQL & AI Telemetry Ledger',
-          status: dbHealthy ? 'healthy' : 'degraded',
-          latencyMs: 18,
-          detail: `${base.engineeringVelocity.sqlMigrations} migrations • RLS enforced`,
-        },
-        {
-          name: 'Context Budget & Guardrails Engine',
-          status: 'healthy',
-          latencyMs: 4,
-          detail: `${base.engineeringVelocity.activeRulesTokens.toLocaleString('en-US')} BPE rules • 9/10 direct MCP servers`,
-        },
-        {
-          name: 'VibeMon Multi-Agent Telemetry & MCP Sync',
-          status: 'healthy',
-          latencyMs: 6,
-          detail: resolveVibemonSubsystemDetail(),
+          name: 'Hybrid L1/L2 Redis Cache',
+          status: redisStatus,
+          latencyMs: avgLatencyMs,
+          detail: redisReachable
+            ? `${hits} hits • ${misses} misses • ${redisErrors} errors`
+            : 'Cache stats unavailable',
         },
       ],
     },
   };
 }
 
-async function createEmptyMetrics(dbHealthy = true) {
-  const buildTelemetry = await buildExecutiveTelemetry(dbHealthy);
+function parseBoundedInt(
+  rawParam: string | null,
+  bounds: { readonly fallback: number; readonly min: number; readonly max: number }
+): number {
+  if (!rawParam) return bounds.fallback;
+  const parsed = Number.parseInt(rawParam, 10);
+  if (!Number.isFinite(parsed)) return bounds.fallback;
+  return Math.min(bounds.max, Math.max(bounds.min, parsed));
+}
+
+function resolveScopeStartDate(scope: string): Date | null {
+  if (scope === 'all-time') return null;
+  const startDate = new Date();
+  if (scope === 'session') {
+    startDate.setHours(0, 0, 0, 0);
+    return startDate;
+  }
+  if (scope === '24h') {
+    startDate.setHours(startDate.getHours() - HOURS_24);
+    return startDate;
+  }
+  if (scope === '7d') {
+    startDate.setDate(startDate.getDate() - DAYS_7);
+    return startDate;
+  }
+  if (scope === '30d') {
+    startDate.setDate(startDate.getDate() - DAYS_30);
+    return startDate;
+  }
+  startDate.setHours(0, 0, 0, 0);
+  return startDate;
+}
+
+function isSchemaOrTableUnavailableError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const code = 'code' in err && typeof err.code === 'string' ? err.code : '';
+  const message = 'message' in err && typeof err.message === 'string' ? err.message : '';
+  return (
+    code === 'PGRST205' ||
+    code === '42P01' ||
+    code === '42501' ||
+    code.startsWith('PGRST') ||
+    message.includes('schema cache') ||
+    message.includes('does not exist')
+  );
+}
+
+function extractErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (
+    typeof err === 'object' &&
+    err !== null &&
+    'message' in err &&
+    typeof err.message === 'string'
+  ) {
+    return err.message;
+  }
+  return 'Failed to fetch metrics';
+}
+
+async function createZeroedMetrics(options: {
+  readonly scope: string;
+  readonly limit: number;
+  readonly offset: number;
+  readonly dbStatus: 'healthy' | 'degraded' | 'unhealthy';
+  readonly dbLatencyMs: number;
+  readonly dbDetail: string;
+  readonly dbError?: string | null;
+}) {
+  const { redisCacheStats, systemHealth } = await collectLiveRuntimeHealth({
+    dbStatus: options.dbStatus,
+    dbLatencyMs: options.dbLatencyMs,
+    dbDetail: options.dbDetail,
+  });
+
   return {
+    scope: options.scope,
     totalTokens: 0,
     totalPromptTokens: 0,
     totalCompletionTokens: 0,
@@ -341,59 +262,77 @@ async function createEmptyMetrics(dbHealthy = true) {
       latency: number;
       status: string;
     }>,
-    buildTelemetry,
+    pagination: {
+      limit: options.limit,
+      offset: options.offset,
+      returnedRows: 0,
+      totalCount: options.dbStatus === 'healthy' ? 0 : null,
+      hasMore: false,
+    } satisfies AIMetricsPagination,
+    redisCacheStats,
+    systemHealth,
+    dbError: options.dbError ?? null,
   };
-}
-
-function isSchemaOrTableUnavailableError(err: unknown): boolean {
-  if (!err || typeof err !== 'object') return false;
-  const code = 'code' in err && typeof err.code === 'string' ? err.code : '';
-  const message = 'message' in err && typeof err.message === 'string' ? err.message : '';
-  return (
-    code === 'PGRST205' ||
-    code === '42P01' ||
-    code === '42501' ||
-    code.startsWith('PGRST') ||
-    message.includes('schema cache') ||
-    message.includes('does not exist')
-  );
 }
 
 /**
  * GET /api/ai/metrics
- * Returns real-time AI token usage metrics for dashboard
+ * Admin-only endpoint returning live AI token usage metrics from public.ai_token_usage.
  */
 export async function GET(request: Request) {
+  const principal = await getAuthenticatedEmployee();
+  if (!principal?.employee) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: HTTP_UNAUTHORIZED }
+    );
+  }
+
+  const role = String(principal.employee.role ?? '').toLowerCase();
+  if (role !== 'admin') {
+    return NextResponse.json({ success: false, error: 'Forbidden' }, { status: HTTP_FORBIDDEN });
+  }
+
+  const rateLimit = await aiMetricsLimiter.check(principal.user.id);
+  if (!rateLimit.allowed) {
+    return NextResponse.json({ success: false, error: 'Rate limit exceeded' }, { status: 429 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const requestedScope = searchParams.get('scope') ?? searchParams.get('range') ?? 'session';
+  const scope = ALLOWED_SCOPES.has(requestedScope) ? requestedScope : 'session';
+  const parsedQuery = aiMetricsQuerySchema.safeParse({
+    range: scope,
+    limit: searchParams.get('limit') ?? undefined,
+    offset: searchParams.get('offset') ?? undefined,
+    department: searchParams.get('department_id') ?? undefined,
+  });
+  const departmentId = parsedQuery.success
+    ? (parsedQuery.data.department ?? null)
+    : searchParams.get('department_id');
+  const limit = parseBoundedInt(searchParams.get('limit'), {
+    fallback: DEFAULT_USAGE_LIMIT,
+    min: 1,
+    max: MAX_USAGE_LIMIT,
+  });
+  const offset = parseBoundedInt(searchParams.get('offset'), {
+    fallback: 0,
+    min: 0,
+    max: 100_000,
+  });
+
+  const queryStartedMs = Date.now();
+
   try {
     const supabase = await createServerSupabaseClient();
-    const { searchParams } = new URL(request.url);
+    const startDate = resolveScopeStartDate(scope);
 
-    const scope = searchParams.get('scope') || 'session'; // 'session' | 'all-time' | '24h' | '7d' | '30d'
-    const departmentId = searchParams.get('department_id');
-
-    // Calculate date range
-    const startDate = new Date();
-    if (scope === 'session') {
-      // Current session = today
-      startDate.setHours(0, 0, 0, 0);
-    } else if (scope === '24h') {
-      startDate.setHours(startDate.getHours() - 24);
-    } else if (scope === '7d') {
-      startDate.setDate(startDate.getDate() - 7);
-    } else if (scope === '30d') {
-      startDate.setDate(startDate.getDate() - 30);
-    } else {
-      // all-time = no date filter
-      startDate.setFullYear(2000, 0, 1);
-    }
-
-    // Build query
     let query = supabase
       .from('ai_token_usage')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false });
 
-    if (scope !== 'all-time') {
+    if (startDate) {
       query = query.gte('created_at', startDate.toISOString());
     }
 
@@ -401,132 +340,267 @@ export async function GET(request: Request) {
       query = query.eq('department_id', departmentId);
     }
 
-    const { data: usage, error } = await query;
+    const queryWithBounds = query as typeof query & {
+      range?: (from: number, to: number) => typeof query;
+      limit?: (maxRows: number) => typeof query;
+    };
+    if (typeof queryWithBounds.range === 'function') {
+      query = queryWithBounds.range(offset, offset + limit - 1);
+    } else if (typeof queryWithBounds.limit === 'function') {
+      query = queryWithBounds.limit(limit);
+    }
+
+    const { data: usage, error, count } = await query;
+    const dbLatencyMs = Math.max(0, Date.now() - queryStartedMs);
 
     if (error) {
       if (isSchemaOrTableUnavailableError(error)) {
-        return NextResponse.json({
-          success: true,
-          metrics: await createEmptyMetrics(true),
-        });
+        const errorDetail = extractErrorMessage(error);
+        return NextResponse.json(
+          {
+            success: true,
+            metrics: await createZeroedMetrics({
+              scope,
+              limit,
+              offset,
+              dbStatus: 'degraded',
+              dbLatencyMs,
+              dbDetail: `Table unavailable: ${errorDetail}`,
+              dbError: errorDetail,
+            }),
+          },
+          {
+            status: HTTP_OK,
+            headers: {
+              'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+            },
+          }
+        );
       }
       throw error;
     }
 
     if (!usage || usage.length === 0) {
-      return NextResponse.json({
-        success: true,
-        metrics: await createEmptyMetrics(true),
-      });
+      return NextResponse.json(
+        {
+          success: true,
+          metrics: await createZeroedMetrics({
+            scope,
+            limit,
+            offset,
+            dbStatus: 'healthy',
+            dbLatencyMs,
+            dbDetail: `0 usage rows in ${scope} window`,
+          }),
+        },
+        {
+          status: HTTP_OK,
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+          },
+        }
+      );
     }
 
-    // Calculate metrics
-    const totalTokens = usage.reduce((sum, r) => sum + Number(r.total_tokens ?? 0), 0);
-    const totalPromptTokens = usage.reduce((sum, r) => sum + Number(r.prompt_tokens ?? 0), 0);
+    const totalTokens = usage.reduce((sum, row) => sum + Number(row.total_tokens ?? 0), 0);
+    const totalPromptTokens = usage.reduce((sum, row) => sum + Number(row.prompt_tokens ?? 0), 0);
     const totalCompletionTokens = usage.reduce(
-      (sum, r) => sum + Number(r.completion_tokens ?? 0),
+      (sum, row) => sum + Number(row.completion_tokens ?? 0),
       0
     );
     const totalCachedTokens = usage.reduce(
-      (sum, r) => sum + Number(r.cached_prompt_tokens ?? 0),
+      (sum, row) => sum + Number(row.cached_prompt_tokens ?? 0),
       0
     );
-    const totalCostCents = usage.reduce((sum, r) => sum + Number(r.total_cost_usd_cents ?? 0), 0);
-    const totalCostUSD = totalCostCents / 100;
-    const totalCostZAR = totalCostUSD * 18.52; // ZAR exchange rate
+    const totalCostCents = usage.reduce(
+      (sum, row) => sum + Number(row.total_cost_usd_cents ?? 0),
+      0
+    );
+    const totalCostUSD = totalCostCents / CENTS_PER_DOLLAR;
 
     const cacheHitRatio =
       totalPromptTokens > 0
-        ? Math.round((totalCachedTokens / totalPromptTokens) * 100 * 10) / 10
+        ? Math.round((totalCachedTokens / totalPromptTokens) * PERCENT_SCALE * TENTHS_ROUNDING) /
+          TENTHS_ROUNDING
         : 0;
 
-    const tokensSaved = totalCachedTokens * 0.75; // 75% savings from cache
+    const tokensSaved = totalCachedTokens * CACHE_TOKEN_SAVINGS_FACTOR;
 
-    // Group by model
     const byModel: Record<
       string,
       { tokens: number; cost: number; requests: number; cachedTokens: number }
     > = {};
-    usage.forEach((r) => {
-      const modelName = (r.model_name as string) || 'unknown';
-      if (!byModel[modelName]) {
-        byModel[modelName] = {
-          tokens: 0,
-          cost: 0,
-          requests: 0,
-          cachedTokens: 0,
-        };
-      }
-      byModel[modelName].tokens += Number(r.total_tokens ?? 0);
-      byModel[modelName].cost += Number(r.total_cost_usd_cents ?? 0);
-      byModel[modelName].requests++;
-      byModel[modelName].cachedTokens += Number(r.cached_prompt_tokens ?? 0);
-    });
+    for (const row of usage) {
+      const modelName = (row.model_name as string) || 'unknown';
+      const existing = byModel[modelName] ?? {
+        tokens: 0,
+        cost: 0,
+        requests: 0,
+        cachedTokens: 0,
+      };
+      existing.tokens += Number(row.total_tokens ?? 0);
+      existing.cost += Number(row.total_cost_usd_cents ?? 0);
+      existing.requests += 1;
+      existing.cachedTokens += Number(row.cached_prompt_tokens ?? 0);
+      byModel[modelName] = existing;
+    }
 
-    // Calculate percentage share for each model
-    const modelBreakdown = Object.entries(byModel).map(([name, data]) => ({
+    const modelBreakdown = Object.entries(byModel).map(([name, modelStats]) => ({
       name,
-      ...data,
-      percentage: totalTokens > 0 ? Math.round((data.tokens / totalTokens) * 100 * 10) / 10 : 0,
+      ...modelStats,
+      percentage:
+        totalTokens > 0
+          ? Math.round((modelStats.tokens / totalTokens) * PERCENT_SCALE * TENTHS_ROUNDING) /
+            TENTHS_ROUNDING
+          : 0,
     }));
 
-    // Recent usage (last 20 requests)
-    const recentUsage = usage.slice(0, 20).map((r) => ({
-      id: r.id,
-      timestamp: r.created_at,
-      model: r.model_name,
-      tokens: Number(r.total_tokens ?? 0),
-      costCents: Number(r.total_cost_usd_cents ?? 0),
-      latency: Number(r.latency_ms ?? 0),
-      status: r.status || 'success',
+    const recentUsage = usage.slice(0, MAX_RECENT_USAGE_ROWS).map((row) => ({
+      id: row.id,
+      timestamp: row.created_at ?? '',
+      model: row.model_name,
+      tokens: Number(row.total_tokens ?? 0),
+      costCents: Number(row.total_cost_usd_cents ?? 0),
+      latency: Number(row.latency_ms ?? 0),
+      status: row.status || 'success',
     }));
 
-    const buildTelemetry = await buildExecutiveTelemetry(true);
+    const resolvedTotalCount = typeof count === 'number' ? count : usage.length;
+    interface AiTokenUsageSummaryRpc {
+      total_requests?: number;
+      total_tokens?: number;
+      total_prompt_tokens?: number;
+      total_completion_tokens?: number;
+      total_cost_usd_cents?: number;
+      avg_latency_ms?: number;
+      by_model?: Array<{
+        model_name: string;
+        requests: number;
+        tokens: number;
+        cost_usd_cents: number;
+        avg_latency_ms: number;
+      }>;
+    }
+
+    const fetchWindowSummary = async (): Promise<AiTokenUsageSummaryRpc | null> => {
+      if (departmentId || typeof (supabase as { rpc?: unknown }).rpc !== 'function') {
+        return null;
+      }
+      try {
+        const { data: rpcSummary, error: rpcError } = await supabase.rpc(
+          'get_ai_token_usage_summary',
+          { p_since: startDate ? startDate.toISOString() : null }
+        );
+        if (!rpcError && rpcSummary && typeof rpcSummary === 'object') {
+          return rpcSummary as AiTokenUsageSummaryRpc;
+        }
+      } catch {
+        // Fall back to row-level aggregation if RPC is unavailable
+      }
+      return null;
+    };
+
+    const windowSummary = await fetchWindowSummary();
+
+    const effectiveTotalTokens =
+      windowSummary?.total_tokens !== undefined ? Number(windowSummary.total_tokens) : totalTokens;
+    const effectivePromptTokens =
+      windowSummary?.total_prompt_tokens !== undefined
+        ? Number(windowSummary.total_prompt_tokens)
+        : totalPromptTokens;
+    const effectiveCompletionTokens =
+      windowSummary?.total_completion_tokens !== undefined
+        ? Number(windowSummary.total_completion_tokens)
+        : totalCompletionTokens;
+    const effectiveCostUSD =
+      windowSummary?.total_cost_usd_cents !== undefined
+        ? Number(windowSummary.total_cost_usd_cents) / CENTS_PER_DOLLAR
+        : totalCostUSD;
+    const effectiveCostZAR =
+      Math.round(effectiveCostUSD * USD_TO_ZAR * CENTS_PER_DOLLAR) / CENTS_PER_DOLLAR;
+    const effectiveTotalRequests =
+      windowSummary?.total_requests !== undefined
+        ? Number(windowSummary.total_requests)
+        : usage.length;
+    const effectiveAvgLatency =
+      windowSummary?.avg_latency_ms !== undefined
+        ? Number(windowSummary.avg_latency_ms)
+        : Math.round(
+            usage.reduce((sum, row) => sum + Number(row.latency_ms ?? 0), 0) / usage.length
+          );
+    const effectiveByModel =
+      Array.isArray(windowSummary?.by_model) && windowSummary.by_model.length > 0
+        ? windowSummary.by_model.map((entry) => {
+            const costUSD = Number(entry.cost_usd_cents ?? 0) / CENTS_PER_DOLLAR;
+            return {
+              model: entry.model_name,
+              requests: Number(entry.requests ?? 0),
+              tokens: Number(entry.tokens ?? 0),
+              costUSD,
+              costZAR: Math.round(costUSD * USD_TO_ZAR * CENTS_PER_DOLLAR) / CENTS_PER_DOLLAR,
+              avgLatency: Number(entry.avg_latency_ms ?? 0),
+            };
+          })
+        : modelBreakdown;
+
+    const { redisCacheStats, systemHealth } = await collectLiveRuntimeHealth({
+      dbStatus: 'healthy',
+      dbLatencyMs,
+      dbDetail: `${usage.length} row(s) queried (${scope})`,
+    });
 
     return NextResponse.json(
       {
         success: true,
         metrics: {
-          totalTokens,
-          totalPromptTokens,
-          totalCompletionTokens,
+          scope,
+          totalTokens: effectiveTotalTokens,
+          totalPromptTokens: effectivePromptTokens,
+          totalCompletionTokens: effectiveCompletionTokens,
           totalCachedTokens,
           cacheHitRatio,
           tokensSaved,
-          totalCostUSD,
-          totalCostZAR,
-          totalRequests: usage.length,
-          avgLatency: Math.round(
-            usage.reduce((sum, r) => sum + Number(r.latency_ms ?? 0), 0) / (usage.length || 1)
-          ),
-          byModel: modelBreakdown,
+          totalCostUSD: effectiveCostUSD,
+          totalCostZAR: effectiveCostZAR,
+          totalRequests: effectiveTotalRequests,
+          avgLatency: effectiveAvgLatency,
+          byModel: effectiveByModel,
           recentUsage,
-          buildTelemetry,
+          pagination: {
+            limit,
+            offset,
+            returnedRows: usage.length,
+            totalCount: resolvedTotalCount,
+            hasMore: offset + usage.length < resolvedTotalCount,
+          } satisfies AIMetricsPagination,
+          redisCacheStats,
+          systemHealth,
+          dbError: null,
         },
       },
       {
+        status: HTTP_OK,
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
         },
       }
     );
   } catch (error) {
+    const dbLatencyMs = Math.max(0, Date.now() - queryStartedMs);
     await logError(error, { context: 'ai_metrics_route' });
-    const message =
-      error instanceof Error
-        ? error.message
-        : typeof error === 'object' &&
-            error !== null &&
-            'message' in error &&
-            typeof error.message === 'string'
-          ? error.message
-          : 'Failed to fetch metrics';
+
+    const { systemHealth } = await collectLiveRuntimeHealth({
+      dbStatus: 'unhealthy',
+      dbLatencyMs,
+      dbDetail: 'Database query failed',
+    });
     return NextResponse.json(
       {
         success: false,
-        error: message,
+        error: 'Failed to load AI metrics',
+        systemHealth,
       },
-      { status: 500 }
+      { status: HTTP_INTERNAL_ERROR }
     );
   }
 }

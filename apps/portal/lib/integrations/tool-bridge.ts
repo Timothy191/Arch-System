@@ -6,15 +6,26 @@ import {
   type IntegrationTriggerOperator,
   type ToolRiskClass,
 } from '@repo/contract/schemas/integration.schema';
+import { logger } from '@repo/logger/server';
+import { FixedWindowStrategy, MemoryStore, RateLimiter, RedisStore } from '@repo/rate-limiter';
+import { getRedisClient } from '@repo/redis/client';
 import { APIError, ForbiddenError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
-import { mcpClientManager } from './mcp-client-manager';
+import { listApprovedDashboards } from './adapters/grafana';
+import { queryPrometheus } from './adapters/prometheus';
+import { decryptSecret } from './crypto';
+import {
+  buildIntegrationAuthHeaders,
+  type ManagedInstallation,
+  mcpClientManager,
+} from './mcp-client-manager';
 import {
   type ActiveIntegration,
   listActiveMcpIntegrations,
   listInstallations,
   writeAuditLog,
 } from './service';
+import { assertSafeUrl } from './ssrf-guard';
 
 /**
  * Tool bridge: the guarded path for invoking integration tools.
@@ -93,12 +104,46 @@ export async function listEmployeeTools(departmentId: string): Promise<ToolIndex
   return index;
 }
 
-const rateWindow = new Map<string, { count: number; resetAt: number }>();
 const consecutiveFailureCounts = new Map<string, number>();
+const integrationFallbackMemoryStore = new MemoryStore();
+const integrationLimiters = new Map<number, RateLimiter>();
+
+async function getIntegrationRateLimiter(maxCallsPerMin: number): Promise<RateLimiter> {
+  const existing = integrationLimiters.get(maxCallsPerMin);
+  if (existing) return existing;
+  let limiter: RateLimiter;
+  try {
+    const redisClient = await getRedisClient();
+    const redisStore = redisClient
+      ? new RedisStore(redisClient as unknown as ConstructorParameters<typeof RedisStore>[0])
+      : null;
+    if (!redisStore) throw new Error('Redis unavailable');
+    limiter = new RateLimiter({
+      store: redisStore,
+      strategy: new FixedWindowStrategy(),
+      limit: maxCallsPerMin,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+      keyPrefix: 'ratelimit:integration_tool:',
+    });
+  } catch {
+    limiter = new RateLimiter({
+      store: integrationFallbackMemoryStore,
+      strategy: new FixedWindowStrategy(),
+      limit: maxCallsPerMin,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+      keyPrefix: 'ratelimit:integration_tool:',
+    });
+  }
+  integrationLimiters.set(maxCallsPerMin, limiter);
+  return limiter;
+}
 
 export function resetIntegrationCircuitBreaker(installationId?: string): void {
   if (installationId) {
     consecutiveFailureCounts.delete(installationId);
+    void getRedisClient()
+      .then((redis) => redis?.del(`arch:integrations:cb:${installationId}`))
+      .catch(() => undefined);
     return;
   }
   consecutiveFailureCounts.clear();
@@ -117,14 +162,9 @@ interface RateLimitCheckOptions {
 async function assertRateLimit(options: RateLimitCheckOptions): Promise<void> {
   const { employeeId, installationId, maxCallsPerMin = RATE_LIMIT_MAX_CALLS } = options;
   const key = `${employeeId}:${installationId}`;
-  const now = Date.now();
-  const entry = rateWindow.get(key);
-  if (!entry || now > entry.resetAt) {
-    rateWindow.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return;
-  }
-  entry.count += 1;
-  if (entry.count > maxCallsPerMin) {
+  const limiter = await getIntegrationRateLimiter(maxCallsPerMin);
+  const { allowed } = await limiter.check(key);
+  if (!allowed) {
     throw new APIError('Integration tool rate limit exceeded', {
       statusCode: HTTP_STATUS_TOO_MANY_REQUESTS,
       context: { installationId, maxCallsPerMin },
@@ -230,22 +270,64 @@ export async function dispatchIntegrationEventTriggers(
         eventName: options.eventName,
         metrics: options.metrics,
       });
-      if (didTrigger) {
-        matchedSlugs.push(inst.catalog_id);
-        await writeAuditLog({
+      if (!didTrigger) continue;
+
+      matchedSlugs.push(inst.catalog_id);
+      const startedAt = Date.now();
+      const targetTool =
+        (inst.tool_allowlist ?? []).find((t) => t === 'dispatch_action_webhook') ??
+        (inst.tool_allowlist ?? [])[0] ??
+        'dispatch_action_webhook';
+
+      let invokeStatus: 'success' | 'error' = 'success';
+      let errorMessage: string | undefined;
+      try {
+        const invokeResult = await invokeIntegrationTool({
+          tool: `integration__${inst.catalog_id}__${targetTool}`,
           installationId: inst.id,
-          toolName: `trigger:${options.eventName ?? rules.threshold_metric ?? 'metric'}`,
-          argsDigest: argsDigest({
-            eventName: options.eventName ?? null,
-            metrics: options.metrics ?? null,
-          }),
-          durationMs: 1,
-          status: 'success',
+          args: {
+            payload: {
+              event: options.eventName ?? null,
+              thresholdMetric: rules.threshold_metric ?? null,
+              metrics: options.metrics ?? null,
+              triggeredAt: new Date().toISOString(),
+            },
+          },
+          employeeId: 'system-event-trigger',
+          departmentId: inst.department_id ?? '',
+          employeeRole: 'admin',
+          kind: 'write',
         });
+        if (!invokeResult.ok) {
+          invokeStatus = 'error';
+          errorMessage = invokeResult.error;
+        }
+      } catch (err) {
+        invokeStatus = 'error';
+        errorMessage = err instanceof Error ? err.message : String(err);
       }
+
+      const durationMs = Math.max(1, Date.now() - startedAt);
+      await writeAuditLog({
+        installationId: inst.id,
+        toolName: `trigger:${options.eventName ?? rules.threshold_metric ?? 'metric'}`,
+        argsDigest: argsDigest({
+          eventName: options.eventName ?? null,
+          metrics: options.metrics ?? null,
+          targetTool,
+          status: invokeStatus,
+        }),
+        durationMs,
+        status: invokeStatus,
+        ...(errorMessage ? { errorMessage } : {}),
+      });
     }
     return matchedSlugs;
-  } catch {
+  } catch (err) {
+    logger.warn({
+      event: 'integration_trigger_dispatch_failed',
+      error: err instanceof Error ? err.message : String(err),
+    });
     return [];
   }
 }
@@ -457,6 +539,69 @@ function findActiveForTool(filter: FindActiveToolFilter): ActiveIntegration {
   return match;
 }
 
+const ACTION_DISPATCH_TIMEOUT_MS = 15_000;
+
+async function executeActionConnectorTool(
+  managed: ManagedInstallation,
+  toolName: string,
+  args: Record<string, unknown>
+): Promise<{ isError?: boolean; content: unknown }> {
+  assertSafeUrl(managed.serverUrl);
+
+  if (toolName === 'list_approved_dashboards') {
+    const apiKey = managed.credentialCiphertext ? decryptSecret(managed.credentialCiphertext) : '';
+    const dashboards = await listApprovedDashboards({
+      baseUrl: managed.serverUrl,
+      apiKey,
+      folderUid: typeof args.folderUid === 'string' ? args.folderUid : undefined,
+    });
+    return { content: dashboards };
+  }
+
+  if (toolName === 'query_prometheus_metric') {
+    const metric = typeof args.metric === 'string' ? args.metric : '';
+    const metricResult = await queryPrometheus({
+      baseUrl: managed.serverUrl,
+      metric,
+    });
+    return { content: metricResult };
+  }
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    ...buildIntegrationAuthHeaders(managed),
+  };
+  const controller = new AbortController();
+  const timeoutMs =
+    typeof managed.config?.request_timeout_ms === 'number'
+      ? managed.config.request_timeout_ms
+      : ACTION_DISPATCH_TIMEOUT_MS;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(managed.serverUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(args),
+      redirect: 'manual',
+      signal: controller.signal,
+    });
+    const text = await response.text();
+    let parsedBody: unknown = text;
+    try {
+      parsedBody = JSON.parse(text) as unknown;
+    } catch {
+      // keep raw text
+    }
+    return {
+      isError: !response.ok,
+      content: { status: response.status, body: parsedBody },
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** Executes one integration tool call through the full guard chain. */
 export async function invokeIntegrationTool(options: InvokeOptions): Promise<InvokeResult> {
   const started = Date.now();
@@ -516,7 +661,10 @@ export async function invokeIntegrationTool(options: InvokeOptions): Promise<Inv
       maxCallsPerMin: rules.rate_limit_per_min,
     });
 
-    const result = await mcpClientManager.callTool(match.managed, toolName, sanitizedArgs);
+    const result =
+      match.managed.kind === 'action'
+        ? await executeActionConnectorTool(match.managed, toolName, sanitizedArgs)
+        : await mcpClientManager.callTool(match.managed, toolName, sanitizedArgs);
 
     await writeAuditLog({
       installationId: match.installation.id,

@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 import { fetchObservabilityCi } from '@/lib/observability/observability-clients';
 
 const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN = 403;
 const HTTP_TOO_MANY_REQUESTS = 429;
 const HTTP_OK = 200;
 const RATE_LIMIT_MAX = 60;
@@ -25,6 +26,10 @@ export async function GET() {
 
   if (!principal?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_UNAUTHORIZED });
+  }
+
+  if (principal.employee?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: HTTP_FORBIDDEN });
   }
 
   const { allowed } = await ciLimiter.check(principal.user.id);

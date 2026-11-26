@@ -89,12 +89,16 @@ export function FeedbackWidget({ variant = 'header', embedded = false }: Feedbac
       properties: { type, messageLength: message.length },
     });
 
-    await fetchClient.post('/api/feedback', { type, message }).catch(() => {});
-
-    setSubmitting(false);
-    setMessage('');
-    setIsOpen(false);
-    toast.success('Feedback transmitted to Arch Support Desk');
+    try {
+      await fetchClient.post('/api/feedback', { type, message });
+      setMessage('');
+      setIsOpen(false);
+      toast.success('Feedback transmitted to Arch Support Desk');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to submit feedback');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleRequestRemoteAssist = async () => {

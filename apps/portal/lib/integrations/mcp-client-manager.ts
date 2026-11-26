@@ -21,10 +21,12 @@ const CLIENT_INFO = { name: 'arch-portal', version: '1.6.2' } as const;
 
 export interface ManagedInstallation {
   id: string;
+  kind?: 'mcp' | 'action';
   serverUrl: string;
   authType: IntegrationAuthType;
   /** Encrypted credential ciphertext from integration_credentials; null when auth_type = none. */
   credentialCiphertext: string | null;
+  capabilities?: Record<string, unknown> | null;
   config: {
     api_key_header?: string;
     request_timeout_ms?: number;
@@ -37,10 +39,10 @@ interface ManagedConnection {
   connectedAt: number;
 }
 
-function buildHeaders(installation: ManagedInstallation): Record<string, string> {
-  const headers: Record<string, string> = {
-    Accept: 'application/json, text/event-stream',
-  };
+export function buildIntegrationAuthHeaders(
+  installation: ManagedInstallation
+): Record<string, string> {
+  const headers: Record<string, string> = {};
   if (!installation.credentialCiphertext) return headers;
 
   const secret = decryptSecret(installation.credentialCiphertext);
@@ -66,6 +68,13 @@ function buildHeaders(installation: ManagedInstallation): Record<string, string>
       break;
   }
   return headers;
+}
+
+function buildHeaders(installation: ManagedInstallation): Record<string, string> {
+  return {
+    Accept: 'application/json, text/event-stream',
+    ...buildIntegrationAuthHeaders(installation),
+  };
 }
 
 function timeoutMs(installation: ManagedInstallation): number {

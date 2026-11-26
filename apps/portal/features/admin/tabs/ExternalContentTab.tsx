@@ -129,21 +129,33 @@ export function ExternalContentTab() {
       </div>
 
       {results && (
-        <GlassCard className="flex items-center gap-3 p-4">
-          {results.errors && results.errors.length > 0 ? (
-            <AlertCircle className="h-5 w-5 text-accent-red" />
-          ) : (
-            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-          )}
-          <div className="flex-1 text-sm">
-            <span className="font-medium">{results.source}</span>: indexed{' '}
-            <span className="font-mono">{results.indexedCount}</span> chunks
-            {results.errors && results.errors.length > 0 && (
-              <span className="ml-2 text-accent-red">
-                ({results.errors.length} error{results.errors.length > 1 ? 's' : ''})
-              </span>
+        <GlassCard className="space-y-2 p-4">
+          <div className="flex items-center gap-3">
+            {results.errors && results.errors.length > 0 ? (
+              <AlertCircle className="h-5 w-5 shrink-0 text-rose-700" />
+            ) : (
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
             )}
+            <div className="flex-1 text-sm">
+              <span className="font-medium text-[var(--text-heading)]">{results.source}</span>:
+              indexed <span className="font-mono">{results.indexedCount}</span> semantic chunks
+              {results.errors && results.errors.length > 0 && (
+                <span className="ml-2 font-medium text-rose-700">
+                  ({results.errors.length} error{results.errors.length > 1 ? 's' : ''})
+                </span>
+              )}
+            </div>
           </div>
+          {results.errors && results.errors.length > 0 && (
+            <ul
+              role="alert"
+              className="list-inside list-disc space-y-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-800 text-xs"
+            >
+              {results.errors.map((errMsg) => (
+                <li key={errMsg}>{errMsg}</li>
+              ))}
+            </ul>
+          )}
         </GlassCard>
       )}
 

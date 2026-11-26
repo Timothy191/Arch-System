@@ -112,4 +112,36 @@ describe('IntegrationManager', () => {
     expect(screen.queryByText('TypeScript LSP')).not.toBeInTheDocument();
     expect(screen.queryByText('SCADA Action')).not.toBeInTheDocument();
   });
+
+  it('supports post-install secret rotation and endpoint update via PATCH', async () => {
+    (fetchClient.get as jest.Mock).mockImplementation(async (url: string) => {
+      if (url === '/api/integrations') {
+        return { catalog: mockCatalog, installations: mockInstallations };
+      }
+      return { auditLogs: [], circuitBreakerFailures: 0 };
+    });
+    (fetchClient.patch as jest.Mock).mockResolvedValue({ installation: mockInstallations[0] });
+
+    render(<IntegrationManager />);
+
+    await waitFor(() => {
+      expect(screen.getByText('1 Installed')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Toggle tools and audit log/i }));
+
+    const secretInput = await screen.findByLabelText('New Credential Secret');
+    fireEvent.change(secretInput, { target: { value: 'sk-rotated-token-2026' } });
+    fireEvent.click(screen.getByRole('button', { name: /Save Endpoint & Rotate Secret/i }));
+
+    await waitFor(() => {
+      expect(fetchClient.patch).toHaveBeenCalledWith(
+        '/api/integrations/inst-1',
+        expect.objectContaining({
+          secret: 'sk-rotated-token-2026',
+          secret_kind: 'bearer',
+        })
+      );
+    });
+  });
 });

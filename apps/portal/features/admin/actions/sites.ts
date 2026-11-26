@@ -6,9 +6,14 @@ import {
   adminUpdateMineBlockSchema,
   adminUpdateSiteSchema,
 } from '@repo/contract/schemas/admin.schema';
-import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+import { updateTags } from '@/lib/server-cache';
 import { assertAdmin, logAdminAuditEvent } from './shared';
+
+const POSTGRES_FOREIGN_KEY_VIOLATION = '23503';
+const siteUuidSchema = z.string().uuid('Invalid site ID format');
+const blockUuidSchema = z.string().uuid('Invalid mine block ID format');
 
 function buildSiteCode(name: string): string {
   const words = name
@@ -55,7 +60,7 @@ export async function adminAddSite(rawInput: {
     active: data.active ?? true,
   });
 
-  if (error) return { error: 'Failed to add site' };
+  if (error) return { error: error.message || 'Failed to add site' };
 
   logAdminAuditEvent({
     actorId: userId,
@@ -64,46 +69,51 @@ export async function adminAddSite(rawInput: {
     metadata: { name, site_code: siteCode },
   });
 
-  await cacheInvalidateTags(['table:sites']);
+  await updateTags(['table:sites']);
   revalidatePath('/admin');
   revalidatePath('/control-room/hourly-loads');
   revalidatePath('/control-room');
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function adminDeleteSite(id: string) {
-  if (!id.trim()) {
-    return { error: 'Site ID is required' };
-  }
-
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
+
+  const idParse = siteUuidSchema.safeParse(id.trim());
+  if (!idParse.success) {
+    return { error: idParse.error.issues[0]?.message || 'Invalid site ID format' };
+  }
+  const validId = idParse.data;
 
   const { supabase, userId } = auth;
 
   let resolution: 'deleted' | 'deactivated' = 'deleted';
-  const { error } = await supabase.from('sites').delete().eq('id', id);
+  const { error } = await supabase.from('sites').delete().eq('id', validId);
   if (error) {
+    if (error.code !== POSTGRES_FOREIGN_KEY_VIOLATION) {
+      return { error: error.message || 'Failed to remove site' };
+    }
     resolution = 'deactivated';
     const { error: updateErr } = await supabase
       .from('sites')
-      .update({ active: false })
-      .eq('id', id);
-    if (updateErr) return { error: 'Failed to remove site' };
+      .update({ active: false, updated_at: new Date().toISOString() })
+      .eq('id', validId);
+    if (updateErr) return { error: updateErr.message || 'Failed to deactivate referenced site' };
   }
 
   logAdminAuditEvent({
     actorId: userId,
     action: resolution === 'deleted' ? 'delete' : 'deactivate',
     resource: 'sites',
-    resourceId: id,
+    resourceId: validId,
   });
 
-  await cacheInvalidateTags(['table:sites']);
+  await updateTags(['table:sites']);
   revalidatePath('/admin');
   revalidatePath('/control-room/hourly-loads');
   revalidatePath('/control-room');
-  return { success: true };
+  return { success: true as const, resolution };
 }
 
 export async function adminUpdateSite(
@@ -116,6 +126,12 @@ export async function adminUpdateSite(
 ) {
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
+
+  const idParse = siteUuidSchema.safeParse(id.trim());
+  if (!idParse.success) {
+    return { error: idParse.error.issues[0]?.message || 'Invalid site ID format' };
+  }
+  const validId = idParse.data;
 
   const parseResult = adminUpdateSiteSchema.safeParse(rawInput);
   if (!parseResult.success) {
@@ -130,30 +146,30 @@ export async function adminUpdateSite(
   if (name !== undefined && !name) return { error: 'Site name cannot be empty.' };
   if (siteCode !== undefined && !siteCode) return { error: 'Site code cannot be empty.' };
 
-  const { error } = await supabase
-    .from('sites')
-    .update({
-      ...data,
-      name,
-      site_code: siteCode,
-    })
-    .eq('id', id);
+  const patch: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+  if (name !== undefined) patch.name = name;
+  if (siteCode !== undefined) patch.site_code = siteCode;
+  if (data.active !== undefined) patch.active = data.active;
 
-  if (error) return { error: 'Failed to update site' };
+  const { error } = await supabase.from('sites').update(patch).eq('id', validId);
+
+  if (error) return { error: error.message || 'Failed to update site' };
 
   logAdminAuditEvent({
     actorId: userId,
     action: 'update',
     resource: 'sites',
-    resourceId: id,
-    metadata: { active: data.active },
+    resourceId: validId,
+    metadata: { name, site_code: siteCode, active: data.active },
   });
 
-  await cacheInvalidateTags(['table:sites']);
+  await updateTags(['table:sites']);
   revalidatePath('/admin');
   revalidatePath('/control-room/hourly-loads');
   revalidatePath('/control-room');
-  return { success: true };
+  return { success: true as const };
 }
 
 function buildBlockCode(name: string): string {
@@ -164,9 +180,9 @@ function buildBlockCode(name: string): string {
     .split(/\s+/)
     .filter(Boolean);
   if (words.length >= 2) {
-    return 'BLK-' + words.map((w) => w.slice(0, 3)).join('-');
+    return `BLK-${words.map((w) => w.slice(0, 3)).join('-')}`;
   }
-  return 'BLK-' + (words[0] || '1').slice(0, 6);
+  return `BLK-${(words[0] || '1').slice(0, 6)}`;
 }
 
 export async function adminAddMineBlock(rawInput: {
@@ -209,46 +225,53 @@ export async function adminAddMineBlock(rawInput: {
     metadata: { name, code, site_id: data.site_id ?? null },
   });
 
-  await cacheInvalidateTags(['table:mine_blocks']);
+  await updateTags(['table:mine_blocks']);
   revalidatePath('/admin');
   revalidatePath('/control-room/hourly-loads');
   revalidatePath('/control-room');
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function adminDeleteMineBlock(id: string) {
-  if (!id.trim()) {
-    return { error: 'Mine block ID is required' };
-  }
-
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
+
+  const idParse = blockUuidSchema.safeParse(id.trim());
+  if (!idParse.success) {
+    return { error: idParse.error.issues[0]?.message || 'Invalid mine block ID format' };
+  }
+  const validId = idParse.data;
 
   const { supabase, userId } = auth;
 
   let resolution: 'deleted' | 'deactivated' = 'deleted';
-  const { error } = await supabase.from('mine_blocks').delete().eq('id', id);
+  const { error } = await supabase.from('mine_blocks').delete().eq('id', validId);
   if (error) {
+    if (error.code !== POSTGRES_FOREIGN_KEY_VIOLATION) {
+      return { error: error.message || 'Failed to remove mine block' };
+    }
     resolution = 'deactivated';
     const { error: updateErr } = await supabase
       .from('mine_blocks')
-      .update({ active: false })
-      .eq('id', id);
-    if (updateErr) return { error: updateErr.message || 'Failed to remove mine block' };
+      .update({ active: false, updated_at: new Date().toISOString() })
+      .eq('id', validId);
+    if (updateErr) {
+      return { error: updateErr.message || 'Failed to deactivate referenced mine block' };
+    }
   }
 
   logAdminAuditEvent({
     actorId: userId,
     action: resolution === 'deleted' ? 'delete' : 'deactivate',
     resource: 'mine_blocks',
-    resourceId: id,
+    resourceId: validId,
   });
 
-  await cacheInvalidateTags(['table:mine_blocks']);
+  await updateTags(['table:mine_blocks']);
   revalidatePath('/admin');
   revalidatePath('/control-room/hourly-loads');
   revalidatePath('/control-room');
-  return { success: true };
+  return { success: true as const, resolution };
 }
 
 export async function adminUpdateMineBlock(
@@ -263,7 +286,7 @@ export async function adminUpdateMineBlock(
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  const parseResult = adminUpdateMineBlockSchema.safeParse({ id, ...rawInput });
+  const parseResult = adminUpdateMineBlockSchema.safeParse({ id: id.trim(), ...rawInput });
   if (!parseResult.success) {
     return { error: parseResult.error.issues[0]?.message || 'Invalid mine block data' };
   }
@@ -271,26 +294,28 @@ export async function adminUpdateMineBlock(
 
   const { supabase, userId } = auth;
 
-  const patch: Record<string, unknown> = {};
+  const patch: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
   if (data.name !== undefined) patch.name = data.name.trim();
   if (data.code !== undefined) patch.code = data.code.trim().toUpperCase();
   if (data.site_id !== undefined) patch.site_id = data.site_id;
   if (data.active !== undefined) patch.active = data.active;
 
-  const { error } = await supabase.from('mine_blocks').update(patch).eq('id', id);
+  const { error } = await supabase.from('mine_blocks').update(patch).eq('id', data.id);
   if (error) return { error: error.message || 'Failed to update mine block' };
 
   logAdminAuditEvent({
     actorId: userId,
     action: 'update',
     resource: 'mine_blocks',
-    resourceId: id,
-    metadata: { active: data.active },
+    resourceId: data.id,
+    metadata: { name: patch.name, code: patch.code, active: data.active },
   });
 
-  await cacheInvalidateTags(['table:mine_blocks']);
+  await updateTags(['table:mine_blocks']);
   revalidatePath('/admin');
   revalidatePath('/control-room/hourly-loads');
   revalidatePath('/control-room');
-  return { success: true };
+  return { success: true as const };
 }

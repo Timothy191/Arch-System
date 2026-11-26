@@ -253,6 +253,19 @@ const DRY_RUN_COMPARATORS: Readonly<
   eq: (metricVal, targetVal) => metricVal === targetVal,
 };
 
+function extractEndpointHostname(rawEndpoint: string): string {
+  const trimmed = rawEndpoint.trim().toLowerCase();
+  if (!trimmed) return '';
+  if (trimmed.includes('://')) {
+    try {
+      return new URL(trimmed).hostname.toLowerCase();
+    } catch {
+      return trimmed;
+    }
+  }
+  return trimmed;
+}
+
 export function simulateIntegrationRulesDryRun(
   rulesForm: Readonly<IntegrationRulesFormState>,
   simInput: Readonly<DryRunSimulationInput>
@@ -292,22 +305,19 @@ export function simulateIntegrationRulesDryRun(
     reasons.push('Human confirmation gate required but call is unapproved');
   }
 
-  // 4. Egress domain check
+  // 4. Egress domain check (aligned with runtime assertAccessAndEgressRules exact hostname match)
   if (rules.egress_domain_allowlist && rules.egress_domain_allowlist.length > 0) {
-    const host = simInput.endpointHost.trim().toLowerCase();
-    const hostAllowed = rules.egress_domain_allowlist.some((domain) => {
-      const normalized = domain.trim().toLowerCase();
-      return host === normalized || host.endsWith(`.${normalized}`);
-    });
-    if (!hostAllowed) {
+    const host = extractEndpointHostname(simInput.endpointHost);
+    const allowedDomains = rules.egress_domain_allowlist.map((d) => d.trim().toLowerCase());
+    if (!host || !allowedDomains.includes(host)) {
       denied = true;
-      reasons.push(`Host "${host}" is not in egress_domain_allowlist`);
+      reasons.push(`Host "${host || '(empty)'}" is not in egress_domain_allowlist`);
     } else {
       reasons.push(`Host "${host}" matches egress allowlist`);
     }
   }
 
-  // 5. Payload parsing, size, blocked keys, and redaction
+  // 5. Payload parsing, size, blocked keys, and redaction (aligned with applyPayloadPolicyRules)
   let parsedPayload: Record<string, unknown> = {};
   try {
     const raw = JSON.parse(simInput.samplePayloadJson || '{}') as unknown;
@@ -328,8 +338,8 @@ export function simulateIntegrationRulesDryRun(
   }
 
   if (rules.blocked_arg_keys && rules.blocked_arg_keys.length > 0) {
-    const blockedSet = new Set(rules.blocked_arg_keys.map((k) => k.toLowerCase()));
-    const hitKey = Object.keys(parsedPayload).find((k) => blockedSet.has(k.toLowerCase()));
+    const blockedSet = new Set(rules.blocked_arg_keys);
+    const hitKey = Object.keys(parsedPayload).find((k) => blockedSet.has(k));
     if (hitKey) {
       denied = true;
       reasons.push(`Argument "${hitKey}" is blocked by blocked_arg_keys`);
@@ -338,9 +348,9 @@ export function simulateIntegrationRulesDryRun(
 
   const sanitizedPayload: Record<string, unknown> = { ...parsedPayload };
   if (rules.redact_fields && rules.redact_fields.length > 0) {
-    const redactSet = new Set(rules.redact_fields.map((k) => k.toLowerCase()));
+    const redactSet = new Set(rules.redact_fields);
     for (const key of Object.keys(sanitizedPayload)) {
-      if (redactSet.has(key.toLowerCase())) {
+      if (redactSet.has(key)) {
         sanitizedPayload[key] = REDACTED_PLACEHOLDER;
         reasons.push(`Redacted field "${key}"`);
       }
@@ -385,6 +395,7 @@ interface IntegrationRulesFieldsProps {
   readonly onChange: (next: IntegrationRulesFormState) => void;
   readonly onSave?: () => void;
   readonly saving?: boolean;
+  readonly defaultEndpointHost?: string;
 }
 
 export function IntegrationRulesFields({
@@ -393,13 +404,14 @@ export function IntegrationRulesFields({
   onChange,
   onSave,
   saving = false,
+  defaultEndpointHost = '',
 }: IntegrationRulesFieldsProps) {
   const [showSimulator, setShowSimulator] = useState(false);
   const [simRole, setSimRole] = useState<IntegrationRole>('supervisor');
   const [simHour, setSimHour] = useState('10');
   const [simApproved, setSimApproved] = useState(false);
-  const [simHost, setSimHost] = useState('mcp.sentry.dev');
-  const [simPayload, setSimPayload] = useState('{"query":"SELECT 1","api_key":"sk-secret"}');
+  const [simHost, setSimHost] = useState(() => extractEndpointHostname(defaultEndpointHost));
+  const [simPayload, setSimPayload] = useState('{}');
   const [simResult, setSimResult] = useState<DryRunSimulationResult | null>(null);
 
   const toggleRole = (role: IntegrationRole) => {

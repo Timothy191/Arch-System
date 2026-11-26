@@ -1,6 +1,7 @@
 import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
 import { type CacheStatsSnapshot, collectRedisHealthDiagnostics, getCacheStats } from '@repo/redis';
 import { getAuthenticatedEmployee } from '@repo/supabase';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
 import {
   type AlertEvaluationResult,
@@ -11,13 +12,21 @@ import {
 } from '@/lib/observability/alert-evaluator';
 import { collectRealLayerRuntimeSnapshot } from '@/lib/observability/metrics';
 import { getObservabilityMetrics } from '@/lib/observability/simple-metrics';
-import { persistSloSnapshots } from '@/lib/observability/slo-store';
 import {
-  getAllUptimeSummaries,
-  getOverallSla24hPct,
-  getUptimeSummariesByTarget,
-  recordHeartbeatTick,
-  type UptimeTargetSummary,
+  DEGRADED_WEIGHT,
+  evaluateSloBudgetState,
+  FULL_SLA_PCT,
+  getUptimeTargetSummary,
+  type HeartbeatStatus,
+  type HeartbeatTick,
+  MAX_HEARTBEAT_TICKS,
+  P95_QUANTILE,
+  ROUNDING_FACTOR,
+  type SloBudgetState,
+  type UptimeTargetId,
+  WINDOW_7D_MS,
+  WINDOW_24H_MS,
+  WINDOW_30D_MS,
 } from '@/lib/observability/uptime-engine';
 
 const HTTP_OK = 200;
@@ -26,6 +35,39 @@ const HTTP_FORBIDDEN = 403;
 const HTTP_TOO_MANY_REQUESTS = 429;
 const RATE_LIMIT_MAX = 60;
 const RATE_LIMIT_WINDOW_MS = 60_000;
+const DEFAULT_ALERT_HOLD_MS = 30_000;
+const REDIS_LATENCY_THRESHOLD_MS = 250;
+const REDIS_LATENCY_RECOVERY_MS = 150;
+const EVENT_LOOP_THRESHOLD_MS = 100;
+const EVENT_LOOP_RECOVERY_MS = 50;
+const MIN_HIT_RATIO_THRESHOLD_PCT = 80;
+const MIN_HIT_RATIO_RECOVERY_PCT = 85;
+const PERCENT_SCALE = 100;
+const BYTES_PER_MEGABYTE = 1_048_576;
+const SPARKLINE_SAMPLE_LIMIT = 12;
+const MAX_SLO_HISTORY_ROWS = 360;
+
+const ALL_TARGET_IDS: readonly UptimeTargetId[] = [
+  'supabase',
+  'redis',
+  'fuxa_scada',
+  'portal_runtime',
+];
+
+const TARGET_LABEL_MAP: Readonly<Record<UptimeTargetId, string>> = {
+  supabase: 'Supabase Cloud (Postgres & Auth)',
+  redis: 'Redis L1/L2 Cache Engine',
+  fuxa_scada: 'FUXA SCADA Telemetry Gateway',
+  portal_runtime: 'Portal Node.js 24 Runtime',
+};
+
+const SLO_NAMES = ALL_TARGET_IDS.map((targetId) => `uptime:${targetId}`);
+
+const STATUS_WEIGHT_MAP: Readonly<Record<HeartbeatStatus, number>> = {
+  UP: 1,
+  DEGRADED: DEGRADED_WEIGHT,
+  DOWN: 0,
+};
 
 const observabilityLimiter = new RateLimiter({
   store: new MemoryStore(),
@@ -46,17 +88,20 @@ function resolvePrincipalIdentity(principal: unknown): { role: string; actorId: 
   const actorId = record.user?.id ?? record.employee?.id ?? record.id ?? 'unknown';
   return { role, actorId };
 }
-const DEFAULT_ALERT_HOLD_MS = 30_000;
-const REDIS_LATENCY_THRESHOLD_MS = 250;
-const REDIS_LATENCY_RECOVERY_MS = 150;
-const EVENT_LOOP_THRESHOLD_MS = 100;
-const EVENT_LOOP_RECOVERY_MS = 50;
-const MIN_HIT_RATIO_THRESHOLD_PCT = 80;
-const MIN_HIT_RATIO_RECOVERY_PCT = 85;
-const PERCENT_SCALE = 100;
-const BYTES_PER_MEGABYTE = 1_048_576;
-const DEFAULT_HIT_RATE_PCT = 100;
-const SPARKLINE_SAMPLE_LIMIT = 12;
+
+export interface PersistedUptimeTargetSummary {
+  readonly targetId: UptimeTargetId;
+  readonly label: string;
+  readonly sampleCount: number;
+  readonly statusLabel: string;
+  readonly currentStatus: HeartbeatStatus | null;
+  readonly sloBudgetState: SloBudgetState | null;
+  readonly p95LatencyMs: number | null;
+  readonly sla24hPct: number | null;
+  readonly sla7dPct: number | null;
+  readonly sla30dPct: number | null;
+  readonly ticks: readonly HeartbeatTick[];
+}
 
 export interface GoldenSignalSummaryItem {
   readonly id: 'latency' | 'traffic' | 'errors' | 'saturation';
@@ -120,6 +165,14 @@ const FALLBACK_CACHE_STATS: CacheStatsSnapshot = {
   avgWriteThroughDelayMs: 0,
 };
 
+interface SloMetricRow {
+  readonly slo_name?: string | null;
+  readonly actual_value?: number | string | null;
+  readonly status?: string | null;
+  readonly measurement_time?: string | null;
+  readonly metadata?: Record<string, unknown> | null;
+}
+
 interface JobMetricLike {
   readonly count: number;
   readonly errors: number;
@@ -132,41 +185,144 @@ interface GoldenSignalBuildContext {
   readonly eventLoopDelayP95Ms: number;
   readonly heapUsedMb: number;
   readonly alerts: readonly AlertEvaluationResult[];
-  readonly redisSummary: UptimeTargetSummary;
-  readonly runtimeSummary: UptimeTargetSummary;
+  readonly redisSummary: PersistedUptimeTargetSummary;
+  readonly runtimeSummary: PersistedUptimeTargetSummary;
 }
 
-function computeCacheHitRatePct(cacheStats: CacheStatsSnapshot): number {
+function computeCacheHitRatePct(cacheStats: CacheStatsSnapshot): number | null {
   const totalLookups = cacheStats.hits + cacheStats.misses;
-  if (totalLookups <= 0) return DEFAULT_HIT_RATE_PCT;
+  if (totalLookups <= 0) return null;
   return Number(((cacheStats.hits / totalLookups) * PERCENT_SCALE).toFixed(1));
 }
 
-function recordPassiveHeartbeats(
-  cacheStats: CacheStatsSnapshot,
-  eventLoopDelayP95Ms: number
-): void {
-  const checkedAt = new Date().toISOString();
-  recordHeartbeatTick({
-    targetId: 'redis',
-    latencyMs: cacheStats.p95LatencyMs || cacheStats.avgLatencyMs,
-    checkedAt,
+function resolveTickStatusFromRow(row: SloMetricRow): HeartbeatStatus {
+  const metaStatus = row.metadata?.currentStatus;
+  if (metaStatus === 'UP' || metaStatus === 'DEGRADED' || metaStatus === 'DOWN') {
+    return metaStatus;
+  }
+  if (row.status === 'breached') return 'DOWN';
+  if (row.status === 'warning') return 'DEGRADED';
+  return 'UP';
+}
+
+function computeWindowSlaPct(ticks: readonly HeartbeatTick[], windowMs: number): number | null {
+  if (ticks.length === 0) return null;
+  const nowMs = Date.now();
+  const windowTicks = ticks.filter((tick) => {
+    const parsedMs = Date.parse(tick.checkedAt);
+    return Number.isNaN(parsedMs) || nowMs - parsedMs <= windowMs;
   });
-  recordHeartbeatTick({
-    targetId: 'portal_runtime',
-    latencyMs: eventLoopDelayP95Ms,
-    checkedAt,
-  });
-  recordHeartbeatTick({
-    targetId: 'supabase',
-    latencyMs: cacheStats.avgLatencyMs,
-    checkedAt,
-  });
-  recordHeartbeatTick({
-    targetId: 'fuxa_scada',
-    latencyMs: eventLoopDelayP95Ms,
-    checkedAt,
-  });
+  const effectiveTicks = windowTicks.length > 0 ? windowTicks : ticks;
+  const weightedSum = effectiveTicks.reduce((sum, tick) => sum + STATUS_WEIGHT_MAP[tick.status], 0);
+  const rawPct = (weightedSum / effectiveTicks.length) * FULL_SLA_PCT;
+  return Math.round(rawPct * ROUNDING_FACTOR) / ROUNDING_FACTOR;
+}
+
+function computeP95FromTicks(ticks: readonly HeartbeatTick[]): number | null {
+  const nonNegative = ticks.filter((tick) => tick.latencyMs >= 0);
+  if (nonNegative.length === 0) return null;
+  const sorted = nonNegative.map((tick) => tick.latencyMs).sort((left, right) => left - right);
+  const quantileIdx = Math.max(0, Math.ceil(sorted.length * P95_QUANTILE) - 1);
+  const p95 = sorted[quantileIdx] ?? 0;
+  return Math.round(p95 * ROUNDING_FACTOR) / ROUNDING_FACTOR;
+}
+
+async function readPersistedSloRows(): Promise<readonly SloMetricRow[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    if (!supabase || typeof supabase.from !== 'function') {
+      return [];
+    }
+    const { data: rows, error } = await supabase
+      .from('slo_metrics')
+      .select('slo_name, actual_value, status, measurement_time, metadata')
+      .in('slo_name', SLO_NAMES)
+      .order('measurement_time', { ascending: false })
+      .limit(MAX_SLO_HISTORY_ROWS);
+
+    if (error || !Array.isArray(rows)) {
+      return [];
+    }
+    return rows as unknown as readonly SloMetricRow[];
+  } catch {
+    return [];
+  }
+}
+
+function buildTargetUptimeSummary(
+  targetId: UptimeTargetId,
+  persistedRows: readonly SloMetricRow[]
+): PersistedUptimeTargetSummary {
+  const sloKey = `uptime:${targetId}`;
+  const matchingPersistedTicks: HeartbeatTick[] = persistedRows
+    .filter((row) => row.slo_name === sloKey)
+    .slice()
+    .reverse()
+    .map((row) => {
+      const metaLatency = Number(row.metadata?.p95LatencyMs);
+      return {
+        status: resolveTickStatusFromRow(row),
+        latencyMs: Number.isFinite(metaLatency) && metaLatency >= 0 ? metaLatency : 0,
+        checkedAt:
+          typeof row.measurement_time === 'string' && row.measurement_time.length > 0
+            ? row.measurement_time
+            : '',
+      };
+    });
+
+  const inMemoryTicks = getUptimeTargetSummary(targetId).ticks;
+  const seenTimestamps = new Set<string>();
+  const combinedTicks: HeartbeatTick[] = [];
+
+  for (const tick of [...matchingPersistedTicks, ...inMemoryTicks]) {
+    const dedupeKey = tick.checkedAt ? `${tick.checkedAt}:${tick.status}` : '';
+    if (dedupeKey && seenTimestamps.has(dedupeKey)) continue;
+    if (dedupeKey) seenTimestamps.add(dedupeKey);
+    combinedTicks.push(tick);
+  }
+
+  const boundedTicks = combinedTicks.slice(-MAX_HEARTBEAT_TICKS);
+  if (boundedTicks.length === 0) {
+    return {
+      targetId,
+      label: TARGET_LABEL_MAP[targetId],
+      sampleCount: 0,
+      statusLabel: 'No samples yet',
+      currentStatus: null,
+      sloBudgetState: null,
+      p95LatencyMs: null,
+      sla24hPct: null,
+      sla7dPct: null,
+      sla30dPct: null,
+      ticks: [],
+    };
+  }
+
+  const latestTick = boundedTicks[boundedTicks.length - 1];
+  const currentStatus: HeartbeatStatus = latestTick ? latestTick.status : 'UP';
+  const p95LatencyMs = computeP95FromTicks(boundedTicks);
+  const sloBudgetState: SloBudgetState =
+    currentStatus === 'DOWN' ? 'CRITICAL' : evaluateSloBudgetState(p95LatencyMs ?? 0);
+
+  const latestPersistedForTarget = persistedRows.find((row) => row.slo_name === sloKey);
+  const persistedActual = Number(latestPersistedForTarget?.actual_value);
+  const computed24h = computeWindowSlaPct(boundedTicks, WINDOW_24H_MS);
+  const sla24hPct =
+    inMemoryTicks.length === 0 && Number.isFinite(persistedActual) ? persistedActual : computed24h;
+
+  return {
+    targetId,
+    label: TARGET_LABEL_MAP[targetId],
+    sampleCount: boundedTicks.length,
+    statusLabel: currentStatus,
+    currentStatus,
+    sloBudgetState,
+    p95LatencyMs,
+    sla24hPct,
+    sla7dPct: computeWindowSlaPct(boundedTicks, WINDOW_7D_MS),
+    sla30dPct: computeWindowSlaPct(boundedTicks, WINDOW_30D_MS),
+    ticks: boundedTicks,
+  };
 }
 
 function evaluateGoldenSignals(cacheStats: CacheStatsSnapshot, eventLoopDelayP95Ms: number): void {
@@ -193,10 +349,11 @@ function evaluateGoldenSignals(cacheStats: CacheStatsSnapshot, eventLoopDelayP95
       sampleValue: cacheStats.redisErrors,
     });
   }
-  if (hitRatioRule) {
+  const hitRatePct = computeCacheHitRatePct(cacheStats);
+  if (hitRatioRule && hitRatePct !== null) {
     evaluateAlertRule({
       rule: hitRatioRule,
-      sampleValue: computeCacheHitRatePct(cacheStats),
+      sampleValue: hitRatePct,
     });
   }
 }
@@ -237,8 +394,8 @@ function buildGoldenSignalPanels(
       id: 'traffic',
       title: 'Traffic & Cache Hit Ratio',
       subtitle: 'L1 TinyLFU + L2 Redis Lookups',
-      primaryValue: String(hitRatePct),
-      unit: '%',
+      primaryValue: hitRatePct !== null ? String(hitRatePct) : 'No samples yet',
+      unit: hitRatePct !== null ? '%' : '',
       secondaryLabel: 'Total Lookups',
       secondaryValue: totalLookups.toLocaleString('en-US'),
       alertState: resolveAlertState(context.alerts, 'cache_hit_ratio_drop'),
@@ -289,20 +446,35 @@ export async function GET() {
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: HTTP_TOO_MANY_REQUESTS });
   }
 
-  const [cacheStats, redisDiagnostics, observability] = await Promise.all([
+  const [cacheStats, redisDiagnostics, observability, persistedSloRows] = await Promise.all([
     getCacheStats().catch(() => FALLBACK_CACHE_STATS),
     collectRedisHealthDiagnostics().catch(() => null),
     getObservabilityMetrics(),
+    readPersistedSloRows(),
   ]);
 
   const runtimeSnapshot = collectRealLayerRuntimeSnapshot();
-  recordPassiveHeartbeats(cacheStats, runtimeSnapshot.eventLoopDelayP95Ms);
   evaluateGoldenSignals(cacheStats, runtimeSnapshot.eventLoopDelayP95Ms);
 
-  const uptimeSummaries = getAllUptimeSummaries();
-  const uptimeByTarget = getUptimeSummariesByTarget();
-  const overallSla24hPct = getOverallSla24hPct();
-  const sloPersistence = await persistSloSnapshots({ summaries: uptimeSummaries });
+  const uptimeByTarget: Record<UptimeTargetId, PersistedUptimeTargetSummary> = {
+    supabase: buildTargetUptimeSummary('supabase', persistedSloRows),
+    redis: buildTargetUptimeSummary('redis', persistedSloRows),
+    fuxa_scada: buildTargetUptimeSummary('fuxa_scada', persistedSloRows),
+    portal_runtime: buildTargetUptimeSummary('portal_runtime', persistedSloRows),
+  };
+  const uptimeSummaries = ALL_TARGET_IDS.map((targetId) => uptimeByTarget[targetId]);
+  const recordedSlaValues = uptimeSummaries
+    .map((summary) => summary.sla24hPct)
+    .filter((sla): sla is number => sla !== null);
+
+  const overallSla24hPct =
+    recordedSlaValues.length > 0
+      ? Math.round(
+          (recordedSlaValues.reduce((sum, sla) => sum + sla, 0) / recordedSlaValues.length) *
+            ROUNDING_FACTOR
+        ) / ROUNDING_FACTOR
+      : null;
+
   const activeAlerts = getActiveAlertEvaluations();
   const goldenSignals = buildGoldenSignalPanels({
     cacheStats,
@@ -331,6 +503,7 @@ export async function GET() {
     {
       timestamp: new Date().toISOString(),
       overallSla24hPct,
+      uptimeStatus: overallSla24hPct !== null ? 'recorded' : 'No samples yet',
       uptime: uptimeSummaries,
       uptimeByTarget,
       goldenSignals,
@@ -341,7 +514,6 @@ export async function GET() {
       },
       runtime: runtimeSnapshot,
       workflows,
-      sloPersistence,
     },
     {
       status: HTTP_OK,

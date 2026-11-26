@@ -48,8 +48,8 @@ export const outboxDrainFn = inngest.createFunction(
           if (Date.now() < nextAttempt) continue; // Exponential backoff not yet expired
 
           try {
-            // Attempt the SCADA write (Simulated here)
-            // Writing to the Portal telemetry push endpoint directly.
+            // Attempt the SCADA write by pushing the queued payload to the
+            // Portal telemetry ingestion endpoint.
             const portalUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
             const res = await fetch(`${portalUrl}/api/telemetry/push`, {
               method: 'POST',

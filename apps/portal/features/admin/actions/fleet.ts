@@ -1,14 +1,17 @@
 'use server';
 
+import {
+  adminAddMachineSchema,
+  adminArchiveMachineSchema,
+  adminUpdateMachineSchema,
+} from '@repo/contract/schemas/admin.schema';
 import { revalidatePath } from 'next/cache';
 import { updateTags } from '@/lib/server-cache';
-import {
-  estimateBaselineStartingSmr,
-  resolveDefaultMachineImage,
-  resolveDefaultManufacturer,
-  resolveMachineIdentity,
-} from '../tabs/fleet-utils';
+import { resolveDefaultManufacturer, resolveMachineIdentity } from '../tabs/fleet-utils';
 import { assertAdmin, logAdminAuditEvent } from './shared';
+
+const MAX_FLEET_OPERATIONS_HISTORY_ROWS = 5000;
+const FLEET_CACHE_TAGS = ['table:fleet', 'table:equipment', 'table:machines'];
 
 export async function adminAddMachine(data: {
   name: string;
@@ -28,8 +31,6 @@ export async function adminAddMachine(data: {
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  const { supabase, userId } = auth;
-
   if (!data.machine_type?.trim()) return { error: 'Machine Type is required.' };
   if (!data.manufacturer?.trim()) return { error: 'Machine Manufacturer is required.' };
   if (!data.serial_number?.trim() && !data.name?.trim()) {
@@ -42,66 +43,73 @@ export async function adminAddMachine(data: {
   ) {
     return { error: 'Starting SMR on Site is required.' };
   }
-  if (!data.department_id) return { error: 'Department is required.' };
+  if (!data.department_id?.trim()) return { error: 'Department is required.' };
 
-  const resolvedMachineId = data.name?.trim() || data.serial_number?.trim() || '';
-  const resolvedMachineName =
-    data.serial_number?.trim() ||
-    `${data.manufacturer.trim()} ${data.machine_type.trim()} (${resolvedMachineId})`;
-  const primaryBinFactor = data.bin_factor_waste ?? data.bin_factor_coal ?? data.bin_factor ?? null;
-  const resolvedImageUrl = resolveDefaultMachineImage({
-    machineType: data.machine_type.trim(),
-    manufacturer: data.manufacturer.trim(),
-    machineId: resolvedMachineId,
-    imageUrl: data.image_url,
-  });
-
-  const baseInsert = {
-    name: resolvedMachineId,
-    machine_type: data.machine_type.trim(),
-    manufacturer: data.manufacturer.trim(),
-    serial_number: resolvedMachineName,
+  const parsed = adminAddMachineSchema.safeParse({
+    ...data,
     starting_smr: data.starting_smr,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || 'Invalid machine details.' };
+  }
+
+  const valid = parsed.data;
+  const { supabase, userId } = auth;
+
+  const resolvedMachineId = valid.name.trim() || valid.serial_number?.trim() || '';
+  const resolvedMachineName =
+    valid.serial_number?.trim() ||
+    `${valid.manufacturer.trim()} ${valid.machine_type.trim()} (${resolvedMachineId})`;
+  const primaryBinFactor =
+    valid.bin_factor_waste ?? valid.bin_factor_coal ?? valid.bin_factor ?? null;
+  const explicitImageUrl = valid.image_url?.trim() || null;
+
+  const insertPayload = {
+    name: resolvedMachineId,
+    machine_type: valid.machine_type.trim(),
+    manufacturer: valid.manufacturer.trim(),
+    serial_number: resolvedMachineName,
+    image_url: explicitImageUrl,
+    starting_smr: valid.starting_smr,
     bin_factor: primaryBinFactor,
-    bin_factor_waste: data.bin_factor_waste ?? null,
-    bin_factor_coal: data.bin_factor_coal ?? null,
-    department_id: data.department_id,
-    site_id: data.site_id || null,
-    active: data.active ?? true,
-    report_exempt: data.report_exempt ?? false,
+    bin_factor_waste: valid.bin_factor_waste ?? null,
+    bin_factor_coal: valid.bin_factor_coal ?? null,
+    department_id: valid.department_id,
+    site_id: valid.site_id || null,
+    active: valid.active ?? true,
+    report_exempt: valid.report_exempt ?? false,
   };
 
-  let { data: inserted, error } = await supabase
+  const { data: inserted, error } = await supabase
     .from('machines')
-    .insert({ ...baseInsert, image_url: resolvedImageUrl })
+    .insert(insertPayload)
     .select('id')
     .maybeSingle();
 
   if (error) {
-    const fallback = await supabase.from('machines').insert(baseInsert).select('id').maybeSingle();
-    inserted = fallback.data;
-    error = fallback.error;
-  }
-
-  if (error) {
-    return { error: 'Failed to add machine' };
+    return { error: error.message || 'Failed to add machine' };
   }
 
   const createdMachineId = inserted?.id;
-  if (createdMachineId && data.starting_smr >= 0) {
+  if (createdMachineId && valid.starting_smr >= 0) {
     const today = new Date().toISOString().split('T')[0] as string;
-    await supabase.from('machine_operations').insert({
-      department_id: data.department_id,
-      site_id: data.site_id || null,
+    const { error: opError } = await supabase.from('machine_operations').insert({
+      department_id: valid.department_id,
+      site_id: valid.site_id || null,
       machine_id: createdMachineId,
       shift_date: today,
       shift_type: 'day',
       start_time: '06:00:00',
       end_time: '06:00:00',
-      start_smu: data.starting_smr,
-      end_smu: data.starting_smr,
+      start_smu: valid.starting_smr,
+      end_smu: valid.starting_smr,
       hours_worked: 0,
     });
+    if (opError) {
+      return {
+        error: `Machine created, but initial SMR operation log failed: ${opError.message}`,
+      };
+    }
   }
 
   logAdminAuditEvent({
@@ -109,12 +117,12 @@ export async function adminAddMachine(data: {
     action: 'create',
     resource: 'machines',
     resourceId: createdMachineId ?? null,
-    metadata: { name: resolvedMachineId, machine_type: data.machine_type.trim() },
+    metadata: { name: resolvedMachineId, machine_type: valid.machine_type.trim() },
   });
 
-  await updateTags(['table:fleet', 'table:equipment', 'table:machines']);
+  await updateTags(FLEET_CACHE_TAGS);
   revalidatePath('/admin');
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function adminUpdateMachine(
@@ -138,66 +146,107 @@ export async function adminUpdateMachine(
   const auth = await assertAdmin();
   if ('error' in auth) return { error: auth.error };
 
-  const { supabase, userId } = auth;
+  if (data.name !== undefined && !data.name.trim()) {
+    return { error: 'Machine ID cannot be empty.' };
+  }
+  if (data.machine_type !== undefined && !data.machine_type.trim()) {
+    return { error: 'Machine type cannot be empty.' };
+  }
 
-  const name = data.name?.trim();
-  const machineType = data.machine_type?.trim();
-  if (name !== undefined && !name) return { error: 'Machine ID cannot be empty.' };
-  if (machineType !== undefined && !machineType) return { error: 'Machine type cannot be empty.' };
+  const parsed = adminUpdateMachineSchema.safeParse({ id, ...data });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || 'Invalid machine update payload.' };
+  }
+
+  const valid = parsed.data;
+  const { supabase, userId } = auth;
 
   const primaryBinFactor =
     data.bin_factor_waste !== undefined || data.bin_factor_coal !== undefined
-      ? (data.bin_factor_waste ?? data.bin_factor_coal ?? data.bin_factor ?? null)
-      : data.bin_factor;
+      ? (valid.bin_factor_waste ?? valid.bin_factor_coal ?? valid.bin_factor ?? null)
+      : valid.bin_factor;
 
+  const { id: targetId, ...fields } = valid;
   const updatePayload = {
-    ...data,
-    ...(name !== undefined ? { name } : {}),
-    ...(machineType !== undefined ? { machine_type: machineType } : {}),
-    ...(data.manufacturer !== undefined ? { manufacturer: data.manufacturer?.trim() || null } : {}),
-    ...(data.serial_number !== undefined
-      ? { serial_number: data.serial_number?.trim() || null }
+    ...fields,
+    ...(valid.name !== undefined ? { name: valid.name.trim() } : {}),
+    ...(valid.machine_type !== undefined ? { machine_type: valid.machine_type.trim() } : {}),
+    ...(data.manufacturer !== undefined
+      ? { manufacturer: valid.manufacturer?.trim() || null }
       : {}),
-    ...(data.image_url !== undefined ? { image_url: data.image_url?.trim() || null } : {}),
+    ...(data.serial_number !== undefined
+      ? { serial_number: valid.serial_number?.trim() || null }
+      : {}),
+    ...(data.image_url !== undefined ? { image_url: valid.image_url?.trim() || null } : {}),
     ...(primaryBinFactor !== undefined ? { bin_factor: primaryBinFactor } : {}),
+    updated_at: new Date().toISOString(),
   };
 
-  let { error } = await supabase.from('machines').update(updatePayload).eq('id', id);
+  const { error } = await supabase.from('machines').update(updatePayload).eq('id', targetId);
 
   if (error) {
-    const {
-      manufacturer: _m,
-      starting_smr: _s,
-      bin_factor_waste: _w,
-      bin_factor_coal: _c,
-      image_url: _img,
-      ...legacyPayload
-    } = updatePayload;
-    const fallback = await supabase.from('machines').update(legacyPayload).eq('id', id);
-    error = fallback.error;
+    return { error: error.message || 'Failed to update machine' };
   }
-
-  if (error) return { error: 'Failed to update machine' };
 
   logAdminAuditEvent({
     actorId: userId,
     action: 'update',
     resource: 'machines',
-    resourceId: id,
+    resourceId: targetId,
   });
 
-  await updateTags(['table:fleet', 'table:equipment', 'table:machines']);
+  await updateTags(FLEET_CACHE_TAGS);
   revalidatePath('/admin');
-  return { success: true };
+  return { success: true as const };
+}
+
+export async function adminArchiveMachine(id: string) {
+  const auth = await assertAdmin();
+  if ('error' in auth) return { error: auth.error };
+
+  const parsed = adminArchiveMachineSchema.safeParse({ id });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || 'Machine ID is required.' };
+  }
+
+  const { supabase, userId } = auth;
+  const nowIso = new Date().toISOString();
+
+  const { error } = await supabase
+    .from('machines')
+    .update({
+      deleted_at: nowIso,
+      active: false,
+      updated_at: nowIso,
+    })
+    .eq('id', parsed.data.id);
+
+  if (error) {
+    return { error: error.message || 'Failed to archive machine' };
+  }
+
+  logAdminAuditEvent({
+    actorId: userId,
+    action: 'archive',
+    resource: 'machines',
+    resourceId: parsed.data.id,
+  });
+
+  await updateTags(FLEET_CACHE_TAGS);
+  revalidatePath('/admin');
+  return { success: true as const };
 }
 
 /**
- * Generates baseline Starting SMR hours (from historical operations or deterministic
- * machine-type baseline) and enriches missing Production department / OEM / picture metadata.
+ * Derives missing Starting SMR hours strictly from real `machine_operations` history
+ * (never fabricating hours when no operations exist) and enriches missing Production
+ * department / OEM metadata.
  */
 export async function adminGenerateStartingSmr(): Promise<{
   success?: boolean;
   updatedCount?: number;
+  skippedNoOpsCount?: number;
+  missingOpsMachines?: string[];
   error?: string;
 }> {
   const auth = await assertAdmin();
@@ -205,21 +254,46 @@ export async function adminGenerateStartingSmr(): Promise<{
 
   const { supabase, userId } = auth;
 
-  const [{ data: machineRows, error: machineErr }, { data: deptRows }, { data: opRows }] =
-    await Promise.all([
-      supabase
-        .from('machines')
-        .select('id, name, serial_number, machine_type, manufacturer, starting_smr, department_id')
-        .is('deleted_at', null),
-      supabase.from('departments').select('id, name'),
-      supabase
-        .from('machine_operations')
-        .select('machine_id, start_smu, end_smu, shift_date, created_at')
-        .order('shift_date', { ascending: true }),
-    ]);
+  const buildDepartmentsQuery = () => {
+    const base = supabase.from('departments').select('id, name');
+    return typeof (base as { is?: unknown }).is === 'function'
+      ? (base as unknown as { is: (col: string, val: null) => typeof base }).is('deleted_at', null)
+      : base;
+  };
 
-  if (machineErr) {
-    return { error: 'Failed to inspect fleet machines for SMR generation.' };
+  const buildOperationsQuery = () => {
+    const ordered = supabase
+      .from('machine_operations')
+      .select('machine_id, start_smu, end_smu, shift_date, created_at')
+      .order('shift_date', { ascending: true });
+    return typeof (ordered as { limit?: unknown }).limit === 'function'
+      ? (ordered as unknown as { limit: (n: number) => typeof ordered }).limit(
+          MAX_FLEET_OPERATIONS_HISTORY_ROWS
+        )
+      : ordered;
+  };
+
+  const [
+    { data: machineRows, error: machineErr },
+    { data: deptRows, error: deptErr },
+    { data: opRows, error: opErr },
+  ] = await Promise.all([
+    supabase
+      .from('machines')
+      .select('id, name, serial_number, machine_type, manufacturer, starting_smr, department_id')
+      .is('deleted_at', null),
+    buildDepartmentsQuery(),
+    buildOperationsQuery(),
+  ]);
+
+  if (machineErr || deptErr || opErr) {
+    return {
+      error:
+        machineErr?.message ||
+        deptErr?.message ||
+        opErr?.message ||
+        'Failed to inspect fleet machines for SMR generation.',
+    };
   }
 
   const productionDept = (deptRows ?? []).find(
@@ -243,6 +317,8 @@ export async function adminGenerateStartingSmr(): Promise<{
   }
 
   let updatedCount = 0;
+  const missingOpsMachines: string[] = [];
+
   for (const row of (machineRows ?? []) as Array<{
     id: string;
     name: string;
@@ -257,14 +333,14 @@ export async function adminGenerateStartingSmr(): Promise<{
       serialNumber: row.serial_number,
     });
     const currentSmr = Number(row.starting_smr ?? 0);
-    const resolvedSmr =
-      Number.isFinite(currentSmr) && currentSmr > 0
-        ? currentSmr
-        : (earliestSmrByMachine.get(row.id) ??
-          estimateBaselineStartingSmr({
-            machineType: row.machine_type,
-            machineId: identity.machineId,
-          }));
+    const hasCurrentSmr = Number.isFinite(currentSmr) && currentSmr > 0;
+    const historicalSmr = earliestSmrByMachine.get(row.id);
+
+    if (!hasCurrentSmr && historicalSmr === undefined) {
+      missingOpsMachines.push(identity.machineId);
+    }
+
+    const nextSmr = hasCurrentSmr ? currentSmr : historicalSmr;
 
     const resolvedMfg = resolveDefaultManufacturer({
       machineId: identity.machineId,
@@ -272,46 +348,55 @@ export async function adminGenerateStartingSmr(): Promise<{
       machineType: row.machine_type,
       manufacturer: row.manufacturer,
     });
-    const resolvedImage = resolveDefaultMachineImage({
-      machineType: row.machine_type,
-      manufacturer: resolvedMfg,
-      machineId: identity.machineId,
-    });
 
     const nextDepartmentId =
       productionDept && (!row.department_id || row.department_id === adminDept?.id)
         ? productionDept.id
         : row.department_id;
 
-    const needsSmr = !(Number.isFinite(currentSmr) && currentSmr > 0);
+    const needsSmr = !hasCurrentSmr && nextSmr !== undefined;
     const needsMfg = !(row.manufacturer ?? '').trim();
     const needsDept = nextDepartmentId !== row.department_id;
 
     if (!needsSmr && !needsMfg && !needsDept) continue;
 
+    const updateFields: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (needsSmr && nextSmr !== undefined) {
+      updateFields.starting_smr = nextSmr;
+    }
+    if (needsMfg) {
+      updateFields.manufacturer = resolvedMfg;
+    }
+    if (needsDept && nextDepartmentId) {
+      updateFields.department_id = nextDepartmentId;
+    }
+
     const { error: updateErr } = await supabase
       .from('machines')
-      .update({
-        starting_smr: resolvedSmr,
-        manufacturer: resolvedMfg,
-        image_url: resolvedImage,
-        ...(nextDepartmentId ? { department_id: nextDepartmentId } : {}),
-      })
+      .update(updateFields)
       .eq('id', row.id);
 
-    if (!updateErr) {
-      updatedCount += 1;
+    if (updateErr) {
+      return { error: `Failed to update machine ${identity.machineId}: ${updateErr.message}` };
     }
+    updatedCount += 1;
   }
 
   logAdminAuditEvent({
     actorId: userId,
     action: 'bulk_generate_smr',
     resource: 'machines',
-    metadata: { updatedCount },
+    metadata: { updatedCount, skippedNoOpsCount: missingOpsMachines.length },
   });
 
-  await updateTags(['table:fleet', 'table:equipment', 'table:machines']);
+  await updateTags(FLEET_CACHE_TAGS);
   revalidatePath('/admin');
-  return { success: true, updatedCount };
+  return {
+    success: true,
+    updatedCount,
+    skippedNoOpsCount: missingOpsMachines.length,
+    missingOpsMachines,
+  };
 }

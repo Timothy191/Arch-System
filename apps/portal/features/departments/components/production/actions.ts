@@ -204,6 +204,38 @@ async function getMonthlyProductionTarget(monthStr?: string): Promise<MonthlyPro
     // Fallback to default target when migration 189 is pending on remote DB
   }
 
+  try {
+    const { data: adminTargetsRow } = await supabase
+      .from('report_templates')
+      .select('config')
+      .eq('report_type', 'operational_targets')
+      .is('deleted_at', null)
+      .maybeSingle();
+    if (adminTargetsRow?.config && typeof adminTargetsRow.config === 'object') {
+      const monthly = (
+        adminTargetsRow.config as {
+          monthly?: {
+            coalTonnesTarget?: number;
+            wasteTonnesTarget?: number;
+            volumeBcmTarget?: number;
+          };
+        }
+      ).monthly;
+      if (monthly) {
+        return {
+          target_month: targetMonth,
+          coal_target_tonnes: Number(monthly.coalTonnesTarget) || 125000,
+          waste_target_tonnes: Number(monthly.wasteTonnesTarget) || 350000,
+          bcm_target: Number(monthly.volumeBcmTarget) || 160000,
+          notes: `${targetMonth} Target (from Admin Operational Targets)`,
+          updated_at: null,
+        };
+      }
+    }
+  } catch {
+    // Fall back to static monthly defaults when report_templates is unavailable
+  }
+
   const fallback = DEFAULT_MONTHLY_TARGETS[targetMonth] ?? {
     coal: 125000,
     waste: 350000,
@@ -301,6 +333,41 @@ export async function getProductionPlatformTargets(): Promise<ProductionPlatform
           ...parsed.data,
           notes: parsed.data.notes ?? null,
           updatedAt: parsed.data.updatedAt ?? data.updated_at ?? null,
+        };
+      }
+    }
+
+    const { data: adminTargetsRow } = await supabase
+      .from('report_templates')
+      .select('config, updated_at')
+      .eq('report_type', 'operational_targets')
+      .is('deleted_at', null)
+      .maybeSingle();
+    if (adminTargetsRow?.config && typeof adminTargetsRow.config === 'object') {
+      const cfg = adminTargetsRow.config as {
+        shift?: ProductionPlatformTargets['shift'] & { volumeBcmTarget?: number };
+        daily?: ProductionPlatformTargets['daily'] & { volumeBcmTarget?: number };
+        monthly?: ProductionPlatformTargets['monthly'] & { volumeBcmTarget?: number };
+      };
+      if (cfg.shift && cfg.daily && cfg.monthly) {
+        const weeklyDays = 7;
+        const dailyVolumeBcmTarget =
+          (cfg.daily as { volumeBcmTarget?: number }).volumeBcmTarget ?? cfg.daily.pitBcmTarget;
+        const dailyRolloverTargetBcm = cfg.daily.rolloverTargetBcm ?? 1300;
+        return {
+          shift: { ...cfg.shift },
+          daily: { ...cfg.daily },
+          weekly: {
+            loadsTarget: cfg.daily.loadsTarget * weeklyDays,
+            coalTonnesTarget: cfg.daily.coalTonnesTarget * weeklyDays,
+            wasteTonnesTarget: cfg.daily.wasteTonnesTarget * weeklyDays,
+            pitBcmTarget: dailyVolumeBcmTarget * weeklyDays,
+            rolloverTargetBcm: dailyRolloverTargetBcm * weeklyDays,
+            smrHoursTarget: cfg.daily.smrHoursTarget * weeklyDays,
+          },
+          monthly: { ...cfg.monthly },
+          notes: 'Derived from Admin Operational Targets',
+          updatedAt: adminTargetsRow.updated_at ?? null,
         };
       }
     }

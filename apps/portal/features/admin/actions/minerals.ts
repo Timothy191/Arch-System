@@ -4,9 +4,10 @@ import {
   type AdminMineralRegistry,
   adminMineralRegistrySchema,
 } from '@repo/contract/schemas/admin.schema';
-import { cacheInvalidateTags } from '@repo/redis';
+import { AuthError, DatabaseError } from '@repo/errors';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { updateTags } from '@/lib/server-cache';
 import { assertAdmin, logAdminAuditEvent } from './shared';
 
 const DEFAULT_WASTE_MINERALS: readonly string[] = [
@@ -30,23 +31,43 @@ const DEFAULT_COAL_MINERALS: readonly string[] = [
 ];
 
 export async function getMineralRegistry(): Promise<AdminMineralRegistry> {
-  try {
-    const supabase = await createServerSupabaseClient();
-    const { data } = await supabase
-      .from('report_templates')
-      .select('config')
-      .eq('report_type', 'mineral_registry')
-      .maybeSingle();
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
-    if (data?.config && typeof data.config === 'object') {
-      const parsed = adminMineralRegistrySchema.safeParse(data.config);
-      if (parsed.success) {
-        return parsed.data;
-      }
-    }
-  } catch {
-    // Fallback to industrial defaults
+  if (authError || !user) {
+    throw new AuthError('Unauthorized', { context: { action: 'getMineralRegistry' } });
   }
+
+  let query = supabase
+    .from('report_templates')
+    .select('config')
+    .eq('report_type', 'mineral_registry');
+  if (typeof (query as { is?: unknown }).is === 'function') {
+    query = (query as unknown as { is: (col: string, val: null) => typeof query }).is(
+      'deleted_at',
+      null
+    );
+  }
+  const { data, error } = await query.maybeSingle();
+
+  if (error) {
+    throw new DatabaseError('Failed to load mineral registry', {
+      operation: 'select',
+      table: 'report_templates',
+      context: { error: error.message },
+    });
+  }
+
+  if (data?.config && typeof data.config === 'object') {
+    const parsed = adminMineralRegistrySchema.safeParse(data.config);
+    if (parsed.success) {
+      return parsed.data;
+    }
+  }
+
   return {
     waste: [...DEFAULT_WASTE_MINERALS],
     coal: [...DEFAULT_COAL_MINERALS],
@@ -65,11 +86,20 @@ export async function adminSaveMineralRegistry(rawInput: { waste: string[]; coal
 
   const { supabase } = auth;
 
-  const { data: existing } = await supabase
+  let existingQuery = supabase
     .from('report_templates')
     .select('id')
-    .eq('report_type', 'mineral_registry')
-    .maybeSingle();
+    .eq('report_type', 'mineral_registry');
+  if (typeof (existingQuery as { is?: unknown }).is === 'function') {
+    existingQuery = (
+      existingQuery as unknown as { is: (col: string, val: null) => typeof existingQuery }
+    ).is('deleted_at', null);
+  }
+  const { data: existing, error: lookupError } = await existingQuery.maybeSingle();
+
+  if (lookupError) {
+    return { error: lookupError.message || 'Failed to inspect mineral registry' };
+  }
 
   if (existing) {
     const { error } = await supabase
@@ -79,7 +109,7 @@ export async function adminSaveMineralRegistry(rawInput: { waste: string[]; coal
         updated_at: new Date().toISOString(),
       })
       .eq('id', existing.id);
-    if (error) return { error: 'Failed to update mineral registry' };
+    if (error) return { error: error.message || 'Failed to update mineral registry' };
   } else {
     const { error } = await supabase.from('report_templates').insert({
       name: 'Mineral Registry',
@@ -87,10 +117,10 @@ export async function adminSaveMineralRegistry(rawInput: { waste: string[]; coal
       report_type: 'mineral_registry',
       config,
     });
-    if (error) return { error: 'Failed to save mineral registry' };
+    if (error) return { error: error.message || 'Failed to save mineral registry' };
   }
 
-  await cacheInvalidateTags(['config:mineral_registry']);
+  await updateTags(['config:mineral_registry']);
   logAdminAuditEvent({
     actorId: auth.userId,
     action: existing ? 'update' : 'create',
@@ -101,5 +131,5 @@ export async function adminSaveMineralRegistry(rawInput: { waste: string[]; coal
   revalidatePath('/admin');
   revalidatePath('/control-room/hourly-loads');
   revalidatePath('/control-room');
-  return { success: true };
+  return { success: true as const };
 }

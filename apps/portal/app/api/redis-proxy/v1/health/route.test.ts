@@ -14,17 +14,16 @@ const TEST_REDIS_SECRET = 'correct-redis-proxy-secret-2026';
 const TEST_N8N_SECRET = 'correct-n8n-api-secret-2026';
 const WRONG_SECRET = 'wrong-redis-proxy-secret-2026';
 
-const mockExecuteCommand = jest.fn((command: string, _args: readonly string[] = []) => {
-  if (command === 'PING') return 'PONG';
-  return [];
+const mockPing = jest.fn().mockResolvedValue('PONG');
+const mockDbSize = jest.fn().mockResolvedValue(EXPECTED_ACTIVE_KEYS_COUNT);
+const mockGetRedisClient = jest.fn().mockResolvedValue({
+  isOpen: true,
+  ping: (...args: unknown[]) => mockPing(...args),
+  dbSize: (...args: unknown[]) => mockDbSize(...args),
 });
-const mockDbSize = jest.fn(() => EXPECTED_ACTIVE_KEYS_COUNT);
 
-jest.mock('@/lib/redis-engine', () => ({
-  redisEngine: {
-    executeCommand: (command: string, args: string[]) => mockExecuteCommand(command, args),
-    dbsize: () => mockDbSize(),
-  },
+jest.mock('@repo/redis/client', () => ({
+  getRedisClient: (...args: unknown[]) => mockGetRedisClient(...args),
 }));
 
 function createHealthRequest(headers: Record<string, string> = {}): NextRequest {
@@ -38,8 +37,9 @@ describe('Given GET /api/redis-proxy/v1/health', () => {
   beforeEach(() => {
     delete process.env.REDIS_AUTH_SECRET;
     delete process.env.N8N_API_KEY;
-    mockExecuteCommand.mockClear();
+    mockPing.mockClear();
     mockDbSize.mockClear();
+    mockGetRedisClient.mockClear();
   });
 
   afterAll(() => {
@@ -66,7 +66,7 @@ describe('Given GET /api/redis-proxy/v1/health', () => {
     for (const response of responses) {
       expect(response.status).toBe(HTTP_UNAUTHORIZED_STATUS);
     }
-    expect(mockExecuteCommand).not.toHaveBeenCalled();
+    expect(mockPing).not.toHaveBeenCalled();
     expect(mockDbSize).not.toHaveBeenCalled();
   });
 
@@ -76,7 +76,7 @@ describe('Given GET /api/redis-proxy/v1/health', () => {
     const response = await GET(createHealthRequest());
 
     expect(response.status).toBe(HTTP_UNAUTHORIZED_STATUS);
-    expect(mockExecuteCommand).not.toHaveBeenCalled();
+    expect(mockPing).not.toHaveBeenCalled();
     expect(mockDbSize).not.toHaveBeenCalled();
   });
 
@@ -93,7 +93,7 @@ describe('Given GET /api/redis-proxy/v1/health', () => {
     for (const response of responses) {
       expect(response.status).toBe(HTTP_UNAUTHORIZED_STATUS);
     }
-    expect(mockExecuteCommand).not.toHaveBeenCalled();
+    expect(mockPing).not.toHaveBeenCalled();
     expect(mockDbSize).not.toHaveBeenCalled();
   });
 
@@ -108,15 +108,14 @@ describe('Given GET /api/redis-proxy/v1/health', () => {
     expect(response.status).toBe(HTTP_OK_STATUS);
     expect(payload).toEqual({
       status: 'healthy',
-      mode: 'serverless-http-redis',
+      mode: 'primary-redis',
       ping: 'PONG',
       activeKeysCount: EXPECTED_ACTIVE_KEYS_COUNT,
       timestamp: expect.any(String),
     });
     expect(Number.isNaN(Date.parse(payload.timestamp))).toBe(false);
     expect(mockDbSize).toHaveBeenCalledTimes(1);
-    expect(mockExecuteCommand).toHaveBeenCalledWith('PING', []);
-    expect(mockExecuteCommand).not.toHaveBeenCalledWith('KEYS', expect.anything());
+    expect(mockPing).toHaveBeenCalledTimes(1);
   });
 
   it('When a valid x-n8n-api-key header is provided, Then it returns 200 using dbsize without invoking KEYS', async () => {
@@ -127,12 +126,11 @@ describe('Given GET /api/redis-proxy/v1/health', () => {
 
     expect(response.status).toBe(HTTP_OK_STATUS);
     expect(payload.status).toBe('healthy');
-    expect(payload.mode).toBe('serverless-http-redis');
+    expect(payload.mode).toBe('primary-redis');
     expect(payload.ping).toBe('PONG');
     expect(payload.activeKeysCount).toBe(EXPECTED_ACTIVE_KEYS_COUNT);
     expect(mockDbSize).toHaveBeenCalledTimes(1);
-    expect(mockExecuteCommand).toHaveBeenCalledWith('PING', []);
-    expect(mockExecuteCommand).not.toHaveBeenCalledWith('KEYS', expect.anything());
+    expect(mockPing).toHaveBeenCalledTimes(1);
   });
 
   it('When a valid x-redis-token header is provided, Then it returns 200 using dbsize without invoking KEYS', async () => {
@@ -143,12 +141,11 @@ describe('Given GET /api/redis-proxy/v1/health', () => {
 
     expect(response.status).toBe(HTTP_OK_STATUS);
     expect(payload.status).toBe('healthy');
-    expect(payload.mode).toBe('serverless-http-redis');
+    expect(payload.mode).toBe('primary-redis');
     expect(payload.ping).toBe('PONG');
     expect(payload.activeKeysCount).toBe(EXPECTED_ACTIVE_KEYS_COUNT);
     expect(mockDbSize).toHaveBeenCalledTimes(1);
-    expect(mockExecuteCommand).toHaveBeenCalledWith('PING', []);
-    expect(mockExecuteCommand).not.toHaveBeenCalledWith('KEYS', expect.anything());
+    expect(mockPing).toHaveBeenCalledTimes(1);
   });
 
   it('When both REDIS_AUTH_SECRET and N8N_API_KEY are set to distinct values, Then either valid credential is accepted', async () => {

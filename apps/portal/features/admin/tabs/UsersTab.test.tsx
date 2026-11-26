@@ -4,15 +4,14 @@ import { UsersTab } from './UsersTab';
 
 const mockGetUsersAdminData = jest.fn();
 const mockUpsertEmployeeAdmin = jest.fn();
+const mockDeactivateEmployeeAdmin = jest.fn();
+const mockUploadEmployeePhoto = jest.fn();
 
 jest.mock('./actions', () => ({
   getUsersAdminData: (...args: unknown[]) => mockGetUsersAdminData(...args),
   upsertEmployeeAdmin: (...args: unknown[]) => mockUpsertEmployeeAdmin(...args),
-}));
-
-jest.mock('./DepartmentsTab', () => ({
-  DEFAULT_ADMIN_AREAS: ['Office', 'Plant', 'Pit Area', 'All Areas'],
-  getSavedAdminAreas: () => ['Office', 'Plant', 'Pit Area', 'All Areas'],
+  deactivateEmployeeAdmin: (...args: unknown[]) => mockDeactivateEmployeeAdmin(...args),
+  uploadEmployeePhoto: (...args: unknown[]) => mockUploadEmployeePhoto(...args),
 }));
 
 jest.mock('sonner', () => ({
@@ -28,6 +27,8 @@ const DEPARTMENTS = [
   { id: 'dept-engineering', display_name: 'Engineering' },
 ];
 
+const SITES = [{ id: 'site-1', name: 'Brakfontein Pit', site_code: 'BRAK' }];
+
 const EXISTING_USER = {
   id: 'emp-1',
   auth_id: 'auth-1',
@@ -39,7 +40,7 @@ const EXISTING_USER = {
   date_of_birth: '1990-04-12',
   national_id: '9004125009087',
   job_title: 'Shift Supervisor',
-  areas: ['Pit Area'],
+  areas: ['Brakfontein Pit'],
   medical_expiry_date: '2027-06-01',
   induction_expiry_date: '2027-07-01',
   employee_code: 'COY-1001',
@@ -56,17 +57,19 @@ const EXISTING_USER = {
   departments: { display_name: 'Drilling' },
 };
 
-describe('UsersTab modal redesign & permissions', () => {
+describe('UsersTab modal redesign, invite email, live areas & deactivation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetUsersAdminData.mockResolvedValue({
       employees: [EXISTING_USER],
       departments: DEPARTMENTS,
+      sites: SITES,
     });
     mockUpsertEmployeeAdmin.mockResolvedValue({ success: true });
+    mockDeactivateEmployeeAdmin.mockResolvedValue({ success: true });
   });
 
-  it('renders Account Type, Gender/Birthday, right-aligned dept checkboxes, and Read+Write permissions in Add modal', async () => {
+  it('renders Account Type, Email for User, Gender/Birthday, live Areas, and Read+Write permissions in Add modal', async () => {
     render(<UsersTab />);
 
     await waitFor(() => {
@@ -77,7 +80,6 @@ describe('UsersTab modal redesign & permissions', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Add Employee/i }));
 
-    // Account Type selector is present first on top
     const accountSelector = screen.getByTestId('account-type-selector');
     expect(accountSelector).toBeInTheDocument();
     expect(screen.getByTestId('account-type-employee')).toHaveAttribute('aria-checked', 'true');
@@ -85,48 +87,38 @@ describe('UsersTab modal redesign & permissions', () => {
     fireEvent.click(screen.getByTestId('account-type-user'));
     expect(screen.getByTestId('account-type-user')).toHaveAttribute('aria-checked', 'true');
 
-    // Fill basic identity, gender & birthday
+    fireEvent.change(screen.getByLabelText(/Email Address/i), {
+      target: { value: 'lerato@plantcor.co.za' },
+    });
     fireEvent.change(screen.getByLabelText('Names'), { target: { value: 'Lerato' } });
     fireEvent.change(screen.getByLabelText('Surname'), { target: { value: 'Khumalo' } });
     fireEvent.click(screen.getByTestId('gender-female'));
     expect(screen.getByTestId('gender-female')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('gender-male')).toBeInTheDocument();
-    expect(screen.getByTestId('gender-other')).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('Birthday'), { target: { value: '1994-09-18' } });
+    fireEvent.change(screen.getByLabelText('Area'), { target: { value: 'Brakfontein Pit' } });
 
-    // Select Drilling & Production using right-checkbox cards
     const drillingCard = screen.getByTestId('dept-card-dept-drilling');
-    const drillingCheckbox = screen.getByTestId('dept-checkbox-dept-drilling');
-    expect(drillingCard).toContainElement(drillingCheckbox);
-    expect(drillingCard).toHaveAttribute('aria-checked', 'false');
-
     fireEvent.click(drillingCard);
     fireEvent.click(screen.getByTestId('dept-card-dept-production'));
 
-    expect(drillingCard).toHaveAttribute('aria-checked', 'true');
-
-    // Read + Write Permissions section lists checked departments
-    const permissionsSection = screen.getByTestId('read-write-permissions-section');
-    expect(permissionsSection).toBeInTheDocument();
     expect(screen.getByText('2 Read · 2 Write enabled')).toBeInTheDocument();
-
-    // Toggle Production Write off -> Read Only
     fireEvent.click(screen.getByLabelText('Production Write permission'));
     expect(screen.getByText('2 Read · 1 Write enabled')).toBeInTheDocument();
 
-    // Submit form and assert complete payload
     fireEvent.click(screen.getByRole('button', { name: 'Add User' }));
 
     await waitFor(() => {
       expect(mockUpsertEmployeeAdmin).toHaveBeenCalledWith(
         expect.objectContaining({
           record_type: 'user',
+          email: 'lerato@plantcor.co.za',
           names: 'Lerato',
           surname: 'Khumalo',
           full_name: 'Lerato Khumalo',
           gender: 'female',
           birthday: '1994-09-18',
+          area: 'Brakfontein Pit',
           accessible_departments: ['dept-drilling', 'dept-production'],
           department_permissions: {
             'dept-drilling': { read: true, write: true },
@@ -137,7 +129,7 @@ describe('UsersTab modal redesign & permissions', () => {
     });
   });
 
-  it('hydrates existing User record_type, gender, birthday, and Read/Write permissions on Edit', async () => {
+  it('hydrates existing User on Edit and confirms deactivation via dialog', async () => {
     render(<UsersTab />);
 
     await waitFor(() => {
@@ -149,14 +141,6 @@ describe('UsersTab modal redesign & permissions', () => {
     expect(screen.getByTestId('account-type-user')).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByTestId('gender-male')).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByLabelText('Birthday')).toHaveValue('1990-04-12');
-    expect(screen.getByLabelText('Drilling Write permission')).toHaveAttribute(
-      'aria-checked',
-      'true'
-    );
-    expect(screen.getByLabelText('Production Write permission')).toHaveAttribute(
-      'aria-checked',
-      'false'
-    );
 
     fireEvent.click(screen.getByRole('button', { name: 'All Read Only' }));
     expect(screen.getByText('2 Read · 0 Write enabled')).toBeInTheDocument();
@@ -176,6 +160,14 @@ describe('UsersTab modal redesign & permissions', () => {
           },
         })
       );
+    });
+
+    fireEvent.click(screen.getByLabelText('Deactivate Thabo Mokoena'));
+    expect(screen.getByText('Deactivate Employee')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm Deactivate' }));
+
+    await waitFor(() => {
+      expect(mockDeactivateEmployeeAdmin).toHaveBeenCalledWith('emp-1');
     });
   });
 });

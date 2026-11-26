@@ -1,6 +1,22 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import WorkflowsPage from './page';
+import WorkflowsPage from './WorkflowsConsoleClient';
+
+const DEPT_ID = '11111111-1111-4111-a111-111111111111';
+
+jest.mock('@repo/supabase/client', () => ({
+  createBrowserSupabaseClient: jest.fn(() => ({
+    from: jest.fn(() => ({
+      select: jest.fn().mockReturnValue({
+        is: jest.fn().mockReturnValue({
+          order: jest.fn().mockResolvedValue({
+            data: [{ id: DEPT_ID, name: 'control-room', display_name: 'Control Room' }],
+          }),
+        }),
+      }),
+    })),
+  })),
+}));
 
 function createJsonResponse(body: unknown, ok = true, status = 200): Response {
   return {
@@ -24,9 +40,48 @@ describe('WorkflowsPage (/admin/workflows)', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders live /api/admin/observability workflow metrics, selects jobs, and shows inline feedback without window.alert', async () => {
-    const fetchMock = jest.fn(async () =>
-      createJsonResponse({
+  it('renders live observability metrics and inspects real Webhook Delivery Logs & Metrics', async () => {
+    const fetchMock = jest.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      if (url === '/api/webhooks') {
+        return createJsonResponse({
+          webhooks: [
+            {
+              id: 'wh-1',
+              url: 'https://hooks.plantcor.example/shift-closeout-sync',
+              description: 'Shift Closeout Hook',
+              event_types: ['daily_log.created'],
+              active: true,
+            },
+          ],
+        });
+      }
+      if (url === '/api/webhooks/wh-1/metrics') {
+        return createJsonResponse({
+          total: 10,
+          successful: 9,
+          failed: 1,
+          retried: 1,
+          successRate: 90,
+          lastDeliveredAt: '2026-11-19T12:00:00.000Z',
+        });
+      }
+      if (url === '/api/webhooks/wh-1/logs') {
+        return createJsonResponse({
+          logs: [
+            {
+              id: 'log-1',
+              event_type: 'daily_log.created',
+              response_status: 200,
+              retry_count: 0,
+              success: true,
+              error_message: null,
+              created_at: '2026-11-19T12:00:00.000Z',
+            },
+          ],
+        });
+      }
+      return createJsonResponse({
         timestamp: '2026-11-19T12:00:00.000Z',
         overallSla24hPct: 99.92,
         workflows: [
@@ -43,8 +98,8 @@ describe('WorkflowsPage (/admin/workflows)', () => {
             lastDurationMs: 320,
           },
         ],
-      })
-    );
+      });
+    });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     render(<WorkflowsPage />);
@@ -63,15 +118,65 @@ describe('WorkflowsPage (/admin/workflows)', () => {
     expect(screen.getByText('320ms')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Inspect daily-pdf-report/i }));
-    const banner = screen.getByRole('status');
-    expect(banner).toHaveTextContent('daily-pdf-report');
+    const inspector = await screen.findByTestId('webhook-delivery-inspector');
+    expect(inspector).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Delivery Rate: 90%')).toBeInTheDocument();
+      expect(screen.getByText('HTTP 200')).toBeInTheDocument();
+    });
     expect(alertSpy).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: /Job Details/i }));
-    expect(screen.getByRole('status')).toHaveTextContent('server workflow schedules');
+    fireEvent.click(screen.getByRole('button', { name: /Close Inspector/i }));
+    expect(screen.queryByTestId('webhook-delivery-inspector')).not.toBeInTheDocument();
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: /Dismiss/i }));
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  it('opens Provision Trigger dialog requiring department and validated HTTPS URL before POST /api/webhooks', async () => {
+    const fetchMock = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      if (url === '/api/webhooks' && init?.method === 'POST') {
+        return createJsonResponse({ webhook: { id: 'wh-created' } }, true, 201);
+      }
+      if (url === '/api/webhooks') {
+        return createJsonResponse({ webhooks: [] });
+      }
+      return createJsonResponse({
+        timestamp: '2026-11-19T12:00:00.000Z',
+        overallSla24hPct: 100,
+        workflows: [],
+      });
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    render(<WorkflowsPage />);
+
+    const provisionBtn = await screen.findByRole('button', { name: /Provision Trigger/i });
+    fireEvent.click(provisionBtn);
+
+    expect(screen.getByText('Provision Webhook Trigger')).toBeInTheDocument();
+
+    // Rejects fictional .internal URL client-side before POSTing
+    const urlInput = screen.getByLabelText(/HTTPS Target Webhook URL/i);
+    fireEvent.change(urlInput, {
+      target: { value: 'https://n8n.arch-system.internal/webhook/test' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Create Webhook Trigger/i }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/disallowed host/i);
+
+    // Accepts valid HTTPS URL + real department_id
+    fireEvent.change(urlInput, {
+      target: { value: 'https://n8n.plantcor.example/webhook/shift-closeout' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Create Webhook Trigger/i }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/webhooks',
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining(DEPT_ID),
+        })
+      );
+    });
   });
 
   it('renders an honest empty state with /admin?tab=webhooks link when zero background jobs have run', async () => {
@@ -92,7 +197,6 @@ describe('WorkflowsPage (/admin/workflows)', () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.queryByText('Data Pipeline Monitor')).not.toBeInTheDocument();
     const webhookLinks = screen.getAllByRole('link', { name: /Webhook/i });
     expect(webhookLinks.length).toBeGreaterThanOrEqual(1);
     expect(webhookLinks[0]).toHaveAttribute('href', '/admin?tab=webhooks');

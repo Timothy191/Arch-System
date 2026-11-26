@@ -97,14 +97,97 @@
  *         description: Internal server error
  */
 
+import { uuidSchema } from '@repo/contract/schemas/common.schema';
 import { updateWebhookSchema } from '@repo/contract/schemas/webhook.schema';
 import { getAuthenticatedEmployee } from '@repo/supabase';
+import { encryptWebhookSecret } from '@/lib/integrations/crypto';
+import { assertSafeResolvedUrl } from '@/lib/integrations/ssrf-guard';
+
+const SAFE_WEBHOOK_COLUMNS =
+  'id, url, description, event_types, department_id, active, created_at, updated_at, secret';
+
+function redactWebhookRow(row: Record<string, unknown>) {
+  const { secret, ...safeFields } = row;
+  return {
+    ...safeFields,
+    has_secret: Boolean(secret),
+  };
+}
+
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
+import { withBodyLimit } from '@/lib/api/body-limit';
 import { applyCors } from '@/lib/api/cors';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { validateBody } from '@/lib/api/response';
+
+const MAX_WEBHOOK_BODY_BYTES = 524_288;
+
+async function handleGetWebhook(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id } = await params;
+  const principal = await getAuthenticatedEmployee();
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
+  if (!principal.employee) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Employee not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
+  }
+  const { employee } = principal;
+  if (employee.role !== 'admin' && employee.role !== 'supervisor') {
+    return NextResponse.json(
+      { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+      { status: 403 }
+    );
+  }
+  if (!uuidSchema.safeParse(id).success) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Invalid webhook ID', code: 'VALIDATION_ERROR' } },
+      { status: 400 }
+    );
+  }
+  const supabase = await createServerSupabaseClient();
+
+  const { data: webhook } = await supabase
+    .from('webhook_endpoints')
+    .select(SAFE_WEBHOOK_COLUMNS)
+    .eq('id', id)
+    .is('deleted_at', null)
+    .single();
+
+  if (!webhook) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Webhook not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
+  }
+
+  if (
+    employee.role !== 'admin' &&
+    webhook.department_id !== employee.department_id &&
+    !employee.accessible_departments?.includes(webhook.department_id)
+  ) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+      { status: 403 }
+    );
+  }
+
+  return NextResponse.json({ webhook: redactWebhookRow(webhook as Record<string, unknown>) });
+}
+
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const response = await withRateLimit(request, () => handleGetWebhook(request, { params }));
+  return applyCors(request, response);
+}
 
 async function handlePutWebhook(
   request: NextRequest,
@@ -124,10 +207,39 @@ async function handlePutWebhook(
     );
   }
   const { employee } = principal;
+  if (employee.role !== 'admin' && employee.role !== 'supervisor') {
+    return NextResponse.json(
+      { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+      { status: 403 }
+    );
+  }
+  if (!uuidSchema.safeParse(id).success) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Invalid webhook ID', code: 'VALIDATION_ERROR' } },
+      { status: 400 }
+    );
+  }
 
   const parsed = await validateBody(request, updateWebhookSchema);
   if (parsed instanceof NextResponse) return parsed;
-  const { url, description, event_types, active } = parsed.data;
+  const { url, description, event_types, active, secret } = parsed.data;
+
+  if (url !== undefined) {
+    try {
+      await assertSafeResolvedUrl(url);
+    } catch (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: error instanceof Error ? error.message : 'Invalid webhook URL',
+            code: 'API_ERROR',
+          },
+        },
+        { status: 400 }
+      );
+    }
+  }
 
   const supabase = await createServerSupabaseClient();
 
@@ -136,6 +248,7 @@ async function handlePutWebhook(
     .from('webhook_endpoints')
     .select('*')
     .eq('id', id)
+    .is('deleted_at', null)
     .single();
 
   if (!existingWebhook) {
@@ -158,6 +271,7 @@ async function handlePutWebhook(
     }
   }
 
+  const encryptedSecret = secret !== undefined ? encryptWebhookSecret(secret) : undefined;
   const { data: webhook, error } = await supabase
     .from('webhook_endpoints')
     .update({
@@ -165,10 +279,12 @@ async function handlePutWebhook(
       ...(description !== undefined && { description }),
       ...(event_types !== undefined && { event_types }),
       ...(active !== undefined && { active }),
+      ...(encryptedSecret !== undefined && { secret: encryptedSecret }),
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
-    .select()
+    .is('deleted_at', null)
+    .select(SAFE_WEBHOOK_COLUMNS)
     .single();
 
   if (error) {
@@ -178,15 +294,19 @@ async function handlePutWebhook(
     );
   }
 
-  revalidatePath('/admin/tools');
+  revalidatePath('/admin');
   revalidatePath('/(departments)/[department]/tools');
 
-  return NextResponse.json({ webhook });
+  return NextResponse.json({ webhook: redactWebhookRow(webhook as Record<string, unknown>) });
 }
 
 // PUT /api/webhooks/[id] - Update a webhook endpoint
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const response = await withRateLimit(request, () => handlePutWebhook(request, { params }));
+  const response = await withRateLimit(request, () =>
+    withBodyLimit(request, () => handlePutWebhook(request, { params }), {
+      maxSize: MAX_WEBHOOK_BODY_BYTES,
+    })
+  );
   return applyCors(request, response);
 }
 
@@ -216,6 +336,7 @@ async function handleDeleteWebhook(
     .from('webhook_endpoints')
     .select('*')
     .eq('id', id)
+    .is('deleted_at', null)
     .single();
 
   if (!existingWebhook) {
@@ -242,7 +363,8 @@ async function handleDeleteWebhook(
   const { error } = await supabase
     .from('webhook_endpoints')
     .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq('id', id)
+    .is('deleted_at', null);
 
   if (error) {
     return NextResponse.json(
@@ -251,7 +373,7 @@ async function handleDeleteWebhook(
     );
   }
 
-  revalidatePath('/admin/tools');
+  revalidatePath('/admin');
   revalidatePath('/(departments)/[department]/tools');
 
   return NextResponse.json({ success: true });

@@ -6,21 +6,39 @@ import { logError } from '@/lib/errors/error-logger';
 /**
  * Enterprise Embedding Service.
  *
- * Provides resilient, high-speed vector embedding generation and caching:
+ * Provides vector embedding generation and caching:
  * - L1 Cache: In-process LRU map (SHA-256 hash -> vector) to avoid repeated queries.
- * - L2 Cache: PostgreSQL user-isolated persistent vector store (`embedding_cache`).
- * - Primary Engine: Local zero-cost Ollama `nomic-embed-text` (768 dimensions).
+ * - L2 Cache: PostgreSQL user-isolated persistent vector store (`embedding_cache`), populated
+ *   strictly with genuine semantic vectors (never deterministic hash fallbacks).
+ * - Primary Engine: Configured Ollama `nomic-embed-text` (768 dimensions).
  * - Secondary Engine: OpenAI `text-embedding-3-small` (dimensions: 768) if configured.
- * - Resilient Fallback: Deterministic unit-normalized projection for CI and offline environments.
+ * - Offline/Test Fallback: Deterministic unit-normalized projection strictly for unit tests;
+ *   semantic callers (`requireSemantic: true`) receive an explicit 503 configuration error
+ *   when neither `OPENAI_API_KEY` nor a reachable `OLLAMA_BASE_URL` is available.
  */
 
 const EMBEDDING_DIMENSIONS = 768;
+const EMBEDDING_CACHE_MAX = 512;
+const OLLAMA_TIMEOUT_MS = 4000;
+const OPENAI_TIMEOUT_MS = 5000;
+
+export interface EmbeddingOptions {
+  /**
+   * When true, refuses deterministic hash fallback and throws an explicit
+   * configuration error if neither Ollama nor OpenAI produces a semantic vector.
+   */
+  readonly requireSemantic?: boolean;
+}
+
+type ProviderFetchOutcome = {
+  readonly vector: number[];
+  readonly isSemantic: boolean;
+};
 
 // ------------------------------------------------------------------
 // L1 Cache (In-memory, size-capped at 512 entries, user-isolated)
 // ------------------------------------------------------------------
 
-const EMBEDDING_CACHE_MAX = 512;
 const embeddingCache = new Map<string, number[]>();
 
 function getL1CacheKey(hash: string, userId: string): string {
@@ -55,6 +73,10 @@ export function clearEmbeddingCache(): void {
 
 function computeHash(text: string): string {
   return crypto.createHash('sha256').update(text).digest('hex');
+}
+
+export function isSemanticEmbeddingConfigured(): boolean {
+  return Boolean(process.env.OPENAI_API_KEY?.trim() || process.env.OLLAMA_BASE_URL?.trim());
 }
 
 // ------------------------------------------------------------------
@@ -135,8 +157,8 @@ async function saveDbCachedEmbedding(
 // ------------------------------------------------------------------
 
 /**
- * Resilient deterministic vector generator.
- * Produces unit-normalized 768-dimensional vectors for offline, test, or CI environments.
+ * Deterministic vector generator for offline unit/CI test environments.
+ * Produces unit-normalized 768-dimensional vectors.
  */
 export function generateDeterministicEmbedding(
   text: string,
@@ -161,50 +183,54 @@ export function generateDeterministicEmbedding(
   return vector;
 }
 
-/**
- * Primary engine: attempts Ollama, then OpenAI, then deterministic fallback.
- */
-async function fetchEmbeddingFromProvider(text: string): Promise<number[]> {
-  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+async function fetchEmbeddingFromProvider(
+  text: string,
+  options?: EmbeddingOptions
+): Promise<ProviderFetchOutcome> {
+  const configuredOllamaUrl = process.env.OLLAMA_BASE_URL?.trim();
+  const ollamaBaseUrl =
+    configuredOllamaUrl ||
+    (!process.env.VERCEL && process.env.NODE_ENV !== 'test' ? 'http://localhost:11434' : '');
   const ollamaModel = process.env.OLLAMA_EMBED_MODEL || 'nomic-embed-text';
 
-  // 1. Try local Ollama instance (LAN zero-cost model)
-  try {
+  // 1. Try Ollama instance when configured or running locally
+  if (ollamaBaseUrl) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), OLLAMA_TIMEOUT_MS);
+    try {
+      const response = await fetch(`${ollamaBaseUrl.replace(/\/$/, '')}/api/embeddings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: ollamaModel,
+          prompt: text,
+        }),
+        signal: controller.signal,
+      });
 
-    const response = await fetch(`${ollamaBaseUrl}/api/embeddings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: ollamaModel,
-        prompt: text,
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      const data = (await response.json()) as { embedding?: number[] };
-      if (Array.isArray(data.embedding) && data.embedding.length === EMBEDDING_DIMENSIONS) {
-        return data.embedding;
+      if (response.ok) {
+        const payload = (await response.json()) as { embedding?: number[] };
+        if (Array.isArray(payload.embedding) && payload.embedding.length === EMBEDDING_DIMENSIONS) {
+          return { vector: payload.embedding, isSemantic: true };
+        }
       }
+    } catch {
+      // Ollama not reachable or timed out — try OpenAI next
+    } finally {
+      clearTimeout(timeoutId);
     }
-  } catch {
-    // Ollama not reachable or timed out — try fallback
   }
 
   // 2. Try OpenAI API if key is explicitly configured
-  if (process.env.OPENAI_API_KEY) {
+  if (process.env.OPENAI_API_KEY?.trim()) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
       const response = await fetch('https://api.openai.com/v1/embeddings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY.trim()}`,
         },
         body: JSON.stringify({
           model: 'text-embedding-3-small',
@@ -213,24 +239,40 @@ async function fetchEmbeddingFromProvider(text: string): Promise<number[]> {
         }),
         signal: controller.signal,
       });
-      clearTimeout(timeoutId);
 
       if (response.ok) {
-        const data = (await response.json()) as {
+        const payload = (await response.json()) as {
           data?: Array<{ embedding?: number[] }>;
         };
-        const vector = data?.data?.[0]?.embedding;
+        const vector = payload?.data?.[0]?.embedding;
         if (Array.isArray(vector) && vector.length === EMBEDDING_DIMENSIONS) {
-          return vector;
+          return { vector, isSemantic: true };
         }
       }
     } catch {
-      // Fall through to deterministic fallback
+      // Fall through to explicit error or test-only deterministic fallback
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
-  // 3. Deterministic unit-normalized fallback for offline CI/test environments
-  return generateDeterministicEmbedding(text, EMBEDDING_DIMENSIONS);
+  const mustBeSemantic =
+    options?.requireSemantic === true ||
+    (process.env.NODE_ENV === 'production' &&
+      process.env.ALLOW_DETERMINISTIC_EMBEDDING_FALLBACK !== 'true');
+
+  if (mustBeSemantic) {
+    throw new APIError(
+      'Semantic embedding provider unavailable: configure OPENAI_API_KEY or a reachable OLLAMA_BASE_URL.',
+      { statusCode: 503, context: { component: 'embeddings' } }
+    );
+  }
+
+  // 3. Deterministic unit-normalized fallback strictly for offline CI/test environments
+  return {
+    vector: generateDeterministicEmbedding(text, EMBEDDING_DIMENSIONS),
+    isSemantic: false,
+  };
 }
 
 // ------------------------------------------------------------------
@@ -240,7 +282,11 @@ async function fetchEmbeddingFromProvider(text: string): Promise<number[]> {
 /**
  * Generate or retrieve an embedding vector for a single text string.
  */
-export async function generateEmbedding(text: string, userId: string): Promise<number[]> {
+export async function generateEmbedding(
+  text: string,
+  userId: string,
+  options?: EmbeddingOptions
+): Promise<number[]> {
   if (!text || text.trim() === '') {
     throw new APIError('Cannot generate embedding for empty text', { statusCode: 400 });
   }
@@ -257,11 +303,12 @@ export async function generateEmbedding(text: string, userId: string): Promise<n
   }
 
   // Generate fresh embedding
-  const vector = await fetchEmbeddingFromProvider(text);
+  const { vector, isSemantic } = await fetchEmbeddingFromProvider(text, options);
   setCachedEmbedding(hash, userId, vector);
 
-  // Persist asynchronously in L2 database cache
-  void saveDbCachedEmbedding(hash, userId, vector);
+  if (isSemantic) {
+    void saveDbCachedEmbedding(hash, userId, vector);
+  }
 
   return vector;
 }
@@ -271,7 +318,8 @@ export async function generateEmbedding(text: string, userId: string): Promise<n
  */
 export async function batchGenerateEmbeddings(
   texts: string[],
-  userId: string
+  userId: string,
+  options?: EmbeddingOptions
 ): Promise<number[][]> {
   if (texts.length === 0) return [];
 
@@ -344,10 +392,12 @@ export async function batchGenerateEmbeddings(
       missingIndices.map(async (idx) => {
         const text = texts[idx]!;
         const hash = hashes[idx]!;
-        const vector = await fetchEmbeddingFromProvider(text);
+        const { vector, isSemantic } = await fetchEmbeddingFromProvider(text, options);
         results[idx] = vector;
         setCachedEmbedding(hash, userId, vector);
-        void saveDbCachedEmbedding(hash, userId, vector);
+        if (isSemantic) {
+          void saveDbCachedEmbedding(hash, userId, vector);
+        }
       })
     );
   }

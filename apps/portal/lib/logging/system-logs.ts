@@ -60,6 +60,7 @@ export async function recordSystemLog(
     employeeId?: string | null;
     departmentId?: string | null;
     ipAddress?: string | null;
+    userAgent?: string | null;
   }
 ): Promise<void> {
   try {
@@ -86,7 +87,7 @@ export async function recordSystemLog(
       employee_id,
       department_id,
       ip_address: entry.ipAddress ?? null,
-      user_agent: null,
+      user_agent: entry.userAgent ?? null,
       resolved: false,
       resolved_at: null,
       resolved_by: null,

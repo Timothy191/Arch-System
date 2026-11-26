@@ -23,11 +23,13 @@
  *         description: Log entry accepted
  *       400:
  *         description: Invalid payload
+ *       413:
+ *         description: Request body too large
  *       429:
  *         description: Rate limit exceeded
  *   get:
  *     summary: List system log entries
- *     description: Admin-only paginated query with level/source/resolved/search filters.
+ *     description: Admin-only paginated query with level/source/category/resolved/search filters.
  *     tags:
  *       - System
  *       - Logging
@@ -45,6 +47,10 @@
  *         schema:
  *           type: string
  *           enum: [client, server, api, cron, csp, integration, auth]
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
  *       - in: query
  *         name: resolved
  *         schema:
@@ -69,6 +75,8 @@
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (admin-only)
+ *       429:
+ *         description: Rate limit exceeded
  *   patch:
  *     summary: Update log resolution state
  *     description: Admin-only bulk triage — mark entries resolved or unresolved.
@@ -99,6 +107,8 @@
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (admin-only)
+ *       429:
+ *         description: Rate limit exceeded
  */
 
 import {
@@ -109,18 +119,27 @@ import {
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
+import { withBodyLimit } from '@/lib/api/body-limit';
 import { getClientIp, withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { recordSystemLog } from '@/lib/logging/system-logs';
 import { extractRequestTraceMetadata } from '@/lib/observability/tracing';
+import { sanitizePostgrestFilterValue } from '@/lib/supabase-filter';
 
+const HTTP_CREATED = 201;
+const HTTP_BAD_REQUEST = 400;
+const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN = 403;
+const HTTP_INTERNAL_ERROR = 500;
+const MAX_LOG_INGEST_BODY_BYTES = 65_536;
 const INGEST_LIMIT = { windowMs: 60_000, maxRequests: 60 };
-const SAFE_SEARCH_FILTER_REGEX = /[,()%]/g;
+const ADMIN_QUERY_LIMIT = { windowMs: 60_000, maxRequests: 120 };
+const ADMIN_PATCH_LIMIT = { windowMs: 60_000, maxRequests: 60 };
 
 async function assertAdmin() {
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return { error: 'Unauthorized', status: 401 as const };
+  if (!principal) return { error: 'Unauthorized', status: HTTP_UNAUTHORIZED };
   if (principal.employee?.role !== 'admin') {
-    return { error: 'Forbidden', status: 403 as const };
+    return { error: 'Forbidden', status: HTTP_FORBIDDEN };
   }
   return { principal };
 }
@@ -132,7 +151,7 @@ async function handlePost(request: NextRequest) {
   } catch {
     return NextResponse.json(
       { success: false, error: 'Invalid JSON body', code: 'INVALID_REQUEST' },
-      { status: 400 }
+      { status: HTTP_BAD_REQUEST }
     );
   }
 
@@ -144,11 +163,10 @@ async function handlePost(request: NextRequest) {
         error: parsed.error.issues[0]?.message ?? 'Invalid log entry',
         code: 'VALIDATION_ERROR',
       },
-      { status: 400 }
+      { status: HTTP_BAD_REQUEST }
     );
   }
 
-  // Identity is derived from the session/request — never trusted from the body.
   const principal = await getAuthenticatedEmployee().catch(() => null);
   const ipAddress = getClientIp(request);
   const entry = parsed.data;
@@ -161,10 +179,10 @@ async function handlePost(request: NextRequest) {
     employeeId: principal?.employee?.id ?? null,
     departmentId: principal?.employee?.department_id ?? null,
     ipAddress,
+    userAgent: request.headers.get('user-agent'),
   });
 
-  // 201 even when persistence silently failed — telemetry must not break clients.
-  return NextResponse.json({ success: true }, { status: 201 });
+  return NextResponse.json({ success: true }, { status: HTTP_CREATED });
 }
 
 async function handleGet(request: NextRequest) {
@@ -188,7 +206,7 @@ async function handleGet(request: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json(
       { success: false, error: 'Invalid query parameters', code: 'INVALID_REQUEST' },
-      { status: 400 }
+      { status: HTTP_BAD_REQUEST }
     );
   }
 
@@ -203,7 +221,7 @@ async function handleGet(request: NextRequest) {
   if (category) query = query.eq('category', category);
   if (resolved !== undefined) query = query.eq('resolved', resolved === 'true');
   if (search) {
-    const sanitizedSearch = search.replace(SAFE_SEARCH_FILTER_REGEX, '').trim();
+    const sanitizedSearch = sanitizePostgrestFilterValue(search);
     if (sanitizedSearch.length > 0) {
       query = query.or(
         `message.ilike.%${sanitizedSearch}%,category.ilike.%${sanitizedSearch}%,trace_id.ilike.%${sanitizedSearch}%,request_id.ilike.%${sanitizedSearch}%`
@@ -211,21 +229,23 @@ async function handleGet(request: NextRequest) {
     }
   }
 
-  const from = (page - 1) * pageSize;
-  query = query.order('created_at', { ascending: false }).range(from, from + pageSize - 1);
+  const fromOffset = (page - 1) * pageSize;
+  query = query
+    .order('created_at', { ascending: false })
+    .range(fromOffset, fromOffset + pageSize - 1);
 
-  const { data, count, error } = await query;
+  const { data: logRows, count, error } = await query;
   if (error) {
     return NextResponse.json(
       { success: false, error: 'Failed to load system logs', code: 'DATABASE_ERROR' },
-      { status: 500 }
+      { status: HTTP_INTERNAL_ERROR }
     );
   }
 
   return NextResponse.json(
     {
       success: true,
-      data: data ?? [],
+      data: logRows ?? [],
       pagination: {
         page,
         pageSize,
@@ -253,7 +273,7 @@ async function handlePatch(request: NextRequest) {
   } catch {
     return NextResponse.json(
       { success: false, error: 'Invalid JSON body', code: 'INVALID_REQUEST' },
-      { status: 400 }
+      { status: HTTP_BAD_REQUEST }
     );
   }
 
@@ -261,7 +281,7 @@ async function handlePatch(request: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json(
       { success: false, error: 'Invalid resolution payload', code: 'VALIDATION_ERROR' },
-      { status: 400 }
+      { status: HTTP_BAD_REQUEST }
     );
   }
 
@@ -280,7 +300,7 @@ async function handlePatch(request: NextRequest) {
   if (error) {
     return NextResponse.json(
       { success: false, error: 'Failed to update log entries', code: 'DATABASE_ERROR' },
-      { status: 500 }
+      { status: HTTP_INTERNAL_ERROR }
     );
   }
 
@@ -288,13 +308,17 @@ async function handlePatch(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  return withRateLimit(request, () => handlePost(request), { customLimit: INGEST_LIMIT });
+  return withRateLimit(
+    request,
+    () => withBodyLimit(request, () => handlePost(request), { maxSize: MAX_LOG_INGEST_BODY_BYTES }),
+    { customLimit: INGEST_LIMIT }
+  );
 }
 
 export async function GET(request: NextRequest) {
-  return handleGet(request);
+  return withRateLimit(request, () => handleGet(request), { customLimit: ADMIN_QUERY_LIMIT });
 }
 
 export async function PATCH(request: NextRequest) {
-  return handlePatch(request);
+  return withRateLimit(request, () => handlePatch(request), { customLimit: ADMIN_PATCH_LIMIT });
 }

@@ -3,7 +3,7 @@
 import { Button } from '@repo/ui/components/ui/button';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Gem, Layers, Plus, Trash2 } from 'lucide-react';
+import { Check, Edit2, Gem, Layers, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { adminSaveMineralRegistry, getMineralRegistry } from '../actions/minerals';
@@ -28,11 +28,18 @@ const DEFAULT_COAL_MINERALS: readonly string[] = [
   'Other',
 ];
 
+interface EditingMineralState {
+  readonly category: 'waste' | 'coal';
+  readonly originalName: string;
+  readonly draftName: string;
+}
+
 export function MineralsTab() {
   const [wasteMinerals, setWasteMinerals] = useState<string[]>([...DEFAULT_WASTE_MINERALS]);
   const [coalMinerals, setCoalMinerals] = useState<string[]>([...DEFAULT_COAL_MINERALS]);
   const [newWasteMineral, setNewWasteMineral] = useState('');
   const [newCoalMineral, setNewCoalMineral] = useState('');
+  const [editingMineral, setEditingMineral] = useState<EditingMineralState | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -42,8 +49,8 @@ export function MineralsTab() {
         const reg = await getMineralRegistry();
         if (reg?.waste?.length) setWasteMinerals(reg.waste);
         if (reg?.coal?.length) setCoalMinerals(reg.coal);
-      } catch {
-        toast.error('Failed to load mineral registry');
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Failed to load mineral registry');
       } finally {
         setLoading(false);
       }
@@ -157,11 +164,145 @@ export function MineralsTab() {
     });
   };
 
+  const handleCommitRename = async () => {
+    if (!editingMineral) return;
+    const trimmed = editingMineral.draftName.trim();
+    if (!trimmed) {
+      toast.error('Mineral name cannot be empty.');
+      return;
+    }
+    if (trimmed === editingMineral.originalName) {
+      setEditingMineral(null);
+      return;
+    }
+
+    const list = editingMineral.category === 'waste' ? wasteMinerals : coalMinerals;
+    const hasDuplicate = list.some(
+      (item) => item !== editingMineral.originalName && item.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (hasDuplicate) {
+      toast.error(`"${trimmed}" is already registered in this category.`);
+      return;
+    }
+
+    const prevWaste = wasteMinerals;
+    const prevCoal = coalMinerals;
+    const nextWaste =
+      editingMineral.category === 'waste'
+        ? wasteMinerals.map((item) => (item === editingMineral.originalName ? trimmed : item))
+        : wasteMinerals;
+    const nextCoal =
+      editingMineral.category === 'coal'
+        ? coalMinerals.map((item) => (item === editingMineral.originalName ? trimmed : item))
+        : coalMinerals;
+
+    setWasteMinerals(nextWaste);
+    setCoalMinerals(nextCoal);
+    setEditingMineral(null);
+
+    await persistRegistry({
+      nextWaste,
+      nextCoal,
+      prevWaste,
+      prevCoal,
+    });
+  };
+
+  const renderMineralRow = (category: 'waste' | 'coal', mineral: string) => {
+    const isEditing =
+      editingMineral?.category === category && editingMineral.originalName === mineral;
+
+    if (isEditing) {
+      return (
+        <li
+          key={mineral}
+          className="flex items-center justify-between gap-2 bg-[var(--bg-secondary)] px-3 py-2 text-xs"
+        >
+          <Input
+            aria-label={`Rename ${mineral}`}
+            value={editingMineral.draftName}
+            onChange={(e) => setEditingMineral({ ...editingMineral, draftName: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                void handleCommitRename();
+              }
+              if (e.key === 'Escape') {
+                setEditingMineral(null);
+              }
+            }}
+            className="h-7 flex-1 border-[var(--border-default)] bg-[var(--bg-primary)] text-xs"
+          />
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={saving}
+              aria-label={`Save rename for ${mineral}`}
+              onClick={() => void handleCommitRename()}
+              className="rounded p-1 text-accent-green transition-colors hover:bg-[var(--bg-tertiary)]"
+            >
+              <Check className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              aria-label={`Cancel rename for ${mineral}`}
+              onClick={() => setEditingMineral(null)}
+              className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-tertiary)]"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </li>
+      );
+    }
+
+    return (
+      <li
+        key={mineral}
+        className="flex items-center justify-between bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs transition-colors hover:bg-[var(--bg-tertiary)]"
+      >
+        <span className="font-medium text-[var(--text-heading)]">{mineral}</span>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() =>
+              setEditingMineral({
+                category,
+                originalName: mineral,
+                draftName: mineral,
+              })
+            }
+            className="p-1 text-[var(--text-muted)] transition-colors hover:text-[var(--text-heading)]"
+            title={`Rename ${mineral}`}
+            aria-label={`Rename ${mineral}`}
+          >
+            <Edit2 className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() =>
+              category === 'waste'
+                ? void handleRemoveWaste(mineral)
+                : void handleRemoveCoal(mineral)
+            }
+            className="p-1 text-[var(--text-muted)] transition-colors hover:text-accent-red"
+            title={`Remove ${mineral}`}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </li>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h2 className="font-medium text-[var(--text-heading)] text-lg">
-          Minerals & Materials Register
+          Minerals &amp; Materials Register
         </h2>
         <p className="text-[var(--text-muted)] text-xs">
           Register operational mineral sub-categories for Waste and Coal. These options
@@ -208,23 +349,7 @@ export function MineralsTab() {
             </form>
 
             <ul className="divide-y divide-[var(--border-default)]/60 overflow-hidden rounded-lg border border-[var(--border-default)]">
-              {wasteMinerals.map((mineral) => (
-                <li
-                  key={mineral}
-                  className="flex items-center justify-between bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs transition-colors hover:bg-[var(--bg-tertiary)]"
-                >
-                  <span className="font-medium text-[var(--text-heading)]">{mineral}</span>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => handleRemoveWaste(mineral)}
-                    className="p-1 text-[var(--text-muted)] transition-colors hover:text-accent-red"
-                    title={`Remove ${mineral}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </li>
-              ))}
+              {wasteMinerals.map((mineral) => renderMineralRow('waste', mineral))}
             </ul>
           </GlassCard>
 
@@ -232,7 +357,7 @@ export function MineralsTab() {
           <GlassCard className="flex flex-col gap-4 p-5">
             <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-3">
               <div className="flex items-center gap-2">
-                <Gem className="h-4 w-4 text-neutral-800" />
+                <Gem className="h-4 w-4 text-accent-gold" />
                 <h3 className="font-semibold text-[var(--text-heading)] text-sm">
                   Coal Minerals ({coalMinerals.length})
                 </h3>
@@ -251,7 +376,7 @@ export function MineralsTab() {
                 type="submit"
                 size="sm"
                 disabled={saving || !newCoalMineral.trim()}
-                className="shrink-0 bg-neutral-800 text-white hover:bg-neutral-900"
+                className="shrink-0 bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
               >
                 <Plus className="mr-1 h-3.5 w-3.5" />
                 Add
@@ -259,23 +384,7 @@ export function MineralsTab() {
             </form>
 
             <ul className="divide-y divide-[var(--border-default)]/60 overflow-hidden rounded-lg border border-[var(--border-default)]">
-              {coalMinerals.map((mineral) => (
-                <li
-                  key={mineral}
-                  className="flex items-center justify-between bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs transition-colors hover:bg-[var(--bg-tertiary)]"
-                >
-                  <span className="font-medium text-[var(--text-heading)]">{mineral}</span>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => handleRemoveCoal(mineral)}
-                    className="p-1 text-[var(--text-muted)] transition-colors hover:text-accent-red"
-                    title={`Remove ${mineral}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </li>
-              ))}
+              {coalMinerals.map((mineral) => renderMineralRow('coal', mineral))}
             </ul>
           </GlassCard>
         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import type { AdminPortalSettings } from '@repo/contract/schemas/admin.schema';
 import { Checkbox } from '@repo/ui/components/Checkbox';
 import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
@@ -15,9 +16,11 @@ import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
   CheckCircle2,
+  Clock,
   ExternalLink,
   Image as ImageIcon,
   Loader2,
+  Save,
   Settings as SettingsIcon,
   Trash2,
   Upload,
@@ -29,7 +32,9 @@ import { toast } from 'sonner';
 import {
   type AdminCardTemplateItem,
   deleteCardTemplate,
+  getPortalSettings,
   listCardTemplates,
+  savePortalSettings,
   setDefaultCardTemplate,
   uploadCardTemplate,
 } from '../actions/card-templates';
@@ -40,12 +45,38 @@ const QUICK_ADMIN_ROUTES = [
   { href: '/admin/redis', label: 'RedisInsight' },
 ] as const;
 
+const TIMEZONE_OPTIONS = [
+  'Africa/Johannesburg',
+  'UTC',
+  'Africa/Harare',
+  'Africa/Maputo',
+  'Australia/Perth',
+  'America/Denver',
+] as const;
+
+const INITIAL_PORTAL_SETTINGS: AdminPortalSettings = {
+  dayShiftStart: '06:00',
+  nightShiftStart: '18:00',
+  shiftDurationHours: 12,
+  siteTimezone: 'Africa/Johannesburg',
+  sessionIdleWarningMinutes: 30,
+  operationalNoticeBanner: '',
+  operationalNoticeActive: false,
+};
+
 export function SettingsTab() {
   const [isUploading, setIsUploading] = useState(false);
   const [templates, setTemplates] = useState<AdminCardTemplateItem[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [busyTemplateId, setBusyTemplateId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminCardTemplateItem | null>(null);
+
+  const [portalSettings, setPortalSettings] =
+    useState<AdminPortalSettings>(INITIAL_PORTAL_SETTINGS);
+  const [savedPortalSettings, setSavedPortalSettings] =
+    useState<AdminPortalSettings>(INITIAL_PORTAL_SETTINGS);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
 
   const refreshTemplates = useCallback(async () => {
     setLoadingTemplates(true);
@@ -62,9 +93,54 @@ export function SettingsTab() {
     }
   }, []);
 
+  const loadSettings = useCallback(async () => {
+    setLoadingSettings(true);
+    try {
+      const res = await getPortalSettings();
+      if (res?.settings) {
+        setPortalSettings(res.settings);
+        setSavedPortalSettings(res.settings);
+      }
+      if (res?.error) {
+        toast.error(res.error);
+      }
+    } catch {
+      toast.error('Failed to load portal configuration');
+    } finally {
+      setLoadingSettings(false);
+    }
+  }, []);
+
   useEffect(() => {
     void refreshTemplates();
-  }, [refreshTemplates]);
+    void loadSettings();
+  }, [loadSettings, refreshTemplates]);
+
+  const isPortalSettingsDirty =
+    JSON.stringify(portalSettings) !== JSON.stringify(savedPortalSettings);
+
+  const handleSavePortalSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    try {
+      const res = await savePortalSettings(portalSettings);
+      if ('error' in res && res.error) {
+        toast.error(res.error);
+        return;
+      }
+      if ('settings' in res && res.settings) {
+        setPortalSettings(res.settings);
+        setSavedPortalSettings(res.settings);
+      } else {
+        setSavedPortalSettings(portalSettings);
+      }
+      toast.success('Global portal & shift configuration saved');
+    } catch {
+      toast.error('Failed to save portal configuration');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -122,6 +198,215 @@ export function SettingsTab() {
   return (
     <div className="space-y-6">
       <h2 className="font-medium text-[var(--text-heading)] text-lg">System Settings</h2>
+
+      {/* Global Portal & Shift Configuration */}
+      <GlassCard className="gold-steel-border gold-steel-border-slim p-6">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-[var(--border-default)] border-b pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent-emerald)]/15 text-[var(--accent-emerald)]">
+              <Clock className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium text-[var(--text-heading)]">
+                  Global Portal &amp; Shift Configuration
+                </h3>
+                {isPortalSettingsDirty && (
+                  <span className="rounded-full border border-accent-amber/35 bg-accent-amber/10 px-2 py-0.5 font-medium text-[11px] text-accent-amber">
+                    Unsaved changes
+                  </span>
+                )}
+              </div>
+              <p className="text-[var(--text-muted)] text-xs">
+                Shift handover hours, site timezone, session idle warning, and operational notice
+                banner.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {loadingSettings ? (
+          <div className="py-6 text-center text-[var(--text-muted)] text-xs">
+            Loading portal configuration...
+          </div>
+        ) : (
+          <form onSubmit={handleSavePortalSettings} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label
+                  htmlFor="day-shift-start"
+                  className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+                >
+                  Day Shift Start (HH:MM)
+                </label>
+                <Input
+                  id="day-shift-start"
+                  type="time"
+                  required
+                  value={portalSettings.dayShiftStart}
+                  onChange={(e) =>
+                    setPortalSettings((prev) => ({ ...prev, dayShiftStart: e.target.value }))
+                  }
+                  className="bg-[var(--bg-primary)] font-mono"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="night-shift-start"
+                  className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+                >
+                  Night Shift Start (HH:MM)
+                </label>
+                <Input
+                  id="night-shift-start"
+                  type="time"
+                  required
+                  value={portalSettings.nightShiftStart}
+                  onChange={(e) =>
+                    setPortalSettings((prev) => ({ ...prev, nightShiftStart: e.target.value }))
+                  }
+                  className="bg-[var(--bg-primary)] font-mono"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="shift-duration-hours"
+                  className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+                >
+                  Shift Duration (Hours)
+                </label>
+                <Input
+                  id="shift-duration-hours"
+                  type="number"
+                  min={1}
+                  max={24}
+                  required
+                  value={portalSettings.shiftDurationHours}
+                  onChange={(e) =>
+                    setPortalSettings((prev) => ({
+                      ...prev,
+                      shiftDurationHours: Math.max(1, Math.min(24, Number(e.target.value) || 12)),
+                    }))
+                  }
+                  className="bg-[var(--bg-primary)] font-mono"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="session-idle-warning"
+                  className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+                >
+                  Idle Warning (Minutes)
+                </label>
+                <Input
+                  id="session-idle-warning"
+                  type="number"
+                  min={5}
+                  max={480}
+                  required
+                  value={portalSettings.sessionIdleWarningMinutes}
+                  onChange={(e) =>
+                    setPortalSettings((prev) => ({
+                      ...prev,
+                      sessionIdleWarningMinutes: Math.max(
+                        5,
+                        Math.min(480, Number(e.target.value) || 30)
+                      ),
+                    }))
+                  }
+                  className="bg-[var(--bg-primary)] font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div>
+                <label
+                  htmlFor="site-timezone"
+                  className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+                >
+                  Site Timezone
+                </label>
+                <select
+                  id="site-timezone"
+                  value={portalSettings.siteTimezone}
+                  onChange={(e) =>
+                    setPortalSettings((prev) => ({ ...prev, siteTimezone: e.target.value }))
+                  }
+                  className="h-9 w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 font-mono text-[var(--text-heading)] text-xs"
+                >
+                  {TIMEZONE_OPTIONS.map((tz) => (
+                    <option key={tz} value={tz}>
+                      {tz}
+                    </option>
+                  ))}
+                  {!TIMEZONE_OPTIONS.includes(
+                    portalSettings.siteTimezone as (typeof TIMEZONE_OPTIONS)[number]
+                  ) && (
+                    <option value={portalSettings.siteTimezone}>
+                      {portalSettings.siteTimezone}
+                    </option>
+                  )}
+                </select>
+              </div>
+
+              <div className="lg:col-span-2">
+                <label
+                  htmlFor="operational-notice-banner"
+                  className="mb-1.5 block font-medium text-[var(--text-heading)] text-xs"
+                >
+                  Operational Notice Banner
+                </label>
+                <Input
+                  id="operational-notice-banner"
+                  placeholder="e.g. Scheduled blast clearance in North Pit at 14:30 SAST"
+                  value={portalSettings.operationalNoticeBanner}
+                  onChange={(e) =>
+                    setPortalSettings((prev) => ({
+                      ...prev,
+                      operationalNoticeBanner: e.target.value,
+                    }))
+                  }
+                  className="bg-[var(--bg-primary)] text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <label className="inline-flex cursor-pointer items-center gap-2 text-[var(--text-heading)] text-xs">
+                <input
+                  type="checkbox"
+                  checked={portalSettings.operationalNoticeActive}
+                  onChange={(e) =>
+                    setPortalSettings((prev) => ({
+                      ...prev,
+                      operationalNoticeActive: e.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 accent-[var(--accent-emerald)]"
+                />
+                <span>Display operational notice banner across portal workspaces</span>
+              </label>
+
+              <Button
+                type="submit"
+                disabled={savingSettings}
+                className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
+              >
+                {savingSettings ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                {savingSettings ? 'Saving...' : 'Save Portal Settings'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </GlassCard>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <GlassCard className="p-6">
@@ -187,7 +472,7 @@ export function SettingsTab() {
               <SettingsIcon className="h-5 w-5 text-[var(--accent-blue)]" />
             </div>
             <div>
-              <h3 className="font-medium text-[var(--text-heading)]">Runtime & Deployment</h3>
+              <h3 className="font-medium text-[var(--text-heading)]">Runtime &amp; Deployment</h3>
               <p className="text-[var(--text-muted)] text-sm">
                 Current portal runtime and deployment metadata
               </p>
@@ -288,7 +573,7 @@ export function SettingsTab() {
                     {tpl.is_default && (
                       <Badge
                         variant="outline"
-                        className="mt-1 border-emerald-600/30 bg-emerald-50 text-[10px] text-emerald-700"
+                        className="mt-1 border-accent-green/30 bg-accent-green/10 text-[10px] text-accent-green"
                       >
                         <CheckCircle2 className="mr-1 h-3 w-3" />
                         Default

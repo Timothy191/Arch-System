@@ -1,6 +1,8 @@
 import crypto from 'node:crypto';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { logError } from '@/lib/errors/error-logger';
+import { decryptWebhookSecret } from '@/lib/integrations/crypto';
+import { assertSafeResolvedUrl } from '@/lib/integrations/ssrf-guard';
 
 const MAX_WEBHOOK_RETRIES = 5;
 const WEBHOOK_REQUEST_TIMEOUT_MS = 10_000;
@@ -34,6 +36,7 @@ async function fetchEndpoint(supabase: ReturnType<typeof createServiceRoleClient
     .from('webhook_endpoints')
     .select('id, url, secret')
     .eq('id', id)
+    .is('deleted_at', null)
     .maybeSingle();
   if (error) {
     throw error;
@@ -47,16 +50,19 @@ async function dispatchDelivery(
 ): Promise<{ responseStatus: number | null; responseBody: string | null; error: string | null }> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (endpoint.secret) {
-    headers['X-Webhook-Signature'] = signPayload(delivery.payload, endpoint.secret);
+    const plaintextSecret = decryptWebhookSecret(endpoint.secret);
+    headers['X-Webhook-Signature'] = signPayload(delivery.payload, plaintextSecret);
   }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), WEBHOOK_REQUEST_TIMEOUT_MS);
   try {
+    await assertSafeResolvedUrl(endpoint.url);
     const response = await fetch(endpoint.url, {
       method: 'POST',
       headers,
       body: JSON.stringify(delivery.payload),
+      redirect: 'manual',
       signal: controller.signal,
     });
     return {

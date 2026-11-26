@@ -66,12 +66,11 @@ export function decryptAndValidateLaunchToken({ token, secret, nowMs = Date.now(
 export async function consumeJtiOnce({ jti, expSeconds, redisClient, memoryCache }) {
   const key = `support:t2:jti:${jti}`;
   if (redisClient) {
-    const existing = await redisClient.get(key);
-    if (existing === 'used') {
+    const ttl = Math.max(30, expSeconds - Math.floor(Date.now() / 1000) + 30);
+    const setResult = await redisClient.set(key, 'used', 'EX', ttl, 'NX');
+    if (setResult === null) {
       throw new Error('Launch token already consumed');
     }
-    const ttl = Math.max(30, expSeconds - Math.floor(Date.now() / 1000) + 30);
-    await redisClient.set(key, 'used', 'EX', ttl);
     return;
   }
 

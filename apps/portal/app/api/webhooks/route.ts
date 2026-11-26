@@ -112,6 +112,19 @@ import { withBodyLimit } from '@/lib/api/body-limit';
 import { applyCors } from '@/lib/api/cors';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { validateBody } from '@/lib/api/response';
+import { encryptWebhookSecret } from '@/lib/integrations/crypto';
+import { assertSafeResolvedUrl } from '@/lib/integrations/ssrf-guard';
+
+const SAFE_WEBHOOK_COLUMNS =
+  'id, url, description, event_types, department_id, active, created_at, updated_at, secret';
+
+function redactWebhookRow(row: Record<string, unknown>) {
+  const { secret, ...safeFields } = row;
+  return {
+    ...safeFields,
+    has_secret: Boolean(secret),
+  };
+}
 
 type WebhookEventType =
   | 'daily_log.created'
@@ -153,14 +166,34 @@ async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
 
   const supabase = await createServerSupabaseClient();
   const { employee } = principal;
+  if (employee.role !== 'admin' && employee.role !== 'supervisor') {
+    return NextResponse.json(
+      { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+      { status: 403 }
+    );
+  }
 
   // Admins can see all webhooks, supervisors only their department's
-  let query = supabase.from('webhook_endpoints').select('*').is('deleted_at', null);
+  let query = supabase
+    .from('webhook_endpoints')
+    .select(SAFE_WEBHOOK_COLUMNS)
+    .is('deleted_at', null);
 
   if (employee.role !== 'admin') {
-    query = query.or(
-      `department_id.eq.${employee.department_id},department_id.in.(${(employee.accessible_departments || []).join(',')})`
+    const accessibleDepartments = (employee.accessible_departments ?? []).filter(
+      (deptId): deptId is string => typeof deptId === 'string' && deptId.trim().length > 0
     );
+    if (accessibleDepartments.length > 0 && employee.department_id) {
+      query = query.or(
+        `department_id.eq.${employee.department_id},department_id.in.(${accessibleDepartments.join(',')})`
+      );
+    } else if (accessibleDepartments.length > 0) {
+      query = query.in('department_id', accessibleDepartments);
+    } else if (employee.department_id) {
+      query = query.eq('department_id', employee.department_id);
+    } else {
+      return NextResponse.json({ webhooks: [] });
+    }
   }
 
   const { data: webhooks, error } = await query;
@@ -172,7 +205,9 @@ async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  return NextResponse.json({ webhooks });
+  return NextResponse.json({
+    webhooks: (webhooks ?? []).map((row) => redactWebhookRow(row as Record<string, unknown>)),
+  });
 }
 
 // GET /api/webhooks - List all webhook endpoints
@@ -197,9 +232,30 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
 
   const parsed = await validateBody(request, createWebhookSchema);
   if (parsed instanceof NextResponse) return parsed;
-  const { url, description, event_types, department_id } = parsed.data;
+  const { url, description, event_types, department_id, secret, active } = parsed.data;
+
+  try {
+    await assertSafeResolvedUrl(url);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          message: error instanceof Error ? error.message : 'Invalid webhook URL',
+          code: 'API_ERROR',
+        },
+      },
+      { status: 400 }
+    );
+  }
 
   const { employee } = principal;
+  if (employee.role !== 'admin' && employee.role !== 'supervisor') {
+    return NextResponse.json(
+      { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+      { status: 403 }
+    );
+  }
 
   // Non-admins can only create webhooks for their department
   if (employee.role !== 'admin') {
@@ -215,6 +271,7 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
     }
   }
 
+  const encryptedSecret = secret !== undefined ? encryptWebhookSecret(secret) : undefined;
   const supabase = await createServerSupabaseClient();
   const { data: webhook, error } = await supabase
     .from('webhook_endpoints')
@@ -223,9 +280,10 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
       description,
       event_types,
       department_id: department_id || employee.department_id,
-      active: true,
+      active: active ?? true,
+      ...(encryptedSecret !== undefined ? { secret: encryptedSecret } : {}),
     })
-    .select()
+    .select(SAFE_WEBHOOK_COLUMNS)
     .single();
 
   if (error) {
@@ -235,10 +293,13 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
     );
   }
 
-  revalidatePath('/admin/tools');
+  revalidatePath('/admin');
   revalidatePath('/(departments)/[department]/tools');
 
-  return NextResponse.json({ webhook }, { status: 201 });
+  return NextResponse.json(
+    { webhook: redactWebhookRow(webhook as Record<string, unknown>) },
+    { status: 201 }
+  );
 }
 
 // POST /api/webhooks - Create a new webhook endpoint

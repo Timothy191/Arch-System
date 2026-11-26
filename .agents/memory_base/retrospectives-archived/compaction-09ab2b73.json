@@ -1,0 +1,35 @@
+{
+  "id": "compaction-09ab2b73",
+  "timestamp": "2026-11-26T05:08:41.239Z",
+  "taskTag": "compaction-standard-09ab2b73",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/packages/database/migrations/232_admin_departments_rls_and_hygiene.sql\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/actions/shared.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/AuditLogsTab.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/admin/data/[table]/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/logs/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/SystemLogsTab.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/health/redis/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/api/cors.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/observability/summary/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/observability/ci/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/cloudflare/summary/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/cloudflare/turnstile/verify/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/admin/admin-auth.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/actions/shared.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/tabs/LogsTabs.test.tsx\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (421 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 263310,
+    "cacheHitRatio": 0.8356,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

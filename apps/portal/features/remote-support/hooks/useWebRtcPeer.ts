@@ -210,6 +210,29 @@ export function useWebRtcPeer({
         return;
       }
 
+      if (envelope.type === 'viewer_ready' && role === 'requester') {
+        const stream = localStreamRef.current;
+        if (!stream || stream.getTracks().length === 0) return;
+        const pc = pcRef.current ?? (await ensurePeerInitialized(sessionId));
+        if (pc.getSenders().length === 0) {
+          for (const track of stream.getTracks()) {
+            pc.addTrack(track, stream);
+          }
+        }
+        const offer = await pc.createOffer({
+          iceRestart: pc.remoteDescription !== null || pc.localDescription !== null,
+        });
+        await pc.setLocalDescription(offer);
+        if (offer.sdp) {
+          await sendSignalRef.current({
+            type: 'offer',
+            senderId,
+            sdp: offer.sdp,
+          });
+        }
+        return;
+      }
+
       if (envelope.type === 'offer' && role === 'agent') {
         const pc = await ensurePeerInitialized(sessionId);
         setPeerState({ phase: 'connecting' });
@@ -257,6 +280,15 @@ export function useWebRtcPeer({
   });
 
   sendSignalRef.current = signaling.sendSignal;
+
+  useEffect(() => {
+    if (!enabled || role !== 'agent' || !sessionId || !senderId) return;
+    if (signaling.status !== 'SUBSCRIBED') return;
+    void signaling.sendSignal({
+      type: 'viewer_ready',
+      senderId,
+    });
+  }, [enabled, role, senderId, sessionId, signaling.sendSignal, signaling.status]);
 
   /**
    * Requester-only: Must be invoked directly inside the user's explicit Consent

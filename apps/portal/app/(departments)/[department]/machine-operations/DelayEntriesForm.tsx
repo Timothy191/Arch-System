@@ -191,9 +191,9 @@ export function DelayEntriesForm({
           }),
           description: `Saving ${entriesToSave.length} delay entries`,
         });
-        const simulatedUpdate = delayEntries.map((d) => ({ ...d, status: 'draft' as const }));
-        setDelayEntries(simulatedUpdate);
-        onDelayChange?.(simulatedUpdate);
+        const optimisticUpdate = delayEntries.map((d) => ({ ...d, status: 'draft' as const }));
+        setDelayEntries(optimisticUpdate);
+        onDelayChange?.(optimisticUpdate);
         setIsSubmitting(false);
         return;
       }

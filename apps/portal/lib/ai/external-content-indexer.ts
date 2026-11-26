@@ -7,10 +7,12 @@
  * using the same pattern as `indexBreakdownVector` in `mining-rag.ts`.
  */
 
+import { logger } from '@repo/logger/server';
 import { searchAvailability, upsertVector } from '@repo/redis/search';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { basename, extname, join } from 'path';
+import { assertSafeUrl } from '@/lib/integrations/ssrf-guard';
 import { chunkForEmbedding } from './chunking';
 import { batchGenerateEmbeddings } from './embeddings';
 import { DOCUMENTS_VECTOR_SPEC, ensureIndexOnce } from './vector-indexes';
@@ -18,6 +20,13 @@ import { DOCUMENTS_VECTOR_SPEC, ensureIndexOnce } from './vector-indexes';
 const EXTERNAL_SESSION_ID = 'external_content';
 const MEMORY_TYPE = 'semantic';
 const MAX_FILES = 200;
+const MAX_DEPTH = 5;
+const MAX_REDIRECTS = 5;
+const URL_FETCH_TIMEOUT_MS = 15_000;
+const GITHUB_TREE_TIMEOUT_MS = 20_000;
+const MIN_EXTRACTABLE_CONTENT_CHARS = 50;
+const INDEXER_USER_AGENT = 'Arch-System-Content-Indexer/1.0';
+const GITHUB_SLUG_PATTERN = /^[A-Za-z0-9_.-]{1,100}$/;
 
 interface IndexedContent {
   source: 'url' | 'github' | 'docs';
@@ -45,22 +54,51 @@ function normalizeUrl(url: string): string {
   return normalized;
 }
 
+export function isValidGitHubSlug(segment: string): boolean {
+  return GITHUB_SLUG_PATTERN.test(segment) && segment !== '.' && segment !== '..';
+}
+
 /**
- * Fetch raw text content from a URL.
- * Extracts visible text from HTML (strips scripts, styles, tags).
+ * Fetch raw text content from a URL with SSRF validation on the initial target
+ * and every redirect hop, using a fresh AbortController per request.
  */
 async function fetchUrlText(url: string): Promise<string> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  let currentUrl = url;
 
-  try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Arch-System External Content Indexer (contact: admin@arch-system.local)',
-      },
-    });
-    clearTimeout(timeoutId);
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    assertSafeUrl(currentUrl);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), URL_FETCH_TIMEOUT_MS);
+
+    let response: Response;
+    try {
+      response = await fetch(currentUrl, {
+        signal: controller.signal,
+        redirect: 'manual',
+        headers: {
+          'User-Agent': INDEXER_USER_AGENT,
+        },
+      });
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch URL ${currentUrl}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (response.status >= 300 && response.status < 400) {
+      const locationHeader = response.headers.get('location');
+      if (!locationHeader) {
+        throw new Error(`Redirect without Location header from ${currentUrl}`);
+      }
+      if (hop === MAX_REDIRECTS) {
+        throw new Error(`Too many redirects while fetching ${url}`);
+      }
+      currentUrl = new URL(locationHeader, currentUrl).toString();
+      assertSafeUrl(currentUrl);
+      continue;
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status} ${response.statusText}`);
@@ -68,10 +106,9 @@ async function fetchUrlText(url: string): Promise<string> {
 
     const html = await response.text();
     return extractTextFromHtml(html);
-  } catch {
-    clearTimeout(timeoutId);
-    throw new Error(`Failed to fetch URL: ${url}`);
   }
+
+  throw new Error(`Exceeded redirect limit for ${url}`);
 }
 
 /**
@@ -109,7 +146,7 @@ function extractTextFromHtml(html: string): string {
 async function indexContent(
   item: IndexedContent,
   userId: string
-): Promise<{ success: boolean; id?: string }> {
+): Promise<{ success: boolean; id?: string; error?: string }> {
   const chunks = chunkForEmbedding(item.content, {
     contentType: 'document',
     maxChunkSize: 512,
@@ -117,11 +154,11 @@ async function indexContent(
   });
 
   if (chunks.length === 0) {
-    return { success: false };
+    return { success: false, error: 'No indexable text chunks extracted' };
   }
 
   const texts = chunks.map((c) => c.text);
-  const vectors = await batchGenerateEmbeddings(texts, userId);
+  const vectors = await batchGenerateEmbeddings(texts, userId, { requireSemantic: true });
 
   const supabase = await createServerSupabaseClient();
   const { data: insertedRows, error } = await supabase
@@ -144,8 +181,11 @@ async function indexContent(
     .select('id');
 
   if (error) {
-    console.error(`Failed to index ${item.source}:${item.sourceId}`, error);
-    return { success: false };
+    logger.error(
+      { source: item.source, sourceId: item.sourceId, error: error.message },
+      'Failed to index external content'
+    );
+    return { success: false, error: error.message };
   }
 
   try {
@@ -188,20 +228,20 @@ export async function fetchAndIndexUrl(url: string, userId: string): Promise<Ind
   let cleanUrl: string;
   try {
     cleanUrl = normalizeUrl(url);
-    new URL(cleanUrl);
-  } catch {
+    assertSafeUrl(cleanUrl);
+  } catch (error) {
     return {
       success: false,
       indexedCount: 0,
       erroredCount: 1,
-      errors: [`Invalid URL: ${url}`],
+      errors: [error instanceof Error ? error.message : `Invalid URL: ${url}`],
     };
   }
 
   try {
     const content = await fetchUrlText(cleanUrl);
 
-    if (!content || content.length < 50) {
+    if (!content || content.length < MIN_EXTRACTABLE_CONTENT_CHARS) {
       return {
         success: false,
         indexedCount: 0,
@@ -247,9 +287,32 @@ export async function fetchAndIndexUrl(url: string, userId: string): Promise<Ind
   }
 }
 
+async function fetchGitHubTreeForBranch(
+  owner: string,
+  repo: string,
+  branch: string
+): Promise<Response> {
+  const treeUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`;
+  assertSafeUrl(treeUrl);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), GITHUB_TREE_TIMEOUT_MS);
+  try {
+    return await fetch(treeUrl, {
+      signal: controller.signal,
+      redirect: 'manual',
+      headers: {
+        Accept: 'application/vnd.github+json',
+        'User-Agent': INDEXER_USER_AGENT,
+      },
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 /**
  * Fetch and index GitHub repository file contents using the public API.
- * Fetches the default branch tree (up to a cap) and indexes each text file.
+ * Fetches the default branch tree (`main` or `master`, up to a cap) and indexes each text file.
  */
 export async function fetchAndIndexGitHubRepo(
   owner: string,
@@ -259,44 +322,48 @@ export async function fetchAndIndexGitHubRepo(
 ): Promise<IndexResult> {
   const errors: string[] = [];
 
+  if (!isValidGitHubSlug(owner) || !isValidGitHubSlug(repo)) {
+    return {
+      success: false,
+      indexedCount: 0,
+      erroredCount: 1,
+      errors: ['Invalid GitHub owner or repository slug'],
+    };
+  }
+
   try {
-    const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000);
-
-    const response = await fetch(treeUrl, {
-      signal: controller.signal,
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'Arch-System External Content Indexer',
-      },
-    });
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      // Try master branch
-      const masterUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/master?recursive=1`;
-      const masterResponse = await fetch(masterUrl, {
-        signal: controller.signal,
-        headers: {
-          Accept: 'application/vnd.github+json',
-          'User-Agent': 'Arch-System External Content Indexer',
-        },
+    const mainResponse = await fetchGitHubTreeForBranch(owner, repo, 'main');
+    if (mainResponse.ok) {
+      return await indexGitHubTree({
+        treeData: await mainResponse.json(),
+        owner,
+        repo,
+        branch: 'main',
+        pathFilter: path,
+        userId,
+        errors,
       });
-      clearTimeout(timeoutId);
-
-      if (!masterResponse.ok) {
-        return {
-          success: false,
-          indexedCount: 0,
-          erroredCount: 1,
-          errors: [`GitHub API returned ${response.status} for ${owner}/${repo}`],
-        };
-      }
-      return indexGitHubTree(await masterResponse.json(), owner, repo, path, userId, errors);
     }
 
-    return indexGitHubTree(await response.json(), owner, repo, path, userId, errors);
+    const masterResponse = await fetchGitHubTreeForBranch(owner, repo, 'master');
+    if (!masterResponse.ok) {
+      return {
+        success: false,
+        indexedCount: 0,
+        erroredCount: 1,
+        errors: [`GitHub API returned ${mainResponse.status} for ${owner}/${repo}`],
+      };
+    }
+
+    return await indexGitHubTree({
+      treeData: await masterResponse.json(),
+      owner,
+      repo,
+      branch: 'master',
+      pathFilter: path,
+      userId,
+      errors,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     errors.push(`GitHub repo ${owner}/${repo}: ${message}`);
@@ -304,17 +371,21 @@ export async function fetchAndIndexGitHubRepo(
   }
 }
 
+interface IndexGitHubTreeOptions {
+  readonly treeData: unknown;
+  readonly owner: string;
+  readonly repo: string;
+  readonly branch: string;
+  readonly pathFilter: string;
+  readonly userId: string;
+  readonly errors: string[];
+}
+
 /**
- * Process a GitHub tree response: filter text files, fetch content, index.
+ * Process a GitHub tree response: filter text files, fetch content from resolved branch, index.
  */
-async function indexGitHubTree(
-  treeData: unknown,
-  owner: string,
-  repo: string,
-  pathFilter: string,
-  userId: string,
-  errors: string[]
-): Promise<IndexResult> {
+async function indexGitHubTree(options: IndexGitHubTreeOptions): Promise<IndexResult> {
+  const { treeData, owner, repo, branch, pathFilter, userId, errors } = options;
   const tree = (treeData as { tree?: Array<{ path: string; type: string; sha: string }> }).tree;
   if (!Array.isArray(tree)) {
     errors.push(`GitHub tree for ${owner}/${repo} was empty or malformed`);
@@ -368,10 +439,11 @@ async function indexGitHubTree(
   let indexedCount = 0;
 
   for (const file of limitedFiles) {
-    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${file.path}`;
+    const encodedPath = file.path.split('/').map(encodeURIComponent).join('/');
+    const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${encodedPath}`;
     try {
       const content = await fetchUrlText(rawUrl);
-      if (!content || content.length < 50) continue;
+      if (!content || content.length < MIN_EXTRACTABLE_CONTENT_CHARS) continue;
 
       const item: IndexedContent = {
         source: 'github',
@@ -381,6 +453,7 @@ async function indexGitHubTree(
         metadata: {
           owner,
           repo,
+          branch,
           path: file.path,
           fetched_at: new Date().toISOString(),
           content_type: 'github',
@@ -389,9 +462,11 @@ async function indexGitHubTree(
 
       const result = await indexContent(item, userId);
       if (result.success) indexedCount++;
-      else errors.push(`Failed to index ${file.path}`);
-    } catch {
-      errors.push(`Failed to fetch ${file.path}`);
+      else errors.push(result.error ?? `Failed to index ${file.path}`);
+    } catch (error) {
+      errors.push(
+        error instanceof Error ? `${file.path}: ${error.message}` : `Failed to fetch ${file.path}`
+      );
     }
   }
 
@@ -440,9 +515,9 @@ export async function indexLocalDocs(dirPath: string, userId: string): Promise<I
 
       const result = await indexContent(item, userId);
       if (result.success) indexedCount++;
-      else errors.push(`Failed to index ${file}`);
-    } catch {
-      errors.push(`Failed to read ${file}`);
+      else errors.push(result.error ?? `Failed to index ${file}`);
+    } catch (error) {
+      errors.push(error instanceof Error ? `${file}: ${error.message}` : `Failed to read ${file}`);
     }
   }
 
@@ -455,14 +530,19 @@ export async function indexLocalDocs(dirPath: string, userId: string): Promise<I
 }
 
 /**
- * Recursively collect markdown files from a directory (max depth 5).
+ * Recursively collect markdown/text files from a directory (enforcing MAX_DEPTH = 5 and MAX_FILES cap).
  */
-function collectMarkdownFiles(dir: string, acc: string[]): string[] {
+function collectMarkdownFiles(dir: string, acc: string[], depth = 0): string[] {
+  if (depth > MAX_DEPTH || acc.length >= MAX_FILES) return acc;
   const entries = readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
+    if (acc.length >= MAX_FILES) break;
+    if (entry.isSymbolicLink()) continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
-      collectMarkdownFiles(full, acc);
+      if (depth < MAX_DEPTH) {
+        collectMarkdownFiles(full, acc, depth + 1);
+      }
     } else if (entry.isFile()) {
       const ext = extname(entry.name).toLowerCase();
       if (['.md', '.markdown', '.txt', '.ts', '.tsx'].includes(ext)) {

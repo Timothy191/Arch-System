@@ -113,6 +113,7 @@ export function Tier1SupportViewer({
   };
 
   const handleStageMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (peer.peerState.phase !== 'connected') return;
     const point = normalizeStagePoint(event.clientX, event.clientY);
     if (!point) return;
 
@@ -127,6 +128,7 @@ export function Tier1SupportViewer({
   };
 
   const handleStageMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (peer.peerState.phase !== 'connected') return;
     const point = normalizeStagePoint(event.clientX, event.clientY);
     if (!point) return;
 
@@ -148,6 +150,7 @@ export function Tier1SupportViewer({
   };
 
   const handleStageMouseUp = () => {
+    if (peer.peerState.phase !== 'connected') return;
     if (tool !== 'draw' || !isDrawing) return;
     setIsDrawing(false);
     const points = currentStrokeRef.current.slice(0, 180);
@@ -201,6 +204,8 @@ export function Tier1SupportViewer({
       });
       toast.success('Support session closed & audited');
       onSessionClosed();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to close support session');
     } finally {
       setIsClosing(false);
     }
@@ -216,8 +221,7 @@ export function Tier1SupportViewer({
   };
 
   const matchedDevice =
-    managedDevices.find((d) => d.assigned_employee_id === session.requester_employee_id) ??
-    managedDevices[0];
+    managedDevices.find((d) => d.assigned_employee_id === session.requester_employee_id) ?? null;
 
   return (
     <GlassCard className="flex flex-col gap-3 p-4">

@@ -423,6 +423,13 @@ export async function persistCacheStatsSnapshot(): Promise<CacheStatsSnapshot> {
   return snapshot;
 }
 
+export interface RedisSlowlogEntry {
+  id: number;
+  timestamp: number;
+  durationUs: number;
+  command: string;
+}
+
 export interface RedisHealthDiagnostics {
   usedMemoryBytes: number;
   usedMemoryRssBytes: number;
@@ -434,21 +441,46 @@ export interface RedisHealthDiagnostics {
   keyspaceHitsTotal: number;
   keyspaceMissesTotal: number;
   hitRateRatio: number;
+  instantaneousOpsPerSec: number;
+  totalKeys: number | null;
   replicationRole: string;
   connectedSlaves: number;
   masterReplOffset: number;
   slowlogCount: number;
+  slowlogEntries: RedisSlowlogEntry[];
+}
+
+function parseSlowlogEntries(raw: unknown): RedisSlowlogEntry[] {
+  if (!Array.isArray(raw)) return [];
+  const entries: RedisSlowlogEntry[] = [];
+  for (const item of raw) {
+    if (!Array.isArray(item) || item.length < 4) continue;
+    const id = asNumber(item[0]);
+    const timestamp = asNumber(item[1]);
+    const durationUs = asNumber(item[2]);
+    const args = Array.isArray(item[3]) ? item[3].map((part) => String(part)) : [];
+    entries.push({
+      id,
+      timestamp,
+      durationUs,
+      command: args.slice(0, 3).join(' '),
+    });
+  }
+  return entries;
 }
 
 export async function collectRedisHealthDiagnostics(): Promise<RedisHealthDiagnostics | null> {
   const redis = await getRedisClient();
   if (!redis) return null;
-  const [rawMemory, rawStats, rawRepl, rawSlowlog] = await Promise.all([
-    sendSafe(redis, ['INFO', 'memory']),
-    sendSafe(redis, ['INFO', 'stats']),
-    sendSafe(redis, ['INFO', 'replication']),
-    sendSafe(redis, ['SLOWLOG', 'LEN']),
-  ]);
+  const [rawMemory, rawStats, rawRepl, rawSlowlog, rawDbSize, rawSlowlogEntries] =
+    await Promise.all([
+      sendSafe(redis, ['INFO', 'memory']),
+      sendSafe(redis, ['INFO', 'stats']),
+      sendSafe(redis, ['INFO', 'replication']),
+      sendSafe(redis, ['SLOWLOG', 'LEN']),
+      sendSafe(redis, ['DBSIZE']),
+      sendSafe(redis, ['SLOWLOG', 'GET', '10']),
+    ]);
   const memoryInfo = asInfoMap(rawMemory);
   const statsInfo = asInfoMap(rawStats);
   const replInfo = asInfoMap(rawRepl);
@@ -457,6 +489,10 @@ export async function collectRedisHealthDiagnostics(): Promise<RedisHealthDiagno
   const totalLookups = keyspaceHitsTotal + keyspaceMissesTotal;
   const hitRateRatio =
     totalLookups > 0 ? Math.round((keyspaceHitsTotal / totalLookups) * 10_000) / 10_000 : 0;
+  const parsedDbSize =
+    rawDbSize !== null && rawDbSize !== undefined && !Number.isNaN(Number(rawDbSize))
+      ? Number(rawDbSize)
+      : null;
   return {
     usedMemoryBytes: asNumber(memoryInfo.used_memory),
     usedMemoryRssBytes: asNumber(memoryInfo.used_memory_rss),
@@ -468,9 +504,12 @@ export async function collectRedisHealthDiagnostics(): Promise<RedisHealthDiagno
     keyspaceHitsTotal,
     keyspaceMissesTotal,
     hitRateRatio,
+    instantaneousOpsPerSec: asNumber(statsInfo.instantaneous_ops_per_sec),
+    totalKeys: parsedDbSize,
     replicationRole: replInfo.role ?? '',
     connectedSlaves: asNumber(replInfo.connected_slaves),
     masterReplOffset: asNumber(replInfo.master_repl_offset),
     slowlogCount: asNumber(rawSlowlog),
+    slowlogEntries: parseSlowlogEntries(rawSlowlogEntries),
   };
 }

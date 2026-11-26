@@ -73,6 +73,54 @@ export const adminOperationalTargetsSchema = z.object({
 export type OperationalTargetWindow = z.infer<typeof operationalTargetWindowSchema>;
 export type AdminOperationalTargets = z.infer<typeof adminOperationalTargetsSchema>;
 
+export const ADMIN_EMPLOYEE_ROLES = [
+  'operator',
+  'supervisor',
+  'control_room_operator',
+  'access_control',
+  'maintenance',
+  'viewer',
+  'manager',
+  'admin',
+] as const;
+
+export const employeeRoleSchema = z.enum(ADMIN_EMPLOYEE_ROLES);
+export type EmployeeRole = z.infer<typeof employeeRoleSchema>;
+
+export const ADMIN_MACHINE_TYPES = [
+  'Articulated Dumper',
+  'Rigid Dumper',
+  'Dump Truck',
+  'Excavator',
+  'Dozer',
+  'Drill Rig',
+  'Grader',
+  'Loader',
+  'Crusher',
+  'Compactor',
+  'Water Truck',
+  'Generator',
+  'Light Vehicle',
+  'Screen',
+  'Conveyor',
+  'Pump',
+  'Transformer',
+  'Switchgear',
+  'Other',
+] as const;
+
+export const adminMachineTypeSchema = z.enum(ADMIN_MACHINE_TYPES);
+export type AdminMachineType = z.infer<typeof adminMachineTypeSchema>;
+
+export const aiMetricsQuerySchema = z.object({
+  range: z.enum(['session', '24h', '7d', '30d', 'all-time']).optional().default('30d'),
+  limit: z.coerce.number().int().min(1).max(1000).optional().default(20),
+  offset: z.coerce.number().int().min(0).max(100_000).optional().default(0),
+  model: z.string().trim().max(120).optional(),
+  department: z.string().uuid().optional(),
+});
+export type AiMetricsQueryInput = z.infer<typeof aiMetricsQuerySchema>;
+
 export const employeeGenderSchema = z.enum(['male', 'female', 'other']);
 export type EmployeeGender = z.infer<typeof employeeGenderSchema>;
 
@@ -110,7 +158,7 @@ export const upsertAdminEmployeeSchema = z.object({
   qr_code: z.string().max(128),
   photo_url: z.string(),
   photo_storage_path: z.string().max(512).nullable().optional(),
-  role: z.string().min(1).max(64),
+  role: employeeRoleSchema,
   department_id: z.string().nullable(),
   accessible_departments: z.array(z.string()),
   department_permissions: departmentPermissionsMapSchema.optional().default({}),
@@ -146,7 +194,7 @@ export const adminAddMachineSchema = z
   .object({
     name: z.string().trim().max(120).optional().default(''),
     serial_number: z.string().trim().max(160).optional(),
-    machine_type: z.string().trim().min(1, 'Machine Type is required.').max(120),
+    machine_type: adminMachineTypeSchema,
     manufacturer: z.string().trim().min(1, 'Machine Manufacturer is required.').max(120),
     image_url: z.string().trim().max(512).nullable().optional(),
     starting_smr: z
@@ -170,7 +218,7 @@ export type AdminAddMachineInput = z.infer<typeof adminAddMachineSchema>;
 export const adminUpdateMachineSchema = z.object({
   id: z.string().trim().min(1, 'Machine ID is required.'),
   name: z.string().trim().min(1, 'Machine ID cannot be empty.').max(120).optional(),
-  machine_type: z.string().trim().min(1, 'Machine type cannot be empty.').max(120).optional(),
+  machine_type: adminMachineTypeSchema.optional(),
   manufacturer: z.string().trim().max(120).nullable().optional(),
   serial_number: z.string().trim().max(160).nullable().optional(),
   image_url: z.string().trim().max(512).nullable().optional(),

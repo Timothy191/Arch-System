@@ -84,13 +84,10 @@ export function authorizeTelemetryStream(req: Request): NextResponse | null {
 export function authorizeWorkflowRequest(req: Request): NextResponse | null {
   const secret = configuredSecret(['DISPATCH_API_KEY', 'TELEMETRY_INGEST_SECRET']);
   if (!secret) {
-    if (process.env.NODE_ENV === 'production' || process.env.REQUIRE_API_KEY === 'true') {
-      return NextResponse.json(
-        { success: false, error: 'Workflow dispatch authentication is not configured.' },
-        { status: 503 }
-      );
-    }
-    return null;
+    return NextResponse.json(
+      { success: false, error: 'Workflow dispatch authentication is not configured.' },
+      { status: 503 }
+    );
   }
 
   const provided = readProvidedSecret(req);

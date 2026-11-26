@@ -20,6 +20,10 @@ jest.mock('next/link', () => ({
   ),
 }));
 
+jest.mock('sonner', () => ({
+  toast: { success: jest.fn(), error: jest.fn() },
+}));
+
 const MOCK_DEPARTMENTS = [
   {
     id: 'dept-access',
@@ -118,10 +122,24 @@ const mockAdminAddDepartment = jest.fn().mockResolvedValue({
   },
 });
 
+const mockAdminUpdateDepartment = jest.fn().mockResolvedValue({
+  success: true,
+  department: {
+    id: 'dept-prod',
+    name: 'production',
+    display_name: 'Production Pit Ops',
+    description: 'Primary haulage',
+    color: 'emerald',
+    icon: 'Truck',
+    created_at: '2026-01-10T10:00:00Z',
+  },
+});
+
 const mockAdminArchiveDepartment = jest.fn().mockResolvedValue({ success: true });
 
 jest.mock('../actions/departments', () => ({
   adminAddDepartment: (input: unknown) => mockAdminAddDepartment(input),
+  adminUpdateDepartment: (input: unknown) => mockAdminUpdateDepartment(input),
   adminArchiveDepartment: (id: string) => mockAdminArchiveDepartment(id),
 }));
 
@@ -183,10 +201,21 @@ const mockSupabaseClient = {
       };
     }
     return {
-      select: jest.fn().mockReturnValue({
-        order: jest.fn().mockReturnValue({
-          limit: jest.fn().mockResolvedValue({ data: MOCK_DAILY_LOGS, error: null }),
-        }),
+      select: jest.fn((_cols: string, opts?: { count?: string; head?: boolean }) => {
+        if (opts?.head) {
+          return {
+            eq: jest.fn((_col: string, val: string) =>
+              Promise.resolve({ count: val === 'dept-prod' ? 412 : 0, error: null })
+            ),
+            then: (resolve: (v: { count: number; error: null }) => unknown) =>
+              Promise.resolve(resolve({ count: 412, error: null })),
+          };
+        }
+        return {
+          order: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue({ data: MOCK_DAILY_LOGS, error: null }),
+          }),
+        };
       }),
     };
   }),
@@ -201,7 +230,7 @@ describe('DepartmentsTab', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the full-panel header KPIs and live division metrics', async () => {
+  it('renders the full-panel header KPIs and live exact shift log count without hardcoded core zones', async () => {
     render(<DepartmentsTab />);
 
     const header = screen.getByTestId('departments-full-panel-header');
@@ -210,6 +239,7 @@ describe('DepartmentsTab', () => {
 
     await waitFor(() => {
       expect(screen.getByText('2 Divisions · 2 Active Sites')).toBeInTheDocument();
+      expect(screen.getByText('412 shift logs')).toBeInTheDocument();
       expect(screen.getByText('2/2')).toBeInTheDocument();
       expect(screen.getByText('1/1')).toBeInTheDocument();
       expect(screen.getByText('1 open alerts')).toBeInTheDocument();
@@ -245,7 +275,7 @@ describe('DepartmentsTab', () => {
     expect(screen.queryByTestId('department-details-access-card-actions')).not.toBeInTheDocument();
   });
 
-  it('supports Expand All / Collapse All, search filtering, adding an area, and archiving an area', async () => {
+  it('supports Expand All, search filtering, adding, editing, and archiving via confirmation dialog', async () => {
     render(<DepartmentsTab />);
 
     await waitFor(() => {
@@ -253,13 +283,7 @@ describe('DepartmentsTab', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: /Expand All/i }));
-    expect(screen.getByTestId('department-details-access-card-actions')).toBeInTheDocument();
-    expect(screen.getByTestId('department-details-production')).toHaveTextContent(
-      'Direct Machine / Event Assignment'
-    );
-    expect(screen.getByTestId('department-details-production')).toHaveTextContent(
-      '11,850 hrs baseline SMR'
-    );
+    expect(screen.getByTestId('department-details-production')).toHaveTextContent('412 Shift Logs');
 
     fireEvent.click(screen.getByRole('button', { name: /Collapse All/i }));
     expect(screen.queryByTestId('department-details-production')).not.toBeInTheDocument();
@@ -271,17 +295,30 @@ describe('DepartmentsTab', () => {
 
     fireEvent.change(searchInput, { target: { value: '' } });
 
-    fireEvent.change(screen.getByPlaceholderText('Add new area...'), {
+    fireEvent.change(screen.getByPlaceholderText('Add department...'), {
       target: { value: 'Safety Compliance' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /Add Area/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Add Department/i }));
 
     await waitFor(() => {
       expect(mockAdminAddDepartment).toHaveBeenCalledWith({ display_name: 'Safety Compliance' });
       expect(screen.getByTestId('department-row-safety-compliance')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Remove Safety Compliance' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Production' }));
+    fireEvent.change(screen.getByLabelText('Display Name'), {
+      target: { value: 'Production Pit Ops' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Department' }));
+    await waitFor(() => {
+      expect(mockAdminUpdateDepartment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'dept-prod', display_name: 'Production Pit Ops' })
+      );
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Archive Safety Compliance' }));
+    expect(screen.getByText('Archive Department')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm Archive' }));
     await waitFor(() => {
       expect(mockAdminArchiveDepartment).toHaveBeenCalledWith('dept-new');
       expect(screen.queryByTestId('department-row-safety-compliance')).not.toBeInTheDocument();

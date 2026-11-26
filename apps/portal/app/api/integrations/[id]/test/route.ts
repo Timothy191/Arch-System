@@ -79,6 +79,9 @@ async function handleTest(request: NextRequest, { params }: { params: Promise<{ 
     args: parsed.data.args,
     employeeId: principal.user.id,
     departmentId: principal.employee.department_id ?? '',
+    employeeRole: ((principal.employee.role as string) === 'viewer'
+      ? 'operator'
+      : principal.employee.role) as 'admin' | 'supervisor' | 'control_room_operator' | 'operator',
     kind: 'write', // admin test path counts as human-confirmed
   });
 
