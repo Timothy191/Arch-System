@@ -65,6 +65,7 @@ ruvector.db-*
 
 # IDE
 .vscode/
+.idea/
 
 # Tooling
 skills-lock.json

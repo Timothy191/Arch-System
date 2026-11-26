@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "instance": {
+    "name": "agentic-engineer",
+    "agentPath": ".agents/agents/agentic-engineer/agent.md",
+    "registryPath": ".agents/a2a/registry/agentic-engineer.json"
+  },
+  "agentContent": {
+    "roots": [
+      ".agents/agents",
+      ".agents/a2a",
+      ".agents/rules",
+      ".agents/hooks",
+      ".agents/hooks.json",
+      ".agents/skills",
+      ".agents/skills.json",
+      ".qoder/agents",
+      ".qoder/skills",
+      ".qoder/hooks",
+      ".cursor/rules",
+      "AGENTS.md",
+      "GEMINI.md",
+      "CLAUDE.md",
+      "AGENT_TRACER.md"
+    ],
+    "runtimeExcludes": [".agents/a2a/bus", ".agents/a2a/whiteboard", ".agents/memory_base"]
+  },
+  "documentation": {
+    "root": "docs/agents/agentic-engineer",
+    "required": [
+      {
+        "id": "spec",
+        "path": "docs/agents/agentic-engineer/SPEC.md",
+        "type": "technical-specification",
+        "sections": [
+          "Purpose and Scope",
+          "Architecture",
+          "Data Contracts",
+          "Interoperability Checks",
+          "Failure Modes"
+        ]
+      },
+      {
+        "id": "usage",
+        "path": "docs/agents/agentic-engineer/USAGE.md",
+        "type": "usage-guide",
+        "sections": ["Quick Start", "CLI Commands", "Coordination Workflow", "Health and Alerts"]
+      },
+      {
+        "id": "integration",
+        "path": "docs/agents/agentic-engineer/INTEGRATION.md",
+        "type": "integration-notes",
+        "sections": ["A2A Bus", "Hook Wiring", "Gate Wiring", "Documentation Sync"]
+      },
+      {
+        "id": "runbook",
+        "path": "docs/agents/agentic-engineer/RUNBOOK.md",
+        "type": "operational-runbook",
+        "sections": ["Health Checks", "Incident Response", "Maintenance", "Recovery"]
+      }
+    ],
+    "catalog": "documentation/07-agentic-systems/agentic-engineer-catalog.md",
+    "healthReport": "documentation/03-audit-reports/agentic-engineer-health.md"
+  },
+  "thresholds": {
+    "interopScore": 100,
+    "docsCompleteness": 100
+  },
+  "state": {
+    "dir": ".ci-local/agentic-engineer",
+    "tasksFile": "tasks.json",
+    "ledgerFile": "audit-ledger.jsonl",
+    "alertsFile": "alerts.jsonl",
+    "healthFile": "health.json",
+    "heartbeatFile": "heartbeat.json"
+  },
+  "coordination": {
+    "defaultAssignee": "agentic-engineer",
+    "priorities": ["P0", "P1", "P2", "P3"]
+  },
+  "alerts": {
+    "webhookEnv": "AGENTIC_ENGINEER_WEBHOOK_URL"
+  }
+}

@@ -5,6 +5,7 @@
       "include_only": [
         "agent-accuracy-enforcement",
         "agent-intercom-coordination",
+        "agentic-engineer",
         "agents-md",
         "audit-federation",
         "code-intelligence",

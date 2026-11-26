@@ -1,11 +1,12 @@
 #!/bin/bash
-# Autonomous Agent Real-World Verification Gate (28-Gate Enterprise Suite)
+# Autonomous Agent Real-World Verification Gate (29-Gate Enterprise Suite)
 # Preserves the foundational 15 static/architectural gates and expands with
-# Gates 16-28 covering authorization matrices, database migration integrity,
+# Gates 16-29 covering authorization matrices, database migration integrity,
 # performance/load budgets, E2E user journeys, supply-chain security,
 # observability/resilience, deployment preflight, accessibility, evidence
-# integrity (JSON + JUnit), AI agent governance/hallucination controls, and
-# Code-Intelligence Substrate Integrity.
+# integrity (JSON + JUnit), AI agent governance/hallucination controls,
+# Code-Intelligence Substrate Integrity, and Agentic Engineer interoperability
+# plus documentation governance.
 #
 # Numbering note: gates 24 and 27 are not run_gate invocations — they are
 # self-recorded by tools/audits/verify-gates.cjs during the evidence-integrity
@@ -84,7 +85,7 @@ run_gate() {
 }
 
 echo "========================================================"
-echo "🔍 [AGENT VERIFICATION] Starting 28-Gate Quality & Runtime Suite..."
+echo "🔍 [AGENT VERIFICATION] Starting 29-Gate Quality & Runtime Suite..."
 echo "========================================================"
 
 # ── Stage 1: Foundational Static, Boundary & Architecture Gates (1–15) ────────
@@ -231,6 +232,10 @@ run_gate 28 "🧠" "Code-Intelligence Substrate Integrity" \
   "node tools/audits/audit-code-intelligence-drift.cjs" \
   "Run 'pnpm ci:reindex' to rebuild the CodeGraph index, then 'pnpm ci:snapshot' to refresh the baseline." \
   "mandatory" "RUNTIME_EMPIRICAL"
+
+run_gate 29 "🤝" "Agentic Engineer Interoperability & Documentation" \
+  "node tools/agentic-engineer/bin/agentic-engineer.cjs gate --ci" \
+  "Fix agent-content interoperability or update the required docs and regenerate the catalog via 'pnpm agent:engineer:docs --write'."
 
 # Assemble machine-readable JSON manifest for Gates 24 & 27 independent verification
 GIT_TREE_HASH=$(git rev-parse "HEAD^{tree}" 2>/dev/null || echo "unknown")

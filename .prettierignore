@@ -18,6 +18,7 @@ __pycache__
 codebase-maps
 graphify-out
 packages/theme/src/css/variables-generated.css
+documentation/07-agentic-systems/agentic-engineer-catalog.md
 
 # Agent runtime state (written by other processes; not source docs)
 .agents/memory_base
