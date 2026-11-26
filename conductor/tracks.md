@@ -14,3 +14,6 @@ This registry tracks all feature, bug-fix, and chore tracks managed with Conduct
 
 - [x] **Track: Dead-Code Cleanup & `effect` Vulnerability Triage**
       _Link: [./tracks/chore_cleanup_20261126/index.md](./tracks/chore_cleanup_20261126/index.md)_
+
+- [x] **Track: Automated Idempotent Docker Swarm Deployment Workflow**
+      _Link: [./tracks/docker_swarm_deploy_20261126/index.md](./tracks/docker_swarm_deploy_20261126/index.md)_

@@ -1,0 +1,237 @@
+version: '3.8'
+
+# Arch-System Production Docker Swarm Stack
+# Services: caddy (public ingress) -> portal (Next.js 16 standalone) -> redis (L2 cache)
+# Secrets are external Docker Swarm secrets mounted at /run/secrets/arch_*.
+
+services:
+  portal:
+    image: ${PORTAL_IMAGE:-ghcr.io/plantcor/arch-system-portal:1.6.2}
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      HOSTNAME: 0.0.0.0
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-arch-portal}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      PORTAL_VERSION: ${PORTAL_VERSION:-1.6.2}
+      SUPABASE_SERVICE_KEY_FILE: /run/secrets/arch_supabase_service_key
+      DATABASE_URL_FILE: /run/secrets/arch_database_url
+      REDIS_PASSWORD_FILE: /run/secrets/arch_redis_password
+      CRON_SECRET_FILE: /run/secrets/arch_cron_secret
+      WEBHOOK_SECRET_FILE: /run/secrets/arch_webhook_secret
+    secrets:
+      - arch_supabase_service_key
+      - arch_database_url
+      - arch_redis_password
+      - arch_cron_secret
+      - arch_webhook_secret
+    networks:
+      - arch_internal
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    deploy:
+      mode: replicated
+      replicas: ${PORTAL_REPLICAS:-2}
+      endpoint_mode: vip
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 30s
+        max_failure_ratio: 0.2
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        failure_action: pause
+        monitor: 20s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7.4-alpine}
+    command:
+      [
+        'sh',
+        '-c',
+        'exec redis-server --save 60 1 --save 300 100 --maxmemory 256mb --maxmemory-policy allkeys-lru --loglevel notice --requirepass "$$(cat /run/secrets/arch_redis_password)"',
+      ]
+    secrets:
+      - arch_redis_password
+    volumes:
+      - redis_data:/data
+    networks:
+      - arch_internal
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'redis-cli --no-auth-warning -a "$$(cat /run/secrets/arch_redis_password)" ping | grep -q PONG',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 20s
+        max_failure_ratio: 0
+        order: stop-first
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        failure_action: pause
+        monitor: 20s
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 384M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  caddy:
+    image: ${CADDY_IMAGE:-caddy:2.8-alpine}
+    ports:
+      - target: 80
+        published: ${CADDY_HTTP_PORT:-80}
+        protocol: tcp
+        mode: ingress
+      - target: 443
+        published: ${CADDY_HTTPS_PORT:-443}
+        protocol: tcp
+        mode: ingress
+    configs:
+      - source: arch_caddyfile
+        target: /etc/caddy/Caddyfile
+        mode: 0444
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - arch_public
+      - arch_internal
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://127.0.0.1:2019/config/ || exit 1',
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      mode: replicated
+      replicas: ${CADDY_REPLICAS:-2}
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 20s
+        max_failure_ratio: 0.2
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        failure_action: pause
+        monitor: 20s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+
+configs:
+  arch_caddyfile:
+    file: ../Caddyfile
+
+volumes:
+  redis_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  arch_internal:
+    driver: overlay
+    internal: true
+    attachable: false
+    driver_opts:
+      encrypted: 'true'
+  arch_public:
+    driver: overlay
+    attachable: true
+
+secrets:
+  arch_supabase_service_key:
+    external: true
+  arch_database_url:
+    external: true
+  arch_redis_password:
+    external: true
+  arch_cron_secret:
+    external: true
+  arch_webhook_secret:
+    external: true
