@@ -41,5 +41,5 @@ paths:
 ## 6. Enforcement
 
 - `pnpm audit:tailwind` (`tools/audits/audit-tailwind-usage.cjs`; `agent:verify` step 14 + CI `policy-check`) fails on: chains >16 without baseline headroom; repeated chains gaining uses; `@apply`/`@layer components` outside allowed packages; `preset.ts` purge regressions (scanning `.ts`/`node_modules`, missing exclusions, disabling `hoverOnlyWhenSupported`).
-- `pnpm lint:css-perf` (`tools/audits/check-css-performance.cjs`): ≤115 KB source CSS.
+- `pnpm lint:css-perf` (`tools/audits/check-css-performance.cjs`): ≤115 KB source CSS. Run it after your **final** CSS edit (gate 19 runs the full `pnpm audit:perf-budgets`). Growing the budget is a deliberate design decision, never the fix for a regression.
 - `tools/audits/tailwind-baseline.json` grandfathers violations. **Never** regenerate it to hide new ones; `--update-baseline` only after counts drop.

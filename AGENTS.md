@@ -38,9 +38,14 @@ Environment gates: `RUN_LIVE_E2E=1` enables live E2E inside `agent:verify`; `COD
 - **Light mode only.** Semantic OKLCH tokens from `@repo/theme`; no `dark:` utilities and no raw hex or rgb values (`pnpm audit:tokens`).
 - **Glass surfaces.** Panels, forms, and floating bars use `@repo/ui/GlassCard` with the branding classes from `packages/theme/src/tokens/glass.ts`: `liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/25 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md`.
 - **Tailwind budget.** At most 20 utilities per element (`pnpm audit:tailwind`); extract repeated chains into CVA variants or `cn()` constants.
+- **CSS budget.** Raw CSS under `packages/{theme,ui}/src` stays ≤115 KB (`pnpm lint:css-perf`; gate 19). Re-run it after your final CSS edit.
 - **RLS.** Every `public` table enables RLS against `(SELECT auth.uid())` and `public.employees`.
 - **Boundaries.** `apps/*` never import `packages/database`; `packages/ui` never imports database or Supabase; `packages/theme` never imports `packages/ui`; `tools/*` never import apps or `@repo/supabase`; packages and libs never import apps.
 - **Generated files.** `protect-paths.sh` blocks hand-edits of `*.generated.*`, theme `variables-generated.css` / `tokens/generated.ts` / `generated-sd.ts`, `packages/supabase/src/database.types.ts`, `packages/supabase/migrations/*` (edit `packages/database/migrations/`), `codebase-maps/latest/*`, `config/tools/eslint.boundaries.cjs`, `tools/scripts/ci-{reindex,snapshot}.cjs`, and `.agents/memory_base/index-snapshot.json`. Change the source and regenerate.
+
+## Resources
+
+Use the full surface: CodeGraph (`codemap`) for structure, skills via the Skill tool, `memory-gateway-mcp` for recall, subagents for parallel exploration, and a real browser for UI verification. `.agents/rules/universal-agent-workflow.md` defines the per-change verification floor.
 
 ## Gotchas
 

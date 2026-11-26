@@ -50,3 +50,15 @@ changes keeps the published inventory truthful. A health report under
 
 Because the catalog is generated, never hand-edit it. Change the components, run
 `pnpm agent:engineer:docs --write`, and commit the result in the same change set.
+
+## Harness Hardening
+
+The universal workflow rule (`.agents/rules/universal-agent-workflow.md`) now states the
+verification floor per change type: theme, `packages/ui`, app CSS, portal UI, migrations,
+contracts, and deployment changes require the full `pnpm agent:verify` suite, while
+`pnpm agent:verify:fast` covers inner-loop smoke checks and docs/config-only changes. CSS
+changes also require `pnpm lint:css-perf` after the final edit, and the 115 KB source-CSS
+budget is recorded as a root invariant in `AGENTS.md`. Orca/Paradev workers report
+`worker_done` only with the measured commands and residual risk. The same rule records the
+resource-utilization contract: CodeGraph for structure, skills and `memory-gateway-mcp` for
+recall, subagents for parallel exploration, and a real browser for UI verification.
