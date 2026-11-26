@@ -1,0 +1,17 @@
+{
+  "track_id": "docker_swarm_deploy_20261126",
+  "title": "Automated Idempotent Docker Swarm Deployment Workflow",
+  "type": "feature",
+  "status": "completed",
+  "created_at": "2026-11-26T19:33:04+02:00",
+  "updated_at": "2026-11-26T19:40:00+02:00",
+  "branch": "raniaoniel23-2760/docker-swarm-conductor",
+  "scope": [
+    "infra/docker/swarm/stack.arch-system.yml",
+    "infra/docker/swarm/deploy-swarm.sh",
+    "infra/docker/swarm/verify-swarm-workflow.test.mjs",
+    "infra/docker/swarm/README.md",
+    "conductor/tracks/docker_swarm_deploy_20261126/",
+    "conductor/tracks.md"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "compaction-f0d42de5",
+  "timestamp": "2026-11-26T17:47:58.788Z",
+  "taskTag": "compaction-standard-f0d42de5",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/packages/theme/src/css/cards.css\"",
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/apps/portal/features/hub/components/CoreOperationalModules.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/packages/ui/src/components/HeroCardContent.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/packages/ui/src/components/HeroRotator.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/libs/features/hub/ui/src/HeroRotator.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/apps/portal/app/hub/page.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/libs/features/departments/data-access/src/department-live-metrics.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/apps/portal/features/hub/components/CoreOperationalModules.test.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/libs/features/hub/ui/src/HeroRotator.test.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/hub-design-perf/apps/portal/app/hub/page.test.tsx\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (420 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 208957,
+    "cacheHitRatio": 0.8464,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

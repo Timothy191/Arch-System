@@ -189,6 +189,7 @@ packages/contract/openapi.generated.json
 audit_report.md
 cleanup-backup/
 metadata.json
+!conductor/**/metadata.json
 .audit/
 documentation/03-audit-reports/logs/
 

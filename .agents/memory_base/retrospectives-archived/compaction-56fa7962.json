@@ -1,0 +1,31 @@
+{
+  "id": "compaction-56fa7962",
+  "timestamp": "2026-11-26T17:42:29.226Z",
+  "taskTag": "compaction-standard-56fa7962",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/infra/docker/swarm/stack.arch-system.yml\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/infra/docker/swarm/deploy-swarm.sh\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/infra/docker/swarm/verify-swarm-workflow.test.mjs\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/infra/docker/swarm/README.md\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/conductor/tracks/docker_swarm_deploy_20261126/metadata.json\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/conductor/tracks/docker_swarm_deploy_20261126/index.md\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/conductor/tracks/docker_swarm_deploy_20261126/spec.md\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/conductor/tracks/docker_swarm_deploy_20261126/plan.md\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/conductor/tracks.md\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/conductor/tracks/docker_swarm_deploy_20261126/plan.md\"",
+    "\"/home/tim/orca/workspaces/Arch-System/docker-swarm-conductor/infra/docker/swarm/verify-swarm-workflow.test.mjs\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (438 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 178538,
+    "cacheHitRatio": 0.8216,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}
