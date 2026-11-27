@@ -5,9 +5,10 @@ import { type RealtimePayload, useSupabaseRealtime } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { getOperationalToday } from '@repo/utils';
-import { ArrowUpRight, Pickaxe, RefreshCw, Truck } from 'lucide-react';
+import { ArrowUpRight, Pickaxe, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GoldenRefreshIcon } from '~/components/ui/GoldenRefreshIcon';
 import {
   deriveScadaPanelRows,
   type ExcavatorActivityViewRow,
@@ -329,11 +330,9 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
             type="button"
             onClick={handleRefresh}
             aria-label="Refresh SCADA Telemetry"
-            className={`cursor-pointer rounded-md p-1.5 transition-colors hover:bg-black/5 ${
-              isRefreshing ? 'animate-spin' : ''
-            }`}
+            className="cursor-pointer rounded-md p-1.5 transition-colors hover:bg-black/5"
           >
-            <RefreshCw className="h-4 w-4 text-[var(--text-heading)]" />
+            <GoldenRefreshIcon isRefreshing={isRefreshing} className="h-4 w-4" />
           </button>
         </div>
       </div>

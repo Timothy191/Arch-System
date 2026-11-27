@@ -1,13 +1,12 @@
 import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { CheckSquare, ClipboardCheck, Clock, Cpu } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { ControlRoomSummaryGridClient } from '../[department]/ControlRoomSummaryGridClient';
+import { ControlRoomActionDropdown } from './components/ControlRoomActionDropdown';
 import { ControlRoomQuickNav } from './components/ControlRoomQuickNav';
 import { ControlRoomSubtabs } from './components/ControlRoomSubtabs';
 
@@ -76,36 +75,9 @@ export default async function ControlRoomPage() {
           <ControlRoomSummaryGridClient deptId={deptId} today={today} />
         </Suspense>
 
-        {/* Quick Action Navigation Buttons */}
-        <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href="/control-room/machine-operations"
-            className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-medium text-sm text-white transition-all duration-200 hover:scale-[1.02] hover:bg-[var(--accent-blue)]/90 active:scale-[0.98]"
-          >
-            <Cpu className="h-4 w-4" />
-            Machine Operations
-          </Link>
-          <Link
-            href="/control-room/hourly-loads"
-            className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-2 font-medium text-[var(--text-secondary)] text-sm transition-all duration-200 hover:scale-[1.02] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)] active:scale-[0.98]"
-          >
-            <Clock className="h-4 w-4" />
-            Update Loads
-          </Link>
-          <Link
-            href="/control-room/shift-compilation"
-            className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-2 font-medium text-[var(--text-secondary)] text-sm transition-all duration-200 hover:scale-[1.02] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)] active:scale-[0.98]"
-          >
-            <ClipboardCheck className="h-4 w-4" />
-            Shift Operations
-          </Link>
-          <Link
-            href="/control-room/shift-compilation?tab=closeout"
-            className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-2 font-medium text-[var(--text-secondary)] text-sm transition-all duration-200 hover:scale-[1.02] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)] active:scale-[0.98]"
-          >
-            <CheckSquare className="h-4 w-4" />
-            Shift Closeout
-          </Link>
+        {/* Quick Action Navigation Dropdown */}
+        <div className="flex items-center">
+          <ControlRoomActionDropdown />
         </div>
 
         {/* Consolidated Dynamic Control Room Widgets */}

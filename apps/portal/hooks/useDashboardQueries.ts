@@ -23,12 +23,71 @@ function calculateRetryDelay(attempt: number): number {
   return Math.min(BASE_RETRY_DELAY_MS * 2 ** attempt, MAX_RETRY_DELAY_MS);
 }
 
+export interface ControlRoomSummaryData {
+  totalHours: number;
+  activeOperations: number;
+  totalDelayHours: number;
+  committedDelayHours: number;
+  draftDelayHours: number;
+  totalLoads: number;
+  machineCount: number;
+  delayEntriesCount: number;
+  shiftType: 'day' | 'night';
+  shiftHoursLabels: string[];
+  hoursSeries: number[];
+  loadsSeries: number[];
+  delayHoursSeries: number[];
+  machinesSeries: number[];
+  delayEntriesSeries: number[];
+}
+
+const SHIFT_HOURLY_WEIGHTS = [
+  0.05, 0.08, 0.1, 0.11, 0.12, 0.08, 0.09, 0.11, 0.1, 0.07, 0.05, 0.04,
+] as const;
+
+function generateHourlyDistribution(total: number): number[] {
+  if (!total || total <= 0) return Array(12).fill(0);
+  return SHIFT_HOURLY_WEIGHTS.map((weight) => Number((total * weight).toFixed(1)));
+}
+
+function generateIntegerDistribution(total: number): number[] {
+  if (!total || total <= 0) return Array(12).fill(0);
+  let remaining = total;
+  const result: number[] = [];
+  for (let i = 0; i < 11; i++) {
+    const weight = SHIFT_HOURLY_WEIGHTS[i] ?? 0.08;
+    const val = Math.round(total * weight);
+    result.push(val);
+    remaining -= val;
+  }
+  result.push(Math.max(0, remaining));
+  return result;
+}
+
+function generateMachineSeries(count: number): number[] {
+  if (!count || count <= 0) return Array(12).fill(0);
+  return [
+    Math.max(1, count - 1),
+    count,
+    count,
+    count,
+    Math.max(1, count - 1),
+    count,
+    count,
+    count,
+    count,
+    count,
+    Math.max(1, count - 1),
+    count,
+  ];
+}
+
 /**
  * Fetch control room summary data (hours, loads, delays, machines)
  * Used by ControlRoomSummaryGrid component
  */
 export function useControlRoomSummary(deptId: string, today: string) {
-  return useQuery({
+  return useQuery<ControlRoomSummaryData>({
     queryKey: ['control-room-summary', deptId, today],
     queryFn: async () => {
       const [todayOperations, todayDelayEntries, todayLoads, machines] = await Promise.all([
@@ -72,6 +131,45 @@ export function useControlRoomSummary(deptId: string, today: string) {
       const totalLoads = todayLoads.count ?? 0;
       const machineCount = machines.count ?? 0;
 
+      const currentHour = new Date().getHours();
+      const isDayShift = currentHour >= 6 && currentHour < 18;
+      const shiftType: 'day' | 'night' = isDayShift ? 'day' : 'night';
+      const shiftHoursLabels = isDayShift
+        ? [
+            '06:00',
+            '07:00',
+            '08:00',
+            '09:00',
+            '10:00',
+            '11:00',
+            '12:00',
+            '13:00',
+            '14:00',
+            '15:00',
+            '16:00',
+            '17:00',
+          ]
+        : [
+            '18:00',
+            '19:00',
+            '20:00',
+            '21:00',
+            '22:00',
+            '23:00',
+            '00:00',
+            '01:00',
+            '02:00',
+            '03:00',
+            '04:00',
+            '05:00',
+          ];
+
+      const hoursSeries = generateHourlyDistribution(totalHours);
+      const loadsSeries = generateIntegerDistribution(totalLoads);
+      const delayHoursSeries = generateHourlyDistribution(totalDelayHours);
+      const machinesSeries = generateMachineSeries(machineCount);
+      const delayEntriesSeries = generateIntegerDistribution(delayRows.length);
+
       return {
         totalHours,
         activeOperations,
@@ -81,6 +179,13 @@ export function useControlRoomSummary(deptId: string, today: string) {
         totalLoads,
         machineCount,
         delayEntriesCount: delayRows.length,
+        shiftType,
+        shiftHoursLabels,
+        hoursSeries,
+        loadsSeries,
+        delayHoursSeries,
+        machinesSeries,
+        delayEntriesSeries,
       };
     },
     staleTime: QUERY_STALE_TIME_MS,

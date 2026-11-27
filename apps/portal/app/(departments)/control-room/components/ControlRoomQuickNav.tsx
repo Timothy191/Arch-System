@@ -93,12 +93,16 @@ const CONTROL_ROOM_QUICK_TABS: readonly TabItem[] = [
 ] as const;
 
 const QUICK_NAV_TRIGGER_CLASS = cn(
-  'gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg',
-  'border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/90 px-3 py-1.5',
-  'font-medium text-[var(--text-heading)] text-xs shadow-sm transition-all duration-200 sm:text-sm',
-  'hover:border-[var(--accent-blue)]/50 hover:bg-[var(--bg-tertiary)] hover:shadow',
-  'focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 active:scale-[0.98]'
+  'liquid-glass-light gold-steel-border gold-steel-border-slim relative overflow-hidden',
+  'inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)]',
+  'bg-gradient-to-r from-white via-[oklch(0.97_0.02_240)] to-[oklch(0.96_0.03_85)] px-3 py-1.5',
+  'font-medium text-[var(--text-heading)] text-xs shadow-diffusion-sm shadow-window transition-all duration-200 sm:text-sm',
+  'hover:-translate-y-0.5 hover:border-[var(--accent-blue)]/50 hover:shadow-md',
+  'focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 active:translate-y-0 active:scale-[0.98]'
 );
+
+const QUICK_NAV_SHINE_CLASS =
+  'pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_3.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent';
 
 export function ControlRoomQuickNav() {
   const pathname = usePathname();
@@ -112,6 +116,7 @@ export function ControlRoomQuickNav() {
           className={QUICK_NAV_TRIGGER_CLASS}
           aria-label="Quick navigation to other Control Room tabs"
         >
+          <span className={QUICK_NAV_SHINE_CLASS} aria-hidden="true" />
           <Compass className="h-4 w-4 shrink-0 text-[var(--accent-blue)]" />
           <span>Quick Navigation</span>
           <Logo

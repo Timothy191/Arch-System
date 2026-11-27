@@ -16,6 +16,26 @@ jest.mock('@/hooks/useDashboardQueries', () => ({
       totalLoads: 164,
       machineCount: 9,
       delayEntriesCount: 5,
+      shiftType: 'day',
+      shiftHoursLabels: [
+        '06:00',
+        '07:00',
+        '08:00',
+        '09:00',
+        '10:00',
+        '11:00',
+        '12:00',
+        '13:00',
+        '14:00',
+        '15:00',
+        '16:00',
+        '17:00',
+      ],
+      hoursSeries: [2.5, 4.0, 4.2, 4.5, 4.1, 4.0, 3.8, 4.2, 4.5, 4.3, 4.2, 4.2],
+      loadsSeries: [8, 12, 15, 16, 14, 13, 11, 14, 16, 17, 15, 13],
+      delayHoursSeries: [0, 0.2, 0.5, 0.1, 0.4, 0.8, 0.2, 0.3, 0.1, 0.2, 0.2, 0.2],
+      machinesSeries: [8, 8, 9, 9, 9, 9, 8, 9, 9, 9, 9, 9],
+      delayEntriesSeries: [0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0],
     },
   }),
 }));
@@ -67,6 +87,20 @@ describe('Control Room Redesigned Panels & Summary KPIs', () => {
     expect(screen.getByTestId('summary-kpi-separator-delay-hours')).toBeInTheDocument();
     expect(screen.getByTestId('summary-kpi-separator-machines')).toBeInTheDocument();
     expect(screen.getByTestId('summary-kpi-separator-delay-entries')).toBeInTheDocument();
+
+    // Verify 5 animated 12-hour shift graphs
+    expect(screen.getByTestId('summary-shift-graph-hours-today')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-shift-graph-total-loads')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-shift-graph-delay-hours')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-shift-graph-machines')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-shift-graph-delay-entries')).toBeInTheDocument();
+
+    // Verify Day/Night shift time format indicators
+    const timeIndicators = screen.getAllByText('06:00 – 17:00');
+    expect(timeIndicators).toHaveLength(5);
+    const dayShiftLabels = screen.getAllByText('Day Shift');
+    expect(dayShiftLabels).toHaveLength(5);
+
     expect(screen.queryByTestId('summary-graph-arch-node')).not.toBeInTheDocument();
   });
 
