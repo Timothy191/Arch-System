@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { ExportButton } from '@/features/analytics/components/ExportButton';
-import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import { saveMonthlyMachineSnapshotAction } from './actions';
 import { CopyReportButton } from './CopyReportButton';
 import {
@@ -500,7 +499,6 @@ export function ReportsDashboardClient({
 
       <div className="no-print flex flex-wrap items-center justify-end gap-2 pt-4">
         <CopyReportButton csvContent={csvContent} />
-        <PDFDownloadButton reportData={pdfShiftReportData} departmentId={departmentId} />
         <ExportButton
           filename={`${departmentSlug}-report-${fromDateStr}-to-${toDateStr}`}
           rows={exportRows}

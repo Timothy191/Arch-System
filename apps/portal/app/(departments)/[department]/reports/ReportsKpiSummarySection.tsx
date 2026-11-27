@@ -8,9 +8,6 @@ import {
   CheckCircle2,
   Clock,
   Layers,
-  Moon,
-  Radio,
-  Sun,
   Truck,
   Wrench,
 } from 'lucide-react';
@@ -68,18 +65,6 @@ export function ReportsKpiSummarySection({
               <h2 className="font-bold text-2xl text-[var(--text-heading)]">
                 {departmentName} Reports &amp; Live Intelligence
               </h2>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-green/20 bg-accent-green/10 px-2.5 py-0.5 font-semibold text-accent-green text-xs">
-                <Radio className="h-3.5 w-3.5 animate-pulse" />
-                Live Telemetry &amp; Logs
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
-                {currentShift === 'day' ? (
-                  <Sun className="h-3.5 w-3.5" />
-                ) : (
-                  <Moon className="h-3.5 w-3.5" />
-                )}
-                Active Shift: {currentShift.toUpperCase()} ({todayStr})
-              </span>
             </div>
           </div>
         </div>

@@ -906,12 +906,12 @@ export function MachineOperationsFilterableTable({
                   <div className="space-y-4 pt-1">
                     {/* Incomplete Machines Subsection (Item 16: incomplete machines at top) */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between rounded-lg border border-amber-300/60 bg-amber-50/80 px-3.5 py-2 shadow-2xs">
+                      <div className="flex animate-pulse items-center justify-between rounded-lg border border-red-400/60 bg-red-50/80 px-3.5 py-2 shadow-2xs">
                         <div className="flex items-center gap-2">
                           {incompleteRows.length > 0 ? (
                             <>
-                              <AlertCircle className="h-4 w-4 text-amber-700" />
-                              <span className="font-bold text-amber-900 text-xs">
+                              <AlertCircle className="h-4 w-4 text-red-700" />
+                              <span className="font-bold text-red-900 text-xs">
                                 Incomplete Machines ({incompleteRows.length})
                               </span>
                             </>
@@ -924,7 +924,7 @@ export function MachineOperationsFilterableTable({
                             </>
                           )}
                         </div>
-                        <span className="text-[11px] text-amber-800">
+                        <span className="text-[11px] text-red-800">
                           {incompleteRows.length > 0
                             ? 'Requires Stop SMR or shift logging'
                             : 'All operations logged'}

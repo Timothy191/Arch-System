@@ -520,8 +520,8 @@ describe('MachineOperationsList', () => {
       expect(screen.getByRole('option', { name: 'Brakfontein Pit' })).toBeInTheDocument();
     });
 
-    // 2. Tip Readability
-    it('renders static accessible operational guidance callout without animate-pulse', () => {
+    // 2. Tip Readability (removed per design feedback)
+    it('no longer renders the SMR logging guidance callout', () => {
       render(
         <MachineOperationsForm
           departmentId="dept-cr"
@@ -532,13 +532,8 @@ describe('MachineOperationsList', () => {
         />
       );
 
-      const callout = screen.getByRole('note', { name: /SMR logging guidance/i });
-      expect(callout).toBeInTheDocument();
-      expect(callout.className).not.toContain('animate-pulse');
-      expect(callout.className).toContain('bg-white');
-      expect(callout.className).toContain('text-slate-900');
-      expect(screen.getByText(/Operational Tip:/i)).toBeInTheDocument();
-      expect(screen.getByText(/Stop SMR is optional at start of shift/i)).toBeInTheDocument();
+      expect(screen.queryByRole('note', { name: /SMR logging guidance/i })).not.toBeInTheDocument();
+      expect(screen.queryByText(/Operational Tip:/i)).not.toBeInTheDocument();
     });
 
     // 3. Drill Rig Fields & Penetration Rate
@@ -1007,6 +1002,47 @@ describe('MachineOperationsList', () => {
       // Feedback 7: Breakdown carry-over checkbox UI is hidden and handled automatically
       const breakdownCheckbox = screen.getByTestId('machine-ops-ends-on-breakdown');
       expect(breakdownCheckbox.closest('.hidden')).toBeInTheDocument();
+    });
+
+    it('renders Stop-SMR-style required errors and label rows for machine/operator/site (items 17-20)', () => {
+      const { container } = render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={[
+            {
+              id: 'dz-22',
+              name: 'BD-22',
+              machine_type: 'Dozer',
+              serial_number: 'SN-BD22',
+              site_id: 'site-a',
+              latest_smu: 1271,
+            },
+          ]}
+          operators={[{ id: 'op-1', full_name: 'Sam Dozer', employee_code: 'OP-BD01' }]}
+          sites={[{ id: 'site-a', name: 'Pit North', site_code: 'BKF' }]}
+          todayOperations={[]}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /Save Operation/i }));
+
+      const errorClass = 'text-[13px] text-accent-red leading-[18px]';
+      expect(screen.getByText('Select a machine').className).toBe(errorClass);
+      expect(screen.getByText('Select an operator').className).toBe(errorClass);
+      expect(screen.getByText('Select a site/location').className).toBe(errorClass);
+
+      for (const fieldName of ['machineId', 'operatorId', 'siteId'] as const) {
+        const fieldWrapper = container.querySelector(`[data-field="${fieldName}"]`);
+        expect(fieldWrapper).toBeInTheDocument();
+        expect(fieldWrapper?.querySelector('div')?.className).toContain('min-h-[26px]');
+      }
+
+      const machineSelect = container.querySelector('#machineIdInput');
+      fireEvent.change(machineSelect!, { target: { value: 'dz-22' } });
+
+      const lifetimeSmr = screen.getByTestId('lifetime-smr-value');
+      expect(lifetimeSmr.className).toContain('font-mono');
+      expect(lifetimeSmr).toHaveTextContent('1271.0h');
     });
 
     it('validates FilterableTable collapsible category panels, sorting, and direct log button', () => {

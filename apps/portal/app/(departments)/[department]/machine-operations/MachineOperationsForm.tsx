@@ -11,7 +11,6 @@ import {
   ChevronUp,
   Clock,
   Drill,
-  Info,
   Lock,
   ShieldAlert,
 } from 'lucide-react';
@@ -187,7 +186,6 @@ export function MachineOperationsForm({
   const isDozer =
     selectedMachine?.machine_type === 'Dozer' ||
     Boolean(selectedMachine?.machine_type?.toLowerCase().includes('dozer'));
-
   const MACHINE_TYPE_OPERATOR_PREFIXES: Record<string, readonly string[]> = {
     Dozer: ['OP-BD', 'OP-DZ'],
     'Drill Rig': ['OP-DR', 'OP-RDT'],
@@ -742,7 +740,10 @@ export function MachineOperationsForm({
                   <span className="block text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                     Lifetime SMR
                   </span>
-                  <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
+                  <span
+                    data-testid="lifetime-smr-value"
+                    className="font-bold font-mono text-[var(--text-heading)] text-sm"
+                  >
                     {selectedMachine.latest_smu != null
                       ? `${Number(selectedMachine.latest_smu).toFixed(1)}h`
                       : '—'}
@@ -792,9 +793,11 @@ export function MachineOperationsForm({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Machine Dropdown */}
           <div className="space-y-1.5" data-field="machineId">
-            <label className={FORM_LABEL_CLASS}>
-              Machine <span className="text-accent-red">*</span>
-            </label>
+            <div className="flex min-h-[26px] items-center justify-between">
+              <label className={FORM_LABEL_CLASS}>
+                Machine <span className="text-accent-red">*</span>
+              </label>
+            </div>
             <select
               id="machineIdInput"
               name="machineId"
@@ -867,9 +870,11 @@ export function MachineOperationsForm({
 
           {/* Operator Dropdown */}
           <div className="space-y-1.5" data-field="operatorId">
-            <label className={FORM_LABEL_CLASS}>
-              Operator <span className="text-accent-red">*</span>
-            </label>
+            <div className="flex min-h-[26px] items-center justify-between">
+              <label className={FORM_LABEL_CLASS}>
+                Operator <span className="text-accent-red">*</span>
+              </label>
+            </div>
             <select
               id="operatorIdInput"
               name="operatorId"
@@ -891,9 +896,11 @@ export function MachineOperationsForm({
 
           {/* Site Dropdown */}
           <div className="space-y-1.5" data-field="siteId">
-            <label className={FORM_LABEL_CLASS}>
-              Site/Location <span className="text-accent-red">*</span>
-            </label>
+            <div className="flex min-h-[26px] items-center justify-between">
+              <label className={FORM_LABEL_CLASS}>
+                Site/Location <span className="text-accent-red">*</span>
+              </label>
+            </div>
             <select
               id="siteIdInput"
               name="siteId"
@@ -1046,9 +1053,6 @@ export function MachineOperationsForm({
                   </p>
                 </div>
               </div>
-              <span className="rounded-full border border-accent-green/20 bg-accent-green/10 px-2.5 py-0.5 font-medium text-[11px] text-accent-green">
-                Auto-Syncs to Drilling Dept
-              </span>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -1493,20 +1497,6 @@ export function MachineOperationsForm({
               )}
             </span>
           </button>
-        </div>
-
-        {/* Operational Guidance Callout (Static high-contrast white surface for maximum readability) */}
-        <div
-          role="note"
-          aria-label="SMR logging guidance"
-          className="flex items-start gap-3 rounded-lg border border-[var(--border-default)] border-l-4 border-l-[var(--accent-blue)] bg-white px-4 py-3 text-[13px] text-slate-900 leading-[18px] shadow-xs"
-        >
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-blue)]" aria-hidden="true" />
-          <p className="font-medium text-slate-900 leading-relaxed">
-            <span className="font-bold text-[var(--text-heading)]">Operational Tip:</span> Stop SMR
-            is optional at start of shift. You can record operations immediately and add closing SMR
-            later. Shift hours and telemetry calculate automatically.
-          </p>
         </div>
       </form>
 
