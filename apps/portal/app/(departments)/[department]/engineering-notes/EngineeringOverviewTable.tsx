@@ -6,7 +6,9 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
+  CloudRain,
   Gauge,
+  Lock,
   RotateCcw,
   Save,
   ShieldAlert,
@@ -26,12 +28,15 @@ import {
   type OverviewDelayKey,
   reconcileOverviewShiftHoursOnDelayChange,
   reconcileOverviewShiftHoursOnSmrChange,
+  reconcileShortShiftHours,
   STANDARD_OVERVIEW_DELAY_DEFAULTS,
   validateOverviewRowDelaysAndComment,
   validateSmrOdometerEntry,
 } from '@/lib/shift-sheet-buckets';
 import { bookOutMachineCarryOverBreakdown, saveMachineOverviewRow } from './actions';
+import { MachineLogFormModal, type MachineLogFormSavePayload } from './MachineLogFormModal';
 import { QuickDelayLoggerPanel } from './QuickDelayLoggerPanel';
+import { useWeatherNaturalDelayMonitor } from './useWeatherNaturalDelayMonitor';
 
 export interface CarryOverBreakdownInfo {
   id: string;
@@ -48,6 +53,7 @@ export interface MachineOverviewInitialRow {
   machineType: string;
   serialNumber: string | null;
   siteId: string | null;
+  siteName: string | null;
   startSmr: number;
   stopSmr: number;
   previousClosingSmr?: number;
@@ -81,16 +87,17 @@ interface EditableMachineRow extends MachineOverviewInitialRow {
 }
 
 const TH_BASE =
-  'whitespace-nowrap px-2.5 py-2.5 text-left font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider';
+  'whitespace-nowrap border border-slate-300/90 px-2.5 py-2.5 text-center align-middle font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider';
 const TH_NUM =
-  'whitespace-nowrap px-2 py-2.5 text-right font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider';
-const TD_BASE = 'whitespace-nowrap px-2.5 py-2 align-top text-xs';
-const INPUT_SMR_CLASS =
-  'w-24 rounded-md border border-[var(--border-default)] bg-white px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]';
+  'whitespace-nowrap border border-slate-300/90 px-2 py-2.5 text-center align-middle font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider';
+const TD_BASE =
+  'whitespace-nowrap border border-slate-300/90 px-2.5 py-2 text-center align-middle text-xs';
+const INPUT_READONLY_CLASS =
+  'w-24 cursor-not-allowed rounded-md border border-slate-300 bg-slate-100/90 px-2 py-1 text-center font-mono text-slate-700 text-xs';
 const SELECT_OP_CLASS =
-  'w-40 rounded-md border border-[var(--border-default)] bg-white px-2 py-1 text-[var(--text-heading)] text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]';
+  'w-40 rounded-md border border-[var(--border-default)] bg-white px-2 py-1 text-center text-[var(--text-heading)] text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]';
 const INPUT_COMMENT_BASE =
-  'w-56 rounded-md border bg-white px-2 py-1 text-[var(--text-heading)] text-xs focus:outline-none focus:ring-2';
+  'w-56 rounded-md border bg-white px-2 py-1 text-center text-[var(--text-heading)] text-xs focus:outline-none focus:ring-2';
 const BTN_PRIMARY =
   'inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-semibold text-white text-xs transition-opacity hover:opacity-90 disabled:opacity-50';
 const BTN_SECONDARY =
@@ -98,11 +105,11 @@ const BTN_SECONDARY =
 
 const DELAY_GROUP_TH_CLASS: Record<OverviewDelayGroup, string> = {
   production:
-    'whitespace-nowrap border-sky-500/20 border-x bg-sky-500/15 px-2 py-2.5 text-right font-bold text-[10px] text-sky-900 uppercase tracking-wider',
+    'whitespace-nowrap border border-slate-300/90 border-x border-x-sky-600/40 bg-sky-500/15 px-2 py-2.5 text-center align-middle font-bold text-[10px] text-sky-900 uppercase tracking-wider',
   nonProduction:
-    'whitespace-nowrap border-amber-500/20 border-x bg-amber-500/15 px-2 py-2.5 text-right font-bold text-[10px] text-amber-900 uppercase tracking-wider',
+    'whitespace-nowrap border border-slate-300/90 border-x border-x-amber-600/40 bg-amber-500/15 px-2 py-2.5 text-center align-middle font-bold text-[10px] text-amber-900 uppercase tracking-wider',
   engineering:
-    'whitespace-nowrap border-rose-500/20 border-x bg-rose-500/15 px-2 py-2.5 text-right font-bold text-[10px] text-rose-900 uppercase tracking-wider',
+    'whitespace-nowrap border border-slate-300/90 border-x border-x-rose-600/40 bg-rose-500/15 px-2 py-2.5 text-center align-middle font-bold text-[10px] text-rose-900 uppercase tracking-wider',
 };
 
 const DELAY_GROUP_STD_BADGE_CLASS: Record<OverviewDelayGroup, string> = {
@@ -113,20 +120,20 @@ const DELAY_GROUP_STD_BADGE_CLASS: Record<OverviewDelayGroup, string> = {
 
 const DELAY_GROUP_TD_CLASS: Record<OverviewDelayGroup, string> = {
   production:
-    'whitespace-nowrap border-sky-500/15 border-x bg-sky-500/5 px-2.5 py-2 text-right align-top text-xs',
+    'whitespace-nowrap border border-slate-300/90 border-x border-x-sky-600/40 bg-sky-50/5 px-2.5 py-2 text-center align-middle text-xs',
   nonProduction:
-    'whitespace-nowrap border-amber-500/15 border-x bg-amber-500/5 px-2.5 py-2 text-right align-top text-xs',
+    'whitespace-nowrap border border-slate-300/90 border-x border-x-amber-600/40 bg-amber-50/5 px-2.5 py-2 text-center align-middle text-xs',
   engineering:
-    'whitespace-nowrap border-rose-500/15 border-x bg-rose-500/5 px-2.5 py-2 text-right align-top text-xs',
+    'whitespace-nowrap border border-slate-300/90 border-x border-x-rose-600/40 bg-rose-50/5 px-2.5 py-2 text-center align-middle text-xs',
 };
 
 const DELAY_GROUP_INPUT_CLASS: Record<OverviewDelayGroup, string> = {
   production:
-    'w-16 rounded-md border border-sky-500/40 bg-sky-50/90 px-1.5 py-1 text-right font-mono text-sky-950 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500',
+    'w-16 rounded-md border border-sky-500/40 bg-sky-50/90 px-1.5 py-1 text-center font-mono text-sky-950 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500',
   nonProduction:
-    'w-16 rounded-md border border-amber-500/40 bg-amber-50/90 px-1.5 py-1 text-right font-mono text-amber-950 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500',
+    'w-16 rounded-md border border-amber-500/40 bg-amber-50/90 px-1.5 py-1 text-center font-mono text-amber-950 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500',
   engineering:
-    'w-16 rounded-md border border-rose-500/40 bg-rose-50/90 px-1.5 py-1 text-right font-mono text-rose-950 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500',
+    'w-16 rounded-md border border-rose-500/40 bg-rose-50/90 px-1.5 py-1 text-center font-mono text-rose-950 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500',
 };
 
 const DEFAULT_ALLOWANCE_COMMENT =
@@ -168,6 +175,8 @@ export function EngineeringOverviewTable({
   const [selectedTypeFilter, setSelectedTypeFilter] = useState('all');
   const [isSimplifiedView, setIsSimplifiedView] = useState(false);
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
+  const [timeUnit, setTimeUnit] = useState<'hours' | 'minutes'>('hours');
+  const [logFormModalMachineId, setLogFormModalMachineId] = useState<string | null>(null);
 
   const [rows, setRows] = useState<EditableMachineRow[]>(() =>
     initialRows.map((r) => ({
@@ -184,27 +193,66 @@ export function EngineeringOverviewTable({
     }))
   );
 
+  // Item 8: Weather-linked Natural Delays auto-monitor hook
+  const weatherMonitor = useWeatherNaturalDelayMonitor({
+    departmentId,
+    shiftDate,
+    shiftType,
+    onAutoLogNaturalDelay: (hours, reason) => {
+      setRows((prev) =>
+        prev.map((r) => {
+          if ((r.delays.natural ?? 0) >= hours) return r;
+          const reconciled = reconcileOverviewShiftHoursOnDelayChange({
+            startSmr: r.startSmr,
+            stopSmr: r.stopSmr,
+            delays: r.delays,
+            changedKey: 'natural',
+            nextDelayValue: hours,
+            maxShiftHours: MAX_SHIFT_HOURS,
+          });
+          const existingComment = r.comment.trim();
+          const autoComment = `[Weather Delay Auto-Monitor] ${reason}`;
+          const nextComment = existingComment ? `${existingComment}; ${autoComment}` : autoComment;
+          return {
+            ...r,
+            delays: reconciled.delays,
+            comment: nextComment,
+            saved: false,
+          };
+        })
+      );
+    },
+  });
+
   const updateRowSmr = (
     machineId: string,
     change: { field: 'startSmr' | 'stopSmr'; rawValue: string }
   ) => {
+    const targetRow = rows.find((r) => r.machineId === machineId);
+    if (!targetRow) return;
+
+    // Item 4: Start SMR is immutable when previousClosingSmr > 0
+    if (change.field === 'startSmr' && (targetRow.previousClosingSmr ?? 0) > 0) {
+      toast.error(`${targetRow.machineName}: Start SMR is immutable and cannot be edited.`);
+      return;
+    }
+
     const parsed = Number.parseFloat(change.rawValue);
     const val = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
-    const targetRow = rows.find((r) => r.machineId === machineId);
-    if (targetRow) {
-      const preview = reconcileOverviewShiftHoursOnSmrChange({
-        currentStartSmr: targetRow.startSmr,
-        currentStopSmr: targetRow.stopSmr,
-        changedField: change.field,
-        nextValue: val,
-        delays: targetRow.delays,
-        maxShiftHours: MAX_SHIFT_HOURS,
-        minAllowedStartSmr: targetRow.previousClosingSmr,
-      });
-      if (preview.smrViolation) {
-        toast.error(`${targetRow.machineName}: ${preview.smrViolation}`);
-      }
+
+    const preview = reconcileOverviewShiftHoursOnSmrChange({
+      currentStartSmr: targetRow.startSmr,
+      currentStopSmr: targetRow.stopSmr,
+      changedField: change.field,
+      nextValue: val,
+      delays: targetRow.delays,
+      maxShiftHours: MAX_SHIFT_HOURS,
+      minAllowedStartSmr: targetRow.previousClosingSmr,
+    });
+    if (preview.smrViolation) {
+      toast.error(`${targetRow.machineName}: ${preview.smrViolation}`);
     }
+
     setRows((prev) =>
       prev.map((r) => {
         if (r.machineId !== machineId) return r;
@@ -233,11 +281,34 @@ export function EngineeringOverviewTable({
     machineId: string,
     change: { key: OverviewDelayKey; rawValue: string }
   ) => {
+    // Item 11: Compulsory lunches locked at 0.5h
+    if (change.key === 'lunches') return;
+
     const parsed = Number.parseFloat(change.rawValue);
-    const val = Number.isNaN(parsed) ? 0 : Math.min(MAX_SHIFT_HOURS, Math.max(0, parsed));
+    const rawVal = Number.isNaN(parsed) ? 0 : Math.min(MAX_SHIFT_HOURS, Math.max(0, parsed));
+    // Item 12: Safety Talks min 0.5h
+    const val = change.key === 'safetyTalks' ? Math.max(0.5, rawVal) : rawVal;
+
+    const targetRow = rows.find((r) => r.machineId === machineId);
+
+    // Item 10: Site-Wide Blasting Delays Auto-Propagation notification
+    if (change.key === 'blasting' && targetRow?.siteId) {
+      const otherSiteMachines = rows.filter(
+        (r) => r.siteId === targetRow.siteId && r.machineId !== machineId
+      );
+      if (otherSiteMachines.length > 0) {
+        toast.info(
+          `Blasting delay (${val.toFixed(1)}h) auto-propagated to ${otherSiteMachines.length} other machine(s) across site.`
+        );
+      }
+    }
+
     setRows((prev) =>
       prev.map((r) => {
-        if (r.machineId !== machineId) return r;
+        const isTarget = r.machineId === machineId;
+        const isSameSite = targetRow?.siteId && r.siteId === targetRow.siteId;
+        if (!isTarget && (!isSameSite || change.key !== 'blasting')) return r;
+
         const reconciled = reconcileOverviewShiftHoursOnDelayChange({
           startSmr: r.startSmr,
           stopSmr: r.stopSmr,
@@ -251,8 +322,17 @@ export function EngineeringOverviewTable({
           !STANDARD_OVERVIEW_DELAY_DEFAULTS[change.key] ||
           Math.abs(appliedVal - STANDARD_OVERVIEW_DELAY_DEFAULTS[change.key]) >
             STRICT_HOURS_EPSILON;
-        const nextComment =
-          isAbnormalOrChanged && r.comment === DEFAULT_ALLOWANCE_COMMENT ? '' : r.comment;
+
+        let nextComment = r.comment;
+        if (isSameSite && !isTarget) {
+          const blastingNote = `Site blasting delay (${appliedVal.toFixed(1)}h)`;
+          nextComment =
+            r.comment && r.comment !== DEFAULT_ALLOWANCE_COMMENT
+              ? `${r.comment}; ${blastingNote}`
+              : blastingNote;
+        } else if (isAbnormalOrChanged && r.comment === DEFAULT_ALLOWANCE_COMMENT) {
+          nextComment = '';
+        }
 
         return {
           ...r,
@@ -441,7 +521,24 @@ export function EngineeringOverviewTable({
     const target = rows.find((r) => r.machineId === machineId);
     if (!target) return;
 
-    const validationError = validateSingleRow(target);
+    // Item 13: Auto-reconcile shortfall (50/50 split between refueling and gesMaintenance)
+    const reconciledShortfall = reconcileShortShiftHours({
+      startSmr: target.startSmr,
+      stopSmr: target.stopSmr,
+      delays: target.delays,
+      comment: target.comment,
+      maxShiftHours: MAX_SHIFT_HOURS,
+    });
+
+    const activeDelays = reconciledShortfall.delays;
+    const activeComment = reconciledShortfall.comment;
+    const candidateRow = {
+      ...target,
+      delays: activeDelays,
+      comment: activeComment,
+    };
+
+    const validationError = validateSingleRow(candidateRow);
     if (validationError) {
       setRows((prev) =>
         prev.map((r) => (r.machineId === machineId ? { ...r, error: validationError } : r))
@@ -464,13 +561,23 @@ export function EngineeringOverviewTable({
         startSmr: target.startSmr,
         stopSmr: target.stopSmr,
         operatorId: target.operatorId,
-        comment: target.comment.trim(),
+        comment: activeComment.trim(),
         endsOnBreakdown: target.endsOnBreakdown,
-        delays: target.delays,
+        delays: activeDelays,
       });
 
       setRows((prev) =>
-        prev.map((r) => (r.machineId === machineId ? { ...r, error: null, saved: true } : r))
+        prev.map((r) =>
+          r.machineId === machineId
+            ? {
+                ...r,
+                delays: activeDelays,
+                comment: activeComment,
+                error: null,
+                saved: true,
+              }
+            : r
+        )
       );
       toast.success(`Saved overview ledger for ${target.machineName}.`);
     } catch (err) {
@@ -484,14 +591,22 @@ export function EngineeringOverviewTable({
 
   const handleSaveAllRows = async () => {
     let hasErrors = false;
-    const validatedRows = rows.map((r) => {
-      const err = validateSingleRow(r);
+    const reconciledRows = rows.map((r) => {
+      const rec = reconcileShortShiftHours({
+        startSmr: r.startSmr,
+        stopSmr: r.stopSmr,
+        delays: r.delays,
+        comment: r.comment,
+        maxShiftHours: MAX_SHIFT_HOURS,
+      });
+      const candidateRow = { ...r, delays: rec.delays, comment: rec.comment };
+      const err = validateSingleRow(candidateRow);
       if (err) hasErrors = true;
-      return { ...r, error: err };
+      return { ...candidateRow, error: err };
     });
 
     if (hasErrors) {
-      setRows(validatedRows);
+      setRows(reconciledRows);
       toast.error(
         'Cannot save all rows: Every machine with a recorded delay must have a matching comment.'
       );
@@ -500,7 +615,7 @@ export function EngineeringOverviewTable({
 
     setIsSavingAll(true);
     try {
-      for (const row of rows) {
+      for (const row of reconciledRows) {
         await saveMachineOverviewRow({
           departmentId,
           machineId: row.machineId,
@@ -518,13 +633,73 @@ export function EngineeringOverviewTable({
           delays: row.delays,
         });
       }
-      setRows((prev) => prev.map((r) => ({ ...r, error: null, saved: true })));
+      setRows(reconciledRows.map((r) => ({ ...r, error: null, saved: true })));
       toast.success(`Saved all ${rows.length} fleet rows for ${shiftType.toUpperCase()} shift.`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to save fleet overview rows';
       toast.error(msg);
     } finally {
       setIsSavingAll(false);
+    }
+  };
+
+  const handleLogFormSave = async (payload: MachineLogFormSavePayload) => {
+    const target = rows.find((r) => r.machineId === payload.machineId);
+    if (!target) return;
+
+    const opObj = operators.find((op) => op.id === payload.operatorId);
+
+    const reconciledShortfall = reconcileShortShiftHours({
+      startSmr: target.startSmr,
+      stopSmr: payload.stopSmr,
+      delays: payload.delays,
+      comment: payload.comment,
+      maxShiftHours: MAX_SHIFT_HOURS,
+    });
+
+    setSavingMachineId(payload.machineId);
+    try {
+      await saveMachineOverviewRow({
+        departmentId,
+        machineId: target.machineId,
+        machineName: target.machineName,
+        machineType: target.machineType,
+        serialNumber: target.serialNumber,
+        siteId: target.siteId,
+        shiftDate,
+        shiftType,
+        startSmr: target.startSmr,
+        stopSmr: payload.stopSmr,
+        operatorId: payload.operatorId,
+        comment: reconciledShortfall.comment.trim(),
+        endsOnBreakdown: payload.endsOnBreakdown,
+        delays: reconciledShortfall.delays,
+      });
+
+      setRows((prev) =>
+        prev.map((r) =>
+          r.machineId === payload.machineId
+            ? {
+                ...r,
+                operatorId: payload.operatorId,
+                operatorName: opObj?.fullName ?? null,
+                stopSmr: payload.stopSmr,
+                delays: reconciledShortfall.delays,
+                comment: reconciledShortfall.comment,
+                endsOnBreakdown: payload.endsOnBreakdown,
+                error: null,
+                saved: true,
+              }
+            : r
+        )
+      );
+      setLogFormModalMachineId(null);
+      toast.success(`Saved log form for ${target.machineName}.`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to save log form';
+      toast.error(msg);
+    } finally {
+      setSavingMachineId(null);
     }
   };
 
@@ -978,6 +1153,21 @@ export function EngineeringOverviewTable({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                data-testid="time-unit-toggle"
+                onClick={() => setTimeUnit((prev) => (prev === 'hours' ? 'minutes' : 'hours'))}
+                className="gold-steel-border inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-white px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs hover:bg-[var(--bg-secondary)]"
+              >
+                <Clock className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+                <span>Time Unit: {timeUnit === 'hours' ? 'Hours (h)' : 'Minutes (m)'}</span>
+              </button>
+              <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+                0.5h = 30m · 0.2h = 12m
+              </span>
+            </div>
+
             <select
               aria-label="Shift Type"
               value={shiftType}
@@ -1043,8 +1233,8 @@ export function EngineeringOverviewTable({
       {!isTableCollapsed && (
         <GlassCard className="overflow-hidden p-0 transition-all duration-300">
           <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse text-left text-xs">
-              <thead className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/80">
+            <table className="min-w-full border-collapse border border-slate-400/70 text-center text-xs">
+              <thead className="border-slate-400/70 border-b bg-[var(--bg-secondary)]/80">
                 <tr>
                   <th className={TH_BASE}>Machine ID</th>
                   <th className={TH_NUM}>Start SMR</th>
@@ -1057,9 +1247,33 @@ export function EngineeringOverviewTable({
                       className={DELAY_GROUP_TH_CLASS[col.delayGroup]}
                     >
                       <div>{col.label}</div>
+                      {col.key === 'other' && (
+                        <div
+                          title="External / Non-Site (e.g. DMRE)"
+                          className="font-normal text-[9px] text-amber-900"
+                        >
+                          External / Non-Site (e.g. DMRE)
+                        </div>
+                      )}
+                      {col.key === 'natural' && weatherMonitor.isWeatherLinked && (
+                        <div
+                          data-testid="weather-linked-badge"
+                          title={
+                            weatherMonitor.weatherAlertMessage ??
+                            'Weather Linked: Natural delay monitor active'
+                          }
+                          className="mt-0.5 inline-flex items-center gap-1 rounded bg-amber-500/20 px-1 py-0.2 font-semibold text-[9px] text-amber-900"
+                        >
+                          <CloudRain className="h-2.5 w-2.5" />
+                          Weather Linked
+                        </div>
+                      )}
                       {col.isStandardAllowance && (
                         <div className={DELAY_GROUP_STD_BADGE_CLASS[col.delayGroup]}>
-                          std {col.standardDefault.toFixed(1)}h
+                          std{' '}
+                          {timeUnit === 'minutes'
+                            ? `${Math.round(col.standardDefault * 60)}m`
+                            : `${col.standardDefault.toFixed(1)}h`}
                         </div>
                       )}
                     </th>
@@ -1071,7 +1285,7 @@ export function EngineeringOverviewTable({
                   <th className={TH_BASE}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border-subtle)] bg-white/80">
+              <tbody className="divide-y divide-slate-300/90 bg-white/80">
                 {filteredRows.map((row) => {
                   const metrics = computeMachineOverviewMetrics(
                     row.startSmr,
@@ -1103,19 +1317,17 @@ export function EngineeringOverviewTable({
                           </div>
                           <button
                             type="button"
-                            onClick={() => setSelectedQuickMachineId(row.machineId)}
+                            data-testid={`open-log-form-btn-${row.machineId}`}
+                            onClick={() => setLogFormModalMachineId(row.machineId)}
                             className="cursor-pointer rounded border border-[var(--accent-blue)]/35 bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/20"
                           >
-                            Quick Log
+                            Log Form
                           </button>
                         </div>
                         <div className="text-[10px] text-[var(--text-secondary)]">
                           {row.serialNumber ? `${row.serialNumber} · ` : ''}
                           {row.machineType}
-                        </div>
-                        <div className="mt-0.5 font-mono text-[10px] text-[var(--text-secondary)]">
-                          Max {MAX_SHIFT_HOURS}.0h · {metrics.maxProductionAllowedHours.toFixed(1)}h
-                          prod left · {metrics.maxDelaysAllowedHours.toFixed(1)}h max delays
+                          {row.siteName ? ` · ${row.siteName}` : ''}
                         </div>
                         {row.carryOverBreakdown && (
                           <div className="mt-1 inline-flex items-center gap-1 rounded border border-red-500/30 bg-red-500/10 px-1.5 py-0.5 font-semibold text-[10px] text-red-600">
@@ -1128,55 +1340,64 @@ export function EngineeringOverviewTable({
                       </td>
 
                       {/* 2. Start SMR */}
-                      <td className={`${TD_BASE} text-right`}>
-                        <input
-                          type="number"
-                          step="0.1"
-                          min={row.previousClosingSmr}
-                          aria-label={`Start SMR ${row.machineName}`}
-                          value={row.startSmr}
-                          onChange={(e) =>
-                            updateRowSmr(row.machineId, {
-                              field: 'startSmr',
-                              rawValue: e.target.value,
-                            })
-                          }
-                          className={INPUT_SMR_CLASS}
-                        />
+                      <td className={TD_BASE}>
+                        <div className="flex items-center justify-center gap-1">
+                          <Lock className="h-3 w-3 text-slate-400" />
+                          <input
+                            type="number"
+                            readOnly
+                            aria-readonly="true"
+                            aria-label={`Start SMR ${row.machineName}`}
+                            value={
+                              timeUnit === 'minutes' ? Math.round(row.startSmr * 60) : row.startSmr
+                            }
+                            className={INPUT_READONLY_CLASS}
+                          />
+                        </div>
                       </td>
 
-                      {/* 3. Stop SMR */}
-                      <td className={`${TD_BASE} text-right`}>
+                      {/* 3. Stop SMR (Non-editable in table) */}
+                      <td className={TD_BASE}>
                         <input
                           type="number"
-                          step="0.1"
-                          min={row.startSmr}
-                          max={Number((row.startSmr + MAX_SHIFT_HOURS).toFixed(DECIMAL_PLACES_TWO))}
+                          readOnly
+                          aria-readonly="true"
+                          title="Editable in Log Form or Quick Logger"
                           aria-label={`Stop SMR ${row.machineName}`}
-                          value={row.stopSmr}
-                          onChange={(e) =>
-                            updateRowSmr(row.machineId, {
-                              field: 'stopSmr',
-                              rawValue: e.target.value,
-                            })
+                          value={
+                            timeUnit === 'minutes' ? Math.round(row.stopSmr * 60) : row.stopSmr
                           }
-                          className={INPUT_SMR_CLASS}
+                          className={INPUT_READONLY_CLASS}
                         />
                       </td>
 
                       {/* 4. Total SMR Worked */}
-                      <td
-                        className={`${TD_BASE} text-right font-bold font-mono text-[var(--accent-blue)]`}
-                      >
-                        <div>{metrics.totalSmrWorked.toFixed(1)}h</div>
+                      <td className={`${TD_BASE} font-bold font-mono text-[var(--accent-blue)]`}>
+                        <div>
+                          {timeUnit === 'minutes'
+                            ? `${Math.round(metrics.totalSmrWorked * 60)}m`
+                            : `${metrics.totalSmrWorked.toFixed(1)}h`}
+                        </div>
                         <div className="font-normal text-[10px] text-[var(--text-secondary)]">
-                          {metrics.maxDelaysAllowedHours.toFixed(1)}h delay cap
+                          {timeUnit === 'minutes'
+                            ? `${Math.round(metrics.maxDelaysAllowedHours * 60)}m delay cap`
+                            : `${metrics.maxDelaysAllowedHours.toFixed(1)}h delay cap`}
                         </div>
                       </td>
 
                       {/* 5..16. Visible Delay Columns */}
                       {visibleDelayColumns.map((col) => {
                         const val = row.delays[col.key] ?? 0;
+                        const isLunch = col.key === 'lunches';
+                        const isSafetyTalks = col.key === 'safetyTalks';
+                        const displayVal = isLunch
+                          ? timeUnit === 'minutes'
+                            ? 30
+                            : 0.5
+                          : timeUnit === 'minutes'
+                            ? Math.round(val * 60)
+                            : val;
+
                         return (
                           <td
                             key={col.key}
@@ -1185,18 +1406,36 @@ export function EngineeringOverviewTable({
                           >
                             <input
                               type="number"
-                              step="0.1"
-                              min="0"
-                              max={metrics.maxDelaysAllowedHours}
+                              step={timeUnit === 'minutes' ? 1 : 0.1}
+                              min={isSafetyTalks ? (timeUnit === 'minutes' ? 30 : 0.5) : 0}
+                              max={
+                                timeUnit === 'minutes'
+                                  ? Math.round(metrics.maxDelaysAllowedHours * 60)
+                                  : metrics.maxDelaysAllowedHours
+                              }
+                              readOnly={isLunch}
+                              aria-readonly={isLunch ? 'true' : 'false'}
+                              title={isLunch ? 'Compulsory lunch locked at 0.5h' : col.label}
                               aria-label={`${col.label} ${row.machineName}`}
-                              value={val}
-                              onChange={(e) =>
+                              value={displayVal}
+                              onChange={(e) => {
+                                if (isLunch) return;
+                                const parsed = Number.parseFloat(e.target.value);
+                                const rawHours = Number.isNaN(parsed)
+                                  ? 0
+                                  : timeUnit === 'minutes'
+                                    ? Number((parsed / 60).toFixed(2))
+                                    : parsed;
                                 updateRowDelay(row.machineId, {
                                   key: col.key,
-                                  rawValue: e.target.value,
-                                })
+                                  rawValue: String(rawHours),
+                                });
+                              }}
+                              className={
+                                isLunch
+                                  ? `${INPUT_READONLY_CLASS} w-16`
+                                  : DELAY_GROUP_INPUT_CLASS[col.delayGroup]
                               }
-                              className={DELAY_GROUP_INPUT_CLASS[col.delayGroup]}
                             />
                           </td>
                         );
@@ -1273,7 +1512,7 @@ export function EngineeringOverviewTable({
                       </td>
 
                       {/* 19. Availability (%) */}
-                      <td className={`${TD_BASE} text-right font-bold font-mono`}>
+                      <td className={`${TD_BASE} font-bold font-mono`}>
                         <span
                           className={
                             metrics.availabilityPercent >= HIGH_AVAILABILITY_THRESHOLD
@@ -1286,12 +1525,14 @@ export function EngineeringOverviewTable({
                           {metrics.availabilityPercent.toFixed(1)}%
                         </span>
                         <div className="font-normal text-[10px] text-[var(--text-secondary)]">
-                          {metrics.availableHours.toFixed(1)}h avail
+                          {timeUnit === 'minutes'
+                            ? `${Math.round(metrics.availableHours * 60)}m avail`
+                            : `${metrics.availableHours.toFixed(1)}h avail`}
                         </div>
                       </td>
 
                       {/* 20. Utilization (%) */}
-                      <td className={`${TD_BASE} text-right font-bold font-mono`}>
+                      <td className={`${TD_BASE} font-bold font-mono`}>
                         <span
                           className={
                             metrics.utilizationPercent >= HIGH_UTILIZATION_THRESHOLD
@@ -1304,12 +1545,23 @@ export function EngineeringOverviewTable({
                           {metrics.utilizationPercent.toFixed(1)}%
                         </span>
                         <div className="font-normal text-[10px] text-[var(--text-secondary)]">
-                          {metrics.totalDelayHours.toFixed(1)}h delays
+                          {timeUnit === 'minutes'
+                            ? `${Math.round(metrics.totalDelayHours * 60)}m delays`
+                            : `${metrics.totalDelayHours.toFixed(1)}h delays`}
                         </div>
                         <div className="font-normal text-[9px] text-[var(--text-secondary)]">
-                          P:{metrics.productionDelayHours.toFixed(1)}h · N:
-                          {metrics.nonProductionDelayHours.toFixed(1)}h · E:
-                          {metrics.engineeringDelayHours.toFixed(1)}h
+                          P:
+                          {timeUnit === 'minutes'
+                            ? `${Math.round(metrics.productionDelayHours * 60)}m`
+                            : `${metrics.productionDelayHours.toFixed(1)}h`}{' '}
+                          · N:
+                          {timeUnit === 'minutes'
+                            ? `${Math.round(metrics.nonProductionDelayHours * 60)}m`
+                            : `${metrics.nonProductionDelayHours.toFixed(1)}h`}{' '}
+                          · E:
+                          {timeUnit === 'minutes'
+                            ? `${Math.round(metrics.engineeringDelayHours * 60)}m`
+                            : `${metrics.engineeringDelayHours.toFixed(1)}h`}
                         </div>
                       </td>
 
@@ -1362,6 +1614,36 @@ export function EngineeringOverviewTable({
           </div>
         </GlassCard>
       )}
+
+      {/* Item 1: Machine Log Form Modal */}
+      {(() => {
+        const activeModalRow = rows.find((r) => r.machineId === logFormModalMachineId);
+        if (!activeModalRow) return null;
+        return (
+          <MachineLogFormModal
+            isOpen={Boolean(activeModalRow)}
+            onClose={() => setLogFormModalMachineId(null)}
+            row={{
+              machineId: activeModalRow.machineId,
+              machineName: activeModalRow.machineName,
+              machineType: activeModalRow.machineType,
+              serialNumber: activeModalRow.serialNumber,
+              startSmr: activeModalRow.startSmr,
+              stopSmr: activeModalRow.stopSmr,
+              previousClosingSmr: activeModalRow.previousClosingSmr,
+              operatorId: activeModalRow.operatorId,
+              operatorName: activeModalRow.operatorName,
+              delays: activeModalRow.delays,
+              comment: activeModalRow.comment,
+              endsOnBreakdown: activeModalRow.endsOnBreakdown,
+              saved: activeModalRow.saved,
+            }}
+            operators={operators}
+            onSave={handleLogFormSave}
+            isSaving={savingMachineId === activeModalRow.machineId}
+          />
+        );
+      })()}
     </div>
   );
 }

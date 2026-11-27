@@ -514,6 +514,11 @@ export default async function EngineeringNotesPage({
     const existingOp = opByMachineId.get(m.id);
     const carryOver = activeBreakdownByMachineId.get(m.id) ?? null;
     const defaultStartSmr = latestSmrByMachine.get(m.id) ?? 0;
+    const sitesRaw = (m as { sites?: unknown }).sites;
+    const siteObj = Array.isArray(sitesRaw)
+      ? (sitesRaw[0] as { name?: string } | undefined)
+      : (sitesRaw as { name?: string } | null | undefined);
+    const siteName = siteObj?.name ?? null;
 
     if (existingOp) {
       const delays = createZeroOverviewDelays();
@@ -565,6 +570,7 @@ export default async function EngineeringNotesPage({
         machineType: m.machine_type,
         serialNumber: m.serial_number ?? null,
         siteId: (m as { site_id?: string | null }).site_id ?? null,
+        siteName,
         startSmr,
         stopSmr,
         previousClosingSmr: defaultStartSmr,
@@ -593,6 +599,7 @@ export default async function EngineeringNotesPage({
       machineType: m.machine_type,
       serialNumber: m.serial_number ?? null,
       siteId: (m as { site_id?: string | null }).site_id ?? null,
+      siteName,
       startSmr: defaultStartSmr,
       stopSmr: defaultStartSmr,
       previousClosingSmr: defaultStartSmr,

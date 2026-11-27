@@ -407,19 +407,31 @@ function trimDelaysToMaxBudget(
   let excess = Number((sumOverviewDelays(nextDelays) - maxTotalDelays).toFixed(2));
   if (excess <= 0) return nextDelays;
 
-  const standardAllowanceColsReversed = [...OVERVIEW_DELAY_COLUMNS]
-    .filter((c) => c.isStandardAllowance && c.key !== protectedKey)
-    .reverse();
-
-  for (const col of standardAllowanceColsReversed) {
-    if (excess <= 0) break;
-    const current = Number(nextDelays[col.key] ?? 0);
-    if (current <= 0) continue;
+  // 1. Refueling Priority Trimming: Trim refueling FIRST (down to 0) before engineering standard allowances
+  if (protectedKey !== 'refueling' && (nextDelays.refueling ?? 0) > 0) {
+    const current = Number(nextDelays.refueling ?? 0);
     const cut = Math.min(current, excess);
-    nextDelays[col.key] = Number((current - cut).toFixed(2));
+    nextDelays.refueling = Number((current - cut).toFixed(2));
     excess = Number((excess - cut).toFixed(2));
   }
 
+  // 2. Trim engineering standard allowances (tyresTracks, greasingStartups, gesMaintenance) while protecting lunches & safetyTalks
+  const engineeringStandardKeys: OverviewDelayKey[] = [
+    'greasingStartups',
+    'tyresTracks',
+    'gesMaintenance',
+  ];
+  for (const key of engineeringStandardKeys) {
+    if (excess <= 0) break;
+    if (key === protectedKey) continue;
+    const current = Number(nextDelays[key] ?? 0);
+    if (current <= 0) continue;
+    const cut = Math.min(current, excess);
+    nextDelays[key] = Number((current - cut).toFixed(2));
+    excess = Number((excess - cut).toFixed(2));
+  }
+
+  // 3. Trim other non-standard columns in reverse order (excluding protectedKey)
   if (excess > 0) {
     const otherColsReversed = [...OVERVIEW_DELAY_COLUMNS]
       .filter((c) => !c.isStandardAllowance && c.key !== protectedKey)
@@ -432,6 +444,30 @@ function trimDelaysToMaxBudget(
       nextDelays[col.key] = Number((current - cut).toFixed(2));
       excess = Number((excess - cut).toFixed(2));
     }
+  }
+
+  // 4. Trim safety talks down to min 0.5h if excess remains
+  if (excess > 0 && protectedKey !== 'safetyTalks' && (nextDelays.safetyTalks ?? 0) > 0.5) {
+    const current = Number(nextDelays.safetyTalks ?? 0);
+    const trimCapacity = current - 0.5;
+    const cut = Math.min(trimCapacity, excess);
+    nextDelays.safetyTalks = Number((current - cut).toFixed(2));
+    excess = Number((excess - cut).toFixed(2));
+  }
+
+  // 5. Unavoidable trim (e.g. shift worked > 11.5h): safety talks down to 0, then compulsory lunches down to 0
+  if (excess > 0 && protectedKey !== 'safetyTalks' && (nextDelays.safetyTalks ?? 0) > 0) {
+    const current = Number(nextDelays.safetyTalks ?? 0);
+    const cut = Math.min(current, excess);
+    nextDelays.safetyTalks = Number((current - cut).toFixed(2));
+    excess = Number((excess - cut).toFixed(2));
+  }
+
+  if (excess > 0 && protectedKey !== 'lunches' && (nextDelays.lunches ?? 0) > 0) {
+    const current = Number(nextDelays.lunches ?? 0);
+    const cut = Math.min(current, excess);
+    nextDelays.lunches = Number((current - cut).toFixed(2));
+    excess = Number((excess - cut).toFixed(2));
   }
 
   return nextDelays;
@@ -664,7 +700,17 @@ export function reconcileOverviewShiftHoursOnDelayChange(params: {
 
   const workedHours = Math.min(maxShiftHours, Math.max(0, Number((stopSmr - startSmr).toFixed(2))));
   const maxDelaysAllowed = Math.max(0, Number((maxShiftHours - workedHours).toFixed(2)));
-  const requested = Math.min(maxDelaysAllowed, Math.max(0, Number(nextDelayValue.toFixed(2))));
+  let requested = Math.min(maxDelaysAllowed, Math.max(0, Number(nextDelayValue.toFixed(2))));
+
+  // Item 11: Compulsory lunches locked at 0.5h (unless shift delay budget is less)
+  if (changedKey === 'lunches') {
+    requested = Math.min(maxDelaysAllowed, 0.5);
+  }
+
+  // Item 12: Safety talks minimum 0.5h (can only increase above 0.5h)
+  if (changedKey === 'safetyTalks') {
+    requested = Math.min(maxDelaysAllowed, Math.max(0.5, requested));
+  }
 
   let candidateDelays: OverviewDelayHours = {
     ...delays,
@@ -801,4 +847,64 @@ export function buildCarryOverBreakdownDelays(params: {
     nextDelayValue: targetBreakdownHours,
     maxShiftHours: MAX_SHIFT_HOURS,
   }).delays;
+}
+
+/**
+ * Reconciles short shift hours (stopSmr > startSmr and worked + delays < 12h)
+ * by performing a 50/50 split of the shortfall between Refueling and GES/Maintenance (GET under Engineering),
+ * and appending an automated comment audit note.
+ */
+export function reconcileShortShiftHours(params: {
+  startSmr: number;
+  stopSmr: number;
+  delays: OverviewDelayHours;
+  comment?: string;
+  maxShiftHours?: number;
+}): {
+  delays: OverviewDelayHours;
+  comment: string;
+  shortfallHours: number;
+} {
+  const { startSmr, stopSmr, delays, comment = '', maxShiftHours = MAX_SHIFT_HOURS } = params;
+
+  if (stopSmr <= startSmr) {
+    return {
+      delays: { ...delays },
+      comment,
+      shortfallHours: 0,
+    };
+  }
+
+  const workedHours = Number((stopSmr - startSmr).toFixed(DECIMAL_PLACES_TWO));
+  const totalDelays = sumOverviewDelays(delays);
+  const combined = Number((workedHours + totalDelays).toFixed(DECIMAL_PLACES_TWO));
+  const shortfallHours = Number((maxShiftHours - combined).toFixed(DECIMAL_PLACES_TWO));
+
+  if (shortfallHours <= 0.01) {
+    return {
+      delays: { ...delays },
+      comment,
+      shortfallHours: 0,
+    };
+  }
+
+  // 50/50 split of the shortfall between refueling and gesMaintenance (GET under Engineering)
+  const half = Number((shortfallHours / 2).toFixed(DECIMAL_PLACES_TWO));
+  const refuelAdd = half;
+  const gesAdd = Number((shortfallHours - half).toFixed(DECIMAL_PLACES_TWO));
+
+  const nextDelays: OverviewDelayHours = {
+    ...delays,
+    refueling: Number(((delays.refueling ?? 0) + refuelAdd).toFixed(DECIMAL_PLACES_TWO)),
+    gesMaintenance: Number(((delays.gesMaintenance ?? 0) + gesAdd).toFixed(DECIMAL_PLACES_TWO)),
+  };
+
+  const shortfallNote = `[Shift Shortfall 50/50 Reconciled: +${refuelAdd.toFixed(1)}h Refueling, +${gesAdd.toFixed(1)}h GES/Maintenance]`;
+  const nextComment = comment.trim() ? `${comment.trim()} ${shortfallNote}` : shortfallNote;
+
+  return {
+    delays: nextDelays,
+    comment: nextComment,
+    shortfallHours,
+  };
 }

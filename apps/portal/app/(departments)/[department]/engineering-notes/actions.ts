@@ -222,6 +222,16 @@ export async function saveMachineOverviewRow(payload: unknown) {
       ? Number(prevOpRow.end_smu)
       : null;
 
+  if (previousClosingSmr !== null && Math.abs(row.startSmr - previousClosingSmr) > 0.01) {
+    throw new ValidationError('Start SMR is immutable and must match previous shift closing SMR.', {
+      context: {
+        machineId: row.machineId,
+        startSmr: row.startSmr,
+        previousClosingSmr,
+      },
+    });
+  }
+
   const smrOdometerCheck = validateSmrOdometerEntry({
     startSmr: row.startSmr,
     stopSmr: row.stopSmr,

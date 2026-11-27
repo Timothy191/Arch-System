@@ -5,11 +5,11 @@ import {
   CheckCircle2,
   Clock,
   Filter,
+  Lock,
   PlusCircle,
   Save,
   Search,
   Sparkles,
-  Wrench,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
@@ -102,6 +102,7 @@ const QUICK_COMMENT_TEMPLATES: Readonly<Record<OverviewDelayGroup, readonly stri
     'Extended refueling & fluid top-up',
   ],
   nonProduction: [
+    'External DMRE safety stoppage & inspection hold',
     'Heavy rain & poor pit visibility hold',
     'Lightning warning safety stand-down',
     'Haul road watering / grading clearance',
@@ -296,22 +297,17 @@ export function QuickDelayLoggerPanel({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="mb-1 block font-semibold text-[11px] text-[var(--text-secondary)]">
+                <label className="mb-1 flex items-center gap-1 font-semibold text-[11px] text-[var(--text-secondary)]">
+                  <Lock className="h-3 w-3 text-slate-500" />
                   Start SMR (h)
                 </label>
                 <input
                   type="number"
-                  step="0.1"
-                  min={selectedRow.previousClosingSmr ?? 0}
+                  readOnly
+                  aria-readonly="true"
                   aria-label="Quick Start SMR"
                   value={selectedRow.startSmr}
-                  onChange={(e) =>
-                    onUpdateSmr(selectedRow.machineId, {
-                      field: 'startSmr',
-                      rawValue: e.target.value,
-                    })
-                  }
-                  className={`${INPUT_CONTROL_BASE} font-mono`}
+                  className="w-full cursor-not-allowed rounded-lg border border-slate-300 bg-slate-100/90 px-2.5 py-1.5 font-mono text-slate-700 text-xs"
                 />
               </div>
               <div>
@@ -425,51 +421,64 @@ export function QuickDelayLoggerPanel({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <label className="font-semibold text-[var(--text-heading)] text-xs">
                   {activeColumnMeta.label} Hours:
+                  {activeColumnMeta.key === 'lunches' && ' (Locked at 0.5h)'}
+                  {activeColumnMeta.key === 'safetyTalks' && ' (Min 0.5h)'}
                 </label>
                 <div className="flex items-center gap-1.5">
                   <input
                     type="number"
                     step="0.1"
-                    min="0"
+                    min={activeColumnMeta.key === 'safetyTalks' ? 0.5 : 0}
                     max={metrics.maxDelaysAllowedHours}
+                    readOnly={activeColumnMeta.key === 'lunches'}
+                    aria-readonly={activeColumnMeta.key === 'lunches' ? 'true' : 'false'}
                     aria-label="Quick Delay Hours"
-                    value={currentDelayVal}
-                    onChange={(e) =>
+                    value={activeColumnMeta.key === 'lunches' ? 0.5 : currentDelayVal}
+                    onChange={(e) => {
+                      if (activeColumnMeta.key === 'lunches') return;
                       onUpdateDelay(selectedRow.machineId, {
                         key: activeColumnMeta.key,
                         rawValue: e.target.value,
-                      })
-                    }
-                    className="w-20 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-1 text-right font-bold font-mono text-[var(--text-heading)] text-xs"
+                      });
+                    }}
+                    className={`w-20 rounded-md border border-[var(--border-default)] px-2 py-1 text-right font-bold font-mono text-xs ${
+                      activeColumnMeta.key === 'lunches'
+                        ? 'cursor-not-allowed bg-slate-100 text-slate-600'
+                        : 'bg-[var(--bg-secondary)] text-[var(--text-heading)]'
+                    }`}
                   />
                   <span className="font-mono text-[11px] text-[var(--text-secondary)]">hrs</span>
                 </div>
               </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-1">
-                <span className="mr-1 font-medium text-[10px] text-[var(--text-secondary)]">
-                  Quick tap:
-                </span>
-                {DURATION_PRESETS.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() =>
-                      onUpdateDelay(selectedRow.machineId, {
-                        key: activeColumnMeta.key,
-                        rawValue: String(preset),
-                      })
-                    }
-                    className={`cursor-pointer rounded border px-2 py-0.5 font-mono font-semibold text-[11px] transition-colors ${
-                      Math.abs(currentDelayVal - preset) < ALLOWANCE_DIFF_EPSILON
-                        ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)] text-white'
-                        : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] hover:border-[var(--accent-blue)]/50'
-                    }`}
-                  >
-                    {preset === 0 ? '0h' : `${preset.toFixed(1)}h`}
-                  </button>
-                ))}
-              </div>
+              {activeColumnMeta.key !== 'lunches' && (
+                <div className="mt-2 flex flex-wrap items-center gap-1">
+                  <span className="mr-1 font-medium text-[10px] text-[var(--text-secondary)]">
+                    Quick tap:
+                  </span>
+                  {DURATION_PRESETS.filter((p) =>
+                    activeColumnMeta.key === 'safetyTalks' ? p >= 0.5 : true
+                  ).map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() =>
+                        onUpdateDelay(selectedRow.machineId, {
+                          key: activeColumnMeta.key,
+                          rawValue: String(preset),
+                        })
+                      }
+                      className={`cursor-pointer rounded border px-2 py-0.5 font-mono font-semibold text-[11px] transition-colors ${
+                        Math.abs(currentDelayVal - preset) < ALLOWANCE_DIFF_EPSILON
+                          ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)] text-white'
+                          : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] hover:border-[var(--accent-blue)]/50'
+                      }`}
+                    >
+                      {preset === 0 ? '0h' : `${preset.toFixed(1)}h`}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Active Non-Standard Delays Summary */}
@@ -571,45 +580,49 @@ export function QuickDelayLoggerPanel({
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-1">
-            <Filter className="mr-0.5 h-3.5 w-3.5 text-[var(--text-muted)]" />
-            <button
-              type="button"
-              onClick={() => onTypeFilterChange('all')}
-              className={`${PILL_BTN_BASE} ${
-                selectedTypeFilter === 'all'
-                  ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)] text-white'
-                  : 'border-[var(--border-default)] bg-white text-[var(--text-secondary)]'
-              }`}
+          <div className="flex items-center gap-1.5">
+            <Filter className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+            <select
+              data-testid="fleet-category-dropdown"
+              aria-label="Fleet category filter"
+              value={
+                selectedTypeFilter === 'all' || selectedTypeFilter === 'abnormal'
+                  ? selectedTypeFilter
+                  : `type:${selectedTypeFilter}`
+              }
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val.startsWith('machine:')) {
+                  const mId = val.replace('machine:', '');
+                  onSelectMachine(mId);
+                  const matched = rows.find((r) => r.machineId === mId);
+                  if (matched) {
+                    onTypeFilterChange(matched.machineType || 'Other');
+                  }
+                } else if (val.startsWith('type:')) {
+                  onTypeFilterChange(val.replace('type:', ''));
+                } else {
+                  onTypeFilterChange(val);
+                }
+              }}
+              className="rounded-lg border border-[var(--border-default)] bg-white px-3 py-1 font-semibold text-[var(--text-heading)] text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
             >
-              All ({rows.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => onTypeFilterChange('abnormal')}
-              className={`${PILL_BTN_BASE} ${
-                selectedTypeFilter === 'abnormal'
-                  ? 'border-amber-600 bg-amber-600 text-white'
-                  : 'border-amber-500/35 bg-amber-500/10 text-amber-900'
-              }`}
-            >
-              <Wrench className="mr-1 inline h-3 w-3" />
-              Delays / Breakdowns ({abnormalRowCount})
-            </button>
-            {machineTypes.map(([typeLabel, count]) => (
-              <button
-                key={typeLabel}
-                type="button"
-                onClick={() => onTypeFilterChange(typeLabel)}
-                className={`${PILL_BTN_BASE} ${
-                  selectedTypeFilter === typeLabel
-                    ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)] text-white'
-                    : 'border-[var(--border-default)] bg-white text-[var(--text-secondary)]'
-                }`}
-              >
-                {typeLabel} ({count})
-              </button>
-            ))}
+              <option value="all">All ({rows.length})</option>
+              <option value="abnormal">Delays / Breakdowns ({abnormalRowCount})</option>
+              {machineTypes.map(([typeLabel, count]) => {
+                const machinesOfType = rows.filter((r) => (r.machineType || 'Other') === typeLabel);
+                return (
+                  <optgroup key={typeLabel} label={`${typeLabel} (${count})`}>
+                    <option value={`type:${typeLabel}`}>All {typeLabel}s</option>
+                    {machinesOfType.map((m) => (
+                      <option key={m.machineId} value={`machine:${m.machineId}`}>
+                        {m.machineName}
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
+            </select>
           </div>
         </div>
 

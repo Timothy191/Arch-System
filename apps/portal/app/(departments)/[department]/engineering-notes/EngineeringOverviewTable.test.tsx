@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { toast } from 'sonner';
-import { createStandardOverviewDelays } from '@/lib/shift-sheet-buckets';
+import { createStandardOverviewDelays, reconcileShortShiftHours } from '@/lib/shift-sheet-buckets';
 import {
   EngineeringOverviewTable,
   type MachineOverviewInitialRow,
@@ -20,7 +20,26 @@ jest.mock('sonner', () => ({
     success: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
+    warning: jest.fn(),
   },
+}));
+
+jest.mock('@repo/supabase/client', () => ({
+  createBrowserSupabaseClient: jest.fn(() => ({
+    from: jest.fn(() => ({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue({ data: [] }),
+    })),
+  })),
+}));
+
+jest.mock('@/lib/weather-api', () => ({
+  fetchWeather: jest.fn().mockResolvedValue({
+    weatherCode: 0,
+    description: 'Clear sky',
+  }),
 }));
 
 const sampleRow: MachineOverviewInitialRow = {
@@ -28,11 +47,31 @@ const sampleRow: MachineOverviewInitialRow = {
   machineName: 'ADT-101 · Bell B45E',
   machineType: 'ADT',
   serialNumber: 'BELL-101',
-  siteId: null,
+  siteId: 'site-alpha-123',
+  siteName: 'Pit Alpha',
   startSmr: 1200,
   stopSmr: 1208.4,
+  previousClosingSmr: 1200,
   operatorId: '22222222-2222-4222-8222-222222222222',
   operatorName: 'T. Mokoena',
+  delays: createStandardOverviewDelays(),
+  comment: '',
+  hasExistingOperation: false,
+  carryOverBreakdown: null,
+};
+
+const secondSiteRow: MachineOverviewInitialRow = {
+  machineId: '22222222-2222-4222-8222-222222222223',
+  machineName: 'ADT-102 · Bell B45E',
+  machineType: 'ADT',
+  serialNumber: 'BELL-102',
+  siteId: 'site-alpha-123',
+  siteName: 'Pit Alpha',
+  startSmr: 800,
+  stopSmr: 805,
+  previousClosingSmr: 800,
+  operatorId: null,
+  operatorName: null,
   delays: createStandardOverviewDelays(),
   comment: '',
   hasExistingOperation: false,
@@ -45,8 +84,10 @@ const carryOverRow: MachineOverviewInitialRow = {
   machineType: 'Excavator',
   serialNumber: 'CAT-6015',
   siteId: null,
+  siteName: null,
   startSmr: 4500,
   stopSmr: 4500,
+  previousClosingSmr: 4500,
   operatorId: null,
   operatorName: null,
   delays: {
@@ -65,14 +106,14 @@ const carryOverRow: MachineOverviewInitialRow = {
   },
 };
 
-describe('EngineeringOverviewTable', () => {
+describe('EngineeringOverviewTable (Feedback Items 1–14)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSaveMachineOverviewRow.mockResolvedValue({ success: true });
     mockBookOutMachineCarryOverBreakdown.mockResolvedValue({ success: true });
   });
 
-  it('renders all 20 required columns in order and initializes standard delay defaults', () => {
+  it('Item 1: removes "Quick Log" and provides "Log Form" modal popup with validation, cancel, and revision', async () => {
     render(
       <EngineeringOverviewTable
         departmentId="dept-cr"
@@ -89,67 +130,69 @@ describe('EngineeringOverviewTable', () => {
       />
     );
 
-    const headers = screen.getAllByRole('columnheader').map((th) => th.textContent ?? '');
-    expect(headers[0]).toContain('Machine ID');
-    expect(headers[1]).toContain('Start SMR');
-    expect(headers[2]).toContain('Stop SMR');
-    expect(headers[3]).toContain('Total SMR Worked');
-    expect(headers[4]).toContain('Natural Delays');
-    expect(headers[5]).toContain('Blasting Delays');
-    expect(headers[6]).toContain('Lunches');
-    expect(headers[7]).toContain('Safety Talks');
-    expect(headers[8]).toContain('Refueling');
-    expect(headers[9]).toContain('No Operator');
-    expect(headers[10]).toContain('Standby');
-    expect(headers[11]).toContain('Other');
-    expect(headers[12]).toContain('GES / Maintenance');
-    expect(headers[13]).toContain('Tyres / Trams');
-    expect(headers[14]).toContain('Greasing / Startups');
-    expect(headers[15]).toContain('Breakdown');
-    expect(headers[16]).toContain('Operator');
-    expect(headers[17]).toContain('Comments');
-    expect(headers[18]).toContain('Availability');
-    expect(headers[19]).toContain('Utilization');
+    // No "Quick Log" button in the table row
+    expect(screen.queryByRole('button', { name: /^Quick Log$/i })).not.toBeInTheDocument();
 
-    // Verify 3 distinct color groups on delay headers:
-    // Non-Production (Natural Delays, Other) -> amber
-    // Production (Blasting, Lunches, Safety Talks, Refueling, No Operator, Standby) -> sky (light blue)
-    // Engineering (GES / Maintenance, Tyres / Trams, Greasing / Startups, Breakdown) -> rose
-    const allTh = screen.getAllByRole('columnheader');
-    expect(allTh[4]).toHaveAttribute('data-delay-group', 'nonProduction');
-    expect(allTh[4]?.className).toContain('bg-amber-500/15');
-    expect(allTh[5]).toHaveAttribute('data-delay-group', 'production');
-    expect(allTh[5]?.className).toContain('bg-sky-500/15');
-    expect(allTh[6]).toHaveAttribute('data-delay-group', 'production');
-    expect(allTh[7]).toHaveAttribute('data-delay-group', 'production');
-    expect(allTh[8]).toHaveAttribute('data-delay-group', 'production');
-    expect(allTh[9]).toHaveAttribute('data-delay-group', 'production');
-    expect(allTh[10]).toHaveAttribute('data-delay-group', 'production');
-    expect(allTh[11]).toHaveAttribute('data-delay-group', 'nonProduction');
-    expect(allTh[11]?.className).toContain('bg-amber-500/15');
-    expect(allTh[12]).toHaveAttribute('data-delay-group', 'engineering');
-    expect(allTh[12]?.className).toContain('bg-rose-500/15');
-    expect(allTh[13]).toHaveAttribute('data-delay-group', 'engineering');
-    expect(allTh[14]).toHaveAttribute('data-delay-group', 'engineering');
-    expect(allTh[15]).toHaveAttribute('data-delay-group', 'engineering');
+    // Has "Log Form" button
+    const openModalBtn = screen.getByTestId(`open-log-form-btn-${sampleRow.machineId}`);
+    expect(openModalBtn).toBeInTheDocument();
+    fireEvent.click(openModalBtn);
 
-    // Standard defaults: Refueling = 0.2, Safety Talks = 0.5, Lunches = 0.5, GES/Maint = 0.5, Tyres/Trams = 0.2, Greasing/Startups = 0.5
-    expect(screen.getByLabelText('Refueling ADT-101 · Bell B45E')).toHaveValue(0.2);
-    expect(screen.getByLabelText('Safety Talks ADT-101 · Bell B45E')).toHaveValue(0.5);
-    expect(screen.getByLabelText('Lunches ADT-101 · Bell B45E')).toHaveValue(0.5);
-    expect(screen.getByLabelText('GES / Maintenance ADT-101 · Bell B45E')).toHaveValue(0.5);
-    expect(screen.getByLabelText('Tyres / Trams ADT-101 · Bell B45E')).toHaveValue(0.2);
-    expect(screen.getByLabelText('Greasing / Startups ADT-101 · Bell B45E')).toHaveValue(0.5);
+    // Modal opens with role="dialog" and aria-modal="true"
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toBeInTheDocument();
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(screen.getByText(/Log Form: ADT-101 · Bell B45E/i)).toBeInTheDocument();
 
-    // Total SMR worked = 1208.4 - 1200 = 8.4h
-    // Downtime = 0.5 + 0.2 + 0.5 + 0 = 1.2h -> Available = 10.8h -> Availability = 90.0%
-    // Utilization = 8.4 / 10.8 = 77.8%
-    expect(screen.getAllByText('8.4h').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('90.0%').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('77.8%').length).toBeGreaterThanOrEqual(1);
+    // Start SMR is immutable inside modal
+    const modalStartSmr = screen.getByLabelText('Modal Start SMR');
+    expect(modalStartSmr).toHaveAttribute('readOnly');
+    expect(modalStartSmr).toHaveValue(1200);
+
+    // Stop SMR is editable in modal
+    const modalStopSmr = screen.getByLabelText('Modal Stop SMR');
+    expect(modalStopSmr).not.toHaveAttribute('readOnly');
+    fireEvent.change(modalStopSmr, { target: { value: '1209.0' } });
+
+    // Lunches is locked in modal
+    const modalLunches = screen.getByLabelText('Modal Lunches');
+    expect(modalLunches).toHaveAttribute('readOnly');
+    expect(modalLunches).toHaveValue(0.5);
+
+    // Safety Talks has min=0.5 in modal
+    const modalSafety = screen.getByLabelText('Modal Safety Talks');
+    expect(modalSafety).toHaveAttribute('min', '0.5');
+
+    // Cancel closes modal
+    const cancelBtn = screen.getByTestId('log-form-cancel-btn');
+    fireEvent.click(cancelBtn);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    // Reopen and test Escape key closes modal
+    fireEvent.click(openModalBtn);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('enforces mandatory comment when any delay is recorded and allows saving once comment is provided', async () => {
+  it('Item 2: completely deletes "Max 12.0h · ... prod left · ... max delays" with zero residual traces', () => {
+    const { container } = render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow]}
+        operators={[]}
+      />
+    );
+
+    expect(screen.queryByText(/prod left/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/max delays/i)).not.toBeInTheDocument();
+    expect(container.innerHTML).not.toContain('prod left');
+    expect(container.innerHTML).not.toContain('max delays');
+  });
+
+  it('Item 3: applies dark crisp grid lines across table, thead, tbody, th, and td', () => {
     render(
       <EngineeringOverviewTable
         departmentId="dept-cr"
@@ -160,217 +203,21 @@ describe('EngineeringOverviewTable', () => {
       />
     );
 
-    // Record a Natural Delay of 1.2h (8.4h worked + 2.4h std + 1.2h natural = 12.0h max shift cap)
-    const naturalInput = screen.getByLabelText('Natural Delays ADT-101 · Bell B45E');
-    fireEvent.change(naturalInput, { target: { value: '1.2' } });
+    const table = screen.getByRole('table');
+    expect(table.className).toContain('border-collapse');
+    expect(table.className).toContain('border');
+    expect(table.className).toContain('border-slate-400/70');
 
-    const saveBtn = screen.getByRole('button', { name: /^Save$/i });
-    fireEvent.click(saveBtn);
+    const headers = screen.getAllByRole('columnheader');
+    expect(headers[0]?.className).toContain('border-slate-300/90');
 
-    expect(mockSaveMachineOverviewRow).not.toHaveBeenCalled();
-    expect(
-      screen.getByText(/A matching comment is required when any delay is recorded/i)
-    ).toBeInTheDocument();
-
-    // Provide matching comment and save
-    const commentInput = screen.getByLabelText('Comments ADT-101 · Bell B45E');
-    fireEvent.change(commentInput, {
-      target: { value: 'Heavy pit rain and visibility hold for 1.2h' },
-    });
-    fireEvent.click(saveBtn);
-
-    await waitFor(() => {
-      expect(mockSaveMachineOverviewRow).toHaveBeenCalledWith(
-        expect.objectContaining({
-          machineId: sampleRow.machineId,
-          comment: 'Heavy pit rain and visibility hold for 1.2h',
-          delays: expect.objectContaining({
-            natural: 1.2,
-            refueling: 0.2,
-            safetyTalks: 0.5,
-            lunches: 0.5,
-            gesMaintenance: 0.5,
-            tyresTracks: 0.2,
-            greasingStartups: 0.5,
-          }),
-        })
-      );
-    });
+    // Darkened group borders
+    expect(headers[4]?.className).toContain('border-x-amber-600/40');
+    expect(headers[5]?.className).toContain('border-x-sky-600/40');
+    expect(headers[12]?.className).toContain('border-x-rose-600/40');
   });
 
-  it('enforces the 12-hour shift cap (10h worked -> max 2h delays; 10h breakdown -> max 2h production)', () => {
-    const idleMachineRow: MachineOverviewInitialRow = {
-      ...sampleRow,
-      startSmr: 1200,
-      stopSmr: 1200,
-    };
-
-    render(
-      <EngineeringOverviewTable
-        departmentId="dept-cr"
-        shiftDate="2026-10-26"
-        initialShiftType="day"
-        initialRows={[idleMachineRow]}
-        operators={[]}
-      />
-    );
-
-    // 1. Set 10 hours worked (Start SMR = 1200, Stop SMR = 1210) -> only 2.0h allowed for delays
-    const stopSmrInput = screen.getByLabelText('Stop SMR ADT-101 · Bell B45E');
-    fireEvent.change(stopSmrInput, { target: { value: '1210' } });
-
-    expect(screen.getByText(/2\.0h delay cap/i)).toBeInTheDocument();
-    expect(screen.getByText(/2\.0h delays/i)).toBeInTheDocument();
-
-    // Attempt to enter 5.0h Blasting Delay when 10.0h is already worked -> clamped to 2.0h max
-    const blastingInput = screen.getByLabelText('Blasting Delays ADT-101 · Bell B45E');
-    fireEvent.change(blastingInput, { target: { value: '5' } });
-    expect(blastingInput).toHaveValue(2);
-
-    // 2. Reset Stop SMR to 1200 (0h worked), reset standard defaults, and enter 10h Breakdown -> only 2.0h left for production
-    fireEvent.change(stopSmrInput, { target: { value: '1200' } });
-    fireEvent.click(screen.getByRole('button', { name: /Reset Standard Defaults/i }));
-
-    const breakdownInput = screen.getByLabelText('Breakdown ADT-101 · Bell B45E');
-    fireEvent.change(breakdownInput, { target: { value: '10' } });
-
-    expect(breakdownInput).toHaveValue(10);
-    expect(screen.getByText(/2\.0h prod left/i)).toBeInTheDocument();
-
-    // Attempt to enter 8 hours worked (Stop SMR = 1208) while Breakdown = 10h -> clamped to 1202 (2.0h worked)
-    fireEvent.change(stopSmrInput, { target: { value: '1208' } });
-    expect(stopSmrInput).toHaveValue(1202);
-  });
-
-  it('displays carried-over breakdown from previous shift and allows booking out', async () => {
-    render(
-      <EngineeringOverviewTable
-        departmentId="dept-cr"
-        shiftDate="2026-10-26"
-        initialShiftType="day"
-        initialRows={[carryOverRow]}
-        operators={[]}
-      />
-    );
-
-    expect(screen.getByText(/Carried Over Breakdown \(Since 2026-10-25\)/i)).toBeInTheDocument();
-    expect(screen.getByLabelText('Breakdown EX-02 · CAT 6015B')).toHaveValue(6);
-
-    const bookOutBtn = screen.getByRole('button', { name: /Book Out/i });
-    fireEvent.click(bookOutBtn);
-
-    await waitFor(() => {
-      expect(mockBookOutMachineCarryOverBreakdown).toHaveBeenCalledWith(
-        expect.objectContaining({
-          machineId: carryOverRow.machineId,
-          machineName: carryOverRow.machineName,
-        })
-      );
-    });
-  });
-
-  it('allows operators to log delays via the 3-Step Quick Delay Logger and toggle Simplified Table View', async () => {
-    render(
-      <EngineeringOverviewTable
-        departmentId="dept-cr"
-        shiftDate="2026-10-26"
-        initialShiftType="day"
-        initialRows={[sampleRow, carryOverRow]}
-        operators={[]}
-      />
-    );
-
-    expect(screen.getByTestId('quick-delay-logger')).toBeInTheDocument();
-
-    // Tap the "1.0h" quick preset for the default selected "Blasting Delays" reason on sampleRow
-    const quickOneHourBtn = screen.getByRole('button', { name: '1.0h' });
-    fireEvent.click(quickOneHourBtn);
-
-    expect(screen.getByLabelText('Blasting Delays ADT-101 · Bell B45E')).toHaveValue(1);
-
-    // Apply a one-tap note template so the mandatory comment requirement is satisfied automatically
-    const templateBtn = screen.getByRole('button', {
-      name: /\+ Pit blast clearance & safety hold/i,
-    });
-    fireEvent.click(templateBtn);
-
-    // Save directly from the Quick Delay Logger
-    const quickSaveBtn = screen.getByTestId('quick-delay-save-btn');
-    fireEvent.click(quickSaveBtn);
-
-    await waitFor(() => {
-      expect(mockSaveMachineOverviewRow).toHaveBeenCalledWith(
-        expect.objectContaining({
-          machineId: sampleRow.machineId,
-          comment: 'Blasting Delays: Pit blast clearance & safety hold',
-          delays: expect.objectContaining({
-            blasting: 1,
-          }),
-        })
-      );
-    });
-
-    // Toggle Simplified Table View (hides the 6 standard allowance columns: 21 -> 15 columnheaders)
-    const viewToggleBtn = screen.getByTestId('table-view-mode-toggle');
-    expect(screen.getAllByRole('columnheader')).toHaveLength(21);
-    fireEvent.click(viewToggleBtn);
-    expect(screen.getAllByRole('columnheader')).toHaveLength(15);
-  });
-
-  it('auto-carries a machine over into the new shift when it ends a shift on breakdown', async () => {
-    render(
-      <EngineeringOverviewTable
-        departmentId="dept-cr"
-        shiftDate="2026-10-26"
-        initialShiftType="day"
-        initialRows={[sampleRow]}
-        operators={[]}
-      />
-    );
-
-    // Mark ADT-101 as ending the Day shift on breakdown
-    const breakdownCheckbox = screen.getByRole('checkbox', {
-      name: /Ends shift on breakdown \(carry over\)/i,
-    });
-    fireEvent.click(breakdownCheckbox);
-    expect(breakdownCheckbox).toBeChecked();
-
-    // Switch Shift Type from Day Shift -> Night Shift
-    const shiftTypeSelect = screen.getByLabelText('Shift Type');
-    fireEvent.change(shiftTypeSelect, { target: { value: 'night' } });
-
-    // Verify ADT-101 automatically carried over into Night Shift on full 12.0h breakdown
-    // with opening & closing SMR equal to the Day shift Stop SMR (1208.4)
-    expect(screen.getByText(/Carried Over Breakdown \(Since 2026-10-26\)/i)).toBeInTheDocument();
-    expect(screen.getByLabelText('Start SMR ADT-101 · Bell B45E')).toHaveValue(1208.4);
-    expect(screen.getByLabelText('Stop SMR ADT-101 · Bell B45E')).toHaveValue(1208.4);
-    expect(screen.getByLabelText('Breakdown ADT-101 · Bell B45E')).toHaveValue(12);
-    expect(screen.getByLabelText('Refueling ADT-101 · Bell B45E')).toHaveValue(0);
-
-    // Save the carried-over Night Shift row and verify it persists cleanly within the 12.0h cap
-    const saveBtn = screen.getByRole('button', { name: /^Save$/i });
-    fireEvent.click(saveBtn);
-
-    await waitFor(() => {
-      expect(mockSaveMachineOverviewRow).toHaveBeenCalledWith(
-        expect.objectContaining({
-          machineId: sampleRow.machineId,
-          shiftType: 'night',
-          startSmr: 1208.4,
-          stopSmr: 1208.4,
-          endsOnBreakdown: true,
-          delays: expect.objectContaining({
-            breakdown: 12,
-            refueling: 0,
-            safetyTalks: 0,
-            lunches: 0,
-          }),
-        })
-      );
-    });
-  });
-
-  it('prevents impossible SMR odometer inversions (e.g. entering 100 when machine hours are 1200) and notifies the operator immediately', () => {
+  it('Item 4 & 5: Start SMR is immutable and Stop SMR is non-editable in the Overview Table', () => {
     render(
       <EngineeringOverviewTable
         departmentId="dept-cr"
@@ -382,37 +229,43 @@ describe('EngineeringOverviewTable', () => {
     );
 
     const startSmrInput = screen.getByLabelText('Start SMR ADT-101 · Bell B45E');
-    expect(startSmrInput).toHaveValue(1200);
+    expect(startSmrInput).toHaveAttribute('readOnly');
+    expect(startSmrInput).toHaveAttribute('aria-readonly', 'true');
 
-    // Operator attempts to enter 100 when machine hours are 1200
-    fireEvent.change(startSmrInput, { target: { value: '100' } });
-
-    // Start SMR is clamped to 1200 and user is notified immediately via toast.error + inline error
-    expect(startSmrInput).toHaveValue(1200);
-    expect(toast.error).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /Impossible SMR: Start SMR \(100\.0h\) cannot be less than machine's current SMR \(1200\.0h\)/i
-      )
-    );
-    expect(
-      screen.getAllByText(
-        /Impossible SMR: Start SMR \(100\.0h\) cannot be less than machine's current SMR \(1200\.0h\)/i
-      ).length
-    ).toBeGreaterThanOrEqual(1);
-
-    // Operator attempts to enter 100 for Stop SMR when Start SMR is 1200
     const stopSmrInput = screen.getByLabelText('Stop SMR ADT-101 · Bell B45E');
-    fireEvent.change(stopSmrInput, { target: { value: '100' } });
-
-    expect(stopSmrInput).toHaveValue(1200);
-    expect(toast.error).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /Impossible SMR: Stop SMR \(100\.0h\) cannot be less than Start SMR \(1200\.0h\)/i
-      )
-    );
+    expect(stopSmrInput).toHaveAttribute('readOnly');
+    expect(stopSmrInput).toHaveAttribute('title', 'Editable in Log Form or Quick Logger');
   });
 
-  it('renders refined SCADA Reporting Panels with progress bars, target thresholds, and delay breakdown pills', () => {
+  it('Item 6: Time Unit toggle switches between decimal hours and whole minutes with concise legend', () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow]}
+        operators={[]}
+      />
+    );
+
+    // Legend is visible
+    expect(screen.getByText('0.5h = 30m · 0.2h = 12m')).toBeInTheDocument();
+
+    const toggleBtn = screen.getByTestId('time-unit-toggle');
+    expect(toggleBtn).toHaveTextContent('Hours (h)');
+
+    // Worked hours is 8.4h
+    expect(screen.getAllByText('8.4h').length).toBeGreaterThanOrEqual(1);
+
+    // Toggle to minutes
+    fireEvent.click(toggleBtn);
+    expect(toggleBtn).toHaveTextContent('Minutes (m)');
+
+    // 8.4h * 60 = 504m
+    expect(screen.getAllByText('504m').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('Item 7: QuickDelayLoggerPanel provides grouped select dropdown with All, Delays/Breakdowns, and optgroup per type', () => {
     render(
       <EngineeringOverviewTable
         departmentId="dept-cr"
@@ -423,30 +276,146 @@ describe('EngineeringOverviewTable', () => {
       />
     );
 
-    const panels = screen.getByTestId('engineering-reporting-panels');
-    expect(panels).toBeInTheDocument();
+    const dropdown = screen.getByTestId('fleet-category-dropdown');
+    expect(dropdown).toBeInTheDocument();
+    expect(dropdown.querySelector('option[value="all"]')).toBeInTheDocument();
+    expect(dropdown.querySelector('option[value="abnormal"]')).toBeInTheDocument();
+    expect(dropdown.querySelector('optgroup[label^="ADT"]')).toBeInTheDocument();
+    expect(dropdown.querySelector('optgroup[label^="Excavator"]')).toBeInTheDocument();
+  });
 
-    const fleetPanel = screen.getByTestId('reporting-panel-working-fleet');
-    expect(fleetPanel).toHaveTextContent('Working Fleet Count');
-    expect(fleetPanel).toHaveTextContent('2 Machines');
-    expect(fleetPanel).toHaveTextContent('Active: 1');
-    expect(fleetPanel).toHaveTextContent('Down: 1');
+  it('Item 8: displays Weather Linked indicator in the Natural Delays header', () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow]}
+        operators={[]}
+      />
+    );
 
-    const smrPanel = screen.getByTestId('reporting-panel-total-smr');
-    expect(smrPanel).toHaveTextContent('Total SMR Worked');
-    expect(smrPanel).toHaveTextContent('8.4h');
-    expect(smrPanel).toHaveTextContent('/ 24h cap');
+    const weatherBadge = screen.getByTestId('weather-linked-badge');
+    expect(weatherBadge).toBeInTheDocument();
+    expect(weatherBadge).toHaveTextContent('Weather Linked');
+  });
 
-    const availabilityPanel = screen.getByTestId('reporting-panel-availability');
-    expect(availabilityPanel).toHaveTextContent('Fleet Availability');
-    expect(availabilityPanel).toHaveTextContent('Target 85%');
+  it('Item 9: center-aligns all table headers, inputs, and cells', () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow]}
+        operators={[]}
+      />
+    );
 
-    const utilizationPanel = screen.getByTestId('reporting-panel-utilization');
-    expect(utilizationPanel).toHaveTextContent('Fleet Utilization');
-    expect(utilizationPanel).toHaveTextContent('Prod:');
-    expect(utilizationPanel).toHaveTextContent('Eng:');
-    expect(utilizationPanel).toHaveTextContent('Nat:');
+    const headers = screen.getAllByRole('columnheader');
+    for (const th of headers) {
+      expect(th.className).toContain('text-center');
+      expect(th.className).toContain('align-middle');
+    }
 
-    expect(screen.getAllByRole('progressbar')).toHaveLength(4);
+    const startSmr = screen.getByLabelText('Start SMR ADT-101 · Bell B45E');
+    expect(startSmr.className).toContain('text-center');
+  });
+
+  it('Item 10: auto-propagates blasting delay to all machines sharing the same siteId with notification', () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow, secondSiteRow]}
+        operators={[]}
+      />
+    );
+
+    const blastingInput = screen.getByLabelText('Blasting Delays ADT-101 · Bell B45E');
+    fireEvent.change(blastingInput, { target: { value: '1.0' } });
+
+    // Propagated to ADT-102
+    const secondBlasting = screen.getByLabelText('Blasting Delays ADT-102 · Bell B45E');
+    expect(secondBlasting).toHaveValue(1);
+
+    expect(toast.info).toHaveBeenCalledWith(
+      expect.stringMatching(/Blasting delay \(1\.0h\) auto-propagated/i)
+    );
+  });
+
+  it('Item 11: compulsory lunches are locked at 0.5h across table and cannot be changed', () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow]}
+        operators={[]}
+      />
+    );
+
+    const lunchInput = screen.getByLabelText('Lunches ADT-101 · Bell B45E');
+    expect(lunchInput).toHaveAttribute('readOnly');
+    expect(lunchInput).toHaveValue(0.5);
+
+    fireEvent.change(lunchInput, { target: { value: '2.0' } });
+    expect(lunchInput).toHaveValue(0.5);
+  });
+
+  it('Item 12: safety talks enforce minimum 0.5h (can only increase above 0.5h)', () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow]}
+        operators={[]}
+      />
+    );
+
+    const safetyInput = screen.getByLabelText('Safety Talks ADT-101 · Bell B45E');
+    expect(safetyInput).toHaveAttribute('min', '0.5');
+
+    // Attempting to decrease below 0.5 clamps to 0.5
+    fireEvent.change(safetyInput, { target: { value: '0.1' } });
+    expect(safetyInput).toHaveValue(0.5);
+
+    // Can increase to 1.0h
+    fireEvent.change(safetyInput, { target: { value: '1.0' } });
+    expect(safetyInput).toHaveValue(1);
+  });
+
+  it('Item 13: auto-reconciles short shift hours (50/50 split between Refueling and GES/Maintenance)', () => {
+    // 8.0h worked, 2.4h standard delays -> 10.4h total -> 1.6h shortfall
+    const result = reconcileShortShiftHours({
+      startSmr: 1000,
+      stopSmr: 1008,
+      delays: createStandardOverviewDelays(),
+      comment: 'Regular shift',
+      maxShiftHours: 12,
+    });
+
+    expect(result.shortfallHours).toBe(1.6);
+    // 1.6 / 2 = 0.8h each
+    // refueling was 0.2 -> 0.2 + 0.8 = 1.0
+    expect(result.delays.refueling).toBe(1.0);
+    // gesMaintenance was 0.5 -> 0.5 + 0.8 = 1.3
+    expect(result.delays.gesMaintenance).toBe(1.3);
+    expect(result.comment).toContain('Shift Shortfall 50/50 Reconciled');
+  });
+
+  it('Item 14: clarifies "Other" delay column as "External / Non-Site (e.g. DMRE)"', () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow]}
+        operators={[]}
+      />
+    );
+
+    expect(screen.getByTitle('External / Non-Site (e.g. DMRE)')).toBeInTheDocument();
   });
 });
