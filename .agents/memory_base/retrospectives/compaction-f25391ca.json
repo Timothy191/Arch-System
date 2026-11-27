@@ -1,10 +1,12 @@
 {
   "id": "compaction-f25391ca",
-  "timestamp": "2026-11-27T06:07:23.968Z",
+  "timestamp": "2026-11-27T07:43:38.499Z",
   "taskTag": "compaction-standard-f25391ca",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:execute_full_compact",
   "affectedFiles": [
+    "\"/home/tim/.gemini/antigravity-cli/brain/f25391ca-f7df-458d-9514-ead1f02a827f/scratch/worker-eng-notes.md\"",
+    "\"/home/tim/.gemini/antigravity-cli/brain/f25391ca-f7df-458d-9514-ead1f02a827f/scratch/worker-ctrl-room.md\"",
     "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx\"",
     "\"/home/tim/Fork/Arch-System/packages/ui/src/components/ui/data-table.tsx\"",
     "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/machine-operations-constants.ts\"",
@@ -15,13 +17,13 @@
     "\"/home/tim/Fork/Arch-System/tools/scripts/biome-parse-guard.cjs\""
   ],
   "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
-  "resolution": "Persisted bounded SKILL.state (454 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "resolution": "Persisted bounded SKILL.state (458 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
   "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
   "metrics": {
     "mode": "standard",
     "decision": "execute_full_compact",
-    "latestInputTokens": 143577,
-    "cacheHitRatio": 0.9646,
+    "latestInputTokens": 327193,
+    "cacheHitRatio": 0.9361,
     "checkpointCount": 1,
     "avoidedCacheRebuildTokens": 0
   }

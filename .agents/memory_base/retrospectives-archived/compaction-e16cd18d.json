@@ -1,0 +1,30 @@
+{
+  "id": "compaction-e16cd18d",
+  "timestamp": "2026-11-27T07:17:13.084Z",
+  "taskTag": "compaction-standard-e16cd18d",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/app/(departments)/control-room/components/ControlRoomActionDropdown.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/app/(departments)/[department]/ControlRoomSummaryGridClient.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/app/(departments)/control-room/components/ControlRoomSubtabs.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/components/ui/GoldenRefreshIcon.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/app/(departments)/control-room/page.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/hooks/useDashboardQueries.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/features/departments/components/control-room/ControlRoomPanels.test.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/app/(departments)/control-room/components/ControlRoomQuickNav.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/features/departments/components/control-room/ScadaPanel.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/ctrl-room-feedback/apps/portal/app/(departments)/control-room/components/ControlRoomSubtabs.tsx\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (459 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 153178,
+    "cacheHitRatio": 0.941,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

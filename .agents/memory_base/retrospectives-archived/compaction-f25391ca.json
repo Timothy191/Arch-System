@@ -1,0 +1,30 @@
+{
+  "id": "compaction-f25391ca",
+  "timestamp": "2026-11-27T07:38:16.432Z",
+  "taskTag": "compaction-standard-f25391ca",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/.gemini/antigravity-cli/brain/f25391ca-f7df-458d-9514-ead1f02a827f/scratch/worker-eng-notes.md\"",
+    "\"/home/tim/.gemini/antigravity-cli/brain/f25391ca-f7df-458d-9514-ead1f02a827f/scratch/worker-ctrl-room.md\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx\"",
+    "\"/home/tim/Fork/Arch-System/packages/ui/src/components/ui/data-table.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/machine-operations-constants.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsSummaryStrip.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsFilterableTable.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsList.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/tools/scripts/biome-parse-guard.cjs\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (458 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 325989,
+    "cacheHitRatio": 0.9348,
+    "checkpointCount": 1,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

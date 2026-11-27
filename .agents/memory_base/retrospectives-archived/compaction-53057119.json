@@ -1,0 +1,31 @@
+{
+  "id": "compaction-53057119",
+  "timestamp": "2026-11-27T07:36:54.773Z",
+  "taskTag": "compaction-standard-53057119",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/useWeatherNaturalDelayMonitor.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/MachineLogFormModal.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/EngineeringOverviewTable.test.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/lib/shift-sheet-buckets.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/actions.ts\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/page.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/QuickDelayLoggerPanel.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/EngineeringOverviewTable.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/EngineeringOverviewTable.test.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/MachineLogFormModal.tsx\"",
+    "\"/home/tim/orca/workspaces/Arch-System/eng-notes-feedback/apps/portal/app/(departments)/[department]/engineering-notes/useWeatherNaturalDelayMonitor.ts\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (460 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 264674,
+    "cacheHitRatio": 0.9622,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}
