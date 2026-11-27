@@ -151,6 +151,12 @@
   --radius-window: 22px;
   --refraction-inner-border: rgba(0, 0, 0, 0.08);
   --refraction-edge-light: rgba(255, 255, 255, 0.55);
+  --separator-hairline-thickness: 1px;
+  --separator-gold-thickness: 1.5px;
+  --separator-gap: 0.625rem;
+  --separator-mark-size: 6px;
+  --separator-pipe-size: 11px;
+  --separator-glow: 0 0 8px rgba(212, 175, 55, 0.45);
   --bg-primary: var(--arch0);
   --bg-secondary: var(--arch1);
   --bg-tertiary: var(--arch2);

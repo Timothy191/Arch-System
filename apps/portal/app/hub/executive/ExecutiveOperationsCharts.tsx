@@ -7,6 +7,9 @@ import {
   CHART_HEIGHT,
   CHART_MARGIN,
   paletteColor,
+  TOOLTIP_CURSOR_BAR,
+  TOOLTIP_ITEM_STYLE,
+  TOOLTIP_LABEL_STYLE,
   TOOLTIP_STYLE,
 } from './chart-theme';
 import { ChartCard, chartStateFor } from './ExecutiveChartCard';
@@ -27,8 +30,13 @@ interface HorizontalBarProps {
 }
 
 const CATEGORY_AXIS_WIDTH = 120;
+const CATEGORY_LABEL_MAX = 18;
 const BAR_RADIUS: [number, number, number, number] = [0, 4, 4, 0];
 const GRID_DASH = '3 3';
+
+function truncateCategory(value: string): string {
+  return value.length > CATEGORY_LABEL_MAX ? `${value.slice(0, CATEGORY_LABEL_MAX - 1)}…` : value;
+}
 
 const BREAKDOWN_STATUS_COLORS: Readonly<Record<string, string>> = {
   Open: CHART_COLORS.alert,
@@ -37,19 +45,43 @@ const BREAKDOWN_STATUS_COLORS: Readonly<Record<string, string>> = {
 
 function HorizontalBar({ entries, seriesName, color }: HorizontalBarProps) {
   return (
-    <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+    <ResponsiveContainer width="100%" height={CHART_HEIGHT} debounce={100}>
       <BarChart data={[...entries]} layout="vertical" margin={CHART_MARGIN}>
-        <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray={GRID_DASH} horizontal={false} />
-        <XAxis type="number" allowDecimals={false} tick={AXIS_TICK} stroke={CHART_COLORS.grid} />
+        <CartesianGrid
+          stroke={CHART_COLORS.grid}
+          strokeDasharray={GRID_DASH}
+          strokeOpacity={0.4}
+          horizontal={false}
+        />
+        <XAxis
+          type="number"
+          allowDecimals={false}
+          tick={AXIS_TICK}
+          stroke={CHART_COLORS.grid}
+          tickMargin={6}
+        />
         <YAxis
           type="category"
           dataKey="label"
           width={CATEGORY_AXIS_WIDTH}
           tick={AXIS_TICK}
           stroke={CHART_COLORS.grid}
+          tickMargin={8}
+          tickFormatter={truncateCategory}
         />
-        <Tooltip contentStyle={TOOLTIP_STYLE} />
-        <Bar dataKey="count" name={seriesName} fill={color} radius={BAR_RADIUS} />
+        <Tooltip
+          contentStyle={TOOLTIP_STYLE}
+          labelStyle={TOOLTIP_LABEL_STYLE}
+          itemStyle={TOOLTIP_ITEM_STYLE}
+          cursor={TOOLTIP_CURSOR_BAR}
+        />
+        <Bar
+          dataKey="count"
+          name={seriesName}
+          fill={color}
+          radius={BAR_RADIUS}
+          isAnimationActive={false}
+        />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -134,6 +166,7 @@ function PersonnelChart({ entries }: { entries: readonly LabeledCount[] }) {
       description="Active employee records grouped by assigned department."
       state={chartStateFor(true, entries.length > 0)}
       emptyMessage="No employee records found."
+      legend={[{ label: 'Employees', color: CHART_COLORS.total }]}
     >
       <HorizontalBar entries={entries} seriesName="Employees" color={CHART_COLORS.total} />
     </ChartCard>

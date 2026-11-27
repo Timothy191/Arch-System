@@ -381,6 +381,36 @@ Overlays and HUD elements overlay layout pages without completely blocking backg
 - **Status badge**: Pill shape. Background is `color-accent-subtle` (or semantic subtle variant), text is the full semantic color.
 - **Corner radius**: `radius-full` (9999px).
 
+### Separators
+
+`ArchSeparator` (`@repo/ui/Separator`, source `packages/ui/src/components/Separator.tsx`) is the **only approved divider** in the system. Never hand-roll `<div className="h-px …">` rules or inline `|` glyphs; use this component so spacing, thickness, and gold ratios stay consistent. Visuals live in `@repo/theme` under `.separator-arch-*`, driven by the `separator` token group in `packages/theme/tokens.json` (regenerate with `pnpm --filter @repo/theme codegen`).
+
+| Variant       | Use                                                                 |
+| :------------ | :------------------------------------------------------------------ |
+| `hairline`    | Neutral structural rule inside cards, lists, and dense data tables. |
+| `gold`        | Branded section break between content groups.                       |
+| `gold-emblem` | Header-level break carrying the circular Arch mark at the centre.   |
+| `pipe`        | Vertical gold pipe for inline taskbar/tray separators.              |
+
+**Tokens**
+
+| Token                          | CSS variable                     | Default                            |
+| :----------------------------- | :------------------------------- | :--------------------------------- |
+| `separator.hairline-thickness` | `--separator-hairline-thickness` | `1px`                              |
+| `separator.gold-thickness`     | `--separator-gold-thickness`     | `1.5px`                            |
+| `separator.gap`                | `--separator-gap`                | `0.625rem`                         |
+| `separator.mark-size`          | `--separator-mark-size`          | `6px`                              |
+| `separator.pipe-size`          | `--separator-pipe-size`          | `11px`                             |
+| `separator.glow`               | `--separator-glow`               | `0 0 8px rgba(212, 175, 55, 0.45)` |
+
+**Rules**
+
+- Import from `@repo/ui/Separator`; do not reuse the Radix `Separator` primitive for branded dividers.
+- `gold-emblem` is reserved for top-of-section breaks; use plain `gold` for repeated dividers and `hairline` for table internals.
+- Set `glow` only once per viewport region; it is a bloom, not a default.
+- With `decorative={false}` (the default for `hairline` and `gold`) the rule exposes `role="separator"` and `aria-orientation`; pass `decorative` to hide purely ornamental rules from assistive tech. `pipe` is always decorative.
+- Storybook: `Components/Borders/ArchSeparator`. Reference adoptions: hub identity separator (`CoreOperationalModules`), taskbar/tray pipes (`SystemTray`, `HeaderWidgets`).
+
 ### Login & Authentication Interface
 
 The sign-in interface is a key entry point that demonstrates the peak of the system's "Liquid Glass" visual design language and macOS Sonoma aesthetics.

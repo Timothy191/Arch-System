@@ -4,6 +4,7 @@ import type { Department } from '@repo/departments/data-access';
 import { DepartmentCard } from '@repo/hub/ui';
 import { ArchLogoBadge } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
+import { ArchSeparator } from '@repo/ui/Separator';
 import { Search, Star } from 'lucide-react';
 import { Fragment, useEffect, useState } from 'react';
 import { useClearanceNotification } from '@/hooks/useClearanceNotification';
@@ -190,15 +191,7 @@ export function CoreOperationalModules({
         </div>
 
         {/* Identity separator: divides the module identity header from source controls */}
-        <div
-          data-testid="core-modules-identity-separator"
-          aria-hidden="true"
-          className="mt-4 flex w-full items-center gap-2.5"
-        >
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent via-accent-gold/35 to-accent-gold/60" />
-          <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35" />
-          <span className="h-px flex-1 bg-gradient-to-l from-transparent via-accent-gold/35 to-accent-gold/60" />
-        </div>
+        <ArchSeparator variant="gold" testId="core-modules-identity-separator" className="mt-4" />
 
         {/* Search & Category Filter Pills */}
         <div className="mt-3 flex flex-wrap items-center gap-2 sm:flex-nowrap">
@@ -279,17 +272,12 @@ export function CoreOperationalModules({
       </div>
 
       {/* System Default Golden Separator — divides header bar from module panels below */}
-      <div
-        data-testid="core-modules-header-separator"
-        aria-hidden="true"
-        className="flex w-full items-center justify-center gap-2.5 py-0.5"
-      >
-        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-gold/55 to-accent-gold shadow-[0_0_8px_rgba(212,175,55,0.45)]" />
-        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35 shadow-[0_0_6px_rgba(212,175,55,0.55)]" />
-        <ArchLogoBadge size="xs" />
-        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/80 bg-accent-gold/35 shadow-[0_0_6px_rgba(212,175,55,0.55)]" />
-        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-gold/55 to-accent-gold shadow-[0_0_8px_rgba(212,175,55,0.45)]" />
-      </div>
+      <ArchSeparator
+        variant="gold-emblem"
+        glow
+        testId="core-modules-header-separator"
+        className="py-0.5"
+      />
 
       {/* Grid Display */}
       {filteredDepartments.length === 0 ? (

@@ -190,7 +190,7 @@ export const EXTERNAL_LIST = [
 ] as const;
 
 export const NAV_BTN =
-  'px-2.5 min-h-11 flex items-center rounded-button text-[13px] font-medium text-[var(--text-heading)] hover:bg-black/10 data-[state=open]:bg-black/10 transition-colors select-none outline-none cursor-default';
+  'flex min-h-11 cursor-default select-none items-center rounded-full px-3 font-medium text-[13px] text-[var(--text-heading)] tracking-[0.01em] transition-colors outline-none hover:bg-white/60 data-[state=open]:bg-white/60';
 
 export const DROPDOWN_CONTENT =
   'liquid-glass-light backdrop-blur-2xl shadow-window border border-white/20 rounded-card py-1';

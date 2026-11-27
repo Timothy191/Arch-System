@@ -187,18 +187,9 @@ describe('HeroRotator', () => {
       'gold-steel-border',
       'gold-steel-border-slim'
     );
-    expect(centralIcon.querySelector('svg')).toHaveAttribute(
-      'viewBox',
-      '22.75 16.625 166.16 166.19'
-    );
-    expect(drillingIcon.querySelector('svg')).toHaveAttribute(
-      'viewBox',
-      '22.75 16.625 166.16 166.19'
-    );
-    expect(productionIcon.querySelector('svg')).toHaveAttribute(
-      'viewBox',
-      '22.75 16.625 166.16 166.19'
-    );
+    expect(centralIcon.querySelector('svg')).toHaveAttribute('viewBox', '0 0 172.61 172.61');
+    expect(drillingIcon.querySelector('svg')).toHaveAttribute('viewBox', '0 0 172.61 172.61');
+    expect(productionIcon.querySelector('svg')).toHaveAttribute('viewBox', '0 0 172.61 172.61');
 
     // Active Site Pins globe banner has been removed from HeroRotator
     expect(screen.queryByTestId('hero-kpi-slim-banner')).not.toBeInTheDocument();
@@ -600,5 +591,44 @@ describe('HeroRotator', () => {
     fireEvent.click(screen.getByLabelText('Next highlight'));
     expect(screen.getByTestId('hero-telemetry-graph-overview')).toBeInTheDocument();
     expect(screen.queryByText(/Topology Health/)).not.toBeInTheDocument();
+  });
+
+  it('provides accessible trend summaries, focus-visible CTA states, alert status role, and poster dimensions', () => {
+    const { container } = render(
+      <HeroRotator
+        {...baseProps}
+        departments={mockDepartments}
+        incidentCount={1}
+        breakdownCount={2}
+      />
+    );
+
+    const statusRegion = screen.getAllByRole('status', {
+      name: 'Operational alerts',
+      hidden: true,
+    });
+    expect(statusRegion.length).toBeGreaterThan(0);
+
+    const primaryCtas = Array.from(
+      container.querySelectorAll<HTMLAnchorElement>('[data-cta="primary-hero"]')
+    );
+    expect(primaryCtas[0]).toHaveClass('focus-visible:ring-2', 'focus-visible:ring-accent-gold');
+    expect(primaryCtas[0]).not.toHaveAttribute('aria-disabled');
+    expect(primaryCtas[1]).toHaveAttribute('aria-disabled', 'true');
+
+    const drillingPoster = screen.getByTestId('hero-poster-drilling');
+    expect(drillingPoster).toHaveAttribute('width', '640');
+    expect(drillingPoster).toHaveAttribute('height', '360');
+
+    const drillingSvg = within(screen.getByTestId('hero-telemetry-graph-drilling')).getByRole(
+      'img',
+      {
+        hidden: true,
+      }
+    );
+    expect(drillingSvg).toHaveAttribute(
+      'aria-label',
+      expect.stringContaining('Depth recorded trend, latest')
+    );
   });
 });

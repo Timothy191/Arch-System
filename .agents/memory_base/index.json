@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-11-27T12:57:13.529Z",
-  "totalRetrospectives": 17,
+  "lastUpdated": "2026-11-27T16:04:21.917Z",
+  "totalRetrospectives": 16,
   "entries": [
     {
       "id": "compaction-034f9737",
@@ -12,12 +12,6 @@
       "id": "compaction-0670e5cc",
       "category": "context-compaction",
       "errorSignature": "compaction_decision:consolidate_state_spine",
-      "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."
-    },
-    {
-      "id": "compaction-3bf2a434",
-      "category": "context-compaction",
-      "errorSignature": "compaction_decision:execute_full_compact",
       "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."
     },
     {

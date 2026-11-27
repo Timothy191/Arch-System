@@ -1,5 +1,6 @@
 'use client';
 
+import { ArchSeparator } from '@repo/ui/Separator';
 import dynamic from 'next/dynamic';
 
 function WidgetFallback({ width = 'w-[58px]' }: { readonly width?: string }) {
@@ -30,23 +31,11 @@ const ServicesDropdown = dynamic(
 export function HeaderWidgets() {
   return (
     <>
-      <span
-        aria-hidden="true"
-        data-testid="system-tray-gold-separator"
-        className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-      >
-        |
-      </span>
+      <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
 
       <SystemClock embedded />
 
-      <span
-        aria-hidden="true"
-        data-testid="system-tray-gold-separator"
-        className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-      >
-        |
-      </span>
+      <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
 
       <ServicesDropdown embedded />
     </>

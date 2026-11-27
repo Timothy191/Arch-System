@@ -14,7 +14,7 @@
      ```text
      liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/25 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md
      ```
-   - Section breaks should use subtle diamond-accented golden or accent-blue dividers (`SystemGoldenSeparator` or module separator styling) to maintain clear visual hierarchy without crowding panels.
+   - Section breaks MUST use the standardized `ArchSeparator` from `@repo/ui/Separator` (`variant="hairline" | "gold" | "gold-emblem" | "pipe"`, see `docs/DESIGN.md` § Separators). Hand-rolled `<div className="h-px …">` dividers and inline `|` glyphs are prohibited; the `separator` token group in `packages/theme/tokens.json` defines thickness, gap, mark size, pipe size, and glow.
 
 3. **Typography & Layout**:
    - Body font: `IBM Plex Sans`; monospace metrics and SMR/tabular telemetry: `JetBrains Mono` (`font-mono tabular-nums`); technical headings: `Space Grotesk`; hero display headings: `font-anurati`.

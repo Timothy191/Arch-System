@@ -89,7 +89,7 @@ describe('DepartmentCard', () => {
     expect(pinBtn).toBeInTheDocument();
 
     const bookmarkSvg = screen.getByTestId('arch-bookmark-icon');
-    expect(bookmarkSvg).toHaveAttribute('viewBox', '22.75 16.625 166.16 166.19');
+    expect(bookmarkSvg).toHaveAttribute('viewBox', '0 0 172.61 172.61');
     expect(bookmarkSvg).toHaveClass('fill-none');
 
     fireEvent.click(pinBtn);

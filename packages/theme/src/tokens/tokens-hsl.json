@@ -187,5 +187,13 @@
   "radius-xs": "4px",
   "radius-window": "22px",
   "refraction-inner-border": "inset 0 0 0 0.5px rgba(0, 0, 0, 0.08)",
-  "refraction-edge-light": "inset 0 1px 0 0 rgba(255, 255, 255, 0.55)"
+  "refraction-edge-light": "inset 0 1px 0 0 rgba(255, 255, 255, 0.55)",
+  "separator": {
+    "hairline-thickness": "1px",
+    "gold-thickness": "1.5px",
+    "gap": "0.625rem",
+    "mark-size": "6px",
+    "pipe-size": "11px",
+    "glow": "0 0 8px rgba(212, 175, 55, 0.45)"
+  }
 }

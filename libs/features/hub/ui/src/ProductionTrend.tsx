@@ -15,6 +15,25 @@ interface ProductionTrendProps {
   isFallback?: boolean;
 }
 
+// Tremor renders its own Recharts CartesianGrid and exposes no grid props, so we
+// restyle its horizontal lines through descendant utilities to match the executive
+// charts: semantic border token, 40% opacity, and a 2-4 dash.
+const AREA_CHART_CLASS = [
+  'mt-2 h-72',
+  '[&_.recharts-cartesian-grid-horizontal_line]:stroke-border-default',
+  '[&_.recharts-cartesian-grid-horizontal_line]:opacity-40',
+  '[&_.recharts-cartesian-grid-horizontal_line]:[stroke-dasharray:2_4]',
+].join(' ');
+
+const TONNAGE_FORMATTER = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+function formatTonnes(value: number): string {
+  return `${TONNAGE_FORMATTER.format(value)} t`;
+}
+
 export function ProductionTrend({ data, isFallback = false }: ProductionTrendProps) {
   if (data.length === 0) return null;
 
@@ -52,11 +71,12 @@ export function ProductionTrend({ data, isFallback = false }: ProductionTrendPro
         </div>
       </div>
       <AreaChart
-        className="mt-2 h-72"
+        className={AREA_CHART_CLASS}
         data={data}
         index="date"
         categories={['Drilling', 'Production', 'Engineering']}
         colors={['blue', 'emerald', 'violet']}
+        valueFormatter={formatTonnes}
         showLegend={false}
         showYAxis={true}
         yAxisWidth={48}

@@ -222,7 +222,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                     <nav id="navigation" aria-label="Main menu">
                       <div
                         data-testid="taskbar-unified-pill"
-                        className="gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full border border-accent-gold/45 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm backdrop-blur-md transition-colors"
+                        className="gold-steel-border gold-steel-border-slim flex h-8 items-center gap-2 rounded-full border border-accent-gold/45 bg-[var(--material-ultra-thin)] px-3 shadow-diffusion-sm backdrop-blur-md transition-colors"
                       >
                         <SystemTrayPill embedded />
                         <HeaderWidgets />

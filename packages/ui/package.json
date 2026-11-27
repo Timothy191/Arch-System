@@ -51,6 +51,7 @@
     "./FilterToolbar": "./src/components/ui/filter-toolbar.tsx",
     "./PrecisionInput": "./src/components/ui/PrecisionInput.tsx",
     "./Divider": "./src/components/Divider.tsx",
+    "./Separator": "./src/components/Separator.tsx",
     "./BorderBox": "./src/components/BorderBox.tsx",
     "./Logo": "./src/components/Logo.tsx",
     "./EveLogo": "./src/components/EveLogo.tsx",

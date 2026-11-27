@@ -90,7 +90,7 @@ describe('CoreOperationalModules', () => {
 
     const logoSvg = logoBadge?.querySelector('svg');
     expect(logoSvg).toBeInTheDocument();
-    expect(logoSvg).toHaveAttribute('viewBox', '22.75 16.625 166.16 166.19');
+    expect(logoSvg).toHaveAttribute('viewBox', '0 0 172.61 172.61');
 
     expect(screen.getByTestId('core-modules-live-background')).toBeInTheDocument();
     expect(screen.getByTestId('core-modules-identity-separator')).toBeInTheDocument();

@@ -29,6 +29,7 @@ export * from './components/N8nIcon';
 export * from './components/PageHeader';
 export * from './components/RedisIcon';
 export * from './components/SecondaryButton';
+export * from './components/Separator';
 export * from './components/ShiftToggle';
 export * from './components/TrustLogos';
 export * from './components/UptimeHeartbeatStrip';

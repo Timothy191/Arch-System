@@ -3,6 +3,7 @@
 import * as Popover from '@radix-ui/react-popover';
 import { ArchLogoBadge } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
+import { ArchSeparator } from '@repo/ui/Separator';
 import {
   BatteryCharging,
   BatteryFull,
@@ -131,23 +132,11 @@ const SystemTrayPillInner = function SystemTrayPillInner({
             <Home className="h-3.5 w-3.5" />
           </Link>
 
-          <span
-            aria-hidden="true"
-            data-testid="system-tray-gold-separator"
-            className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-          >
-            |
-          </span>
+          <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
 
           <TaskbarNotificationBell embedded />
 
-          <span
-            aria-hidden="true"
-            data-testid="system-tray-gold-separator"
-            className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-          >
-            |
-          </span>
+          <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
         </>
       )}
 
@@ -170,22 +159,10 @@ const SystemTrayPillInner = function SystemTrayPillInner({
               )}
               <span className={cn('relative inline-flex h-2 w-2 rounded-full', healthDotColor)} />
             </span>
-            <span
-              aria-hidden="true"
-              data-testid="system-tray-gold-separator"
-              className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-            >
-              |
-            </span>
+            <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
 
             <VolumeIcon className={cn('h-3.5 w-3.5', volumeColor)} />
-            <span
-              aria-hidden="true"
-              data-testid="system-tray-gold-separator"
-              className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-            >
-              |
-            </span>
+            <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
             <div className="flex items-center gap-0.5">
               <BatteryIcon className={cn('h-3.5 w-3.5', batteryColor)} />
               {battery.supported && battery.level !== null && (
@@ -198,13 +175,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
             {/* Offline queue pending badge */}
             {offlineQueue.pendingCount > 0 && (
               <>
-                <span
-                  aria-hidden="true"
-                  data-testid="system-tray-gold-separator"
-                  className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-                >
-                  |
-                </span>
+                <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
                 <div
                   className="flex animate-pulse items-center gap-1 rounded-full border border-accent-gold/35 bg-accent-gold/10 px-1.5 py-0.5 text-accent-gold"
                   title={`${offlineQueue.pendingCount} offline actions pending sync`}
@@ -215,13 +186,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
               </>
             )}
 
-            <span
-              aria-hidden="true"
-              data-testid="system-tray-gold-separator"
-              className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-            >
-              |
-            </span>
+            <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
             <ArchLogoBadge
               size="xs"
               className={cn(
@@ -294,23 +259,11 @@ const SystemTrayPillInner = function SystemTrayPillInner({
         </Popover.Portal>
       </Popover.Root>
 
-      <span
-        aria-hidden="true"
-        data-testid="system-tray-gold-separator"
-        className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-      >
-        |
-      </span>
+      <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
 
       <WifiNetworkPopover network={network} embedded />
 
-      <span
-        aria-hidden="true"
-        data-testid="system-tray-gold-separator"
-        className="select-none font-bold font-mono text-[11px] text-accent-gold leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
-      >
-        |
-      </span>
+      <ArchSeparator variant="pipe" testId="system-tray-gold-separator" />
 
       <FeedbackWidget variant="header" embedded />
     </div>

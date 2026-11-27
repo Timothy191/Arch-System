@@ -2,7 +2,7 @@
 
 import { Activity, AlertTriangle, Power, Wrench } from 'lucide-react';
 import Link from 'next/link';
-import { memo, useId } from 'react';
+import { memo, useId, useMemo } from 'react';
 import { cn } from '../lib/utils';
 import type { Panel } from './hero-types';
 import { ARCH_LOGO_VIEWBOX, ArchLogoBadge } from './Logo';
@@ -17,6 +17,8 @@ const GRAPH_PAD_BOTTOM = 26;
 const GRAPH_NODE_SIZE = 8;
 const GRAPH_LAST_NODE_SIZE = 11;
 const GRAPH_GRID_STEPS = 4;
+const GRAPH_MAX_POINT_NODES = 16;
+const GRAPH_MAX_VERTICAL_MARKERS = 10;
 const ARCH_GRAPH_NODE_VIEWBOX_SIZE = 172.61;
 const ARCH_GRAPH_NODE_PATH =
   'M86.31 0 55.25 31.05 0 86.31l55.25 55.25L86.31 172.61l31.05-31.05L172.61 86.31 117.36 31.05 86.31 0Zm0 31.05 25.19 25.2-25.19 25.19L61.12 56.25 86.31 31.05ZM31.05 86.31l25.2-25.19 25.19 25.19-25.19 25.2-25.2-25.2Zm55.26 55.26-25.19-25.2 25.19-25.19 25.19 25.19-25.19 25.2Z';
@@ -55,11 +57,20 @@ function formatGraphValue(value: number): string {
   return value.toFixed(1);
 }
 
+// Keeps marker/node counts bounded so very long windows stay cheap and legible.
+function sampleIndexes(length: number, maxCount: number): number[] {
+  if (length <= maxCount) return Array.from({ length }, (_, index) => index);
+  const step = Math.ceil(length / maxCount);
+  const indexes: number[] = [];
+  for (let index = 0; index < length; index += step) indexes.push(index);
+  const lastIndex = length - 1;
+  if (indexes[indexes.length - 1] !== lastIndex) indexes.push(lastIndex);
+  return indexes;
+}
+
 const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: Panel }) {
   const nodeSymbolId = useId();
   const areaGradientId = useId();
-  const trend = panel.trend?.filter((value) => Number.isFinite(value)) ?? [];
-  const hasTrend = trend.length >= TELEMETRY_MIN_POINTS;
   const plotLeft = GRAPH_PAD_LEFT;
   const plotRight = GRAPH_VIEWBOX_WIDTH - GRAPH_PAD_RIGHT;
   const plotTop = GRAPH_PAD_TOP;
@@ -67,16 +78,39 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
   const plotWidth = plotRight - plotLeft;
   const plotHeight = plotBottom - plotTop;
 
-  const minValue = hasTrend ? Math.min(...trend) : 0;
-  const maxValue = hasTrend ? Math.max(...trend) : 0;
-  const range = Math.max(maxValue - minValue, 1);
-  const coordinates = hasTrend
-    ? trend.map((value, index) => ({
-        x: plotLeft + (index / Math.max(trend.length - 1, 1)) * plotWidth,
-        y: plotBottom - ((value - minValue) / range) * plotHeight,
-        value,
-      }))
-    : [];
+  const trend = useMemo(
+    () => panel.trend?.filter((value) => Number.isFinite(value)) ?? [],
+    [panel.trend]
+  );
+
+  // Single-pass extents plus downsampled marker indexes keep long windows cheap to draw.
+  const graph = useMemo(() => {
+    if (trend.length < TELEMETRY_MIN_POINTS) return null;
+    let minValue = Number.POSITIVE_INFINITY;
+    let maxValue = Number.NEGATIVE_INFINITY;
+    for (const value of trend) {
+      if (value < minValue) minValue = value;
+      if (value > maxValue) maxValue = value;
+    }
+    const range = Math.max(maxValue - minValue, 1);
+    const coordinates = trend.map((value, index) => ({
+      x: plotLeft + (index / Math.max(trend.length - 1, 1)) * plotWidth,
+      y: plotBottom - ((value - minValue) / range) * plotHeight,
+      value,
+    }));
+    return {
+      maxValue,
+      range,
+      coordinates,
+      nodeIndices: sampleIndexes(coordinates.length, GRAPH_MAX_POINT_NODES),
+      markerIndices: sampleIndexes(coordinates.length, GRAPH_MAX_VERTICAL_MARKERS),
+    };
+  }, [trend, plotLeft, plotWidth, plotBottom, plotHeight]);
+
+  const hasTrend = graph !== null;
+  const coordinates = graph?.coordinates ?? [];
+  const maxValue = graph?.maxValue ?? 0;
+  const range = graph?.range ?? 1;
   const linePath = coordinates
     .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`)
     .join(' ');
@@ -105,6 +139,8 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
     (_, index) => maxValue - (index / GRAPH_GRID_STEPS) * range
   );
   const latestPoint = coordinates[coordinates.length - 1];
+  const nodeIndices = graph?.nodeIndices ?? [];
+  const markerIndices = graph?.markerIndices ?? [];
 
   return (
     <div
@@ -146,8 +182,9 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
             preserveAspectRatio="xMidYMid meet"
             className="h-[92px] w-full sm:h-[100px] lg:h-[108px]"
             role="img"
-            aria-label={`${panel.stats?.label ?? panel.title} recorded trend`}
+            aria-label={`${panel.stats?.label ?? panel.title} recorded trend, latest ${formatGraphValue(lastValue)}, ${deltaDirection} ${Math.abs(deltaPct).toFixed(1)} percent`}
           >
+            <title>{`${panel.stats?.label ?? panel.title} recorded trend, latest ${formatGraphValue(lastValue)}, ${deltaDirection} ${Math.abs(deltaPct).toFixed(1)} percent`}</title>
             <defs>
               <path
                 id={nodeSymbolId}
@@ -161,7 +198,12 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
               </linearGradient>
             </defs>
 
-            <g data-testid="hero-graph-grid" stroke="var(--border-subtle)" strokeWidth="1">
+            <g
+              data-testid="hero-graph-grid"
+              stroke="var(--border-default)"
+              strokeWidth="1"
+              strokeOpacity="0.5"
+            >
               {gridLines.map((ratio, index) => {
                 const y = plotTop + ratio * plotHeight;
                 return (
@@ -171,14 +213,15 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
                       y1={y.toFixed(1)}
                       x2={plotRight}
                       y2={y.toFixed(1)}
-                      strokeDasharray={index === GRAPH_GRID_STEPS ? undefined : '3 5'}
+                      strokeDasharray={index === GRAPH_GRID_STEPS ? undefined : '2 4'}
+                      strokeOpacity={index === GRAPH_GRID_STEPS ? 0.7 : 0.4}
                     />
                     <text
-                      x={plotLeft - 5}
+                      x={plotLeft - 6}
                       y={y + 2.5}
                       textAnchor="end"
-                      fontSize="7.5"
-                      fill="var(--text-muted)"
+                      fontSize="7"
+                      fill="var(--text-secondary)"
                       stroke="none"
                       className="font-mono tabular-nums"
                     >
@@ -191,20 +234,27 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
 
             <g
               data-testid="hero-graph-vertical-markers"
-              stroke="var(--border-subtle)"
+              stroke="var(--border-default)"
               strokeWidth="1"
+              strokeOpacity="0.6"
             >
-              {coordinates.map((point, index) => (
-                <line
-                  key={`v-${index}-${point.x.toFixed(1)}`}
-                  x1={point.x.toFixed(1)}
-                  y1={plotTop}
-                  x2={point.x.toFixed(1)}
-                  y2={plotBottom}
-                  strokeDasharray="2 6"
-                  opacity="0.5"
-                />
-              ))}
+              {markerIndices.map((index) => {
+                const point = coordinates[index];
+                if (!point) return null;
+                const isLatest = index === coordinates.length - 1;
+                return (
+                  <line
+                    key={`v-${index}-${point.x.toFixed(1)}`}
+                    x1={point.x.toFixed(1)}
+                    y1={plotTop}
+                    x2={point.x.toFixed(1)}
+                    y2={plotBottom}
+                    stroke={isLatest ? 'var(--accent-gold)' : undefined}
+                    strokeDasharray={isLatest ? undefined : '2 4'}
+                    strokeOpacity={isLatest ? 0.9 : 0.55}
+                  />
+                );
+              })}
             </g>
 
             <g data-testid="hero-graph-y-axis">
@@ -213,8 +263,8 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
                 y1={plotTop}
                 x2={plotLeft}
                 y2={plotBottom}
-                stroke="var(--text-muted)"
-                strokeWidth="1"
+                stroke="var(--text-secondary)"
+                strokeWidth="1.2"
               />
             </g>
 
@@ -224,15 +274,16 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
                 y1={plotBottom}
                 x2={plotRight}
                 y2={plotBottom}
-                stroke="var(--text-muted)"
-                strokeWidth="1"
+                stroke="var(--text-secondary)"
+                strokeWidth="1.2"
               />
               <text
                 x={plotLeft}
                 y={GRAPH_VIEWBOX_HEIGHT - 8}
-                fontSize="7.5"
-                fill="var(--text-muted)"
+                fontSize="7"
+                fill="var(--text-secondary)"
                 stroke="none"
+                className="font-mono"
               >
                 START
               </text>
@@ -240,9 +291,10 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
                 x={plotRight}
                 y={GRAPH_VIEWBOX_HEIGHT - 8}
                 textAnchor="end"
-                fontSize="7.5"
-                fill="var(--text-muted)"
+                fontSize="7"
+                fill="var(--text-secondary)"
                 stroke="none"
+                className="font-mono"
               >
                 NOW
               </text>
@@ -275,13 +327,14 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
               </text>
             )}
 
-            {coordinates.map((point, index) => {
-              const size =
-                index === coordinates.length - 1 ? GRAPH_LAST_NODE_SIZE : GRAPH_NODE_SIZE;
+            {nodeIndices.map((index) => {
+              const point = coordinates[index];
+              if (!point) return null;
+              const isLatest = index === coordinates.length - 1;
+              const size = isLatest ? GRAPH_LAST_NODE_SIZE : GRAPH_NODE_SIZE;
               const scale = size / ARCH_GRAPH_NODE_VIEWBOX_SIZE;
               const tx = point.x - size / 2;
               const ty = point.y - size / 2;
-              const isLatest = index === coordinates.length - 1;
               return (
                 <g
                   key={`${index}-${point.x.toFixed(1)}`}
@@ -289,6 +342,7 @@ const HeroTelemetryGraph = memo(function HeroTelemetryGraph({ panel }: { panel: 
                   data-testid="hero-graph-arch-node"
                   className={isLatest ? 'motion-safe:animate-pulse' : undefined}
                 >
+                  <title>{`${panel.stats?.label ?? panel.title}: ${formatGraphValue(point.value)}`}</title>
                   <use href={`#${nodeSymbolId}`} />
                 </g>
               );
@@ -319,6 +373,13 @@ export interface HeroCardContentProps {
   offlineMachineCount: number;
 }
 
+const HERO_CTA_BASE_CLASS = cn(
+  'gold-steel-border gold-steel-border-slim inline-flex min-h-[34px] items-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-xs',
+  'transition-all duration-200 hover:-translate-y-0.5 hover:shadow-diffusion-sm',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-1',
+  'active:translate-y-0 active:scale-95'
+);
+
 const HERO_LEFT_COLUMN_CLASS = cn(
   'liquid-glass-light relative z-20 order-2 flex min-h-0 w-full flex-1 flex-col justify-between gap-2.5',
   'rounded-b-2xl border border-white/20 p-4 shadow-window sm:p-5',
@@ -345,30 +406,34 @@ export const HeroCardContent = memo(function HeroCardContent({
   const hasUrgentTelemetry = incidentCount > 0 || breakdownCount > 0 || offlineMachineCount > 0;
   const isViewLogs = panel.primary.label.toLowerCase().includes('log');
   const primaryBtnClass = isViewLogs
-    ? 'bg-amber-400 text-stone-950 hover:bg-amber-300 font-semibold shadow-xs'
-    : 'bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 font-medium shadow-xs';
+    ? 'border-amber-500/30 bg-amber-400 font-semibold text-stone-950 shadow-xs hover:bg-amber-300'
+    : 'border-black/[0.08] bg-[var(--accent-gold)] font-semibold text-stone-950 shadow-xs hover:bg-[var(--accent-gold-hover)]';
 
   return (
     <div className="relative z-10 flex h-full w-full flex-col md:flex-row">
       <div className={HERO_LEFT_COLUMN_CLASS}>
         <div>
           {hasUrgentTelemetry && (
-            <div className="mb-3 flex flex-wrap items-center gap-1.5 font-mono text-[10px] tabular-nums">
+            <div
+              role="status"
+              aria-label="Operational alerts"
+              className="mb-3 flex flex-wrap items-center gap-1.5 font-mono text-[11px] tabular-nums"
+            >
               {incidentCount > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-accent-red/10 px-2 py-0.5 font-medium text-accent-red">
-                  <AlertTriangle className="h-3 w-3" />
+                <span className="inline-flex items-center gap-1 rounded-md border border-accent-red/20 bg-accent-red/10 px-2 py-0.5 font-semibold text-accent-red">
+                  <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden="true" />
                   {incidentCount} Open
                 </span>
               )}
               {breakdownCount > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-accent-amber/10 px-2 py-0.5 font-medium text-accent-amber">
-                  <Wrench className="h-3 w-3" />
+                <span className="inline-flex items-center gap-1 rounded-md border border-accent-amber/30 bg-accent-amber/15 px-2 py-0.5 font-semibold text-amber-900">
+                  <Wrench className="h-3 w-3 shrink-0" aria-hidden="true" />
                   {breakdownCount} Breakdown
                 </span>
               )}
               {offlineMachineCount > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-black/[0.04] px-2 py-0.5 font-medium text-[var(--text-secondary)]">
-                  <Power className="h-3 w-3" />
+                <span className="inline-flex items-center gap-1 rounded-md border border-black/[0.08] bg-black/[0.04] px-2 py-0.5 font-semibold text-[var(--text-secondary)]">
+                  <Power className="h-3 w-3 shrink-0" aria-hidden="true" />
                   {offlineMachineCount} Offline
                 </span>
               )}
@@ -382,13 +447,13 @@ export const HeroCardContent = memo(function HeroCardContent({
                 testId={`hero-dept-icon-${panel.name}`}
                 className="border-accent-gold/40 bg-accent-gold/10 shadow-2xs"
               />
-              <h2 className="pr-4 font-anurati font-bold text-[var(--text-heading)] text-xl leading-snug tracking-[0.04em] sm:text-2xl">
+              <h2 className="pr-4 font-anurati font-bold text-[var(--text-heading)] text-lg leading-tight tracking-[0.04em] sm:text-xl lg:text-2xl">
                 {panel.title}
               </h2>
             </div>
             <div className="relative space-y-2">
               <p
-                className="line-clamp-2 min-h-[2.5rem] max-w-[95%] font-medium text-slate-800 text-xs leading-relaxed tracking-[0.01em] sm:text-sm"
+                className="line-clamp-2 min-h-[2.5rem] max-w-[95%] font-medium text-[var(--text-body)] text-xs leading-relaxed tracking-[0.01em] sm:text-sm"
                 data-testid={`hero-subtitle-${panel.name}`}
               >
                 {panel.description}
@@ -409,11 +474,9 @@ export const HeroCardContent = memo(function HeroCardContent({
             <Link
               href={panel.primary.href}
               data-cta="primary-hero"
-              className={cn(
-                'gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg border border-black/[0.08] px-3.5 py-1.5 text-xs transition-all duration-300 active:scale-95',
-                primaryBtnClass
-              )}
+              className={cn(HERO_CTA_BASE_CLASS, primaryBtnClass)}
               tabIndex={isActive ? 0 : -1}
+              aria-disabled={!isActive || undefined}
             >
               {panel.primary.icon}
               {panel.primary.label}
@@ -422,8 +485,12 @@ export const HeroCardContent = memo(function HeroCardContent({
               <Link
                 href={panel.secondary.href}
                 data-cta="secondary-hero"
-                className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-black/[0.04] px-3.5 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all duration-300 hover:bg-black/[0.08] active:scale-95"
+                className={cn(
+                  HERO_CTA_BASE_CLASS,
+                  'border-black/10 bg-white/80 font-medium text-[var(--text-heading)] hover:border-accent-gold/45 hover:bg-white'
+                )}
                 tabIndex={isActive ? 0 : -1}
+                aria-disabled={!isActive || undefined}
               >
                 {panel.secondary.icon}
                 {panel.secondary.label}
@@ -480,6 +547,8 @@ export const HeroCardContent = memo(function HeroCardContent({
                   src={posterSrc}
                   alt={`${panel.title} visual`}
                   data-testid={`hero-poster-${panel.name}`}
+                  width={640}
+                  height={360}
                   loading="lazy"
                   decoding="async"
                   fetchPriority={isNext ? 'low' : 'auto'}

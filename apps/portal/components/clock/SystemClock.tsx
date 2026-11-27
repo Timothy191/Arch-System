@@ -258,7 +258,7 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
           className={cn(
             embedded
               ? 'flex cursor-default select-none items-center gap-1 rounded-full px-1 outline-none transition-colors hover:text-accent-gold active:scale-95'
-              : 'gold-steel-border gold-steel-border-slim flex h-7 cursor-default select-none items-center gap-1.5 rounded-full border border-accent-gold/45 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm outline-none backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] active:scale-95'
+              : 'gold-steel-border gold-steel-border-slim flex h-8 cursor-default select-none items-center gap-2 rounded-full border border-accent-gold/45 bg-[var(--material-ultra-thin)] px-3 shadow-diffusion-sm outline-none backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] active:scale-95'
           )}
         >
           <Clock className="h-3 w-3 shrink-0 text-accent-gold" aria-hidden="true" />
@@ -272,10 +272,13 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
         <Popover.Content
           align="end"
           sideOffset={8}
-          className="z-popover flex select-none gap-5 rounded-2xl border border-black/[0.08] bg-white/95 p-4 shadow-window backdrop-blur-2xl focus:outline-none"
+          className={cn(
+            'z-popover flex max-w-[calc(100vw-1.5rem)] select-none flex-col gap-4 rounded-3xl border border-black/[0.08] bg-white/95 p-4 shadow-window backdrop-blur-2xl focus:outline-none',
+            'sm:flex-row sm:gap-5'
+          )}
         >
           {/* Left panel: Calendar */}
-          <div className="w-[218px]">
+          <div className="w-full sm:w-[218px]">
             <div className="mb-2 flex items-center justify-between">
               <span className="font-mono font-semibold text-[10px] text-[var(--accent-blue)] uppercase tracking-wider">
                 {todaySummary}
@@ -432,42 +435,58 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
           </div>
 
           {/* Right panel: Analog + Digital Clock */}
-          <div className="flex min-w-[132px] flex-col items-center justify-center border-black/[0.06] border-l pl-5">
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-black/[0.08] bg-gradient-to-b from-white to-black/[0.03] shadow-inner ring-1 ring-black/[0.03]">
-              <div className="absolute top-1.5 h-1.5 w-0.5 rounded-full bg-amber-600/70" />
-              <div className="absolute bottom-1.5 h-1.5 w-0.5 rounded-full bg-black/25" />
-              <div className="absolute left-1.5 h-0.5 w-1.5 rounded-full bg-black/25" />
-              <div className="absolute right-1.5 h-0.5 w-1.5 rounded-full bg-black/25" />
+          <div className="flex w-full flex-col items-center justify-center gap-3 border-black/[0.06] border-t pt-4 sm:w-[176px] sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5">
+            <div className="relative flex h-28 w-28 items-center justify-center">
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full border border-black/[0.06] bg-gradient-to-b from-white to-black/[0.03] shadow-inner ring-1 ring-black/[0.03]"
+              />
+              {Array.from({ length: 12 }, (_, tick) => (
+                <span
+                  key={`clock-tick-${tick}`}
+                  aria-hidden="true"
+                  className="absolute inset-0 flex justify-center"
+                  style={{ transform: `rotate(${tick * 30}deg)` }}
+                >
+                  <span
+                    className={cn(
+                      'mt-1.5 h-1.5 w-0.5 rounded-full bg-black/20',
+                      tick % 3 === 0 && 'mt-1 h-2 w-[3px] bg-accent-gold/80'
+                    )}
+                  />
+                </span>
+              ))}
 
               <div
-                className="absolute bottom-1/2 left-1/2 h-6 w-[3px] origin-bottom rounded-full bg-zinc-900"
+                className="absolute bottom-1/2 left-1/2 h-7 w-[3px] origin-bottom rounded-full bg-zinc-900"
                 style={{
                   transform: `translate(-50%, 0) rotate(${hourDeg}deg)`,
                   transition: 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                 }}
               />
               <div
-                className="absolute bottom-1/2 left-1/2 h-8 w-[2px] origin-bottom rounded-full bg-zinc-600"
+                className="absolute bottom-1/2 left-1/2 h-9 w-[2px] origin-bottom rounded-full bg-zinc-600"
                 style={{
                   transform: `translate(-50%, 0) rotate(${minuteDeg}deg)`,
                   transition: 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                 }}
               />
               <div
-                className="absolute bottom-1/2 left-1/2 h-9 w-[1px] origin-bottom rounded-full bg-[var(--accent-red)]"
+                className="absolute bottom-1/2 left-1/2 h-10 w-[1.5px] origin-bottom rounded-full bg-[var(--accent-red)]"
                 style={{
                   transform: `translate(-50%, 0) rotate(${secondDeg}deg)`,
                   transition: secondDeg === 0 ? 'none' : 'transform 0.1s ease-out',
                 }}
               />
-              <div
-                className="absolute h-2 w-2 rounded-full border border-white bg-zinc-900 shadow-sm"
+              <span
+                aria-hidden="true"
+                className="absolute h-2.5 w-2.5 rounded-full border-2 border-white bg-zinc-900 shadow-sm"
                 style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
               />
             </div>
 
-            <div className="mt-3 w-full rounded-lg border border-black/[0.06] bg-black/[0.03] px-2.5 py-1 text-center">
-              <div className="select-all font-mono font-semibold text-[12px] text-[var(--text-heading)] tabular-nums">
+            <div className="w-full rounded-2xl border border-black/[0.06] bg-white/80 px-3 py-2 text-center shadow-2xs">
+              <div className="select-all font-mono font-semibold text-[20px] text-[var(--text-heading)] tabular-nums leading-none tracking-tight">
                 {time.toLocaleTimeString('en-US', {
                   timeZone: TIMEZONE_META[timezoneMode].iana,
                   hour: '2-digit',
@@ -476,14 +495,14 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
                   hour12,
                 })}
               </div>
-              <div className="font-mono text-[9px] text-[var(--text-muted)] uppercase tracking-wider">
+              <div className="mt-1.5 font-medium text-[9.5px] text-[var(--text-muted)] uppercase tracking-[0.16em]">
                 {weekdayLong} · {TIMEZONE_META[timezoneMode].offsetLabel}
               </div>
             </div>
 
-            <div className="mt-2 flex w-full items-center justify-between gap-1">
+            <div className="flex w-full items-center gap-1.5">
               <div
-                className="flex flex-1 rounded-lg border border-black/[0.06] bg-black/[0.02] p-0.5"
+                className="flex flex-1 rounded-full border border-black/[0.06] bg-black/[0.03] p-0.5"
                 role="group"
                 aria-label="Clock timezone"
               >
@@ -494,10 +513,10 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
                     onClick={() => selectTimezone(mode)}
                     aria-pressed={timezoneMode === mode}
                     className={cn(
-                      'flex-1 rounded-md px-1.5 py-0.5 font-mono font-semibold text-[9px] uppercase transition-colors',
+                      'flex-1 rounded-full px-1.5 py-1 font-mono font-semibold text-[9px] uppercase transition-colors',
                       timezoneMode === mode
-                        ? 'bg-[var(--accent-blue)] text-white shadow-sm'
-                        : 'text-[var(--text-secondary)] hover:bg-black/[0.04]'
+                        ? 'bg-white text-[var(--text-heading)] shadow-2xs ring-1 ring-accent-gold/40'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
                     )}
                   >
                     {TIMEZONE_META[mode].label}
@@ -508,7 +527,7 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
                 type="button"
                 onClick={toggleHour12}
                 aria-label="Toggle 12 or 24 hour format"
-                className="rounded-lg border border-black/[0.06] bg-black/[0.02] px-1.5 py-1 font-mono font-semibold text-[9px] text-[var(--text-secondary)] transition-colors hover:bg-black/[0.05]"
+                className="rounded-full border border-black/[0.06] bg-white px-2 py-1 font-mono font-semibold text-[9px] text-[var(--text-heading)] shadow-2xs transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
               >
                 {hour12 ? '12H' : '24H'}
               </button>

@@ -54,6 +54,7 @@ module.exports = {
     '^@repo/theme/(.*)$': '<rootDir>/../../packages/theme/src/$1',
     '^@repo/ui/lib/(.*)$': '<rootDir>/../../packages/ui/src/lib/$1',
     '^@repo/ui/Divider$': '<rootDir>/../../packages/ui/src/components/Divider.tsx',
+    '^@repo/ui/Separator$': '<rootDir>/../../packages/ui/src/components/Separator.tsx',
     '^@repo/ui/BorderBox$': '<rootDir>/../../packages/ui/src/components/BorderBox.tsx',
     '^@repo/ui/GlassCard$': '<rootDir>/../../packages/ui/src/components/GlassCard.tsx',
     '^@repo/ui/GoldenPanel$': '<rootDir>/../../packages/ui/src/components/GoldenPanel.tsx',

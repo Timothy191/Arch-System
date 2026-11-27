@@ -58,5 +58,6 @@ export {
   variants,
 } from './motion';
 export { radii } from './radii';
+export { type SeparatorTokens, separatorTokens } from './separator';
 export { shadows } from './shadows';
 export { fonts, fontWeights } from './typography';

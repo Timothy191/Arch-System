@@ -56,7 +56,7 @@ const SHEEN_HALF_WIDTH = 144;
 const BAR_PERSPECTIVE = 1200;
 
 const BAR_LAYOUT =
-  'fixed inset-x-3 top-2 z-50 flex h-11 items-center justify-between gap-2 rounded-full px-3.5';
+  'fixed inset-x-3 top-2 z-50 flex h-12 items-center justify-between gap-2.5 rounded-full px-4 font-sans tracking-[0.01em]';
 const BAR_GLASS =
   'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/25 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md';
 
@@ -78,7 +78,7 @@ const GLINT_TRACK = 'absolute inset-0';
 const GLINT =
   'absolute inset-y-0 left-0 w-24 -skew-x-12 bg-gradient-to-r from-transparent via-white/45 to-transparent';
 const SEPARATOR =
-  'hidden h-5 w-px shrink-0 rounded-full bg-gradient-to-b from-transparent via-accent-gold/70 to-transparent md:block';
+  'hidden h-6 w-px shrink-0 rounded-full bg-gradient-to-b from-transparent via-accent-gold/70 to-transparent md:block';
 
 const NAV_BTN_LIFT =
   'relative transform-gpu transition-[transform,background-color] duration-200 ease-out hover:-translate-y-px active:translate-y-0 motion-reduce:transform-none';
@@ -346,8 +346,8 @@ export function MacMenuBar({
           type="button"
           onClick={() => setSystemMenuOpen((open) => !open)}
           className={cn(
-            'group/ctx gold-steel-border gold-steel-border-slim ml-1 hidden h-7 cursor-pointer select-none items-center gap-1.5 rounded-full',
-            'border border-accent-gold/40 bg-white/70 px-2.5 font-medium text-[11px] text-[var(--text-heading)] shadow-2xs backdrop-blur-md transition-all hover:border-accent-gold hover:bg-white/90 md:inline-flex'
+            'group/ctx gold-steel-border gold-steel-border-slim ml-1 hidden h-8 cursor-pointer select-none items-center gap-1.5 rounded-full',
+            'border border-accent-gold/40 bg-white/70 px-3 font-medium text-[11.5px] text-[var(--text-heading)] shadow-2xs backdrop-blur-md transition-all hover:border-accent-gold hover:bg-white/90 md:inline-flex'
           )}
           title="Open System Menu"
         >
@@ -687,9 +687,9 @@ export function MacMenuBar({
                 placeholder="Search..."
                 aria-label="Search"
                 className={cn(
-                  'gold-steel-border gold-steel-border-slim h-6 w-full rounded-full border border-accent-gold/60 bg-white/35 pr-7 pl-7',
-                  'text-[12px] text-[var(--text-heading)] shadow-diffusion-sm backdrop-blur-md transition-all placeholder:text-[var(--text-muted)]',
-                  'hover:bg-white/50 focus:border-accent-gold focus:bg-white/70 focus:outline-none'
+                  'gold-steel-border gold-steel-border-slim h-8 w-full rounded-full border border-accent-gold/60 bg-white/45 pr-8 pl-8',
+                  'font-medium text-[13px] text-[var(--text-heading)] shadow-diffusion-sm backdrop-blur-md transition-all placeholder:text-[var(--text-muted)]',
+                  'hover:border-accent-gold/80 hover:bg-white/65 focus:border-accent-gold focus:bg-white/80 focus:outline-none'
                 )}
               />
             </div>
@@ -700,7 +700,7 @@ export function MacMenuBar({
       <BarSeparator delay={0.5} reduceMotion={reduceMotion} />
 
       {/* Right: system tray slot */}
-      <div className="flex shrink-0 items-center gap-1.5 text-[12px] text-[var(--text-secondary)]">
+      <div className="flex shrink-0 items-center gap-2 text-[12px] text-[var(--text-secondary)]">
         {rightSlot}
       </div>
     </m.div>

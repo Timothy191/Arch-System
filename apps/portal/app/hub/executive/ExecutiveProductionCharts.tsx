@@ -13,7 +13,17 @@ import {
   YAxis,
 } from 'recharts';
 import { RECONCILIATION_THRESHOLDS } from '@/lib/production-reconciliation';
-import { AXIS_TICK, CHART_COLORS, CHART_HEIGHT, CHART_MARGIN, TOOLTIP_STYLE } from './chart-theme';
+import {
+  AXIS_TICK,
+  CHART_COLORS,
+  CHART_HEIGHT,
+  CHART_MARGIN,
+  TOOLTIP_CURSOR_BAR,
+  TOOLTIP_CURSOR_LINE,
+  TOOLTIP_ITEM_STYLE,
+  TOOLTIP_LABEL_STYLE,
+  TOOLTIP_STYLE,
+} from './chart-theme';
 import { ChartCard, type ChartState, chartStateFor } from './ExecutiveChartCard';
 import { DonutChart } from './ExecutiveDonut';
 import { formatCompact, formatPercent, formatRatio, formatShortDate } from './executive-format';
@@ -37,27 +47,52 @@ const REFERENCE_DASH = '4 4';
 const GRID_DASH = '3 3';
 const PERCENT = 100;
 
-function TimeAxes({ rightAxis = false }: { rightAxis?: boolean }) {
+type TooltipCursor = typeof TOOLTIP_CURSOR_LINE | typeof TOOLTIP_CURSOR_BAR;
+
+function TimeAxes({
+  rightAxis = false,
+  cursor = TOOLTIP_CURSOR_LINE,
+}: {
+  rightAxis?: boolean;
+  cursor?: TooltipCursor;
+}) {
   return (
     <>
-      <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray={GRID_DASH} vertical={false} />
+      <CartesianGrid
+        stroke={CHART_COLORS.grid}
+        strokeDasharray={GRID_DASH}
+        strokeOpacity={0.4}
+        vertical={false}
+      />
       <XAxis
         dataKey="date"
         tickFormatter={formatShortDate}
         tick={AXIS_TICK}
         stroke={CHART_COLORS.grid}
+        minTickGap={24}
+        tickMargin={8}
       />
       <YAxis
         yAxisId="left"
         tickFormatter={formatCompact}
         tick={AXIS_TICK}
         stroke={CHART_COLORS.grid}
+        tickMargin={6}
       />
       {rightAxis ? (
-        <YAxis yAxisId="right" orientation="right" tick={AXIS_TICK} stroke={CHART_COLORS.grid} />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          tick={AXIS_TICK}
+          stroke={CHART_COLORS.grid}
+          tickMargin={6}
+        />
       ) : null}
       <Tooltip
         contentStyle={TOOLTIP_STYLE}
+        labelStyle={TOOLTIP_LABEL_STYLE}
+        itemStyle={TOOLTIP_ITEM_STYLE}
+        cursor={cursor}
         labelFormatter={(label) => formatShortDate(String(label ?? ''))}
       />
     </>
@@ -82,7 +117,7 @@ function TonnageTrendChart({
         { label: '30-day avg total', color: CHART_COLORS.muted },
       ]}
     >
-      <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+      <ResponsiveContainer width="100%" height={CHART_HEIGHT} debounce={100}>
         <LineChart data={[...daily]} margin={CHART_MARGIN}>
           <TimeAxes />
           <Line
@@ -93,6 +128,7 @@ function TonnageTrendChart({
             stroke={CHART_COLORS.coal}
             strokeWidth={LINE_WIDTH}
             dot={false}
+            isAnimationActive={false}
           />
           <Line
             yAxisId="left"
@@ -102,6 +138,7 @@ function TonnageTrendChart({
             stroke={CHART_COLORS.waste}
             strokeWidth={LINE_WIDTH}
             dot={false}
+            isAnimationActive={false}
           />
           <Line
             yAxisId="left"
@@ -111,6 +148,7 @@ function TonnageTrendChart({
             stroke={CHART_COLORS.total}
             strokeWidth={LINE_WIDTH}
             dot={false}
+            isAnimationActive={false}
           />
           {avgDailyTonnes === null ? null : (
             <ReferenceLine
@@ -138,7 +176,7 @@ function DriftEfficiencyChart({ daily, state }: SeriesChartProps) {
         { label: 'Fuel L/t', color: CHART_COLORS.efficiency },
       ]}
     >
-      <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+      <ResponsiveContainer width="100%" height={CHART_HEIGHT} debounce={100}>
         <LineChart data={[...daily]} margin={CHART_MARGIN}>
           <TimeAxes rightAxis />
           <ReferenceLine
@@ -161,6 +199,7 @@ function DriftEfficiencyChart({ daily, state }: SeriesChartProps) {
             stroke={CHART_COLORS.drift}
             strokeWidth={LINE_WIDTH}
             dot={false}
+            isAnimationActive={false}
           />
           <Line
             yAxisId="right"
@@ -170,6 +209,7 @@ function DriftEfficiencyChart({ daily, state }: SeriesChartProps) {
             stroke={CHART_COLORS.efficiency}
             strokeWidth={LINE_WIDTH}
             dot={false}
+            isAnimationActive={false}
             connectNulls
           />
         </LineChart>
@@ -190,15 +230,16 @@ function FuelHoursChart({ daily, state }: SeriesChartProps) {
         { label: 'Machine hours (h)', color: CHART_COLORS.hours },
       ]}
     >
-      <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+      <ResponsiveContainer width="100%" height={CHART_HEIGHT} debounce={100}>
         <BarChart data={[...daily]} margin={CHART_MARGIN}>
-          <TimeAxes rightAxis />
+          <TimeAxes rightAxis cursor={TOOLTIP_CURSOR_BAR} />
           <Bar
             yAxisId="left"
             dataKey="fuelLitres"
             name="Diesel (L)"
             fill={CHART_COLORS.fuel}
             radius={[4, 4, 0, 0]}
+            isAnimationActive={false}
           />
           <Bar
             yAxisId="right"
@@ -206,6 +247,7 @@ function FuelHoursChart({ daily, state }: SeriesChartProps) {
             name="Machine hours (h)"
             fill={CHART_COLORS.hours}
             radius={[4, 4, 0, 0]}
+            isAnimationActive={false}
           />
         </BarChart>
       </ResponsiveContainer>

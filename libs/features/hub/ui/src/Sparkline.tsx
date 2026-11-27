@@ -137,8 +137,8 @@ export function Sparkline({
           x2={width}
           y2={firstCoord.y}
           className="stroke-slate-400/60"
-          strokeWidth="0.75"
-          strokeDasharray="3 3"
+          strokeWidth="1"
+          strokeDasharray="2 4"
           vectorEffect="non-scaling-stroke"
           data-testid="sparkline-baseline"
         />
