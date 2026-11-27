@@ -19,6 +19,15 @@ const ControlRoomActivityFeed = dynamic(
   }
 );
 
+const ControlRoomGlobePanel = dynamic(
+  () =>
+    import('@/app/(departments)/control-room/components/ControlRoomGlobePanel').then(
+      (m) => m.ControlRoomGlobePanel
+    ),
+  {
+    loading: () => <div className="h-[420px] animate-pulse rounded-card bg-bg-tertiary" />,
+  }
+);
 interface ControlRoomWidgetsProps {
   deptId: string;
   deptSlug?: string;
@@ -41,6 +50,10 @@ export function ControlRoomWidgets({ deptId }: ControlRoomWidgetsProps) {
           <AlertPanel departmentId={deptId} />
         </Suspense>
       </div>
+      {/* Interactive 3D Operations Globe with live data bubbles */}
+      <Suspense fallback={<div className="h-[420px] animate-pulse rounded-card bg-bg-tertiary" />}>
+        <ControlRoomGlobePanel departmentId={deptId} />
+      </Suspense>
 
       {/* Activity Feed */}
       <Suspense fallback={<div className="h-[400px] animate-pulse rounded-card bg-bg-tertiary" />}>

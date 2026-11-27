@@ -1,7 +1,7 @@
 'use client';
 
 import { cva, type VariantProps } from 'class-variance-authority';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { type HTMLAttributes, type ReactNode, useId, useState } from 'react';
 import { cn } from '../lib/utils';
@@ -196,7 +196,7 @@ export function GoldenPanel({
 
           <AnimatePresence initial={false}>
             {activeItem?.panelContent && (
-              <motion.div
+              <m.div
                 id={`${panelId}-drawer`}
                 key={activeItem.id}
                 initial={prefersReduced ? { opacity: 1 } : { opacity: 0, y: -6 }}
@@ -206,14 +206,14 @@ export function GoldenPanel({
                 className="border-[var(--accent-gold-border)] border-b bg-white/75 px-5 py-4"
               >
                 {activeItem.panelContent}
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>
       )}
 
       {hasBody && isExpanded && (
-        <motion.div
+        <m.div
           id={`${panelId}-body`}
           initial={collapsible && !prefersReduced ? { opacity: 0, y: -4 } : false}
           animate={{ opacity: 1, y: 0 }}
@@ -221,7 +221,7 @@ export function GoldenPanel({
           className={cn(!noBodyPadding && 'p-5', contentClassName)}
         >
           {children}
-        </motion.div>
+        </m.div>
       )}
     </div>
   );

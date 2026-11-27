@@ -9,6 +9,7 @@ import { ControlRoomSummaryGridClient } from '../[department]/ControlRoomSummary
 import { ControlRoomActionDropdown } from './components/ControlRoomActionDropdown';
 import { ControlRoomQuickNav } from './components/ControlRoomQuickNav';
 import { ControlRoomSubtabs } from './components/ControlRoomSubtabs';
+import { SectionHeader } from './components/SectionHeader';
 
 // AGENT-TRACE: ControlRoomWidgets dynamic island — co-locates all control-room
 // specific widgets (ScadaPanel, AlertPanel, ActivityFeed, Checklist, ShiftCoverage, EquipmentDashboard)
@@ -51,14 +52,10 @@ export default async function ControlRoomPage() {
         {/* Page Title & Header */}
         <GlassCard hover accent="charcoal">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <div>
-              <h1 className="font-bold text-2xl text-[var(--text-heading)] tracking-tight">
-                Control Room Dashboard
-              </h1>
-              <p className="mt-1 text-[var(--text-secondary)] text-sm">
-                Live SCADA monitoring, production metrics, and shift dispatch.
-              </p>
-            </div>
+            <SectionHeader
+              title="Control Room Dashboard"
+              subtitle="Live SCADA monitoring, production metrics, and shift dispatch."
+            />
             <div className="flex items-center gap-3 self-start sm:self-auto">
               <ControlRoomQuickNav />
             </div>

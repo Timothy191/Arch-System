@@ -19,6 +19,7 @@ import { CheckSquare, ClipboardCheck, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ControlRoomSubtabs } from '../../control-room/components/ControlRoomSubtabs';
+import { SectionHeader } from '../../control-room/components/SectionHeader';
 import { ShiftCloseoutForm } from '../../control-room/components/ShiftCloseoutForm';
 import {
   type ShiftReportSummary,
@@ -106,15 +107,10 @@ export function ShiftCompilationClient({
 
       {/* Unified Shift Operations Section Switcher */}
       <GlassCard className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="font-bold text-[var(--text-heading)] text-xl tracking-tight">
-            Shift Operations
-          </h1>
-          <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
-            Unified shift handover compilation, roster &amp; machine coverage, and atomic shift
-            closeout.
-          </p>
-        </div>
+        <SectionHeader
+          title="Shift Operations"
+          subtitle="Unified shift handover compilation, roster & machine coverage, and atomic shift closeout."
+        />
         <div
           role="tablist"
           aria-label="Shift Operations Views"
