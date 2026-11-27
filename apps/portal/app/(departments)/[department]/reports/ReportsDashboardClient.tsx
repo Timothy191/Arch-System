@@ -41,6 +41,7 @@ import type {
   ShiftCoverageMissingItem,
   ShiftReportRow,
 } from './reports-types';
+import { ShiftActivityDashboard } from './ShiftActivityDashboard';
 import { buildPdfSiteGroups } from './ShiftPdfReportTab';
 
 function ReportsTabSkeleton() {
@@ -116,6 +117,7 @@ export function ReportsDashboardClient({
   machineDailyRecords = EMPTY_MACHINE_DAILY_RECORDS,
 }: ReportsDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<ReportSubtab>(initialTab);
+  const [shiftView, setShiftView] = useState<'overview' | 'activity'>('overview');
   const [, startTabTransition] = useTransition();
   const [shiftFilter, setShiftFilter] = useState<'all' | 'day' | 'night'>('all');
   const [siteFilter, setSiteFilter] = useState<string>('all');
@@ -407,20 +409,50 @@ export function ReportsDashboardClient({
       />
 
       {activeTab === 'shift' && (
-        <ReportsShiftViewTab
-          departmentId={departmentId}
-          departmentName={departmentName}
-          todayStr={todayStr}
-          currentShift={currentShift}
-          fromDateStr={fromDateStr}
-          toDateStr={toDateStr}
-          shiftFilter={shiftFilter}
-          shiftComparison={shiftComparison}
-          siteBreakdown={siteBreakdown}
-          filteredShiftRows={filteredShiftRows}
-          filteredMachineOps={filteredMachineOps}
-          filteredEngineeringLogs={filteredEngineeringLogs}
-        />
+        <div className="space-y-4">
+          <div
+            role="tablist"
+            aria-label="Shift report views"
+            className="no-print flex flex-wrap gap-2 border-[var(--border-default)] border-b pb-2"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={shiftView === 'overview'}
+              onClick={() => setShiftView('overview')}
+              className="rounded-lg border border-[var(--border-default)] px-3 py-1.5 font-semibold text-[var(--text-secondary)] text-xs"
+            >
+              Overview
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={shiftView === 'activity'}
+              onClick={() => setShiftView('activity')}
+              className="rounded-lg border border-[var(--border-default)] px-3 py-1.5 font-semibold text-[var(--text-secondary)] text-xs"
+            >
+              Activity
+            </button>
+          </div>
+          {shiftView === 'overview' ? (
+            <ReportsShiftViewTab
+              departmentId={departmentId}
+              departmentName={departmentName}
+              todayStr={todayStr}
+              currentShift={currentShift}
+              fromDateStr={fromDateStr}
+              toDateStr={toDateStr}
+              shiftFilter={shiftFilter}
+              shiftComparison={shiftComparison}
+              siteBreakdown={siteBreakdown}
+              filteredShiftRows={filteredShiftRows}
+              filteredMachineOps={filteredMachineOps}
+              filteredEngineeringLogs={filteredEngineeringLogs}
+            />
+          ) : (
+            <ShiftActivityDashboard departmentId={departmentId} logs={machineOperationLogs} />
+          )}
+        </div>
       )}
 
       {activeTab === 'day' && (
@@ -497,7 +529,10 @@ export function ReportsDashboardClient({
         />
       )}
 
-      <div className="no-print flex flex-wrap items-center justify-end gap-2 pt-4">
+      <div
+        data-testid="reports-dashboard-action-bar"
+        className="no-print flex flex-wrap items-center justify-end gap-2 pt-4"
+      >
         <CopyReportButton csvContent={csvContent} />
         <ExportButton
           filename={`${departmentSlug}-report-${fromDateStr}-to-${toDateStr}`}
