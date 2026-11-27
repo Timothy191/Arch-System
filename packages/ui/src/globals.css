@@ -141,3 +141,20 @@
     margin: 0;
   }
 }
+
+/* Auth screens hide the global taskbar and status footer. The marker is
+   server-rendered inside the auth layout, so :has() hides chrome in the first
+   paint and there is no flash while navigating from the Hub to sign-in. */
+body:has([data-auth-chrome]) {
+  --app-chrome-offset: 0rem;
+}
+
+body:has([data-auth-chrome]) header[aria-label='Global navigation'],
+body:has([data-auth-chrome]) footer[role='contentinfo'] {
+  display: none;
+}
+
+body:has([data-auth-chrome]) #main-content {
+  padding-top: 0;
+  padding-bottom: 0;
+}

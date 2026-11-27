@@ -130,7 +130,9 @@ describe('LoginForm (@repo/auth/ui)', () => {
 
     const passwordInput = screen.getByPlaceholderText('••••••••');
     expect(passwordInput).toHaveAttribute('type', 'password');
-    expect(screen.getByText('Encrypted session handoff')).toBeInTheDocument();
+    expect(screen.queryByText('Encrypted session handoff')).not.toBeInTheDocument();
+    expect(screen.queryByText('Credentials ready')).not.toBeInTheDocument();
+    expect(screen.queryByText('Email or Employee Code')).not.toBeInTheDocument();
 
     fireEvent.change(passwordInput, { target: { value: 'StrongMiningPass#1' } });
     expect(screen.getByText('Credentials ready')).toBeInTheDocument();

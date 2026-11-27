@@ -7,7 +7,8 @@ import * as Sentry from '@sentry/nextjs';
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <Sentry.ErrorBoundary fallback={<p>An error has occurred in the authentication view.</p>}>
-      <div className="relative flex h-full min-h-[calc(100vh-4rem)] w-full overflow-hidden">
+      <div className="relative flex h-full min-h-[calc(100dvh-var(--app-chrome-offset,4rem))] w-full overflow-hidden">
+        <span data-auth-chrome hidden />
         {children}
       </div>
     </Sentry.ErrorBoundary>

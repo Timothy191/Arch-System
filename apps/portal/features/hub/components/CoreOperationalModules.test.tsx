@@ -57,7 +57,7 @@ const mockDepartments: Department[] = [
 
 describe('CoreOperationalModules', () => {
   it('renders the Mining Department Modules heading with the Arch System Logo icon and department pin buttons', () => {
-    render(<CoreOperationalModules departments={mockDepartments} canSeeExecutive={true} />);
+    render(<CoreOperationalModules departments={mockDepartments} />);
 
     const heading = screen.getByRole('heading', { name: /Mining Department Modules/i });
     expect(heading).toBeInTheDocument();
@@ -92,54 +92,22 @@ describe('CoreOperationalModules', () => {
     expect(logoSvg).toBeInTheDocument();
     expect(logoSvg).toHaveAttribute('viewBox', '22.75 16.625 166.16 166.19');
 
+    expect(screen.getByTestId('core-modules-live-background')).toBeInTheDocument();
+    expect(screen.getByTestId('core-modules-identity-separator')).toBeInTheDocument();
+
     expect(screen.getByLabelText('Pin Administration')).toBeInTheDocument();
     expect(screen.getByLabelText('Pin Stock Control Department')).toBeInTheDocument();
     expect(screen.getAllByTestId('arch-bookmark-icon')).toHaveLength(2);
     expect(screen.queryByTestId('core-modules-count-badge')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Executive Dashboard/i })).toHaveClass(
-      'gold-steel-border',
-      'gold-steel-border-slim'
-    );
+    expect(screen.queryByRole('link', { name: /Executive Dashboard/i })).not.toBeInTheDocument();
+    expect(document.querySelector('.stat-chip-shine')).toBeNull();
     expect(screen.getByLabelText('Search operational modules')).toHaveClass(
       'gold-steel-border',
       'gold-steel-border-slim',
       'font-bold',
       'text-accent-gold'
     );
-    expect(screen.getAllByText('Active')[0]?.parentElement).toHaveClass(
-      'stat-chip-shine',
-      'chip-elevated-3d',
-      'shining',
-      'bg-emerald-950',
-      'text-white'
-    );
-    expect(screen.getByText('Pinned').parentElement).toHaveClass(
-      'stat-chip-shine',
-      'stat-chip-shine-delay-1',
-      'chip-elevated-3d',
-      'shining',
-      'bg-amber-950',
-      'text-amber-50'
-    );
-    expect(screen.getAllByText('Alerts')[0]?.parentElement).toHaveClass(
-      'stat-chip-shine',
-      'stat-chip-shine-delay-2',
-      'chip-elevated-3d',
-      'shining',
-      'bg-rose-950',
-      'text-white'
-    );
     expect(screen.getByRole('button', { name: /^All$/i })).toHaveClass(
-      'chip-elevated-3d',
-      'shining'
-    );
-    expect(screen.getByRole('button', { name: /Active/i })).toHaveClass(
-      'border-slate-500/80',
-      'chip-elevated-3d',
-      'shining'
-    );
-    expect(screen.getByRole('button', { name: /Alerts/i })).toHaveClass(
-      'border-slate-500/80',
       'chip-elevated-3d',
       'shining'
     );

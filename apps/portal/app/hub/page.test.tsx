@@ -340,9 +340,7 @@ describe('HubPage — graceful degradation', () => {
     expect(mockCoreOperationalModules).toHaveBeenCalledTimes(1);
     const passedProps = mockCoreOperationalModules.mock.calls[0]?.[0] as {
       departments: Array<{ name: string }>;
-      canSeeExecutive: boolean;
     };
-    expect(passedProps.canSeeExecutive).toBe(false);
     expect(passedProps.departments.map((d) => d.name)).toEqual(['control-room']);
   });
 
@@ -367,9 +365,7 @@ describe('HubPage — graceful degradation', () => {
     expect(mockCoreOperationalModules).toHaveBeenCalledTimes(1);
     const passedProps = mockCoreOperationalModules.mock.calls[0]?.[0] as {
       departments: Array<{ name: string }>;
-      canSeeExecutive: boolean;
     };
-    expect(passedProps.canSeeExecutive).toBe(true);
     expect(passedProps.departments.map((d) => d.name)).toEqual([
       'drilling',
       'plant-processing',

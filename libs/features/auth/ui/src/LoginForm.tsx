@@ -26,7 +26,7 @@ const MAX_PASSWORD_LENGTH = 128;
 const LOCK_ICON_STROKE_WIDTH = 1.5;
 
 const LOGIN_INPUT_WRAPPER_CLASS =
-  'liquid-glass-light gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-secondary)] shadow-diffusion-sm backdrop-blur-md transition-all duration-200 hover:bg-[var(--bg-tertiary)] focus-within:border-[var(--accent-gold-border)] focus-within:bg-[var(--bg-tertiary)] focus-within:ring-2 focus-within:ring-[var(--accent-gold)]/15';
+  'liquid-glass-light gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-secondary)] shadow-diffusion-sm backdrop-blur-md transition-all duration-200 focus-within:-translate-y-px focus-within:border-[var(--accent-gold-border)] focus-within:bg-[var(--bg-tertiary)] focus-within:ring-2 focus-within:ring-[var(--accent-gold)]/15';
 
 const LOGIN_INPUT_CLASS =
   'h-12 w-full rounded-xl bg-transparent pr-10 pl-10 text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-0';
@@ -102,12 +102,9 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
             >
               Email Address
             </label>
-            <span className="select-none font-mono text-[13px] text-zinc-600 leading-[18px]">
-              Email or Employee Code
-            </span>
           </div>
           <div className={LOGIN_INPUT_WRAPPER_CLASS}>
-            <Mail className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-zinc-600" />
+            <Mail className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-zinc-600 transition-colors" />
             <input
               id="email"
               name="email"
@@ -164,7 +161,7 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
             </Link>
           </div>
           <div className={LOGIN_INPUT_WRAPPER_CLASS}>
-            <Lock className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-zinc-600" />
+            <Lock className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-zinc-600 transition-colors" />
             <input
               id="password"
               name="password"
@@ -194,21 +191,15 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <div className="flex items-center justify-between pt-0.5 font-mono text-[13px] text-[var(--text-secondary)] leading-[18px]">
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2
-                className={
-                  password.length > 0
-                    ? 'h-3.5 w-3.5 text-[var(--accent-green)]'
-                    : 'h-3.5 w-3.5 text-[var(--text-muted)]'
-                }
-              />
-              <span>{password.length > 0 ? 'Credentials ready' : 'Encrypted session handoff'}</span>
-            </span>
-          </div>
+          {password.length > 0 && (
+            <div className="flex items-center gap-1.5 pt-0.5 font-mono text-[13px] text-[var(--text-secondary)] leading-[18px]">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[var(--accent-green)]" />
+              <span>Credentials ready</span>
+            </div>
+          )}
           {passwordError && (
             <div
-              className="mt-1 flex items-center gap-1.5 text-[13px] text-[var(--accent-red)] leading-[18px]"
+              className="mt-1 flex items-center gap-1.5 text-[13px] text-[var(--accent-red)] leading-[18px] motion-safe:animate-[fade-in_160ms_ease-out]"
               role="alert"
               aria-live="assertive"
             >

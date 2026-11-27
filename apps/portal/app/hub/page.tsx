@@ -277,11 +277,7 @@ export default async function HubPage() {
             <div className="h-64 animate-pulse rounded-card bg-arch-surface-secondary/40" />
           }
         >
-          <CoreOperationalModules
-            departments={departments}
-            clearance={employeeClearance}
-            canSeeExecutive={canSeeExecutive}
-          />
+          <CoreOperationalModules departments={departments} clearance={employeeClearance} />
         </Suspense>
       )}
 

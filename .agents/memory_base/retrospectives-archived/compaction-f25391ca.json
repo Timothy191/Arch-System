@@ -1,6 +1,6 @@
 {
   "id": "compaction-f25391ca",
-  "timestamp": "2026-11-27T07:38:16.432Z",
+  "timestamp": "2026-11-27T07:43:38.499Z",
   "taskTag": "compaction-standard-f25391ca",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:execute_full_compact",
@@ -22,8 +22,8 @@
   "metrics": {
     "mode": "standard",
     "decision": "execute_full_compact",
-    "latestInputTokens": 325989,
-    "cacheHitRatio": 0.9348,
+    "latestInputTokens": 327193,
+    "cacheHitRatio": 0.9361,
     "checkpointCount": 1,
     "avoidedCacheRebuildTokens": 0
   }

@@ -23,3 +23,46 @@ export function Logo({ className, variant: _variant = 'default' }: LogoProps) {
     </svg>
   );
 }
+
+const ARCH_LOGO_BADGE_SIZES = {
+  xs: { box: 'h-5 w-5', mark: 'h-3 w-3' },
+  sm: { box: 'h-8 w-8', mark: 'h-4 w-4' },
+  md: { box: 'h-10 w-10', mark: 'h-5 w-5' },
+  lg: { box: 'h-12 w-12', mark: 'h-7 w-7' },
+} as const;
+
+export type ArchLogoBadgeSize = keyof typeof ARCH_LOGO_BADGE_SIZES;
+
+interface ArchLogoBadgeProps {
+  /** Canonical circular gold badge used everywhere the Arch mark appears. */
+  size?: ArchLogoBadgeSize;
+  className?: string;
+  logoClassName?: string;
+  testId?: string;
+}
+
+export function ArchLogoBadge({
+  size = 'md',
+  className,
+  logoClassName,
+  testId,
+}: ArchLogoBadgeProps) {
+  const scale = ARCH_LOGO_BADGE_SIZES[size];
+  return (
+    <span
+      data-testid={testId}
+      aria-hidden="true"
+      className={cn(
+        'gold-steel-border gold-steel-border-slim relative inline-flex shrink-0 items-center justify-center rounded-full border border-accent-gold/45 bg-white/95 text-accent-gold shadow-diffusion-sm',
+        scale.box,
+        className
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_22%,rgba(255,255,255,0.95),transparent_62%)]"
+      />
+      <Logo className={cn('relative', scale.mark, logoClassName)} />
+    </span>
+  );
+}

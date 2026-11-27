@@ -21,7 +21,7 @@ import {
 import Link from 'next/link';
 import * as React from 'react';
 import { cn } from '../lib/utils';
-import { Logo } from './Logo';
+import { ArchLogoBadge, Logo } from './Logo';
 import { MacSystemMenuDropdown } from './MacSystemMenuDropdown';
 import {
   DEPARTMENTS_LIST,
@@ -365,10 +365,10 @@ export function MacMenuBar({
           >
             {currentContextLabel}
           </span>
-          <Logo
-            variant="gold"
+          <ArchLogoBadge
+            size="xs"
             className={cn(
-              'h-3 w-3 shrink-0 transition-transform duration-200 ease-out',
+              'transition-transform duration-200 ease-out',
               systemMenuOpen ? 'rotate-0' : 'rotate-180'
             )}
           />

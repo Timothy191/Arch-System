@@ -31,11 +31,12 @@ describe('AuthLayout', () => {
 
     const outerContainer = container.firstChild;
     expect(outerContainer).toHaveClass('relative');
-    expect(outerContainer).toHaveClass('min-h-[calc(100vh-4rem)]');
+    expect(outerContainer).toHaveClass('min-h-[calc(100dvh-var(--app-chrome-offset,4rem))]');
     expect(outerContainer).toHaveClass('w-full');
     expect(outerContainer).toHaveClass('h-full');
     expect(outerContainer).toHaveClass('flex');
     expect(outerContainer).toHaveClass('overflow-hidden');
+    expect(outerContainer?.querySelector('[data-auth-chrome]')).not.toBeNull();
   });
 
   it('unmounts cleanly without side effects', () => {

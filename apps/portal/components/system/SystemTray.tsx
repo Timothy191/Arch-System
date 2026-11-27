@@ -1,7 +1,7 @@
 'use client';
 
 import * as Popover from '@radix-ui/react-popover';
-import { Logo } from '@repo/ui/Logo';
+import { ArchLogoBadge } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import {
   BatteryCharging,
@@ -222,10 +222,10 @@ const SystemTrayPillInner = function SystemTrayPillInner({
             >
               |
             </span>
-            <Logo
-              variant="gold"
+            <ArchLogoBadge
+              size="xs"
               className={cn(
-                'h-3 w-3 shrink-0 text-accent-gold transition-transform duration-200 ease-out',
+                'transition-transform duration-200 ease-out',
                 trayOpen ? 'rotate-0' : 'rotate-180'
               )}
             />

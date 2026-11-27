@@ -1,7 +1,6 @@
 export const instant = false;
 
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
-import { EveLogo } from '@repo/ui/EveLogo';
 import { Logo } from '@repo/ui/Logo';
 import { AlertTriangle, Cpu, Loader2, ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -10,6 +9,7 @@ import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { LoginForm } from '@/features/auth/components/LoginForm';
+import { AgentProviderMarquee } from './AgentProviderMarquee';
 import { LoginVideoStage } from './LoginVideoStage';
 
 const ALERT_ICON_STROKE_WIDTH = 1.5;
@@ -142,9 +142,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                       <span className="h-2.5 w-2.5 rotate-45 rounded-[2px] border border-accent-gold-hover bg-accent-gold/55 shadow-diffusion-sm" />
                       <span className="h-[2px] flex-1 rounded-full bg-gradient-to-l from-accent-gold/20 via-accent-gold to-accent-gold-hover shadow-diffusion-sm" />
                     </div>
-                    <div className="inline-flex items-center gap-1.5 rounded border border-accent-gold/35 bg-accent-gold/10 px-2.5 py-0.5 font-medium text-[13px] text-amber-900 leading-[18px]">
-                      <span>Brakfontein Pit &amp; Plant · SCADA</span>
-                    </div>
                   </div>
                 </div>
                 <p className="font-sans text-[14px] text-zinc-700 leading-relaxed">
@@ -164,11 +161,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                 <p className="mt-1 font-sans text-[13px] text-zinc-600 leading-[18px]">
                   Autonomous multi-agent orchestration and self-healing telemetry
                 </p>
-                <div className="mt-2 flex items-center gap-2 border-zinc-200 border-t pt-2">
-                  <span className="font-medium text-[13px] text-zinc-600 leading-[18px]">
-                    Powered by
-                  </span>
-                  <EveLogo className="h-4 w-auto text-accent-gold" />
+                <div className="mt-2 border-zinc-200 border-t pt-2">
+                  <AgentProviderMarquee />
                 </div>
               </div>
             </aside>
@@ -219,10 +213,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                 </Suspense>
               </div>
 
+              {/* Section divider between the form and the trust footer */}
+              <div
+                data-testid="login-section-separator"
+                aria-hidden="true"
+                className="mt-5 flex items-center gap-2"
+              >
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent to-accent-gold/40" />
+                <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-gold/60 bg-accent-gold/35" />
+                <span className="h-px flex-1 bg-gradient-to-l from-transparent to-accent-gold/40" />
+              </div>
+
               {/* Compact Taskbar-Styled Footer Pill inside Command Portal */}
               <footer
                 data-testid="login-footer"
-                className="liquid-glass-light gold-steel-border gold-steel-border-slim mt-5 flex flex-wrap items-center justify-between gap-2 rounded-full border border-white/25 bg-[var(--material-ultra-thin)] px-4 py-2 text-zinc-700 shadow-diffusion-sm backdrop-blur-md"
+                className="liquid-glass-light gold-steel-border gold-steel-border-slim mt-3 flex flex-wrap items-center justify-between gap-2 rounded-full border border-white/25 bg-[var(--material-ultra-thin)] px-4 py-2 text-zinc-700 shadow-diffusion-sm backdrop-blur-md"
               >
                 <div className="inline-flex items-center gap-1.5 font-medium text-[13px] text-zinc-700 leading-[18px]">
                   <span
@@ -239,18 +244,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                   >
                     Security Policy
                   </a>
-                  <span aria-hidden="true" className={TASKBAR_GOLD_SEPARATOR_CLASS}>
-                    |
-                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="h-4 w-px rounded-full bg-gradient-to-b from-transparent via-accent-gold/60 to-transparent"
+                  />
                   <a
                     className="inline-flex min-h-8 items-center px-1.5 text-zinc-700 transition-colors hover:text-amber-900 hover:underline"
                     href="/docs#support"
                   >
                     Support
                   </a>
-                  <span aria-hidden="true" className={TASKBAR_GOLD_SEPARATOR_CLASS}>
-                    |
-                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="h-4 w-px rounded-full bg-gradient-to-b from-transparent via-accent-gold/60 to-transparent"
+                  />
                   <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
                 </div>
               </footer>

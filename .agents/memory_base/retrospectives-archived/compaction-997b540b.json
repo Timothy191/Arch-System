@@ -1,0 +1,35 @@
+{
+  "id": "compaction-997b540b",
+  "timestamp": "2026-11-27T11:51:50.342Z",
+  "taskTag": "compaction-standard-997b540b",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/.gemini/antigravity-cli/brain/997b540b-b7dc-44ea-9172-5eda0257c433/phase1_requirements_spec.md\"",
+    "\"/home/tim/.gemini/antigravity-cli/brain/997b540b-b7dc-44ea-9172-5eda0257c433/phase2_architecture_design.md\"",
+    "\"/home/tim/.gemini/antigravity-cli/brain/997b540b-b7dc-44ea-9172-5eda0257c433/phase3_implementation_plan.md\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/packages/ui/src/icons/EngineeringIcons.tsx\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/apps/portal/public/images/engineering/tire-telemetry-schematic.svg\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/apps/portal/public/images/engineering/workshop-bay-schematic.svg\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/packages/ui/src/components/GoldenPanel.tsx\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/packages/ui/src/components/ui/professional-dropdown-menu.tsx\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/apps/portal/app/(departments)/[department]/tire-management/TireFleetStatusPanel.tsx\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/apps/portal/app/(departments)/[department]/tire-management/page.tsx\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/libs/features/departments/ui/src/engineering/breakdowns/BreakdownsDashboard.tsx\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/libs/features/departments/ui/src/engineering/breakdowns/BreakdownStats.tsx\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/libs/features/departments/ui/src/engineering/breakdowns/BreakdownCharts.tsx\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/libs/features/departments/ui/src/engineering/breakdowns/BreakdownsTable.tsx\"",
+    "\"/home/tim/Fork/.worktrees/engineering-tire-breakdowns/libs/features/departments/ui/src/engineering/breakdowns/BookInForm.tsx\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (391 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 483094,
+    "cacheHitRatio": 0.8578,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

@@ -107,7 +107,8 @@ describe('LoginPage Server Component', () => {
     expect(screen.getByTestId('arch-systems-gold-separator')).toBeInTheDocument();
     expect(screen.queryByTestId('login-security-telemetry-pill')).not.toBeInTheDocument();
     expect(screen.getByTestId('eve-agentic-backend-banner')).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'eve' })).toBeInTheDocument();
+    expect(screen.getByTestId('agent-provider-marquee')).toBeInTheDocument();
+    expect(screen.queryByText(/Brakfontein/i)).not.toBeInTheDocument();
     expect(screen.getByText(/Fully Intelligent & Agentic Backend/i)).toBeInTheDocument();
   });
 
