@@ -1044,6 +1044,18 @@ export function MachineOperationsForm({
                 <span className="rounded-lg bg-[var(--accent-blue)]/10 p-1.5 text-[var(--accent-blue)]">
                   <Drill className="h-4 w-4" />
                 </span>
+                {selectedMachine && (
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-[var(--accent-blue)]/30 bg-white shadow-2xs">
+                    <img
+                      src={getMachineFleetImage(selectedMachine.name, selectedMachine.machine_type)}
+                      alt={selectedMachine.name}
+                      className="h-full w-full object-cover object-center"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/images/fleet/volvo-adt.webp';
+                      }}
+                    />
+                  </div>
+                )}
                 <div>
                   <h4 className="font-semibold text-[var(--text-heading)] text-sm">
                     Drilling Production Metrics
@@ -1053,6 +1065,15 @@ export function MachineOperationsForm({
                   </p>
                 </div>
               </div>
+            </div>
+            <div
+              data-testid="drilling-section-separator"
+              aria-hidden="true"
+              className="my-1 flex w-full items-center justify-center gap-1.5"
+            >
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+              <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-[var(--accent-blue)] bg-[var(--accent-blue)]/40 shadow-2xs" />
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
