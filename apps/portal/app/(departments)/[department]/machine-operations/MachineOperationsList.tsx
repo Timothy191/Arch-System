@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { cn } from '@repo/ui/lib/utils';
 import { memo, useDeferredValue, useMemo, useState } from 'react';
 import {
   FleetMachineCard,
@@ -20,6 +21,18 @@ import {
   groupMachinesBySite,
   type MachineOperationsListProps,
 } from './machine-operations-constants';
+
+const LIST_SURFACE_CLASS =
+  'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/25 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md';
+
+const LIST_CARD_CLASS = cn(
+  LIST_SURFACE_CLASS,
+  'p-5 transition-[box-shadow,border-color] duration-200 ease-out hover:shadow-diffusion-md motion-reduce:transition-none'
+);
+
+const LIST_TITLE_CLASS = 'font-semibold text-sm text-[var(--text-heading)]';
+
+const LIST_META_CLASS = 'text-xs text-[var(--text-muted)]';
 
 function MachineOperationsList({
   operations = [],
@@ -71,7 +84,7 @@ function MachineOperationsList({
   if (machines === undefined) {
     if (operations.length === 0) {
       return (
-        <GlassCard>
+        <GlassCard className={LIST_CARD_CLASS}>
           <p className="py-8 text-center text-[var(--text-muted)] text-sm">
             No operations logged today. Use the form above to add operations.
           </p>
@@ -107,9 +120,9 @@ function MachineOperationsList({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-[var(--accent-blue)]" />
-                  <h4 className="font-semibold text-[var(--text-heading)] text-sm">{siteName}</h4>
+                  <h4 className={LIST_TITLE_CLASS}>{siteName}</h4>
                 </div>
-                <div className="flex items-center gap-3 text-[var(--text-muted)] text-xs">
+                <div className={cn('flex items-center gap-3', LIST_META_CLASS)}>
                   <span>{siteHours.toFixed(1)}h total</span>
                   {siteBcm > 0 && (
                     <>
@@ -185,7 +198,7 @@ function MachineOperationsList({
       />
 
       {filteredMachines.length === 0 ? (
-        <GlassCard>
+        <GlassCard className={LIST_CARD_CLASS}>
           <p className="py-6 text-center text-[var(--text-muted)] text-sm">
             No machines matching the selected filter or search query.
           </p>
@@ -209,13 +222,13 @@ function MachineOperationsList({
                         {siteCode}
                       </span>
                     )}
-                    <h4 className="font-semibold text-[var(--text-heading)] text-sm">{siteName}</h4>
+                    <h4 className={LIST_TITLE_CLASS}>{siteName}</h4>
                     <span className="text-[var(--text-muted)] text-xs">
                       ({items.length} machine{items.length !== 1 ? 's' : ''})
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 text-[var(--text-muted)] text-xs">
-                    <span className="font-medium text-accent-green">
+                  <div className={cn('flex items-center gap-3', LIST_META_CLASS)}>
+                    <span className="font-medium text-[var(--accent-green)]">
                       {siteOperatingCount} operating
                     </span>
                     {siteTotalHours > 0 && (

@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { cn } from '@repo/ui/lib/utils';
 import { AlertCircle, CheckCircle2, Clock, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -24,8 +25,45 @@ interface MachineOperationsFilterStripProps {
   onCategoryChange?: (category: MachineCategory) => void;
 }
 
-const FILTER_PILL_BASE_CLASSES =
-  'flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all';
+const SUMMARY_SURFACE_CLASS =
+  'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/25 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md';
+
+const FOCUS_RING_CLASS =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]';
+
+const FILTER_BUTTON_CLASS = cn(
+  'flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all motion-reduce:transition-none',
+  FOCUS_RING_CLASS
+);
+
+const SEARCH_INPUT_CLASS = cn(
+  'gold-steel-border gold-steel-border-slim h-9 w-full rounded-full border border-[var(--accent-gold)]/60 bg-[var(--bg-secondary)] py-1.5 pr-4 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-[var(--accent-gold)]/30 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none',
+  FOCUS_RING_CLASS
+);
+
+const FILTER_TONES = {
+  neutral: {
+    selected:
+      'border border-[var(--accent-charcoal)] bg-[var(--accent-charcoal)] text-white shadow-sm',
+    idle: 'border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]',
+  },
+  green: {
+    selected: 'border border-[var(--accent-green)] bg-[var(--accent-green)] text-white shadow-sm',
+    idle: 'border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]',
+  },
+  amber: {
+    selected: 'border border-[var(--accent-amber)] bg-[var(--accent-amber)] text-white shadow-sm',
+    idle: 'border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]',
+  },
+  red: {
+    selected: 'border border-[var(--accent-red)] bg-[var(--accent-red)] text-white shadow-sm',
+    idle: 'border border-[var(--accent-red)]/30 bg-[var(--accent-red)]/10 text-[var(--accent-red)] hover:bg-[var(--accent-red)]/20',
+  },
+} as const;
+
+const SUMMARY_TITLE_CLASS = 'font-semibold text-sm text-[var(--text-heading)]';
+
+const SUMMARY_META_CLASS = 'text-xs text-[var(--text-muted)]';
 
 export function MachineOperationsFilterStrip({
   filterStatus,
@@ -58,19 +96,17 @@ export function MachineOperationsFilterStrip({
   return (
     <div
       data-testid="machine-operations-filter-panel"
-      className="gold-steel-border gold-steel-border-slim space-y-4 rounded-2xl border border-accent-gold/45 bg-gradient-to-br from-white/95 via-amber-50/[0.15] to-white/95 p-4 shadow-sm backdrop-blur-md"
+      className={cn(SUMMARY_SURFACE_CLASS, 'space-y-4 rounded-2xl p-4')}
     >
       {/* Panel Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-black/[0.06] border-b pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-subtle)] border-b pb-3">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-accent-gold/40 bg-amber-50 text-[var(--accent-blue)]">
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/10 text-[var(--accent-blue)]">
             <Search className="h-3.5 w-3.5" />
           </span>
-          <span className="font-semibold text-[var(--text-heading)] text-sm">
-            Fleet Filter &amp; Search Console
-          </span>
+          <span className={SUMMARY_TITLE_CLASS}>Fleet Filter &amp; Search Console</span>
         </div>
-        <span className="gold-steel-border gold-steel-border-slim rounded-full border border-accent-gold/40 bg-amber-50/80 px-2.5 py-0.5 font-mono font-semibold text-[var(--accent-blue)] text-xs">
+        <span className="gold-steel-border gold-steel-border-slim rounded-full border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/10 px-2.5 py-0.5 font-mono font-semibold text-[var(--accent-blue)] text-xs">
           {counts.total} Machines Tracked
         </span>
       </div>
@@ -90,11 +126,15 @@ export function MachineOperationsFilterStrip({
                   key={cat}
                   type="button"
                   onClick={() => onCategoryChange(cat)}
-                  className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
+                  className={cn(
+                    FILTER_BUTTON_CLASS,
                     isSelected
-                      ? 'gold-steel-border gold-steel-border-slim border border-accent-gold bg-[var(--accent-blue)] text-white shadow-xs'
-                      : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:border-accent-gold/40 hover:bg-amber-50/50 hover:text-[var(--text-heading)]'
-                  }`}
+                      ? 'gold-steel-border gold-steel-border-slim border border-[var(--accent-gold)] bg-[var(--accent-blue)] text-white shadow-xs'
+                      : cn(
+                          FILTER_TONES.neutral.idle,
+                          'hover:border-[var(--accent-gold)]/40 hover:bg-[var(--accent-gold)]/10'
+                        )
+                  )}
                 >
                   {MACHINE_CATEGORY_LABELS[cat]} ({count})
                 </button>
@@ -110,22 +150,24 @@ export function MachineOperationsFilterStrip({
           <button
             type="button"
             onClick={() => onFilterStatusChange('all')}
-            className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
+            className={cn(
+              FILTER_BUTTON_CLASS,
               filterStatus === 'all'
-                ? 'gold-steel-border gold-steel-border-slim border border-neutral-700 bg-neutral-800 text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-            }`}
+                ? cn('gold-steel-border gold-steel-border-slim', FILTER_TONES.neutral.selected)
+                : FILTER_TONES.neutral.idle
+            )}
           >
             All Machines ({counts.total})
           </button>
           <button
             type="button"
             onClick={() => onFilterStatusChange('operating')}
-            className={`${FILTER_PILL_BASE_CLASSES} ${
+            className={cn(
+              FILTER_BUTTON_CLASS,
               filterStatus === 'operating'
-                ? 'gold-steel-border gold-steel-border-slim border border-emerald-600 bg-accent-green text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-            }`}
+                ? cn('gold-steel-border gold-steel-border-slim', FILTER_TONES.green.selected)
+                : FILTER_TONES.green.idle
+            )}
           >
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent-green" />
             Operating ({counts.operating})
@@ -133,22 +175,24 @@ export function MachineOperationsFilterStrip({
           <button
             type="button"
             onClick={() => onFilterStatusChange('standby')}
-            className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
+            className={cn(
+              FILTER_BUTTON_CLASS,
               filterStatus === 'standby'
-                ? 'gold-steel-border gold-steel-border-slim border border-amber-500 bg-amber-600 text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-            }`}
+                ? cn('gold-steel-border gold-steel-border-slim', FILTER_TONES.amber.selected)
+                : FILTER_TONES.amber.idle
+            )}
           >
             Standby ({counts.standby})
           </button>
           <button
             type="button"
             onClick={() => onFilterStatusChange('breakdown')}
-            className={`${FILTER_PILL_BASE_CLASSES} ${
+            className={cn(
+              FILTER_BUTTON_CLASS,
               filterStatus === 'breakdown'
-                ? 'gold-steel-border gold-steel-border-slim border border-red-500 bg-accent-red text-white shadow-sm'
-                : 'border border-accent-red/30 bg-accent-red/10 text-accent-red hover:bg-accent-red/20'
-            }`}
+                ? cn('gold-steel-border gold-steel-border-slim', FILTER_TONES.red.selected)
+                : FILTER_TONES.red.idle
+            )}
           >
             <AlertCircle size={12} />
             Breakdowns ({counts.breakdown})
@@ -156,13 +200,14 @@ export function MachineOperationsFilterStrip({
           <button
             type="button"
             onClick={() => onFilterStatusChange('inactive')}
-            className={`${FILTER_PILL_BASE_CLASSES} ${
+            className={cn(
+              FILTER_BUTTON_CLASS,
               filterStatus === 'inactive'
-                ? 'gold-steel-border gold-steel-border-slim border border-neutral-500 bg-neutral-600 text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-            }`}
+                ? cn('gold-steel-border gold-steel-border-slim', FILTER_TONES.neutral.selected)
+                : FILTER_TONES.neutral.idle
+            )}
           >
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400" />
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--text-muted)]" />
             Inactive ({counts.inactive})
           </button>
         </div>
@@ -178,7 +223,7 @@ export function MachineOperationsFilterStrip({
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
             placeholder="Search machine, type, or SN..."
-            className="gold-steel-border gold-steel-border-slim h-9 w-full rounded-full border border-accent-gold/60 bg-white/95 py-1.5 pr-4 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-gold/30 focus:outline-none"
+            className={SEARCH_INPUT_CLASS}
           />
         </div>
       </div>
@@ -215,7 +260,7 @@ export function FleetMachineCard({
   };
 
   return (
-    <GlassCard className="px-4 py-3">
+    <GlassCard className={cn(SUMMARY_SURFACE_CLASS, 'px-4 py-3')}>
       <div className="space-y-3">
         {/* Machine Header Row */}
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -223,22 +268,21 @@ export function FleetMachineCard({
           <div className="flex min-w-0 items-center gap-3">
             {/* Status Indicator */}
             <div
-              className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+              className={cn(
+                'h-2.5 w-2.5 shrink-0 rounded-full',
                 status === 'breakdown'
-                  ? 'animate-pulse bg-accent-red'
+                  ? 'animate-pulse bg-[var(--accent-red)] motion-reduce:animate-none'
                   : status === 'in-progress'
-                    ? 'animate-pulse bg-accent-blue'
+                    ? 'animate-pulse bg-[var(--accent-blue)] motion-reduce:animate-none'
                     : status === 'operating'
-                      ? 'bg-accent-green'
+                      ? 'bg-[var(--accent-green)]'
                       : 'bg-[var(--text-muted)]/50'
-              }`}
+              )}
             />
 
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold text-[var(--text-heading)] text-sm">
-                  {machine.name}
-                </span>
+                <span className={SUMMARY_TITLE_CLASS}>{machine.name}</span>
                 <span className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
                   {machine.machine_type}
                 </span>
@@ -267,30 +311,35 @@ export function FleetMachineCard({
 
             {/* Status Badge */}
             {status === 'breakdown' && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-accent-red/20 bg-accent-red/10 px-2 py-0.5 font-medium text-accent-red text-xs">
+              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--accent-red)]/20 bg-[var(--accent-red)]/10 px-2 py-0.5 font-medium text-[var(--accent-red)] text-xs">
                 <AlertCircle size={12} />
                 Breakdown
               </span>
             )}
             {status === 'in-progress' && (
-              <span className="inline-flex animate-pulse items-center gap-1 rounded-md border border-[var(--accent-blue)]/20 bg-accent-blue/10 px-2 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
+              <span className="inline-flex animate-pulse items-center gap-1 rounded-md border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium text-[var(--accent-blue)] text-xs motion-reduce:animate-none">
                 <Clock size={12} />
                 In Progress
               </span>
             )}
             {status === 'operating' && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-accent-green/20 bg-accent-green/10 px-2 py-0.5 font-medium text-accent-green text-xs">
+              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--accent-green)]/20 bg-[var(--accent-green)]/10 px-2 py-0.5 font-medium text-[var(--accent-green)] text-xs">
                 <CheckCircle2 size={12} />
                 {totalHours.toFixed(1)}h logged
               </span>
             )}
             {status === 'standby' && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[var(--text-muted)] text-xs">
+              <span
+                className={cn(
+                  SUMMARY_META_CLASS,
+                  'inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium'
+                )}
+              >
                 Standby
               </span>
             )}
             {status === 'inactive' && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-neutral-100 px-2 py-0.5 font-medium text-neutral-600 text-xs">
+              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[var(--text-muted)] text-xs">
                 Inactive
               </span>
             )}
@@ -300,7 +349,10 @@ export function FleetMachineCard({
               <button
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="ml-1 font-medium text-[var(--accent-blue)] text-xs hover:underline"
+                className={cn(
+                  'ml-1 font-medium text-[var(--accent-blue)] text-xs hover:underline',
+                  FOCUS_RING_CLASS
+                )}
               >
                 {operations.length} shift{operations.length !== 1 ? 's' : ''} (
                 {isExpanded ? 'Hide' : 'Show'})
@@ -311,12 +363,12 @@ export function FleetMachineCard({
 
         {/* Breakdown Alert Banner */}
         {breakdown && breakdown.status === 'active' && (
-          <div className="rounded-lg border border-accent-red/20 bg-accent-red/10 p-2.5 text-xs">
+          <div className="rounded-lg border border-[var(--accent-red)]/20 bg-[var(--accent-red)]/10 p-2.5 text-xs">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="flex items-start gap-2">
-                <AlertCircle size={14} className="mt-0.5 shrink-0 text-accent-red" />
+                <AlertCircle size={14} className="mt-0.5 shrink-0 text-[var(--accent-red)]" />
                 <div>
-                  <p className="font-semibold text-accent-red">
+                  <p className="font-semibold text-[var(--accent-red)]">
                     Engineering Breakdown: {breakdown.reason}
                   </p>
                   {breakdown.repair_notes && (
@@ -325,7 +377,7 @@ export function FleetMachineCard({
                 </div>
               </div>
               {engineeringDelay && engineeringDelay.hours > 0 && (
-                <span className="rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 font-mono font-semibold text-[11px] text-amber-900">
+                <span className="rounded-full border border-[var(--accent-amber)]/40 bg-[var(--accent-amber)]/15 px-2 py-0.5 font-mono font-semibold text-[11px] text-[var(--accent-amber)]">
                   Eng Delay: {engineeringDelay.hours.toFixed(1)}h · Remaining Shift Cap:{' '}
                   {Math.max(0, 12 - engineeringDelay.hours).toFixed(1)}h
                 </span>
@@ -355,7 +407,10 @@ export function FleetMachineCard({
             <button
               type="button"
               onClick={scrollToForm}
-              className="inline-flex items-center gap-1 font-medium text-[var(--accent-blue)] transition-colors hover:text-[var(--accent-blue)]/80"
+              className={cn(
+                'inline-flex items-center gap-1 font-medium text-[var(--accent-blue)] transition-colors hover:text-[var(--accent-blue)]/80 motion-reduce:transition-none',
+                FOCUS_RING_CLASS
+              )}
             >
               <Plus size={12} />
               Log Shift
@@ -430,21 +485,22 @@ export function OperationCard({
   const [showDelays, setShowDelays] = useState(false);
 
   return (
-    <GlassCard className="px-3 py-2.5">
+    <GlassCard className={cn(SUMMARY_SURFACE_CLASS, 'px-3 py-2.5')}>
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Status Indicator */}
             <div
-              className={`h-2 w-2 rounded-full ${
+              className={cn(
+                'h-2 w-2 rounded-full',
                 machineBreakdown?.status === 'active'
-                  ? 'animate-pulse bg-accent-red'
+                  ? 'animate-pulse bg-[var(--accent-red)] motion-reduce:animate-none'
                   : isComplete
-                    ? 'bg-accent-green'
+                    ? 'bg-[var(--accent-green)]'
                     : isInProgress
-                      ? 'animate-pulse bg-accent-blue'
+                      ? 'animate-pulse bg-[var(--accent-blue)] motion-reduce:animate-none'
                       : 'bg-[var(--text-secondary)]'
-              }`}
+              )}
             />
 
             {/* Machine & Details */}
@@ -464,11 +520,12 @@ export function OperationCard({
                 </span>
                 {machineBreakdown && (
                   <span
-                    className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] ${
+                    className={cn(
+                      'flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px]',
                       machineBreakdown.status === 'active'
-                        ? 'bg-accent-red/10 text-accent-red'
-                        : 'bg-accent-green/10 text-accent-green'
-                    }`}
+                        ? 'bg-[var(--accent-red)]/10 text-[var(--accent-red)]'
+                        : 'bg-[var(--accent-green)]/10 text-[var(--accent-green)]'
+                    )}
                   >
                     <AlertCircle size={10} />
                     {machineBreakdown.status === 'active' ? 'Active Breakdown' : 'Repaired'}
@@ -517,14 +574,14 @@ export function OperationCard({
                 </span>
               ) : null}
               {operation.hours_worked !== null && (
-                <span className="font-medium text-accent-green">
+                <span className="font-medium text-[var(--accent-green)]">
                   {operation.hours_worked.toFixed(2)}h
                 </span>
               )}
               {operation.meters_drilled != null && (
                 <>
                   <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="font-medium text-accent-green">
+                  <span className="font-medium text-[var(--accent-green)]">
                     {Number(operation.meters_drilled).toFixed(1)}m
                   </span>
                 </>
@@ -546,7 +603,7 @@ export function OperationCard({
                       : `${materialBCM.toFixed(1)} BCM`}
                   </span>
                   <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="text-accent-blue">{bcmPerHour.toFixed(1)} BCM/h</span>
+                  <span className="text-[var(--accent-blue)]">{bcmPerHour.toFixed(1)} BCM/h</span>
                 </>
               )}
               {isDozerOtherActivity && (
@@ -565,15 +622,21 @@ export function OperationCard({
             <div className="flex items-start gap-2 text-xs">
               <AlertCircle
                 size={14}
-                className={
+                className={cn(
+                  'mt-0.5 shrink-0',
                   machineBreakdown.status === 'active'
-                    ? 'mt-0.5 shrink-0 text-accent-red'
-                    : 'mt-0.5 shrink-0 text-accent-green'
-                }
+                    ? 'text-[var(--accent-red)]'
+                    : 'text-[var(--accent-green)]'
+                )}
               />
               <div>
                 <p
-                  className={`font-medium ${machineBreakdown.status === 'active' ? 'text-accent-red' : 'text-accent-green'}`}
+                  className={cn(
+                    'font-medium',
+                    machineBreakdown.status === 'active'
+                      ? 'text-[var(--accent-red)]'
+                      : 'text-[var(--accent-green)]'
+                  )}
                 >
                   Engineering Breakdown: {machineBreakdown.reason}
                 </p>
@@ -591,13 +654,16 @@ export function OperationCard({
             <button
               type="button"
               onClick={() => setShowDelays(!showDelays)}
-              className="flex items-center gap-2 text-[var(--text-muted)] text-xs transition-colors hover:text-[var(--text-heading)]"
+              className={cn(
+                'flex items-center gap-2 text-[var(--text-muted)] text-xs transition-colors hover:text-[var(--text-heading)] motion-reduce:transition-none',
+                FOCUS_RING_CLASS
+              )}
             >
               <Clock size={14} />
               <span className="font-medium">
                 {delayEntries.length} delay{delayEntries.length > 1 ? 's' : ''}
               </span>
-              <span className="text-accent-red">{totalDelayHours.toFixed(2)}h total</span>
+              <span className="text-[var(--accent-red)]">{totalDelayHours.toFixed(2)}h total</span>
               {draftDelayHours > 0 && (
                 <span className="text-[var(--accent-amber)]">
                   ({draftDelayHours.toFixed(2)}h draft)
