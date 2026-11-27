@@ -3,7 +3,6 @@
 import { CloseShiftModal } from '@repo/departments/ui';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { ShiftToggle } from '@repo/ui/ShiftToggle';
 import {
   AlertTriangle,
   CheckCircle,
@@ -45,7 +44,7 @@ export function ShiftCoverageClient({
 }: ShiftCoverageClientProps) {
   const supabase = createBrowserSupabaseClient();
   const [date, setDate] = useState(initialDate);
-  const [shiftType, setShiftType] = useState<'day' | 'night'>(initialShift);
+  const [shiftType] = useState<'day' | 'night'>(initialShift);
   const [machines, setMachines] = useState<MachineWithOp[]>([]);
   const [isClosed, setIsClosed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -190,9 +189,9 @@ export function ShiftCoverageClient({
               <ChevronRight className="h-5 w-5" />
             </button>
           </div>
-          <div className="w-48">
-            <ShiftToggle value={shiftType} onChange={setShiftType} />
-          </div>
+          <span className="font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+            {shiftType === 'day' ? 'Day Shift' : 'Night Shift'}
+          </span>
         </div>
       </GlassCard>
 
