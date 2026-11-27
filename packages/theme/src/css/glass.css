@@ -37,12 +37,8 @@
 .glass-card,
 .glass-premium,
 .glass-input,
-.glass-button,
-.glass-badge,
-.glass-modal,
 .glass-video,
 .glass-macos,
-.layer-telemetry-dock,
 .layer-signin-card {
   font-family: var(--font-sans), sans-serif;
 }
@@ -61,21 +57,6 @@
     transform var(--transition-medium),
     background-color var(--transition-medium),
     box-shadow var(--transition-medium);
-}
-
-.glass-hover:hover {
-  background:
-    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
-    var(--glass-border-gradient) border-box;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.06),
-    0 24px 30px -5px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
-  transform: translateY(-2px);
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background-color var(--transition-fast);
 }
 
 /* ── Glass Components ── */
@@ -181,158 +162,6 @@
     box-shadow var(--transition-fast);
 }
 
-.glass-button {
-  background:
-    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
-  backdrop-filter: blur(12px) saturate(150%);
-  border: 1px solid transparent;
-  border-radius: var(--radius-button);
-  color: var(--text-on-glass);
-  cursor: pointer;
-  transition:
-    transform var(--transition-fast),
-    background var(--transition-fast),
-    box-shadow var(--transition-medium);
-}
-
-.glass-button:hover {
-  background:
-    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
-    var(--glass-border-gradient) border-box;
-  box-shadow: var(--shadow-card-hover);
-  transform: translateY(-1px);
-}
-
-.glass-button:active {
-  transform: scale(0.98) translateY(1px);
-}
-
-.glass-button-accent {
-  background: var(--accent-electric-blue-subtle);
-  border-color: var(--accent-electric-blue-border);
-  color: var(--accent-blue);
-}
-
-.glass-button-accent:hover {
-  background: rgba(0, 122, 255, 0.15);
-  box-shadow: var(--shadow-glow-primary);
-}
-
-.glass-button-danger {
-  background: rgba(244, 63, 94, 0.15);
-  border-color: rgba(244, 63, 94, 0.3);
-  color: var(--accent-red);
-}
-
-.glass-button-danger:hover {
-  background: rgba(244, 63, 94, 0.25);
-  box-shadow: 0 0 20px rgba(244, 63, 94, 0.15);
-}
-
-.glass-action-button {
-  background: rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02);
-  border-radius: 9999px;
-  color: var(--text-secondary);
-  font-weight: 500;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast),
-    color var(--transition-fast),
-    transform var(--transition-fast);
-}
-
-.glass-action-button:hover {
-  background: rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.06);
-  color: var(--text-primary);
-}
-
-.glass-action-button:active {
-  transform: scale(0.97);
-}
-
-.glass-badge {
-  background:
-    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(8px) saturate(140%);
-  backdrop-filter: blur(8px) saturate(140%);
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
-  color: var(--text-on-glass);
-  font-size: 0.75rem;
-  line-height: 1;
-  padding: 0.25rem 0.75rem;
-}
-
-.glass-divider {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--glass-border) 20%,
-    var(--glass-border) 80%,
-    transparent
-  );
-}
-
-.glass-modal-overlay {
-  background: rgba(5, 5, 8, 0.6);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-}
-
-.glass-modal {
-  background:
-    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid transparent;
-  box-shadow: var(--shadow-elevated);
-  border-radius: var(--radius-xl);
-  color: var(--text-on-glass);
-}
-
-.glass-nav-item {
-  color: var(--text-muted);
-  border-radius: var(--radius-button);
-  transition:
-    background var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.glass-nav-item:hover {
-  background: var(--glass-surface);
-  color: var(--text-heading);
-}
-
-.glass-nav-item.active {
-  background: var(--glass-surface-hover);
-  color: var(--accent-blue);
-  border-left: 2px solid var(--accent-blue);
-}
-
-.glass-shine-sweep {
-  background: linear-gradient(
-    135deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.08) 50%,
-    transparent 60%
-  );
-}
-
-.glass-spinner {
-  border: 2px solid var(--glass-border);
-  border-top-color: var(--accent-blue);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
 .badge-pulse-dot {
   width: 6px;
   height: 6px;
@@ -340,54 +169,6 @@
   background: var(--accent-green, #34c759);
   box-shadow: 0 0 6px rgba(52, 199, 89, 0.6);
   animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* ── Glow Effects ── */
-
-.glow-border {
-  border: 1px solid var(--accent-electric-blue-border);
-  box-shadow: 0 0 12px rgba(0, 122, 255, 0.08);
-}
-
-.glow-border-strong {
-  border: 1px solid rgba(0, 122, 255, 0.35);
-  box-shadow: 0 0 20px rgba(0, 122, 255, 0.15);
-}
-
-/* ── Text Effects ── */
-
-.text-gradient {
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-subtle {
-  background: linear-gradient(135deg, var(--text-heading), var(--text-primary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-glow {
-  text-shadow: 0 0 20px rgba(0, 122, 255, 0.3);
-}
-
-/* ── Liquid Glass (Premium) ── */
-
-.liquid-border {
-  border: 1px solid transparent;
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-  background-image:
-    linear-gradient(var(--glass-surface), var(--glass-surface)), var(--liquid-border-gradient);
-}
-
-.liquid-border-hover:hover {
-  background-image:
-    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)),
-    var(--liquid-border-gradient-hover);
 }
 
 /* ── Liquid Glass Utility Classes ──
@@ -428,18 +209,6 @@
   border-radius: var(--radius-card);
 }
 
-.liquid-glass-elevated {
-  background:
-    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
-  backdrop-filter: blur(24px) saturate(200%);
-  border: 1px solid transparent;
-  box-shadow: var(--shadow-elevated), var(--refraction-inner-border);
-  border-radius: var(--radius-card);
-  color: var(--text-on-glass);
-}
-
 .liquid-glass-pane {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.3) 100%);
   -webkit-backdrop-filter: blur(24px) saturate(160%) contrast(110%);
@@ -471,26 +240,7 @@
   transition: border-radius 0.65s cubic-bezier(0.25, 1.15, 0.45, 1);
 }
 
-.liquid-glass-surface {
-  border: 1.5px solid transparent;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.3) 100%) padding-box,
-    linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.75) 0%,
-        rgba(240, 240, 240, 0.15) 50%,
-        rgba(255, 255, 255, 0.45) 100%
-      )
-      border-box;
-  backdrop-filter: blur(24px) saturate(160%) contrast(110%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%) contrast(110%);
-  border-radius: 20px;
-}
-
 /* Fluid Interactions & Micro-Inertia Animation */
-.ease-liquid-inertia {
-  transition-timing-function: cubic-bezier(0.25, 1.15, 0.45, 1);
-}
 
 .liquid-glass-interactive {
   transition:
@@ -510,49 +260,16 @@
 }
 
 /* Sub-Element Layout Shifts (staggered micro-parallax) */
-.liquid-glass-interactive .liquid-shift-y {
-  transition: transform 0.65s cubic-bezier(0.25, 1.15, 0.45, 1);
-  will-change: transform;
-}
-
-.liquid-glass-interactive:hover .liquid-shift-y {
-  transform: translateY(-2px);
-}
-
-.liquid-glass-interactive .liquid-shift-y-delay {
-  transition: transform 0.65s cubic-bezier(0.25, 1.15, 0.45, 1);
-  transition-delay: 50ms;
-  will-change: transform;
-}
-
-.liquid-glass-interactive:hover .liquid-shift-y-delay {
-  transform: translateY(-2px);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .liquid-glass-interactive,
   .liquid-glass-interactive:hover,
-  .liquid-glass-interactive .liquid-shift-y,
-  .liquid-glass-interactive:hover .liquid-shift-y,
-  .liquid-glass-interactive .liquid-shift-y-delay,
-  .liquid-glass-interactive:hover .liquid-shift-y-delay,
   .liquid-glass-pane-rounded,
   .liquid-glass-interactive:hover .liquid-glass-pane-rounded {
     transition: none;
     transform: none;
     border-radius: inherit;
   }
-}
-
-.glass-elevated {
-  background:
-    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid transparent;
-  box-shadow: var(--shadow-card-hover);
-  color: var(--text-on-glass);
 }
 
 /* ── Premium Glass — highest-tier surface (Apple / Stripe / Linear aesthetic) ──
@@ -591,24 +308,6 @@
 
 .glass-premium:active {
   transform: translateY(0);
-}
-
-/* Electric-blue CTA accent variant */
-.glass-premium-electric {
-  border-color: var(--accent-electric-blue-border);
-  box-shadow: var(--glass-premium-shadow), var(--shadow-glow-electric-blue);
-}
-
-/* Mint positive/active accent variant */
-.glass-premium-mint {
-  border-color: var(--accent-mint-border);
-  box-shadow: var(--glass-premium-shadow), var(--shadow-glow-mint);
-}
-
-/* Amber warning accent variant */
-.glass-premium-amber {
-  border-color: var(--accent-amber-border);
-  box-shadow: var(--glass-premium-shadow), var(--shadow-glow-amber);
 }
 
 /* ── Glass-on-Video — light blurred glass over dark media ──
@@ -674,25 +373,6 @@
   border-top-color: var(--glass-border-top);
 }
 
-/* ── Layer-Telemetry-Dock ──
-   For secondary info panels: system status, weather, support.
-   Softer blur, lower opacity, less saturation to sit behind the primary card.
-   background-clip + will-change + translateZ(0) prevent sub-pixel artifacts
-   on rounded corners. */
-.layer-telemetry-dock {
-  background:
-    rgba(255, 255, 255, 0.4) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(12px) saturate(110%);
-  backdrop-filter: blur(12px) saturate(110%);
-  border: 1px solid transparent;
-  box-shadow:
-    0 2px 4px -1px rgba(0, 0, 0, 0.03),
-    0 12px 16px -4px rgba(0, 0, 0, 0.02);
-  will-change: transform, opacity;
-  transform: translateZ(0);
-}
-
 /* ── Layer-Signin-Card ──
    Premium primary interactive card for the sign-in surface.
    Dual-Stroke Edge Guard: border + outline for crisp edge definition
@@ -728,66 +408,6 @@
   box-shadow:
     inset 0 1px 0 0 rgba(255, 255, 255, 0.95),
     var(--shadow-window);
-}
-
-.layer-signin-card-webgl {
-  isolation: isolate;
-  border: 1.5px solid transparent;
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-  background-image:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%),
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.5) 0%,
-      rgba(240, 240, 240, 0.05) 50%,
-      rgba(255, 255, 255, 0.3) 100%
-    );
-  box-shadow:
-    inset 0 8px 16px rgba(255, 255, 255, 0.45),
-    inset 0 -6px 12px rgba(0, 0, 0, 0.03),
-    0 10px 20px rgba(0, 0, 0, 0.08);
-  border-radius: var(--liquid-glass-radius-card);
-  will-change: border-radius, transform;
-  transform: translateZ(0);
-  background-size:
-    100% 100%,
-    200% 200%;
-  animation: border-glow-sweep 8s linear infinite;
-  transition:
-    border-radius 0.6s cubic-bezier(0.25, 1, 0.5, 1),
-    transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
-    box-shadow 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.layer-signin-card-webgl:hover {
-  border-radius: var(--liquid-glass-radius-card-hover);
-  transform: scaleX(1.012) scaleY(1.008);
-  box-shadow:
-    inset 0 10px 20px rgba(255, 255, 255, 0.55),
-    inset 0 -8px 16px rgba(0, 0, 0, 0.04),
-    0 20px 35px rgba(0, 0, 0, 0.12);
-}
-
-/* ── Border Sweep Animation ── */
-@keyframes border-glow-sweep {
-  0% {
-    background-position:
-      0% 0%,
-      0% 0%;
-  }
-
-  50% {
-    background-position:
-      0% 0%,
-      100% 100%;
-  }
-
-  100% {
-    background-position:
-      0% 0%,
-      0% 0%;
-  }
 }
 
 /* ── Liquid Glass Form Controls ── */
@@ -848,13 +468,6 @@
   transform: scale(0.97);
 }
 
-/* ── Specular SVG Film Grain overlay ── */
-.liquid-grain-overlay {
-  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYDFgQoIWJGvQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDQcAAAAZSURBVFjD7cEBDQAAAMKg909tDwcUAAAAXwYNKQAB5H3g4AAAAABJRU5ErkJggg==');
-  background-size: 150px 150px;
-  animation: grain-dance 8s steps(10) infinite;
-}
-
 /* AGENT-TRACE: grain-dance animates transform (compositor) instead of
    background-position (paint). Consumers must be oversized (inset: -24px)
    so translate3d offsets never reveal edges. */
@@ -901,43 +514,19 @@
   }
 }
 
-/* ── High Contrast Text Lift ── */
-.liquid-text-lift {
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
-}
-
 /* ── Reduced Motion Fallback ── */
 @media (prefers-reduced-motion: reduce) {
   .liquid-glass-input,
   .liquid-glass-button,
-  .layer-signin-card,
-  .layer-signin-card-webgl {
+  .layer-signin-card {
     transform: none;
     border-radius: var(--liquid-glass-radius-card, 16px);
     transition: none;
     animation: none;
   }
-
-  .liquid-grain-overlay,
-  .route-bg-grain {
-    animation: none;
-  }
-}
-
-/* ── Hairline Border ── */
-
-.border-hairline {
-  border: 1px solid;
-  border-image: var(--glass-border-gradient) 1;
 }
 
 /* ── Data Layouts ── */
-
-.data-section {
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 0.75rem;
-  margin-bottom: 0.75rem;
-}
 
 .data-row {
   display: flex;
@@ -947,36 +536,12 @@
   border-bottom: 1px solid rgba(var(--arch4), 0.3);
 }
 
-.divide-subtle > :not([hidden]) ~ :not([hidden]) {
-  border-top: 1px solid var(--border-subtle);
-}
-
-/* ── Tactile Button ── */
-
-.tactile-button {
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-.tactile-button:active {
-  transform: scale(0.98) translateY(1px);
-}
-
 /* ══════════════════════════════════════════════════════════════════════════
    ROUTE BACKGROUND — Wave Canvas Layers
    Static CSS classes for RouteBackground.tsx so zero inline styles are
    needed. All geometry and token refs live here; animation classes live
    in animations.css (.animate-wave-canvas-a/b/c).
    ══════════════════════════════════════════════════════════════════════════ */
-
-/* Base canvas: ice-blue gradient fill */
-.route-bg-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: -10;
-  background: var(--canvas-gradient, linear-gradient(135deg, #f4f4f7, #e8ecf4));
-}
 
 /* Video container — provides viewport-relative sizing that works reliably
    across all browsers during window resizes. The container is fixed to the
@@ -996,8 +561,7 @@
 /* Video element — fills the container and maintains aspect ratio with object-fit.
    Pristine native rendering: no -webkit-optimize-contrast (which forces jagged pixelation)
    and no per-frame CSS filter shaders (which block zero-copy hardware video overlays). */
-.route-bg-video,
-.route-bg-image {
+.route-bg-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1006,33 +570,7 @@
 }
 
 @media (width <= 768px) {
-  .route-bg-video,
-  .route-bg-image {
+  .route-bg-video {
     opacity: 1;
   }
-}
-
-/* Ambient Film Grain overlay to eliminate H.264 banding and add crisp texture.
-   AGENT-TRACE: inset is oversized (-24px) so the transform-based grain-dance
-   translate3d offsets never reveal the element edges. */
-.route-bg-grain {
-  position: fixed;
-  inset: -24px;
-  z-index: -8;
-  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYDFgQoIWJGvQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDQcAAAAZSURBVFjD7cEBDQAAAMKg909tDwcUAAAAXwYNKQAB5H3g4AAAAABJRU5ErkJggg==');
-  background-size: 140px 140px;
-  opacity: 0.016;
-  /* extremely subtle but prevents gradient banding and keeps black canvas crisp */
-  animation: grain-dance 8s steps(10) infinite;
-  pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ── Light-mode video styles ─────────────────────────────
-    Light mode is the only mode now. Focus mode has been removed. */
-
-.low-perf-fallback .login-card-container .liquid-glass-pane-rounded {
-  background: rgba(255, 255, 255, 0.15);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
 }

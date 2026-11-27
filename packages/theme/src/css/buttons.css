@@ -111,22 +111,6 @@
   border-radius: 16px;
 }
 
-/* Original massive size from Uiverse */
-.button-uiverse-xl .inner {
-  padding: 14px 25px;
-  font-size: 1.4rem;
-  border-radius: 14px;
-}
-
-.button-uiverse-xl {
-  border-radius: 16px;
-  font-size: 1.4rem;
-}
-
-.button-uiverse-xl .blob1 {
-  border-radius: 16px;
-}
-
 /* Hover & Active States */
 .button:hover {
   transform: scale(1.02);

@@ -9,9 +9,11 @@ interface SparklineProps {
   width?: number;
   height?: number;
   strokeWidth?: number;
+  /** Colour comes from `currentColor`; pass a semantic token class such as `text-accent-gold`. */
   className?: string;
-  color?: string;
   isFluidWidth?: boolean;
+  /** When provided the chart is exposed to assistive tech as `role="img"`. */
+  ariaLabel?: string;
 }
 
 interface SparkPoint {
@@ -21,7 +23,7 @@ interface SparkPoint {
 }
 
 const SPLINE_TENSION = 0.2;
-const PADDING_Y_PX = 4;
+const PADDING_Y_PX = 5;
 
 function buildSmoothSparklinePath(points: readonly SparkPoint[]): string {
   if (points.length === 0) return '';
@@ -55,37 +57,50 @@ function buildSmoothSparklinePath(points: readonly SparkPoint[]): string {
   return commands.join(' ');
 }
 
+function pickExtreme(coords: readonly SparkPoint[], mode: 'max' | 'min'): SparkPoint | null {
+  return coords.reduce<SparkPoint | null>((best, candidate) => {
+    if (!best) return candidate;
+    return mode === 'max'
+      ? candidate.value > best.value
+        ? candidate
+        : best
+      : candidate.value < best.value
+        ? candidate
+        : best;
+  }, null);
+}
+
+// AGENT-TRACE: Token-driven area sparkline. All colours resolve through `currentColor`
+// (no raw hex/rgb), the first value is drawn as a dashed baseline so the delta badge has
+// a visible reference, and high/low markers make the min–max scale legible.
 export function Sparkline({
   data,
   width = 180,
   height = 40,
   strokeWidth = 2,
   className,
-  color,
   isFluidWidth = false,
+  ariaLabel,
 }: SparklineProps) {
   const id = useId();
 
   if (data.length < 2) return null;
 
-  const lineGradId = `sparkLineGrad-${id}`;
   const areaGradId = `sparkAreaGrad-${id}`;
 
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
   const usableHeight = Math.max(height - PADDING_Y_PX * 2, 1);
+  const toY = (value: number) => height - PADDING_Y_PX - ((value - min) / range) * usableHeight;
 
   const coords: SparkPoint[] = data.map((value, i) => ({
     x: (i / (data.length - 1)) * width,
-    y: height - PADDING_Y_PX - ((value - min) / range) * usableHeight,
+    y: toY(value),
     value,
   }));
 
   const pathD = buildSmoothSparklinePath(coords);
-  const trend = data[data.length - 1]! - data[0]!;
-  const strokeColor = color || (trend >= 0 ? '#d4af37' : '#e11d48');
-
   const firstCoord = coords[0];
   const lastCoord = coords[coords.length - 1];
   const areaPathD =
@@ -93,10 +108,8 @@ export function Sparkline({
       ? `${pathD} L ${lastCoord.x.toFixed(1)} ${height} L ${firstCoord.x.toFixed(1)} ${height} Z`
       : '';
 
-  const peakCoord = coords.reduce<SparkPoint | null>(
-    (best, candidate) => (!best || candidate.value > best.value ? candidate : best),
-    null
-  );
+  const peakCoord = pickExtreme(coords, 'max');
+  const lowCoord = max === min ? null : pickExtreme(coords, 'min');
 
   return (
     <svg
@@ -105,60 +118,62 @@ export function Sparkline({
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio={isFluidWidth ? 'none' : undefined}
       className={cn(isFluidWidth ? 'block w-full' : 'shrink-0 overflow-visible', className)}
-      aria-hidden="true"
+      role={ariaLabel ? 'img' : undefined}
+      aria-label={ariaLabel}
+      aria-hidden={ariaLabel ? undefined : 'true'}
+      data-testid="sparkline-svg"
     >
       <defs>
-        <linearGradient id={lineGradId} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={strokeColor} stopOpacity={0.6} />
-          <stop offset="80%" stopColor={strokeColor} stopOpacity={0.95} />
-          <stop offset="100%" stopColor={strokeColor} stopOpacity={1} />
-        </linearGradient>
         <linearGradient id={areaGradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={strokeColor} stopOpacity={0.35} />
-          <stop offset="100%" stopColor={strokeColor} stopOpacity={0.02} />
+          <stop offset="0%" stopColor="currentColor" stopOpacity={0.28} />
+          <stop offset="100%" stopColor="currentColor" stopOpacity={0.02} />
         </linearGradient>
       </defs>
 
-      {[0.25, 0.5, 0.75].map((ratio) => (
+      {firstCoord && (
         <line
-          key={ratio}
           x1="0"
-          y1={height * ratio}
+          y1={firstCoord.y}
           x2={width}
-          y2={height * ratio}
-          stroke="rgba(148, 163, 184, 0.25)"
+          y2={firstCoord.y}
+          className="stroke-slate-400/60"
           strokeWidth="0.75"
           strokeDasharray="3 3"
-          shapeRendering="crispEdges"
-        />
-      ))}
-
-      {areaPathD && (
-        <path
-          d={areaPathD}
-          fill={`url(#${areaGradId})`}
-          className="pointer-events-none"
-          shapeRendering="auto"
+          vectorEffect="non-scaling-stroke"
+          data-testid="sparkline-baseline"
         />
       )}
+
+      {areaPathD && <path d={areaPathD} fill={`url(#${areaGradId})`} />}
       <path
         d={pathD}
         fill="none"
-        stroke={`url(#${lineGradId})`}
+        stroke="currentColor"
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
-        opacity={0.96}
+        vectorEffect="non-scaling-stroke"
         shapeRendering="geometricPrecision"
       />
+      {lowCoord && (
+        <circle
+          cx={lowCoord.x}
+          cy={lowCoord.y}
+          r={2}
+          className="fill-white stroke-slate-500"
+          strokeWidth={1.25}
+          data-testid="sparkline-low-marker"
+        />
+      )}
       {peakCoord && (
         <circle
           cx={peakCoord.x}
           cy={peakCoord.y}
           r={2.5}
-          fill="#ffffff"
-          stroke={strokeColor}
+          className="fill-white"
+          stroke="currentColor"
           strokeWidth={1.5}
+          data-testid="sparkline-high-marker"
         />
       )}
       {lastCoord && (
@@ -171,7 +186,7 @@ export function Sparkline({
           aria-hidden="true"
           className="motion-safe:animate-pulse"
         >
-          <path d={ARCH_LOGO_PATH} fill={strokeColor} fillRule="evenodd" />
+          <path d={ARCH_LOGO_PATH} fill="currentColor" fillRule="evenodd" />
         </svg>
       )}
     </svg>

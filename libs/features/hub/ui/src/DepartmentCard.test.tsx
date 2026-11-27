@@ -135,14 +135,33 @@ describe('DepartmentCard', () => {
     );
     expect(screen.getByTestId('dept-telemetry-graph-drilling')).toBeInTheDocument();
     expect(screen.getByText('24H Trend')).toBeInTheDocument();
-    expect(screen.getByText('10–30')).toBeInTheDocument();
-    expect(screen.getByText('+150.0%')).toBeInTheDocument();
+    expect(screen.getByTestId('dept-trend-delta-drilling')).toHaveTextContent('▲ 150%');
+    expect(screen.getByTestId('dept-telemetry-graph-drilling')).toHaveTextContent(
+      'Low 10 · High 30Now 25'
+    );
 
     expect(screen.getByRole('heading', { name: 'Drilling Operations' })).toHaveClass(
       'uiverse-card-title',
       'font-anurati'
     );
     expect(screen.getByTestId('dept-header-separator-drilling')).toBeInTheDocument();
+  });
+
+  it('renders an honest live snapshot instead of a fake trend for short counter arrays', () => {
+    const adminDept: Department = {
+      ...mockDepartment,
+      name: 'admin',
+      displayName: 'Administration',
+      status: 'alert',
+      trend: [18, 13, 9, 630],
+    };
+    render(<DepartmentCard department={adminDept} index={0} />);
+    expect(screen.queryByTestId('dept-telemetry-graph-admin')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sparkline')).not.toBeInTheDocument();
+    expect(screen.getByTestId('dept-telemetry-snapshot-admin')).toHaveTextContent(
+      'Live snapshot24H history pending'
+    );
+    expect(screen.queryByText(/3400/)).not.toBeInTheDocument();
   });
 
   it('applies the unified scaled icon bubble and h-5 w-5 gold Logo setup to all departments', () => {

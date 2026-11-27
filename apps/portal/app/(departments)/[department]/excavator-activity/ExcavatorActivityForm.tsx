@@ -4,10 +4,20 @@ import { useSupabaseRealtime } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
+import { cn } from '@repo/ui/lib/utils';
 import { getCurrentShift } from '@repo/utils/client';
+import { LazyMotion, MotionConfig, m, useReducedMotion } from 'framer-motion';
 import { Check, Plus, Sparkles, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Fragment,
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
 import { quickAddMineBlock, updateExcavatorAssignmentConfig } from '../hourly-loads/actions';
@@ -24,16 +34,40 @@ import {
   parseExcavatorMaterial,
 } from '../hourly-loads/loads-utils';
 import { saveExcavatorShiftTelemetry } from './actions';
+import { ExcavatorLoadsTable } from './ExcavatorLoadsTable';
 import {
   type ExcavatorOperatorOption,
   ExcavatorShiftTelemetryControls,
   type ExcavatorShiftTelemetryDraft,
 } from './ExcavatorShiftTelemetryControls';
 import {
+  CARD_TOP_HIGHLIGHT_CLASS,
+  EXCAVATOR_CARD_CLASS,
+  FIELD_LABEL_CLASS,
+  GOLD_FIELD_CLASS,
+  MATERIAL_PILL_ACTIVE_STYLE,
+  MATERIAL_PILL_ACTIVE_TEXT,
+  MATERIAL_PILL_PILL_CLASS,
+  MATERIAL_SEGMENT_BUTTON_CLASS,
+  MATERIAL_SEGMENT_IDLE_TEXT,
+  MATERIAL_SEGMENT_SHELL_CLASS,
+  PILL_SPRING,
+  REDUCED_MOTION_TRANSITION,
+  SECTION_BOX_CLASS,
+  SECTION_HEADER_CLASS,
+  SECTION_STAGGER_VARIANTS,
+} from './excavator-activity-styles';
+import {
+  buildExcavatorLoadTable,
   buildExcavatorShiftTelemetryKey,
   buildInitialShiftTelemetryMap,
   type ExcavatorShiftSmrDefaults,
+  sortExcavatorsForLog,
+  validateStopSmrCap,
 } from './excavator-shift-helpers';
+
+/** Async-loaded domMax features (layout / layoutId animations) for the material selector. */
+const loadMotionFeatures = () => import('framer-motion').then((mod) => mod.domMax);
 
 interface ExcavatorMachine {
   id: string;
@@ -97,6 +131,8 @@ interface ExcavatorActivityFormProps {
   todayActivities?: ExcavatorActivityConfig[];
   todayAssignments?: SavedDumperAssignment[];
   initialShiftTelemetry?: Record<string, ExcavatorShiftSmrDefaults>;
+  /** Logged delay hours per `${excavatorId}|${shift}` (machine_operations_with_delays). */
+  shiftDelayHours?: Record<string, number>;
   mineralRegistry?: {
     waste: string[];
     coal: string[];
@@ -105,167 +141,17 @@ interface ExcavatorActivityFormProps {
   initialShift?: HourlyShift;
 }
 
-const MATERIAL_PILL_ACTIVE_STYLE: Record<ExcavatorActivityMaterial, string> = {
-  Waste: 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs',
-  Coal: 'bg-neutral-800 text-white shadow-xs',
-  Plant: 'bg-accent-green text-white shadow-xs',
-  Other: 'bg-accent-amber text-white shadow-xs',
-};
-
-const MATERIAL_PILL_BASE_CLASS =
-  'cursor-pointer rounded-full px-2.5 py-1 font-semibold text-xs transition-colors duration-150';
-
-const SELECT_FIELD_CLASS =
-  'w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 font-medium text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]';
-
 const GOLDEN_SEPARATOR_CLASS =
-  'h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent';
+  'h-px w-full bg-gradient-to-r from-accent-gold/80 via-accent-gold/25 to-transparent';
 
-interface RegularModePanelMeta {
-  readonly title: string;
-  readonly subtitle: string;
-  readonly badgeClass: string;
-  readonly panelClass: string;
-  readonly testId: string;
-}
+const REGULAR_DIVIDER_CLASS =
+  'col-span-full flex items-center gap-2 pt-1 font-bold text-[11px] text-[var(--text-heading)] uppercase tracking-wider';
 
-const REGULAR_MODE_PANEL_META: Record<'Plant' | 'Other', RegularModePanelMeta> = {
-  Plant: {
-    title: 'Plant',
-    subtitle: 'Excavators assigned to Plant mode (logged as regular machines).',
-    badgeClass:
-      'rounded-full border border-accent-green/30 bg-accent-green/12 px-2 py-0.5 font-semibold text-[11px] text-accent-green',
-    panelClass: 'border border-accent-green/30 bg-[var(--vibrancy-surface)] p-4',
-    testId: 'plant-excavators-panel',
-  },
-  Other: {
-    title: 'Other',
-    subtitle: 'Excavators assigned to Other mode (logged as regular machines).',
-    badgeClass:
-      'rounded-full border border-accent-amber/30 bg-accent-amber/12 px-2 py-0.5 font-semibold text-[11px] text-accent-amber',
-    panelClass: 'border border-accent-amber/30 bg-[var(--vibrancy-surface)] p-4',
-    testId: 'other-excavators-panel',
-  },
-};
-
-const QUICK_SWITCH_BTN_CLASS =
-  'cursor-pointer rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1 font-medium text-[11px] text-[var(--text-heading)] transition-colors hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)]';
-
-interface RegularModeExcavatorPanelProps {
-  readonly mode: 'Plant' | 'Other';
-  readonly assignedExcavators: readonly ExcavatorMachine[];
-  readonly excavatorSites: Record<string, string>;
-  readonly excavatorMaterialSubCategories: Record<string, string>;
-  readonly sites: readonly Site[];
-  readonly mineralRegistry: ExcavatorActivityFormProps['mineralRegistry'];
-  readonly onMaterialChange: (excavatorId: string, newMaterial: ExcavatorActivityMaterial) => void;
-  readonly onSubCategoryChange: (excavatorId: string, newSubCategory: string | null) => void;
-}
-
-function RegularModeExcavatorPanel({
-  mode,
-  assignedExcavators,
-  excavatorSites,
-  excavatorMaterialSubCategories,
-  sites,
-  mineralRegistry,
-  onMaterialChange,
-  onSubCategoryChange,
-}: RegularModeExcavatorPanelProps) {
-  if (assignedExcavators.length === 0) return null;
-
-  const meta = REGULAR_MODE_PANEL_META[mode];
-  const subCategories = getMaterialSubCategories(mode, mineralRegistry);
-
-  return (
-    <GlassCard data-testid={meta.testId} className={meta.panelClass}>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <Logo variant="gold" className="h-4 w-4 shrink-0" />
-            <h4 className="font-semibold text-[var(--text-heading)] text-sm">{meta.title}</h4>
-            <span className={meta.badgeClass}>
-              {assignedExcavators.length} excavator{assignedExcavators.length === 1 ? '' : 's'}
-            </span>
-          </div>
-          <div aria-hidden="true" className={`my-1.5 ${GOLDEN_SEPARATOR_CLASS}`} />
-          <p className="text-[var(--text-muted)] text-xs">{meta.subtitle}</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {assignedExcavators.map((excavator) => {
-          const siteId = excavatorSites[excavator.id] ?? '';
-          const siteName = sites.find((s) => s.id === siteId)?.name ?? 'No Site Assigned';
-          const currentSubCategory = excavatorMaterialSubCategories[excavator.id] ?? '';
-
-          return (
-            <div
-              key={excavator.id}
-              data-testid={`${mode.toLowerCase()}-excavator-card-${excavator.name}`}
-              className="flex flex-col gap-2.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3 shadow-xs"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--text-heading)] text-sm">
-                    <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
-                    <span>{excavator.name}</span>
-                  </span>
-                  <span className="block truncate text-[11px] text-[var(--text-muted)]">
-                    Site: {siteName}
-                    {excavator.serial_number ? ` · ${excavator.serial_number}` : ''}
-                  </span>
-                </div>
-                <span className={meta.badgeClass}>Regular Machine · {mode}</span>
-              </div>
-
-              <div className="space-y-1">
-                <label className="block font-medium text-[11px] text-[var(--text-muted)]">
-                  Activity ({mode})
-                </label>
-                <select
-                  value={currentSubCategory}
-                  onChange={(e) => onSubCategoryChange(excavator.id, e.target.value || null)}
-                  aria-label={`Select ${mode} activity for ${excavator.name}`}
-                  className={SELECT_FIELD_CLASS}
-                >
-                  <option value="">Select {mode.toLowerCase()} activity...</option>
-                  {subCategories.map((subCat) => (
-                    <option key={subCat} value={subCat}>
-                      {subCat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-1.5 border-[var(--border-default)]/60 border-t pt-2">
-                <span className="text-[11px] text-[var(--text-muted)]">Quick switch:</span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => onMaterialChange(excavator.id, 'Waste')}
-                    aria-label={`Switch ${excavator.name} to Waste`}
-                    className={QUICK_SWITCH_BTN_CLASS}
-                  >
-                    To Waste
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onMaterialChange(excavator.id, 'Coal')}
-                    aria-label={`Switch ${excavator.name} to Coal`}
-                    className={QUICK_SWITCH_BTN_CLASS}
-                  >
-                    To Coal
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </GlassCard>
-  );
-}
+const QUICK_ADD_BTN_CLASS = cn(
+  'gold-steel-border gold-steel-border-slim inline-flex h-[31px] w-[31px] shrink-0 cursor-pointer',
+  'items-center justify-center rounded-lg border border-accent-gold/55 bg-[var(--bg-primary)]',
+  'text-[var(--text-heading)] shadow-2xs transition-colors hover:bg-accent-gold/15'
+);
 
 function resolveNextSubCategory(
   newMaterial: ExcavatorActivityMaterial,
@@ -342,50 +228,6 @@ function updateLoadsMaterial(
   );
 }
 
-function resolveAssignedMachineNames(
-  excavatorId: string,
-  actForExcavator: ExcavatorActivityConfig | undefined,
-  loadsState: HourlyLoadSegmentSummary[],
-  todayAssignments: SavedDumperAssignment[],
-  dumpers: DumperMachine[],
-  selectedShift: HourlyShift
-): string[] {
-  const assignedFromLoads = loadsState
-    .filter(
-      (l) =>
-        l.excavator_id === excavatorId &&
-        (!l.shift_type || l.shift_type === selectedShift) &&
-        !l.is_locked
-    )
-    .map((l) => dumpers.find((d) => d.id === l.machine_id)?.name || '');
-  const assignedFromSaved = actForExcavator?.id
-    ? todayAssignments
-        .filter((a) => a.excavator_activity_id === actForExcavator.id)
-        .map((a) => dumpers.find((d) => d.id === a.dumper_machine_id)?.name || '')
-    : [];
-  return Array.from(new Set([...assignedFromLoads, ...assignedFromSaved].filter(Boolean)));
-}
-
-function resolveExcavatorSubtitle(
-  isRegularMachine: boolean,
-  currentMaterial: ExcavatorActivityMaterial,
-  assignedMachineNames: string[]
-): string {
-  if (isRegularMachine) return `Regular Machine Mode (${currentMaterial})`;
-  if (assignedMachineNames.length > 0) return `Active: ${assignedMachineNames.join(', ')}`;
-  return 'No active machine assigned';
-}
-
-function resolveExcavatorTitle(
-  isRegularMachine: boolean,
-  currentMaterial: ExcavatorActivityMaterial,
-  assignedMachineNames: string[]
-): string {
-  if (isRegularMachine) return `Logged as regular machine (${currentMaterial})`;
-  if (assignedMachineNames.length > 0) return `Active machines: ${assignedMachineNames.join(', ')}`;
-  return 'No active machine assigned';
-}
-
 export function ExcavatorActivityForm({
   departmentId,
   excavators,
@@ -397,11 +239,13 @@ export function ExcavatorActivityForm({
   todayActivities = [],
   todayAssignments = [],
   initialShiftTelemetry = {},
+  shiftDelayHours = {},
   mineralRegistry,
   today,
   initialShift,
 }: ExcavatorActivityFormProps) {
   const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
 
   const [selectedShift, setSelectedShift] = useState<HourlyShift>(
@@ -767,6 +611,15 @@ export function ExcavatorActivityForm({
         toast.error('Stop SMR must be greater than or equal to Start SMR.');
         return;
       }
+      const capError = validateStopSmrCap({
+        startSmr: parsedStart,
+        stopSmr: parsedStop,
+        delayHours: shiftDelayHours[key] ?? 0,
+      });
+      if (capError) {
+        toast.error(capError);
+        return;
+      }
 
       const selectedOp = operators.find((op) => op.id === draft.operatorId) ?? null;
       const currentSiteId = excavatorSites[excavator.id] || null;
@@ -825,6 +678,7 @@ export function ExcavatorActivityForm({
     [
       selectedShift,
       shiftDrafts,
+      shiftDelayHours,
       buildDraftFromTelemetry,
       operators,
       excavatorSites,
@@ -1184,362 +1038,386 @@ export function ExcavatorActivityForm({
     ]
   );
 
-  const { plantExcavators, otherExcavators } = useMemo(() => {
-    const plant: ExcavatorMachine[] = [];
-    const other: ExcavatorMachine[] = [];
-    for (const excavator of excavators) {
-      const mat = excavatorMaterials[excavator.id] || 'Waste';
-      if (mat === 'Plant') plant.push(excavator);
-      if (mat === 'Other') other.push(excavator);
-    }
-    return { plantExcavators: plant, otherExcavators: other };
-  }, [excavators, excavatorMaterials]);
+  // Plant / Other excavators move to the end of the log (stable order otherwise).
+  const orderedExcavators = useMemo(
+    () => sortExcavatorsForLog(excavators, excavatorMaterials),
+    [excavators, excavatorMaterials]
+  );
+  const firstRegularExcavatorId = useMemo(
+    () =>
+      orderedExcavators.find((e) =>
+        isRegularMachineExcavatorActivity(excavatorMaterials[e.id] || 'Waste')
+      )?.id ?? null,
+    [orderedExcavators, excavatorMaterials]
+  );
 
   return (
-    <div className="space-y-4">
-      <GlassCard className="p-4">
-        <div className="mb-3 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-          <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-              Excavator Location, Block Mined & Material Mapping
-            </h3>
-            <div
-              data-testid="excavator-mapping-header-separator"
-              aria-hidden="true"
-              className={`my-1.5 ${GOLDEN_SEPARATOR_CLASS}`}
-            />
-            <p className="text-[var(--text-muted)] text-xs">
-              Assign each Excavator to a Site, Block Mined / Area, and Material (Waste, Coal, Plant,
-              or Other). Selecting Plant or Other logs the Excavator as a regular machine.
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <span className="text-[var(--text-muted)] text-xs">Shift:</span>
-            <div className="flex items-center gap-1 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] p-0.5">
-              <button
-                type="button"
-                onClick={() => setSelectedShift('day')}
-                className={`rounded-full px-2.5 py-1 font-semibold text-xs transition-all ${
-                  selectedShift === 'day'
-                    ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-                }`}
-              >
-                Day (06:00 - 17:59)
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedShift('night')}
-                className={`rounded-full px-2.5 py-1 font-semibold text-xs transition-all ${
-                  selectedShift === 'night'
-                    ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-                }`}
-              >
-                Night (18:00 - 05:59)
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
-          {excavators.map((excavator) => {
-            const currentSiteId = excavatorSites[excavator.id] || '';
-            const currentBlockId = excavatorBlocks[excavator.id] || '';
-            const currentMaterial = excavatorMaterials[excavator.id] || 'Waste';
-            const currentSubCategory = excavatorMaterialSubCategories[excavator.id] || '';
-            const materialSubCategories = getMaterialSubCategories(
-              currentMaterial,
-              mineralRegistry
-            );
-            const availableBlocks = currentSiteId
-              ? localMineBlocks.filter((mb) => mb.site_id === currentSiteId || mb.site_id === null)
-              : localMineBlocks;
-
-            const actForExcavator = resolveActivityForExcavator(
-              excavator.id,
-              activitiesState,
-              selectedShift
-            );
-            const assignedMachineNames = resolveAssignedMachineNames(
-              excavator.id,
-              actForExcavator,
-              loadsState,
-              todayAssignments,
-              dumpers,
-              selectedShift
-            );
-
-            const isRegularMachine = isRegularMachineExcavatorActivity(currentMaterial);
-            const isQuickAddOpen = quickAddExcavatorId === excavator.id;
-            const currentSiteName = sites.find((s) => s.id === currentSiteId)?.name ?? null;
-            const quickFormatPreview = quickBlockName.trim()
-              ? normalizeQuickBlockFormat(quickBlockName, quickBlockCode, currentSiteName)
-              : null;
-
-            return (
-              <div
-                key={excavator.id}
-                data-testid={`excavator-activity-card-${excavator.name}`}
-                className="gold-steel-border gold-steel-border-slim flex flex-col gap-3 rounded-xl border border-accent-gold/45 bg-white p-4 shadow-card"
-              >
-                {/* Header: Excavator Name (with Gold Arch Logo + Golden Separator) + Active Machines Subtitle + Material Toggle */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-default)]/60 border-b pb-2.5">
-                  <div className="flex min-w-0 flex-col">
-                    <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--text-heading)] text-sm">
-                      <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
-                      <span>{excavator.name}</span>
-                    </span>
-                    <div
-                      data-testid={`excavator-machine-id-separator-${excavator.name}`}
-                      aria-hidden="true"
-                      className={`my-1 ${GOLDEN_SEPARATOR_CLASS}`}
-                    />
-                    <span
-                      className="truncate text-[11px] text-[var(--text-muted)]"
-                      title={resolveExcavatorTitle(
-                        isRegularMachine,
-                        currentMaterial,
-                        assignedMachineNames
-                      )}
-                    >
-                      {resolveExcavatorSubtitle(
-                        isRegularMachine,
-                        currentMaterial,
-                        assignedMachineNames
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Material Selector (Waste / Coal / Plant / Other) */}
-                  <div className="gold-steel-border gold-steel-border-slim flex shrink-0 flex-wrap items-center gap-1 rounded-full border border-[var(--border-default)] bg-[var(--bg-primary)] p-0.5">
-                    {EXCAVATOR_ACTIVITY_MATERIALS.map((matOption) => {
-                      const isSelected = currentMaterial === matOption;
-                      return (
-                        <button
-                          key={matOption}
-                          type="button"
-                          aria-pressed={isSelected}
-                          onClick={() => handleExcavatorMaterialChange(excavator.id, matOption)}
-                          title={
-                            matOption === 'Plant' || matOption === 'Other'
-                              ? `${matOption} — Logs ${excavator.name} as a regular machine`
-                              : `Set ${excavator.name} material to ${matOption}`
-                          }
-                          className={`${MATERIAL_PILL_BASE_CLASS} ${
-                            isSelected
-                              ? MATERIAL_PILL_ACTIVE_STYLE[matOption]
-                              : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-                          }`}
-                        >
-                          {matOption}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Step 1: Site, Block Mined / Area (+ Quick Add) & Material Sub-Category */}
-                <div className="space-y-2 rounded-xl border border-accent-gold/35 bg-[var(--bg-secondary)]/55 p-3">
-                  <span className="block font-semibold text-[11px] text-[var(--text-heading)] uppercase tracking-wide">
-                    1. Location &amp; Material
-                  </span>
-                  <div
-                    className={`grid grid-cols-1 gap-2.5 ${isRegularMachine ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}
-                  >
-                    <div className="space-y-1">
-                      <label className="block font-medium text-[11px] text-[var(--text-muted)]">
-                        Site / Location
-                      </label>
-                      <select
-                        value={currentSiteId}
-                        onChange={(e) =>
-                          handleExcavatorSiteChange(excavator.id, e.target.value || null)
-                        }
-                        aria-label={`Select Site / Location for ${excavator.name}`}
-                        className={SELECT_FIELD_CLASS}
-                      >
-                        <option value="">No Site</option>
-                        {sites.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {!isRegularMachine && (
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between gap-1">
-                          <label className="block font-medium text-[11px] text-[var(--text-muted)]">
-                            Block Mined / Area
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <select
-                            value={currentBlockId}
-                            onChange={(e) =>
-                              handleExcavatorBlockChange(excavator.id, e.target.value || null)
-                            }
-                            aria-label={`Select Block Mined / Area for ${excavator.name}`}
-                            className={SELECT_FIELD_CLASS}
-                          >
-                            <option value="">Select block / area...</option>
-                            {availableBlocks.map((mb) => (
-                              <option key={mb.id} value={mb.id}>
-                                {mb.name} ({mb.code})
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (isQuickAddOpen) {
-                                setQuickAddExcavatorId(null);
-                              } else {
-                                setQuickAddExcavatorId(excavator.id);
-                                setQuickBlockName('');
-                                setQuickBlockCode('');
-                              }
-                            }}
-                            aria-label={`Quick add Block Mined / Area for ${excavator.name}`}
-                            title="Quick add Block (auto-configures format & BLK code)"
-                            data-testid={`quick-add-block-btn-${excavator.name}`}
-                            className="gold-steel-border gold-steel-border-slim inline-flex h-[31px] w-[31px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-accent-amber/40 bg-[var(--bg-primary)] text-[var(--text-heading)] shadow-2xs transition-colors hover:bg-accent-amber/15"
-                          >
-                            {isQuickAddOpen ? (
-                              <X className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-                            ) : (
-                              <Plus className="h-3.5 w-3.5 text-accent-amber" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {!isRegularMachine && (
-                      <div className="space-y-1">
-                        <label className="block font-medium text-[11px] text-[var(--text-muted)]">
-                          {isRegularMachine
-                            ? `Activity (${currentMaterial})`
-                            : `Material (${currentMaterial})`}
-                        </label>
-                        <select
-                          value={currentSubCategory}
-                          onChange={(e) =>
-                            handleExcavatorMaterialSubCategoryChange(
-                              excavator.id,
-                              e.target.value || null
-                            )
-                          }
-                          aria-label={`Select ${currentMaterial} material sub-category for ${excavator.name}`}
-                          className={SELECT_FIELD_CLASS}
-                        >
-                          <option value="">
-                            Select {currentMaterial.toLowerCase()}{' '}
-                            {isRegularMachine ? 'activity...' : 'material...'}
-                          </option>
-                          {materialSubCategories.map((subCat) => (
-                            <option key={subCat} value={subCat}>
-                              {subCat}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Inline Quick Add Block Drawer with Auto-Formatter */}
-                {isQuickAddOpen && (
-                  <div
-                    data-testid={`quick-add-block-panel-${excavator.name}`}
-                    className="gold-steel-border gold-steel-border-slim space-y-2 rounded-lg border border-accent-amber/35 bg-[var(--bg-primary)] p-2.5 shadow-2xs"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="inline-flex items-center gap-1 font-semibold text-[11px] text-[var(--text-heading)]">
-                        <Sparkles className="h-3 w-3 text-accent-amber" />
-                        Quick Add Block (Auto-Format)
-                      </span>
-                      {quickFormatPreview && (
-                        <span className="font-mono text-[10px] text-[var(--accent-blue)]">
-                          {quickFormatPreview.formattedName} ({quickFormatPreview.formattedCode})
-                        </span>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_110px_auto]">
-                      <input
-                        type="text"
-                        value={quickBlockName}
-                        onChange={(e) => setQuickBlockName(e.target.value)}
-                        placeholder="Block / Bench (e.g. Brakfontein Pit Bench D)"
-                        aria-label={`New block name for ${excavator.name}`}
-                        className={SELECT_FIELD_CLASS}
-                      />
-                      <input
-                        type="text"
-                        value={quickBlockCode}
-                        onChange={(e) => setQuickBlockCode(e.target.value)}
-                        placeholder={quickFormatPreview?.formattedCode || 'Auto BLK-code'}
-                        aria-label={`New block code for ${excavator.name}`}
-                        className={`${SELECT_FIELD_CLASS} font-mono`}
-                      />
-                      <button
-                        type="button"
-                        disabled={isSavingQuickBlock || !quickBlockName.trim()}
-                        onClick={() => handleQuickAddBlockSubmit(excavator.id)}
-                        aria-label={`Save quick block for ${excavator.name}`}
-                        className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-semibold text-white text-xs shadow-2xs transition hover:opacity-90 disabled:opacity-40"
-                      >
-                        <Check className="h-3.5 w-3.5" />
-                        Add
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Steps 2 & 3: Operator, Start/Stop SMR & Shift Comment */}
-                <ExcavatorShiftTelemetryControls
-                  excavatorName={excavator.name}
-                  operators={operators}
-                  draft={
-                    shiftDrafts[buildExcavatorShiftTelemetryKey(excavator.id, selectedShift)] ??
-                    buildDraftFromTelemetry(excavator.id, selectedShift)
-                  }
-                  onUpdateDraft={(patch) => handleUpdateTelemetryDraft(excavator.id, patch)}
-                  onSave={() => handleSaveShiftTelemetry(excavator)}
+    <LazyMotion features={loadMotionFeatures}>
+      <MotionConfig reducedMotion="user">
+        <div className="space-y-4">
+          <GlassCard className="p-4">
+            <div className="mb-3 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-bold text-[var(--text-heading)] text-sm">
+                  Excavator Location, Block Mined & Material Mapping
+                </h3>
+                <div
+                  data-testid="excavator-mapping-header-separator"
+                  aria-hidden="true"
+                  className={`my-1.5 ${GOLDEN_SEPARATOR_CLASS}`}
                 />
+                <p className="font-medium text-[var(--text-secondary)] text-xs">
+                  Assign each Excavator to a Site, Block Mined / Area, and Material (Waste, Coal,
+                  Plant, or Other). Selecting Plant or Other logs the Excavator as a regular machine
+                  and moves it to the end of the log.
+                </p>
               </div>
-            );
-          })}
-          {excavators.length === 0 && (
-            <p className="col-span-full text-[var(--text-muted)] text-xs">
-              No active excavators found. Please add excavators in Machine DB.
-            </p>
-          )}
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="font-semibold text-[var(--text-heading)] text-xs">Shift:</span>
+                <div className="flex items-center gap-1 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedShift('day')}
+                    className={`rounded-full px-2.5 py-1 font-semibold text-xs transition-all ${
+                      selectedShift === 'day'
+                        ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+                    }`}
+                  >
+                    Day (06:00 - 17:59)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedShift('night')}
+                    className={`rounded-full px-2.5 py-1 font-semibold text-xs transition-all ${
+                      selectedShift === 'night'
+                        ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+                    }`}
+                  >
+                    Night (18:00 - 05:59)
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
+              {orderedExcavators.map((excavator) => {
+                const currentSiteId = excavatorSites[excavator.id] || '';
+                const currentBlockId = excavatorBlocks[excavator.id] || '';
+                const currentMaterial = excavatorMaterials[excavator.id] || 'Waste';
+                const currentSubCategory = excavatorMaterialSubCategories[excavator.id] || '';
+                const materialSubCategories = getMaterialSubCategories(
+                  currentMaterial,
+                  mineralRegistry
+                );
+                const availableBlocks = currentSiteId
+                  ? localMineBlocks.filter(
+                      (mb) => mb.site_id === currentSiteId || mb.site_id === null
+                    )
+                  : localMineBlocks;
+
+                const actForExcavator = resolveActivityForExcavator(
+                  excavator.id,
+                  activitiesState,
+                  selectedShift
+                );
+                const loadTable = buildExcavatorLoadTable({
+                  excavatorId: excavator.id,
+                  shift: selectedShift,
+                  activityId: actForExcavator?.id ?? null,
+                  loads: loadsState,
+                  assignments: todayAssignments,
+                  dumpers,
+                });
+
+                const isRegularMachine = isRegularMachineExcavatorActivity(currentMaterial);
+                const isQuickAddOpen = quickAddExcavatorId === excavator.id;
+                const currentSiteName = sites.find((s) => s.id === currentSiteId)?.name ?? null;
+                const quickFormatPreview = quickBlockName.trim()
+                  ? normalizeQuickBlockFormat(quickBlockName, quickBlockCode, currentSiteName)
+                  : null;
+
+                const showRegularDivider = firstRegularExcavatorId === excavator.id;
+
+                return (
+                  <Fragment key={excavator.id}>
+                    {showRegularDivider && (
+                      <div data-testid="regular-machines-divider" className={REGULAR_DIVIDER_CLASS}>
+                        <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
+                        <span>Plant / Other — logged as regular machines</span>
+                        <span aria-hidden="true" className={`flex-1 ${GOLDEN_SEPARATOR_CLASS}`} />
+                      </div>
+                    )}
+                    <div
+                      data-testid={`excavator-activity-card-${excavator.name}`}
+                      data-material={currentMaterial}
+                      className={EXCAVATOR_CARD_CLASS}
+                    >
+                      <span aria-hidden="true" className={CARD_TOP_HIGHLIGHT_CLASS} />
+                      {/* Header: Excavator Name (with Gold Arch Logo + Golden Separator) + Active Machines Subtitle + Material Toggle */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-default)]/60 border-b pb-2.5">
+                        <div className="flex min-w-0 flex-col">
+                          <span className="inline-flex items-center gap-1.5 font-bold text-[var(--text-heading)] text-base tracking-tight">
+                            <Logo variant="gold" className="h-4 w-4 shrink-0" />
+                            <span>{excavator.name}</span>
+                          </span>
+                          <div
+                            data-testid={`excavator-machine-id-separator-${excavator.name}`}
+                            aria-hidden="true"
+                            className={`my-1 ${GOLDEN_SEPARATOR_CLASS}`}
+                          />
+                          {isRegularMachine && (
+                            <span className="truncate font-semibold text-[11px] text-[var(--text-secondary)]">
+                              Regular Machine Mode ({currentMaterial})
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Material Selector (Waste / Coal / Plant / Other) */}
+                        <div
+                          role="group"
+                          aria-label={`Material for ${excavator.name}`}
+                          className={MATERIAL_SEGMENT_SHELL_CLASS}
+                        >
+                          {EXCAVATOR_ACTIVITY_MATERIALS.map((matOption) => {
+                            const isSelected = currentMaterial === matOption;
+                            return (
+                              <button
+                                key={matOption}
+                                type="button"
+                                aria-pressed={isSelected}
+                                onClick={() =>
+                                  handleExcavatorMaterialChange(excavator.id, matOption)
+                                }
+                                title={
+                                  matOption === 'Plant' || matOption === 'Other'
+                                    ? `${matOption} — Logs ${excavator.name} as a regular machine`
+                                    : `Set ${excavator.name} material to ${matOption}`
+                                }
+                                className={cn(
+                                  MATERIAL_SEGMENT_BUTTON_CLASS,
+                                  isSelected
+                                    ? MATERIAL_PILL_ACTIVE_TEXT
+                                    : MATERIAL_SEGMENT_IDLE_TEXT
+                                )}
+                              >
+                                {isSelected && (
+                                  <m.span
+                                    layoutId={`material-pill-${excavator.id}`}
+                                    aria-hidden="true"
+                                    data-testid={`material-pill-${excavator.name}`}
+                                    className={cn(
+                                      MATERIAL_PILL_PILL_CLASS,
+                                      MATERIAL_PILL_ACTIVE_STYLE[matOption]
+                                    )}
+                                    transition={
+                                      prefersReducedMotion ? REDUCED_MOTION_TRANSITION : PILL_SPRING
+                                    }
+                                  />
+                                )}
+                                <span className="relative z-10">{matOption}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {!isRegularMachine && (
+                        <ExcavatorLoadsTable excavatorName={excavator.name} table={loadTable} />
+                      )}
+
+                      {/* Step 1: Site, Block Mined / Area (+ Quick Add) & Material Sub-Category */}
+                      <m.div
+                        className={SECTION_BOX_CLASS}
+                        variants={SECTION_STAGGER_VARIANTS}
+                        initial="hidden"
+                        animate="visible"
+                        custom={0}
+                      >
+                        <span className={SECTION_HEADER_CLASS}>1. Location &amp; Material</span>
+                        <div
+                          className={`grid grid-cols-1 gap-2.5 ${isRegularMachine ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}
+                        >
+                          <div className="space-y-1">
+                            <label className={FIELD_LABEL_CLASS}>Site / Location</label>
+                            <select
+                              value={currentSiteId}
+                              onChange={(e) =>
+                                handleExcavatorSiteChange(excavator.id, e.target.value || null)
+                              }
+                              aria-label={`Select Site / Location for ${excavator.name}`}
+                              className={GOLD_FIELD_CLASS}
+                            >
+                              <option value="">No Site</option>
+                              {sites.map((s) => (
+                                <option key={s.id} value={s.id}>
+                                  {s.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {!isRegularMachine && (
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between gap-1">
+                                <label className={FIELD_LABEL_CLASS}>Block Mined / Area</label>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <select
+                                  value={currentBlockId}
+                                  onChange={(e) =>
+                                    handleExcavatorBlockChange(excavator.id, e.target.value || null)
+                                  }
+                                  aria-label={`Select Block Mined / Area for ${excavator.name}`}
+                                  className={GOLD_FIELD_CLASS}
+                                >
+                                  <option value="">Select block / area...</option>
+                                  {availableBlocks.map((mb) => (
+                                    <option key={mb.id} value={mb.id}>
+                                      {mb.name} ({mb.code})
+                                    </option>
+                                  ))}
+                                </select>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (isQuickAddOpen) {
+                                      setQuickAddExcavatorId(null);
+                                    } else {
+                                      setQuickAddExcavatorId(excavator.id);
+                                      setQuickBlockName('');
+                                      setQuickBlockCode('');
+                                    }
+                                  }}
+                                  aria-label={`Quick add Block Mined / Area for ${excavator.name}`}
+                                  title="Quick add Block (auto-configures format & BLK code)"
+                                  data-testid={`quick-add-block-btn-${excavator.name}`}
+                                  className={QUICK_ADD_BTN_CLASS}
+                                >
+                                  {isQuickAddOpen ? (
+                                    <X className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                                  ) : (
+                                    <Plus className="h-3.5 w-3.5 text-accent-amber" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="space-y-1">
+                            <label className={FIELD_LABEL_CLASS}>
+                              {isRegularMachine
+                                ? `Activity (${currentMaterial})`
+                                : `Material (${currentMaterial})`}
+                            </label>
+                            <select
+                              value={currentSubCategory}
+                              onChange={(e) =>
+                                handleExcavatorMaterialSubCategoryChange(
+                                  excavator.id,
+                                  e.target.value || null
+                                )
+                              }
+                              aria-label={
+                                isRegularMachine
+                                  ? `Select ${currentMaterial} activity for ${excavator.name}`
+                                  : `Select ${currentMaterial} material sub-category for ${excavator.name}`
+                              }
+                              className={GOLD_FIELD_CLASS}
+                            >
+                              <option value="">
+                                Select {currentMaterial.toLowerCase()}{' '}
+                                {isRegularMachine ? 'activity...' : 'material...'}
+                              </option>
+                              {materialSubCategories.map((subCat) => (
+                                <option key={subCat} value={subCat}>
+                                  {subCat}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </m.div>
+
+                      {/* Inline Quick Add Block Drawer with Auto-Formatter */}
+                      {isQuickAddOpen && (
+                        <div
+                          data-testid={`quick-add-block-panel-${excavator.name}`}
+                          className="gold-steel-border gold-steel-border-slim space-y-2 rounded-lg border border-accent-amber/35 bg-[var(--bg-primary)] p-2.5 shadow-2xs"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1 font-semibold text-[11px] text-[var(--text-heading)]">
+                              <Sparkles className="h-3 w-3 text-accent-amber" />
+                              Quick Add Block (Auto-Format)
+                            </span>
+                            {quickFormatPreview && (
+                              <span className="font-mono text-[10px] text-[var(--accent-blue)]">
+                                {quickFormatPreview.formattedName} (
+                                {quickFormatPreview.formattedCode})
+                              </span>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_110px_auto]">
+                            <input
+                              type="text"
+                              value={quickBlockName}
+                              onChange={(e) => setQuickBlockName(e.target.value)}
+                              placeholder="Block / Bench (e.g. Brakfontein Pit Bench D)"
+                              aria-label={`New block name for ${excavator.name}`}
+                              className={GOLD_FIELD_CLASS}
+                            />
+                            <input
+                              type="text"
+                              value={quickBlockCode}
+                              onChange={(e) => setQuickBlockCode(e.target.value)}
+                              placeholder={quickFormatPreview?.formattedCode || 'Auto BLK-code'}
+                              aria-label={`New block code for ${excavator.name}`}
+                              className={`${GOLD_FIELD_CLASS} font-mono`}
+                            />
+                            <button
+                              type="button"
+                              disabled={isSavingQuickBlock || !quickBlockName.trim()}
+                              onClick={() => handleQuickAddBlockSubmit(excavator.id)}
+                              aria-label={`Save quick block for ${excavator.name}`}
+                              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-semibold text-white text-xs shadow-2xs transition hover:opacity-90 disabled:opacity-40"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                              Add
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Steps 2 & 3: Operator, Start/Stop SMR & Shift Comment */}
+                      <ExcavatorShiftTelemetryControls
+                        excavatorName={excavator.name}
+                        operators={operators}
+                        delayHours={
+                          shiftDelayHours[
+                            buildExcavatorShiftTelemetryKey(excavator.id, selectedShift)
+                          ] ?? 0
+                        }
+                        draft={
+                          shiftDrafts[
+                            buildExcavatorShiftTelemetryKey(excavator.id, selectedShift)
+                          ] ?? buildDraftFromTelemetry(excavator.id, selectedShift)
+                        }
+                        onUpdateDraft={(patch) => handleUpdateTelemetryDraft(excavator.id, patch)}
+                        onSave={() => handleSaveShiftTelemetry(excavator)}
+                      />
+                    </div>
+                  </Fragment>
+                );
+              })}
+              {excavators.length === 0 && (
+                <p className="col-span-full text-[var(--text-muted)] text-xs">
+                  No active excavators found. Please add excavators in Machine DB.
+                </p>
+              )}
+            </div>
+          </GlassCard>
         </div>
-      </GlassCard>
-
-      <RegularModeExcavatorPanel
-        mode="Plant"
-        assignedExcavators={plantExcavators}
-        excavatorSites={excavatorSites}
-        excavatorMaterialSubCategories={excavatorMaterialSubCategories}
-        sites={sites}
-        mineralRegistry={mineralRegistry}
-        onMaterialChange={handleExcavatorMaterialChange}
-        onSubCategoryChange={handleExcavatorMaterialSubCategoryChange}
-      />
-
-      <RegularModeExcavatorPanel
-        mode="Other"
-        assignedExcavators={otherExcavators}
-        excavatorSites={excavatorSites}
-        excavatorMaterialSubCategories={excavatorMaterialSubCategories}
-        sites={sites}
-        mineralRegistry={mineralRegistry}
-        onMaterialChange={handleExcavatorMaterialChange}
-        onSubCategoryChange={handleExcavatorMaterialSubCategoryChange}
-      />
-    </div>
+      </MotionConfig>
+    </LazyMotion>
   );
 }

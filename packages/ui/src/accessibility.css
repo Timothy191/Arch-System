@@ -78,9 +78,3 @@ select,
 textarea {
   color-scheme: light;
 }
-
-/* WCAG 2.5.5 / 2.5.8 44x44px minimum touch target utility for pit tablets */
-.touch-target-44 {
-  min-width: 44px;
-  min-height: 44px;
-}

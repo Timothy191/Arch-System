@@ -13,6 +13,7 @@ import {
   RateLimitError,
   ValidationError,
 } from '@/lib/errors/error-classes';
+import { SHIFT_LENGTH_HOURS, validateStopSmrCap } from './excavator-shift-helpers';
 
 const SHIFT_START_TIME_BY_TYPE: Readonly<Record<'day' | 'night', string>> = {
   day: '06:00',
@@ -51,6 +52,18 @@ const saveExcavatorShiftTelemetrySchema = z
       payload.startSmr === null || payload.stopSmr === null || payload.stopSmr >= payload.startSmr,
     {
       message: 'Stop SMR must be greater than or equal to Start SMR',
+      path: ['stopSmr'],
+    }
+  )
+  .refine(
+    (payload) =>
+      validateStopSmrCap({
+        startSmr: payload.startSmr,
+        stopSmr: payload.stopSmr,
+        delayHours: 0,
+      }) === null,
+    {
+      message: `Stop SMR cannot exceed Start SMR + ${SHIFT_LENGTH_HOURS} hours`,
       path: ['stopSmr'],
     }
   );
@@ -141,6 +154,23 @@ export async function saveExcavatorShiftTelemetry(
 
   const existingActivity = existingActivities?.[0] ?? null;
   const existingOperation = existingOperations?.[0] ?? null;
+
+  // Delay-aware Stop SMR cap: Stop ≤ Start + (12 h − logged delay hours). Server-side
+  // so the client `max` attribute cannot be bypassed.
+  if (existingOperation && data.startSmr !== null && data.stopSmr !== null) {
+    const { data: delayRows } = await serviceClient
+      .from('machine_operations_with_delays')
+      .select('total_delay_hours')
+      .eq('id', existingOperation.id);
+    const capError = validateStopSmrCap({
+      startSmr: data.startSmr,
+      stopSmr: data.stopSmr,
+      delayHours: delayRows?.[0]?.total_delay_hours ?? 0,
+    });
+    if (capError) {
+      throw new ValidationError(capError);
+    }
+  }
 
   const activityMutation = existingActivity
     ? serviceClient

@@ -156,6 +156,21 @@ describe('CoreOperationalModules', () => {
     expect(screen.queryByText('LIVE SYSTEM FEED')).not.toBeInTheDocument();
   });
 
+  it('renders module card graphs with capped deltas and honest snapshots for counter arrays', () => {
+    const withTrends: Department[] = [
+      { ...mockDepartments[0]!, status: 'alert', trend: [18, 13, 9, 630] },
+      { ...mockDepartments[1]!, trend: [18, 40, 90, 200, 400, 630] },
+    ];
+    render(<CoreOperationalModules departments={withTrends} />);
+
+    expect(screen.getByTestId('dept-telemetry-snapshot-admin')).toBeInTheDocument();
+    expect(screen.getByTestId('dept-trend-delta-plant-inventory')).toHaveTextContent('▲ 35×');
+    expect(
+      screen.getByRole('img', { name: /Stock Control Department 24-hour trend: up 35 times/ })
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/3400/)).not.toBeInTheDocument();
+  });
+
   describe('CookieConsent persistence & zero-flash behavior', () => {
     beforeEach(() => {
       localStorage.clear();

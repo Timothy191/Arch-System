@@ -106,6 +106,7 @@ describe('excavator-activity saveExcavatorShiftTelemetry action', () => {
     const actUpdateChain = makeQuery({ data: null, error: null });
     const opSelectChain = makeQuery({ data: [{ id: 'op-existing' }], error: null });
     const opUpdateChain = makeQuery({ data: null, error: null });
+    const delaySelectChain = makeQuery({ data: [{ total_delay_hours: 0 }], error: null });
     let actCall = 0;
     let opCall = 0;
 
@@ -118,6 +119,9 @@ describe('excavator-activity saveExcavatorShiftTelemetry action', () => {
         if (table === 'machine_operations') {
           opCall += 1;
           return opCall === 1 ? opSelectChain : opUpdateChain;
+        }
+        if (table === 'machine_operations_with_delays') {
+          return delaySelectChain;
         }
         throw new Error(`Unexpected table ${table}`);
       }),
@@ -228,5 +232,70 @@ describe('excavator-activity saveExcavatorShiftTelemetry action', () => {
         hours_worked: 9.5,
       })
     );
+  });
+
+  it('rejects via Zod when Stop SMR exceeds Start SMR + 12 hours', async () => {
+    (getAuthenticatedEmployee as jest.Mock).mockResolvedValueOnce({
+      user: { id: 'user-3' },
+      employee: {
+        id: 'emp-3',
+        role: 'supervisor',
+        department_id: DEPT_ID,
+        accessible_departments: ['control-room'],
+      },
+    });
+
+    await expect(
+      saveExcavatorShiftTelemetry({
+        departmentId: DEPT_ID,
+        excavatorId: EXCAVATOR_ID,
+        loadDate: '2026-11-24',
+        shiftType: 'day',
+        startSmr: 1200,
+        stopSmr: 1212.5,
+        operatorId: OPERATOR_ID,
+        operatorName: 'Thabo Mokoena',
+        comment: null,
+      })
+    ).rejects.toThrow('Stop SMR cannot exceed Start SMR + 12 hours');
+  });
+
+  it('rejects when Stop SMR exceeds Start SMR + (12 h - logged delay hours)', async () => {
+    (getAuthenticatedEmployee as jest.Mock).mockResolvedValueOnce({
+      user: { id: 'user-4' },
+      employee: {
+        id: 'emp-4',
+        role: 'supervisor',
+        department_id: DEPT_ID,
+        accessible_departments: ['control-room'],
+      },
+    });
+
+    const actSelectChain = makeQuery({ data: [{ id: 'act-existing' }], error: null });
+    const opSelectChain = makeQuery({ data: [{ id: 'op-existing' }], error: null });
+    const delaySelectChain = makeQuery({ data: [{ total_delay_hours: 2.5 }], error: null });
+
+    (createServiceRoleClient as jest.Mock).mockReturnValue({
+      from: jest.fn((table: string) => {
+        if (table === 'excavator_activity') return actSelectChain;
+        if (table === 'machine_operations') return opSelectChain;
+        if (table === 'machine_operations_with_delays') return delaySelectChain;
+        throw new Error(`Unexpected table ${table}`);
+      }),
+    });
+
+    await expect(
+      saveExcavatorShiftTelemetry({
+        departmentId: DEPT_ID,
+        excavatorId: EXCAVATOR_ID,
+        loadDate: '2026-11-24',
+        shiftType: 'day',
+        startSmr: 1200,
+        stopSmr: 1210,
+        operatorId: OPERATOR_ID,
+        operatorName: 'Thabo Mokoena',
+        comment: null,
+      })
+    ).rejects.toThrow('Stop SMR cannot exceed 1209.5 (Start SMR + 12 h − 2.5 h delay).');
   });
 });

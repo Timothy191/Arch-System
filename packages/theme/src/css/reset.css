@@ -42,15 +42,6 @@ label[for] {
   cursor: var(--cursor-arch-wait);
 }
 
-/* Custom scrollbar utility */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
 /* Screen reader only */
 .sr-only {
   position: absolute;

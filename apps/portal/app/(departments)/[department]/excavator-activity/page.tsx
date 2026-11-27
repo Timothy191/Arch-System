@@ -9,7 +9,9 @@ import { ExcavatorActivityList } from './ExcavatorActivityList';
 import { ExcavatorActivityTelemetryOverview } from './ExcavatorActivityTelemetryOverview';
 import {
   buildInitialShiftTelemetryMap,
+  buildShiftDelayHoursMap,
   type RawMachineOperationSmrRow,
+  type RawShiftDelayRow,
 } from './excavator-shift-helpers';
 
 const RECENT_SMR_OPS_LIMIT = 200;
@@ -52,7 +54,7 @@ export default async function ExcavatorActivityPage({
       .order('name'),
     supabase
       .from('operators')
-      .select('id, full_name, employee_code')
+      .select('id, full_name, employee_code, role')
       .eq('active', true)
       .order('full_name'),
     supabase.from('sites').select('id, name, site_code, active').eq('active', true).order('name'),
@@ -76,33 +78,41 @@ export default async function ExcavatorActivityPage({
   const excavatorIds = (excavators ?? []).map((e) => e.id);
   const activityIds = todayActivity?.map((a) => a.id) || [];
 
-  const [{ data: assignments }, { data: todayLoads }, machineOpsResult] = await Promise.all([
-    activityIds.length > 0
-      ? supabase
-          .from('excavator_dumper_assignments')
-          .select('*, dumper:machines!dumper_machine_id(name, bin_factor, machine_type)')
-          .in('excavator_activity_id', activityIds)
-      : Promise.resolve({ data: [] }),
-    supabase
-      .from('hourly_loads')
-      .select(
-        'id, machine_id, excavator_id, material_type, shift_type, start_hour, end_hour, is_locked, total_loads'
-      )
-      .eq('department_id', deptId)
-      .eq('load_date', today),
-    excavatorIds.length > 0
-      ? supabase
-          .from('machine_operations')
-          .select(
-            'id, machine_id, shift_date, shift_type, start_smu, end_smu, hours_worked, operator_id, operator_name'
-          )
-          .in('machine_id', excavatorIds)
-          .lte('shift_date', today)
-          .order('shift_date', { ascending: false })
-          .order('created_at', { ascending: false })
-          .limit(RECENT_SMR_OPS_LIMIT)
-      : Promise.resolve({ data: [] as RawMachineOperationSmrRow[] }),
-  ]);
+  const [{ data: assignments }, { data: todayLoads }, machineOpsResult, delayResult] =
+    await Promise.all([
+      activityIds.length > 0
+        ? supabase
+            .from('excavator_dumper_assignments')
+            .select('*, dumper:machines!dumper_machine_id(name, bin_factor, machine_type)')
+            .in('excavator_activity_id', activityIds)
+        : Promise.resolve({ data: [] }),
+      supabase
+        .from('hourly_loads')
+        .select(
+          'id, machine_id, excavator_id, material_type, shift_type, start_hour, end_hour, is_locked, total_loads'
+        )
+        .eq('department_id', deptId)
+        .eq('load_date', today),
+      excavatorIds.length > 0
+        ? supabase
+            .from('machine_operations')
+            .select(
+              'id, machine_id, shift_date, shift_type, start_smu, end_smu, hours_worked, operator_id, operator_name'
+            )
+            .in('machine_id', excavatorIds)
+            .lte('shift_date', today)
+            .order('shift_date', { ascending: false })
+            .order('created_at', { ascending: false })
+            .limit(RECENT_SMR_OPS_LIMIT)
+        : Promise.resolve({ data: [] as RawMachineOperationSmrRow[] }),
+      excavatorIds.length > 0
+        ? supabase
+            .from('machine_operations_with_delays')
+            .select('machine_id, shift_date, shift_type, total_delay_hours')
+            .in('machine_id', excavatorIds)
+            .eq('shift_date', today)
+        : Promise.resolve({ data: [] as RawShiftDelayRow[] }),
+    ]);
 
   const todayAssignments = assignments || [];
   const machineOperations = (machineOpsResult.data ?? []) as RawMachineOperationSmrRow[];
@@ -112,6 +122,10 @@ export default async function ExcavatorActivityPage({
     todayActivities: todayActivity || [],
     today,
   });
+  const shiftDelayHours = buildShiftDelayHoursMap(
+    (delayResult.data ?? []) as RawShiftDelayRow[],
+    today
+  );
 
   // Compute KPIs and Global Combined Tally
   const totalLoads = todayAssignments?.reduce((sum, a) => sum + (a.total_loads || 0), 0) || 0;
@@ -167,6 +181,7 @@ export default async function ExcavatorActivityPage({
         todayActivities={todayActivity || []}
         todayAssignments={todayAssignments || []}
         initialShiftTelemetry={initialShiftTelemetry}
+        shiftDelayHours={shiftDelayHours}
         mineralRegistry={mineralRegistry}
         today={today}
         initialShift={getCurrentShift()}

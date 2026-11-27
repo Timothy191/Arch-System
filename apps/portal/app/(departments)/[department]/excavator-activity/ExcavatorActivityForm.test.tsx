@@ -1,9 +1,36 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import type { ReactNode } from 'react';
 import { quickAddMineBlock, updateExcavatorAssignmentConfig } from '../hourly-loads/actions';
 import { saveExcavatorShiftTelemetry } from './actions';
 import { ExcavatorActivityForm } from './ExcavatorActivityForm';
 import { ExcavatorActivityTelemetryOverview } from './ExcavatorActivityTelemetryOverview';
+
+jest.mock('framer-motion', () => ({
+  LazyMotion: ({ children }: { children: ReactNode }) => <>{children}</>,
+  MotionConfig: ({ children }: { children: ReactNode }) => <>{children}</>,
+  useReducedMotion: () => false,
+  m: {
+    div: ({
+      children,
+      variants: _variants,
+      initial: _initial,
+      animate: _animate,
+      custom: _custom,
+      ...rest
+    }: Record<string, unknown> & { children?: ReactNode }) => <div {...rest}>{children}</div>,
+    span: ({
+      children,
+      layoutId,
+      transition: _transition,
+      ...rest
+    }: Record<string, unknown> & { children?: ReactNode; layoutId?: string }) => (
+      <span data-layout-id={layoutId} {...rest}>
+        {children}
+      </span>
+    ),
+  },
+}));
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -94,7 +121,7 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     jest.clearAllMocks();
   });
 
-  it('renders Excavator Location, Block Mined & Material Mapping panel, golden separators, and active machines', () => {
+  it('renders Excavator Location, Block Mined & Material Mapping panel, golden separators, and accessible loads table', () => {
     render(<ExcavatorActivityForm {...mockProps} />);
 
     expect(
@@ -105,7 +132,26 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     expect(screen.getByTestId('excavator-mapping-header-separator')).toBeInTheDocument();
     expect(screen.getByText('EX-10')).toBeInTheDocument();
     expect(screen.getByTestId('excavator-machine-id-separator-EX-10')).toBeInTheDocument();
-    expect(screen.getByText('Active: DT-01')).toBeInTheDocument();
+
+    const tableContainer = screen.getByTestId('excavator-loads-table-EX-10');
+    expect(within(tableContainer).getByText('Machine ID')).toBeInTheDocument();
+    expect(within(tableContainer).getByText('Loads')).toBeInTheDocument();
+    expect(within(tableContainer).getByText('Total Material')).toBeInTheDocument();
+    expect(within(tableContainer).getByText('DT-01')).toBeInTheDocument();
+    const totalRow = screen.getByTestId('excavator-loads-total-EX-10');
+    expect(totalRow).toHaveTextContent('Total');
+    expect(totalRow).toHaveTextContent('6');
+    expect(totalRow).toHaveTextContent('150 BCM');
+  });
+
+  it('renders empty state row in the loads table when no machines are assigned', () => {
+    render(<ExcavatorActivityForm {...mockProps} todayDumperLoads={[]} />);
+
+    const tableContainer = screen.getByTestId('excavator-loads-table-EX-10');
+    expect(within(tableContainer).getByText('No machines assigned this shift')).toBeInTheDocument();
+    const totalRow = screen.getByTestId('excavator-loads-total-EX-10');
+    expect(totalRow).toHaveTextContent('0');
+    expect(totalRow).toHaveTextContent('0 BCM');
   });
 
   it('persists excavator site and material changes via updateExcavatorAssignmentConfig', async () => {
@@ -130,6 +176,11 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     const coalBtn = screen.getByRole('button', { name: 'Coal' });
     fireEvent.click(coalBtn);
 
+    expect(screen.getByTestId('material-pill-EX-10')).toHaveAttribute(
+      'data-layout-id',
+      'material-pill-ex-10'
+    );
+
     await waitFor(() => {
       expect(updateExcavatorAssignmentConfig).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -142,54 +193,7 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     });
   });
 
-  it('renders Plant and Other buttons and logs Excavator as a regular machine when selected', async () => {
-    render(<ExcavatorActivityForm {...mockProps} />);
-
-    const plantBtn = screen.getByRole('button', { name: 'Plant' });
-    const otherBtn = screen.getByRole('button', { name: 'Other' });
-    expect(plantBtn).toBeInTheDocument();
-    expect(otherBtn).toBeInTheDocument();
-
-    fireEvent.click(plantBtn);
-    expect(plantBtn).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('Regular Machine Mode (Plant)')).toBeInTheDocument();
-    const plantPanel = screen.getByTestId('plant-excavators-panel');
-    expect(plantPanel).toBeInTheDocument();
-    expect(plantPanel).toHaveTextContent('Plant');
-    expect(plantPanel).toHaveTextContent('EX-10');
-    expect(plantPanel).toHaveTextContent('Site: Main Pit');
-    expect(plantPanel).toHaveTextContent('Regular Machine · Plant');
-
-    await waitFor(() => {
-      expect(updateExcavatorAssignmentConfig).toHaveBeenCalledWith(
-        expect.objectContaining({
-          excavatorId: 'ex-10',
-          materialType: 'Plant',
-        })
-      );
-    });
-
-    fireEvent.click(otherBtn);
-    expect(otherBtn).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('Regular Machine Mode (Other)')).toBeInTheDocument();
-    expect(screen.queryByTestId('plant-excavators-panel')).not.toBeInTheDocument();
-    const otherPanel = screen.getByTestId('other-excavators-panel');
-    expect(otherPanel).toBeInTheDocument();
-    expect(otherPanel).toHaveTextContent('Other');
-    expect(otherPanel).toHaveTextContent('EX-10');
-    expect(otherPanel).toHaveTextContent('Regular Machine · Other');
-
-    await waitFor(() => {
-      expect(updateExcavatorAssignmentConfig).toHaveBeenCalledWith(
-        expect.objectContaining({
-          excavatorId: 'ex-10',
-          materialType: 'Other',
-        })
-      );
-    });
-  });
-
-  it('lists all Plant and Other excavators in dedicated panels and supports activity selection & quick switch', async () => {
+  it('moves Plant and Other excavators to the end of the log without duplicate panels and supports activity selection', async () => {
     render(
       <ExcavatorActivityForm
         {...mockProps}
@@ -208,6 +212,13 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
             serial_number: 'CAT 349',
             site_id: 'site-2',
           },
+          {
+            id: 'ex-30',
+            name: 'EX-30',
+            machine_type: 'Excavator',
+            serial_number: 'Komatsu PC450',
+            site_id: 'site-1',
+          },
         ]}
         todayActivities={[
           {
@@ -219,10 +230,18 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
             activity_date: '2026-10-23',
           },
           {
-            id: 'act-other',
+            id: 'act-waste',
             machine_id: 'ex-20',
             shift_type: 'day',
             site_id: 'site-2',
+            material_type: 'Waste',
+            activity_date: '2026-10-23',
+          },
+          {
+            id: 'act-other',
+            machine_id: 'ex-30',
+            shift_type: 'day',
+            site_id: 'site-1',
             material_type: 'Other - Trenching',
             activity_date: '2026-10-23',
           },
@@ -230,15 +249,23 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
       />
     );
 
-    const plantPanel = screen.getByTestId('plant-excavators-panel');
-    expect(plantPanel).toHaveTextContent('EX-10');
-    expect(plantPanel).toHaveTextContent('Site: Main Pit');
+    // No duplicate Plant/Other panels
+    expect(screen.queryByTestId('plant-excavators-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('other-excavators-panel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('regular-machines-divider')).toBeInTheDocument();
 
-    const otherPanel = screen.getByTestId('other-excavators-panel');
-    expect(otherPanel).toHaveTextContent('EX-20');
-    expect(otherPanel).toHaveTextContent('Site: North Pit');
+    // EX-20 (Waste) comes first, then EX-10 (Plant) and EX-30 (Other) at the end
+    const cards = screen.getAllByTestId(/^excavator-activity-card-/);
+    expect(cards.map((el) => el.getAttribute('data-testid'))).toEqual([
+      'excavator-activity-card-EX-20',
+      'excavator-activity-card-EX-10',
+      'excavator-activity-card-EX-30',
+    ]);
 
-    // Select activity inside Plant panel
+    expect(screen.getByText('Regular Machine Mode (Plant)')).toBeInTheDocument();
+    expect(screen.getByText('Regular Machine Mode (Other)')).toBeInTheDocument();
+
+    // Select Plant activity inside EX-10 card
     const plantActivitySelect = screen.getByLabelText('Select Plant activity for EX-10');
     fireEvent.change(plantActivitySelect, { target: { value: 'Crusher Feed' } });
 
@@ -252,10 +279,18 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
       );
     });
 
-    // Quick switch EX-10 from Plant to Waste -> removes Plant panel
-    fireEvent.click(screen.getByRole('button', { name: 'Switch EX-10 to Waste' }));
-    expect(screen.queryByTestId('plant-excavators-panel')).not.toBeInTheDocument();
-    expect(screen.getByTestId('other-excavators-panel')).toBeInTheDocument();
+    // Switching EX-20 to Plant moves it into the end group
+    const ex20Card = screen.getByTestId('excavator-activity-card-EX-20');
+    fireEvent.click(within(ex20Card).getByRole('button', { name: 'Plant' }));
+
+    await waitFor(() => {
+      expect(updateExcavatorAssignmentConfig).toHaveBeenCalledWith(
+        expect.objectContaining({
+          excavatorId: 'ex-20',
+          materialType: 'Plant',
+        })
+      );
+    });
   });
 
   it('supports Quick Add Block (+) with auto-formatting for block name and BLK-* code', async () => {
@@ -359,13 +394,23 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('pre-populates Start SMR, validates Stop SMR against Start SMR, and saves Operator, SMR, and Comment', async () => {
+  it('filters operator select to excavator operators, enforces Stop SMR delay-aware cap, and saves shift telemetry', async () => {
     render(
       <ExcavatorActivityForm
         {...mockProps}
         operators={[
-          { id: 'op-1', full_name: 'Thabo Mokoena', employee_code: 'EMP-101' },
-          { id: 'op-2', full_name: 'Sipho Dlamini', employee_code: 'EMP-102' },
+          {
+            id: 'op-1',
+            full_name: 'Thabo Mokoena',
+            employee_code: 'EMP-101',
+            role: 'Excavator Operator',
+          },
+          {
+            id: 'op-2',
+            full_name: 'Sipho Dlamini',
+            employee_code: 'EMP-102',
+            role: 'ADT Driver',
+          },
         ]}
         initialShiftTelemetry={{
           'ex-10|day': {
@@ -376,12 +421,15 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
             comment: '',
           },
         }}
+        shiftDelayHours={{
+          'ex-10|day': 2,
+        }}
       />
     );
 
     expect(screen.getByTestId('excavator-activity-card-EX-10')).toHaveClass(
-      'bg-white',
-      'gold-steel-border'
+      'gold-steel-border',
+      'shadow-card'
     );
     expect(screen.getByText('Start: Prev Shift')).toBeInTheDocument();
 
@@ -392,13 +440,29 @@ describe('ExcavatorActivityForm & ExcavatorActivityTelemetryOverview', () => {
     const saveBtn = screen.getByLabelText('Save shift telemetry for EX-10');
 
     expect(startInput.value).toBe('14500');
+    expect(stopInput).toHaveAttribute('max', '14510');
+    expect(screen.getByTestId('smr-cap-hint-EX-10')).toHaveTextContent(
+      'Max Stop SMR 14510 (12 h − 2 h delay)'
+    );
+
+    // Operator dropdown filters to excavator operators only
+    const optionLabels = Array.from(operatorSelect.options).map((opt) => opt.textContent);
+    expect(optionLabels).toContain('Thabo Mokoena (EMP-101)');
+    expect(optionLabels).not.toContain('Sipho Dlamini (EMP-102)');
 
     // Entering Stop SMR below Start SMR shows inline alert and disables saving
     fireEvent.change(stopInput, { target: { value: '14490' } });
     expect(screen.getByRole('alert')).toHaveTextContent('Stop SMR cannot be lower than Start SMR.');
     expect(saveBtn).toBeDisabled();
 
-    // Enter valid Stop SMR, Operator, and Comment
+    // Entering Stop SMR above delay-aware cap shows inline alert and disables saving
+    fireEvent.change(stopInput, { target: { value: '14511' } });
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Stop SMR cannot exceed 14510 (Start SMR + 12 h − 2 h delay).'
+    );
+    expect(saveBtn).toBeDisabled();
+
+    // Enter valid Stop SMR within cap, Operator, and Comment
     fireEvent.change(stopInput, { target: { value: '14510' } });
     expect(screen.getByTestId('shift-hours-badge-EX-10')).toHaveTextContent('10.0 hrs');
     expect(saveBtn).toBeEnabled();
