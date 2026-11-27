@@ -1,14 +1,12 @@
 'use client';
 
 import {
-  CalendarDays,
-  ClipboardList,
-  ClipboardPlus,
-  Clock,
-  Save,
-  Sparkles,
-  Trash2,
-} from 'lucide-react';
+  EngineeringHydraulicWrenchIcon,
+  EngineeringWorkshopBayIcon,
+} from '@repo/ui/engineering-icons';
+import { GoldenPanel } from '@repo/ui/GoldenPanel';
+import { cn } from '@repo/ui/lib/utils';
+import { CalendarDays, Clock, Sparkles, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { createBreakdown } from './actions';
@@ -28,10 +26,28 @@ const COMMON_REASONS = [
   'Brake System Pressure Drop',
   'Transmission Slip / Filter Clogged',
   'Pin & Bushing Excessive Play',
-];
+] as const;
 
 const DRAFT_KEY = 'arch_breakdown_bookin_draft';
 const DEFAULT_FLEET_IMAGE = '/images/fleet/volvo-adt.webp';
+
+const GOLD_CONTROL_CLASS =
+  'gold-steel-border gold-steel-border-slim w-full rounded-lg px-3 py-2 text-[var(--text-heading)] text-sm transition-all placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)]/45';
+
+const MACHINE_PROFILE_CARD_CLASS =
+  'gold-steel-border gold-steel-border-slim flex flex-col gap-4 rounded-xl border border-[var(--accent-gold-border)] bg-white/90 p-4 shadow-card transition-all sm:flex-row sm:items-center';
+
+const PRESET_CONTAINER_CLASS =
+  'gold-steel-border gold-steel-border-slim mb-2.5 flex flex-wrap gap-1.5 rounded-xl border border-[var(--accent-gold-border)] bg-white/75 p-2.5 shadow-2xs';
+
+const PRESET_BTN_BASE_CLASS =
+  'gold-steel-border gold-steel-border-slim rounded-lg px-2.5 py-1 font-medium text-[11px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)]/50';
+
+const SUBMIT_BTN_CLASS =
+  'gold-steel-border gold-steel-border-slim w-full rounded-xl bg-[var(--accent-charcoal)] py-2.5 font-semibold text-sm text-white shadow-card transition-all hover:-translate-y-0.5 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50';
+
+const TH_CLASS =
+  'px-4 py-3 text-left font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider';
 
 function resolveMachineImageUrl(machine: Machine): string {
   const explicit = (machine.image_url ?? '').trim();
@@ -194,10 +210,8 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
           text: 'Machine booked in successfully!',
         });
 
-        // Clear local cache on successful commit
         clearDraft();
 
-        // Dispatch Inngest event for breakdown alert
         fetch('/api/engineering/breakdown-alert', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -214,51 +228,48 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      {/* Form */}
-      <div className="rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)] p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <ClipboardPlus className="h-5 w-5 text-violet-400" />
-            <h3 className="font-medium text-[var(--text-heading)] text-lg">Book In Machine</h3>
-          </div>
-
-          {/* Draft status indicator */}
-          {hasDraft && (
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/15 px-2 py-0.5 text-[11px] text-violet-400">
-                <Save className="h-3 w-3" />
-                Draft Cached
-              </span>
-              <button
-                type="button"
-                onClick={clearDraft}
-                title="Clear Draft"
-                className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-accent-red/10 hover:text-accent-red"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
-        </div>
-
+      {/* #14, #15, #16, #17, #18 Golden-Bordered Book-In Panel with Official Logo & Horizontal Separator */}
+      <GoldenPanel
+        variant="elevated"
+        showLogo
+        title="Book In Machine"
+        headingLevel="h3"
+        subtitle="Log workshop bay intake, machine SMR telemetry, and fault diagnostics"
+        icon={<EngineeringHydraulicWrenchIcon className="h-5 w-5 text-dept-engineering" />}
+        actions={
+          hasDraft ? (
+            <button
+              type="button"
+              onClick={clearDraft}
+              title="Clear Form"
+              aria-label="Clear saved form inputs"
+              className="rounded-lg border border-[var(--border-default)] bg-white/85 p-1.5 text-[var(--text-muted)] transition-colors hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-700"
+            >
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          ) : undefined
+        }
+      >
         {message && (
           <div
-            className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
+            role="status"
+            className={cn(
+              'mb-4 rounded-lg border px-4 py-3 font-medium text-sm',
               message.type === 'success'
-                ? 'border-accent-green/20 bg-accent-green/10 text-accent-green'
-                : 'border-accent-red/20 bg-accent-red/10 text-accent-red'
-            }`}
+                ? 'border-emerald-500/30 bg-emerald-500/12 text-emerald-800'
+                : 'border-rose-500/30 bg-rose-500/12 text-rose-800'
+            )}
           >
             {message.text}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Step 1: Machine ID Selector */}
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          {/* #16 Step 1: Machine ID Selector with Golden Border */}
           <div>
             <label
               htmlFor="machine-select"
-              className="mb-1.5 block font-medium text-[var(--text-secondary)] text-sm"
+              className="mb-1.5 block font-semibold text-[var(--text-heading)] text-sm"
             >
               Step 1 · Machine ID (Select Machine)
             </label>
@@ -267,7 +278,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
               required
               value={selectedMachineId}
               onChange={(e) => setSelectedMachineId(e.target.value)}
-              className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
+              className={GOLD_CONTROL_CLASS}
             >
               <option value="">— Choose a Machine ID —</option>
               {machines.map((m) => (
@@ -278,22 +289,19 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             </select>
           </div>
 
-          {/* Saved Machine Profile Card */}
+          {/* #15 Animated Golden-Border Saved Machine Profile Card */}
           {selectedMachine && (
-            <div
-              data-testid="selected-machine-profile"
-              className="flex flex-col gap-4 rounded-xl border border-violet-500/20 bg-violet-500/5 p-3.5 sm:flex-row sm:items-center"
-            >
+            <div data-testid="selected-machine-profile" className={MACHINE_PROFILE_CARD_CLASS}>
               <Image
                 src={resolveMachineImageUrl(selectedMachine)}
                 alt={selectedMachine.name}
                 width={160}
                 height={96}
-                className="h-24 w-40 shrink-0 rounded-lg border border-[var(--border-default)] object-cover"
+                className="gold-steel-border gold-steel-border-slim h-24 w-40 shrink-0 rounded-lg border border-[var(--accent-gold-border)] object-cover"
               />
               <div className="grid flex-1 grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
                 <div>
-                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                  <p className="font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                     Machine ID
                   </p>
                   <p className="font-semibold text-[var(--text-heading)] text-sm">
@@ -301,7 +309,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                  <p className="font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                     Fleet / Serial
                   </p>
                   <p className="font-medium text-[var(--text-heading)] text-sm">
@@ -309,7 +317,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                  <p className="font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                     Manufacturer
                   </p>
                   <p className="font-medium text-[var(--text-heading)] text-sm">
@@ -317,7 +325,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                  <p className="font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                     Machine Type
                   </p>
                   <p className="font-medium text-[var(--text-heading)] text-sm">
@@ -325,7 +333,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                  <p className="font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                     Site
                   </p>
                   <p className="font-medium text-[var(--text-heading)] text-sm">
@@ -333,10 +341,10 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                  <p className="font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                     Saved SMR Hours
                   </p>
-                  <p className="font-semibold text-[var(--text-heading)] text-sm">
+                  <p className="font-semibold text-[var(--text-heading)] text-sm tabular-nums">
                     {formatSavedSmr(selectedMachine)}
                   </p>
                 </div>
@@ -347,8 +355,8 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
           {/* Step 2: Date & Time */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 font-medium text-[var(--text-secondary)] text-sm">
-                <CalendarDays className="h-3.5 w-3.5" />
+              <label className="mb-1.5 flex items-center gap-1.5 font-semibold text-[var(--text-heading)] text-sm">
+                <CalendarDays className="h-3.5 w-3.5 text-accent-gold" aria-hidden="true" />
                 Step 2 · Date In
               </label>
               <input
@@ -357,12 +365,12 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                 aria-label="Date In"
                 value={dateIn}
                 onChange={(e) => setDateIn(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
+                className={GOLD_CONTROL_CLASS}
               />
             </div>
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 font-medium text-[var(--text-secondary)] text-sm">
-                <Clock className="h-3.5 w-3.5" />
+              <label className="mb-1.5 flex items-center gap-1.5 font-semibold text-[var(--text-heading)] text-sm">
+                <Clock className="h-3.5 w-3.5 text-accent-gold" aria-hidden="true" />
                 Time In
               </label>
               <input
@@ -371,37 +379,46 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                 aria-label="Time In"
                 value={timeIn}
                 onChange={(e) => setTimeIn(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
+                className={GOLD_CONTROL_CLASS}
               />
             </div>
           </div>
 
-          {/* Step 3: Breakdown Reason & Quick Presets */}
+          {/* #18 Step 3: Breakdown Reason & Golden-Bordered Quick Presets Setup */}
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label
                 htmlFor="breakdown-reason-input"
-                className="block font-medium text-[var(--text-secondary)] text-sm"
+                className="block font-semibold text-[var(--text-heading)] text-sm"
               >
                 Step 3 · Breakdown Reason
               </label>
-              <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
-                <Sparkles className="h-3 w-3 text-violet-400" />
+              <span className="flex items-center gap-1 font-medium text-[11px] text-[var(--text-secondary)]">
+                <Sparkles className="h-3 w-3 text-accent-gold" aria-hidden="true" />
                 Quick presets
               </span>
             </div>
 
-            <div className="mb-2 flex flex-wrap gap-1.5">
-              {COMMON_REASONS.map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setReason(r)}
-                  className="rounded-md border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-2 py-1 text-[11px] text-[var(--text-secondary)] transition-all hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-[var(--text-heading)]"
-                >
-                  {r}
-                </button>
-              ))}
+            <div data-testid="breakdown-quick-presets" className={PRESET_CONTAINER_CLASS}>
+              {COMMON_REASONS.map((r) => {
+                const isSelected = reason === r;
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => setReason(r)}
+                    className={cn(
+                      PRESET_BTN_BASE_CLASS,
+                      isSelected
+                        ? 'bg-[var(--accent-charcoal)] text-white shadow-2xs'
+                        : 'bg-white/95 text-[var(--text-heading)] hover:bg-[var(--accent-gold-subtle)]'
+                    )}
+                  >
+                    {r}
+                  </button>
+                );
+              })}
             </div>
 
             <textarea
@@ -411,92 +428,72 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Describe the issue or select a preset..."
-              className="w-full resize-none rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
+              className={cn(GOLD_CONTROL_CLASS, 'resize-none')}
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isPending}
-            className="w-full rounded-lg bg-violet-600 py-2.5 font-medium text-sm text-white shadow-card transition-colors hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <button type="submit" disabled={isPending} className={SUBMIT_BTN_CLASS}>
             {isPending ? 'Booking In...' : 'Book In Machine'}
           </button>
         </form>
-      </div>
+      </GoldenPanel>
 
-      {/* Active List */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-violet-400" />
-            <h3 className="font-medium text-[var(--text-heading)] text-lg">Active Breakdowns</h3>
-          </div>
-          <span className="text-[var(--text-secondary)] text-sm">
+      {/* Workshop Queue Panel (without removed standalone 'Active Breakdowns' h3) */}
+      <GoldenPanel
+        title="Workshop Bay Queue"
+        headingLevel="h4"
+        subtitle="Units currently checked into maintenance bays"
+        icon={<EngineeringWorkshopBayIcon className="h-5 w-5 text-accent-gold" />}
+        statusBadge={
+          <span className="rounded-full border border-[var(--accent-gold-border)] bg-[var(--accent-gold-subtle)] px-2.5 py-0.5 font-mono font-semibold text-[var(--text-heading)] text-xs">
             {activeBreakdowns.length} machines
           </span>
-        </div>
-
-        <div className="overflow-hidden rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)]">
-          {activeBreakdowns.length === 0 ? (
-            <div className="p-8 text-center text-[var(--text-secondary)] text-sm">
-              No active breakdowns. All machines operational.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-[var(--border-emphasis)] border-b">
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wide"
-                    >
-                      Fleet ID
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wide"
-                    >
-                      Machine
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wide"
-                    >
-                      Type
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wide"
-                    >
-                      Date In
-                    </th>
+        }
+        noBodyPadding
+      >
+        {activeBreakdowns.length === 0 ? (
+          <div className="p-8 text-center text-[var(--text-secondary)] text-sm">
+            No active breakdowns. All machines operational.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm" aria-label="Workshop bay queue">
+              <thead>
+                <tr className="border-[var(--border-default)] border-b bg-black/[0.02]">
+                  <th scope="col" className={TH_CLASS}>
+                    Fleet ID
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    Machine
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    Type
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    Date In
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-default)]">
+                {activeBreakdowns.map((b) => (
+                  <tr key={b.id} className="transition-colors hover:bg-white/60">
+                    <td className="px-4 py-3 font-mono font-semibold text-[var(--text-heading)]">
+                      {b.fleet_id}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-[var(--text-heading)]">
+                      {b.machine_name || b.fleet_id}
+                    </td>
+                    <td className="px-4 py-3 text-[var(--text-secondary)]">{b.machine_type}</td>
+                    <td className="whitespace-nowrap px-4 py-3 font-mono text-[var(--text-secondary)] text-xs">
+                      {b.date_in}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {activeBreakdowns.map((b) => (
-                    <tr
-                      key={b.id}
-                      className="border-[var(--border-emphasis)] border-b transition-colors last:border-0 hover:bg-[var(--bg-tertiary)]"
-                    >
-                      <td className="px-4 py-3 font-medium text-[var(--text-heading)]">
-                        {b.fleet_id}
-                      </td>
-                      <td className="px-4 py-3 text-[var(--text-heading)]">
-                        {b.machine_name || b.fleet_id}
-                      </td>
-                      <td className="px-4 py-3 text-[var(--text-muted)]">{b.machine_type}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-[var(--text-muted)]">
-                        {b.date_in}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </GoldenPanel>
     </div>
   );
 }

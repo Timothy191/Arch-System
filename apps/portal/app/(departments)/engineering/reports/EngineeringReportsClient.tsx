@@ -2,6 +2,7 @@
 
 /* cspell:ignore mttr */
 
+import { EngineeringHydraulicWrenchIcon } from '@repo/ui/engineering-icons';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
@@ -20,7 +21,6 @@ import {
   Loader2,
   MessageSquare,
   Printer,
-  Wrench,
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -197,8 +197,9 @@ export function EngineeringReportsClient({ payload }: EngineeringReportsClientPr
       <GlassCard variant="window" className="no-print p-5">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
-            <div className="flex items-center gap-2">
-              <Wrench className="h-5 w-5 text-[var(--accent-blue)]" aria-hidden="true" />
+            <div className="flex items-center gap-2.5">
+              <Logo className="h-6 w-6 text-accent-gold" />
+              <EngineeringHydraulicWrenchIcon className="h-5 w-5 text-dept-engineering" />
               <h2 className="font-bold text-2xl text-[var(--text-heading)]">
                 Engineering Reports &amp; Dispatch Suite
               </h2>

@@ -15,6 +15,7 @@ export * from './components/FormFields';
 // Composite & Industrial UI Primitives
 export * from './components/GlassCard';
 export * from './components/GlobePins';
+export * from './components/GoldenPanel';
 export * from './components/GoldenSignalPanel';
 export * from './components/HeroCardContent';
 export * from './components/HeroRotator';
@@ -87,6 +88,7 @@ export * from './components/ui/menu';
 export * from './components/ui/metric-card';
 export * from './components/ui/PrecisionInput';
 export * from './components/ui/pagination';
+export * from './components/ui/professional-dropdown-menu';
 export * from './components/ui/scroll-area';
 export * from './components/ui/select';
 export * from './components/ui/separator';
@@ -100,5 +102,6 @@ export * from './components/ui/telemetry-chart';
 export * from './hooks/useAutoSave';
 // Central Iconography Registry
 export * from './icons/department-icons';
+export * from './icons/EngineeringIcons';
 // Utilities & Hooks
 export * from './lib/utils';

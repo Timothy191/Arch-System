@@ -56,6 +56,10 @@ module.exports = {
     '^@repo/ui/Divider$': '<rootDir>/../../packages/ui/src/components/Divider.tsx',
     '^@repo/ui/BorderBox$': '<rootDir>/../../packages/ui/src/components/BorderBox.tsx',
     '^@repo/ui/GlassCard$': '<rootDir>/../../packages/ui/src/components/GlassCard.tsx',
+    '^@repo/ui/GoldenPanel$': '<rootDir>/../../packages/ui/src/components/GoldenPanel.tsx',
+    '^@repo/ui/ProfessionalDropdownMenu$':
+      '<rootDir>/../../packages/ui/src/components/ui/professional-dropdown-menu.tsx',
+    '^@repo/ui/engineering-icons$': '<rootDir>/../../packages/ui/src/icons/EngineeringIcons.tsx',
     '^@repo/ui/AnimeStagger$': '<rootDir>/../../packages/ui/src/components/motion/AnimeStagger.tsx',
     '^@repo/ui/DepartmentFilterToolbar$':
       '<rootDir>/../../packages/ui/src/components/DepartmentFilterToolbar.tsx',

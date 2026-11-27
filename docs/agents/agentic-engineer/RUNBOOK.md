@@ -38,6 +38,7 @@ health run; manual ledger edits are prohibited because they break the hash chain
 - Keep runtime state in `.ci-local/agentic-engineer/`; never commit `tasks.json`,
   heartbeats, alerts, or the ledger.
 - Regenerate the catalog after every component change and commit it alongside the change.
+- When `AGENT_TRACER.md` is updated alongside portal or library feature deliveries, record or verify the corresponding operational runbook/catalog state so `docs.change-sync` remains at 100%.
 - Prune completed tasks with `coordinate list` review; completed records remain useful for
   audit but may be archived with the repository's normal hygiene process.
 - Review thresholds quarterly; raising the documentation threshold above 100 is invalid.

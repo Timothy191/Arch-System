@@ -6,6 +6,19 @@
 
 <!-- cspell:ignore commandcode autohand Autohand styleguides EOVERRIDE PLAYWRIGHT_MISE_DIR btrim unevidenced fastapi agentsroom typegen fulcra uvx -->
 
+## [2026-11-27T12:16:00+02:00] - Engineering Tire Management & Breakdowns 18-Item Design Feedback Overhaul
+
+- **Design System Primitives (`@repo/ui` & `@repo/theme`)**:
+  - Created `GoldenPanel` (`packages/ui/src/components/GoldenPanel.tsx`) with CVA variants (`default`, `elevated`, `interactive`, `subtle`), official `<Logo />` integration, metallic gold horizontal separator, collapsible body, and animated interactive header item drawers.
+  - Created `ProfessionalDropdownMenu` (`packages/ui/src/components/ui/professional-dropdown-menu.tsx`) supporting hybrid click + hover triggers (`65ms` open / `<100ms` latency), nested multi-level sub-menus, icons, dividers, disabled states, selected item indicators, and WCAG 2.1 AA keyboard navigation.
+  - Created `EngineeringIcons` (`packages/ui/src/icons/EngineeringIcons.tsx`) and static SVG schematics (`apps/portal/public/images/engineering/`) across Engineering Hub, Tire Management, Breakdowns, Daily Log, and Reports.
+  - Extended `packages/theme/src/css/cards.css` golden-steel border rules to `select.gold-steel-border` and `textarea.gold-steel-border` (`89.46 KB / 115 KB` CSS budget).
+- **Tire Management (`/engineering/tire-management`, Items #1–#5)**:
+  - Upgraded page header, Recent Tyre Activity ledger, and `TireFleetStatusPanel` (`TireFleetStatusPanel.tsx`) to full `GoldenPanel` setups with `ProfessionalDropdownMenu` filters and Engineering SVG KPI badges.
+- **Breakdown Management (`/engineering/breakdowns`, Items #6–#18)**:
+  - Added animated `GoldenPanel` header drawers (`Fleet Health Pulse`, `SLA Configuration`), removed `AI Diagnostics` tab, upgraded tab bar, `BreakdownStats`, and `BreakdownCharts` (`Fleet Health Distribution`, `Reliability Analytics`) to golden-bordered light-glass panels, removed `"No records found."`, standalone `"Active Breakdowns"` `h3`, and `"Draft Cached"` pill, integrated `<Logo />` + horizontal separator on `"Book In Machine"`, and applied animated golden borders to `#machine-select`, `selected-machine-profile`, and `COMMON_REASONS` quick presets.
+- **Documentation**: Authored `docs/architecture/engineering-panel-and-dropdown-spec.md` and `docs/architecture/engineering-color-and-animation-schema.md`.
+
 ## [2026-11-26T13:40:00+02:00] - Production Hardening & Model Accuracy/Token-Drift Audit (uncommitted)
 
 - **Scope & approval**: Phase 1 safe-first review and Phase 2 both approved ("Proceed (Recommended)"); all pre-existing uncommitted user work preserved; no commit/push/merge.

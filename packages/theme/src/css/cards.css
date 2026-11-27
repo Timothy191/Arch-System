@@ -390,13 +390,15 @@
   opacity: 1;
 }
 
-input.gold-steel-border {
+input.gold-steel-border,
+select.gold-steel-border,
+textarea.gold-steel-border {
   border: var(--gold-border-width, 1.75px) solid rgba(122, 84, 6, 0.92);
   box-shadow:
     0 0 0 1px rgba(146, 102, 12, 0.65),
     inset 0 1px 0 rgba(255, 246, 204, 0.75);
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+    linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)),
     linear-gradient(135deg, #5c4004 0%, #8c630c 25%, #f6dc7a 50%, #8c630c 75%, #5c4004 100%);
   background-origin: border-box;
   background-clip: padding-box, border-box;
@@ -407,7 +409,11 @@ input.gold-steel-border {
 }
 
 input.gold-steel-border:hover,
-input.gold-steel-border:focus {
+input.gold-steel-border:focus,
+select.gold-steel-border:hover,
+select.gold-steel-border:focus,
+textarea.gold-steel-border:hover,
+textarea.gold-steel-border:focus {
   animation: gold-shimmer 1.8s ease-in-out infinite;
 }
 
@@ -417,7 +423,11 @@ input.gold-steel-border:focus {
   .stat-chip-shine.shining::before,
   .chip-elevated-3d.shining::after,
   input.gold-steel-border:hover,
-  input.gold-steel-border:focus {
+  input.gold-steel-border:focus,
+  select.gold-steel-border:hover,
+  select.gold-steel-border:focus,
+  textarea.gold-steel-border:hover,
+  textarea.gold-steel-border:focus {
     animation: none;
     background-position: 50% 50%;
   }

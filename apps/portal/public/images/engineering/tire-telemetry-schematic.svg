@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" fill="none" role="img" aria-labelledby="eng-tire-svg-title">
+  <title id="eng-tire-svg-title">Arch OS Engineering Tire Telemetry Schematic</title>
+  <rect x="2" y="2" width="316" height="116" rx="16" fill="#FFFFFF" fill-opacity="0.72" stroke="#D4AF37" stroke-opacity="0.55" stroke-width="1.75"/>
+  <circle cx="64" cy="60" r="38" stroke="#1D1D1F" stroke-opacity="0.82" stroke-width="3"/>
+  <circle cx="64" cy="60" r="21" stroke="#D4AF37" stroke-width="2.25"/>
+  <circle cx="64" cy="60" r="6" fill="#D4AF37"/>
+  <path d="M64 16v8M64 96v8M20 60h8M100 60h8M33 29l6 6M89 85l6 6M95 29l-6 6M39 85l-6 6" stroke="#7C3AED" stroke-width="2" stroke-linecap="round"/>
+  <path d="M132 82L158 52L182 68L214 34L244 56L288 28" stroke="#10B981" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M132 94H292" stroke="#D4AF37" stroke-opacity="0.5" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <circle cx="214" cy="34" r="4.5" fill="#D4AF37"/>
+  <circle cx="288" cy="28" r="4.5" fill="#10B981"/>
+</svg>

@@ -1,6 +1,12 @@
 'use client';
 
-import { BarChart, Card, type Color, DonutChart, Title } from '@tremor/react';
+import {
+  EngineeringMountedWheelIcon,
+  EngineeringReliabilityPulseIcon,
+} from '@repo/ui/engineering-icons';
+import { GoldenPanel } from '@repo/ui/GoldenPanel';
+import { cn } from '@repo/ui/lib/utils';
+import { BarChart, type Color, DonutChart } from '@tremor/react';
 import { ShieldAlert } from 'lucide-react';
 import type { MTBFDataPoint, ServiceTrigger } from './types';
 
@@ -17,13 +23,20 @@ interface BreakdownChartsProps {
   serviceTriggers?: ServiceTrigger[];
 }
 
+const LEGEND_PILL_CLASS =
+  'inline-flex items-center gap-1.5 rounded-full border border-[var(--border-default)] bg-white/85 px-2.5 py-1 font-medium text-[var(--text-heading)] text-xs shadow-2xs';
+
+const TRIGGER_CARD_CLASS =
+  'gold-steel-border gold-steel-border-slim flex flex-col justify-between space-y-2 rounded-xl border border-white/40 bg-white/85 p-3.5 shadow-card transition-transform duration-200 hover:-translate-y-0.5';
+
+const STATUS_ROW_CLASS =
+  'flex items-center justify-between rounded-lg border border-[var(--border-default)] bg-white/75 px-3 py-2 text-xs transition-colors hover:bg-white';
+
 export function BreakdownCharts({
   statusData,
-  mttrData = [],
   mtbfData = [],
   serviceTriggers = [],
 }: BreakdownChartsProps) {
-  // Use only real MTBF data when available
   const reliabilityChartData = mtbfData.map((d) => ({
     category: d.category,
     'MTTR (hrs)': d.mttrHours,
@@ -34,83 +47,78 @@ export function BreakdownCharts({
     <div className="space-y-6">
       {/* Automated Preventative Service Triggers */}
       {serviceTriggers.length > 0 && (
-        <div className="space-y-3 rounded-xl border border-accent-amber/25 bg-accent-amber/10 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-accent-amber" />
-              <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-                Automated Preventative Service Triggers ({serviceTriggers.length} Active)
-              </h3>
-            </div>
-            <span className="rounded-full bg-accent-amber/20 px-2 py-0.5 font-semibold text-[11px] text-accent-amber uppercase tracking-wider">
+        <GoldenPanel
+          variant="subtle"
+          title={`Automated Preventative Service Triggers (${serviceTriggers.length} Active)`}
+          headingLevel="h3"
+          subtitle="High-frequency workshop interventions flagged for scheduled bay overhaul"
+          icon={<ShieldAlert className="h-5 w-5 text-amber-700" aria-hidden="true" />}
+          statusBadge={
+            <span className="rounded-full border border-amber-500/30 bg-amber-500/12 px-2.5 py-0.5 font-semibold text-[11px] text-amber-800 uppercase tracking-wider">
               High Priority
             </span>
-          </div>
-
+          }
+        >
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {serviceTriggers.map((trigger) => (
-              <div
-                key={trigger.id}
-                className="flex flex-col justify-between space-y-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-3 shadow-card"
-              >
+              <div key={trigger.id} className={TRIGGER_CARD_CLASS}>
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-[var(--text-heading)] text-xs">
                       {trigger.machine_name}
                     </span>
                     <span
-                      className={`rounded px-1.5 py-0.5 font-medium text-[10px] ${
+                      className={cn(
+                        'rounded-full px-2 py-0.5 font-semibold text-[10px]',
                         trigger.severity === 'high'
-                          ? 'bg-accent-red/15 text-accent-red'
-                          : 'bg-accent-amber/15 text-accent-amber'
-                      }`}
+                          ? 'bg-rose-500/12 text-rose-800'
+                          : 'bg-amber-500/12 text-amber-800'
+                      )}
                     >
                       {trigger.severity.toUpperCase()}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+                  <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
                     {trigger.machine_type} • {trigger.reason}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between border-[var(--border-default)] border-t pt-2 text-[11px]">
                   <span className="font-mono text-[var(--text-muted)]">{trigger.metric_value}</span>
-                  <span className="font-medium text-[var(--accent-blue)]">
+                  <span className="font-semibold text-[var(--text-heading)]">
                     {trigger.recommended_action}
                   </span>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </GoldenPanel>
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Reliability Metrics: MTTR vs Predictive MTBF */}
-        <Card className="border-[var(--border-default)] bg-[var(--bg-primary)] p-5 shadow-none lg:col-span-2">
-          <div className="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-            <div>
-              <Title className="font-semibold text-[var(--text-heading)] text-sm">
-                Reliability Analytics: MTTR vs Predictive MTBF (Hours)
-              </Title>
-              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
-                Mean Time to Repair vs Mean Time Between Failures by equipment category.
-              </p>
+        {/* #11 Reliability Analytics: MTTR vs Predictive MTBF (Hours) */}
+        <GoldenPanel
+          variant="interactive"
+          className="lg:col-span-2"
+          title="Reliability Analytics: MTTR vs Predictive MTBF (Hours)"
+          headingLevel="h3"
+          subtitle="Mean Time to Repair vs Mean Time Between Failures by equipment category."
+          icon={<EngineeringReliabilityPulseIcon className="h-5 w-5 text-accent-gold" />}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={LEGEND_PILL_CLASS}>
+                <span className="h-2.5 w-2.5 rounded-sm bg-sky-600" aria-hidden="true" />
+                <span>MTTR (Repair)</span>
+              </span>
+              <span className={LEGEND_PILL_CLASS}>
+                <span className="h-2.5 w-2.5 rounded-sm bg-emerald-600" aria-hidden="true" />
+                <span>MTBF (Uptime)</span>
+              </span>
             </div>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-1.5">
-                <div className="h-2.5 w-2.5 rounded bg-accent-blue" />
-                <span className="text-[var(--text-muted)]">MTTR (Repair)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-2.5 w-2.5 rounded bg-accent-green" />
-                <span className="text-[var(--text-muted)]">MTBF (Uptime)</span>
-              </div>
-            </div>
-          </div>
-
+          }
+        >
           <BarChart
-            className="mt-4 h-72"
+            className="mt-2 h-72"
             data={reliabilityChartData}
             index="category"
             categories={['MTTR (hrs)', 'MTBF (hrs)']}
@@ -119,18 +127,18 @@ export function BreakdownCharts({
             showLegend={false}
             showGridLines={true}
           />
-        </Card>
+        </GoldenPanel>
 
-        {/* Fleet Health Distribution */}
-        <Card className="border-[var(--border-default)] bg-[var(--bg-primary)] p-5 shadow-none">
-          <Title className="mb-1 font-semibold text-[var(--text-heading)] text-sm">
-            Fleet Health Distribution
-          </Title>
-          <p className="mb-4 text-[var(--text-muted)] text-xs">
-            Proportion of active operational fleet vs broken-down units.
-          </p>
+        {/* #10 Fleet Health Distribution */}
+        <GoldenPanel
+          variant="interactive"
+          title="Fleet Health Distribution"
+          headingLevel="h3"
+          subtitle="Proportion of active operational fleet vs broken-down units."
+          icon={<EngineeringMountedWheelIcon className="h-5 w-5 text-emerald-700" />}
+        >
           <DonutChart
-            className="mt-2 h-60"
+            className="mt-1 h-56"
             data={statusData}
             category="value"
             index="name"
@@ -140,18 +148,24 @@ export function BreakdownCharts({
           />
           <div className="mt-4 flex flex-col gap-2">
             {statusData.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className={`h-2 w-2 rounded-full ${idx === 0 ? 'bg-accent-green' : 'bg-accent-red'}`}
+              <div key={item.name} className={STATUS_ROW_CLASS}>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      'h-2.5 w-2.5 rounded-full',
+                      idx === 0 ? 'bg-emerald-600' : 'bg-rose-600'
+                    )}
+                    aria-hidden="true"
                   />
-                  <span className="text-[var(--text-secondary)]">{item.name}</span>
+                  <span className="font-medium text-[var(--text-heading)]">{item.name}</span>
                 </div>
-                <span className="font-medium text-[var(--text-heading)]">{item.value} units</span>
+                <span className="font-mono font-semibold text-[var(--text-heading)]">
+                  {item.value} units
+                </span>
               </div>
             ))}
           </div>
-        </Card>
+        </GoldenPanel>
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 'use client';
 
+import { EngineeringReliabilityPulseIcon } from '@repo/ui/engineering-icons';
 import { GlassCard } from '@repo/ui/GlassCard';
+import { GoldenPanel } from '@repo/ui/GoldenPanel';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -127,43 +129,38 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
   return (
     <div className="space-y-6">
       {/* Header & Actions */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <ClipboardList className="h-6 w-6 text-[var(--accent-blue)]" aria-hidden="true" />
-            <h2 className="font-bold text-2xl text-[var(--text-heading)]">
-              24-Hour Machine Breakdowns Daily Log
-            </h2>
+      <GoldenPanel
+        variant="elevated"
+        showLogo
+        headingLevel="h2"
+        title="24-Hour Machine Breakdowns Daily Log"
+        subtitle={`Rolling 24-hour breakdown activity report & shift log for ${report.today} (${report.kpis.activeMachinesCount} active fleet units monitored)`}
+        icon={<EngineeringReliabilityPulseIcon className="h-6 w-6 text-dept-engineering" />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/engineering" className={ACTION_BUTTON_CLASS}>
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              Engineering Hub
+            </Link>
+            <Link href="/engineering/breakdowns" className={ACTION_BUTTON_CLASS}>
+              <Wrench className="h-3.5 w-3.5 text-accent-red" aria-hidden="true" />
+              Manage Breakdowns
+            </Link>
+            <button type="button" onClick={handlePrint} className={ACTION_BUTTON_CLASS}>
+              <Printer className="h-3.5 w-3.5" aria-hidden="true" />
+              Print Report
+            </button>
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-charcoal)] px-3 py-1.5 font-medium text-white text-xs shadow-2xs transition-opacity hover:opacity-90"
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden="true" />
+              Export CSV
+            </button>
           </div>
-          <p className="mt-1 text-[var(--text-muted)] text-sm">
-            Rolling 24-hour breakdown activity report &amp; shift log for {report.today} (
-            {report.kpis.activeMachinesCount} active fleet units monitored)
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/engineering" className={ACTION_BUTTON_CLASS}>
-            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-            Engineering Hub
-          </Link>
-          <Link href="/engineering/breakdowns" className={ACTION_BUTTON_CLASS}>
-            <Wrench className="h-3.5 w-3.5 text-accent-red" aria-hidden="true" />
-            Manage Breakdowns
-          </Link>
-          <button type="button" onClick={handlePrint} className={ACTION_BUTTON_CLASS}>
-            <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-            Print Report
-          </button>
-          <button
-            type="button"
-            onClick={handleExportCsv}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-medium text-white text-xs shadow-2xs transition-opacity hover:opacity-90"
-          >
-            <Download className="h-3.5 w-3.5" aria-hidden="true" />
-            Export CSV
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* KPI Strip */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">

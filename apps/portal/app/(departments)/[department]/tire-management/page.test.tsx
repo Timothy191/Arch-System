@@ -156,6 +156,9 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
     render(jsx);
 
     expect(screen.getByText('Tire Management')).toBeInTheDocument();
+    expect(screen.getByText('Tire Fleet Status')).toBeInTheDocument();
+    expect(screen.getByTestId('tire-activity-filter-dropdown')).toBeInTheDocument();
+    expect(screen.getByTestId('fleet-status-filter-dropdown')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument(); // Total tires
     expect(screen.getByText('2')).toBeInTheDocument(); // Installed active
     expect(screen.getAllByText('1').length).toBeGreaterThan(0); // Inventory / Spares and Critical alerts

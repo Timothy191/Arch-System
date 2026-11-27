@@ -2,8 +2,10 @@ import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { BorderBox } from '@repo/ui/BorderBox';
 import { Divider } from '@repo/ui/Divider';
+import { EngineeringTireTreadIcon, EngineeringWorkshopBayIcon } from '@repo/ui/engineering-icons';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { AlertTriangle, ArrowRight, CircleDot, ClipboardList, Cpu, Wrench } from 'lucide-react';
+import { GoldenPanel } from '@repo/ui/GoldenPanel';
+import { ArrowRight, ClipboardList, Cpu, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import { withCache } from '@/lib/cache-utils';
 import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
@@ -191,32 +193,34 @@ export default async function EngineeringDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-semibold text-2xl text-[var(--text-heading)]">Engineering Hub</h2>
-          <p className="mt-1 text-[var(--text-muted)] text-sm">
-            Breakdowns, tire management, fleet availability &amp; maintenance reporting
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/engineering/daily-log" className={QUICK_LINK_CLASS}>
-            <ClipboardList className="h-3.5 w-3.5 text-[var(--accent-blue)]" aria-hidden="true" />
-            24h Daily Log
-          </Link>
-          <Link href="/engineering/machines" className={QUICK_LINK_CLASS}>
-            <Cpu className="h-3.5 w-3.5 text-accent-green" aria-hidden="true" />
-            Machine Panels
-          </Link>
-          <p className="ml-1 text-[var(--text-muted)] text-sm">
-            {new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-        </div>
-      </div>
+      <GoldenPanel
+        variant="elevated"
+        showLogo
+        headingLevel="h2"
+        title="Engineering Hub"
+        subtitle="Breakdowns, tire management, fleet availability & maintenance reporting"
+        icon={<EngineeringWorkshopBayIcon className="h-6 w-6 text-dept-engineering" />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/engineering/daily-log" className={QUICK_LINK_CLASS}>
+              <ClipboardList className="h-3.5 w-3.5 text-[var(--accent-blue)]" aria-hidden="true" />
+              24h Daily Log
+            </Link>
+            <Link href="/engineering/machines" className={QUICK_LINK_CLASS}>
+              <Cpu className="h-3.5 w-3.5 text-accent-green" aria-hidden="true" />
+              Machine Panels
+            </Link>
+            <p className="ml-1 text-[var(--text-muted)] text-xs">
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+          </div>
+        }
+      />
 
       <Divider variant="dotted" label="FLEET HEALTH & TELEMETRY" />
 
@@ -228,8 +232,8 @@ export default async function EngineeringDashboardPage() {
             <GlassCard className="h-full cursor-pointer transition-colors hover:bg-[var(--bg-secondary)]">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-xl bg-accent-red/10 p-2.5 text-accent-red">
-                    <AlertTriangle className="h-5 w-5" />
+                  <div className="rounded-xl border border-accent-red/20 bg-accent-red/10 p-2.5 text-accent-red">
+                    <EngineeringWorkshopBayIcon className="h-5 w-5" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-[var(--text-heading)] text-lg">Breakdowns</h3>
@@ -293,8 +297,8 @@ export default async function EngineeringDashboardPage() {
             <GlassCard className="h-full cursor-pointer transition-colors hover:bg-[var(--bg-secondary)]">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-xl bg-[var(--accent-blue)]/10 p-2.5 text-[var(--accent-blue)]">
-                    <CircleDot className="h-5 w-5" />
+                  <div className="rounded-xl border border-[var(--accent-gold-border)] bg-[var(--accent-gold-subtle)] p-2.5 text-accent-gold">
+                    <EngineeringTireTreadIcon className="h-5 w-5" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-[var(--text-heading)] text-lg">

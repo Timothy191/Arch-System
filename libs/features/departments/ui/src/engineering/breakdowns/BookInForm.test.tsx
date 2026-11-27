@@ -89,7 +89,11 @@ describe('BookInForm', () => {
     createBreakdown.mockResolvedValue(undefined);
   });
 
-  it('renders form fields and book in button', () => {
+  it('renders form fields, official logo separator header, golden presets, and omits Draft Cached badge', () => {
+    localStorage.setItem(
+      'arch_breakdown_bookin_draft',
+      JSON.stringify({ selectedMachineId: 'm-1', reason: 'Hydraulic leak' })
+    );
     render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
 
     expect(screen.getByLabelText(/Machine ID/i)).toBeInTheDocument();
@@ -98,6 +102,9 @@ describe('BookInForm', () => {
     expect(screen.getByLabelText(/Time In/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Describe the issue/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Book In Machine/i })).toBeInTheDocument();
+    expect(screen.getByTestId('breakdown-quick-presets')).toHaveClass('gold-steel-border');
+    expect(screen.queryByText('Draft Cached')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Active Breakdowns' })).not.toBeInTheDocument();
   });
 
   it("shows 'No active breakdowns' when activeBreakdowns is empty", () => {

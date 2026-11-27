@@ -3,17 +3,24 @@
 /* cspell:ignore Tyre tyre */
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { GoldenPanel } from '@repo/ui/GoldenPanel';
 import { cn } from '@repo/ui/lib/utils';
+import {
+  type ProfessionalDropdownItem,
+  ProfessionalDropdownMenu,
+} from '@repo/ui/ProfessionalDropdownMenu';
 import {
   AlertTriangle,
   ArrowLeftRight,
   CheckCircle2,
   ClipboardCheck,
+  Filter,
   Gauge,
   History,
   Layers,
   PlusCircle,
   Search,
+  SlidersHorizontal,
   Trash2,
   Wrench,
   X,
@@ -174,6 +181,7 @@ export function TireActivityManagerClient({
   const [formError, setFormError] = useState<string | null>(null);
 
   const [ledgerFilter, setLedgerFilter] = useState<'all' | TireActivityType>('all');
+  const [conditionFilter, setConditionFilter] = useState<'all' | TireConditionStatus>('all');
   const [ledgerSearch, setLedgerSearch] = useState<string>('');
 
   const machineInstalledTires = useMemo(() => {
@@ -351,12 +359,98 @@ export function TireActivityManagerClient({
       if (ledgerFilter !== 'all' && activityType !== ledgerFilter) {
         return false;
       }
+      if (conditionFilter !== 'all' && entry.condition_status !== conditionFilter) {
+        return false;
+      }
       if (!query) return true;
       const hay =
         `${entry.serial_number} ${entry.brand} ${entry.machineName} ${entry.position} ${entry.notes ?? ''} ${entry.inspection_date}`.toLowerCase();
       return hay.includes(query);
     });
-  }, [recentActivities, ledgerFilter, ledgerSearch]);
+  }, [recentActivities, ledgerFilter, conditionFilter, ledgerSearch]);
+
+  const activeLedgerFilterLabel: Record<'all' | TireActivityType, string> = {
+    all: 'All Activities',
+    removal: 'Removals',
+    replacement: 'Replacements',
+    installation: 'Installations',
+    inspection: 'Inspections',
+  };
+
+  const ledgerDropdownItems: readonly ProfessionalDropdownItem[] = [
+    {
+      id: 'act-all',
+      label: 'All Activities',
+      description: 'Show full tyre inspection & changeout ledger',
+      badge: recentActivities.length,
+      icon: <History className="h-3.5 w-3.5" />,
+      selected: ledgerFilter === 'all' && conditionFilter === 'all',
+      onSelect: () => {
+        setLedgerFilter('all');
+        setConditionFilter('all');
+      },
+    },
+    {
+      id: 'act-removal',
+      label: 'Removals',
+      icon: <Trash2 className="h-3.5 w-3.5" />,
+      selected: ledgerFilter === 'removal',
+      onSelect: () => setLedgerFilter('removal'),
+    },
+    {
+      id: 'act-replacement',
+      label: 'Replacements',
+      icon: <ArrowLeftRight className="h-3.5 w-3.5" />,
+      selected: ledgerFilter === 'replacement',
+      onSelect: () => setLedgerFilter('replacement'),
+    },
+    {
+      id: 'act-installation',
+      label: 'Installations',
+      icon: <Layers className="h-3.5 w-3.5" />,
+      selected: ledgerFilter === 'installation',
+      onSelect: () => setLedgerFilter('installation'),
+    },
+    {
+      id: 'act-inspection',
+      label: 'Inspections',
+      icon: <ClipboardCheck className="h-3.5 w-3.5" />,
+      selected: ledgerFilter === 'inspection',
+      onSelect: () => setLedgerFilter('inspection'),
+    },
+    {
+      id: 'cond-submenu',
+      label: 'Filter by Condition',
+      icon: <SlidersHorizontal className="h-3.5 w-3.5" />,
+      dividerBefore: true,
+      subItems: [
+        {
+          id: 'cond-all',
+          label: 'Any Condition',
+          selected: conditionFilter === 'all',
+          onSelect: () => setConditionFilter('all'),
+        },
+        {
+          id: 'cond-good',
+          label: 'Good Condition',
+          selected: conditionFilter === 'good',
+          onSelect: () => setConditionFilter('good'),
+        },
+        {
+          id: 'cond-warning',
+          label: 'Warning (<25mm)',
+          selected: conditionFilter === 'warning',
+          onSelect: () => setConditionFilter('warning'),
+        },
+        {
+          id: 'cond-critical',
+          label: 'Critical (<15mm)',
+          selected: conditionFilter === 'critical',
+          onSelect: () => setConditionFilter('critical'),
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -843,18 +937,31 @@ export function TireActivityManagerClient({
         </GlassCard>
       )}
 
-      {/* Recent Tyre Activity & Removal/Replacement Ledger */}
-      <div className="space-y-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <History className="h-4 w-4 text-[var(--accent-blue)]" aria-hidden="true" />
-            <h3 className="font-semibold text-[var(--text-heading)] text-lg">
-              Recent Tyre Activity &amp; Removal/Replacement Ledger
-            </h3>
-          </div>
-
+      {/* #3 & #5 Recent Tyre Activity & Removal/Replacement Ledger GoldenPanel */}
+      <GoldenPanel
+        title="Recent Tyre Activity & Removal/Replacement Ledger"
+        headingLevel="h3"
+        subtitle="Immutable workshop ledger of tyre removals, replacements, spare installations, and inspections"
+        icon={<History className="h-5 w-5 text-accent-gold" aria-hidden="true" />}
+        statusBadge={
+          <span className="rounded-full border border-[var(--accent-gold-border)] bg-[var(--accent-gold-subtle)] px-2.5 py-0.5 font-mono font-semibold text-[11px] text-[var(--text-heading)]">
+            {filteredActivities.length} Events
+          </span>
+        }
+        collapsible
+        noBodyPadding
+        actions={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded-lg border border-[var(--border-default)] bg-white p-0.5">
+            <ProfessionalDropdownMenu
+              testId="tire-activity-filter-dropdown"
+              ariaLabel="Filter tyre activity ledger"
+              triggerLabel={activeLedgerFilterLabel[ledgerFilter]}
+              triggerIcon={<Filter className="h-3.5 w-3.5" />}
+              triggerBadge={conditionFilter !== 'all' ? conditionFilter.toUpperCase() : undefined}
+              items={ledgerDropdownItems}
+            />
+
+            <div className="hidden rounded-lg border border-[var(--accent-gold-border)] bg-white/85 p-0.5 xl:inline-flex">
               {(
                 [
                   { id: 'all', label: 'All' },
@@ -871,7 +978,7 @@ export function TireActivityManagerClient({
                   className={cn(
                     FILTER_PILL_BASE,
                     ledgerFilter === pill.id
-                      ? 'bg-[var(--accent-blue)] text-white'
+                      ? 'bg-[var(--accent-charcoal)] text-white shadow-2xs'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                   )}
                 >
@@ -891,128 +998,121 @@ export function TireActivityManagerClient({
                 placeholder="Search serial, machine..."
                 value={ledgerSearch}
                 onChange={(e) => setLedgerSearch(e.target.value)}
-                className="rounded-lg border border-[var(--border-default)] bg-white py-1.5 pr-3 pl-8 text-xs focus:border-[var(--accent-blue)] focus:outline-none"
+                className="gold-steel-border gold-steel-border-slim rounded-lg py-1.5 pr-3 pl-8 text-[var(--text-heading)] text-xs focus:outline-none"
               />
             </div>
           </div>
-        </div>
+        }
+      >
+        {filteredActivities.length === 0 ? (
+          <div className="py-8 text-center text-[var(--text-muted)] text-xs">
+            No tyre removal, replacement, or inspection events match the active filter.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table
+              className="w-full text-left text-sm"
+              aria-label="Recent tyre activity and removal replacement ledger"
+            >
+              <thead>
+                <tr className="border-[var(--border-default)] border-b bg-black/[0.02]">
+                  <th scope="col" className={TH_CLASS}>
+                    Date
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    Activity
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    Tyre Serial
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    Machine / Position
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    Tread / PSI
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    Condition
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    SMU Hours
+                  </th>
+                  <th scope="col" className={TH_CLASS}>
+                    Notes
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-default)]">
+                {filteredActivities.map((entry) => {
+                  const badge =
+                    ACTIVITY_BADGE_MAP[entry.activityType || classifyTireActivityType(entry.notes)];
+                  const condBadge =
+                    CONDITION_BADGE_MAP[entry.condition_status] ?? 'bg-zinc-500/10 text-zinc-700';
 
-        <GlassCard className="overflow-hidden p-0">
-          {filteredActivities.length === 0 ? (
-            <div className="py-8 text-center text-[var(--text-muted)] text-xs">
-              No tyre removal, replacement, or inspection events match the active filter.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table
-                className="w-full text-left text-sm"
-                aria-label="Recent tyre activity and removal replacement ledger"
-              >
-                <thead>
-                  <tr className="border-[var(--border-default)] border-b bg-black/[0.02]">
-                    <th scope="col" className={TH_CLASS}>
-                      Date
-                    </th>
-                    <th scope="col" className={TH_CLASS}>
-                      Activity
-                    </th>
-                    <th scope="col" className={TH_CLASS}>
-                      Tyre Serial
-                    </th>
-                    <th scope="col" className={TH_CLASS}>
-                      Machine / Position
-                    </th>
-                    <th scope="col" className={TH_CLASS}>
-                      Tread / PSI
-                    </th>
-                    <th scope="col" className={TH_CLASS}>
-                      Condition
-                    </th>
-                    <th scope="col" className={TH_CLASS}>
-                      SMU Hours
-                    </th>
-                    <th scope="col" className={TH_CLASS}>
-                      Notes
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border-default)]">
-                  {filteredActivities.map((entry) => {
-                    const badge =
-                      ACTIVITY_BADGE_MAP[
-                        entry.activityType || classifyTireActivityType(entry.notes)
-                      ];
-                    const condBadge =
-                      CONDITION_BADGE_MAP[entry.condition_status] ?? 'bg-zinc-500/10 text-zinc-700';
-
-                    return (
-                      <tr key={entry.id} className="transition-colors hover:bg-black/[0.01]">
-                        <td className="px-4 py-3 font-mono text-[var(--text-secondary)] text-xs">
-                          {entry.inspection_date}
-                        </td>
-                        <td className="px-4 py-3 text-xs">
-                          <span
-                            className={cn(
-                              'inline-flex rounded-full px-2 py-0.5 font-semibold text-[11px]',
-                              badge.className
-                            )}
-                          >
-                            {badge.label}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs">
-                          <span className="font-mono font-semibold text-[var(--text-heading)]">
-                            {entry.serial_number}
-                          </span>
-                          <span className="block text-[11px] text-[var(--text-muted)]">
-                            {entry.brand} {entry.size}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs">
-                          <span className="font-medium text-[var(--text-heading)]">
-                            {entry.machineName}
-                          </span>
-                          <span className="block text-[11px] text-[var(--text-muted)]">
-                            {entry.position}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs">
-                          <span className="inline-flex items-center gap-1 font-medium text-[var(--text-heading)]">
-                            <Gauge
-                              className="h-3 w-3 text-[var(--text-muted)]"
-                              aria-hidden="true"
-                            />
-                            {Number(entry.tread_depth_mm).toFixed(1)} mm ·{' '}
-                            {Number(entry.pressure_psi).toFixed(0)} PSI
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs">
-                          <span
-                            className={cn(
-                              'inline-flex rounded-full px-2 py-0.5 font-semibold text-[11px] uppercase',
-                              condBadge
-                            )}
-                          >
-                            {entry.condition_status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 font-mono text-[var(--text-secondary)] text-xs">
-                          {entry.current_smu != null
-                            ? `${Number(entry.current_smu).toLocaleString('en-US')} hrs`
-                            : '—'}
-                        </td>
-                        <td className="max-w-xs truncate px-4 py-3 text-[var(--text-muted)] text-xs">
-                          {entry.notes || '—'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </GlassCard>
-      </div>
+                  return (
+                    <tr key={entry.id} className="transition-colors hover:bg-white/60">
+                      <td className="px-4 py-3 font-mono text-[var(--text-secondary)] text-xs">
+                        {entry.inspection_date}
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        <span
+                          className={cn(
+                            'inline-flex rounded-full px-2 py-0.5 font-semibold text-[11px]',
+                            badge.className
+                          )}
+                        >
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        <span className="font-mono font-semibold text-[var(--text-heading)]">
+                          {entry.serial_number}
+                        </span>
+                        <span className="block text-[11px] text-[var(--text-muted)]">
+                          {entry.brand} {entry.size}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        <span className="font-medium text-[var(--text-heading)]">
+                          {entry.machineName}
+                        </span>
+                        <span className="block text-[11px] text-[var(--text-muted)]">
+                          {entry.position}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        <span className="inline-flex items-center gap-1 font-medium text-[var(--text-heading)]">
+                          <Gauge className="h-3 w-3 text-[var(--text-muted)]" aria-hidden="true" />
+                          {Number(entry.tread_depth_mm).toFixed(1)} mm ·{' '}
+                          {Number(entry.pressure_psi).toFixed(0)} PSI
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        <span
+                          className={cn(
+                            'inline-flex rounded-full px-2 py-0.5 font-semibold text-[11px] uppercase',
+                            condBadge
+                          )}
+                        >
+                          {entry.condition_status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-[var(--text-secondary)] text-xs">
+                        {entry.current_smu != null
+                          ? `${Number(entry.current_smu).toLocaleString('en-US')} hrs`
+                          : '—'}
+                      </td>
+                      <td className="max-w-xs truncate px-4 py-3 text-[var(--text-muted)] text-xs">
+                        {entry.notes || '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </GoldenPanel>
     </div>
   );
 }
