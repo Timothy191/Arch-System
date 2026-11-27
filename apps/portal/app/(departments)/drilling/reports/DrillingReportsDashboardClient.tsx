@@ -558,7 +558,11 @@ export function DrillingReportsDashboardClient({
                   : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
               }`}
             >
-              <MessageSquare className="h-4 w-4" />
+              <img
+                src="/whatsapp-logo.jpeg"
+                alt="WhatsApp"
+                className="h-4 w-4 rounded-sm object-contain"
+              />
               <span>WhatsApp Report</span>
             </button>
 

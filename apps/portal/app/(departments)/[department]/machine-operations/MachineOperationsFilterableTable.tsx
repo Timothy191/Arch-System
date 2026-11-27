@@ -3,6 +3,7 @@
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import type { DataTableColumn } from '@repo/ui/components/ui/data-table';
 import { DataTable } from '@repo/ui/components/ui/data-table';
+import { Logo } from '@repo/ui/Logo';
 import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
 import {
@@ -10,8 +11,6 @@ import {
   AlertCircle,
   ArrowUpRight,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   Clock,
   Drill,
   Gauge,
@@ -569,9 +568,26 @@ export function MachineOperationsFilterableTable({
   const machineIdColumn: DataTableColumn<MachineTableRow> = {
     key: 'name',
     header: 'Machine ID',
-    cell: (row: MachineTableRow) => (
-      <span className="font-semibold text-[var(--text-heading)]">{row.name}</span>
-    ),
+    cell: (row: MachineTableRow) => {
+      const statusColor =
+        row.status === 'operating'
+          ? 'bg-accent-green'
+          : row.status === 'breakdown'
+            ? 'bg-accent-red'
+            : row.status === 'in-progress'
+              ? 'bg-blue-500'
+              : 'bg-amber-400';
+      return (
+        <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--text-heading)]">
+          <span
+            data-testid="machine-status-indicator"
+            className={`h-2.5 w-2.5 rounded-full ${statusColor} shadow-sm`}
+            title={row.status}
+          />
+          {row.name}
+        </span>
+      );
+    },
     sortable: true,
     align: 'left' as const,
   };
@@ -894,9 +910,15 @@ export function MachineOperationsFilterableTable({
                       className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.06] bg-white/80 text-[var(--text-secondary)] shadow-2xs transition-transform"
                     >
                       {isCollapsed ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <Logo
+                          variant="gold"
+                          className={`h-4 w-4 text-accent-gold transition-transform duration-300 ${isCollapsed ? 'rotate-0' : 'rotate-180'}`}
+                        />
                       ) : (
-                        <ChevronUp className="h-4 w-4" />
+                        <Logo
+                          variant="gold"
+                          className={`h-4 w-4 text-accent-gold transition-transform duration-300 ${isCollapsed ? 'rotate-0' : 'rotate-180'}`}
+                        />
                       )}
                     </button>
                   </div>

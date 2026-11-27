@@ -3,6 +3,7 @@ import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ActiveDepartmentSetter } from '@/components/nav/ActiveDepartmentSetter';
+import { DepartmentVideoBackground } from './DepartmentVideoBackground';
 
 interface DepartmentLayoutProps {
   children: React.ReactNode;
@@ -29,11 +30,14 @@ export default async function DepartmentRootLayout({ children, params }: Departm
   const tabs = getDepartmentTabs(department);
 
   return (
-    <>
-      <ActiveDepartmentSetter department={department} />
-      <DepartmentLayout department={dept} tabs={tabs}>
-        {children}
-      </DepartmentLayout>
-    </>
+    <div className="relative min-h-screen">
+      <DepartmentVideoBackground department={department} />
+      <div className="relative z-10">
+        <ActiveDepartmentSetter department={department} />
+        <DepartmentLayout department={dept} tabs={tabs}>
+          {children}
+        </DepartmentLayout>
+      </div>
+    </div>
   );
 }
