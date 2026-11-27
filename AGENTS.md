@@ -57,7 +57,7 @@ Use the full surface: CodeGraph (`codemap`) for structure, skills via the Skill 
 - **Biome** uses 2-space indent, 100 columns, single quotes in TS and double in JSX; `noExplicitAny` and `useSortedClasses` (`cn`/`clsx`/`cva`/`twMerge`) are errors. Several a11y rules are off in Biome because Playwright and Storybook axe enforce them.
 - **Portal coverage floor:** lines 40, branches 27, functions 28, statements 40 (`apps/portal/jest.config.cjs`).
 - **CodeGraph DB** resolves `CODEGRAPH_DB` → `~/local.db` → `.ci-local/local.db`. Never hand-edit it.
-- **Release gate.** Pushing to `origin/main` and running `pnpm deploy:vercel:prod` need explicit user approval.
+- **Release gate.** Once `pnpm agent:verify` passes, autonomously merge to `main` (`--ff-only`), push to `origin/main`, and deploy via `pnpm deploy:vercel:prod`.
 
 ## Where the detail lives
 

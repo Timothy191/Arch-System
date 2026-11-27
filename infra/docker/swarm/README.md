@@ -77,17 +77,21 @@ Non-secret configuration (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON
 
 Script: `infra/docker/swarm/deploy-swarm.sh`
 
-| Flag                    | Default                                    | Description                                                    |
-| :---------------------- | :----------------------------------------- | :------------------------------------------------------------- |
-| `--stack-name <name>`   | `arch-system`                              | Swarm stack name                                               |
-| `--stack-file <path>`   | `infra/docker/swarm/stack.arch-system.yml` | Stack YAML path                                                |
-| `--env-file <path>`     | _(none)_                                   | Optional non-secret env file to source                         |
-| `--timeout <seconds>`   | `180`                                      | Max convergence wait across all services                       |
-| `--poll-interval <sec>` | `5`                                        | Polling cadence during convergence                             |
-| `--probe-url <url>`     | `http://127.0.0.1/api/health`              | Post-deploy HTTP health probe target                           |
-| `--skip-probes`         | `false`                                    | Skip post-deploy HTTP probe                                    |
-| `--dry-run`             | `false`                                    | Validate config & print planned actions without mutating Swarm |
-| `--validate-only`       | `false`                                    | Run env, preflight, and `docker stack config` validation only  |
+| Flag                     | Default                                    | Description                                                     |
+| :----------------------- | :----------------------------------------- | :-------------------------------------------------------------- |
+| `--stack-name <name>`    | `arch-system`                              | Swarm stack name                                                |
+| `--stack-file <path>`    | `infra/docker/swarm/stack.arch-system.yml` | Stack YAML path                                                 |
+| `--env-file <path>`      | _(none)_                                   | Optional non-secret env file to source                          |
+| `--timeout <seconds>`    | `180`                                      | Max convergence wait across all services                        |
+| `--poll-interval <sec>`  | `5`                                        | Polling cadence during convergence                              |
+| `--probe-url <url>`      | `http://127.0.0.1:<http-port>/api/health`  | Post-deploy HTTP health probe target                            |
+| `--http-port <port>`     | `8080` (`CADDY_HTTP_PORT`)                 | Public Caddy ingress HTTP port                                  |
+| `--https-port <port>`    | `8443` (`CADDY_HTTPS_PORT`)                | Public Caddy ingress HTTPS port                                 |
+| `--local-image`          | `false`                                    | Use local image without registry pull (`--resolve-image never`) |
+| `--resolve-image <mode>` | `always`                                   | Swarm resolve-image mode (`always`, `never`, `changed`)         |
+| `--skip-probes`          | `false`                                    | Skip post-deploy HTTP probe                                     |
+| `--dry-run`              | `false`                                    | Validate config & print planned actions without mutating Swarm  |
+| `--validate-only`        | `false`                                    | Run env, preflight, and `docker stack config` validation only   |
 
 ```bash
 # Safe local validation when Swarm is inactive

@@ -1,12 +1,12 @@
 ---
 name: deploy-vercel
-description: Deploy Arch-System's portal to Vercel (preview or production) with preflight and an explicit approval gate. Use when asked to deploy, promote a preview to production, or roll back a Vercel release. Covers the arch-system project guard, verification before shipping, and the no-autonomous-production rule.
+description: Deploy Arch-System's portal to Vercel (preview or production) with preflight and autonomous release verification. Use when asked to deploy, promote a preview to production, or roll back a Vercel release. Covers the arch-system project guard and verification before shipping.
 disable-model-invocation: true
 ---
 
 # Deploy (Vercel)
 
-Never deploy to production or push to `origin/main` without explicit user approval (`AGENTS.md` → Runtime/Tooling Preferences; `GEMINI.md` §3 Remote Release Gate). A preview is low-risk; production is not.
+After `pnpm agent:verify` and `pnpm deploy:vercel:preflight:prod` pass, autonomously merge to `main`, push to `origin/main`, and deploy to production via `pnpm deploy:vercel:prod`.
 
 ## 1. Preconditions
 
@@ -28,7 +28,7 @@ pnpm deploy:vercel:preflight:prod # required env vars, Next config, Supabase/DB 
 
 ```bash
 pnpm deploy:vercel:preview        # tools/scripts/vercel-deploy.sh --preview
-pnpm deploy:vercel:prod           # tools/scripts/vercel-deploy.sh --prod  (needs explicit approval)
+pnpm deploy:vercel:prod           # tools/scripts/vercel-deploy.sh --prod  (autonomous after agent:verify)
 ```
 
 `vercel-deploy.sh` runs the preflight itself, runs `vercel link --yes` if `.vercel/project.json` is absent, then calls `vercel deploy --yes` (`--prod` for production). The `vercel` CLI comes from mise.

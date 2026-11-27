@@ -2,6 +2,7 @@ module.exports = {
   rootDir: __dirname,
   testEnvironment: 'node',
   forceExit: true,
+  transformIgnorePatterns: ['node_modules/(?!(.*@t3-oss)/)'],
   transform: {
     '^.+\\.(t|j)sx?$': [
       '@swc/jest',

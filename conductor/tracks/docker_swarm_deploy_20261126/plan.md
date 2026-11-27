@@ -22,3 +22,10 @@
 
 - [x] Task: Register track `docker_swarm_deploy_20261126` in `conductor/tracks.md`
 - [x] Task: Execute all verification gates (`bash -n`, `--dry-run`, `node --test`, `markdownlint`, `cspell`, `pnpm policy:check`, `pnpm validate:json`)
+
+## Phase 4: Distroless Secret Files & Swarm Execution Hardening
+
+- [x] Task: Implement pure `*_FILE` secret loader in `@repo/shared/utils` (`secret-files.ts`) and wire in `apps/portal/instrumentation.ts`
+- [x] Task: Add Jest unit test coverage in `libs/shared/utils/src/secret-files.test.ts` (11/11 passing)
+- [x] Task: Configure configurable ports (8080/8443 defaults) and `--local-image` / `--resolve-image` flags in `deploy-swarm.sh` and `stack.arch-system.yml`
+- [x] Task: Expand test suite in `infra/docker/swarm/verify-swarm-workflow.test.mjs` to assert `--local-image` and port overrides

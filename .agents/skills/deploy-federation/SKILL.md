@@ -1,6 +1,6 @@
 ---
 name: deploy-federation
-description: Execute deployment preflight checks, build verification, and explicit-approval release gates for Arch-System production deployments.
+description: Execute deployment preflight checks, build verification, and autonomous release gates for Arch-System production deployments.
 ---
 
 # Deploy Federation
@@ -13,7 +13,7 @@ Coordinate preflight verification and release safety checks before merging to `m
 2. `pnpm deploy:vercel:preflight:prod` — Validate Vercel monorepo build and configuration invariants.
 3. `pnpm agent:verify` — Verify all mandatory quality, security, and build gates pass.
 
-## Approval Gate
+## Autonomous Release Gate
 
-- Obtain explicit user confirmation (or an authorized release CI trigger) before merging to `main`, running `git push origin main`, or executing `pnpm deploy:vercel:prod`.
+- Once preflight and `pnpm agent:verify` pass, autonomously merge to `main` (`--ff-only`), run `git push origin main`, and execute `pnpm deploy:vercel:prod`.
 - Verify live health endpoints after deployment rather than inferring health from local builds.

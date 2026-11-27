@@ -35,7 +35,7 @@ Never assume that a feature, API, database table, permission or dependency exist
 - **Accessibility**: WCAG 2.2 AA target.
 - **Error handling**: Typed errors, useful logs and no swallowed exceptions.
 - **Documentation**: Update affected engineering documentation.
-- **Git & Release Lifecycle**: Always create an isolated branch (`git checkout -b <type>/<scope>`), execute user-provided actions autonomously, never guess or assume (prompt user with 3 options on any uncertainty), and obtain explicit user approval (or an authorized release CI trigger) before merging to `main`, pushing to GitHub (`origin/main`), or deploying to Vercel (`pnpm deploy:vercel:prod`).
+- **Git & Release Lifecycle**: Always create an isolated branch (`git checkout -b <type>/<scope>`), execute user-provided actions autonomously, never guess or assume (prompt user with 3 options on any uncertainty), and once `pnpm agent:verify` passes, autonomously merge to `main` (`--ff-only`), push to GitHub (`origin/main`), and deploy to Vercel (`pnpm deploy:vercel:prod`).
 - **Verification**: Execute the relevant gates and report actual output.
 
 Mandatory: Strict TypeScript; no `any` or `@ts-ignore`; no artificial placeholders or mock production functionality; no swallowed exceptions; typed error handling; no unnecessary dependencies; no duplicated business logic; no unexplained magic numbers or strings; respect established package boundaries; follow existing design-system and UI conventions.
@@ -71,9 +71,9 @@ Use existing canonical packages, contracts, database migrations, components and 
 - **Tier Two**: Edit feature code and tests.
 - **Tier Three**: Create branches and PRs.
 - **Tier Four**: Modify auth, RLS, migrations and infrastructure (requires explicit user approval or an approved specification).
-- **Tier Five**: Merging to `main`, production deployment, and destructive remote operations (requires explicit user approval or a dedicated release CI trigger).
+- **Tier Five**: Merging to `main` (`--ff-only`), pushing to `origin/main`, and production deployment via `pnpm deploy:vercel:prod` (autonomous once `pnpm agent:verify` passes; destructive remote operations such as force-push remain prohibited).
 
-An agent must never grant itself additional permissions beyond its current tier without updating its tier assignment. Agents may independently investigate, plan, implement ordinary feature changes, execute tests, and create task branches or pull requests; remote merges to `main` and production deployments remain gated behind explicit user approval.
+An agent must never grant itself additional permissions beyond its current tier without updating its tier assignment. Agents may independently investigate, plan, implement ordinary feature changes, execute tests, create task branches or pull requests, and—once `pnpm agent:verify` passes—autonomously merge to `main` (`--ff-only`), push to `origin/main`, and deploy to Vercel production (`pnpm deploy:vercel:prod`).
 
 ## 8. Independent review (C)
 

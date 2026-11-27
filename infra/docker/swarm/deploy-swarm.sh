@@ -15,7 +15,11 @@ STACK_FILE="${STACK_FILE:-$SCRIPT_DIR/stack.arch-system.yml}"
 ENV_FILE="${ENV_FILE:-}"
 CONVERGE_TIMEOUT="${CONVERGE_TIMEOUT:-180}"
 POLL_INTERVAL="${POLL_INTERVAL:-5}"
-PROBE_URL="${PROBE_URL:-http://127.0.0.1/api/health}"
+LOCAL_IMAGE=false
+RESOLVE_IMAGE="${RESOLVE_IMAGE:-always}"
+CADDY_HTTP_PORT="${CADDY_HTTP_PORT:-8080}"
+CADDY_HTTPS_PORT="${CADDY_HTTPS_PORT:-8443}"
+PROBE_URL="${PROBE_URL:-}"
 SKIP_PROBES=false
 DRY_RUN=false
 VALIDATE_ONLY=false
@@ -66,7 +70,11 @@ Options:
   --env-file <path>        Optional non-secret env file to source before validation
   --timeout <seconds>      Service convergence timeout in seconds (default: 180)
   --poll-interval <sec>    Convergence polling interval in seconds (default: 5)
-  --probe-url <url>        Post-deploy health probe URL (default: http://127.0.0.1/api/health)
+  --probe-url <url>        Post-deploy health probe URL (default: http://127.0.0.1:<http-port>/api/health)
+  --http-port <port>       Public Caddy HTTP port (default: 8080)
+  --https-port <port>      Public Caddy HTTPS port (default: 8443)
+  --local-image            Use local image without registry pull (--resolve-image never)
+  --resolve-image <mode>   Swarm resolve-image mode: always, never, changed (default: always)
   --skip-probes            Skip post-deployment HTTP health probes
   --dry-run                Validate config and print planned actions without mutating Swarm
   --validate-only          Run environment, preflight, and stack config validation only
@@ -116,6 +124,26 @@ parse_args() {
         PROBE_URL="$2"
         shift 2
         ;;
+      --http-port)
+        [ "$#" -ge 2 ] || { error "--http-port requires a value"; exit 2; }
+        CADDY_HTTP_PORT="$2"
+        shift 2
+        ;;
+      --https-port)
+        [ "$#" -ge 2 ] || { error "--https-port requires a value"; exit 2; }
+        CADDY_HTTPS_PORT="$2"
+        shift 2
+        ;;
+      --local-image)
+        LOCAL_IMAGE=true
+        RESOLVE_IMAGE="never"
+        shift
+        ;;
+      --resolve-image)
+        [ "$#" -ge 2 ] || { error "--resolve-image requires a value (always|never|changed)"; exit 2; }
+        RESOLVE_IMAGE="$2"
+        shift 2
+        ;;
       --skip-probes)
         SKIP_PROBES=true
         shift
@@ -160,6 +188,13 @@ validate_environment() {
 
   require_positive_int "--timeout" "$CONVERGE_TIMEOUT"
   require_positive_int "--poll-interval" "$POLL_INTERVAL"
+  require_positive_int "--http-port" "$CADDY_HTTP_PORT"
+  require_positive_int "--https-port" "$CADDY_HTTPS_PORT"
+
+  if [ -z "$PROBE_URL" ]; then
+    PROBE_URL="http://127.0.0.1:${CADDY_HTTP_PORT}/api/health"
+  fi
+  export CADDY_HTTP_PORT CADDY_HTTPS_PORT
 
   if [ ! -f "$STACK_FILE" ]; then
     error "Stack file not found: $STACK_FILE"
@@ -318,8 +353,16 @@ recover_and_rollback() {
 deploy_stack() {
   info "Phase 4: Deploying Swarm stack '$STACK_NAME'..."
 
+  local deploy_cmd=(docker stack deploy --prune)
+  if [ "$LOCAL_IMAGE" = true ] || [ "$RESOLVE_IMAGE" = "never" ]; then
+    deploy_cmd+=(--resolve-image never)
+  else
+    deploy_cmd+=(--with-registry-auth --resolve-image "$RESOLVE_IMAGE")
+  fi
+  deploy_cmd+=(-c "$STACK_FILE" "$STACK_NAME")
+
   if [ "$DRY_RUN" = true ]; then
-    dry_run "Would execute: docker stack deploy --prune --with-registry-auth --resolve-image always -c \"$STACK_FILE\" \"$STACK_NAME\""
+    dry_run "Would execute: ${deploy_cmd[*]}"
     dry_run "Would poll convergence for services: ${DEPLOY_SERVICES[*]} (timeout=${CONVERGE_TIMEOUT}s, interval=${POLL_INTERVAL}s)"
     if [ "$SKIP_PROBES" = false ]; then
       dry_run "Would execute post-deployment health probe against $PROBE_URL"
@@ -330,12 +373,7 @@ deploy_stack() {
     return 0
   fi
 
-  docker stack deploy \
-    --prune \
-    --with-registry-auth \
-    --resolve-image always \
-    -c "$STACK_FILE" \
-    "$STACK_NAME"
+  "${deploy_cmd[@]}"
 
   info "Stack deploy submitted for '$STACK_NAME'"
 }

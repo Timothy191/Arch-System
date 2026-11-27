@@ -34,7 +34,7 @@ const clientEnvShape = {
   NEXT_PUBLIC_REMOTE_DESKTOP_GATEWAY_URL: z.string().url().optional(),
 };
 
-const serverEnvShape = {
+export const serverEnvShape = {
   // ── Server-side required ───────────────────────────────────────────
   SUPABASE_URL: z.string().url().optional(),
   SUPABASE_ANON_KEY: z.string().optional(),
@@ -49,6 +49,8 @@ const serverEnvShape = {
   // ── Redis (optional, used only when configured) ────────────────────
   REDIS_URL: z.string().optional(),
   REDIS_STACK_URL: z.string().optional(),
+  // Applied when REDIS_URL carries no credentials (e.g. Swarm `redis://redis:6379`).
+  REDIS_PASSWORD: z.string().min(1).optional(),
 
   // ── LLM / AI providers (optional) ──────────────────────────────────
   OPENAI_API_KEY: z.string().optional(),
@@ -220,6 +222,7 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
       NODE_ENV: process.env.NODE_ENV,
       REDIS_URL: process.env.REDIS_URL,
       REDIS_STACK_URL: process.env.REDIS_STACK_URL,
+      REDIS_PASSWORD: process.env.REDIS_PASSWORD,
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,
       OPENAI_MODEL: process.env.OPENAI_MODEL,
       OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
@@ -301,6 +304,7 @@ function parseEnv(): EnvVars {
     NODE_ENV: process.env.NODE_ENV,
     REDIS_URL: process.env.REDIS_URL,
     REDIS_STACK_URL: process.env.REDIS_STACK_URL,
+    REDIS_PASSWORD: process.env.REDIS_PASSWORD,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_MODEL: process.env.OPENAI_MODEL,
     OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,

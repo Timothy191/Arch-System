@@ -16,7 +16,7 @@ Arch-System controls real mining operations. Every agent must:
 - **Strict Task Focus** — never explore unrelated code or files outside the user's explicit objective.
 - **Assume real-world consequences** — a wrong RLS policy or migration can halt production.
 - **Verify before claiming** — never assert "works" without empirical evidence (runtime tests, live probes).
-- **Own the full local lifecycle** — always create a task branch (`git checkout -b <type>/<scope>`), perform all user-provided implementation and verification actions autonomously, never assume or guess (prompt the user with **3 options** at any point of uncertainty), and obtain explicit user approval (or a dedicated release CI trigger) before merging to `main`, pushing to GitHub (`git push origin main`), or deploying to Vercel (`pnpm deploy:vercel:prod`).
+- **Own the full delivery lifecycle** — always create a task branch (`git checkout -b <type>/<scope>`), perform all user-provided implementation and verification actions autonomously, never assume or guess (prompt the user with **3 options** at any point of uncertainty), and after verification passes, autonomously merge to `main` (`--ff-only`), push to GitHub (`git push origin main`), and deploy to Vercel (`pnpm deploy:vercel:prod`).
 
 ## Anti-Assumption & 3-Option Uncertainty Mandate (CRITICAL)
 

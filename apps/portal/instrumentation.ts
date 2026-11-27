@@ -53,6 +53,23 @@ async function loadBaselinesFromConfig(): Promise<void> {
 }
 
 export async function register(): Promise<void> {
+  // Resolve Docker Swarm / Kubernetes *_FILE secrets into process.env before initialization
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    try {
+      const fs = await import('node:fs');
+      const { loadSecretFiles } = await import('@repo/shared/utils');
+      if (typeof loadSecretFiles === 'function') {
+        loadSecretFiles({
+          env: process.env,
+          readFile: (filePath: string) => fs.readFileSync(filePath, 'utf8'),
+        });
+      }
+    } catch (error) {
+      console.error('[Instrumentation] Error loading secret files:', error);
+      throw error;
+    }
+  }
+
   // Attach Sentry before anything else so startup failures are reported.
   await initializeSentry();
 

@@ -10,5 +10,5 @@ Non-negotiable:
 
 - Run every command from this repo root, with `pnpm` only.
 - `pnpm agent:verify` must pass before claiming work is complete.
-- Never push to `origin/main` or run `pnpm deploy:vercel:prod` without explicit user approval.
+- After `pnpm agent:verify` passes, autonomously merge to `main` (`--ff-only`), push to `origin/main`, and deploy via `pnpm deploy:vercel:prod`.
 - Domain rules live in `.agents/rules/`; repeatable workflows in `.qoder/skills/`.

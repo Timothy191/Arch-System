@@ -114,7 +114,27 @@ test('deploy-swarm.sh --dry-run executes idempotently without mutating Swarm', (
     assert.equal(res.status, 0, `--dry-run run #${run} failed: ${res.stderr}`);
     assert.match(res.stdout, /\[DRY-RUN\]/);
     assert.match(res.stdout, /docker stack deploy --prune/);
+    assert.match(res.stdout, /http:\/\/127\.0\.0\.1:8080\/api\/health/);
   }
+
+  // Verify --local-image uses --resolve-image never
+  const localRes = spawnSync(DEPLOY_SCRIPT, ['--dry-run', '--local-image'], {
+    cwd: REPO_ROOT,
+    env: SYNTHETIC_ENV,
+    encoding: 'utf8',
+  });
+  assert.equal(localRes.status, 0, `--local-image failed: ${localRes.stderr}`);
+  assert.match(localRes.stdout, /--resolve-image never/);
+  assert.doesNotMatch(localRes.stdout, /--with-registry-auth/);
+
+  // Verify custom http port overrides probe URL
+  const portRes = spawnSync(DEPLOY_SCRIPT, ['--dry-run', '--http-port', '9090'], {
+    cwd: REPO_ROOT,
+    env: SYNTHETIC_ENV,
+    encoding: 'utf8',
+  });
+  assert.equal(portRes.status, 0, `--http-port failed: ${portRes.stderr}`);
+  assert.match(portRes.stdout, /http:\/\/127\.0\.0\.1:9090\/api\/health/);
 });
 
 test('deploy-swarm.sh --validate-only and --help behave as documented', () => {
