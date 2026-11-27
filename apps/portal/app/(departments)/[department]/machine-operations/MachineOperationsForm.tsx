@@ -5,22 +5,18 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
 import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
-import {
-  AlertTriangle,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Drill,
-  Lock,
-  ShieldAlert,
-} from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, Clock, Lock, ShieldAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
 import { computeNextShiftSlot, validateSmrOdometerEntry } from '@/lib/shift-sheet-buckets';
 import { DelayEntriesForm } from './DelayEntriesForm';
-import { getMachineFleetImage } from './machine-operations-constants';
+import {
+  applyMachineImageFallback,
+  describeMachineImage,
+  resolveMachineFleetImage,
+} from './machine-images';
 
 interface Machine {
   id: string;
@@ -710,12 +706,15 @@ export function MachineOperationsForm({
               <div className="flex items-center gap-3.5">
                 <div className="gold-steel-border gold-steel-border-slim relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-accent-gold/50 bg-amber-50 shadow-2xs">
                   <img
-                    src={getMachineFleetImage(selectedMachine.name, selectedMachine.machine_type)}
-                    alt={selectedMachine.name}
+                    data-testid="machine-fleet-image"
+                    src={resolveMachineFleetImage({
+                      name: selectedMachine.name,
+                      machineType: selectedMachine.machine_type,
+                      serialNumber: selectedMachine.serial_number,
+                    })}
+                    alt={describeMachineImage(selectedMachine)}
                     className="h-full w-full object-cover object-center"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = '/images/fleet/volvo-adt.webp';
-                    }}
+                    onError={applyMachineImageFallback}
                   />
                 </div>
                 <div>
@@ -1041,18 +1040,18 @@ export function MachineOperationsForm({
           <div className="space-y-4 rounded-xl border border-[var(--accent-blue)]/30 bg-[var(--bg-secondary)]/80 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="rounded-lg bg-[var(--accent-blue)]/10 p-1.5 text-[var(--accent-blue)]">
-                  <Drill className="h-4 w-4" />
-                </span>
                 {selectedMachine && (
                   <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-[var(--accent-blue)]/30 bg-white shadow-2xs">
                     <img
-                      src={getMachineFleetImage(selectedMachine.name, selectedMachine.machine_type)}
-                      alt={selectedMachine.name}
+                      data-testid="machine-fleet-image"
+                      src={resolveMachineFleetImage({
+                        name: selectedMachine.name,
+                        machineType: selectedMachine.machine_type,
+                        serialNumber: selectedMachine.serial_number,
+                      })}
+                      alt={describeMachineImage(selectedMachine)}
                       className="h-full w-full object-cover object-center"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = '/images/fleet/volvo-adt.webp';
-                      }}
+                      onError={applyMachineImageFallback}
                     />
                   </div>
                 )}

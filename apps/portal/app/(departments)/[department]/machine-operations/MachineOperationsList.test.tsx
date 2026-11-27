@@ -1,10 +1,15 @@
 import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MachineOperationsFilterableTable } from './MachineOperationsFilterableTable';
 import { MachineOperationsForm } from './MachineOperationsForm';
 import { MachineOperationsKpiStrip } from './MachineOperationsKpiStrip';
 import { MachineOperationsList } from './MachineOperationsList';
+import {
+  MACHINE_FLEET_FALLBACK_IMAGE,
+  MACHINE_FLEET_IMAGE_PATHS,
+  resolveMachineFleetImage,
+} from './machine-images';
 import {
   calculateDelayDurationHours,
   formatDelayEntriesFromDb,
@@ -1113,6 +1118,182 @@ describe('MachineOperationsList', () => {
       expect(screen.queryByText('Incomplete Machines (1)')).not.toBeInTheDocument();
       fireEvent.click(screen.getByTestId('category-panel-header-adt'));
       expect(screen.getByText('Incomplete Machines (1)')).toBeInTheDocument();
+    });
+  });
+
+  describe('Machine fleet image mapping', () => {
+    it('maps every known fleet type to a real asset and falls back safely', () => {
+      const knownCases = [
+        {
+          name: 'DT-12 (Volvo A35D)',
+          machineType: 'Articulated Dumper',
+          serialNumber: null,
+          expected: '/images/fleet/volvo-adt.webp',
+        },
+        {
+          name: 'DT-201 (CAT 777)',
+          machineType: 'Dump Truck',
+          serialNumber: null,
+          expected: '/images/fleet/caterpillar-rdt.webp',
+        },
+        {
+          name: 'RDT25',
+          machineType: 'Rigid Dumper',
+          serialNumber: 'Komatsu HD785',
+          expected: '/images/fleet/komatsu-rdt.webp',
+        },
+        {
+          name: 'BD-35 (Komatsu D65)',
+          machineType: 'Bulldozer',
+          serialNumber: null,
+          expected: '/images/fleet/komatsu-dozer.webp',
+        },
+        {
+          name: 'EX-101 (CAT 6060)',
+          machineType: 'Excavator',
+          serialNumber: null,
+          expected: '/images/fleet/hitachi-excavator.webp',
+        },
+        {
+          name: 'EX-39',
+          machineType: 'Excavator',
+          serialNumber: 'Komatsu PC1250 sp',
+          expected: '/images/fleet/komatsu-excavator.webp',
+        },
+        {
+          name: 'DR-301 (Sandvik DR410i)',
+          machineType: 'Drill Rig',
+          serialNumber: null,
+          expected: '/images/fleet/atlas-copco-drill.webp',
+        },
+        {
+          name: 'G-14 (Sany)',
+          machineType: 'Grader',
+          serialNumber: null,
+          expected: '/images/fleet/sany-grader.webp',
+        },
+        {
+          name: 'L-20 (Volvo L180H)',
+          machineType: 'Frontend Loader',
+          serialNumber: null,
+          expected: '/images/fleet/volvo-loader.webp',
+        },
+        {
+          name: 'CAT 966H',
+          machineType: 'Loader',
+          serialNumber: null,
+          expected: '/images/fleet/caterpillar-loader.webp',
+        },
+        {
+          name: 'WB-004',
+          machineType: 'Water Bowser',
+          serialNumber: null,
+          expected: '/images/fleet/water-bowser.webp',
+        },
+        {
+          name: 'FB-16',
+          machineType: 'Service Bowser',
+          serialNumber: 'Toyota Hino 500',
+          expected: '/images/fleet/service-bowser.webp',
+        },
+        {
+          name: 'CR-08',
+          machineType: 'Crusher',
+          serialNumber: null,
+          expected: '/images/fleet/mobile-crusher.webp',
+        },
+        {
+          name: 'CKN-02',
+          machineType: 'Compactor',
+          serialNumber: null,
+          expected: '/images/fleet/roller-compactor.webp',
+        },
+      ] as const;
+
+      for (const knownCase of knownCases) {
+        const resolved = resolveMachineFleetImage(knownCase);
+        expect(MACHINE_FLEET_IMAGE_PATHS).toContain(resolved);
+        expect(resolved).toBe(knownCase.expected);
+      }
+
+      expect(resolveMachineFleetImage({ name: 'MX-999', machineType: 'Unmapped Equipment' })).toBe(
+        MACHINE_FLEET_FALLBACK_IMAGE
+      );
+      expect(
+        resolveMachineFleetImage({
+          name: 'DT-500',
+          machineType: 'Dump Truck',
+          imageUrl: '/images/fleet/does-not-exist.webp',
+        })
+      ).toBe('/images/fleet/volvo-adt.webp');
+    });
+
+    it('renders mapped and fallback thumbnails in operation rows with status indicators intact', () => {
+      render(
+        <MachineOperationsFilterableTable
+          machines={[
+            {
+              id: 'bd-komatsu',
+              name: 'BD-35 (Komatsu D65)',
+              machine_type: 'Bulldozer',
+              serial_number: 'Komatsu D65',
+              latest_smu: 1200,
+            },
+            {
+              id: 'unknown-fleet-item',
+              name: 'MX-999',
+              machine_type: 'Unmapped Equipment',
+              serial_number: null,
+              latest_smu: 10,
+            },
+          ]}
+          operations={[]}
+          activeBreakdowns={[]}
+        />
+      );
+
+      expect(screen.getByAltText('BD-35 (Komatsu D65) (Bulldozer)')).toHaveAttribute(
+        'src',
+        '/images/fleet/komatsu-dozer.webp'
+      );
+      expect(screen.getByAltText('MX-999 (Unmapped Equipment)')).toHaveAttribute(
+        'src',
+        MACHINE_FLEET_FALLBACK_IMAGE
+      );
+      expect(screen.getAllByTestId('machine-status-indicator')).toHaveLength(2);
+      expect(screen.getAllByTestId('machine-fleet-image').length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('switches a failed form thumbnail to the fallback once without retrying it', () => {
+      render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={[
+            {
+              id: 'bd-35',
+              name: 'BD-35 (Komatsu D65)',
+              machine_type: 'Bulldozer',
+              serial_number: 'Komatsu D65',
+            },
+          ]}
+          operators={[]}
+          sites={[]}
+          todayOperations={[]}
+        />
+      );
+
+      fireEvent.change(screen.getAllByRole('combobox')[0]!, { target: { value: 'bd-35' } });
+      const previewImage = within(screen.getByTestId('selected-machine-preview-card')).getByTestId(
+        'machine-fleet-image'
+      );
+      expect(previewImage).toHaveAttribute('src', '/images/fleet/komatsu-dozer.webp');
+
+      previewImage.setAttribute('src', '/images/fleet/missing.webp');
+      fireEvent.error(previewImage);
+      expect(previewImage).toHaveAttribute('src', MACHINE_FLEET_FALLBACK_IMAGE);
+
+      fireEvent.error(previewImage);
+      expect(previewImage).toHaveStyle({ visibility: 'hidden' });
     });
   });
 });

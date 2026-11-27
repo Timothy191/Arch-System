@@ -6,22 +6,19 @@ import { DataTable } from '@repo/ui/components/ui/data-table';
 import { Logo } from '@repo/ui/Logo';
 import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
-import {
-  Activity,
-  AlertCircle,
-  ArrowUpRight,
-  CheckCircle2,
-  Clock,
-  Drill,
-  Gauge,
-  Layers,
-  Truck,
-} from 'lucide-react';
+import { AlertCircle, ArrowUpRight, CheckCircle2, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
 import { MachineOperationsFilterStrip } from './MachineOperationsSummaryStrip';
+import {
+  applyMachineImageFallback,
+  describeMachineImage,
+  MACHINE_CATEGORY_IMAGE_PATHS,
+  MACHINE_FLEET_FALLBACK_IMAGE,
+  resolveMachineFleetImage,
+} from './machine-images';
 import {
   type Breakdown,
   buildBreakdownsByFleetIdMap,
@@ -578,12 +575,25 @@ export function MachineOperationsFilterableTable({
               ? 'bg-blue-500'
               : 'bg-amber-400';
       return (
-        <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--text-heading)]">
+        <span className="inline-flex items-center gap-2 font-semibold text-[var(--text-heading)]">
           <span
             data-testid="machine-status-indicator"
             className={`h-2.5 w-2.5 rounded-full ${statusColor} shadow-sm`}
             title={row.status}
           />
+          <span className="h-7 w-9 shrink-0 overflow-hidden rounded-md border border-black/[0.08] bg-white shadow-2xs">
+            <img
+              data-testid="machine-fleet-image"
+              src={resolveMachineFleetImage({
+                name: row.name,
+                machineType: row.machine_type,
+                serialNumber: row.serial_number,
+              })}
+              alt={describeMachineImage({ name: row.name, machineType: row.machine_type })}
+              className="h-full w-full object-cover object-center"
+              onError={applyMachineImageFallback}
+            />
+          </span>
           {row.name}
         </span>
       );
@@ -794,19 +804,18 @@ export function MachineOperationsFilterableTable({
     }
   };
 
-  const getCategoryIcon = (cat: MachineCategory) => {
-    switch (cat) {
-      case 'adt':
-        return <Truck className="h-4 w-4 text-accent-blue" aria-hidden="true" />;
-      case 'drill':
-        return <Drill className="h-4 w-4 text-[var(--accent-blue)]" aria-hidden="true" />;
-      case 'dozer':
-        return <Layers className="h-4 w-4 text-amber-700" aria-hidden="true" />;
-      case 'excavator':
-        return <Activity className="h-4 w-4 text-emerald-600" aria-hidden="true" />;
-      default:
-        return <Gauge className="h-4 w-4 text-neutral-600" aria-hidden="true" />;
-    }
+  const getCategoryImage = (cat: MachineCategory) => {
+    const imageSrc =
+      cat === 'all' ? MACHINE_FLEET_FALLBACK_IMAGE : MACHINE_CATEGORY_IMAGE_PATHS[cat];
+    return (
+      <img
+        data-testid="machine-fleet-image"
+        src={imageSrc}
+        alt={`${MACHINE_CATEGORY_LABELS[cat]} representative machine`}
+        className="h-full w-full rounded-lg object-cover object-center"
+        onError={applyMachineImageFallback}
+      />
+    );
   };
 
   // Group filtered machines into categories
@@ -881,8 +890,8 @@ export function MachineOperationsFilterableTable({
                   className={CATEGORY_PANEL_HEADER_CLASS}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-accent-gold/40 bg-amber-50 shadow-2xs">
-                      {getCategoryIcon(cat)}
+                    <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-accent-gold/40 bg-amber-50 shadow-2xs">
+                      {getCategoryImage(cat)}
                     </span>
                     <div>
                       <h4 className="font-bold text-[var(--text-heading)] text-base">
