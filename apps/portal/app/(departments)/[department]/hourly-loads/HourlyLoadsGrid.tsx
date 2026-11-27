@@ -6,6 +6,7 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { AlertTriangle, Lock, Search, X } from 'lucide-react';
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { isAdtOrDumpTruck } from '@/lib/control-room/machine-utils';
 import { logError } from '@/lib/errors/error-logger';
 import { trackClientMetric } from '@/lib/observability/client-telemetry';
 import { saveHourlyLoad, saveHourlyLoadMachineOperation, splitMachineHourlyLoad } from './actions';
@@ -45,6 +46,7 @@ const EMPTY_MINE_BLOCKS: NonNullable<HourlyLoadsGridProps['mineBlocks']> = [];
 const EMPTY_EXCAVATOR_ACTIVITIES: NonNullable<HourlyLoadsGridProps['excavatorActivities']> = [];
 const EMPTY_ACTIVE_BREAKDOWNS: NonNullable<HourlyLoadsGridProps['activeBreakdowns']> = [];
 const EMPTY_OPERATORS: NonNullable<HourlyLoadsGridProps['operators']> = [];
+const MAX_SHIFT_HOURS = 12;
 const EMPTY_TODAY_OPERATIONS: NonNullable<HourlyLoadsGridProps['todayOperations']> = [];
 const EMPTY_LATEST_SMR: Record<string, number> = {};
 
@@ -776,6 +778,20 @@ function HourlyLoadsGrid({
     [source, hourLabels, machines.length]
   );
 
+  // Filter operators per machine type (ADT vs RDT) so the dropdown is shorter.
+  const operatorsForMachineType = useCallback(
+    (machineType: string) => {
+      const isAdtMachine = isAdtOrDumpTruck(machineType);
+      const matchesCode = (employeeCode: string) =>
+        isAdtMachine
+          ? employeeCode.toUpperCase().includes('ADT')
+          : employeeCode.toUpperCase().includes('RDT');
+      const matched = operators.filter((op) => matchesCode(op.employee_code ?? ''));
+      return matched.length > 0 ? matched : operators;
+    },
+    [operators]
+  );
+
   const filteredRows = useMemo(() => {
     const query = deferredMachineSearch.trim().toLowerCase();
     return source
@@ -954,7 +970,7 @@ function HourlyLoadsGrid({
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border-default)]/60 text-[var(--text-heading)] text-xs">
+              <tbody className="divide-y divide-[var(--border-default)]/90 border border-[var(--border-default)]/60 text-[var(--text-heading)] text-xs">
                 {filteredRows.length === 0 ? (
                   <tr>
                     <td
@@ -999,6 +1015,38 @@ function HourlyLoadsGrid({
                         >
                           <div className="flex min-w-[140px] max-w-[200px] flex-col gap-1">
                             <div className="flex items-center gap-1.5">
+                              {(() => {
+                                const hasOperator = Boolean(
+                                  machineOpsState[`${row.machineId}:${selectedShift}`]?.operatorId
+                                );
+                                const hasExcavator = Boolean(row.excavatorId);
+                                const hasLoads = (row.total ?? 0) > 0;
+                                const completionCount =
+                                  (hasOperator ? 1 : 0) +
+                                  (hasExcavator ? 1 : 0) +
+                                  (hasLoads ? 1 : 0);
+                                if (isBreakdownBlocked) return null;
+                                const dotClass =
+                                  isLocked || completionCount === 3
+                                    ? 'bg-emerald-500 shadow-[0_0_6px_1px_rgba(16,185,129,0.75)]'
+                                    : completionCount >= 1
+                                      ? 'bg-amber-400 shadow-[0_0_6px_1px_rgba(251,191,36,0.7)]'
+                                      : 'bg-red-500 shadow-[0_0_6px_1px_rgba(239,68,68,0.7)]';
+                                const dotLabel =
+                                  isLocked || completionCount === 3
+                                    ? 'All entries complete'
+                                    : completionCount >= 1
+                                      ? 'Some entries missing'
+                                      : 'Incomplete entries';
+                                return (
+                                  <span
+                                    data-testid={`machine-status-dot-${row.machineId}`}
+                                    title={dotLabel}
+                                    aria-label={dotLabel}
+                                    className={`inline-block h-2 w-2 shrink-0 animate-pulse rounded-full ${dotClass}`}
+                                  />
+                                );
+                              })()}
                               <span
                                 className={`truncate font-semibold text-xs ${
                                   isBreakdownBlocked
@@ -1065,7 +1113,7 @@ function HourlyLoadsGrid({
                             }}
                             disabled={isRowDisabled}
                             aria-disabled={isBreakdownBlocked ? 'true' : undefined}
-                            className={`w-full rounded-md border px-2 py-1 font-medium text-xs transition-colors ${
+                            className={`gold-steel-border gold-steel-border-slim w-full rounded-md border px-2 py-1 font-medium text-xs transition-colors ${
                               isBreakdownBlocked
                                 ? 'cursor-not-allowed border-red-300 bg-red-100/80 text-red-900 opacity-85'
                                 : isLocked
@@ -1074,7 +1122,7 @@ function HourlyLoadsGrid({
                             }`}
                           >
                             <option value="">Select Operator</option>
-                            {operators.map((op) => (
+                            {operatorsForMachineType(row.machineType).map((op) => (
                               <option key={op.id} value={op.id}>
                                 {op.full_name} ({op.employee_code})
                               </option>
@@ -1090,6 +1138,7 @@ function HourlyLoadsGrid({
                             type="number"
                             step="0.1"
                             min={latestSmrByMachine[row.machineId] ?? 0}
+                            max={(latestSmrByMachine[row.machineId] ?? 0) + MAX_SHIFT_HOURS}
                             data-row={String(originalRowIndex)}
                             data-action="input-stop-smr"
                             aria-label={`Stop SMR for ${row.machineName}`}
@@ -1123,7 +1172,7 @@ function HourlyLoadsGrid({
                             }}
                             disabled={isRowDisabled}
                             aria-disabled={isBreakdownBlocked ? 'true' : undefined}
-                            className={`w-full rounded-md border px-2 py-1 font-mono text-xs transition-colors ${
+                            className={`gold-steel-border gold-steel-border-slim w-full rounded-md border px-2 py-1 font-mono text-xs transition-colors ${
                               isBreakdownBlocked
                                 ? 'cursor-not-allowed border-red-300 bg-red-100/80 text-red-900 opacity-85'
                                 : isLocked

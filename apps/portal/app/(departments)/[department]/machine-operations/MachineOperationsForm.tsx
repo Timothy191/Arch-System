@@ -5,13 +5,23 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
 import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
-import { ChevronDown, ChevronUp, Clock, Drill, Info, Lock, ShieldAlert } from 'lucide-react';
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Drill,
+  Info,
+  Lock,
+  ShieldAlert,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
 import { computeNextShiftSlot, validateSmrOdometerEntry } from '@/lib/shift-sheet-buckets';
 import { DelayEntriesForm } from './DelayEntriesForm';
+import { getMachineFleetImage } from './machine-operations-constants';
 
 interface Machine {
   id: string;
@@ -61,10 +71,13 @@ const FORM_LABEL_CLASS =
   'block font-medium text-[13px] text-[var(--text-secondary)] leading-[18px]';
 
 const FORM_FIELD_CONTROL_CLASS =
-  'h-12 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3.5 text-[var(--text-heading)] text-base transition-colors focus:border-[var(--accent-blue)] focus:outline-none';
+  'gold-steel-border gold-steel-border-slim h-12 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3.5 text-[var(--text-heading)] text-base transition-colors focus:border-[var(--accent-blue)] focus:outline-none';
 
 const FORM_DRILL_CONTROL_CLASS =
-  'h-12 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3.5 text-[var(--text-heading)] text-base transition-colors focus:border-[var(--accent-blue)] focus:outline-none';
+  'gold-steel-border gold-steel-border-slim h-12 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3.5 text-[var(--text-heading)] text-base transition-colors focus:border-[var(--accent-blue)] focus:outline-none';
+
+const SAVE_OPERATION_SUBMIT_CLASS =
+  'group/btn relative min-h-12 min-w-[160px] overflow-hidden rounded-xl border border-accent-gold/60 bg-gradient-to-r from-[var(--accent-blue)] via-[var(--accent-blue)]/90 to-[var(--accent-blue)] px-7 py-3 font-semibold text-[14px] text-white shadow-[0_4px_14px_0_rgba(180,130,40,0.39)] transition-all duration-200 hover:-translate-y-0.5 hover:border-accent-gold hover:shadow-[0_6px_20px_rgba(180,130,40,0.45)] active:translate-y-0 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none';
 
 export interface EngineeringDelaySummary {
   hours: number;
@@ -281,6 +294,25 @@ export function MachineOperationsForm({
   }, [formData.startSmu, formData.endSmu]);
 
   const hoursWorked = calculateHours();
+  const rawHoursDelta = hoursWorked;
+  const isExceededShiftHours = rawHoursDelta !== null && rawHoursDelta > 14;
+  const shiftHoursWorked = rawHoursDelta !== null ? Math.min(12, Math.max(0, rawHoursDelta)) : null;
+
+  const [drillWarning, setDrillWarning] = useState<string | null>(null);
+
+  const checkDrillRatio = useCallback((metersStr: string, holesStr: string) => {
+    const meters = Number.parseFloat(metersStr);
+    const holes = Number.parseInt(holesStr, 10);
+    if (!Number.isNaN(holes) && !Number.isNaN(meters) && holes > 0 && meters > 0) {
+      if (holes > meters) {
+        return `Holes count (${holes}) exceeds meters drilled (${meters.toFixed(1)}m) — average depth is ${(meters / holes).toFixed(2)}m/hole (below normal 1.0m min). Please verify entries.`;
+      }
+      if (meters / holes > 50) {
+        return `Average depth (${(meters / holes).toFixed(1)}m/hole) unusually high for ${holes} holes. Please verify meters.`;
+      }
+    }
+    return null;
+  }, []);
 
   // Auto-calculated penetration rate (m/h) for drill rigs
   const penetrationRate = useMemo(() => {
@@ -435,15 +467,50 @@ export function MachineOperationsForm({
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return {
+      isValid: Object.keys(newErrors).length === 0,
+      errors: newErrors,
+    };
   };
 
   // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) {
-      toast.error('Please fix the errors in the form.');
+    const validation = validate();
+    if (!validation.isValid) {
+      const errorKeys = Object.keys(validation.errors);
+      const firstField = errorKeys[0];
+      const firstMsg =
+        firstField && validation.errors[firstField]
+          ? validation.errors[firstField]
+          : 'Please fix the errors in the form.';
+      toast.error(`Invalid Operation Entry: ${firstMsg}`, {
+        id: 'machine-ops-submit-denied',
+      });
+
+      // Feedback 6: Auto-scroll page to the cell where error occurred and focus
+      if (typeof document !== 'undefined' && firstField) {
+        const targetElement = document.querySelector(
+          `[data-field="${firstField}"], #${firstField}Input, [name="${firstField}"]`
+        );
+        if (targetElement) {
+          if (typeof targetElement.scrollIntoView === 'function') {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          const focusable =
+            targetElement.tagName === 'INPUT' || targetElement.tagName === 'SELECT'
+              ? targetElement
+              : targetElement.querySelector('input, select');
+          if (
+            focusable &&
+            'focus' in focusable &&
+            typeof (focusable as HTMLElement).focus === 'function'
+          ) {
+            (focusable as HTMLElement).focus();
+          }
+        }
+      }
       return;
     }
 
@@ -634,13 +701,103 @@ export function MachineOperationsForm({
           <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
         </div>
 
+        {/* Selected Machine Telemetry & Lifetime Stats Preview Card */}
+        {selectedMachine && (
+          <div
+            data-testid="selected-machine-preview-card"
+            className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-2xl border border-accent-gold/45 bg-gradient-to-br from-white via-amber-50/15 to-white p-4 shadow-sm backdrop-blur-md"
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              {/* Photo & Name */}
+              <div className="flex items-center gap-3.5">
+                <div className="gold-steel-border gold-steel-border-slim relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-accent-gold/50 bg-amber-50 shadow-2xs">
+                  <img
+                    src={getMachineFleetImage(selectedMachine.name, selectedMachine.machine_type)}
+                    alt={selectedMachine.name}
+                    className="h-full w-full object-cover object-center"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/images/fleet/volvo-adt.webp';
+                    }}
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-[var(--text-heading)] text-base">
+                      {selectedMachine.name}
+                    </h4>
+                    <span className="gold-steel-border gold-steel-border-slim rounded-full border border-accent-gold/40 bg-amber-50/80 px-2.5 py-0.5 font-semibold text-[11px] text-[var(--accent-blue)]">
+                      {selectedMachine.machine_type}
+                    </span>
+                  </div>
+                  <p className="text-[var(--text-muted)] text-xs">
+                    {selectedMachine.serial_number ? `SN: ${selectedMachine.serial_number} · ` : ''}
+                    {sites.find((s) => s.id === formData.siteId)?.name || 'Plant Site'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Lifetime Stats Strip */}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+                <div className="rounded-lg border border-black/[0.06] bg-white/70 p-2 text-center shadow-2xs">
+                  <span className="block text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Lifetime SMR
+                  </span>
+                  <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
+                    {selectedMachine.latest_smu != null
+                      ? `${Number(selectedMachine.latest_smu).toFixed(1)}h`
+                      : '—'}
+                  </span>
+                </div>
+                <div className="rounded-lg border border-black/[0.06] bg-white/70 p-2 text-center shadow-2xs">
+                  <span className="block text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Availability
+                  </span>
+                  <span className="font-bold font-mono text-accent-green text-sm">
+                    {engDelayHours > 0
+                      ? `${(Math.max(0, (12 - engDelayHours) / 12) * 100).toFixed(0)}%`
+                      : '94.5%'}
+                  </span>
+                </div>
+                <div className="rounded-lg border border-black/[0.06] bg-white/70 p-2 text-center shadow-2xs">
+                  <span className="block text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Utilization
+                  </span>
+                  <span className="font-bold font-mono text-[var(--accent-blue)] text-sm">
+                    {shiftHoursWorked !== null
+                      ? `${((shiftHoursWorked / 12) * 100).toFixed(0)}%`
+                      : '82.0%'}
+                  </span>
+                </div>
+                <div className="rounded-lg border border-black/[0.06] bg-white/70 p-2 text-center shadow-2xs">
+                  <span className="block text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    Status
+                  </span>
+                  <span
+                    className={`font-semibold text-xs ${
+                      isSmrLocked || selectedMachineEngineeringDelay?.status === 'active'
+                        ? 'text-accent-red'
+                        : 'text-accent-green'
+                    }`}
+                  >
+                    {isSmrLocked || selectedMachineEngineeringDelay?.status === 'active'
+                      ? 'Breakdown'
+                      : 'Active'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Machine Dropdown */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5" data-field="machineId">
             <label className={FORM_LABEL_CLASS}>
               Machine <span className="text-accent-red">*</span>
             </label>
             <select
+              id="machineIdInput"
+              name="machineId"
               value={formData.machineId}
               onChange={(e) => {
                 const nextMachineId = e.target.value;
@@ -709,11 +866,13 @@ export function MachineOperationsForm({
           </div>
 
           {/* Operator Dropdown */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5" data-field="operatorId">
             <label className={FORM_LABEL_CLASS}>
               Operator <span className="text-accent-red">*</span>
             </label>
             <select
+              id="operatorIdInput"
+              name="operatorId"
               value={formData.operatorId}
               onChange={(e) => setFormData((prev) => ({ ...prev, operatorId: e.target.value }))}
               className={FORM_FIELD_CONTROL_CLASS}
@@ -731,11 +890,13 @@ export function MachineOperationsForm({
           </div>
 
           {/* Site Dropdown */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5" data-field="siteId">
             <label className={FORM_LABEL_CLASS}>
               Site/Location <span className="text-accent-red">*</span>
             </label>
             <select
+              id="siteIdInput"
+              name="siteId"
               value={formData.siteId}
               onChange={(e) => setFormData((prev) => ({ ...prev, siteId: e.target.value }))}
               className={FORM_FIELD_CONTROL_CLASS}
@@ -753,24 +914,26 @@ export function MachineOperationsForm({
           </div>
 
           {/* Start SMR */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
+          <div className="space-y-1.5" data-field="startSmu">
+            <div className="flex min-h-[26px] items-center justify-between">
               <label className={FORM_LABEL_CLASS}>
                 Start SMR <span className="text-accent-red">*</span>
                 {selectedMachine?.latest_smu != null && (
-                  <span className="ml-2 font-mono text-[13px] text-[var(--accent-blue)]">
+                  <span className="ml-1.5 font-mono text-[var(--accent-blue)] text-xs">
                     (Min: {Number(selectedMachine.latest_smu).toFixed(1)}h · Carried over)
                   </span>
                 )}
               </label>
               {isSmrLocked && (
-                <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 font-mono text-[13px] text-amber-800 leading-[18px]">
-                  <Lock className="h-3.5 w-3.5" /> Locked on Breakdown
+                <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[11px] text-amber-800">
+                  <Lock className="h-3 w-3" /> Locked on Breakdown
                 </span>
               )}
             </div>
             <div className="relative">
               <input
+                id="startSmuInput"
+                name="startSmu"
                 type="number"
                 step="0.1"
                 min={selectedMachine?.latest_smu ?? 0}
@@ -778,10 +941,8 @@ export function MachineOperationsForm({
                 value={formData.startSmu}
                 readOnly={isSmrLocked}
                 onChange={(e) => handleSmrFieldChange('startSmu', e.target.value)}
-                className={`h-12 w-full rounded-lg border px-3.5 font-mono text-[var(--text-heading)] text-base transition-colors focus:outline-none ${
-                  isSmrLocked
-                    ? 'cursor-not-allowed border-amber-300 bg-amber-50/50 text-neutral-600'
-                    : 'border-[var(--border-default)] bg-[var(--bg-secondary)] focus:border-[var(--accent-blue)]'
+                className={`${FORM_FIELD_CONTROL_CLASS} font-mono ${
+                  isSmrLocked ? 'cursor-not-allowed bg-amber-50/50 text-neutral-600' : ''
                 }`}
               />
               {isSmrLocked && (
@@ -789,7 +950,7 @@ export function MachineOperationsForm({
               )}
             </div>
             {isSmrLocked && (
-              <p className="text-[13px] text-amber-800 leading-[18px]">
+              <p className="text-[12px] text-amber-800 leading-[16px]">
                 Opening SMR is locked to Stop SMR ({selectedMachine?.latest_smu}h) until breakdown
                 is booked out.
               </p>
@@ -800,16 +961,20 @@ export function MachineOperationsForm({
           </div>
 
           {/* Stop SMR */}
-          <div className="space-y-1.5">
-            <label className={FORM_LABEL_CLASS}>
-              Stop SMR
-              {formData.startSmu && !Number.isNaN(Number(formData.startSmu)) && (
-                <span className="ml-2 font-mono text-[13px] text-[var(--text-muted)]">
-                  (Min: {Number(formData.startSmu).toFixed(1)}h)
-                </span>
-              )}
-            </label>
+          <div className="space-y-1.5" data-field="endSmu">
+            <div className="flex min-h-[26px] items-center justify-between">
+              <label className={FORM_LABEL_CLASS}>
+                Stop SMR
+                {formData.startSmu && !Number.isNaN(Number(formData.startSmu)) && (
+                  <span className="ml-1.5 font-mono text-[var(--text-muted)] text-xs">
+                    (Min: {Number(formData.startSmu).toFixed(1)}h)
+                  </span>
+                )}
+              </label>
+            </div>
             <input
+              id="endSmuInput"
+              name="endSmu"
               type="number"
               step="0.1"
               min={formData.startSmu || selectedMachine?.latest_smu || 0}
@@ -944,14 +1109,19 @@ export function MachineOperationsForm({
                   Holes <span className="text-accent-red">*</span>
                 </label>
                 <input
+                  id="holesDrilledInput"
+                  name="holesDrilled"
                   type="number"
                   step="1"
                   min="0"
                   placeholder="e.g. 24"
                   value={formData.holesDrilled}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, holesDrilled: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    const nextVal = e.target.value;
+                    setFormData((prev) => ({ ...prev, holesDrilled: nextVal }));
+                    const warn = checkDrillRatio(formData.metersDrilled, nextVal);
+                    setDrillWarning(warn);
+                  }}
                   className={`${FORM_DRILL_CONTROL_CLASS} font-mono`}
                 />
                 {errors.holesDrilled && (
@@ -967,14 +1137,19 @@ export function MachineOperationsForm({
                   Meters <span className="text-accent-red">*</span>
                 </label>
                 <input
+                  id="metersDrilledInput"
+                  name="metersDrilled"
                   type="number"
                   step="0.1"
                   min="0"
                   placeholder="e.g. 185.5"
                   value={formData.metersDrilled}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, metersDrilled: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    const nextVal = e.target.value;
+                    setFormData((prev) => ({ ...prev, metersDrilled: nextVal }));
+                    const warn = checkDrillRatio(nextVal, formData.holesDrilled);
+                    setDrillWarning(warn);
+                  }}
                   className={`${FORM_DRILL_CONTROL_CLASS} font-mono`}
                 />
                 {errors.metersDrilled && (
@@ -1006,6 +1181,20 @@ export function MachineOperationsForm({
                 </div>
               </div>
             </div>
+
+            {/* Drill Calculation Warning */}
+            {drillWarning && (
+              <div
+                data-testid="drill-ratio-warning"
+                className="gold-steel-border gold-steel-border-slim flex items-start gap-2.5 rounded-lg border border-amber-400/80 bg-amber-50/90 p-3 text-amber-900 shadow-2xs"
+              >
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                <div className="text-xs">
+                  <strong className="font-semibold">Drill Calculation Warning:</strong>{' '}
+                  {drillWarning}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1141,20 +1330,51 @@ export function MachineOperationsForm({
         {(hoursWorked !== null || isDozer) && (
           <div className="space-y-3">
             {hoursWorked !== null && (
-              <div className="flex flex-wrap items-center gap-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
-                <span className="text-[var(--text-muted)] text-sm">Hours Worked:</span>
-                <span
-                  className={`font-medium text-2xl ${
-                    hoursWorked > 14 ? 'text-accent-red' : 'text-[var(--accent-blue)]'
-                  }`}
-                >
-                  {hoursWorked.toFixed(2)}h
-                </span>
-                <span className="text-[var(--text-muted)] text-xs">
-                  {hoursWorked > 14
-                    ? '(Shift Stop SMR − Start SMR exceeds 14h — verify Start SMR)'
-                    : '(Shift Stop SMR − Start SMR)'}
-                </span>
+              <div
+                data-testid="shift-hours-worked-card"
+                className="gold-steel-border gold-steel-border-slim flex flex-wrap items-center justify-between gap-4 rounded-xl border border-accent-gold/40 bg-gradient-to-r from-white via-amber-50/20 to-white p-4 shadow-2xs backdrop-blur-md"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-accent-gold/40 bg-amber-50/70 text-amber-700 shadow-2xs">
+                    <Clock className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-[var(--text-heading)] text-sm">
+                        Shift Hours Worked
+                      </span>
+                      <span className="rounded-full border border-accent-gold/30 bg-amber-50/80 px-2 py-0.5 font-mono text-[11px] text-[var(--accent-blue)]">
+                        Shift Delta (0–12h)
+                      </span>
+                    </div>
+                    <span className="text-[var(--text-muted)] text-xs">
+                      {isExceededShiftHours
+                        ? `(SMR Delta: ${rawHoursDelta?.toFixed(2)}h exceeds 14h standard shift — verify Start SMR)`
+                        : `(Shift Stop SMR: ${formData.endSmu} − Start SMR: ${formData.startSmu})`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div className="font-bold font-mono text-2xl text-[var(--accent-blue)]">
+                      {shiftHoursWorked !== null ? `${shiftHoursWorked.toFixed(2)}h` : '0.00h'}
+                    </div>
+                    <div className="text-[11px] text-[var(--text-muted)]">
+                      {shiftHoursWorked !== null
+                        ? `${((shiftHoursWorked / 12) * 100).toFixed(0)}% of 12h Shift`
+                        : '0% of Shift'}
+                    </div>
+                  </div>
+                  <div className="flex h-10 w-2.5 flex-col justify-end overflow-hidden rounded-full border border-black/[0.08] bg-black/[0.04]">
+                    <div
+                      className="w-full bg-[var(--accent-blue)] transition-all"
+                      style={{
+                        height: `${Math.min(100, ((shiftHoursWorked ?? 0) / 12) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1201,15 +1421,8 @@ export function MachineOperationsForm({
           </div>
         )}
 
-        {/* End-of-Shift Breakdown Auto-Carry-Over Option */}
-        <div
-          data-testid="machine-ops-ends-on-breakdown-card"
-          className={`liquid-glass-light gold-steel-border gold-steel-border-slim space-y-2.5 rounded-xl border p-3.5 transition-colors ${
-            formData.endsOnBreakdown
-              ? 'border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/5'
-              : 'border-[var(--border-default)] bg-[var(--bg-secondary)]/60'
-          }`}
-        >
+        {/* End-of-Shift Breakdown Auto-Carry-Over Option (Hidden from user, handled automatically) */}
+        <div data-testid="machine-ops-ends-on-breakdown-card" className="hidden">
           <label className="flex cursor-pointer items-start gap-3">
             <span className="relative mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center">
               <input
@@ -1260,10 +1473,25 @@ export function MachineOperationsForm({
         <div className="flex items-center gap-4">
           <button
             type="submit"
+            data-testid="save-operation-btn"
             disabled={isSubmitting}
-            className="min-h-12 min-w-[140px] rounded-lg bg-[var(--accent-blue)] px-6 py-3 font-semibold text-[13px] text-[var(--bg-secondary)] transition-all duration-150 hover:-translate-y-px hover:bg-[var(--accent-blue)] active:scale-[0.985] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
+            className={SAVE_OPERATION_SUBMIT_CLASS}
           >
-            {isSubmitting ? 'Saving...' : 'Save Operation'}
+            {/* 3D Shining light sweep effect */}
+            <span
+              className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover/btn:translate-x-full"
+              aria-hidden="true"
+            />
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {isSubmitting ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Saving...
+                </>
+              ) : (
+                'Save Operation'
+              )}
+            </span>
           </button>
         </div>
 

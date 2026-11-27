@@ -4,16 +4,23 @@ import { AnimatedDialog } from '@repo/ui';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
-import { Activity, AlertTriangle, Lock, Minus, Plus, TrendingUp, Truck } from 'lucide-react';
+import { AlertTriangle, Lock, Minus, Plus, TrendingUp, Truck } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 import type { Excavator, HourlySlotSeries, Machine } from './hourly-loads-utils';
 import { HOUR_PROP, HOURS_12, type HourlyMaterial, type HourlyShift } from './loads-utils';
 
 /** Shared KPI tile shell — golden steel border over the vibrancy surface. */
 const KPI_TILE_CLASS =
-  'gold-steel-border gold-steel-border-slim rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs';
+  'gold-steel-border gold-steel-border-slim group relative overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs transition-transform duration-200 ease-out hover:-translate-y-0.5';
 const KPI_TILE_ROW_CLASS = `${KPI_TILE_CLASS} flex items-center justify-between`;
 const KPI_TILE_STACK_CLASS = `${KPI_TILE_CLASS} flex flex-col justify-between`;
+
+/** Golden animated panel shell used for the legend + timeline sections. */
+const GOLD_PANEL_CLASS =
+  'gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-gold/40 bg-[var(--bg-secondary)]/80 p-3.5 shadow-2xs';
+
+/** Target loads per shift used for the up/down delta indicator. */
+const SHIFT_TARGET_LOADS = 120;
 
 const SPLIT_TRIGGER_BTN_CLASS =
   'inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[var(--accent-blue)] px-4 py-2.5 font-semibold text-white text-xs shadow-sm transition-all hover:bg-[var(--accent-blue)]/90 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30';
@@ -206,124 +213,267 @@ export function HourlyLoadsTelemetryHeader({
   return (
     <GlassCard className="space-y-4 p-4 sm:p-5">
       {/* Redesigned Live KPI Strip */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {/* KPI 1: Total Loads Captured */}
-        <div className={KPI_TILE_ROW_CLASS}>
-          <div className="space-y-0.5">
-            <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
-              Total Shift Loads
-            </span>
-            <div className="flex items-baseline gap-2">
-              <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
-                {grandTotalLoads}
+      <div className={GOLD_PANEL_CLASS}>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {/* KPI 1: Total Loads Captured — Arch arrow + delta vs target */}
+          <div className={KPI_TILE_ROW_CLASS}>
+            <div className="space-y-0.5">
+              <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+                Total Shift Loads
               </span>
-              <span className="font-medium text-[11px] text-[var(--accent-blue)]">
-                {selectedShift === 'day' ? 'Day Shift' : 'Night Shift'}
+              <div className="flex items-baseline gap-2">
+                <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
+                  {grandTotalLoads}
+                </span>
+                <span className="font-medium text-[11px] text-[var(--accent-blue)]">
+                  {selectedShift === 'day' ? 'Day Shift' : 'Night Shift'}
+                </span>
+              </div>
+              {(() => {
+                const isAboveTarget = grandTotalLoads >= SHIFT_TARGET_LOADS;
+                const deltaPct =
+                  SHIFT_TARGET_LOADS > 0
+                    ? Math.abs(
+                        ((grandTotalLoads - SHIFT_TARGET_LOADS) / SHIFT_TARGET_LOADS) * 100
+                      ).toFixed(1)
+                    : '0.0';
+                return (
+                  <div
+                    data-testid="kpi-loads-delta"
+                    className="flex items-center gap-1.5 pt-0.5"
+                    title={`Target: ${SHIFT_TARGET_LOADS} loads`}
+                  >
+                    <span
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                        isAboveTarget
+                          ? 'bg-[var(--accent-green)]/15 text-[var(--accent-green)]'
+                          : 'bg-[var(--accent-red)]/15 text-[var(--accent-red)]'
+                      } ${isAboveTarget ? '' : 'rotate-180'}`}
+                    >
+                      <Logo variant="gold" className="h-3.5 w-3.5" />
+                    </span>
+                    <span
+                      className={`font-mono font-semibold text-[11px] tabular-nums ${
+                        isAboveTarget ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]'
+                      }`}
+                    >
+                      {isAboveTarget ? '+' : '-'}
+                      {deltaPct}%
+                    </span>
+                    <span className="text-[11px] text-[var(--text-muted)]">
+                      {isAboveTarget ? 'above target' : 'below target'}
+                    </span>
+                  </div>
+                );
+              })()}
+              {grandTotalMaterial > 0 && (
+                <span className="block text-[11px] text-[var(--text-muted)]">
+                  {grandTotalMaterial.toLocaleString('en-US')} t total material
+                </span>
+              )}
+            </div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+              <TrendingUp className="h-5 w-5" />
+            </div>
+          </div>
+
+          {/* KPI 2: Machines Active — radial fleet utilization gauge */}
+          <div className={KPI_TILE_ROW_CLASS}>
+            <div className="space-y-0.5">
+              <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+                Machines Active
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
+                  {activeMachinesCount}
+                </span>
+                <span className="font-medium text-[var(--text-muted)] text-xs">
+                  / {machinesCount} fleet
+                </span>
+              </div>
+              <div
+                data-testid="kpi-fleet-bar"
+                className="mt-1 flex h-1.5 w-full max-w-[120px] overflow-hidden rounded-full bg-black/[0.07]"
+                title={
+                  machinesCount > 0
+                    ? `${Math.round((activeMachinesCount / machinesCount) * 100)}% fleet utilization`
+                    : 'No fleet configured'
+                }
+              >
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--accent-green)] to-[var(--accent-blue)] transition-all duration-500"
+                  style={{
+                    width: `${
+                      machinesCount > 0
+                        ? Math.min(100, Math.round((activeMachinesCount / machinesCount) * 100))
+                        : 0
+                    }%`,
+                  }}
+                />
+              </div>
+              <span className="block text-[11px] text-[var(--text-muted)]">
+                {machinesCount > 0
+                  ? `${Math.round((activeMachinesCount / machinesCount) * 100)}% fleet utilization`
+                  : 'No fleet configured'}
               </span>
             </div>
-            <span className="block text-[11px] text-[var(--text-muted)]">
-              {grandTotalMaterial > 0
-                ? `${grandTotalMaterial.toLocaleString('en-US')} t total material`
-                : 'Real-time shift tally'}
-            </span>
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
+              <svg viewBox="0 0 36 36" className="h-12 w-12 -rotate-90" aria-hidden="true">
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15.5"
+                  fill="none"
+                  stroke="rgba(0,0,0,0.08)"
+                  strokeWidth="3.5"
+                />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15.5"
+                  fill="none"
+                  stroke="var(--accent-green)"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeDasharray={`${
+                    machinesCount > 0
+                      ? Math.min(100, Math.round((activeMachinesCount / machinesCount) * 100))
+                      : 0
+                  } 100`}
+                  pathLength={100}
+                  className="transition-all duration-500"
+                />
+              </svg>
+              <Truck className="absolute h-4 w-4 text-[var(--accent-green)]" />
+            </div>
           </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
-            <TrendingUp className="h-5 w-5" />
-          </div>
-        </div>
 
-        {/* KPI 2: Machines Active */}
-        <div className={KPI_TILE_ROW_CLASS}>
-          <div className="space-y-0.5">
-            <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
-              Machines Active
-            </span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
-                {activeMachinesCount}
+          {/* KPI 3: Avg Loads / Machine — micro sparkline of hourly series */}
+          <div className={KPI_TILE_ROW_CLASS}>
+            <div className="space-y-0.5">
+              <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+                Avg Loads / Machine
               </span>
-              <span className="font-medium text-[var(--text-muted)] text-xs">
-                / {machinesCount} fleet
+              <div className="flex items-baseline gap-2">
+                <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
+                  {avgLoadsPerMachine}
+                </span>
+                <span className="font-medium text-[11px] text-[var(--text-muted)]">loads/unit</span>
+              </div>
+              <span className="block text-[11px] text-[var(--text-muted)]">
+                Peak:{' '}
+                {peakHour.totalLoads > 0
+                  ? `${peakHour.hourLabel} (${peakHour.totalLoads})`
+                  : 'No loads yet'}
               </span>
             </div>
-            <span className="block text-[11px] text-[var(--text-muted)]">
-              {machinesCount > 0
-                ? `${Math.round((activeMachinesCount / machinesCount) * 100)}% fleet utilization`
-                : 'No fleet configured'}
-            </span>
-          </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-green)]/20 bg-[var(--accent-green)]/10 text-[var(--accent-green)]">
-            <Truck className="h-5 w-5" />
-          </div>
-        </div>
-
-        {/* KPI 3: Avg Loads / Machine */}
-        <div className={KPI_TILE_ROW_CLASS}>
-          <div className="space-y-0.5">
-            <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
-              Avg Loads / Machine
-            </span>
-            <div className="flex items-baseline gap-2">
-              <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
-                {avgLoadsPerMachine}
-              </span>
-              <span className="font-medium text-[11px] text-[var(--text-muted)]">loads/unit</span>
-            </div>
-            <span className="block text-[11px] text-[var(--text-muted)]">
-              Peak:{' '}
-              {peakHour.totalLoads > 0
-                ? `${peakHour.hourLabel} (${peakHour.totalLoads})`
-                : 'No loads yet'}
-            </span>
-          </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-amber)]/30 bg-[var(--accent-amber)]/15 text-[var(--accent-amber)]">
-            <Activity className="h-5 w-5" />
-          </div>
-        </div>
-
-        {/* KPI 4: Waste vs Coal Split */}
-        <div className={KPI_TILE_STACK_CLASS}>
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
-              Material Split
-            </span>
-            <span className="font-mono font-semibold text-[11px] text-[var(--text-heading)]">
-              W: {wasteTotalLoads} · C: {coalTotalLoads}
-            </span>
-          </div>
-          <div className="my-2 flex h-2 w-full overflow-hidden rounded-full bg-black/[0.06]">
             <div
-              className="h-full bg-[var(--accent-blue)] transition-all duration-300"
-              style={{
-                width: `${
-                  grandTotalLoads > 0 ? Math.round((wasteTotalLoads / grandTotalLoads) * 100) : 50
-                }%`,
-              }}
-              title={`Waste: ${wasteTotalLoads} loads`}
-            />
-            <div
-              className="h-full bg-neutral-800 transition-all duration-300"
-              style={{
-                width: `${
-                  grandTotalLoads > 0
-                    ? 100 - Math.round((wasteTotalLoads / grandTotalLoads) * 100)
-                    : 50
-                }%`,
-              }}
-              title={`Coal: ${coalTotalLoads} loads`}
-            />
+              data-testid="kpi-avg-sparkline"
+              className="flex h-10 w-16 shrink-0 items-end gap-[2px]"
+              aria-hidden="true"
+            >
+              {hourlySeries.map((slot) => (
+                <span
+                  key={`spark-${slot.hourLabel}`}
+                  className={`flex-1 rounded-[1px] transition-all duration-300 ${
+                    slot.totalLoads > 0
+                      ? 'bg-gradient-to-t from-[var(--accent-amber)]/45 to-[var(--accent-amber)]'
+                      : 'bg-black/[0.07]'
+                  }`}
+                  style={{
+                    height: `${
+                      slot.totalLoads > 0
+                        ? Math.max(12, Math.round((slot.totalLoads / maxHourLoads) * 100))
+                        : 8
+                    }%`,
+                  }}
+                />
+              ))}
+            </div>
           </div>
-          <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
-            <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-[var(--accent-blue)]" />
-              Waste (
-              {grandTotalLoads > 0 ? Math.round((wasteTotalLoads / grandTotalLoads) * 100) : 0}%)
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-neutral-800" />
-              Coal ({grandTotalLoads > 0 ? Math.round((coalTotalLoads / grandTotalLoads) * 100) : 0}
-              %)
-            </span>
+
+          {/* KPI 4: Waste vs Coal Split — donut + proportional bar */}
+          <div className={KPI_TILE_STACK_CLASS}>
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+                Material Split
+              </span>
+              <span className="font-mono font-semibold text-[11px] text-[var(--text-heading)]">
+                W: {wasteTotalLoads} · C: {coalTotalLoads}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              {(() => {
+                const wastePct =
+                  grandTotalLoads > 0 ? Math.round((wasteTotalLoads / grandTotalLoads) * 100) : 0;
+                const coalPct = grandTotalLoads > 0 ? 100 - wastePct : 0;
+                return (
+                  <>
+                    <svg
+                      viewBox="0 0 36 36"
+                      className="h-12 w-12 shrink-0 -rotate-90"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="14"
+                        fill="none"
+                        stroke="rgba(0,0,0,0.07)"
+                        strokeWidth="4"
+                      />
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="14"
+                        fill="none"
+                        stroke="var(--accent-blue)"
+                        strokeWidth="4"
+                        strokeDasharray={`${wastePct} 100`}
+                        pathLength={100}
+                        className="transition-all duration-500"
+                      />
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="14"
+                        fill="none"
+                        stroke="#262626"
+                        strokeWidth="4"
+                        strokeDasharray={`${coalPct} 100`}
+                        strokeDashoffset={-wastePct}
+                        pathLength={100}
+                        className="transition-all duration-500"
+                      />
+                    </svg>
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
+                        <div
+                          className="h-full bg-[var(--accent-blue)] transition-all duration-300"
+                          style={{ width: `${grandTotalLoads > 0 ? wastePct : 50}%` }}
+                          title={`Waste: ${wasteTotalLoads} loads`}
+                        />
+                        <div
+                          className="h-full bg-neutral-800 transition-all duration-300"
+                          style={{ width: `${grandTotalLoads > 0 ? coalPct : 50}%` }}
+                          title={`Coal: ${coalTotalLoads} loads`}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+                        <span className="inline-flex items-center gap-1">
+                          <span className="h-2 w-2 rounded-full bg-[var(--accent-blue)]" />
+                          Waste ({wastePct}%)
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="h-2 w-2 rounded-full bg-neutral-800" />
+                          Coal ({coalPct}%)
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
         </div>
       </div>
@@ -340,12 +490,12 @@ export function HourlyLoadsTelemetryHeader({
       </div>
 
       {/* Live Hourly Timeline Graph */}
-      <div className="mt-3 space-y-3 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 p-3.5">
+      <div className={`mt-3 space-y-3 ${GOLD_PANEL_CLASS}`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Logo variant="gold" className="h-4 w-4 shrink-0" />
             <div>
-              <h3 className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
+              <h3 className="animate-shimmer bg-gradient-to-r from-amber-700 via-[var(--accent-blue)] to-amber-800 bg-clip-text font-bold text-transparent text-xs uppercase tracking-wider">
                 Live Hourly Production Timeline (
                 {selectedShift === 'day' ? '06:00 – 17:00' : '18:00 – 05:00'})
               </h3>
@@ -354,7 +504,7 @@ export function HourlyLoadsTelemetryHeader({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4 font-medium text-[11px] text-[var(--text-muted)]">
+          <div className="gold-steel-border gold-steel-border-slim flex flex-wrap items-center gap-4 rounded-full border border-accent-gold/40 bg-white/85 px-3 py-1 font-medium text-[11px] text-[var(--text-muted)] shadow-2xs">
             <span className="inline-flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-xs bg-[var(--accent-blue)]" />
               Waste Loads

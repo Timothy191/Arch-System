@@ -516,3 +516,47 @@ export function validateDelayFormEntry(
 
   return null;
 }
+
+export function getMachineFleetImage(machineName?: string, machineType?: string): string {
+  const name = (machineName || '').toUpperCase();
+  const type = (machineType || '').toLowerCase();
+
+  if (type.includes('drill') || name.startsWith('DR-') || name.startsWith('DR')) {
+    return '/images/fleet/atlas-copco-drill.webp';
+  }
+  if (
+    type.includes('dozer') ||
+    name.startsWith('BD-') ||
+    name.startsWith('DZ-') ||
+    name.startsWith('BD')
+  ) {
+    return '/images/fleet/caterpillar-dozer.webp';
+  }
+  if (type.includes('excavator') || name.startsWith('EX-') || name.startsWith('EX')) {
+    return '/images/fleet/hitachi-excavator.webp';
+  }
+  if (type.includes('dump') || name.startsWith('DT-') || name.startsWith('ADT')) {
+    return '/images/fleet/volvo-adt.webp';
+  }
+  if (type.includes('rdt') || name.startsWith('RDT')) {
+    return '/images/fleet/caterpillar-rdt.webp';
+  }
+  if (type.includes('grader') || name.startsWith('G-') || name.startsWith('GR')) {
+    return '/images/fleet/caterpillar-grader.webp';
+  }
+  if (type.includes('loader') || name.startsWith('L-') || name.startsWith('LD')) {
+    return '/images/fleet/volvo-loader.webp';
+  }
+  if (type.includes('crusher') || name.startsWith('CR-')) {
+    return '/images/fleet/mobile-crusher.webp';
+  }
+  if (
+    type.includes('compactor') ||
+    type.includes('roller') ||
+    name.startsWith('CKN') ||
+    name.startsWith('RL-')
+  ) {
+    return '/images/fleet/roller-compactor.webp';
+  }
+  return '/images/fleet/volvo-adt.webp';
+}

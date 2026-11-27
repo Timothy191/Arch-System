@@ -56,41 +56,64 @@ export function MachineOperationsFilterStrip({
   };
 
   return (
-    <div className="space-y-3">
+    <div
+      data-testid="machine-operations-filter-panel"
+      className="gold-steel-border gold-steel-border-slim space-y-4 rounded-2xl border border-accent-gold/45 bg-gradient-to-br from-white/95 via-amber-50/[0.15] to-white/95 p-4 shadow-sm backdrop-blur-md"
+    >
+      {/* Panel Header */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-black/[0.06] border-b pb-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-accent-gold/40 bg-amber-50 text-[var(--accent-blue)]">
+            <Search className="h-3.5 w-3.5" />
+          </span>
+          <span className="font-semibold text-[var(--text-heading)] text-sm">
+            Fleet Filter &amp; Search Console
+          </span>
+        </div>
+        <span className="gold-steel-border gold-steel-border-slim rounded-full border border-accent-gold/40 bg-amber-50/80 px-2.5 py-0.5 font-mono font-semibold text-[var(--accent-blue)] text-xs">
+          {counts.total} Machines Tracked
+        </span>
+      </div>
+
       {/* Category Tabs Strip */}
       {onCategoryChange && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-          {categories.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            const count = getCategoryCount(cat);
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => onCategoryChange(cat)}
-                className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
-                  isSelected
-                    ? 'bg-[var(--accent-blue)] text-white shadow-xs'
-                    : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)]'
-                }`}
-              >
-                {MACHINE_CATEGORY_LABELS[cat]} ({count})
-              </button>
-            );
-          })}
+        <div className="space-y-1.5">
+          <span className="block font-medium text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+            Machine Category
+          </span>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+            {categories.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              const count = getCategoryCount(cat);
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => onCategoryChange(cat)}
+                  className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
+                    isSelected
+                      ? 'gold-steel-border gold-steel-border-slim border border-accent-gold bg-[var(--accent-blue)] text-white shadow-xs'
+                      : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:border-accent-gold/40 hover:bg-amber-50/50 hover:text-[var(--text-heading)]'
+                  }`}
+                >
+                  {MACHINE_CATEGORY_LABELS[cat]} ({count})
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
       {/* Status Filter and Search Strip */}
-      <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col items-stretch justify-between gap-3 pt-1 sm:flex-row sm:items-center">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           <button
             type="button"
             onClick={() => onFilterStatusChange('all')}
             className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
               filterStatus === 'all'
-                ? 'bg-neutral-800 text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                ? 'gold-steel-border gold-steel-border-slim border border-neutral-700 bg-neutral-800 text-white shadow-sm'
+                : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
             All Machines ({counts.total})
@@ -100,8 +123,8 @@ export function MachineOperationsFilterStrip({
             onClick={() => onFilterStatusChange('operating')}
             className={`${FILTER_PILL_BASE_CLASSES} ${
               filterStatus === 'operating'
-                ? 'bg-accent-green text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                ? 'gold-steel-border gold-steel-border-slim border border-emerald-600 bg-accent-green text-white shadow-sm'
+                : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent-green" />
@@ -112,8 +135,8 @@ export function MachineOperationsFilterStrip({
             onClick={() => onFilterStatusChange('standby')}
             className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
               filterStatus === 'standby'
-                ? 'bg-amber-600 text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                ? 'gold-steel-border gold-steel-border-slim border border-amber-500 bg-amber-600 text-white shadow-sm'
+                : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
             Standby ({counts.standby})
@@ -123,7 +146,7 @@ export function MachineOperationsFilterStrip({
             onClick={() => onFilterStatusChange('breakdown')}
             className={`${FILTER_PILL_BASE_CLASSES} ${
               filterStatus === 'breakdown'
-                ? 'bg-accent-red text-white shadow-sm'
+                ? 'gold-steel-border gold-steel-border-slim border border-red-500 bg-accent-red text-white shadow-sm'
                 : 'border border-accent-red/30 bg-accent-red/10 text-accent-red hover:bg-accent-red/20'
             }`}
           >
@@ -135,8 +158,8 @@ export function MachineOperationsFilterStrip({
             onClick={() => onFilterStatusChange('inactive')}
             className={`${FILTER_PILL_BASE_CLASSES} ${
               filterStatus === 'inactive'
-                ? 'bg-neutral-600 text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                ? 'gold-steel-border gold-steel-border-slim border border-neutral-500 bg-neutral-600 text-white shadow-sm'
+                : 'border border-[var(--border-default)] bg-white/80 text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400" />

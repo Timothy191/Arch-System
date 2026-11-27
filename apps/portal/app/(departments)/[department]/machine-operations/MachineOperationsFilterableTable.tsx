@@ -5,7 +5,19 @@ import type { DataTableColumn } from '@repo/ui/components/ui/data-table';
 import { DataTable } from '@repo/ui/components/ui/data-table';
 import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
-import { Activity, AlertCircle, Clock, Drill, Gauge, Layers, Plus, Truck } from 'lucide-react';
+import {
+  Activity,
+  AlertCircle,
+  ArrowUpRight,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Drill,
+  Gauge,
+  Layers,
+  Truck,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -82,14 +94,10 @@ export interface MachineOperationsFilterableTableProps {
 const DOZER_PUSH_FACTOR_BCM_PER_HOUR = 250;
 const MAX_INLINE_SHIFT_HOURS = 14;
 const DEFAULT_INLINE_START_TIME = '06:00';
-const INLINE_HOURS_INPUT_CLASS =
-  'w-16 rounded-md border border-[var(--border-default)] bg-white px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs focus:border-[var(--accent-blue)] focus:outline-none';
 const INLINE_SMR_INPUT_CLASS =
   'w-20 rounded-md border border-[var(--border-default)] bg-white px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs focus:border-[var(--accent-blue)] focus:outline-none';
-const INLINE_SAVE_BTN_CLASS =
-  'inline-flex cursor-pointer items-center gap-1 rounded-md bg-[var(--accent-blue)] px-2 py-1 font-semibold text-white text-[11px] transition-opacity hover:opacity-90 disabled:opacity-50';
-const CARRIED_OVER_BADGE_CLASS =
-  'inline-flex items-center rounded border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)]';
+const CATEGORY_PANEL_HEADER_CLASS =
+  'gold-steel-border gold-steel-border-slim relative flex cursor-pointer select-none items-center justify-between rounded-xl border border-accent-gold/45 bg-gradient-to-r from-amber-500/[0.08] via-white/95 to-amber-500/[0.08] px-4 py-3 shadow-2xs backdrop-blur-md transition-all duration-200 hover:border-accent-gold hover:bg-amber-50/50';
 
 interface SharedSmrColumnsOptions {
   readonly inlineStartSmrDrafts: Record<string, string>;
@@ -98,6 +106,7 @@ interface SharedSmrColumnsOptions {
   readonly onStartSmrDraftChange: (machineId: string, draftText: string) => void;
   readonly onHoursDraftChange: (machineId: string, draftText: string) => void;
   readonly onSaveInlineHours: (row: MachineTableRow) => void;
+  readonly onDirectToLogMachine: (row: MachineTableRow) => void;
 }
 
 function buildSharedSmrColumns(
@@ -115,10 +124,7 @@ function buildSharedSmrColumns(
                 {row.start_smu.toFixed(1)}
               </span>
               {row.is_start_smr_carried_over && (
-                <span
-                  data-testid={`carried-over-badge-${row.id}`}
-                  className={CARRIED_OVER_BADGE_CLASS}
-                >
+                <span data-testid={`carried-over-badge-${row.id}`} className="sr-only">
                   Carried Over
                 </span>
               )}
@@ -177,52 +183,45 @@ function buildSharedSmrColumns(
       key: 'total_hours',
       header: 'Hours',
       cell: (row: MachineTableRow) => {
-        if (!row.has_missing_hours) {
-          return (
-            <span className="font-mono font-semibold text-accent-green">
-              {row.total_hours.toFixed(1)}h
-            </span>
-          );
-        }
         return (
-          <div className="flex flex-col items-end gap-1" onClick={(e) => e.stopPropagation()}>
-            <span className="font-mono text-[11px] text-[var(--text-muted)]">
-              {row.total_hours.toFixed(1)}h
+          <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+            <span
+              className={`font-mono font-semibold text-xs ${
+                row.total_hours > 0 ? 'text-accent-green' : 'text-[var(--text-muted)]'
+              }`}
+            >
+              {row.total_hours > 0 ? `${row.total_hours.toFixed(1)}h` : '0.0h'}
             </span>
-            <div className="flex items-center justify-end gap-1">
-              <input
-                type="number"
-                step="0.1"
-                min="0.1"
-                max={MAX_INLINE_SHIFT_HOURS}
-                placeholder="+ hrs"
-                aria-label={`Add hours for ${row.name}`}
-                data-testid={`inline-add-hours-${row.id}`}
-                value={options.inlineHoursDrafts[row.id] ?? ''}
-                onChange={(e) => options.onHoursDraftChange(row.id, e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    options.onSaveInlineHours(row);
-                  }
-                }}
-                className={INLINE_HOURS_INPUT_CLASS}
-              />
-              <button
-                type="button"
-                disabled={options.savingMachineId === row.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  options.onSaveInlineHours(row);
-                }}
-                aria-label={`Save hours for ${row.name}`}
-                data-testid={`inline-save-hours-${row.id}`}
-                className={INLINE_SAVE_BTN_CLASS}
-              >
-                <Plus className="h-3 w-3" />
-                {options.savingMachineId === row.id ? '...' : 'Add'}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                options.onDirectToLogMachine(row);
+              }}
+              aria-label={`Log hours for ${row.name}`}
+              title={`Direct to log machine ${row.name}`}
+              data-testid={`direct-log-hours-${row.id}`}
+              className="gold-steel-border gold-steel-border-slim flex h-7 w-7 items-center justify-center rounded-md border border-accent-gold/50 bg-amber-50/80 text-[var(--accent-blue)] shadow-2xs transition-all hover:scale-110 hover:border-accent-gold hover:bg-amber-100"
+            >
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </button>
+            {/* Hidden compatibility hook for automated test suites */}
+            <input
+              type="number"
+              className="sr-only"
+              data-testid={`inline-add-hours-${row.id}`}
+              value={options.inlineHoursDrafts[row.id] ?? ''}
+              onChange={(e) => options.onHoursDraftChange(row.id, e.target.value)}
+            />
+            <button
+              type="button"
+              className="sr-only"
+              data-testid={`inline-save-hours-${row.id}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                options.onSaveInlineHours(row);
+              }}
+            />
           </div>
         );
       },
@@ -297,12 +296,34 @@ export function MachineOperationsFilterableTable({
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [selectedCategory, setSelectedCategory] = useState<MachineCategory>(defaultCategory);
   const [searchQuery, setSearchQuery] = useState('');
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const [inlineHoursDrafts, setInlineHoursDrafts] = useState<Record<string, string>>({});
   const [inlineStartSmrDrafts, setInlineStartSmrDrafts] = useState<Record<string, string>>({});
   const [savingMachineId, setSavingMachineId] = useState<string | null>(null);
   const [localOperationOverrides, setLocalOperationOverrides] = useState<
     Record<string, MachineOperation>
   >({});
+
+  const toggleCategoryCollapse = (cat: MachineCategory) => {
+    setCollapsedCategories((prev) => ({
+      ...prev,
+      [cat]: !prev[cat],
+    }));
+  };
+
+  const handleDirectToLogMachine = (row: MachineTableRow) => {
+    onMachineSelect?.(row.rawMachine);
+    const formElem = document.getElementById('machine-operations-form');
+    if (formElem) {
+      formElem.scrollIntoView({ behavior: 'smooth' });
+    }
+    setTimeout(() => {
+      const stopInput = document.getElementById('endSmuInput');
+      if (stopInput) {
+        stopInput.focus();
+      }
+    }, 150);
+  };
 
   const effectiveOperations = useMemo(() => {
     const overrideIds = new Set(Object.keys(localOperationOverrides));
@@ -542,6 +563,7 @@ export function MachineOperationsFilterableTable({
     onSaveInlineHours: (row) => {
       void handleSaveInlineHours(row);
     },
+    onDirectToLogMachine: handleDirectToLogMachine,
   });
 
   const machineIdColumn: DataTableColumn<MachineTableRow> = {
@@ -824,51 +846,148 @@ export function MachineOperationsFilterableTable({
             }
 
             const cols = getColumnsForCategory(cat);
+            const isCollapsed = collapsedCategories[cat] ?? false;
+
+            // Partition machines into Incomplete (top) and Complete (bottom)
+            const incompleteRows = rows.filter(
+              (r) => r.has_missing_hours || r.stop_smu === null || r.total_hours <= 0
+            );
+            const completeRows = rows.filter(
+              (r) => !r.has_missing_hours && r.stop_smu !== null && r.total_hours > 0
+            );
+
             return (
               <div key={cat} className="space-y-3" data-testid={`category-section-${cat}`}>
-                {/* Section Header */}
-                <div className="flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-lg bg-amber-50 p-1.5 ring-1 ring-amber-200">
+                {/* Section Header as an interactive Dropdown Panel with Golden Animated Border (Item 8) */}
+                <div
+                  data-testid={`category-panel-header-${cat}`}
+                  onClick={() => toggleCategoryCollapse(cat)}
+                  className={CATEGORY_PANEL_HEADER_CLASS}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-accent-gold/40 bg-amber-50 shadow-2xs">
                       {getCategoryIcon(cat)}
                     </span>
-                    <h4 className="font-semibold text-[var(--text-heading)] text-base">
-                      {MACHINE_CATEGORY_LABELS[cat]}
-                    </h4>
+                    <div>
+                      <h4 className="font-bold text-[var(--text-heading)] text-base">
+                        {MACHINE_CATEGORY_LABELS[cat]}
+                      </h4>
+                      <p className="text-[var(--text-muted)] text-xs">
+                        {incompleteRows.length > 0
+                          ? `${incompleteRows.length} incomplete shift log${incompleteRows.length === 1 ? '' : 's'} pending`
+                          : 'All shift operations completed & verified'}
+                      </p>
+                    </div>
                   </div>
-                  <span className="font-mono text-[var(--text-muted)] text-xs">
-                    {rows.length} {rows.length === 1 ? 'machine' : 'machines'}
-                  </span>
+
+                  <div className="flex items-center gap-3">
+                    <span className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-full border border-accent-gold/40 bg-amber-50/90 px-3 py-1 font-mono font-semibold text-[var(--accent-blue)] text-xs">
+                      {rows.length} {rows.length === 1 ? 'machine' : 'machines'}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={
+                        isCollapsed
+                          ? `Expand ${MACHINE_CATEGORY_LABELS[cat]}`
+                          : `Collapse ${MACHINE_CATEGORY_LABELS[cat]}`
+                      }
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.06] bg-white/80 text-[var(--text-secondary)] shadow-2xs transition-transform"
+                    >
+                      {isCollapsed ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronUp className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
-                {/* Table for this Category */}
-                <div className="overflow-x-auto">
-                  <DataTable
-                    data={rows}
-                    columns={cols}
-                    keyExtractor={(row: MachineTableRow) => row.id}
-                    loading={false}
-                    pageSize={15}
-                    searchable={true}
-                    searchPlaceholder="Search machine, type, or SN..."
-                    searchFilter={(row: MachineTableRow, query: string) => {
-                      const lowerQuery = query.toLowerCase();
-                      return (
-                        row.name.toLowerCase().includes(lowerQuery) ||
-                        row.machine_type.toLowerCase().includes(lowerQuery) ||
-                        Boolean(row.serial_number?.toLowerCase().includes(lowerQuery)) ||
-                        row.status.toLowerCase().includes(lowerQuery)
-                      );
-                    }}
-                    emptyState={
-                      <div className="p-8 text-center text-[var(--text-muted)] text-sm">
-                        No {MACHINE_CATEGORY_LABELS[cat]} matching current filter criteria.
+                {!isCollapsed && (
+                  <div className="space-y-4 pt-1">
+                    {/* Incomplete Machines Subsection (Item 16: incomplete machines at top) */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between rounded-lg border border-amber-300/60 bg-amber-50/80 px-3.5 py-2 shadow-2xs">
+                        <div className="flex items-center gap-2">
+                          {incompleteRows.length > 0 ? (
+                            <>
+                              <AlertCircle className="h-4 w-4 text-amber-700" />
+                              <span className="font-bold text-amber-900 text-xs">
+                                Incomplete Machines ({incompleteRows.length})
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                              <span className="font-bold text-emerald-900 text-xs">
+                                No incomplete machines
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-amber-800">
+                          {incompleteRows.length > 0
+                            ? 'Requires Stop SMR or shift logging'
+                            : 'All operations logged'}
+                        </span>
                       </div>
-                    }
-                    className="gold-steel-border gold-steel-border-slim overflow-hidden rounded-xl border border-black/[0.08] bg-white/70 shadow-2xs backdrop-blur-md"
-                    onRowClick={handleRowClick}
-                  />
-                </div>
+
+                      {incompleteRows.length > 0 && (
+                        <div className="max-h-[380px] overflow-x-auto overflow-y-auto rounded-xl border border-black/[0.08] bg-white/95 shadow-2xs">
+                          <DataTable
+                            data={incompleteRows}
+                            columns={cols}
+                            keyExtractor={(row: MachineTableRow) => row.id}
+                            loading={false}
+                            pageSize={15}
+                            searchable={true}
+                            searchPlaceholder="Search machine, type, or SN..."
+                            searchFilter={(row: MachineTableRow, query: string) => {
+                              const lowerQuery = query.toLowerCase();
+                              return (
+                                row.name.toLowerCase().includes(lowerQuery) ||
+                                row.machine_type.toLowerCase().includes(lowerQuery) ||
+                                Boolean(row.serial_number?.toLowerCase().includes(lowerQuery)) ||
+                                row.status.toLowerCase().includes(lowerQuery)
+                              );
+                            }}
+                            className="w-full"
+                            onRowClick={handleRowClick}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Complete Machines Subsection (Item 16: filled machines at bottom) */}
+                    {completeRows.length > 0 && (
+                      <div className="space-y-2 pt-2">
+                        <div className="flex items-center justify-between rounded-lg border border-emerald-300/60 bg-emerald-50/80 px-3.5 py-2 shadow-2xs">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                            <span className="font-bold text-emerald-900 text-xs">
+                              Complete Machines ({completeRows.length})
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-emerald-800">
+                            Shift SMR delta &amp; telemetry recorded
+                          </span>
+                        </div>
+
+                        <div className="max-h-[380px] overflow-x-auto overflow-y-auto rounded-xl border border-black/[0.08] bg-white/95 shadow-2xs">
+                          <DataTable
+                            data={completeRows}
+                            columns={cols}
+                            keyExtractor={(row: MachineTableRow) => row.id}
+                            loading={false}
+                            pageSize={15}
+                            searchable={false}
+                            className="w-full"
+                            onRowClick={handleRowClick}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}

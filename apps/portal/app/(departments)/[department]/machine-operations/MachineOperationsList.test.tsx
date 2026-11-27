@@ -932,5 +932,151 @@ describe('MachineOperationsList', () => {
         )
       ).toContain('Total delay hours cannot exceed 12h shift limit');
     });
+
+    it('validates 17 Design Feedback requirements on MachineOperationsForm and FilterableTable', async () => {
+      const mockMachine = {
+        id: 'dr-01',
+        name: 'DR-01',
+        machine_type: 'Drill Rig',
+        serial_number: 'SN-DR01',
+        site_id: 'site-a',
+        latest_smu: 21658.0,
+      };
+
+      const { container } = render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={[mockMachine]}
+          operators={[{ id: 'op-dr', full_name: 'Drill Op', employee_code: 'OP-DR01' }]}
+          sites={[{ id: 'site-a', name: 'Pit North', site_code: 'BKF' }]}
+          todayOperations={[]}
+        />
+      );
+
+      // Feedback 1: Start SMR and Stop SMR headers aligned
+      const startSmuField = container.querySelector('[data-field="startSmu"]');
+      const endSmuField = container.querySelector('[data-field="endSmu"]');
+      expect(startSmuField).toBeInTheDocument();
+      expect(endSmuField).toBeInTheDocument();
+      expect(startSmuField?.querySelector('div')?.className).toContain('min-h-[26px]');
+      expect(endSmuField?.querySelector('div')?.className).toContain('min-h-[26px]');
+
+      // Feedback 2: Golden bordering on inputs
+      const machineSelect = container.querySelector('#machineIdInput');
+      expect(machineSelect?.className).toContain('gold-steel-border');
+      expect(machineSelect?.className).toContain('gold-steel-border-slim');
+
+      // Feedback 17: Select machine displays preview card with photo and lifetime stats
+      fireEvent.change(machineSelect!, { target: { value: 'dr-01' } });
+      expect(screen.getByTestId('selected-machine-preview-card')).toBeInTheDocument();
+      expect(screen.getByText('Lifetime SMR')).toBeInTheDocument();
+      expect(screen.getByText('21658.0h')).toBeInTheDocument();
+      expect(screen.getByText('Availability')).toBeInTheDocument();
+      expect(screen.getByText('Utilization')).toBeInTheDocument();
+
+      // Feedback 3: Drill rig penetration rate calculation and hole/meter ratio warning
+      const holesInput = container.querySelector('#holesDrilledInput')!;
+      const metersInput = container.querySelector('#metersDrilledInput')!;
+      const stopInput = container.querySelector('#endSmuInput')!;
+
+      // Enter 8 hours of work (Stop SMR = 21666.0)
+      fireEvent.change(stopInput, { target: { value: '21666.0' } });
+
+      // Feedback 4 & 5: Shift Hours Worked card (8.00h) with golden bordering and professional styling
+      expect(screen.getByTestId('shift-hours-worked-card')).toBeInTheDocument();
+      expect(screen.getByText('8.00h')).toBeInTheDocument();
+      expect(screen.getByText(/Shift Hours Worked/i)).toBeInTheDocument();
+
+      // Holes > meters triggers warning prompt
+      fireEvent.change(holesInput, { target: { value: '50' } });
+      fireEvent.change(metersInput, { target: { value: '20' } });
+      expect(
+        screen.getByText(/Holes count \(50\) exceeds meters drilled \(20\.0m\)/i)
+      ).toBeInTheDocument();
+
+      // Valid meters: 160m for 8h = 20.0 m/h penetration rate
+      fireEvent.change(holesInput, { target: { value: '10' } });
+      fireEvent.change(metersInput, { target: { value: '160' } });
+      expect(screen.getByText('20.0 m/h')).toBeInTheDocument();
+
+      // Feedback 6: Save Operation button has golden bordering and 3D shine
+      const saveBtn = screen.getByTestId('save-operation-btn');
+      expect(saveBtn.className).toContain('shadow-[');
+      expect(saveBtn.className).toContain('border-accent-gold');
+
+      // Feedback 7: Breakdown carry-over checkbox UI is hidden and handled automatically
+      const breakdownCheckbox = screen.getByTestId('machine-ops-ends-on-breakdown');
+      expect(breakdownCheckbox.closest('.hidden')).toBeInTheDocument();
+    });
+
+    it('validates FilterableTable collapsible category panels, sorting, and direct log button', () => {
+      const machinesList = [
+        {
+          id: 'dt-101',
+          name: 'DT-101',
+          machine_type: 'Dump Truck',
+          serial_number: 'SN-DT101',
+          latest_smu: 1000,
+          bin_factor: 28,
+        },
+        {
+          id: 'dt-102',
+          name: 'DT-102',
+          machine_type: 'Dump Truck',
+          serial_number: 'SN-DT102',
+          latest_smu: 1200,
+          bin_factor: 28,
+        },
+      ];
+
+      const completedOp = {
+        id: 'op-101',
+        machine_id: 'dt-101',
+        operator_id: 'op-1',
+        site_id: 'site-a',
+        shift_type: 'day' as const,
+        start_time: '06:00',
+        end_time: '18:00',
+        hours_worked: 10,
+        start_smu: 1000,
+        end_smu: 1010,
+        machine: { name: 'DT-101', machine_type: 'Dump Truck', bin_factor: 28 },
+        operator: { full_name: 'John Driver' },
+        site: { name: 'Pit North' },
+      };
+
+      const onMachineSelect = jest.fn();
+
+      render(
+        <MachineOperationsFilterableTable
+          departmentId="dept-cr"
+          machines={machinesList}
+          operations={[completedOp]}
+          onMachineSelect={onMachineSelect}
+        />
+      );
+
+      // Feedback 9: Filter panel setup with golden border
+      expect(screen.getByTestId('machine-operations-filter-panel')).toBeInTheDocument();
+
+      // Feedback 8: Category header panel with golden border
+      expect(screen.getByTestId('category-panel-header-adt')).toBeInTheDocument();
+
+      // Feedback 16: Incomplete machines (DT-102) and Complete machines (DT-101) subsections
+      expect(screen.getByText('Incomplete Machines (1)')).toBeInTheDocument();
+      expect(screen.getByText('Complete Machines (1)')).toBeInTheDocument();
+
+      // Feedback 12: Direct log button with small square and arrow
+      const directLogBtn = screen.getByTestId('direct-log-hours-dt-102');
+      expect(directLogBtn).toBeInTheDocument();
+      fireEvent.click(directLogBtn);
+      expect(onMachineSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'dt-102' }));
+
+      // Feedback 8: Toggle collapse/expand category table
+      fireEvent.click(screen.getByTestId('category-panel-header-adt'));
+      expect(screen.queryByText('Incomplete Machines (1)')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('category-panel-header-adt'));
+      expect(screen.getByText('Incomplete Machines (1)')).toBeInTheDocument();
+    });
   });
 });

@@ -35,4 +35,4 @@ if [ "${FORCE_AGENT_VERIFY:-0}" != "1" ] && [ -f ".ci-local/agent-verify-evidenc
   fi
 fi
 
-pnpm turbo:affected:type-check && bash tools/scripts/agent-verify.sh && publish_ci_status
+pnpm turbo:affected:type-check && node tools/scripts/biome-parse-guard.cjs --pre-push && bash tools/scripts/agent-verify.sh && publish_ci_status

@@ -234,31 +234,29 @@ export function DataTable<T>({
 
         {/* Pagination & Count footer */}
         {!loading && sortedData.length > 0 && (
-          <div className="flex flex-col items-center justify-between gap-3 border-black/[0.06] border-t bg-black/[0.01] px-4 py-3 text-[var(--text-secondary)] text-xs sm:flex-row">
-            <span>
-              Showing{' '}
-              <strong className="font-mono font-semibold text-[var(--text-heading)]">
-                {(currentPage - 1) * pageSize + 1}
-              </strong>{' '}
-              to{' '}
-              <strong className="font-mono font-semibold text-[var(--text-heading)]">
-                {Math.min(currentPage * pageSize, sortedData.length)}
-              </strong>{' '}
-              of{' '}
-              <strong className="font-mono font-semibold text-[var(--text-heading)]">
-                {sortedData.length}
-              </strong>{' '}
-              records
-            </span>
-
-            {totalPages > 1 && (
+          <div className="flex flex-col items-center justify-between gap-2 border-black/[0.06] border-t bg-black/[0.01] px-4 py-2 text-[var(--text-secondary)] text-xs sm:flex-row">
+            {totalPages > 1 ? (
               <Pagination
+                className="w-full border-0 bg-transparent p-0 shadow-none"
                 currentPage={currentPage}
                 totalPages={totalPages}
                 pageSize={pageSize}
                 totalCount={sortedData.length}
                 onPageChange={setCurrentPage}
               />
+            ) : (
+              <span className="font-medium text-[var(--text-muted)] text-xs">
+                Showing{' '}
+                <strong className="font-mono font-semibold text-[var(--text-heading)]">1</strong> to{' '}
+                <strong className="font-mono font-semibold text-[var(--text-heading)]">
+                  {sortedData.length}
+                </strong>{' '}
+                of{' '}
+                <strong className="font-mono font-semibold text-[var(--text-heading)]">
+                  {sortedData.length}
+                </strong>{' '}
+                entries
+              </span>
             )}
           </div>
         )}
