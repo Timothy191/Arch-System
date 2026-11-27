@@ -7,7 +7,9 @@ export interface DepartmentMachineRow {
   readonly id: string;
   readonly name: string;
   readonly machine_type: string;
+  readonly manufacturer?: string | null;
   readonly serial_number: string | null;
+  readonly image_url?: string | null;
   readonly bin_factor: number | null;
   readonly active: boolean;
   readonly created_at: string;

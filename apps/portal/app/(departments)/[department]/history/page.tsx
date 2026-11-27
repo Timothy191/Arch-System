@@ -12,6 +12,12 @@ import { PlantHistoryDatabaseClient } from '~/features/departments/components/pl
 import { getProductionPerformanceData } from '~/features/departments/components/production/actions';
 import { ProductionPerformanceClient } from '~/features/departments/components/production/ProductionPerformanceClient';
 import { getDepartmentContext } from '~/lib/dept-context';
+import { classifyTireActivityType } from '../tire-management/tire-constants';
+import {
+  type EngineeringHistoryBreakdownRow,
+  EngineeringHistoryClient,
+  type EngineeringHistoryTireRow,
+} from './EngineeringHistoryClient';
 
 const DEFAULT_HISTORY_WINDOW_DAYS = 30;
 const MS_PER_DAY = 86_400_000;
@@ -233,6 +239,77 @@ export default async function HistoryPage({
       .split('T')[0] ?? today;
   const to = toParam || today;
   const from = fromParam || defaultFrom;
+
+  if (deptSlug === 'engineering') {
+    const db = await createReadReplicaClient([]);
+    const [{ data: breakdownRows }, { data: tireInspectionRows }] = await Promise.all([
+      db
+        .from('breakdowns')
+        .select(
+          'id, fleet_id, machine_name, machine_type, site_code, shift_type, date_in, time_in, date_out, duration_hours, reason, repair_notes, status'
+        )
+        .eq('department_id', deptId)
+        .is('deleted_at', null)
+        .order('date_in', { ascending: false })
+        .limit(500),
+      db
+        .from('tire_inspections')
+        .select(
+          'id, inspection_date, tread_depth_mm, pressure_psi, condition_status, current_smu, notes, tires(serial_number, brand, size, position, machines(name))'
+        )
+        .order('inspection_date', { ascending: false })
+        .limit(500),
+    ]);
+
+    const breakdowns: EngineeringHistoryBreakdownRow[] = (breakdownRows ?? []).map((row) => ({
+      id: row.id,
+      fleetId: row.fleet_id ?? '—',
+      machineName: row.machine_name || row.fleet_id || 'Unknown Machine',
+      machineType: row.machine_type ?? '—',
+      siteCode: row.site_code ?? '—',
+      shiftType: row.shift_type ?? 'day',
+      dateIn: row.date_in ?? '',
+      timeIn: row.time_in ?? '',
+      dateOut: row.date_out ?? '—',
+      durationHours: Number(row.duration_hours) || 0,
+      reason: row.reason ?? '—',
+      repairNotes: row.repair_notes ?? '',
+      status: row.status ?? 'active',
+    }));
+
+    const tireActivities: EngineeringHistoryTireRow[] = (tireInspectionRows ?? []).map((row) => {
+      const tireObj = Array.isArray(row.tires) ? row.tires[0] : row.tires;
+      const machineObj = tireObj?.machines
+        ? Array.isArray(tireObj.machines)
+          ? tireObj.machines[0]
+          : tireObj.machines
+        : null;
+      return {
+        id: row.id,
+        inspectionDate: row.inspection_date ?? '',
+        activityType: classifyTireActivityType(row.notes),
+        serialNumber: tireObj?.serial_number ?? 'Unknown Serial',
+        brand: tireObj?.brand ?? '—',
+        size: tireObj?.size ?? '—',
+        machineName: machineObj?.name ?? 'Unassigned',
+        position: tireObj?.position ?? '—',
+        currentSmu: row.current_smu != null ? Number(row.current_smu) : null,
+        treadDepthMm: Number(row.tread_depth_mm) || 0,
+        pressurePsi: Number(row.pressure_psi) || 0,
+        conditionStatus: row.condition_status ?? 'good',
+        notes: row.notes ?? '',
+      };
+    });
+
+    return (
+      <EngineeringHistoryClient
+        initialFrom={from}
+        initialTo={to}
+        breakdowns={breakdowns}
+        tireActivities={tireActivities}
+      />
+    );
+  }
 
   const isControlRoom = dept.type === CONTROL_ROOM_DEPT_TYPE;
   const historyResult = await getCachedDepartmentHistory({

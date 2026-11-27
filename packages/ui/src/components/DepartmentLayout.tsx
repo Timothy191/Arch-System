@@ -110,14 +110,14 @@ interface DepartmentLayoutProps {
 }
 
 const TAB_LINK_BASE =
-  'group relative flex flex-1 items-center gap-2.5 rounded-xl border px-2.5 py-2 text-[13px] transition-all';
+  'group relative flex flex-1 items-center gap-2.5 rounded-xl border px-2.5 py-2 text-[13px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)]/60';
 const TAB_LINK_ACTIVE =
   'gold-steel-border gold-steel-border-slim border-accent-gold/65 bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-xs ring-1 ring-accent-gold/30 ring-inset';
 const TAB_LINK_INACTIVE =
   'border-black/[0.08] bg-white/65 font-medium text-[var(--text-heading)] shadow-2xs hover:border-accent-gold/45 hover:bg-white/90 hover:text-[var(--accent-blue)]';
 
 const SUBTAB_LINK_BASE =
-  'group relative flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-[12px] transition-all';
+  'group relative flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-[12px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)]/60';
 const SUBTAB_LINK_ACTIVE =
   'gold-steel-border gold-steel-border-slim border-accent-gold/60 bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs ring-1 ring-accent-gold/30 ring-inset';
 const SUBTAB_LINK_INACTIVE =
@@ -236,6 +236,17 @@ export function DepartmentLayout({
     };
   }, []);
 
+  useEffect(() => {
+    if (!isOpen || isPinned || typeof window === 'undefined') return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isPinned]);
+
   const isSidebarExpanded = isPinned || isOpen;
 
   useEffect(() => {
@@ -305,8 +316,9 @@ export function DepartmentLayout({
       {/* Static full-viewport sidebar that stays pinned in place while scrolling */}
       <aside
         ref={sidebarRef}
+        aria-label={`${department.displayName} navigation sidebar`}
         className={cn(
-          'group/sidebar liquid-glass-light gold-steel-border fixed top-14 bottom-12 left-0 z-navigation flex w-60 flex-col overflow-hidden rounded-r-3xl border-accent-gold/40 bg-white/90 shadow-window transition-transform duration-300',
+          'group/sidebar liquid-glass-light gold-steel-border fixed top-14 bottom-12 left-0 z-navigation flex w-60 flex-col overflow-hidden rounded-r-3xl border-accent-gold/40 bg-white/90 shadow-window transition-transform duration-300 motion-reduce:transition-none',
           isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
         style={{ borderRight: '1px solid rgba(212, 175, 55, 0.42)' }}
@@ -353,8 +365,9 @@ export function DepartmentLayout({
             <button
               type="button"
               onClick={togglePin}
+              aria-pressed={isPinned}
               aria-label={isPinned ? 'Unpin sidebar' : 'Pin sidebar'}
-              className="gold-steel-border gold-steel-border-slim cursor-pointer rounded-full bg-white/80 p-1.5 text-[var(--text-heading)] shadow-2xs transition-colors hover:bg-white hover:text-[var(--accent-blue)]"
+              className="gold-steel-border gold-steel-border-slim cursor-pointer rounded-full bg-white/80 p-1.5 text-[var(--text-heading)] shadow-2xs transition-colors hover:bg-white hover:text-[var(--accent-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)]/60"
               title={isPinned ? 'Unpin sidebar (auto-collapse)' : 'Pin sidebar (always open)'}
             >
               <Pin
@@ -400,6 +413,7 @@ export function DepartmentLayout({
 
         {/* Navigation items */}
         <nav
+          aria-label={`${department.displayName} navigation`}
           className={cn(
             'flex-1 space-y-1 overflow-y-auto px-2.5 py-1 transition-opacity duration-200',
             isPinned || isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
@@ -429,20 +443,29 @@ export function DepartmentLayout({
               (pathname === `${basePath}/shift-compilation` ||
                 pathname === `${basePath}/shift-coverage` ||
                 pathname === `${basePath}/shift-closeout`);
+            const isReportsRouteMatch =
+              tab.name === 'reports' &&
+              (pathname === href || pathname.startsWith(`${basePath}/reports/`));
             const isRouteMatch =
               pathname === href ||
+              isReportsRouteMatch ||
               (tab.name === 'dashboard' &&
                 (pathname === basePath ||
                   isShiftOperationsSubtabActive ||
                   isShiftCloseoutSubtabActive)) ||
               isShiftOperationsActive;
             const isPdfReportActive =
-              tab.name === 'reports' && isRouteMatch && activeTabParam === 'pdf-report';
+              tab.name === 'reports' &&
+              isRouteMatch &&
+              (pathname === `${basePath}/reports/pdf` || activeTabParam === 'pdf-report');
             const isWhatsappReportActive =
-              tab.name === 'reports' && isRouteMatch && activeTabParam === 'whatsapp-report';
+              tab.name === 'reports' &&
+              isRouteMatch &&
+              (pathname === `${basePath}/reports/whatsapp` || activeTabParam === 'whatsapp-report');
             const isReportsDashboardActive =
               tab.name === 'reports' &&
               isRouteMatch &&
+              pathname === `${basePath}/reports` &&
               !isPdfReportActive &&
               !isWhatsappReportActive;
             const isAccessLogsSubtabSelected =
@@ -455,11 +478,20 @@ export function DepartmentLayout({
               !isShiftCloseoutSubtabActive &&
               !isAccessLogsSubtabSelected;
             const Icon = ICON_MAP[tab.icon];
+            const pdfReportHref =
+              department.name === 'engineering'
+                ? `${basePath}/reports/pdf`
+                : `${basePath}/reports?tab=pdf-report`;
+            const whatsappReportHref =
+              department.name === 'engineering'
+                ? `${basePath}/reports/whatsapp`
+                : `${basePath}/reports?tab=whatsapp-report`;
             return (
               <div key={tab.name} className="space-y-0.5">
                 <div className="flex items-center gap-0.5">
                   <Link
                     href={href}
+                    aria-current={isActive ? 'page' : undefined}
                     onClick={() => {
                       if (hasAnyDashboardSubtabs) {
                         setIsDashboardExpanded(true);
@@ -673,6 +705,7 @@ export function DepartmentLayout({
                     <Link
                       href={`${basePath}/reports`}
                       data-testid="reports-subtab-dashboard"
+                      aria-current={isReportsDashboardActive ? 'page' : undefined}
                       className={cn(
                         SUBTAB_LINK_BASE,
                         isReportsDashboardActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
@@ -689,8 +722,9 @@ export function DepartmentLayout({
                       <span>Dashboard</span>
                     </Link>
                     <Link
-                      href={`${basePath}/reports?tab=pdf-report`}
+                      href={pdfReportHref}
                       data-testid="reports-subtab-pdf-report"
+                      aria-current={isPdfReportActive ? 'page' : undefined}
                       className={cn(
                         SUBTAB_LINK_BASE,
                         isPdfReportActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
@@ -707,8 +741,9 @@ export function DepartmentLayout({
                       <span>PDF Report</span>
                     </Link>
                     <Link
-                      href={`${basePath}/reports?tab=whatsapp-report`}
+                      href={whatsappReportHref}
                       data-testid="reports-subtab-whatsapp-report"
+                      aria-current={isWhatsappReportActive ? 'page' : undefined}
                       className={cn(
                         SUBTAB_LINK_BASE,
                         isWhatsappReportActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE

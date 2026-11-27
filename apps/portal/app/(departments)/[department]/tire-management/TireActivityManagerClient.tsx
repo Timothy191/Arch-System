@@ -3,8 +3,9 @@
 /* cspell:ignore Tyre tyre */
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { GoldenPanel } from '@repo/ui/GoldenPanel';
 import { cn } from '@repo/ui/lib/utils';
-import { AlertTriangle, CheckCircle2, ChevronDown, History, Search } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronDown, Search } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
@@ -16,6 +17,7 @@ import {
 } from '@/features/admin/tabs/fleet-utils';
 import { ArchLogoShowcase } from './ArchLogoShowcase';
 import { logTireActivity } from './actions';
+import { TireReasonDropdown } from './TireReasonDropdown';
 import { TyreArtwork } from './TyreArtwork';
 import { type TyreSwapFieldValues, TyreSwapTable } from './TyreSwapTable';
 import {
@@ -24,7 +26,6 @@ import {
   isWheeledMachine,
   parseTireActivityNote,
   resolveVehicleLayout,
-  TIRE_ACTIVITY_REASON_PRESETS,
   TIRE_POSITIONS,
   type TireActivityMode,
   type TireActivityType,
@@ -723,7 +724,15 @@ export function TireActivityManagerClient({
 
   return (
     <div className="space-y-6">
-      <GlassCard className="p-4" data-testid="tire-activity-panel">
+      <GoldenPanel
+        showLogo
+        variant="elevated"
+        headingLevel="h3"
+        title="Machine Tyre Activity & Changeout Workflow"
+        subtitle="Log removals to spare inventory or scrap, mount replacement tyres per wheel position, and track machine SMU hours."
+        collapsible
+        data-testid="tire-activity-panel"
+      >
         <ArchLogoShowcase />
 
         <form onSubmit={handleSubmit} noValidate className="mt-5 space-y-5">
@@ -928,6 +937,7 @@ export function TireActivityManagerClient({
             </div>
             <WheelPositionDiagram
               layout={vehicleLayout}
+              machineType={selectedMachine?.machine_type ?? null}
               value={position}
               onChange={handlePositionChange}
             />
@@ -970,36 +980,10 @@ export function TireActivityManagerClient({
           />
 
           <div>
-            <label htmlFor="tire-reason-input" className={LABEL_CLASS}>
+            <label htmlFor="tire-reason-select" className={LABEL_CLASS}>
               Reason *
             </label>
-            <div className="mb-2 flex flex-wrap gap-1.5">
-              {TIRE_ACTIVITY_REASON_PRESETS.map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => setReason(preset)}
-                  className={cn(
-                    'rounded-md border px-2.5 py-1 font-medium text-[11px] transition-colors',
-                    reason === preset
-                      ? cn(GOLD_SELECTED_CLASS, 'border')
-                      : 'border-[var(--border-default)] bg-white text-[var(--text-secondary)] hover:border-[var(--accent-gold)]/40 hover:text-[var(--text-heading)]'
-                  )}
-                >
-                  {preset}
-                </button>
-              ))}
-            </div>
-            <input
-              id="tire-reason-input"
-              type="text"
-              placeholder="Select a preset or describe reason (min 3 characters)..."
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              className={INPUT_CLASS}
-              aria-required="true"
-              required
-            />
+            <TireReasonDropdown value={reason} onChange={setReason} />
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-default)] border-t pt-4">
@@ -1018,17 +1002,17 @@ export function TireActivityManagerClient({
             </button>
           </div>
         </form>
-      </GlassCard>
+      </GoldenPanel>
 
-      <div className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <History className="h-4 w-4 text-[var(--accent-gold)]" aria-hidden="true" />
-            <h3 className="font-semibold text-[var(--text-heading)] text-lg">
-              Recent Tyre Activity &amp; Removal/Replacement Ledger
-            </h3>
-          </div>
-
+      <GoldenPanel
+        showLogo
+        variant="default"
+        headingLevel="h3"
+        title="Recent Tyre Activity & Removal/Replacement Ledger"
+        subtitle="Chronological Tyre Off removals and Tyre On installations"
+        collapsible
+        data-testid="tire-activity-ledger-panel"
+        actions={
           <div className="flex flex-wrap items-center gap-2">
             <div className="inline-flex rounded-lg border border-[var(--border-default)] bg-white p-0.5">
               {(
@@ -1071,25 +1055,27 @@ export function TireActivityManagerClient({
               />
             </div>
           </div>
+        }
+      >
+        <div className="space-y-4">
+          <TyreRecordTable
+            title="Tyre Off Records"
+            subtitle="Removals from equipment · chronological"
+            accentClass="bg-amber-500"
+            traKey="TRAOff"
+            rows={tyreOffRecords}
+            machines={machines}
+          />
+          <TyreRecordTable
+            title="Tyre On Records"
+            subtitle="Installations onto equipment · chronological"
+            accentClass="bg-emerald-500"
+            traKey="TRAOn"
+            rows={tyreOnRecords}
+            machines={machines}
+          />
         </div>
-
-        <TyreRecordTable
-          title="Tyre Off Records"
-          subtitle="Removals from equipment · chronological"
-          accentClass="bg-amber-500"
-          traKey="TRAOff"
-          rows={tyreOffRecords}
-          machines={machines}
-        />
-        <TyreRecordTable
-          title="Tyre On Records"
-          subtitle="Installations onto equipment · chronological"
-          accentClass="bg-emerald-500"
-          traKey="TRAOn"
-          rows={tyreOnRecords}
-          machines={machines}
-        />
-      </div>
+      </GoldenPanel>
     </div>
   );
 }

@@ -1,11 +1,13 @@
 'use client';
 
-import { EngineeringReliabilityPulseIcon } from '@repo/ui/engineering-icons';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { GoldenPanel } from '@repo/ui/GoldenPanel';
+import { GoldenPanel, type GoldenPanelHeaderItem } from '@repo/ui/GoldenPanel';
+import { cn } from '@repo/ui/lib/utils';
+import { m, useReducedMotion } from 'framer-motion';
 import {
   AlertTriangle,
   ArrowLeft,
+  ArrowUpDown,
   CheckCircle2,
   ClipboardList,
   Clock,
@@ -13,6 +15,7 @@ import {
   Gauge,
   Printer,
   Search,
+  SlidersHorizontal,
   Wrench,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -39,27 +42,52 @@ const TOOLTIP_STYLE = {
 
 const KPI_LABEL_CLASS = 'font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider';
 const KPI_VALUE_CLASS = 'mt-1.5 font-bold text-2xl text-[var(--text-heading)] tabular-nums';
+const KPI_CARD_CLASS =
+  'gold-steel-border gold-steel-border-slim transition-transform duration-200 hover:-translate-y-0.5';
+const KPI_BADGE_BASE =
+  'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border shadow-2xs';
 const TH_CLASS =
   'px-3.5 py-2.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider';
+const SORT_BTN_CLASS =
+  'inline-flex items-center gap-1 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider hover:text-[var(--text-heading)]';
 const TD_CLASS = 'px-3.5 py-3 text-[var(--text-secondary)] text-xs';
 const TD_HEADING_CLASS = 'px-3.5 py-3 font-medium text-[var(--text-heading)] text-xs';
 const ACTION_BUTTON_CLASS =
-  'inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-colors hover:border-[var(--border-emphasis)]';
+  'gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-white/85 px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-colors hover:border-[var(--accent-gold)]/60 hover:bg-white';
 const FILTER_CONTROL_CLASS =
-  'rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs focus:border-[var(--accent-blue)] focus:outline-none';
+  'rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs focus:border-[var(--accent-gold)] focus:outline-none';
+const PRESET_BTN_BASE = 'rounded-md border px-2.5 py-1 font-medium text-xs transition-colors';
 
 type StatusFilter = 'all' | 'active' | 'completed';
 type ShiftFilter = 'all' | 'day' | 'night';
+type DailyLogSortKey = 'machineName' | 'shiftType' | 'dateIn' | 'durationHours' | 'status';
 
 export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientProps) {
+  const prefersReduced = useReducedMotion();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [shiftFilter, setShiftFilter] = useState<ShiftFilter>('all');
   const [machineTypeFilter, setMachineTypeFilter] = useState('all');
+  const [sortKey, setSortKey] = useState<DailyLogSortKey>('dateIn');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (key: DailyLogSortKey) => {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  };
+
+  const getAriaSort = (key: DailyLogSortKey): 'ascending' | 'descending' | 'none' => {
+    if (sortKey !== key) return 'none';
+    return sortDirection === 'asc' ? 'ascending' : 'descending';
+  };
 
   const filteredRecords = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    return report.records.filter((record) => {
+    const filtered = report.records.filter((record) => {
       if (statusFilter !== 'all' && record.status !== statusFilter) return false;
       if (shiftFilter !== 'all' && record.shiftType !== shiftFilter) return false;
       if (machineTypeFilter !== 'all' && record.machineType !== machineTypeFilter) return false;
@@ -73,7 +101,27 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
         record.repairNotes.toLowerCase().includes(query)
       );
     });
-  }, [machineTypeFilter, report.records, searchTerm, shiftFilter, statusFilter]);
+
+    return [...filtered].sort((left, right) => {
+      let cmp = 0;
+      if (sortKey === 'durationHours') {
+        cmp = left.durationHours - right.durationHours;
+      } else if (sortKey === 'dateIn') {
+        cmp = `${left.dateIn} ${left.timeIn}`.localeCompare(`${right.dateIn} ${right.timeIn}`);
+      } else {
+        cmp = String(left[sortKey]).localeCompare(String(right[sortKey]));
+      }
+      return sortDirection === 'asc' ? cmp : -cmp;
+    });
+  }, [
+    machineTypeFilter,
+    report.records,
+    searchTerm,
+    shiftFilter,
+    sortDirection,
+    sortKey,
+    statusFilter,
+  ]);
 
   const handleExportCsv = () => {
     const headers = [
@@ -126,112 +174,236 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
     }
   };
 
+  const totalLogged = Math.max(report.kpis.loggedLast24h, 1);
+  const resolvedPct = Math.round((report.kpis.completedResolved / totalLogged) * 100);
+  const activePct = Math.round((report.kpis.stillActive / totalLogged) * 100);
+  const downtimePct = Math.min(100, Math.round((report.kpis.totalDowntimeHours / 24) * 100));
+  const mttrPct = Math.min(100, Math.round((report.kpis.mttrHours / 8) * 100));
+
+  const headerItems: readonly GoldenPanelHeaderItem[] = [
+    {
+      id: 'quick-filters',
+      label: 'Quick Filters',
+      icon: <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />,
+      badge: `${filteredRecords.length}`,
+      panelContent: (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-[var(--text-muted)] text-xs uppercase">
+              Status:
+            </span>
+            {(['all', 'active', 'completed'] as const).map((status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => setStatusFilter(status)}
+                className={cn(
+                  PRESET_BTN_BASE,
+                  statusFilter === status
+                    ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/15 text-[var(--text-heading)]'
+                    : 'border-[var(--border-default)] bg-white text-[var(--text-secondary)]'
+                )}
+              >
+                {status === 'all' ? 'All' : status === 'active' ? 'Active' : 'Resolved'}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-[var(--text-muted)] text-xs uppercase">Shift:</span>
+            {(['all', 'day', 'night'] as const).map((shift) => (
+              <button
+                key={shift}
+                type="button"
+                onClick={() => setShiftFilter(shift)}
+                className={cn(
+                  PRESET_BTN_BASE,
+                  shiftFilter === shift
+                    ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/15 text-[var(--text-heading)]'
+                    : 'border-[var(--border-default)] bg-white text-[var(--text-secondary)]'
+                )}
+              >
+                {shift === 'all' ? 'All' : shift === 'day' ? 'Day Shift' : 'Night Shift'}
+              </button>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  const motionProps = prefersReduced
+    ? {}
+    : {
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] as const },
+      };
+
   return (
     <div className="space-y-6">
       {/* Header & Actions */}
-      <GoldenPanel
-        variant="elevated"
-        showLogo
-        headingLevel="h2"
-        title="24-Hour Machine Breakdowns Daily Log"
-        subtitle={`Rolling 24-hour breakdown activity report & shift log for ${report.today} (${report.kpis.activeMachinesCount} active fleet units monitored)`}
-        icon={<EngineeringReliabilityPulseIcon className="h-6 w-6 text-dept-engineering" />}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link href="/engineering" className={ACTION_BUTTON_CLASS}>
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              Engineering Hub
-            </Link>
-            <Link href="/engineering/breakdowns" className={ACTION_BUTTON_CLASS}>
-              <Wrench className="h-3.5 w-3.5 text-accent-red" aria-hidden="true" />
-              Manage Breakdowns
-            </Link>
-            <button type="button" onClick={handlePrint} className={ACTION_BUTTON_CLASS}>
-              <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-              Print Report
-            </button>
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-charcoal)] px-3 py-1.5 font-medium text-white text-xs shadow-2xs transition-opacity hover:opacity-90"
-            >
-              <Download className="h-3.5 w-3.5" aria-hidden="true" />
-              Export CSV
-            </button>
-          </div>
-        }
-      />
+      <m.div {...motionProps}>
+        <GoldenPanel
+          variant="elevated"
+          showLogo
+          headingLevel="h2"
+          title="24-Hour Machine Breakdowns Daily Log"
+          subtitle={`Rolling 24-hour breakdown activity report & shift log for ${report.today} (${report.kpis.activeMachinesCount} active fleet units monitored)`}
+          headerItems={headerItems}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/engineering" className={ACTION_BUTTON_CLASS}>
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                Engineering Hub
+              </Link>
+              <Link href="/engineering/breakdowns" className={ACTION_BUTTON_CLASS}>
+                <Wrench className="h-3.5 w-3.5 text-accent-red" aria-hidden="true" />
+                Manage Breakdowns
+              </Link>
+              <button type="button" onClick={handlePrint} className={ACTION_BUTTON_CLASS}>
+                <Printer className="h-3.5 w-3.5" aria-hidden="true" />
+                Print Report
+              </button>
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-charcoal)] px-3 py-1.5 font-medium text-white text-xs shadow-2xs transition-opacity hover:opacity-90"
+              >
+                <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                Export CSV
+              </button>
+            </div>
+          }
+        />
+      </m.div>
 
-      {/* KPI Strip */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <GlassCard>
-          <div className="flex items-center justify-between">
-            <span className={KPI_LABEL_CLASS}>Logged Last 24h</span>
-            <ClipboardList className="h-4 w-4 text-[var(--accent-blue)]" aria-hidden="true" />
+      {/* KPI Strip with Contextual Icons & Visual Illustrations */}
+      <m.div
+        {...motionProps}
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
+        data-testid="daily-log-kpi-grid"
+      >
+        <GlassCard className={KPI_CARD_CLASS}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className={KPI_LABEL_CLASS}>Logged Last 24h</span>
+              <p className={KPI_VALUE_CLASS}>{report.kpis.loggedLast24h}</p>
+            </div>
+            <div className={cn(KPI_BADGE_BASE, 'border-sky-500/30 bg-sky-500/10')}>
+              <ClipboardList className="h-4 w-4 text-[var(--accent-blue)]" aria-hidden="true" />
+            </div>
           </div>
-          <p className={KPI_VALUE_CLASS}>{report.kpis.loggedLast24h}</p>
           <span className="mt-1 block text-[var(--text-muted)] text-xs">
             Deduplicated 24h incidents
           </span>
         </GlassCard>
 
-        <GlassCard>
-          <div className="flex items-center justify-between">
-            <span className={KPI_LABEL_CLASS}>Still Active</span>
-            <AlertTriangle className="h-4 w-4 text-accent-red" aria-hidden="true" />
+        <GlassCard className={KPI_CARD_CLASS}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className={KPI_LABEL_CLASS}>Still Active</span>
+              <p className="mt-1.5 font-bold text-2xl text-accent-red tabular-nums">
+                {report.kpis.stillActive}
+              </p>
+            </div>
+            <div className={cn(KPI_BADGE_BASE, 'border-red-500/30 bg-red-500/10')}>
+              <AlertTriangle className="h-4 w-4 text-accent-red" aria-hidden="true" />
+            </div>
           </div>
-          <p className="mt-1.5 font-bold text-2xl text-accent-red tabular-nums">
-            {report.kpis.stillActive}
-          </p>
-          <span className="mt-1 block text-[var(--text-muted)] text-xs">Open faults on floor</span>
+          <div
+            aria-hidden="true"
+            className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-secondary)]"
+          >
+            <div
+              className="h-full rounded-full bg-[var(--accent-red)] transition-all duration-300"
+              style={{ width: `${activePct}%` }}
+            />
+          </div>
+          <span className="mt-2 block text-[var(--text-muted)] text-xs">Open faults on floor</span>
         </GlassCard>
 
-        <GlassCard>
-          <div className="flex items-center justify-between">
-            <span className={KPI_LABEL_CLASS}>Completed / Resolved</span>
-            <CheckCircle2 className="h-4 w-4 text-accent-green" aria-hidden="true" />
+        <GlassCard className={KPI_CARD_CLASS}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className={KPI_LABEL_CLASS}>Completed / Resolved</span>
+              <p className="mt-1.5 font-bold text-2xl text-accent-green tabular-nums">
+                {report.kpis.completedResolved}
+              </p>
+            </div>
+            <div className={cn(KPI_BADGE_BASE, 'border-emerald-500/30 bg-emerald-500/10')}>
+              <CheckCircle2 className="h-4 w-4 text-accent-green" aria-hidden="true" />
+            </div>
           </div>
-          <p className="mt-1.5 font-bold text-2xl text-accent-green tabular-nums">
-            {report.kpis.completedResolved}
-          </p>
-          <span className="mt-1 block text-[var(--text-muted)] text-xs">
+          <div
+            aria-hidden="true"
+            className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-secondary)]"
+          >
+            <div
+              className="h-full rounded-full bg-[var(--accent-green)] transition-all duration-300"
+              style={{ width: `${resolvedPct}%` }}
+            />
+          </div>
+          <span className="mt-2 block text-[var(--text-muted)] text-xs">
             Booked out within window
           </span>
         </GlassCard>
 
-        <GlassCard>
-          <div className="flex items-center justify-between">
-            <span className={KPI_LABEL_CLASS}>Total Downtime</span>
-            <Clock className="h-4 w-4 text-accent-amber" aria-hidden="true" />
+        <GlassCard className={KPI_CARD_CLASS}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className={KPI_LABEL_CLASS}>Total Downtime</span>
+              <p className={KPI_VALUE_CLASS}>{report.kpis.totalDowntimeHours.toFixed(1)} hrs</p>
+            </div>
+            <div className={cn(KPI_BADGE_BASE, 'border-amber-500/30 bg-amber-500/10')}>
+              <Clock className="h-4 w-4 text-accent-amber" aria-hidden="true" />
+            </div>
           </div>
-          <p className={KPI_VALUE_CLASS}>{report.kpis.totalDowntimeHours.toFixed(1)} hrs</p>
-          <span className="mt-1 block text-[var(--text-muted)] text-xs">
+          <div
+            aria-hidden="true"
+            className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-secondary)]"
+          >
+            <div
+              className="h-full rounded-full bg-[var(--accent-amber)] transition-all duration-300"
+              style={{ width: `${downtimePct}%` }}
+            />
+          </div>
+          <span className="mt-2 block text-[var(--text-muted)] text-xs">
             Combined 24h repair outage
           </span>
         </GlassCard>
 
-        <GlassCard>
-          <div className="flex items-center justify-between">
-            <span className={KPI_LABEL_CLASS}>MTTR Avg</span>
-            <Gauge className="h-4 w-4 text-[var(--accent-indigo)]" aria-hidden="true" />
+        <GlassCard className={KPI_CARD_CLASS}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className={KPI_LABEL_CLASS}>MTTR Avg</span>
+              <p className={KPI_VALUE_CLASS}>{report.kpis.mttrHours.toFixed(1)} hrs</p>
+            </div>
+            <div className={cn(KPI_BADGE_BASE, 'border-indigo-500/30 bg-indigo-500/10')}>
+              <Gauge className="h-4 w-4 text-[var(--accent-indigo)]" aria-hidden="true" />
+            </div>
           </div>
-          <p className={KPI_VALUE_CLASS}>{report.kpis.mttrHours.toFixed(1)} hrs</p>
-          <span className="mt-1 block text-[var(--text-muted)] text-xs">Mean time to restore</span>
+          <div
+            aria-hidden="true"
+            className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-secondary)]"
+          >
+            <div
+              className="h-full rounded-full bg-[var(--accent-indigo)] transition-all duration-300"
+              style={{ width: `${mttrPct}%` }}
+            />
+          </div>
+          <span className="mt-2 block text-[var(--text-muted)] text-xs">Mean time to restore</span>
         </GlassCard>
-      </div>
+      </m.div>
 
       {/* Recharts Hourly & Shift Activity Graphs */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <GlassCard className="lg:col-span-2">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-                24-Hour Breakdown Activity Timeline
-              </h3>
-              <p className="text-[var(--text-muted)] text-xs">
-                Active vs resolved breakdowns across 2-hour windows
-              </p>
-            </div>
+        <GoldenPanel
+          showLogo
+          headingLevel="h3"
+          title="24-Hour Breakdown Activity Timeline"
+          subtitle="Active vs resolved breakdowns across 2-hour windows"
+          className="lg:col-span-2"
+          actions={
             <div className="flex items-center gap-3 text-[var(--text-muted)] text-xs">
               <span className="flex items-center gap-1">
                 <span className="inline-block h-2.5 w-2.5 rounded-full bg-[var(--accent-red)]" />
@@ -242,8 +414,8 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
                 Resolved
               </span>
             </div>
-          </div>
-
+          }
+        >
           {report.kpis.loggedLast24h > 0 ? (
             <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
               <BarChart data={report.hourlyActivity}>
@@ -276,18 +448,14 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
               No breakdowns logged in the last 24 hours.
             </p>
           )}
-        </GlassCard>
+        </GoldenPanel>
 
-        <GlassCard>
-          <div className="mb-3">
-            <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-              Day vs Night Shift Summary
-            </h3>
-            <p className="text-[var(--text-muted)] text-xs">
-              Shift distribution of active and resolved breakdowns
-            </p>
-          </div>
-
+        <GoldenPanel
+          showLogo
+          headingLevel="h3"
+          title="Day vs Night Shift Summary"
+          subtitle="Shift distribution of active and resolved breakdowns"
+        >
           {report.kpis.loggedLast24h > 0 ? (
             <div className="space-y-3">
               <ResponsiveContainer width="100%" height={180}>
@@ -333,21 +501,17 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
               No shift activity recorded in the last 24 hours.
             </p>
           )}
-        </GlassCard>
+        </GoldenPanel>
       </div>
 
       {/* Filterable 24-Hour Breakdowns Report Table */}
-      <GlassCard className="overflow-hidden p-0">
-        <div className="flex flex-col gap-3 border-[var(--border-default)] border-b p-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h3 className="font-semibold text-[var(--text-heading)] text-sm">
-              24-Hour Breakdowns Report Table
-            </h3>
-            <p className="text-[var(--text-muted)] text-xs">
-              Showing {filteredRecords.length} of {report.records.length} logged breakdowns
-            </p>
-          </div>
-
+      <GoldenPanel
+        showLogo
+        headingLevel="h3"
+        title="24-Hour Breakdowns Report Table"
+        subtitle={`Showing ${filteredRecords.length} of ${report.records.length} logged breakdowns`}
+        noBodyPadding
+        actions={
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
               <Search
@@ -400,8 +564,8 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
               ))}
             </select>
           </div>
-        </div>
-
+        }
+      >
         {filteredRecords.length === 0 ? (
           <div className="p-8 text-center">
             <p className="font-medium text-[var(--text-heading)] text-sm">
@@ -416,8 +580,15 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
             <table className="w-full text-left text-sm" aria-label="24-hour machine breakdowns log">
               <thead>
                 <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]">
-                  <th scope="col" className={TH_CLASS}>
-                    Machine
+                  <th scope="col" className={TH_CLASS} aria-sort={getAriaSort('machineName')}>
+                    <button
+                      type="button"
+                      onClick={() => handleSort('machineName')}
+                      className={SORT_BTN_CLASS}
+                    >
+                      <span>Machine</span>
+                      <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                    </button>
                   </th>
                   <th scope="col" className={TH_CLASS}>
                     Type
@@ -425,17 +596,42 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
                   <th scope="col" className={TH_CLASS}>
                     Site
                   </th>
-                  <th scope="col" className={TH_CLASS}>
-                    Shift
+                  <th scope="col" className={TH_CLASS} aria-sort={getAriaSort('shiftType')}>
+                    <button
+                      type="button"
+                      onClick={() => handleSort('shiftType')}
+                      className={SORT_BTN_CLASS}
+                    >
+                      <span>Shift</span>
+                      <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                    </button>
                   </th>
-                  <th scope="col" className={TH_CLASS}>
-                    Date / Time In
+                  <th scope="col" className={TH_CLASS} aria-sort={getAriaSort('dateIn')}>
+                    <button
+                      type="button"
+                      onClick={() => handleSort('dateIn')}
+                      className={SORT_BTN_CLASS}
+                    >
+                      <span>Date / Time In</span>
+                      <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                    </button>
                   </th>
                   <th scope="col" className={TH_CLASS}>
                     Date / Time Out
                   </th>
-                  <th scope="col" className={`${TH_CLASS} text-right`}>
-                    Duration
+                  <th
+                    scope="col"
+                    className={`${TH_CLASS} text-right`}
+                    aria-sort={getAriaSort('durationHours')}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('durationHours')}
+                      className={SORT_BTN_CLASS}
+                    >
+                      <span>Duration</span>
+                      <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                    </button>
                   </th>
                   <th scope="col" className={TH_CLASS}>
                     Fault Reason
@@ -443,14 +639,24 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
                   <th scope="col" className={TH_CLASS}>
                     Repair Notes
                   </th>
-                  <th scope="col" className={TH_CLASS}>
-                    Status
+                  <th scope="col" className={TH_CLASS} aria-sort={getAriaSort('status')}>
+                    <button
+                      type="button"
+                      onClick={() => handleSort('status')}
+                      className={SORT_BTN_CLASS}
+                    >
+                      <span>Status</span>
+                      <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                    </button>
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-default)]">
                 {filteredRecords.map((record) => (
-                  <tr key={record.id} className="hover:bg-[var(--bg-secondary)]/50">
+                  <tr
+                    key={record.id}
+                    className="transition-colors hover:bg-[var(--bg-secondary)]/50"
+                  >
                     <td className={TD_HEADING_CLASS}>
                       <span>{record.machineName}</span>
                       <span className="block font-mono font-normal text-[11px] text-[var(--text-muted)]">
@@ -473,12 +679,15 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
                     <td className={`${TD_CLASS} max-w-[200px]`}>{record.repairNotes}</td>
                     <td className={TD_CLASS}>
                       <span
-                        className={`inline-flex rounded-full px-2 py-0.5 font-medium text-[11px] ${
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-[11px] ${
                           record.status === 'active'
                             ? 'bg-accent-red/10 text-accent-red'
                             : 'bg-accent-green/10 text-accent-green'
                         }`}
                       >
+                        {record.status === 'active' && (
+                          <span className="badge-pulse-dot bg-red-500" aria-hidden="true" />
+                        )}
                         {record.status === 'active' ? 'Active' : 'Resolved'}
                       </span>
                     </td>
@@ -488,7 +697,7 @@ export function EngineeringDailyLogClient({ report }: EngineeringDailyLogClientP
             </table>
           </div>
         )}
-      </GlassCard>
+      </GoldenPanel>
     </div>
   );
 }

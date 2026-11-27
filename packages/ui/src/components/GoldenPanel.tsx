@@ -116,7 +116,16 @@ export function GoldenPanel({
           <div className={HEADER_BAR_CLASS}>
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2.5">
-                {showLogo && <Logo className="h-6 w-6 shrink-0 text-accent-gold" />}
+                {showLogo && (
+                  <>
+                    <Logo className="h-6 w-6 shrink-0 text-accent-gold" />
+                    <span
+                      aria-hidden="true"
+                      data-testid="golden-panel-logo-separator"
+                      className="h-5 w-px shrink-0 bg-gradient-to-b from-transparent via-[var(--accent-gold)]/70 to-transparent"
+                    />
+                  </>
+                )}
                 {icon && <span className="shrink-0 text-[var(--text-heading)]">{icon}</span>}
                 {title && (
                   <HeadingTag

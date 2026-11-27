@@ -1,6 +1,38 @@
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import type React from 'react';
 import type { ReactNode } from 'react';
+
+jest.mock('framer-motion', () => {
+  const MOTION_PROPS = new Set([
+    'initial',
+    'animate',
+    'exit',
+    'transition',
+    'whileHover',
+    'variants',
+    'custom',
+    'layoutId',
+  ]);
+  const strip = (props: Record<string, unknown>) =>
+    Object.fromEntries(Object.entries(props).filter(([key]) => !MOTION_PROPS.has(key)));
+  const createMotionComponent = (tag: 'div' | 'span') =>
+    function MotionMock({
+      children,
+      ...rest
+    }: { children?: React.ReactNode } & Record<string, unknown>) {
+      const Tag = tag as 'div';
+      return <Tag {...strip(rest)}>{children}</Tag>;
+    };
+  return {
+    m: {
+      div: createMotionComponent('div'),
+      span: createMotionComponent('span'),
+    },
+    AnimatePresence: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    useReducedMotion: () => true,
+  };
+});
 
 jest.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: ReactNode }) => (
@@ -160,7 +192,7 @@ describe('/engineering/daily-log Page & Report Client', () => {
     render(jsx);
 
     expect(screen.getByText('24-Hour Machine Breakdowns Daily Log')).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument(); // Deduplicated 24h count (not 3!)
+    expect(within(screen.getByTestId('daily-log-kpi-grid')).getByText('2')).toBeInTheDocument(); // Deduplicated 24h count (not 3!)
     expect(screen.getByText('Caterpillar D9R #43')).toBeInTheDocument();
     expect(screen.getByText('CAT 777G #19')).toBeInTheDocument();
     expect(screen.getByText('Hydraulic hose burst')).toBeInTheDocument();
@@ -168,6 +200,8 @@ describe('/engineering/daily-log Page & Report Client', () => {
     expect(screen.getByText('7.0 hrs')).toBeInTheDocument(); // 2.5h + 4.5h
     expect(screen.getByText('2.5 hrs')).toBeInTheDocument(); // MTTR avg
     expect(screen.getAllByTestId('bar-chart')).toHaveLength(2);
+    expect(screen.getAllByTestId('golden-panel-logo-separator').length).toBeGreaterThanOrEqual(4);
+    expect(screen.getByTestId('daily-log-kpi-grid')).toBeInTheDocument();
   });
 
   it('renders clean empty state when no breakdowns occurred in the last 24 hours', async () => {

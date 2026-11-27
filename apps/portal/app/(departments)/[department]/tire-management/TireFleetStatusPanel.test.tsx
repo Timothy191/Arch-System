@@ -1,8 +1,24 @@
 import '@testing-library/jest-dom';
 import { GoldenPanel } from '@repo/ui/GoldenPanel';
 import { ProfessionalDropdownMenu } from '@repo/ui/ProfessionalDropdownMenu';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { updateTireRepairStatus } from './actions';
 import { TireFleetStatusPanel } from './TireFleetStatusPanel';
+
+jest.mock('./actions', () => ({
+  updateTireRepairStatus: jest.fn(async () => ({
+    success: true,
+    tireId: 't-rep-1',
+    status: 'in_stock',
+  })),
+}));
+
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
+}));
 
 describe('GoldenPanel, ProfessionalDropdownMenu & TireFleetStatusPanel', () => {
   beforeEach(() => {
@@ -152,5 +168,80 @@ describe('GoldenPanel, ProfessionalDropdownMenu & TireFleetStatusPanel', () => {
     });
     expect(screen.queryByText('TIRE-101')).not.toBeInTheDocument();
     expect(screen.getByText('TIRE-202')).toBeInTheDocument();
+  });
+
+  it('switches between Tyre Fleet Status and Tires in Repair, validates dates, and renders 8 columns + 3-option status dropdown', async () => {
+    render(
+      <TireFleetStatusPanel
+        tires={[
+          {
+            id: 't-rep-1',
+            serial_number: 'TIRE-REP-01',
+            brand: 'Michelin',
+            size: '59/80R63',
+            position: 'Front Left',
+            status: 'inventory',
+            machine_id: 'm1',
+            machineName: 'DT-01',
+            installed_at: '2026-01-01',
+            installed_hours: 1400,
+            removed_at: '2026-11-10',
+            latestInspection: {
+              id: 'i-rep-1',
+              tire_id: 't-rep-1',
+              inspection_date: '2026-11-10',
+              tread_depth_mm: 22,
+              pressure_psi: 100,
+              condition_status: 'warning',
+              notes:
+                '[REPAIR] Machine: DT-01 | Serial: TIRE-REP-01 | DateOut: 2026-11-10 | Reason: Sidewall Cut | ServiceProvider: Kal Tire | RepairStatus: repaired',
+            },
+          },
+        ]}
+      />
+    );
+
+    const repairTab = screen.getByRole('tab', { name: 'Tires in Repair' });
+    fireEvent.click(repairTab);
+    expect(screen.getByTestId('tires-in-repair-view')).toBeInTheDocument();
+
+    const table = screen.getByRole('table', { name: 'Out for Repair table' });
+    const headers = within(table).getAllByRole('columnheader');
+    expect(headers.map((h) => h.textContent?.trim())).toEqual([
+      'Machine Id',
+      'Serial Number',
+      'Date out',
+      'Date in',
+      'Reason',
+      'Comment',
+      'Status',
+      'Service provider',
+    ]);
+
+    const statusSelect = screen.getByLabelText('Repair status for TIRE-REP-01');
+    const options = within(statusSelect).getAllByRole('option');
+    expect(options.map((o) => o.textContent)).toEqual(['Scrap', 'Repaired', 'In Stock']);
+
+    fireEvent.change(statusSelect, { target: { value: 'in_stock' } });
+    await waitFor(() => {
+      expect(updateTireRepairStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tireId: 't-rep-1',
+          serialNumber: 'TIRE-REP-01',
+          status: 'in_stock',
+        })
+      );
+    });
+
+    // Reject Date in < Date out
+    fireEvent.change(screen.getByLabelText('Date in for TIRE-REP-01'), {
+      target: { value: '2026-11-01' },
+    });
+    expect(screen.getByRole('alert')).toHaveTextContent('Date in cannot be earlier than Date out.');
+
+    // Switch back to Tyre Fleet Status
+    fireEvent.click(screen.getByRole('tab', { name: 'Tyre Fleet Status' }));
+    expect(screen.queryByTestId('tires-in-repair-view')).not.toBeInTheDocument();
+    expect(screen.getByText('TIRE-REP-01')).toBeInTheDocument();
   });
 });

@@ -192,10 +192,7 @@ export default async function TireManagementPage({
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <EngineeringTireTreadIcon className="h-6 w-6 text-dept-engineering" />
-            <h2 className="font-bold text-2xl text-[var(--text-heading)]">Tire Management</h2>
-          </div>
+          <h2 className="font-bold text-2xl text-[var(--text-heading)]">Tire Management</h2>
           <p className="mt-1 text-[var(--text-muted)] text-sm">
             Fleet tire pressure, tread wear telemetry, and replacement tracking
           </p>
@@ -292,7 +289,7 @@ export default async function TireManagementPage({
       />
 
       {/* #4 Redesigned Tire Fleet Status GoldenPanel */}
-      <TireFleetStatusPanel tires={tires} />
+      <TireFleetStatusPanel tires={tires} machines={machines} />
     </div>
   );
 }

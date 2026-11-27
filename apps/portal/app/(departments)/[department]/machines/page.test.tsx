@@ -2,6 +2,14 @@ import '@testing-library/jest-dom';
 import { render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ src, alt, className }: { src: string; alt: string; className?: string }) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={typeof src === 'string' ? src : ''} alt={alt} className={className} />
+  ),
+}));
+
 jest.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: ReactNode }) => (
     <div data-testid="responsive-container">{children}</div>
@@ -309,15 +317,23 @@ describe('/[department]/machines Page & Telemetry Panels', () => {
       'gold-steel-border',
       'border-accent-gold/60'
     );
-    expect(screen.getByTestId('machine-database-admin-banner')).toHaveClass(
-      'bg-white',
-      'gold-steel-border',
-      'border-accent-gold/55'
-    );
+    expect(screen.queryByTestId('machine-database-admin-banner')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Manage in Admin/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('site-group-pill-PIT-1')).toHaveClass(
       'bg-white',
       'gold-steel-border',
       'border-accent-gold/60'
+    );
+
+    const bd43Frame = screen.getByTestId('machine-image-frame-m-bd43');
+    expect(bd43Frame).toHaveClass('aspect-square', 'gold-steel-border');
+    expect(within(bd43Frame).getByRole('img')).toHaveAttribute(
+      'src',
+      expect.stringContaining('/images/fleet/')
+    );
+    expect(screen.getByTestId('machine-image-frame-m-ht12')).toHaveClass(
+      'aspect-square',
+      'gold-steel-border'
     );
 
     // Upward & downward % indicators and totals

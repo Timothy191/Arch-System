@@ -22,6 +22,9 @@ import {
   TIRE_ACTIVITY_RATE_LIMIT,
   TIRE_ACTIVITY_WINDOW_MS,
   tireActivitySchema,
+  tireRepairUpdateSchema,
+  type UpdateTireRepairStatusInput,
+  type UpdateTireRepairStatusResult,
 } from './tire-constants';
 
 type ServerSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -373,5 +376,121 @@ export async function logTireActivity(
     installedTireId,
     inspectedTireId,
     machineName,
+  };
+}
+
+export async function updateTireRepairStatus(
+  rawInput: UpdateTireRepairStatusInput
+): Promise<UpdateTireRepairStatusResult> {
+  // Step 1: Authenticate
+  const supabase = await createServerSupabaseClient();
+  const principal = await getAuthenticatedEmployee(supabase);
+  if (!principal) {
+    throw new AuthError('Unauthorized', {
+      context: { action: 'updateTireRepairStatus' },
+    });
+  }
+
+  // Step 2: Authorize
+  if (!principal.employee || !hasTireActivityPermission(principal.employee)) {
+    throw new ForbiddenError('Insufficient permissions for engineering tire management', {
+      context: { action: 'updateTireRepairStatus', role: principal.employee?.role ?? 'none' },
+    });
+  }
+
+  // Step 3: Validate
+  const parsed = tireRepairUpdateSchema.safeParse(rawInput);
+  if (!parsed.success) {
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid tire repair payload', {
+      context: { action: 'updateTireRepairStatus' },
+    });
+  }
+
+  // Step 4: Rate-limit
+  const { allowed } = await tireActivityLimiter.check(principal.user.id);
+  if (!allowed) {
+    throw new RateLimitError('Rate limit exceeded for tire repair updates', {
+      context: { action: 'updateTireRepairStatus', userId: principal.user.id },
+    });
+  }
+
+  // Step 5: Execute
+  const input = parsed.data;
+  const mappedStatus = input.status === 'scrap' ? 'scrapped' : 'inventory';
+  const { error: updateError } = await supabase
+    .from('tires')
+    .update({
+      status: mappedStatus,
+      removed_at: input.dateOut,
+      scrapped_reason: input.reason,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', input.tireId);
+
+  if (updateError) {
+    throw new DatabaseError('Failed to update tire repair status', {
+      operation: 'update',
+      table: 'tires',
+      context: { error: updateError.message, tireId: input.tireId },
+    });
+  }
+
+  const repairNoteSegments = [
+    `[REPAIR] Machine: ${input.machineId || 'Unassigned'}`,
+    `Serial: ${input.serialNumber}`,
+    `DateOut: ${input.dateOut}`,
+    ...(input.dateIn ? [`DateIn: ${input.dateIn}`] : []),
+    `Reason: ${input.reason}`,
+    ...(input.comment ? [`Comment: ${input.comment}`] : []),
+    `RepairStatus: ${input.status}`,
+    ...(input.serviceProvider ? [`ServiceProvider: ${input.serviceProvider}`] : []),
+  ];
+
+  const { error: inspectionError } = await supabase.from('tire_inspections').insert({
+    tire_id: input.tireId,
+    inspection_date: input.dateIn || input.dateOut,
+    tread_depth_mm: 0,
+    pressure_psi: 0,
+    condition_status: input.status === 'scrap' ? 'critical' : 'good',
+    notes: repairNoteSegments.join(' | '),
+  });
+
+  if (inspectionError) {
+    throw new DatabaseError('Failed to log tire repair update', {
+      operation: 'insert',
+      table: 'tire_inspections',
+      context: { error: inspectionError.message, tireId: input.tireId },
+    });
+  }
+
+  // Step 6: Audit log
+  await logAuditEvent({
+    action: 'update',
+    tableName: 'tires',
+    recordId: input.tireId,
+    newData: {
+      machineId: input.machineId,
+      serialNumber: input.serialNumber,
+      dateOut: input.dateOut,
+      dateIn: input.dateIn || null,
+      reason: input.reason,
+      comment: input.comment || null,
+      repairStatus: input.status,
+      serviceProvider: input.serviceProvider || null,
+      mappedStatus,
+    },
+    departmentId: principal.employee.department_id,
+  });
+
+  // Step 7: Invalidate caches
+  await cacheInvalidateTags(['table:tires', 'table:tire_inspections']);
+  revalidatePath('/engineering/tire-management');
+  revalidatePath('/engineering/reports');
+
+  // Step 8: Return typed result
+  return {
+    success: true,
+    tireId: input.tireId,
+    status: input.status,
   };
 }

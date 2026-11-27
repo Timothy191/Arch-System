@@ -1,7 +1,6 @@
 import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { GlassCard } from '@repo/ui/GlassCard';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { withCache } from '@/lib/cache-utils';
@@ -43,7 +42,7 @@ async function loadDepartmentMachines(deptSlug: string): Promise<DepartmentMachi
   let machinesQuery = db
     .from('machines')
     .select(
-      'id, name, machine_type, serial_number, bin_factor, active, created_at, site:sites(name, site_code)'
+      'id, name, machine_type, manufacturer, serial_number, image_url, bin_factor, active, created_at, site:sites(name, site_code)'
     );
   if (deptSlug === 'drilling') {
     machinesQuery = machinesQuery.eq('machine_type', DRILL_RIG_MACHINE_TYPE);
@@ -203,33 +202,6 @@ export default async function MachinesPage({
         className="gold-steel-border gold-steel-border-slim flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-accent-gold/60 bg-white px-5 py-3.5 shadow-card"
       >
         <h2 className="font-bold text-2xl text-[var(--text-heading)]">Machine Database</h2>
-        <Link
-          href="/admin"
-          className="rounded-full border border-accent-gold/50 bg-white px-4 py-2 font-medium text-[var(--text-heading)] text-sm transition-colors hover:border-accent-gold hover:text-[var(--accent-blue)]"
-        >
-          Manage in Admin →
-        </Link>
-      </div>
-
-      <div
-        data-testid="machine-database-admin-banner"
-        className="gold-steel-border gold-steel-border-slim flex items-center gap-2.5 rounded-2xl border border-accent-gold/55 bg-white px-5 py-3 text-[var(--text-heading)] text-sm shadow-2xs"
-      >
-        <svg
-          className="h-4 w-4 shrink-0 text-accent-amber"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z"
-          />
-        </svg>
-        Fleet is managed by the Admin department. Contact an administrator to add, edit, or
-        decommission machines.
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

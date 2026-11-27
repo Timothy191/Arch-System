@@ -3,10 +3,11 @@
 /* cspell:ignore Tyre */
 
 import { cn } from '@repo/ui/lib/utils';
-import { TIRE_POSITIONS, type VehicleLayoutKey } from './tire-constants';
+import { resolveVehicleLayout, TIRE_POSITIONS, type VehicleLayoutKey } from './tire-constants';
 
 export interface WheelPositionDiagramProps {
-  readonly layout: VehicleLayoutKey;
+  readonly layout?: VehicleLayoutKey;
+  readonly machineType?: string | null;
   readonly value: string;
   readonly onChange: (position: string) => void;
   readonly className?: string;
@@ -30,6 +31,7 @@ const SIDE_WHEELS: Readonly<Record<VehicleLayoutKey, readonly number[]>> = {
   ADT: [58, 196, 236, 276],
   RDT: [58, 196, 224, 252],
   Grader: [46, 72, 190, 214, 246, 270],
+  Compactor: [58, 196, 224, 252],
 };
 
 const LAYOUT_COPY: Readonly<Record<VehicleLayoutKey, { title: string; detail: string }>> = {
@@ -45,18 +47,25 @@ const LAYOUT_COPY: Readonly<Record<VehicleLayoutKey, { title: string; detail: st
     title: 'Grader · Motor Grader',
     detail: '2 front tyres · 4 rear tyres in tandem pairs, all six visible in side view',
   },
+  Compactor: {
+    title: 'Compactor · Roller Compactor',
+    detail: '2 front wheels · 4 rear wheels, tyre elements omitted in both views',
+  },
 };
 
 export function WheelPositionDiagram({
   layout,
+  machineType,
   value,
   onChange,
   className,
 }: WheelPositionDiagramProps) {
+  const resolvedLayout = layout || resolveVehicleLayout({ machine_type: machineType });
   const highlightFront = value.startsWith('Front');
   const highlightRear = value.startsWith('Rear');
-  const sideWheels = SIDE_WHEELS[layout];
-  const copy = LAYOUT_COPY[layout];
+  const sideWheels = SIDE_WHEELS[resolvedLayout] ?? SIDE_WHEELS.RDT;
+  const copy = LAYOUT_COPY[resolvedLayout] ?? LAYOUT_COPY.RDT;
+  const isCompactor = resolvedLayout === 'Compactor';
 
   const handleKeyDown = (event: React.KeyboardEvent<SVGGElement>, position: string) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -67,7 +76,12 @@ export function WheelPositionDiagram({
 
   return (
     <div className={cn('grid grid-cols-1 gap-4 md:grid-cols-2', className)}>
-      <figure className="rounded-xl border border-[var(--border-default)] bg-white p-3">
+      <figure
+        className={cn(
+          'gold-steel-border gold-steel-border-slim rounded-xl border border-[var(--border-default)] bg-white p-3',
+          className
+        )}
+      >
         <figcaption className="mb-2 font-semibold text-[11px] text-[var(--text-secondary)] uppercase tracking-wider">
           Plan view · select a wheel
         </figcaption>
@@ -112,6 +126,7 @@ export function WheelPositionDiagram({
           {TIRE_POSITIONS.map((position) => {
             const wheel = TOP_WHEELS[position];
             const isSelected = value === position;
+            // Compactor renders plain wheel outlines with no tyre tread detailing
             return (
               <g
                 key={position}
@@ -131,16 +146,23 @@ export function WheelPositionDiagram({
                   rx="7"
                   className={cn(
                     'stroke-2 transition-colors',
-                    isSelected
-                      ? 'fill-red-600 stroke-red-700'
-                      : 'fill-[var(--text-heading)] stroke-[var(--text-secondary)] hover:fill-[var(--text-secondary)]'
+                    isCompactor
+                      ? isSelected
+                        ? 'fill-[var(--accent-gold)] stroke-[var(--accent-gold-hover)]'
+                        : 'fill-white stroke-[var(--accent-gold)]/60 hover:fill-[var(--bg-secondary)]'
+                      : isSelected
+                        ? 'fill-red-600 stroke-red-700'
+                        : 'fill-[var(--text-heading)] stroke-[var(--text-secondary)] hover:fill-[var(--text-secondary)]'
                   )}
                 />
                 <text
                   x={wheel.x + WHEEL_WIDTH / 2}
                   y={wheel.y + WHEEL_HEIGHT / 2 + 4}
                   textAnchor="middle"
-                  className="pointer-events-none fill-white font-semibold text-[11px]"
+                  className={cn(
+                    'pointer-events-none font-semibold text-[11px]',
+                    isCompactor ? 'fill-[var(--text-heading)]' : 'fill-white'
+                  )}
                 >
                   {wheel.glyph}
                 </text>
@@ -158,9 +180,14 @@ export function WheelPositionDiagram({
         </svg>
       </figure>
 
-      <figure className="rounded-xl border border-[var(--border-default)] bg-white p-3">
+      <figure
+        className={cn(
+          'gold-steel-border gold-steel-border-slim rounded-xl border border-[var(--border-default)] bg-white p-3',
+          className
+        )}
+      >
         <figcaption className="mb-2 font-semibold text-[11px] text-[var(--text-secondary)] uppercase tracking-wider">
-          Side view · {layout}
+          Side view · {resolvedLayout}
         </figcaption>
         <svg
           viewBox="0 0 320 120"
@@ -177,19 +204,23 @@ export function WheelPositionDiagram({
             className="fill-[var(--text-muted)]/40"
           />
           {sideWheels.map((cx, index) => {
-            const isFrontAxle = layout === 'Grader' ? index < 2 : index === 0;
+            const isFrontAxle = resolvedLayout === 'Grader' ? index < 2 : index === 0;
             const isHighlighted = isFrontAxle ? highlightFront : highlightRear;
             return (
-              <g key={`${layout}-side-${cx}`}>
+              <g key={`${resolvedLayout}-side-${cx}`}>
                 <circle
                   cx={cx}
                   cy="86"
                   r="16"
                   className={cn(
                     'stroke-2 transition-colors',
-                    isHighlighted
-                      ? 'fill-red-600 stroke-red-700'
-                      : 'fill-[var(--text-heading)] stroke-[var(--text-secondary)]'
+                    isCompactor
+                      ? isHighlighted
+                        ? 'fill-[var(--accent-gold)] stroke-[var(--accent-gold-hover)]'
+                        : 'fill-white stroke-[var(--accent-gold)]/60'
+                      : isHighlighted
+                        ? 'fill-red-600 stroke-red-700'
+                        : 'fill-[var(--text-heading)] stroke-[var(--text-secondary)]'
                   )}
                 />
                 <circle cx={cx} cy="86" r="6" className="fill-[var(--bg-secondary)]" />

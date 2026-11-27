@@ -2,7 +2,13 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import { TrendingDown, TrendingUp } from 'lucide-react';
+import Image from 'next/image';
 import { Bar, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  resolveDefaultMachineImage,
+  resolveDefaultManufacturer,
+  resolveMachineIdentity,
+} from '@/features/admin/tabs/fleet-utils';
 import type { SiteMachineGroup } from './machine-telemetry-helpers';
 
 interface MachineTelemetryPanelsClientProps {
@@ -18,8 +24,12 @@ const MINI_TOOLTIP_STYLE = {
   fontSize: 11,
 } as const;
 
+const MACHINE_CARD_CLASS =
+  'group gold-steel-border gold-steel-border-slim px-4 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover';
+const IMAGE_FRAME_CLASS =
+  'gold-steel-border gold-steel-border-slim relative aspect-square h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-[var(--accent-gold)]/60 bg-[var(--bg-secondary)] shadow-xs sm:h-24 sm:w-24';
 const STAT_BOX_CLASS =
-  'rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)]/70 px-2.5 py-2';
+  'rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)]/70 px-2.5 py-2 transition-colors group-hover:border-[var(--accent-gold)]/35';
 const STAT_LABEL_CLASS = 'text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wide';
 const STAT_VALUE_CLASS = 'mt-0.5 font-semibold text-sm text-[var(--text-heading)] tabular-nums';
 
@@ -59,16 +69,57 @@ export function MachineTelemetryPanelsClient({ siteGroups }: MachineTelemetryPan
               const { telemetry } = machine;
               const isDeltaPositive = telemetry.hoursDeltaPct >= 0;
               const formattedDelta = `${isDeltaPositive && telemetry.hoursDeltaPct > 0 ? '+' : ''}${telemetry.hoursDeltaPct.toFixed(1)}%`;
+              const identity = resolveMachineIdentity({
+                name: machine.name,
+                serialNumber: machine.serial_number,
+              });
+              const manufacturer = resolveDefaultManufacturer({
+                machineId: identity.machineId,
+                machineName: identity.machineName,
+                machineType: machine.machine_type,
+                manufacturer: machine.manufacturer,
+              });
+              const imageUrl = resolveDefaultMachineImage({
+                machineType: machine.machine_type,
+                manufacturer,
+                machineId: identity.machineId,
+                imageUrl: machine.image_url,
+              });
 
               return (
-                <GlassCard key={machine.id} className="px-4 py-3.5">
-                  {/* Panel Header */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-semibold text-[var(--text-heading)] text-sm">
-                        {machine.name}
-                      </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                <GlassCard key={machine.id} className={MACHINE_CARD_CLASS}>
+                  {/* Panel Header with Square Golden-Border Machine Image */}
+                  <div className="flex items-start gap-3">
+                    <div
+                      data-testid={`machine-image-frame-${machine.id}`}
+                      className={IMAGE_FRAME_CLASS}
+                    >
+                      <Image
+                        src={imageUrl}
+                        alt={`${machine.name} (${machine.machine_type})`}
+                        width={160}
+                        height={160}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="truncate font-bold text-[var(--text-heading)] text-sm tracking-tight">
+                          {machine.name}
+                        </p>
+                        <span
+                          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-xs ${
+                            machine.active
+                              ? 'border-emerald-200/50 bg-emerald-50/70 text-emerald-700'
+                              : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)]'
+                          }`}
+                        >
+                          {machine.active && <span className="badge-pulse-dot bg-emerald-500" />}
+                          {machine.active ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                         <span className="rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
                           {machine.machine_type}
                         </span>
@@ -77,24 +128,13 @@ export function MachineTelemetryPanelsClient({ siteGroups }: MachineTelemetryPan
                             Bin: {machine.bin_factor} BCM
                           </span>
                         )}
-                        {machine.serial_number && (
-                          <span className="font-mono text-[11px] text-[var(--text-muted)]">
-                            {machine.serial_number}
-                          </span>
-                        )}
                       </div>
+                      {machine.serial_number && (
+                        <p className="mt-1 truncate font-mono text-[11px] text-[var(--text-muted)]">
+                          {machine.serial_number}
+                        </p>
+                      )}
                     </div>
-
-                    <span
-                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-xs ${
-                        machine.active
-                          ? 'border-emerald-200/50 bg-emerald-50/70 text-emerald-700'
-                          : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)]'
-                      }`}
-                    >
-                      {machine.active && <span className="badge-pulse-dot bg-emerald-500" />}
-                      {machine.active ? 'Active' : 'Inactive'}
-                    </span>
                   </div>
 
                   {/* Totals Strip: Hours Worked (+% Up/Down), Breakdowns, Tyre Activity */}

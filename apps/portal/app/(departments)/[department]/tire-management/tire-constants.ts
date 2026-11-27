@@ -13,6 +13,8 @@ export const TIRE_POSITIONS = [
 export const TIRE_ACTIVITY_MODES = ['replace', 'remove', 'install', 'inspect'] as const;
 export const TIRE_CONDITION_STATUSES = ['good', 'warning', 'critical'] as const;
 export const TIRE_REMOVED_OUTCOMES = ['inventory', 'scrapped'] as const;
+export const TIRE_REPAIR_STATUS_OPTIONS = ['scrap', 'repaired', 'in_stock'] as const;
+export type TireRepairStatusOption = (typeof TIRE_REPAIR_STATUS_OPTIONS)[number];
 export const TIRE_ACTIVITY_REASON_PRESETS = [
   'Sidewall Cut',
   'Tread Worn',
@@ -74,7 +76,7 @@ const TRACKED_TYPE_TOKENS = [
   'rig',
 ] as const;
 
-export type VehicleLayoutKey = 'ADT' | 'RDT' | 'Grader';
+export type VehicleLayoutKey = 'ADT' | 'RDT' | 'Grader' | 'Compactor';
 
 export function isWheeledMachine(machine: {
   readonly machine_type: string;
@@ -89,11 +91,12 @@ export function isWheeledMachine(machine: {
 
 export function resolveVehicleLayout(
   machine?: {
-    readonly machine_type?: string;
-    readonly name?: string;
+    readonly machine_type?: string | null;
+    readonly name?: string | null;
   } | null
 ): VehicleLayoutKey {
   const haystack = `${machine?.machine_type ?? ''} ${machine?.name ?? ''}`.toLowerCase();
+  if (haystack.includes('compactor') || haystack.includes('roller')) return 'Compactor';
   if (haystack.includes('grader')) return 'Grader';
   if (haystack.includes('articulated') || haystack.includes('adt')) return 'ADT';
   return 'RDT';
@@ -554,4 +557,40 @@ export function classifyTireActivityType(notes: string | null | undefined): Tire
   if (normalized.startsWith('[REPLACEMENT]')) return 'replacement';
   if (normalized.startsWith('[INSTALLATION]')) return 'installation';
   return 'inspection';
+}
+
+export const tireRepairUpdateSchema = z
+  .object({
+    tireId: z.string().trim().min(1, 'Tire ID is required'),
+    machineId: z.string().trim().max(120).optional().default(''),
+    serialNumber: z.string().trim().min(1, 'Serial Number is required').max(120),
+    dateOut: z.string().regex(DATE_YYYY_MM_DD_REGEX, 'Date out must follow YYYY-MM-DD format'),
+    dateIn: z
+      .union([
+        z.literal(''),
+        z.string().regex(DATE_YYYY_MM_DD_REGEX, 'Date in must follow YYYY-MM-DD format'),
+      ])
+      .optional()
+      .default(''),
+    reason: z.string().trim().min(2, 'Reason is required').max(300),
+    comment: z.string().trim().max(500).optional().default(''),
+    status: z.enum(TIRE_REPAIR_STATUS_OPTIONS),
+    serviceProvider: z.string().trim().max(160).optional().default(''),
+  })
+  .superRefine((val, ctx) => {
+    if (val.dateIn && val.dateOut && val.dateIn < val.dateOut) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['dateIn'],
+        message: 'Date in cannot be earlier than Date out',
+      });
+    }
+  });
+
+export type UpdateTireRepairStatusInput = z.input<typeof tireRepairUpdateSchema>;
+
+export interface UpdateTireRepairStatusResult {
+  readonly success: true;
+  readonly tireId: string;
+  readonly status: TireRepairStatusOption;
 }

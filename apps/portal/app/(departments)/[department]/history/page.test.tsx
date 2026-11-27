@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import type React from 'react';
 import { getDepartmentContext } from '~/lib/dept-context';
+import { EngineeringHistoryClient } from './EngineeringHistoryClient';
 import HistoryPage from './page';
 
 const mockFrom = jest.fn();
@@ -248,5 +249,97 @@ describe('HistoryPage ([department]/history/page.tsx)', () => {
     expect(
       screen.getByText(new Date('2026-10-22T08:00:00Z').toLocaleDateString('en-ZA'))
     ).toBeInTheDocument();
+  });
+
+  it('toggles EngineeringHistoryClient between Breakdowns and Tyre Management, filters, and exports', () => {
+    const createObjectUrlMock = jest.fn(() => 'blob:eng-history');
+    const revokeObjectUrlMock = jest.fn();
+    Object.defineProperty(URL, 'createObjectURL', { value: createObjectUrlMock, writable: true });
+    Object.defineProperty(URL, 'revokeObjectURL', { value: revokeObjectUrlMock, writable: true });
+    const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    render(
+      <EngineeringHistoryClient
+        initialFrom="2026-11-01"
+        initialTo="2026-11-27"
+        breakdowns={[
+          {
+            id: 'bd-1',
+            fleetId: 'BD-43',
+            machineName: 'CAT D9R #43',
+            machineType: 'Dozer',
+            siteCode: 'PIT-1',
+            shiftType: 'day',
+            dateIn: '2026-11-20',
+            timeIn: '08:00',
+            dateOut: '—',
+            durationHours: 3.5,
+            reason: 'Hydraulic hose leak',
+            repairNotes: 'Replaced hose',
+            status: 'completed',
+          },
+        ]}
+        tireActivities={[
+          {
+            id: 'tr-1',
+            inspectionDate: '2026-11-21',
+            activityType: 'replacement',
+            serialNumber: 'TIRE-900',
+            brand: 'Michelin',
+            size: '59/80R63',
+            machineName: 'DT-01',
+            position: 'Front Left',
+            currentSmu: 1500,
+            treadDepthMm: 38,
+            pressurePsi: 105,
+            conditionStatus: 'good',
+            notes: '[REPLACEMENT] Machine: DT-01',
+          },
+        ]}
+      />
+    );
+
+    const bdTable = screen.getByRole('table', { name: 'Breakdowns history table' });
+    expect(
+      within(bdTable)
+        .getAllByRole('columnheader')
+        .map((h) => h.textContent?.trim())
+    ).toEqual([
+      'Date In',
+      'Machine',
+      'Type',
+      'Site',
+      'Shift',
+      'Fault Reason',
+      'Repair Notes',
+      'Duration',
+      'Status',
+    ]);
+    expect(screen.getByText('Hydraulic hose leak')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: /Tyre Management/i }));
+    const tireTable = screen.getByRole('table', { name: 'Tyre management history table' });
+    expect(
+      within(tireTable)
+        .getAllByRole('columnheader')
+        .map((h) => h.textContent?.trim())
+    ).toEqual([
+      'Date',
+      'Activity',
+      'Serial Number',
+      'Brand / Size',
+      'Machine / Position',
+      'SMU Hours',
+      'Tread / PSI',
+      'Condition',
+      'Notes',
+    ]);
+    expect(screen.getByText('TIRE-900')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('history-export-csv-btn'));
+    fireEvent.click(screen.getByTestId('history-export-json-btn'));
+    expect(createObjectUrlMock).toHaveBeenCalledTimes(2);
+    expect(clickSpy).toHaveBeenCalledTimes(2);
+    clickSpy.mockRestore();
   });
 });

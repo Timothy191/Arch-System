@@ -351,4 +351,50 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(screen.queryByText('Reports')).not.toBeInTheDocument();
     expect(screen.queryByText('History')).not.toBeInTheDocument();
   });
+
+  it('uses dedicated report routes, WAI-ARIA current/pressed attributes, and Escape-to-close for Engineering', () => {
+    localStorage.removeItem('arch:sidebar:pinned');
+    const engineeringDept = DEPARTMENTS.find((d) => d.name === 'engineering')!;
+    const engineeringTabs = getDepartmentTabs('engineering');
+    mockUsePathname.mockReturnValue('/engineering/reports/pdf');
+    mockUseSearchParams.mockReturnValue(new URLSearchParams(''));
+
+    const { container } = render(
+      <DepartmentLayout department={engineeringDept} tabs={engineeringTabs}>
+        <div>Engineering PDF Report</div>
+      </DepartmentLayout>
+    );
+
+    const aside = container.querySelector('aside')!;
+    expect(aside).toHaveAttribute('aria-label', 'Engineering navigation sidebar');
+    expect(screen.getByRole('navigation', { name: 'Engineering navigation' })).toBeInTheDocument();
+
+    expect(screen.getByTestId('reports-subtab-dashboard')).toHaveAttribute(
+      'href',
+      '/engineering/reports'
+    );
+    expect(screen.getByTestId('reports-subtab-pdf-report')).toHaveAttribute(
+      'href',
+      '/engineering/reports/pdf'
+    );
+    expect(screen.getByTestId('reports-subtab-pdf-report')).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByTestId('reports-subtab-whatsapp-report')).toHaveAttribute(
+      'href',
+      '/engineering/reports/whatsapp'
+    );
+
+    const pinBtn = screen.getByRole('button', { name: /Pin sidebar/i });
+    expect(pinBtn).toHaveAttribute('aria-pressed', 'false');
+
+    // Open unpinned sidebar, then press Escape to close
+    act(() => {
+      fireEvent.mouseEnter(aside);
+    });
+    expect(aside.className).toContain('translate-x-0');
+
+    act(() => {
+      fireEvent.keyDown(window, { key: 'Escape' });
+    });
+    expect(aside.className).toContain('-translate-x-[calc(100%-12px)]');
+  });
 });

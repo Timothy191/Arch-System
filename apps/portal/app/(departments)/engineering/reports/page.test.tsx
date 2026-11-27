@@ -4,8 +4,11 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type React from 'react';
 import { getDepartmentContext } from '~/lib/dept-context';
+import { EngineeringDashboardReportClient } from './EngineeringDashboardReportClient';
 import { EngineeringPdfDocument } from './EngineeringPdfDocument';
+import { EngineeringPdfReportClient } from './EngineeringPdfReportClient';
 import { EngineeringReportsClient } from './EngineeringReportsClient';
+import { EngineeringWhatsappReportClient } from './EngineeringWhatsappReportClient';
 import {
   buildEngineeringCsvContent,
   buildEngineeringReportsPayload,
@@ -16,8 +19,13 @@ import {
 } from './engineering-reports-model';
 import { buildEngineeringWhatsappMessage } from './engineering-whatsapp';
 import EngineeringReportsPage from './page';
+import EngineeringPdfReportPage from './pdf/page';
+import EngineeringWhatsappReportPage from './whatsapp/page';
 
 const mockPush = jest.fn();
+const mockRedirect = jest.fn((url: string) => {
+  throw new Error(`NEXT_REDIRECT:${url}`);
+});
 
 jest.mock('next/server', () => ({
   connection: jest.fn(async () => undefined),
@@ -30,6 +38,7 @@ jest.mock('next/navigation', () => ({
   }),
   usePathname: () => '/engineering/reports',
   useSearchParams: () => new URLSearchParams(''),
+  redirect: (url: string) => mockRedirect(url),
 }));
 
 jest.mock('sonner', () => ({
@@ -354,5 +363,78 @@ describe('Engineering Reports Suite (/engineering/reports)', () => {
     expect(screen.getByTestId('react-pdf-document')).toBeInTheDocument();
     expect(screen.getByText(/Engineering Executive & Fleet Report/i)).toBeInTheDocument();
     expect(screen.getByText('Hydraulic hose leak')).toBeInTheDocument();
+  });
+
+  it('redirects legacy ?tab= queries and renders the three dedicated reporting routes', async () => {
+    await expect(
+      EngineeringReportsPage({
+        searchParams: Promise.resolve({ tab: 'pdf-report', range: '30d' }),
+      })
+    ).rejects.toThrow('NEXT_REDIRECT:/engineering/reports/pdf?range=30d');
+
+    await expect(
+      EngineeringReportsPage({
+        searchParams: Promise.resolve({ tab: 'whatsapp-report', range: '7d' }),
+      })
+    ).rejects.toThrow('NEXT_REDIRECT:/engineering/reports/whatsapp?range=7d');
+
+    (getDepartmentContext as jest.Mock).mockResolvedValue({
+      dept: { name: 'engineering', displayName: 'Engineering' },
+      deptId: 'dept-eng-1',
+      today: '2026-11-20',
+      supabase: {
+        from: jest.fn(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          is: jest.fn().mockReturnThis(),
+          gte: jest.fn().mockReturnThis(),
+          order: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockResolvedValue({ data: [], error: null }),
+        })),
+      },
+    });
+
+    const pdfJsx = await EngineeringPdfReportPage({
+      searchParams: Promise.resolve({ range: '7d' }),
+    });
+    render(pdfJsx);
+    expect(screen.getByTestId('engineering-pdf-view')).toBeInTheDocument();
+
+    const whatsappJsx = await EngineeringWhatsappReportPage({
+      searchParams: Promise.resolve({ range: '7d' }),
+    });
+    render(whatsappJsx);
+    expect(screen.getByTestId('engineering-whatsapp-view')).toBeInTheDocument();
+  });
+
+  it('supports dedicated Dashboard, PDF formatting controls, and WhatsApp recipient management', () => {
+    const payload = buildSamplePayload('dashboard');
+    const { unmount } = render(<EngineeringDashboardReportClient payload={payload} />);
+    expect(screen.getByTestId('engineering-dashboard-view')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /PDF Report/i })).toHaveAttribute(
+      'href',
+      '/engineering/reports/pdf?range=7d'
+    );
+    unmount();
+
+    const pdfRender = render(<EngineeringPdfReportClient payload={payload} />);
+    expect(screen.getByTestId('engineering-pdf-preview')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Breakdowns'));
+    expect(screen.queryByText(/Active & Resolved Breakdowns \(2\)/i)).not.toBeInTheDocument();
+    pdfRender.unmount();
+
+    render(<EngineeringWhatsappReportClient payload={payload} />);
+    fireEvent.change(screen.getByLabelText('Recipient name'), {
+      target: { value: 'Pit Supervisor' },
+    });
+    fireEvent.change(screen.getByLabelText('Recipient phone'), {
+      target: { value: '+27821112233' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Add Recipient/i }));
+    expect(screen.getAllByText('Pit Supervisor').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByTestId('send-whatsapp-report-link')).toHaveAttribute(
+      'href',
+      expect.stringContaining('https://wa.me/27821112233?text=')
+    );
   });
 });

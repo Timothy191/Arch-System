@@ -305,7 +305,9 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
     fireEvent.change(screen.getByLabelText('Tyre On make'), {
       target: { value: 'Bridgestone' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Sidewall Cut' }));
+    fireEvent.change(screen.getByLabelText('Tire activity reason'), {
+      target: { value: 'Sidewall Cut' },
+    });
 
     fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
 
@@ -413,7 +415,9 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
     expect(screen.getByLabelText('Tyre On serial number')).toBeEnabled();
 
     fireEvent.change(screen.getByLabelText(/Machine Hours \(SMU\)/i), { target: { value: '' } });
-    fireEvent.click(screen.getByRole('button', { name: 'New Mount / Book-In' }));
+    fireEvent.change(screen.getByLabelText('Tire activity reason'), {
+      target: { value: 'New Mount / Book-In' },
+    });
     fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
 
     await waitFor(() => {
@@ -514,7 +518,9 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
     });
     fireEvent.change(screen.getByLabelText('Tyre On size'), { target: { value: '59/80R63' } });
     fireEvent.change(screen.getByLabelText('Tyre On make'), { target: { value: 'Goodyear' } });
-    fireEvent.click(screen.getByRole('button', { name: 'New Mount / Book-In' }));
+    fireEvent.change(screen.getByLabelText('Tire activity reason'), {
+      target: { value: 'New Mount / Book-In' },
+    });
     fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
 
     await waitFor(() => {
