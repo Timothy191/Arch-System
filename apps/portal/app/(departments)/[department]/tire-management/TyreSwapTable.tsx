@@ -126,7 +126,7 @@ export function TyreSwapTable({
   };
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-[var(--border-default)]">
+    <div className="gold-steel-border gold-steel-border-slim overflow-x-auto rounded-xl border border-[var(--border-default)]">
       <table
         className="w-full min-w-[620px] border-collapse text-left"
         aria-label="Tyre Off and Tyre On changeout table"
