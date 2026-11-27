@@ -4,6 +4,7 @@ import { getCurrentShift } from '@repo/utils';
 import dynamic from 'next/dynamic';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+import { Interactive3DMachineStage } from '~/components/visualization/Interactive3DMachineStage';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { type BreakdownDelaySource, breakdownShiftDelayHours } from '~/lib/shift-completeness';
 import { MachineOperationsKpiStrip } from './MachineOperationsKpiStrip';
@@ -275,6 +276,9 @@ export default async function MachineOperationsPage({
         controlRoomDelayHours={controlRoomDelayHours}
         totalEngineeringDelayHours={totalEngineeringDelayHours}
       />
+
+      {/* Dependency-free CSS-3D fleet viewer */}
+      <Interactive3DMachineStage />
 
       {/* Add Operation Form */}
       <div id="machine-operations-form" className="scroll-mt-6">
