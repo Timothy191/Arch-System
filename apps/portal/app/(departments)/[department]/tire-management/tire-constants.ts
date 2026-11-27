@@ -1,3 +1,4 @@
+/* cspell:ignore Maxam Pirelli Sailun Trelleborg */
 import { z } from 'zod';
 
 export const TIRE_POSITIONS = [
@@ -20,6 +21,83 @@ export const TIRE_ACTIVITY_REASON_PRESETS = [
   'New Mount / Book-In',
   'Routine Inspection',
 ] as const;
+
+export const TIRE_MAKES = [
+  'Michelin',
+  'Bridgestone',
+  'Goodyear',
+  'Continental',
+  'Pirelli',
+  'Yokohama',
+  'Trelleborg',
+  'BKT',
+  'Maxam',
+  'Triangle',
+  'Double Coin',
+  'Sailun',
+  'Other',
+] as const;
+
+export const WHEELED_MACHINE_TYPES = [
+  'Dump Truck',
+  'Grader',
+  'Loader',
+  'Water Truck',
+  'Light Vehicle',
+  'Compactor',
+] as const;
+
+const WHEELED_TYPE_TOKENS = [
+  'dump truck',
+  'dumper',
+  'dump_truck',
+  'adt',
+  'rdt',
+  'grader',
+  'loader',
+  'water',
+  'bowser',
+  'light vehicle',
+  'compactor',
+  'roller',
+] as const;
+
+const TRACKED_TYPE_TOKENS = [
+  'dozer',
+  'excavator',
+  'drill',
+  'crusher',
+  'screen',
+  'conveyor',
+  'pump',
+  'generator',
+  'rig',
+] as const;
+
+export type VehicleLayoutKey = 'ADT' | 'RDT' | 'Grader';
+
+export function isWheeledMachine(machine: {
+  readonly machine_type: string;
+  readonly name: string;
+}): boolean {
+  const haystack = `${machine.machine_type} ${machine.name}`.toLowerCase();
+  if (TRACKED_TYPE_TOKENS.some((token) => haystack.includes(token))) {
+    return false;
+  }
+  return WHEELED_TYPE_TOKENS.some((token) => haystack.includes(token));
+}
+
+export function resolveVehicleLayout(
+  machine?: {
+    readonly machine_type?: string;
+    readonly name?: string;
+  } | null
+): VehicleLayoutKey {
+  const haystack = `${machine?.machine_type ?? ''} ${machine?.name ?? ''}`.toLowerCase();
+  if (haystack.includes('grader')) return 'Grader';
+  if (haystack.includes('articulated') || haystack.includes('adt')) return 'ADT';
+  return 'RDT';
+}
 
 export const CRITICAL_TREAD_DEPTH_MM = 15;
 export const WARNING_TREAD_DEPTH_MM = 22;
@@ -45,6 +123,10 @@ export interface TireMachineOption {
   readonly serial_number: string | null;
   readonly starting_smr?: number | null;
   readonly latest_smu?: number | null;
+  readonly manufacturer?: string | null;
+  readonly image_url?: string | null;
+  readonly site_name?: string | null;
+  readonly site_code?: string | null;
 }
 
 export interface TireLatestInspection {
@@ -241,6 +323,65 @@ function validateInspectionRequirements(
   }
 }
 
+export interface TyreSwapSideDetails {
+  readonly serial?: string;
+  readonly size?: string;
+  readonly make?: string;
+  readonly tra?: number;
+  readonly treadDepth?: number;
+  readonly remainInSite?: boolean;
+  readonly scrap?: boolean;
+  readonly repair?: boolean;
+  readonly isNew?: boolean;
+  readonly repaired?: boolean;
+}
+
+export interface TyreSwapDetails {
+  readonly jobCardNumber?: string;
+  readonly off?: TyreSwapSideDetails;
+  readonly on?: TyreSwapSideDetails;
+}
+
+const tyreSwapSideSchema = z.object({
+  serial: z.string().trim().max(120).optional(),
+  size: z.string().trim().max(120).optional(),
+  make: z.string().trim().max(120).optional(),
+  tra: z.coerce.number().min(0, 'TRA must be >= 0').max(200, 'TRA cannot exceed 200').optional(),
+  treadDepth: z.coerce
+    .number()
+    .min(0, 'Tread depth must be >= 0 mm')
+    .max(150, 'Tread depth cannot exceed 150 mm')
+    .optional(),
+  remainInSite: z.boolean().optional().default(false),
+  scrap: z.boolean().optional().default(false),
+  repair: z.boolean().optional().default(false),
+  isNew: z.boolean().optional().default(false),
+  repaired: z.boolean().optional().default(false),
+});
+
+const tyreSwapSchema = z
+  .object({
+    jobCardNumber: z.string().trim().max(60).optional(),
+    off: tyreSwapSideSchema.optional(),
+    on: tyreSwapSideSchema.optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.off?.scrap && val.off.remainInSite) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tyreSwap', 'off', 'scrap'],
+        message: 'A tyre cannot both remain in site and be scrapped',
+      });
+    }
+    if (val.on?.isNew && val.on.repaired) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tyreSwap', 'on', 'repaired'],
+        message: 'A mounted tyre is either new or repaired, not both',
+      });
+    }
+  });
+
 export const tireActivitySchema = z
   .object({
     mode: z.enum(TIRE_ACTIVITY_MODES),
@@ -282,6 +423,7 @@ export const tireActivitySchema = z
       .optional(),
     conditionStatus: z.enum(TIRE_CONDITION_STATUSES).default('good'),
     notes: z.string().trim().max(1000).optional(),
+    tyreSwap: tyreSwapSchema.optional(),
   })
   .superRefine((val, ctx) => {
     if (val.mode === 'remove' || val.mode === 'replace') {
@@ -319,6 +461,7 @@ export function buildTireActivityNote(options: {
   readonly treadDepthMm?: number;
   readonly pressurePsi?: number;
   readonly notes?: string;
+  readonly swap?: TyreSwapDetails;
 }): string {
   const segments = [
     `${options.prefix} Machine: ${options.machineName}`,
@@ -343,8 +486,66 @@ export function buildTireActivityNote(options: {
   if (options.notes?.trim()) {
     segments.push(`Notes: ${options.notes.trim()}`);
   }
+  if (options.swap) {
+    segments.push(...buildTyreSwapSegments(options.swap));
+  }
 
   return segments.join(' | ');
+}
+
+function buildTyreSwapSegments(swap: TyreSwapDetails): string[] {
+  const segments: string[] = [];
+  if (swap.jobCardNumber?.trim()) {
+    segments.push(`Job: ${swap.jobCardNumber.trim()}`);
+  }
+  const off = swap.off;
+  if (off) {
+    if (off.serial?.trim()) segments.push(`SerialOff: ${off.serial.trim()}`);
+    if (off.size?.trim()) segments.push(`SizeOff: ${off.size.trim()}`);
+    if (off.make?.trim()) segments.push(`MakeOff: ${off.make.trim()}`);
+    if (off.tra !== undefined) segments.push(`TRAOff: ${off.tra}`);
+    if (off.treadDepth !== undefined) segments.push(`TreadOff: ${off.treadDepth}mm`);
+    const disposition = [
+      off.remainInSite ? 'Remain in Site' : null,
+      off.scrap ? 'Scrap' : null,
+      off.repair ? 'Repair' : null,
+    ].filter(Boolean);
+    if (disposition.length > 0) segments.push(`TyreOff: ${disposition.join(', ')}`);
+  }
+  const on = swap.on;
+  if (on) {
+    if (on.serial?.trim()) segments.push(`SerialOn: ${on.serial.trim()}`);
+    if (on.size?.trim()) segments.push(`SizeOn: ${on.size.trim()}`);
+    if (on.make?.trim()) segments.push(`MakeOn: ${on.make.trim()}`);
+    if (on.tra !== undefined) segments.push(`TRAOn: ${on.tra}`);
+    if (on.treadDepth !== undefined) segments.push(`TreadOn: ${on.treadDepth}mm`);
+    const condition = [on.isNew ? 'New' : null, on.repaired ? 'Repaired' : null].filter(Boolean);
+    if (condition.length > 0) segments.push(`TyreOn: ${condition.join(', ')}`);
+  }
+  return segments;
+}
+
+/**
+ * Parses the immutable ledger note string written by {@link buildTireActivityNote}
+ * into ordered key/value pairs. Unknown or malformed segments are ignored.
+ */
+export function parseTireActivityNote(notes: string | null | undefined): Map<string, string> {
+  const parsed = new Map<string, string>();
+  const normalized = (notes ?? '').trim();
+  if (!normalized) return parsed;
+  const [prefixSegment, ...rest] = normalized.split(' | ');
+  const prefixMatch = prefixSegment?.match(/^\[[A-Z]+\] Machine: (.*)$/);
+  if (prefixMatch?.[1]) {
+    parsed.set('Machine', prefixMatch[1]);
+  }
+  for (const segment of rest) {
+    const separatorIndex = segment.indexOf(': ');
+    if (separatorIndex <= 0) continue;
+    const key = segment.slice(0, separatorIndex).trim();
+    const value = segment.slice(separatorIndex + 2).trim();
+    if (key && value) parsed.set(key, value);
+  }
+  return parsed;
 }
 
 export function classifyTireActivityType(notes: string | null | undefined): TireActivityType {

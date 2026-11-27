@@ -104,6 +104,7 @@ async function performTireRemoval(options: {
     treadDepthMm: input.treadDepthMm,
     pressurePsi: input.pressurePsi,
     notes: input.notes,
+    swap: input.tyreSwap,
   });
 
   const { error: inspectionError } = await supabase.from('tire_inspections').insert({
@@ -212,6 +213,7 @@ async function performTireInstallation(options: {
     treadDepthMm: input.treadDepthMm,
     pressurePsi: input.pressurePsi,
     notes: input.notes,
+    swap: input.tyreSwap,
   });
 
   const { error: inspectionError } = await supabase.from('tire_inspections').insert({
@@ -256,6 +258,7 @@ async function performTireInspection(options: {
     treadDepthMm: input.treadDepthMm,
     pressurePsi: input.pressurePsi,
     notes: input.notes,
+    swap: input.tyreSwap,
   });
 
   const { error: inspectionError } = await supabase.from('tire_inspections').insert({
@@ -351,6 +354,8 @@ export async function logTireActivity(
       removedTireId,
       installedTireId,
       inspectedTireId,
+      jobCardNumber: input.tyreSwap?.jobCardNumber || null,
+      tyreSwap: input.tyreSwap ?? null,
     },
     departmentId: principal.employee.department_id,
   });

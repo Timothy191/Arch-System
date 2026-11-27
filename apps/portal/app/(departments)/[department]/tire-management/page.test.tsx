@@ -3,9 +3,12 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { toast } from 'sonner';
+import { ArchLogoShowcase } from './ArchLogoShowcase';
 import { logTireActivity } from './actions';
 import TireManagementPage from './page';
 import { TireActivityManagerClient } from './TireActivityManagerClient';
+import { type TyreSwapFieldValues, TyreSwapTable } from './TyreSwapTable';
+import { WheelPositionDiagram } from './WheelPositionDiagram';
 
 const mockRefresh = jest.fn();
 
@@ -19,6 +22,45 @@ jest.mock('next/navigation', () => ({
     push: jest.fn(),
   }),
 }));
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ src, alt, className }: { src: string; alt: string; className?: string }) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={typeof src === 'string' ? src : ''} alt={alt} className={className} />
+  ),
+}));
+
+jest.mock('framer-motion', () => {
+  const MOTION_PROPS = new Set([
+    'initial',
+    'animate',
+    'transition',
+    'whileHover',
+    'variants',
+    'custom',
+    'layoutId',
+  ]);
+  const strip = (props: Record<string, unknown>) =>
+    Object.fromEntries(Object.entries(props).filter(([key]) => !MOTION_PROPS.has(key)));
+  const createMotionComponent = (tag: 'div' | 'span' | 'li') =>
+    function MotionMock({
+      children,
+      ...rest
+    }: { children?: React.ReactNode } & Record<string, unknown>) {
+      const Tag = tag as 'div';
+      return <Tag {...strip(rest)}>{children}</Tag>;
+    };
+  return {
+    m: {
+      div: createMotionComponent('div'),
+      span: createMotionComponent('span'),
+      li: createMotionComponent('li'),
+    },
+    AnimatePresence: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    useReducedMotion: () => true,
+  };
+});
 
 jest.mock('sonner', () => ({
   toast: {
@@ -129,6 +171,7 @@ jest.mock('~/lib/dept-context', () => ({
                   name: 'DT-01',
                   machine_type: 'Dump Truck',
                   serial_number: 'SN-01',
+                  manufacturer: 'Volvo',
                   active: true,
                 },
               ],
@@ -144,24 +187,34 @@ jest.mock('~/lib/dept-context', () => ({
   }),
 }));
 
+const emptySwapSide: TyreSwapFieldValues = {
+  serial: '',
+  size: '',
+  make: '',
+  tra: '',
+  treadDepth: '',
+  remainInSite: false,
+  scrap: false,
+  repair: false,
+  isNew: false,
+  repaired: false,
+};
+
 describe('TireManagementPage & TireActivityManagerClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders tire management page with single-pass metric aggregations and activity ledger', async () => {
+  it('renders tire management page with metric aggregations and the tyre off/on record tables', async () => {
     const jsx = await TireManagementPage({
       params: Promise.resolve({ department: 'engineering' }),
     });
     render(jsx);
 
     expect(screen.getByText('Tire Management')).toBeInTheDocument();
-    expect(screen.getByText('Tire Fleet Status')).toBeInTheDocument();
-    expect(screen.getByTestId('tire-activity-filter-dropdown')).toBeInTheDocument();
-    expect(screen.getByTestId('fleet-status-filter-dropdown')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument(); // Total tires
-    expect(screen.getByText('2')).toBeInTheDocument(); // Installed active
-    expect(screen.getAllByText('1').length).toBeGreaterThan(0); // Inventory / Spares and Critical alerts
+    expect(screen.getAllByText('3').length).toBeGreaterThan(0); // Total tires
+    expect(screen.getAllByText('2').length).toBeGreaterThan(0); // Installed active
+    expect(screen.getAllByText('1').length).toBeGreaterThan(0); // Inventory / critical alerts
 
     expect(screen.getAllByText('TIRE-001').length).toBeGreaterThan(0);
     expect(screen.getAllByText('TIRE-002').length).toBeGreaterThan(0);
@@ -169,105 +222,20 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
     expect(
       screen.getByText('Recent Tyre Activity & Removal/Replacement Ledger')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('open-tire-activity-btn')).toBeInTheDocument();
-  });
 
-  it('opens activity logger, switches modes, and submits a tire replacement per machine', async () => {
-    render(
-      <TireActivityManagerClient
-        todayStr="2026-11-20"
-        machines={[
-          { id: 'm1', name: 'DT-01', machine_type: 'Dump Truck', serial_number: 'SN-01' },
-          { id: 'm2', name: 'DT-02', machine_type: 'Dump Truck', serial_number: 'SN-02' },
-        ]}
-        tires={[
-          {
-            id: 't1',
-            serial_number: 'TIRE-001',
-            brand: 'Michelin',
-            size: '59/80R63',
-            position: 'Front Left',
-            status: 'installed',
-            machine_id: 'm1',
-            machineName: 'DT-01',
-            installed_at: '2026-01-01',
-            installed_hours: 1200,
-          },
-          {
-            id: 't3',
-            serial_number: 'TIRE-003',
-            brand: 'Goodyear',
-            size: '59/80R63',
-            position: 'Spare',
-            status: 'inventory',
-            machine_id: null,
-            machineName: 'Unassigned',
-            installed_at: null,
-            installed_hours: 0,
-          },
-        ]}
-        recentActivities={[
-          {
-            id: 'a1',
-            tire_id: 't1',
-            serial_number: 'TIRE-001',
-            brand: 'Michelin',
-            size: '59/80R63',
-            machineName: 'DT-01',
-            position: 'Front Left',
-            inspection_date: '2026-11-19',
-            tread_depth_mm: 11,
-            pressure_psi: 104,
-            condition_status: 'critical',
-            current_smu: 1200,
-            notes: '[REMOVAL] Machine: DT-01 | Sidewall wear',
-            activityType: 'removal',
-          },
-        ]}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('open-tire-activity-btn'));
+    // The activity form is permanently visible, with no toggle or close control.
     expect(screen.getByTestId('tire-activity-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('open-tire-activity-btn')).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText('Machine'), { target: { value: 'm1' } });
-    fireEvent.change(screen.getByLabelText('Wheel Position'), { target: { value: 'Front Left' } });
-    fireEvent.change(screen.getByLabelText('Installed Tyre'), { target: { value: 't1' } });
-    fireEvent.change(screen.getByLabelText(/Serial Number/i), {
-      target: { value: 'TIRE-900' },
-    });
-    fireEvent.change(screen.getByLabelText(/Brand/i), { target: { value: 'Bridgestone' } });
-    fireEvent.change(screen.getByLabelText(/Tyre Size/i), { target: { value: '59/80R63' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Sidewall Cut' }));
-    fireEvent.change(screen.getByLabelText('Tread Depth (mm)'), { target: { value: '12' } });
-
-    expect(screen.getByLabelText('Condition Status')).toHaveValue('critical');
-
-    fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
-
-    await waitFor(() => {
-      expect(logTireActivity).toHaveBeenCalledWith(
-        expect.objectContaining({
-          mode: 'replace',
-          machineId: 'm1',
-          position: 'Front Left',
-          removedTireId: 't1',
-          tireSerial: 'TIRE-001',
-          tireBrand: 'Michelin',
-          replacementSerial: 'TIRE-900',
-          replacementBrand: 'Bridgestone',
-          replacementSize: '59/80R63',
-          removedReason: 'Sidewall Cut',
-          conditionStatus: 'critical',
-        })
-      );
-    });
-
-    expect(toast.success).toHaveBeenCalled();
-    expect(mockRefresh).toHaveBeenCalled();
+    expect(screen.getByText('Tyre Off Records')).toBeInTheDocument();
+    expect(screen.getByText('Tyre On Records')).toBeInTheDocument();
+    expect(screen.getByTestId('arch-logo-showcase')).toBeInTheDocument();
+    expect(screen.getByTestId('machine-preview')).toBeInTheDocument();
+    expect(screen.getByLabelText('Tyre activity type')).toBeInTheDocument();
+    expect(screen.queryByText('Log Inspection')).not.toBeInTheDocument();
   });
 
-  it('auto-populates SMU hours, serial, and brand and rejects missing required fields client-side', async () => {
+  it('switches activity modes through the dropdown and submits a tyre replacement', async () => {
     render(
       <TireActivityManagerClient
         todayStr="2026-11-20"
@@ -277,6 +245,8 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
             name: 'DT-01',
             machine_type: 'Dump Truck',
             serial_number: 'SN-01',
+            manufacturer: 'Volvo',
+            site_name: 'North Pit',
             latest_smu: 1200,
           },
           {
@@ -299,48 +269,149 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
             machineName: 'DT-01',
             installed_at: '2026-01-01',
             installed_hours: 1200,
-          },
-          {
-            id: 't3',
-            serial_number: 'TIRE-003',
-            brand: 'Goodyear',
-            size: '59/80R63',
-            position: 'Spare',
-            status: 'inventory',
-            machine_id: null,
-            machineName: 'Unassigned',
-            installed_at: null,
-            installed_hours: 0,
+            latestInspection: {
+              id: 'i1',
+              tire_id: 't1',
+              inspection_date: '2026-02-01',
+              tread_depth_mm: 14,
+              pressure_psi: 108,
+              condition_status: 'critical',
+            },
           },
         ]}
         recentActivities={[]}
       />
     );
 
-    fireEvent.click(screen.getByTestId('open-tire-activity-btn'));
+    // Selecting a machine shows the preview card with its identity and site.
+    fireEvent.change(screen.getByLabelText('Machine'), { target: { value: 'm1' } });
+    expect(screen.getByText('North Pit')).toBeInTheDocument();
+    expect(screen.getByText('Volvo')).toBeInTheDocument();
 
-    // Switching machine auto-populates Machine Hours (SMU)
-    fireEvent.change(screen.getByLabelText('Machine'), { target: { value: 'm2' } });
-    expect(screen.getByLabelText(/Machine Hours \(SMU\)/i)).toHaveValue(4520);
+    fireEvent.change(screen.getByLabelText('Wheel Position'), { target: { value: 'Front Left' } });
+    expect(screen.getByTestId('installed-tyre-status')).toHaveTextContent(
+      'Mounted at Front Left: TIRE-001'
+    );
 
-    // Rejects submission when Reason is missing
-    fireEvent.change(screen.getByLabelText(/Serial Number/i), { target: { value: 'TIRE-999' } });
-    fireEvent.change(screen.getByLabelText(/Brand/i), { target: { value: 'Michelin' } });
-    fireEvent.change(screen.getByLabelText(/Tyre Size/i), { target: { value: '59/80R63' } });
+    // Off side is auto-populated from the mounted tyre.
+    expect(screen.getByLabelText('Tyre Off serial number')).toHaveValue('TIRE-001');
+    expect(screen.getByLabelText('Tyre Off make')).toHaveValue('Michelin');
+
+    fireEvent.change(screen.getByLabelText('Tyre Off tread depth'), { target: { value: '11' } });
+    fireEvent.change(screen.getByLabelText('Tyre On serial number'), {
+      target: { value: 'TIRE-900' },
+    });
+    fireEvent.change(screen.getByLabelText('Tyre On size'), { target: { value: '59/80R63' } });
+    fireEvent.change(screen.getByLabelText('Tyre On make'), {
+      target: { value: 'Bridgestone' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Sidewall Cut' }));
+
     fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Reason is required (min 3 characters)');
+      expect(logTireActivity).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mode: 'replace',
+          machineId: 'm1',
+          position: 'Front Left',
+          removedTireId: 't1',
+          tireSerial: 'TIRE-001',
+          tireBrand: 'Michelin',
+          replacementSerial: 'TIRE-900',
+          replacementBrand: 'Bridgestone',
+          replacementSize: '59/80R63',
+          removedReason: 'Sidewall Cut',
+          treadDepthMm: 11,
+          conditionStatus: 'critical',
+          tyreSwap: expect.objectContaining({
+            on: expect.objectContaining({ serial: 'TIRE-900', make: 'Bridgestone' }),
+            off: expect.objectContaining({ serial: 'TIRE-001', treadDepth: 11 }),
+          }),
+        })
+      );
+    });
+
+    expect(toast.success).toHaveBeenCalled();
+    expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it('filters to wheeled machines only and validates required fields client-side', async () => {
+    render(
+      <TireActivityManagerClient
+        todayStr="2026-11-20"
+        machines={[
+          {
+            id: 'm1',
+            name: 'DT-01',
+            machine_type: 'Dump Truck',
+            serial_number: 'SN-01',
+            latest_smu: 1200,
+          },
+          {
+            id: 'm2',
+            name: 'DT-02',
+            machine_type: 'Dump Truck',
+            serial_number: 'SN-02',
+            latest_smu: 4520,
+          },
+          {
+            id: 'm3',
+            name: 'DZ-01',
+            machine_type: 'Dozer',
+            serial_number: 'SN-03',
+          },
+        ]}
+        tires={[
+          {
+            id: 't1',
+            serial_number: 'TIRE-001',
+            brand: 'Michelin',
+            size: '59/80R63',
+            position: 'Front Left',
+            status: 'installed',
+            machine_id: 'm1',
+            machineName: 'DT-01',
+            installed_at: '2026-01-01',
+            installed_hours: 1200,
+          },
+        ]}
+        recentActivities={[]}
+      />
+    );
+
+    const machineSelect = screen.getByLabelText('Machine');
+    expect(machineSelect).toHaveDisplayValue('DT-01 (Dump Truck)');
+    expect(screen.queryByRole('option', { name: /DZ-01/ })).not.toBeInTheDocument();
+
+    // Switching machine auto-populates Machine Hours (SMU).
+    fireEvent.change(machineSelect, { target: { value: 'm2' } });
+    expect(screen.getByLabelText(/Machine Hours \(SMU\)/i)).toHaveValue(4520);
+
+    // Rejects submission when Reason is missing.
+    fireEvent.change(screen.getByLabelText(/Machine Hours \(SMU\)/i), {
+      target: { value: '4520' },
+    });
+    fireEvent.change(screen.getByLabelText('Tyre On serial number'), {
+      target: { value: 'TIRE-900' },
+    });
+    fireEvent.change(screen.getByLabelText('Tyre On size'), { target: { value: '59/80R63' } });
+    fireEvent.change(screen.getByLabelText('Tyre On make'), { target: { value: 'Michelin' } });
+    fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'No tyre is registered at Front Left on DT-02'
+      );
     });
     expect(logTireActivity).not.toHaveBeenCalled();
 
-    // Switching to Install Spare auto-populates Serial Number and Brand
-    fireEvent.click(screen.getByRole('tab', { name: /Install Spare \/ New/i }));
-    fireEvent.click(screen.getByRole('button', { name: /Use Inventory Spare/i }));
-    expect(screen.getByLabelText(/Serial Number/i)).toHaveValue('TIRE-003');
-    expect(screen.getByLabelText(/Brand/i)).toHaveValue('Goodyear');
+    // Switching to Install Spare / New through the dropdown disables the Tyre Off side.
+    fireEvent.click(screen.getByLabelText('Tyre activity type'));
+    fireEvent.click(screen.getByRole('option', { name: /Install Spare \/ New/i }));
+    expect(screen.getByLabelText('Tyre Off serial number')).toBeDisabled();
+    expect(screen.getByLabelText('Tyre On serial number')).toBeEnabled();
 
-    // Rejects empty Machine Hours (SMU)
     fireEvent.change(screen.getByLabelText(/Machine Hours \(SMU\)/i), { target: { value: '' } });
     fireEvent.click(screen.getByRole('button', { name: 'New Mount / Book-In' }));
     fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
@@ -351,7 +422,7 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
     expect(logTireActivity).not.toHaveBeenCalled();
   });
 
-  it('filters ledger entries by activity type and search text and handles error feedback', async () => {
+  it('filters the ledger by activity type and search text and surfaces server errors', async () => {
     (logTireActivity as jest.Mock).mockRejectedValueOnce(new Error('Database failure'));
 
     render(
@@ -398,7 +469,7 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
             pressure_psi: 108,
             condition_status: 'warning',
             current_smu: 1200,
-            notes: '[REMOVAL] Machine: DT-01',
+            notes: '[REMOVAL] Machine: DT-01 | Job: JC-77 | TRAOff: 8',
             activityType: 'removal',
           },
           {
@@ -414,12 +485,17 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
             pressure_psi: 112,
             condition_status: 'good',
             current_smu: 1210,
-            notes: '[INSTALLATION] Machine: DT-01',
+            notes: '[INSTALLATION] Machine: DT-01 | Job: JC-78 | TRAOn: 6',
             activityType: 'installation',
           },
         ]}
       />
     );
+
+    expect(screen.getByText('Tyre Off Records')).toBeInTheDocument();
+    expect(screen.getByText('Tyre On Records')).toBeInTheDocument();
+    expect(screen.getByText('JC-77')).toBeInTheDocument();
+    expect(screen.getByText('JC-78')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Removals' }));
     expect(screen.getByText('TIRE-001')).toBeInTheDocument();
@@ -430,18 +506,94 @@ describe('TireManagementPage & TireActivityManagerClient', () => {
       target: { value: 'TIRE-003' },
     });
     expect(screen.getByText('TIRE-003')).toBeInTheDocument();
+    expect(screen.queryByText('TIRE-001')).not.toBeInTheDocument();
 
-    // Open and switch to Install Spare / New mode, verify spare option and error alert
-    fireEvent.click(screen.getByTestId('open-tire-activity-btn'));
-    fireEvent.click(screen.getByRole('tab', { name: /Install Spare \/ New/i }));
-    fireEvent.click(screen.getByRole('button', { name: /Use Inventory Spare/i }));
-    expect(screen.getByLabelText('Inventory Spare Tyre')).toHaveValue('t3');
-
+    fireEvent.change(screen.getByLabelText('Search tyre ledger'), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText('Tyre On serial number'), {
+      target: { value: 'TIRE-901' },
+    });
+    fireEvent.change(screen.getByLabelText('Tyre On size'), { target: { value: '59/80R63' } });
+    fireEvent.change(screen.getByLabelText('Tyre On make'), { target: { value: 'Goodyear' } });
     fireEvent.click(screen.getByRole('button', { name: 'New Mount / Book-In' }));
     fireEvent.click(screen.getByTestId('submit-tire-activity-btn'));
+
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('Database failure');
     });
     expect(toast.error).toHaveBeenCalledWith('Database failure');
+  });
+});
+
+describe('WheelPositionDiagram', () => {
+  it('renders six selectable wheels and reports plan-view selections', () => {
+    const onChange = jest.fn();
+    render(<WheelPositionDiagram layout="Grader" value="Front Left" onChange={onChange} />);
+
+    expect(screen.getByLabelText('Vehicle wheel position plan view')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Grader · Motor Grader side view suspension and wheel layout')
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Select Front Left wheel position')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    fireEvent.click(screen.getByLabelText('Select Rear Outer Right wheel position'));
+    expect(onChange).toHaveBeenCalledWith('Rear Outer Right');
+  });
+});
+
+describe('TyreSwapTable', () => {
+  it('renders Tyre Off and Tyre On column groups and emits field changes', () => {
+    const onChange = jest.fn();
+    render(
+      <TyreSwapTable
+        off={{ ...emptySwapSide, serial: 'TIRE-001' }}
+        on={emptySwapSide}
+        showOff
+        showOn
+        onChange={onChange}
+      />
+    );
+
+    expect(
+      screen.getByRole('table', { name: 'Tyre Off and Tyre On changeout table' })
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Tyre Off serial number')).toHaveValue('TIRE-001');
+
+    fireEvent.change(screen.getByLabelText('Tyre Off tra'), { target: { value: '9' } });
+    expect(onChange).toHaveBeenCalledWith('off', 'tra', '9');
+
+    fireEvent.click(screen.getByLabelText('Scrap (Tyre Off)'));
+    expect(onChange).toHaveBeenCalledWith('off', 'scrap', true);
+  });
+
+  it('disables the Tyre Off side when the activity does not remove a tyre', () => {
+    render(
+      <TyreSwapTable
+        off={emptySwapSide}
+        on={emptySwapSide}
+        showOff={false}
+        showOn
+        onChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByLabelText('Tyre Off serial number')).toBeDisabled();
+    expect(screen.getByLabelText('Tyre On serial number')).toBeEnabled();
+    expect(screen.getByLabelText('Remain in Site (Tyre Off)')).toBeDisabled();
+  });
+});
+
+describe('ArchLogoShowcase', () => {
+  it('presents the Arch System identity, palette, guidelines and motion spec', () => {
+    render(<ArchLogoShowcase />);
+
+    expect(screen.getByText('Arch System identity')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Arch System brand palette' })).toBeInTheDocument();
+    expect(screen.getByText('Metallic Gold')).toBeInTheDocument();
+    expect(screen.getByText('Usage guidelines')).toBeInTheDocument();
+    expect(screen.getByText('Motion specification')).toBeInTheDocument();
+    expect(screen.getByText(/Reduced motion/)).toBeInTheDocument();
   });
 });

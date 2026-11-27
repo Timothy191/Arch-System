@@ -1,16 +1,11 @@
 /* cspell:ignore Tyre */
 import {
-  EngineeringHydraulicWrenchIcon,
   EngineeringMountedWheelIcon,
   EngineeringPressureAlertIcon,
   EngineeringSpareStockIcon,
-  EngineeringTelemetryIllustration,
   EngineeringTireTreadIcon,
 } from '@repo/ui/engineering-icons';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { GoldenPanel } from '@repo/ui/GoldenPanel';
-import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 import { connection } from 'next/server';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { TireActivityManagerClient } from './TireActivityManagerClient';
@@ -23,12 +18,6 @@ import {
   type TireMachineOption,
   type TireRecord,
 } from './tire-constants';
-
-const HEADER_SECONDARY_LINK_CLASS =
-  'gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg border border-[var(--accent-gold-border)] bg-white/90 px-3.5 py-2 font-semibold text-[var(--text-heading)] text-xs shadow-2xs transition-all hover:-translate-y-0.5 hover:bg-white';
-
-const HEADER_PRIMARY_LINK_CLASS =
-  'gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-charcoal)] px-3.5 py-2 font-semibold text-white text-xs shadow-card transition-all hover:-translate-y-0.5 hover:opacity-95';
 
 const KPI_ICON_BADGE_CLASS =
   'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-gold-border)] bg-[var(--accent-gold-subtle)] shadow-2xs';
@@ -63,7 +52,9 @@ export default async function TireManagementPage({
         .limit(50),
       supabase
         .from('machines')
-        .select('id, name, machine_type, serial_number, starting_smr, active')
+        .select(
+          'id, name, machine_type, serial_number, manufacturer, starting_smr, image_url, active, site:sites(name, site_code)'
+        )
         .order('name'),
     ]);
 
@@ -158,6 +149,7 @@ export default async function TireManagementPage({
     const startingSmr =
       rawStarting != null && Number.isFinite(Number(rawStarting)) ? Number(rawStarting) : null;
     const latestSmu = latestSmuByMachine.get(m.id) ?? startingSmr;
+    const rawSite = (m as { site?: { name?: string; site_code?: string } | null }).site;
     return {
       id: m.id,
       name: m.name,
@@ -165,6 +157,10 @@ export default async function TireManagementPage({
       serial_number: m.serial_number ?? null,
       starting_smr: startingSmr,
       latest_smu: latestSmu,
+      manufacturer: (m as { manufacturer?: string | null }).manufacturer ?? null,
+      image_url: (m as { image_url?: string | null }).image_url ?? null,
+      site_name: rawSite?.name ?? null,
+      site_code: rawSite?.site_code ?? null,
     };
   });
 
@@ -193,49 +189,18 @@ export default async function TireManagementPage({
 
   return (
     <div className="space-y-6">
-      {/* #1 Golden-Border Modular Header Panel */}
-      <GoldenPanel
-        variant="elevated"
-        showLogo
-        headingLevel="h2"
-        title="Tire Management"
-        subtitle="Fleet tire pressure, tread wear telemetry, and replacement tracking"
-        icon={<EngineeringTireTreadIcon className="h-6 w-6 text-dept-engineering" />}
-        statusBadge={
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-semibold text-[11px] text-emerald-800">
-            <span className="badge-pulse-dot" aria-hidden="true" />
-            Telemetry Online
-          </span>
-        }
-        actions={
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Link href="/engineering/breakdowns" className={HEADER_SECONDARY_LINK_CLASS}>
-              <EngineeringHydraulicWrenchIcon className="h-4 w-4 text-dept-engineering" />
-              <span>Breakdowns</span>
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-            </Link>
-            <Link href="/admin" className={HEADER_PRIMARY_LINK_CLASS}>
-              <span>Manage Fleet</span>
-            </Link>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <EngineeringTireTreadIcon className="h-6 w-6 text-dept-engineering" />
+            <h2 className="font-bold text-2xl text-[var(--text-heading)]">Tire Management</h2>
           </div>
-        }
-        contentClassName="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div className="flex flex-wrap items-center gap-4 text-[var(--text-secondary)] text-xs">
-          <span>
-            Active Machines Monitored:{' '}
-            <strong className="font-mono text-[var(--text-heading)]">{machines.length}</strong>
-          </span>
-          <span className="hidden h-3.5 w-px bg-[var(--border-default)] sm:inline-block" />
-          <span>
-            Critical Wear Threshold:{' '}
-            <strong className="font-mono text-[var(--text-heading)]">
-              &lt;{CRITICAL_TREAD_DEPTH_MM} mm
-            </strong>
-          </span>
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
+            Fleet tire pressure, tread wear telemetry, and replacement tracking
+          </p>
         </div>
-        <EngineeringTelemetryIllustration className="hidden h-10 w-32 text-accent-gold sm:block" />
-      </GoldenPanel>
+      </div>
 
       {/* #2 Engineering Department Bespoke Vector Visuals & Metrics Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
